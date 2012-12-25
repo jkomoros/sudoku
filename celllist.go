@@ -12,7 +12,8 @@ type simpleCellList struct {
 	start  int
 	end    int
 	stride int
-	cache  []*Cell
+	//TODO: mark if cache is valid or not, and build it up the first time we walk through it. Right now we don't actually need channels.
+	cache []*Cell
 }
 
 func (self CellStream) Now() (result []*Cell) {
