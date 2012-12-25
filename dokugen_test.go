@@ -56,6 +56,13 @@ func TestGridCreation(t *testing.T) {
 		t.Fail()
 	}
 
+	cell := grid.Cell(2, 2)
+
+	if cell.Row != 2 || cell.Col != 2 {
+		t.Log("We grabbed a cell but what we got back was the wrong row and col.")
+		t.Fail()
+	}
+
 	cellStream := row.All()
 	_ = cellStream.Now()
 	if len(cellStream.Now()) != 0 {

@@ -40,6 +40,14 @@ func (self *Grid) Col(index int) CellList {
 	return self.cols[index]
 }
 
+func (self *Grid) Cell(row int, col int) *Cell {
+	index := row*DIM + col
+	if index >= DIM*DIM || index < 0 {
+		return nil
+	}
+	return &self.cells[index]
+}
+
 func (self *Grid) DataString() string {
 	var rows []string
 	for r := 0; r < DIM; r++ {
