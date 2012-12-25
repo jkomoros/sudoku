@@ -35,7 +35,7 @@ func (self *Grid) Row(index int) CellList {
 
 func (self *Grid) Col(index int) CellList {
 	if self.cols[index] == nil {
-		self.cols[index] = &simpleCellList{self, index, DIM*(DIM-1) + index, DIM, nil}
+		self.cols[index] = &simpleCellList{self, index, DIM*(DIM-1) + index + 1, DIM, nil}
 	}
 	return self.cols[index]
 }
