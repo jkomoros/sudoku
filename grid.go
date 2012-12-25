@@ -41,6 +41,20 @@ func (self *simpleCellList) All() chan *Cell {
 	return result
 }
 
+func (self *simpleCellList) Without(exclude *Cell) chan *Cell {
+	all := self.All()
+	result := make(chan *Cell, DIM*DIM)
+	go func() {
+		for cell := range all {
+			if cell == exclude {
+				continue
+			}
+			result <- cell
+		}
+	}()
+	return result
+}
+
 func (self *simpleCellList) buildCache() {
 	if self.grid == nil {
 		panic("Grid is nil!")
