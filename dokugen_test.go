@@ -20,7 +20,7 @@ func TestCellCreation(t *testing.T) {
 		t.Log("Cell came back wrong")
 		t.Fail()
 	}
-	if cell.String() != data {
+	if cell.DataString() != data {
 		t.Log("Cell round-tripped out with different string than data in")
 		t.Fail()
 	}
@@ -36,7 +36,7 @@ func TestGridCreation(t *testing.T) {
 		t.Log("Didn't generate enough cells")
 		t.Fail()
 	}
-	if grid.String() != data {
+	if grid.DataString() != data {
 		t.Log("The grid round-tripped with different result than data in")
 		t.Fail()
 	}

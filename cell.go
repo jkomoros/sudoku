@@ -18,6 +18,6 @@ func NewCell(grid *Grid, row int, col int, data string) Cell {
 	return Cell{grid, num, row, col, nil}
 }
 
-func (self *Cell) String() string {
+func (self *Cell) DataString() string {
 	return strconv.Itoa(self.Number)
 }
