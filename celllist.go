@@ -42,6 +42,7 @@ func (self *simpleCellList) Without(exclude *Cell) CellStream {
 			}
 			result <- cell
 		}
+		close(result)
 	}()
 	return result
 }
