@@ -55,6 +55,14 @@ func TestGridCreation(t *testing.T) {
 		t.Log("We got back a row but it had the wrong number of items.")
 		t.Fail()
 	}
+
+	cellStream := row.All()
+	_ = cellStream.Now()
+	if len(cellStream.Now()) != 0 {
+		t.Log("We called Now again on a cellstream and got something back!")
+		t.Fail()
+	}
+
 }
 
 func nCopies(in string, copies int) (result []string) {

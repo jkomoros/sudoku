@@ -16,14 +16,23 @@ type simpleCellList struct {
 }
 
 func (self CellStream) Now() (result []*Cell) {
+	if self == nil {
+		return
+	}
 	for cell := range self.Chan() {
 		result = append(result, cell)
 	}
+	self = nil
 	return
 }
 
 func (self CellStream) Chan() chan *Cell {
-	return chan *Cell(self)
+	if self == nil {
+		return nil
+	}
+	result := chan *Cell(self)
+	self = nil
+	return result
 }
 
 func (self *simpleCellList) All() CellStream {
