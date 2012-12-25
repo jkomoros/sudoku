@@ -15,7 +15,7 @@ type simpleCellList struct {
 	cache  []*Cell
 }
 
-func (self *CellStream) Now() (result []*Cell) {
+func (self CellStream) Now() (result []*Cell) {
 	for cell := range self.Chan() {
 		result = append(result, cell)
 	}
