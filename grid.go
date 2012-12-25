@@ -42,6 +42,9 @@ func (self *simpleCellList) All() chan *Cell {
 }
 
 func (self *simpleCellList) buildCache() {
+	if self.grid == nil {
+		panic("Grid is nil!")
+	}
 	i := self.start
 	if self.stride == 0 {
 		self.stride = 1
