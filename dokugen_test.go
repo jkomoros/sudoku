@@ -36,6 +36,10 @@ func TestGridCreation(t *testing.T) {
 		t.Log("Didn't generate enough cells")
 		t.Fail()
 	}
+	if grid.String() != data {
+		t.Log("The grid round-tripped with different result than data in")
+		t.Fail()
+	}
 	if grid.cells[10].Number != 1 {
 		t.Log("A random spot check of a cell had the wrong number: %s", grid.cells[10])
 		t.Fail()
