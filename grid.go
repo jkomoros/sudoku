@@ -18,6 +18,7 @@ func NewGrid(data string) *Grid {
 	for r, row := range strings.Split(data, ROW_SEP) {
 		for c, cell := range strings.Split(row, COL_SEP) {
 			result.cells[i] = NewCell(result, r, c, cell)
+			i++
 		}
 	}
 	return result
