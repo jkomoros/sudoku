@@ -7,6 +7,6 @@ type Cell struct {
 }
 
 type Grid struct {
-	data string
+	data  string
 	cells [DIM * DIM]Cell
 }

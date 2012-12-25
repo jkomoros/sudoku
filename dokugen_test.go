@@ -4,6 +4,6 @@ import (
 	"testing"
 )
 
-func TestBasic(t * testing.T) {
+func TestBasic(t *testing.T) {
 	_ = Grid{data: "data"}
 }
