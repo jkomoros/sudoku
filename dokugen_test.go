@@ -5,5 +5,5 @@ import (
 )
 
 func TestBasic(t *testing.T) {
-	_ = Grid{data: "data"}
+	_ = Grid{}
 }
