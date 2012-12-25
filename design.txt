@@ -1,0 +1,13 @@
+dokugen must be able to solve Sudoku itself to be able to generate them.
+
+A simple BFS of statespace on constraints should be fastest. But to get difficulty, we'll need to solve as a human does.
+
+We'll have a fastSolve, which uses a constrained BFS, and a humanSolve, which proceeds knowing a grid can be solved and returns a difficulty.
+
+Grids are passed back and forth over channels. They should be easily serializable and small whenever possible, but still be fast for common operations. You may read and write to them only if you have a ref, and you can only get a ref via a channel.
+
+
+Grid {
+	data string
+	cells Cell[DIM * DIM]
+}
