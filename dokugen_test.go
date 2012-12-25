@@ -44,6 +44,16 @@ func TestGridCreation(t *testing.T) {
 		t.Log("A random spot check of a cell had the wrong number: %s", grid.cells[10])
 		t.Fail()
 	}
+	col := grid.Col(2)
+	if len(col.All()) != DIM {
+		t.Log("We got back a column but it had the wrong amount of items.")
+		t.Fail()
+	}
+	row := grid.Row(2)
+	if len(row.All()) != DIM {
+		t.Log("We got back a row but it had the wrong number of items.")
+		t.Fail()
+	}
 }
 
 func nCopies(in string, copies int) (result []string) {
