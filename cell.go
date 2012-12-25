@@ -21,3 +21,7 @@ func NewCell(grid *Grid, row int, col int, data string) Cell {
 func (self *Cell) DataString() string {
 	return strconv.Itoa(self.Number)
 }
+
+func (self *Cell) String() string {
+	return "Cell[" + strconv.Itoa(self.Row) + "][" + strconv.Itoa(self.Col) + "]:" + strconv.Itoa(self.Number) + "\n"
+}

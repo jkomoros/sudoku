@@ -45,8 +45,9 @@ func TestGridCreation(t *testing.T) {
 		t.Fail()
 	}
 	col := grid.Col(2)
-	if num := len(col.All().Now()); num != DIM {
-		t.Log("We got back a column but it had the wrong amount of items: ", num)
+	items := col.All().Now()
+	if num := len(items); num != DIM {
+		t.Log("We got back a column but it had the wrong amount of items: ", num, "\n", items)
 		t.Fail()
 	}
 	row := grid.Row(2)
