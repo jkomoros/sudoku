@@ -10,6 +10,8 @@ const COL_SEP = "|"
 
 type Grid struct {
 	cells [DIM * DIM]Cell
+	rows  [DIM]*simpleCellList
+	cols  [DIM]*simpleCellList
 }
 
 func NewGrid(data string) *Grid {
@@ -22,6 +24,20 @@ func NewGrid(data string) *Grid {
 		}
 	}
 	return result
+}
+
+func (self *Grid) Row(index int) CellList {
+	if self.rows[index] == nil {
+		self.rows[index] = &simpleCellList{self, index * DIM, index*DIM + DIM, 0, nil}
+	}
+	return self.rows[index]
+}
+
+func (self *Grid) Col(index int) CellList {
+	if self.cols[index] == nil {
+		self.cols[index] = &simpleCellList{self, index, DIM*(DIM-1) + index, DIM, nil}
+	}
+	return self.cols[index]
 }
 
 func (self *Grid) String() string {
