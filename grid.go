@@ -28,14 +28,14 @@ func NewGrid(data string) *Grid {
 
 func (self *Grid) Row(index int) CellList {
 	if self.rows[index] == nil {
-		self.rows[index] = &simpleCellList{self, index * DIM, index*DIM + DIM, 0, nil}
+		self.rows[index] = &simpleCellList{self, index * DIM, index*DIM + DIM, 0}
 	}
 	return self.rows[index]
 }
 
 func (self *Grid) Col(index int) CellList {
 	if self.cols[index] == nil {
-		self.cols[index] = &simpleCellList{self, index, DIM*(DIM-1) + index + 1, DIM, nil}
+		self.cols[index] = &simpleCellList{self, index, DIM*(DIM-1) + index + 1, DIM}
 	}
 	return self.cols[index]
 }

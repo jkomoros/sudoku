@@ -12,8 +12,7 @@ type simpleCellList struct {
 	start  int
 	end    int
 	stride int
-	//TODO: mark if cache is valid or not, and build it up the first time we walk through it. Right now we don't actually need channels.
-	cache []*Cell
+	//TODO: cache the stream the first time through. Don't store in the cache value until it's done, and don't stomp if someone beat us.
 }
 
 func (self CellStream) Now() (result []*Cell) {
@@ -42,31 +41,16 @@ func (self *simpleCellList) All() CellStream {
 
 func (self *simpleCellList) Without(exclude *Cell) CellStream {
 	result := make(chan *Cell, DIM*DIM)
-	if self.cache == nil {
-		self.buildCache()
-	}
 	go func() {
-		for _, cell := range self.cache {
-			if cell == exclude {
-				continue
-			}
-			result <- cell
+		i := self.start
+		if self.stride == 0 {
+			self.stride = 1
+		}
+		for i < self.end {
+			result <- &self.grid.cells[i]
+			i = i + self.stride
 		}
 		close(result)
 	}()
 	return result
-}
-
-func (self *simpleCellList) buildCache() {
-	if self.grid == nil {
-		panic("Grid is nil!")
-	}
-	i := self.start
-	if self.stride == 0 {
-		self.stride = 1
-	}
-	for i < self.end {
-		self.cache = append(self.cache, &self.grid.cells[i])
-		i = i + self.stride
-	}
 }
