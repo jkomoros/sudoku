@@ -3,10 +3,17 @@ package dokugen
 const DIM = 9
 
 type Cell struct {
-	data string
+	Number int
+	Row    int
+	Col    int
+}
+
+type CellList interface {
+	All() chan *Cell
+	Without(cell *Cell) chan *Cell
 }
 
 type Grid struct {
 	data  string
-	cells [DIM * DIM]Cell
+	cells *[DIM * DIM]Cell
 }
