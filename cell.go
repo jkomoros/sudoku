@@ -12,8 +12,8 @@ type Cell struct {
 	cells  *simpleCellList
 }
 
-func NewCell(grid *Grid, row int, col int, data string) *Cell {
+func NewCell(grid *Grid, row int, col int, data string) Cell {
 	//Format, for now, is just the number itself, or 0 if no number.
 	num, _ := strconv.Atoi(data)
-	return &Cell{grid, num, row, col, nil}
+	return Cell{grid, num, row, col, nil}
 }
