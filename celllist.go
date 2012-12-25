@@ -1,9 +1,11 @@
 package dokugen
 
 type CellList interface {
-	All() chan *Cell
-	Without(cell *Cell) chan *Cell
+	All() CellStream
+	Without(cell *Cell) CellStream
 }
+
+type CellStream chan *Cell
 
 type simpleCellList struct {
 	grid   *Grid
@@ -13,11 +15,22 @@ type simpleCellList struct {
 	cache  []*Cell
 }
 
-func (self *simpleCellList) All() chan *Cell {
+func (self *CellStream) Now() (result []*Cell) {
+	for cell := range self.Chan() {
+		result = append(result, cell)
+	}
+	return
+}
+
+func (self CellStream) Chan() chan *Cell {
+	return chan *Cell(self)
+}
+
+func (self *simpleCellList) All() CellStream {
 	return self.Without(nil)
 }
 
-func (self *simpleCellList) Without(exclude *Cell) chan *Cell {
+func (self *simpleCellList) Without(exclude *Cell) CellStream {
 	result := make(chan *Cell, DIM*DIM)
 	if self.cache == nil {
 		self.buildCache()
