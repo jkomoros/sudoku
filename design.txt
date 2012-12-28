@@ -13,8 +13,7 @@ Grid {
 }
 
 TODO:
-
-* Stop using channels to do iterations on CellList. They don't ever change, and the first generation isn't particularly expensive.
-* Add a test for whether CellList.Without works (hint: it doesn't right now)
 * Next, add getBlock (but name it according to the PDF). Requires compoundCellList.
+* Implement Neighbors list (grid must be initalized fully)
+* Implement legal []int on each cell and make sure it's inited properly (after grid is fully created)
 * Grid should suppot copy operations and have copy-on-write semantics with shared cells.
