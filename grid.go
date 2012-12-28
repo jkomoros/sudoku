@@ -45,8 +45,15 @@ func (self *Grid) Col(index int) []*Cell {
 
 func (self *Grid) Block(index int) []*Cell {
 	if self.blocks[index] == nil {
-		row := index % BLOCK_DIM
-		col := index - (row * BLOCK_DIM)
+		//Conceptually, we'll pretend like the grid is made up of blocks that are arrayed with row/column
+		//Once we find the block r/c, we'll multiply by the actual dim to get the upper left corner.
+
+		blockCol := index % BLOCK_DIM
+		blockRow := index - blockCol
+
+		col := blockCol * BLOCK_DIM
+		row := blockRow * BLOCK_DIM
+
 		self.blocks[index] = self.cellList(row, col, row+BLOCK_DIM-1, col+BLOCK_DIM-1)
 	}
 	return self.blocks[index]
