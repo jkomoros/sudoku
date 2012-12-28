@@ -9,7 +9,7 @@ type Cell struct {
 	Number int
 	Row    int
 	Col    int
-	cells  *simpleCellList
+	cells  []*Cell
 }
 
 func NewCell(grid *Grid, row int, col int, data string) Cell {
