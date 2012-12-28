@@ -38,7 +38,10 @@ func (self *Cell) Neighbors() []*Cell {
 			self.neighbors[outputIndex] = cell
 			outputIndex++
 		}
-		//TODO: also put in each block neighbor.
+		for _, cell := range self.grid.Block(self.Block) {
+			self.neighbors[outputIndex] = cell
+			outputIndex++
+		}
 	}
 	return self.neighbors
 

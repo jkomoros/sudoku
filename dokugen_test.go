@@ -120,6 +120,8 @@ func TestGridCreation(t *testing.T) {
 
 	}
 
+	//TODO: test neighbors list is set correctly.
+
 	cell := grid.Cell(2, 2)
 
 	if cell.Row != 2 || cell.Col != 2 {
