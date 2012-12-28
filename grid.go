@@ -77,6 +77,7 @@ func (self *Grid) Block(index int) []*Cell {
 func (self *Grid) Cell(row int, col int) *Cell {
 	index := row*DIM + col
 	if index >= DIM*DIM || index < 0 {
+		log.Println("Invalid row/col index passed to Cell: ", row, ", ", col)
 		return nil
 	}
 	return &self.cells[index]
