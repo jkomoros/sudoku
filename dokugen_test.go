@@ -28,6 +28,7 @@ func TestCellCreation(t *testing.T) {
 }
 
 func TestGridCreation(t *testing.T) {
+
 	cellData := "1"
 	rowData := strings.Join(nCopies(cellData, DIM), COL_SEP)
 	data := strings.Join(nCopies(rowData, DIM), ROW_SEP)
@@ -45,51 +46,57 @@ func TestGridCreation(t *testing.T) {
 		t.Fail()
 	}
 
-	col := grid.Col(2)
-	if num := len(col); num != DIM {
-		t.Log("We got back a column but it had the wrong amount of items: ", num, "\n")
-		t.Fail()
-	}
-	for i, cell := range col {
-		if cell.Col != 2 {
-			t.Log("One of the cells we got back when asking for column 2 was not in the right column.")
+	for count := 0; count < DIM; count++ {
+		col := grid.Col(count)
+		if num := len(col); num != DIM {
+			t.Log("We got back a column but it had the wrong amount of items: ", num, "\n")
 			t.Fail()
 		}
-		if cell.Row != i {
-			t.Log("One of the cells we got back when asking for column 2 was not in the right row.")
+		for i, cell := range col {
+			if cell.Col != count {
+				t.Log("One of the cells we got back when asking for column ", count, " was not in the right column.")
+				t.Fail()
+			}
+			if cell.Row != i {
+				t.Log("One of the cells we got back when asking for column ", count, " was not in the right row.")
+				t.Fail()
+			}
+		}
+
+		row := grid.Row(count)
+		if len(row) != DIM {
+			t.Log("We got back a row but it had the wrong number of items.")
 			t.Fail()
 		}
+		for i, cell := range row {
+			if cell.Row != count {
+				t.Log("One of the cells we got back when asking for row ", count, " was not in the right rows.")
+				t.Fail()
+			}
+			if cell.Col != i {
+				t.Log("One of the cells we got back from row ", count, " was not in the right column.")
+				t.Fail()
+			}
+		}
+
 	}
 
-	row := grid.Row(2)
-	if len(row) != DIM {
-		t.Log("We got back a row but it had the wrong number of items.")
-		t.Fail()
-	}
-	for i, cell := range row {
-		if cell.Row != 2 {
-			t.Log("One of the cells we got back when asking for row 2 was not in the right rows.")
-			t.Fail()
-		}
-		if cell.Col != i {
-			t.Log("One of the cells we got back from row 2 was not in the right column.")
-			t.Fail()
-		}
-	}
+	count := 2
 
-	block := grid.Block(2)
+	//TODO: move this inside of the loop.
+	block := grid.Block(count)
 	if len(block) != DIM {
 		t.Log("We got back a block but it had the wrong number of items.")
 		t.Fail()
 	}
 
 	if block[0].Row != 0 || block[0].Col != 6 {
-		t.Log("We got back the wrong first cell from block two: ", block[0])
+		t.Log("We got back the wrong first cell from block ", count, ": ", block[0])
 		t.Fail()
 	}
 
 	if block[DIM-1].Row != 2 || block[DIM-1].Col != 8 {
-		t.Log("We got back the wrong last cell from block two: ", block[0])
+		t.Log("We got back the wrong last cell from block ", count, ": ", block[0])
 		t.Fail()
 	}
 
