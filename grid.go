@@ -1,6 +1,7 @@
 package dokugen
 
 import (
+	"log"
 	"strings"
 )
 
@@ -32,6 +33,10 @@ func NewGrid(data string) *Grid {
 }
 
 func (self *Grid) Row(index int) []*Cell {
+	if index < 0 || index >= DIM {
+		log.Println("Invalid index passed to Row: ", index)
+		return nil
+	}
 	if self.rows[index] == nil {
 		self.rows[index] = self.cellList(index, 0, index, DIM-1)
 	}
@@ -39,6 +44,10 @@ func (self *Grid) Row(index int) []*Cell {
 }
 
 func (self *Grid) Col(index int) []*Cell {
+	if index < 0 || index >= DIM {
+		log.Println("Invalid index passed to Col: ", index)
+		return nil
+	}
 	if self.cols[index] == nil {
 		self.cols[index] = self.cellList(0, index, DIM-1, index)
 	}
@@ -46,6 +55,10 @@ func (self *Grid) Col(index int) []*Cell {
 }
 
 func (self *Grid) Block(index int) []*Cell {
+	if index < 0 || index >= DIM {
+		log.Println("Invalid index passed to Block: ", index)
+		return nil
+	}
 	if self.blocks[index] == nil {
 		//Conceptually, we'll pretend like the grid is made up of blocks that are arrayed with row/column
 		//Once we find the block r/c, we'll multiply by the actual dim to get the upper left corner.
