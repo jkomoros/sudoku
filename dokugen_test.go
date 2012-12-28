@@ -50,9 +50,13 @@ func TestGridCreation(t *testing.T) {
 		t.Log("We got back a column but it had the wrong amount of items: ", num, "\n")
 		t.Fail()
 	}
-	for _, cell := range col {
+	for i, cell := range col {
 		if cell.Col != 2 {
 			t.Log("One of the cells we got back when asking for column 2 was not in the right column.")
+			t.Fail()
+		}
+		if cell.Row != i {
+			t.Log("One of the cells we got back when asking for column 2 was not in the right row.")
 			t.Fail()
 		}
 	}
@@ -62,9 +66,13 @@ func TestGridCreation(t *testing.T) {
 		t.Log("We got back a row but it had the wrong number of items.")
 		t.Fail()
 	}
-	for _, cell := range row {
+	for i, cell := range row {
 		if cell.Row != 2 {
 			t.Log("One of the cells we got back when asking for row 2 was not in the right rows.")
+			t.Fail()
+		}
+		if cell.Col != i {
+			t.Log("One of the cells we got back from row 2 was not in the right column.")
 			t.Fail()
 		}
 	}
