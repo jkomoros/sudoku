@@ -4,14 +4,17 @@ import (
 	"strings"
 )
 
-const DIM = 9
+//TODO: Support non-squared DIMS (logic in Block() would need updating)
+const BLOCK_DIM = 3
+const DIM = BLOCK_DIM * BLOCK_DIM
 const ROW_SEP = "||"
 const COL_SEP = "|"
 
 type Grid struct {
-	cells [DIM * DIM]Cell
-	rows  [DIM][]*Cell
-	cols  [DIM][]*Cell
+	cells  [DIM * DIM]Cell
+	rows   [DIM][]*Cell
+	cols   [DIM][]*Cell
+	blocks [DIM][]*Cell
 }
 
 func NewGrid(data string) *Grid {
@@ -38,6 +41,15 @@ func (self *Grid) Col(index int) []*Cell {
 		self.cols[index] = self.cellList(0, index, DIM-1, index)
 	}
 	return self.cols[index]
+}
+
+func (self *Grid) Block(index int) []*Cell {
+	if self.blocks[index] == nil {
+		row := index % BLOCK_DIM
+		col := index - (row * BLOCK_DIM)
+		self.blocks[index] = self.cellList(row, col, row+BLOCK_DIM-1, col+BLOCK_DIM-1)
+	}
+	return self.blocks[index]
 }
 
 func (self *Grid) Cell(row int, col int) *Cell {

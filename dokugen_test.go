@@ -44,6 +44,7 @@ func TestGridCreation(t *testing.T) {
 		t.Log("A random spot check of a cell had the wrong number: %s", grid.cells[10])
 		t.Fail()
 	}
+	//TODO: test that these are actually getting back the right cells...
 	col := grid.Col(2)
 	if num := len(col); num != DIM {
 		t.Log("We got back a column but it had the wrong amount of items: ", num, "\n")
@@ -52,6 +53,12 @@ func TestGridCreation(t *testing.T) {
 	row := grid.Row(2)
 	if len(row) != DIM {
 		t.Log("We got back a row but it had the wrong number of items.")
+		t.Fail()
+	}
+
+	block := grid.Block(2)
+	if len(block) != DIM {
+		t.Log("We got back a block but it had the wrong number of items.")
 		t.Fail()
 	}
 
