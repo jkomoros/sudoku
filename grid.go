@@ -75,7 +75,7 @@ func (self *Grid) cellList(rowOne int, colOne int, rowTwo int, colTwo int) []*Ce
 	currentRow := rowOne
 	currentCol := colOne
 	for i := 0; i < length; i++ {
-		result[i] = &self.cells[currentRow*DIM+currentCol]
+		result[i] = self.Cell(currentRow, currentCol)
 		if colTwo > currentCol {
 			currentCol++
 		} else {
