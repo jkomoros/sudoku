@@ -28,17 +28,8 @@ func NewGrid(data string) *Grid {
 			i++
 		}
 	}
-	result.setBlocks()
 	result.initalized = true
 	return result
-}
-
-func (self *Grid) setBlocks() {
-	for i := 0; i < DIM; i++ {
-		for _, cell := range self.Block(i) {
-			cell.Block = i
-		}
-	}
 }
 
 func (self *Grid) Row(index int) []*Cell {
@@ -81,6 +72,12 @@ func (self *Grid) Block(index int) []*Cell {
 		self.blocks[index] = self.cellList(row, col, row+BLOCK_DIM-1, col+BLOCK_DIM-1)
 	}
 	return self.blocks[index]
+}
+
+func (self *Grid) blockForCell(row int, col int) int {
+	blockCol := col / BLOCK_DIM
+	blockRow := row / BLOCK_DIM
+	return blockRow*BLOCK_DIM + blockCol
 }
 
 func (self *Grid) Cell(row int, col int) *Cell {
