@@ -11,10 +11,11 @@ const ROW_SEP = "||"
 const COL_SEP = "|"
 
 type Grid struct {
-	cells  [DIM * DIM]Cell
-	rows   [DIM][]*Cell
-	cols   [DIM][]*Cell
-	blocks [DIM][]*Cell
+	initalized bool
+	cells      [DIM * DIM]Cell
+	rows       [DIM][]*Cell
+	cols       [DIM][]*Cell
+	blocks     [DIM][]*Cell
 }
 
 func NewGrid(data string) *Grid {
@@ -26,6 +27,7 @@ func NewGrid(data string) *Grid {
 			i++
 		}
 	}
+	result.initalized = true
 	return result
 }
 
