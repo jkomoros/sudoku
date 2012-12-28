@@ -29,6 +29,22 @@ func TestCellCreation(t *testing.T) {
 
 func TestGridCreation(t *testing.T) {
 
+	blockUpperLeftRow := make([]int, DIM)
+	blockUpperLeftCol := make([]int, DIM)
+
+	row := 0
+	col := -1 * BLOCK_DIM
+
+	for i := 0; i < DIM; i++ {
+		col += BLOCK_DIM
+		if col >= DIM {
+			col = 0
+			row += BLOCK_DIM
+		}
+		blockUpperLeftRow[i] = row
+		blockUpperLeftCol[i] = col
+	}
+
 	cellData := "1"
 	rowData := strings.Join(nCopies(cellData, DIM), COL_SEP)
 	data := strings.Join(nCopies(rowData, DIM), ROW_SEP)
@@ -79,25 +95,22 @@ func TestGridCreation(t *testing.T) {
 			}
 		}
 
-	}
+		block := grid.Block(count)
+		if len(block) != DIM {
+			t.Log("We got back a block but it had the wrong number of items.")
+			t.Fail()
+		}
 
-	count := 2
+		if block[0].Row != blockUpperLeftRow[count] || block[0].Col != blockUpperLeftCol[count] {
+			t.Log("We got back the wrong first cell from block ", count, ": ", block[0])
+			t.Fail()
+		}
 
-	//TODO: move this inside of the loop.
-	block := grid.Block(count)
-	if len(block) != DIM {
-		t.Log("We got back a block but it had the wrong number of items.")
-		t.Fail()
-	}
+		if block[DIM-1].Row != blockUpperLeftRow[count]+BLOCK_DIM-1 || block[DIM-1].Col != blockUpperLeftCol[count]+BLOCK_DIM-1 {
+			t.Log("We got back the wrong last cell from block ", count, ": ", block[0])
+			t.Fail()
+		}
 
-	if block[0].Row != 0 || block[0].Col != 6 {
-		t.Log("We got back the wrong first cell from block ", count, ": ", block[0])
-		t.Fail()
-	}
-
-	if block[DIM-1].Row != 2 || block[DIM-1].Col != 8 {
-		t.Log("We got back the wrong last cell from block ", count, ": ", block[0])
-		t.Fail()
 	}
 
 	cell := grid.Cell(2, 2)
