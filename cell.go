@@ -17,6 +17,7 @@ type Cell struct {
 func NewCell(grid *Grid, row int, col int, data string) Cell {
 	//Format, for now, is just the number itself, or 0 if no number.
 	num, _ := strconv.Atoi(data)
+	//TODO: instead of waiting to have our block initialized later, why not have a Grid.blockForCell(row, col) method and set it now?
 	return Cell{grid, num, row, col, -1, nil}
 }
 
