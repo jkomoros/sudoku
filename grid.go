@@ -28,14 +28,14 @@ func NewGrid(data string) *Grid {
 
 func (self *Grid) Row(index int) []*Cell {
 	if self.rows[index] == nil {
-		self.rows[index] = self.cellList(index*DIM, index*DIM+DIM, 1)
+		self.rows[index] = self.cellList(index, 0, index, DIM-1)
 	}
 	return self.rows[index]
 }
 
 func (self *Grid) Col(index int) []*Cell {
 	if self.cols[index] == nil {
-		self.cols[index] = self.cellList(index, DIM*(DIM-1)+index+1, DIM)
+		self.cols[index] = self.cellList(0, index, DIM-1, index)
 	}
 	return self.cols[index]
 }
@@ -48,19 +48,25 @@ func (self *Grid) Cell(row int, col int) *Cell {
 	return &self.cells[index]
 }
 
-func (self *Grid) cellList(start int, end int, stride int) []*Cell {
-	var result [DIM]*Cell
-	outputIndex := 0
-	i := start
-	if stride == 0 {
-		stride = 1
+func (self *Grid) cellList(rowOne int, colOne int, rowTwo int, colTwo int) []*Cell {
+	length := (rowTwo - rowOne + 1) * (colTwo - colOne + 1)
+	result := make([]*Cell, length)
+	currentRow := rowOne
+	currentCol := colOne
+	for i := 0; i < length; i++ {
+		result[i] = &self.cells[currentRow*DIM+currentCol]
+		if colTwo > currentCol {
+			currentCol++
+		} else {
+			if rowTwo > currentRow {
+				currentRow++
+				currentCol = colOne
+			} else {
+				//This should only happen the last time through the loop.
+			}
+		}
 	}
-	for i < end {
-		result[outputIndex] = &self.cells[i]
-		i = i + stride
-		outputIndex++
-	}
-	return result[:]
+	return result
 }
 
 func (self *Grid) DataString() string {
