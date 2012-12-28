@@ -45,13 +45,12 @@ func TestGridCreation(t *testing.T) {
 		t.Fail()
 	}
 	col := grid.Col(2)
-	items := col.All().Now()
-	if num := len(items); num != DIM {
-		t.Log("We got back a column but it had the wrong amount of items: ", num, "\n", items)
+	if num := len(col); num != DIM {
+		t.Log("We got back a column but it had the wrong amount of items: ", num, "\n")
 		t.Fail()
 	}
 	row := grid.Row(2)
-	if len(row.All().Now()) != DIM {
+	if len(row) != DIM {
 		t.Log("We got back a row but it had the wrong number of items.")
 		t.Fail()
 	}
@@ -60,13 +59,6 @@ func TestGridCreation(t *testing.T) {
 
 	if cell.Row != 2 || cell.Col != 2 {
 		t.Log("We grabbed a cell but what we got back was the wrong row and col.")
-		t.Fail()
-	}
-
-	cellStream := row.All()
-	_ = cellStream.Now()
-	if len(cellStream.Now()) != 0 {
-		t.Log("We called Now again on a cellstream and got something back!")
 		t.Fail()
 	}
 
