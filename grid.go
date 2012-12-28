@@ -64,7 +64,7 @@ func (self *Grid) Block(index int) []*Cell {
 		//Once we find the block r/c, we'll multiply by the actual dim to get the upper left corner.
 
 		blockCol := index % BLOCK_DIM
-		blockRow := index - blockCol
+		blockRow := (index - blockCol) / BLOCK_DIM
 
 		col := blockCol * BLOCK_DIM
 		row := blockRow * BLOCK_DIM
