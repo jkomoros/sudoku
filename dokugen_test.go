@@ -101,6 +101,13 @@ func TestGridCreation(t *testing.T) {
 			t.Fail()
 		}
 
+		for _, cell := range block {
+			if cell.Block != count {
+				t.Log("We got a cell back in a block with the wrong block number")
+				t.Fail()
+			}
+		}
+
 		if block[0].Row != blockUpperLeftRow[count] || block[0].Col != blockUpperLeftCol[count] {
 			t.Log("We got back the wrong first cell from block ", count, ": ", block[0])
 			t.Fail()

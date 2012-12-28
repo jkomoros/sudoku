@@ -10,13 +10,14 @@ type Cell struct {
 	Number    int
 	Row       int
 	Col       int
+	Block     int
 	neighbors []*Cell
 }
 
 func NewCell(grid *Grid, row int, col int, data string) Cell {
 	//Format, for now, is just the number itself, or 0 if no number.
 	num, _ := strconv.Atoi(data)
-	return Cell{grid, num, row, col, nil}
+	return Cell{grid, num, row, col, -1, nil}
 }
 
 func (self *Cell) Neighbors() []*Cell {
