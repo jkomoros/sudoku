@@ -44,21 +44,44 @@ func TestGridCreation(t *testing.T) {
 		t.Log("A random spot check of a cell had the wrong number: %s", grid.cells[10])
 		t.Fail()
 	}
-	//TODO: test that these are actually getting back the right cells...
+
 	col := grid.Col(2)
 	if num := len(col); num != DIM {
 		t.Log("We got back a column but it had the wrong amount of items: ", num, "\n")
 		t.Fail()
 	}
+	for _, cell := range col {
+		if cell.Col != 2 {
+			t.Log("One of the cells we got back when asking for column 2 was not in the right column.")
+			t.Fail()
+		}
+	}
+
 	row := grid.Row(2)
 	if len(row) != DIM {
 		t.Log("We got back a row but it had the wrong number of items.")
 		t.Fail()
 	}
+	for _, cell := range row {
+		if cell.Row != 2 {
+			t.Log("One of the cells we got back when asking for row 2 was not in the right rows.")
+			t.Fail()
+		}
+	}
 
 	block := grid.Block(2)
 	if len(block) != DIM {
 		t.Log("We got back a block but it had the wrong number of items.")
+		t.Fail()
+	}
+
+	if block[0].Row != 0 || block[0].Col != 6 {
+		t.Log("We got back the wrong first cell from block two: ", block[0])
+		t.Fail()
+	}
+
+	if block[DIM-1].Row != 2 || block[DIM-1].Col != 8 {
+		t.Log("We got back the wrong last cell from block two: ", block[0])
 		t.Fail()
 	}
 
