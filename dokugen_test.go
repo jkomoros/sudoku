@@ -62,8 +62,22 @@ func TestCellCreation(t *testing.T) {
 		}
 	}
 
-	//TODO: test that un-explicitly setting a cell brings it back to normal possibles.
-	//TODO: test that a cell with nothing explicitly set operates like a counter.
+	number = 0
+
+	cell.SetNumber(number)
+
+	if cell.Number() != number {
+		t.Log("Number came back wrong after being set with SetNumber to 0")
+		t.Fail()
+	}
+
+	for i := 1; i <= DIM; i++ {
+		if !cell.Possible(i) {
+			t.Log("We reported back a number was not possible when 0 had been explicitly set.")
+			t.Fail()
+		}
+	}
+	//TODO: test that a cell with nothing explicitly set operates like a counter for possibles.
 }
 
 func TestGridCreation(t *testing.T) {
