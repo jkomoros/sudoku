@@ -121,3 +121,15 @@ func (self *Grid) DataString() string {
 	}
 	return strings.Join(rows, ROW_SEP)
 }
+
+func (self *Grid) String() string {
+	var rows []string
+	for r := 0; r < DIM; r++ {
+		var row []string
+		for c := 0; c < DIM; c++ {
+			row = append(row, self.cells[r*DIM+c].String())
+		}
+		rows = append(rows, strings.Join(row, COL_SEP))
+	}
+	return strings.Join(rows, ROW_SEP)
+}
