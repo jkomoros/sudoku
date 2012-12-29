@@ -11,6 +11,30 @@ func TestCellCreation(t *testing.T) {
 	number := 1
 	data := strconv.Itoa(number)
 	cell := NewCell(nil, 0, 0)
+
+	for i := 1; i <= DIM; i++ {
+		if !cell.Possible(i) {
+			t.Log("Cell reported ", i, " was impossible even though it hadn't been touched")
+			t.Fail()
+		}
+		cell.setImpossible(i)
+		if cell.Possible(i) {
+			t.Log("Cell reported ", i, " was possible even though we explicitly set it as impossible")
+			t.Fail()
+		}
+		cell.setImpossible(i)
+		cell.setPossible(i)
+		if cell.Possible(i) {
+			t.Log("Cell reported ", i, " was possible even though we'd only called Possible 1x and Impossible 2x")
+			t.Fail()
+		}
+		cell.setPossible(i)
+		if !cell.Possible(i) {
+			t.Log("Cell reported ", i, " was impossible even after matched calls to setPossible/setImpossible")
+			t.Fail()
+		}
+	}
+
 	cell.Load(data)
 	if cell.Number() != number {
 		t.Log("Number came back wrong")
@@ -77,7 +101,6 @@ func TestCellCreation(t *testing.T) {
 			t.Fail()
 		}
 	}
-	//TODO: test that a cell with nothing explicitly set operates like a counter for possibles.
 }
 
 func TestGridCreation(t *testing.T) {
