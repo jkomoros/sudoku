@@ -11,6 +11,11 @@ func TestCellCreation(t *testing.T) {
 	data := strconv.Itoa(number)
 	cell := NewCell(nil, 0, 0)
 
+	if cell.Rank() != DIM {
+		t.Log("Cell's rank was not DIM when initalized")
+		t.Fail()
+	}
+
 	for i := 1; i <= DIM; i++ {
 		if !cell.Possible(i) {
 			t.Log("Cell reported ", i, " was impossible even though it hadn't been touched")
