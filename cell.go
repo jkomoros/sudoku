@@ -8,16 +8,17 @@ import (
 type Cell struct {
 	grid *Grid
 	//The number if it's explicitly set. Number() will return it if it's explicitly or implicitly set.
-	number    int
-	Row       int
-	Col       int
-	Block     int
-	neighbors []*Cell
+	number      int
+	Row         int
+	Col         int
+	Block       int
+	neighbors   []*Cell
+	impossibles [DIM]int
 }
 
 func NewCell(grid *Grid, row int, col int) Cell {
 	//TODO: we should not set the number until neighbors are initialized.
-	return Cell{grid, 0, row, col, grid.blockForCell(row, col), nil}
+	return Cell{grid: grid, Row: row, Col: col, Block: grid.blockForCell(row, col)}
 }
 
 func (self *Cell) Load(data string) {
@@ -34,6 +35,38 @@ func (self *Cell) Number() int {
 func (self *Cell) SetNumber(number int) {
 	//Sets the explicit number. This will affect its neighbors possibles list (in the future).
 	self.number = number
+}
+
+func (self *Cell) setPossible(number int) {
+	//Number is 1 indexed, but we store it as 0-indexed
+	number--
+	if number < 0 || number >= DIM {
+		return
+	}
+	if self.impossibles[number] == 0 {
+		log.Println("We were told to mark something that was already possible to possible.")
+		return
+	}
+	self.impossibles[number]--
+
+}
+
+func (self *Cell) setImpossible(number int) {
+	//Number is 1 indexed, but we store it as 0-indexed
+	number--
+	if number < 0 || number >= DIM {
+		return
+	}
+	self.impossibles[number]++
+}
+
+func (self *Cell) Possible(number int) bool {
+	//Number is 1 indexed, but we store it as 0-indexed
+	number--
+	if number < 0 || number >= DIM {
+		return false
+	}
+	return self.impossibles[number] == 0
 }
 
 func (self *Cell) Neighbors() []*Cell {
