@@ -6,6 +6,7 @@ import (
 )
 
 func TestCellCreation(t *testing.T) {
+
 	data := "1"
 	cell := NewCell(nil, 0, 0)
 	cell.Load(data)
@@ -37,6 +38,7 @@ func TestCellCreation(t *testing.T) {
 			t.Fail()
 		}
 	}
+	//TODO: test that moving from one explcitly set number to another looks normal.
 	//TODO: test that un-explicitly setting a cell brings it back to normal possibles.
 	//TODO: test that a cell with nothing explicitly set operates like a counter.
 }

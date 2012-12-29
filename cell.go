@@ -35,12 +35,23 @@ func (self *Cell) Number() int {
 
 func (self *Cell) SetNumber(number int) {
 	//Sets the explicit number. This will affect its neighbors possibles list (in the future).
+	oldNumber := self.number
 	self.number = number
-	for i := 1; i <= DIM; i++ {
-		if i == number {
-			continue
+	if oldNumber > 0 {
+		for i := 1; i <= DIM; i++ {
+			if i == oldNumber {
+				continue
+			}
+			self.setPossible(i)
 		}
-		self.setImpossible(i)
+	}
+	if number > 0 {
+		for i := 1; i <= DIM; i++ {
+			if i == number {
+				continue
+			}
+			self.setImpossible(i)
+		}
 	}
 	//TODO: alert neighbors that it changed.
 }
