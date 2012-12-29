@@ -15,11 +15,15 @@ type Cell struct {
 	neighbors []*Cell
 }
 
-func NewCell(grid *Grid, row int, col int, data string) Cell {
+func NewCell(grid *Grid, row int, col int) Cell {
+	//TODO: we should not set the number until neighbors are initialized.
+	return Cell{grid, 0, row, col, grid.blockForCell(row, col), nil}
+}
+
+func (self *Cell) Load(data string) {
 	//Format, for now, is just the number itself, or 0 if no number.
 	num, _ := strconv.Atoi(data)
-	//TODO: we should not set the number until neighbors are initialized.
-	return Cell{grid, num, row, col, grid.blockForCell(row, col), nil}
+	self.SetNumber(num)
 }
 
 func (self *Cell) Number() int {

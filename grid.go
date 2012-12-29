@@ -19,16 +19,27 @@ type Grid struct {
 	blocks     [DIM][]*Cell
 }
 
-func NewGrid(data string) *Grid {
+func NewGrid() *Grid {
 	result := &Grid{}
 	i := 0
-	for r, row := range strings.Split(data, ROW_SEP) {
-		for c, cell := range strings.Split(row, COL_SEP) {
-			result.cells[i] = NewCell(result, r, c, cell)
+	for r := 0; r < DIM; r++ {
+		for c := 0; c < DIM; c++ {
+			result.cells[i] = NewCell(result, r, c)
 			i++
 		}
 	}
 	result.initalized = true
+	return result
+}
+
+func LoadGrid(data string) *Grid {
+	result := NewGrid()
+	for r, row := range strings.Split(data, ROW_SEP) {
+		for c, data := range strings.Split(row, COL_SEP) {
+			cell := result.Cell(r, c)
+			cell.Load(data)
+		}
+	}
 	return result
 }
 

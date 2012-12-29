@@ -7,7 +7,8 @@ import (
 
 func TestCellCreation(t *testing.T) {
 	data := "1"
-	cell := NewCell(nil, 0, 0, data)
+	cell := NewCell(nil, 0, 0)
+	cell.Load(data)
 	if cell.Number() != 1 {
 		t.Log("Number came back wrong")
 		t.Fail()
@@ -48,7 +49,7 @@ func TestGridCreation(t *testing.T) {
 	cellData := "1"
 	rowData := strings.Join(nCopies(cellData, DIM), COL_SEP)
 	data := strings.Join(nCopies(rowData, DIM), ROW_SEP)
-	grid := NewGrid(data)
+	grid := LoadGrid(data)
 	if len(grid.cells) != DIM*DIM {
 		t.Log("Didn't generate enough cells")
 		t.Fail()
