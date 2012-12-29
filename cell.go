@@ -28,10 +28,7 @@ func (self *Cell) Load(data string) {
 }
 
 func (self *Cell) Number() int {
-	//A layer of indirection since number could be set explicitly or implicitly.
-	if self.number == 0 {
-		return self.implicitNumber()
-	}
+	//A layer of indirection since number needs to be used from the Setter.
 	return self.number
 }
 

@@ -13,7 +13,6 @@ Grid {
 }
 
 TODO:
-* Make it so Number doesn't return implicitNumbers; solve will set each one explicitly.
 * A FinitePriorityQueue. Takes low (we'll use 1) and max int. Things must implement a Rank() int method. Inside, it's a [DIM]RankedObject. Each Get will verify its rank again before returning. Objects should call Insert() again whenever their rank may have changed. 
 * Grid should suppot copy operations and have copy-on-write semantics with shared cells.
 * Have some way for cell.invalid(), when it's been called, to alert back up that an inconsistency has been found.

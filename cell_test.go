@@ -50,7 +50,7 @@ func TestCellCreation(t *testing.T) {
 
 	for i := 1; i <= DIM; i++ {
 		cell.setPossible(i)
-		if cell.Number() != i {
+		if cell.implicitNumber() != i {
 			t.Log("Implicit number failed to notice that ", i, " should be implict number.")
 			t.Fail()
 		}
