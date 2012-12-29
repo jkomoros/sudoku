@@ -36,7 +36,7 @@ func (self *Cell) Number() int {
 }
 
 func (self *Cell) SetNumber(number int) {
-	//Sets the explicit number. This will affect its neighbors possibles list (in the future).
+	//Sets the explicit number. This will affect its neighbors possibles list.
 	oldNumber := self.number
 	self.number = number
 	if oldNumber > 0 {
@@ -135,6 +135,7 @@ func (self *Cell) Neighbors() []*Cell {
 		return nil
 	}
 	if self.neighbors == nil {
+		//We don't want duplicates, so we will collect in a map (used as a set) and then reduce.
 		neighborsMap := make(map[*Cell]bool)
 		for _, cell := range self.grid.Row(self.Row) {
 			if cell == self {
