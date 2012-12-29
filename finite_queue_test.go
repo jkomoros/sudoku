@@ -34,7 +34,8 @@ func TestFiniteQueue(t *testing.T) {
 			t.Log("We got back an object with the wrong rank: ", retrievedObj.Rank(), " is not ", obj.Rank())
 			t.Fail()
 		}
-		if retrievedObj != obj {
+		convertedObj, _ := retrievedObj.(SimpleRankedObject)
+		if &convertedObj != &obj {
 			//Note that technically the API doesn't require that items with the same rank come back out in the same order.
 			//So this test will fail even in some valid cases.
 			t.Log("We didn't get back the objects we put in.")

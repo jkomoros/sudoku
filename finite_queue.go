@@ -32,7 +32,8 @@ func (self *FiniteQueue) Insert(obj RankedObject) {
 	}
 	//Scrub the list for this item.
 	for _, item := range list {
-		if item == obj {
+		//Structs will compare equal if all of their fields are the same.
+		if &item == &obj {
 			//It's already there, just return.
 			return
 		}
