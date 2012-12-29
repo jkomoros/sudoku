@@ -120,8 +120,6 @@ func TestGridCreation(t *testing.T) {
 
 	}
 
-	//TODO: test neighbors list is set correctly.
-
 	cell := grid.Cell(2, 2)
 
 	if cell.Row != 2 || cell.Col != 2 {
@@ -135,6 +133,7 @@ func TestGridCreation(t *testing.T) {
 		t.Log("We got a different number of neighbors than what we were expecting: ", len(neighbors))
 		t.Fail()
 	}
+	neighborsMap := make(map[*Cell]bool)
 	for _, neighbor := range neighbors {
 		if neighbor == nil {
 			t.Log("We found a nil neighbor")
@@ -144,7 +143,12 @@ func TestGridCreation(t *testing.T) {
 			t.Log("We found a neighbor in ourselves that doesn't appear to be related: Neighbor: ", neighbor, " Cell: ", cell)
 			t.Fail()
 		}
-		//TODO: Check to make sure we don't get duplicates in this list.
+		if _, ok := neighborsMap[neighbor]; ok {
+			t.Log("We found a duplicate in the neighbors list")
+			t.Fail()
+		} else {
+			neighborsMap[cell] = true
+		}
 	}
 
 }
