@@ -25,8 +25,8 @@ func (self *FiniteQueue) Max() int {
 
 func (self *FiniteQueue) Insert(obj RankedObject) {
 	rank := obj.Rank()
-	list := self.getList(rank)
-	if list == nil {
+	list, ok := self.getList(rank)
+	if !ok {
 		//Apparently rank wasn't legal.
 		return
 	}
@@ -65,11 +65,11 @@ func (self *FiniteQueue) legalRank(rank int) bool {
 	return rank >= self.min && rank <= self.max
 }
 
-func (self *FiniteQueue) getList(rank int) []RankedObject {
+func (self *FiniteQueue) getList(rank int) ([]RankedObject, bool) {
 	if !self.legalRank(rank) {
-		return nil
+		return nil, false
 	}
-	return self.objects[rank-self.min]
+	return self.objects[rank-self.min], true
 }
 
 func (self *FiniteQueue) setList(rank int, list []RankedObject) {
