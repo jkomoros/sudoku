@@ -56,6 +56,8 @@ func TestFiniteQueue(t *testing.T) {
 
 	objects[1].rank = 4
 	queue.Insert(objects[1])
+	//We'll sneak in a test for double-inserting here.
+	queue.Insert(objects[1])
 	//Keep track of our golden set, too.
 	temp := objects[1]
 	objects[1] = objects[2]
@@ -86,6 +88,5 @@ func TestFiniteQueue(t *testing.T) {
 		t.Log("We were able to get back more objects than what we put in.")
 		t.Fail()
 	}
-	//TODO: test inputting the same object twice.
 	//TODO: test inputting one object, changing its rank, and then getting (to make sure we don't get again).
 }
