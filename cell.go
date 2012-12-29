@@ -111,6 +111,16 @@ func (self *Cell) Invalid() bool {
 	return true
 }
 
+func (self *Cell) Rank() int {
+	count := 0
+	for _, counter := range self.impossibles {
+		if counter == 0 {
+			count++
+		}
+	}
+	return count
+}
+
 func (self *Cell) implicitNumber() int {
 	//Impossibles is in 0-index space, but represents nubmers in 1-indexed space.
 	result := -1

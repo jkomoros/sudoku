@@ -27,6 +27,11 @@ func TestCellCreation(t *testing.T) {
 			t.Fail()
 		}
 
+		if cell.Rank() != DIM-1 {
+			t.Log("Cell reported an incorrect rank")
+			t.Fail()
+		}
+
 		cell.setImpossible(i)
 		cell.setPossible(i)
 		if cell.Possible(i) {
@@ -102,6 +107,11 @@ func TestCellCreation(t *testing.T) {
 
 	if cell.Number() != number {
 		t.Log("Number came back wrong after being set with SetNumber")
+		t.Fail()
+	}
+
+	if cell.Rank() != 1 {
+		t.Log("Cell with an explicit number came back with a non-1 Rank")
 		t.Fail()
 	}
 
