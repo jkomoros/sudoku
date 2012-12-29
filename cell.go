@@ -44,6 +44,7 @@ func (self *Cell) SetNumber(number int) {
 			}
 			self.setPossible(i)
 		}
+		self.alertNeighbors(oldNumber, true)
 	}
 	if number > 0 {
 		for i := 1; i <= DIM; i++ {
@@ -52,8 +53,18 @@ func (self *Cell) SetNumber(number int) {
 			}
 			self.setImpossible(i)
 		}
+		self.alertNeighbors(number, false)
 	}
-	//TODO: alert neighbors that it changed.
+}
+
+func (self *Cell) alertNeighbors(number int, possible bool) {
+	for _, cell := range self.Neighbors() {
+		if possible {
+			cell.setPossible(number)
+		} else {
+			cell.setImpossible(number)
+		}
+	}
 }
 
 func (self *Cell) setPossible(number int) {
@@ -91,8 +102,7 @@ func (self *Cell) Possible(number int) bool {
 }
 
 func (self *Cell) Neighbors() []*Cell {
-	if !self.grid.initalized {
-		log.Println("Neighbors called before the grid had been finalized")
+	if self.grid == nil || !self.grid.initalized {
 		return nil
 	}
 	if self.neighbors == nil {
