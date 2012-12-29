@@ -129,6 +129,24 @@ func TestGridCreation(t *testing.T) {
 		t.Fail()
 	}
 
+	neighbors := cell.Neighbors()
+
+	if len(neighbors) != (DIM-1)*3 {
+		t.Log("We got a different number of neighbors than what we were expecting")
+		t.Fail()
+	}
+	for _, neighbor := range neighbors {
+		if neighbor == nil {
+			t.Log("We found a nil neighbor")
+			t.Fail()
+		}
+		if neighbor.Row != cell.Row && neighbor.Col != cell.Col && neighbor.Block != cell.Block {
+			t.Log("We found a neighbor in ourselves that doesn't appear to be related: Neighbor: ", neighbor, " Cell: ", cell)
+			t.Fail()
+		}
+		//TODO: Check to make sure we don't get duplicates in this list.
+	}
+
 }
 
 func nCopies(in string, copies int) (result []string) {
