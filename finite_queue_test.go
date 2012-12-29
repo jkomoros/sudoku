@@ -20,9 +20,9 @@ func TestFiniteQueue(t *testing.T) {
 		t.Fail()
 	}
 	//TODO: These two objects don't compare as distinct for some reason. Fix it.
-	objects := [...]SimpleRankedObject{{1, "a"}, {2, "b"}, {2, "c"}, {3, "d"}}
+	objects := [...]*SimpleRankedObject{{1, "a"}, {2, "b"}, {2, "c"}, {3, "d"}}
 	for _, object := range objects {
-		queue.Insert(&object)
+		queue.Insert(object)
 	}
 	for _, obj := range objects {
 		retrievedObj := queue.Get()
@@ -51,11 +51,11 @@ func TestFiniteQueue(t *testing.T) {
 
 	//Now test changing rank.
 	for _, obj := range objects {
-		queue.Insert(&obj)
+		queue.Insert(obj)
 	}
 
 	objects[1].rank = 4
-	queue.Insert(&objects[1])
+	queue.Insert(objects[1])
 	//Keep track of our golden set, too.
 	temp := objects[1]
 	objects[1] = objects[2]
