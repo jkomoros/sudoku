@@ -22,6 +22,12 @@ func TestCellCreation(t *testing.T) {
 			t.Log("Cell reported ", i, " was possible even though we explicitly set it as impossible")
 			t.Fail()
 		}
+
+		if cell.Invalid() {
+			t.Log("Cell reported it was invalid even though only one number is impossible.")
+			t.Fail()
+		}
+
 		cell.setImpossible(i)
 		cell.setPossible(i)
 		if cell.Possible(i) {
@@ -33,6 +39,22 @@ func TestCellCreation(t *testing.T) {
 			t.Log("Cell reported ", i, " was impossible even after matched calls to setPossible/setImpossible")
 			t.Fail()
 		}
+	}
+
+	for i := 1; i <= DIM; i++ {
+		cell.setImpossible(i)
+	}
+	if !cell.Invalid() {
+		t.Log("Cell didn't realize it was invalid even though every number is impossible.")
+		t.Fail()
+	}
+	for i := 1; i <= DIM; i++ {
+		cell.setPossible(i)
+	}
+
+	if cell.Invalid() {
+		t.Log("Cell still thinks it's invalid even though we reset all possible counters.")
+		t.Fail()
 	}
 
 	cell.Load(data)

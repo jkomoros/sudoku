@@ -101,6 +101,17 @@ func (self *Cell) Possible(number int) bool {
 	return self.impossibles[number] == 0
 }
 
+func (self *Cell) Invalid() bool {
+	//Returns true if no numbers are possible.
+	//TODO: figure out a way to send this back up to the solver when it happens.
+	for _, counter := range self.impossibles {
+		if counter == 0 {
+			return false
+		}
+	}
+	return true
+}
+
 func (self *Cell) Neighbors() []*Cell {
 	if self.grid == nil || !self.grid.initalized {
 		return nil
