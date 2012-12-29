@@ -18,12 +18,18 @@ type Cell struct {
 func NewCell(grid *Grid, row int, col int, data string) Cell {
 	//Format, for now, is just the number itself, or 0 if no number.
 	num, _ := strconv.Atoi(data)
+	//TODO: we should not set the number until neighbors are initialized.
 	return Cell{grid, num, row, col, grid.blockForCell(row, col), nil}
 }
 
 func (self *Cell) Number() int {
 	//A layer of indirection since number could be set explicitly or implicitly.
 	return self.number
+}
+
+func (self *Cell) SetNumber(number int) {
+	//Sets the explicit number. This will affect its neighbors possibles list (in the future).
+	self.number = number
 }
 
 func (self *Cell) Neighbors() []*Cell {
