@@ -48,6 +48,16 @@ func TestCellCreation(t *testing.T) {
 		t.Log("Cell didn't realize it was invalid even though every number is impossible.")
 		t.Fail()
 	}
+
+	for i := 1; i <= DIM; i++ {
+		cell.setPossible(i)
+		if cell.Number() != i {
+			t.Log("Implicit number failed to notice that ", i, " should be implict number.")
+			t.Fail()
+		}
+		cell.setImpossible(i)
+	}
+
 	for i := 1; i <= DIM; i++ {
 		cell.setPossible(i)
 	}

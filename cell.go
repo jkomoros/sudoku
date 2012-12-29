@@ -29,8 +29,10 @@ func (self *Cell) Load(data string) {
 
 func (self *Cell) Number() int {
 	//A layer of indirection since number could be set explicitly or implicitly.
+	if self.number == 0 {
+		return self.implicitNumber()
+	}
 	return self.number
-	//TODO: return the number if there's only one that's possible
 }
 
 func (self *Cell) SetNumber(number int) {
@@ -110,6 +112,22 @@ func (self *Cell) Invalid() bool {
 		}
 	}
 	return true
+}
+
+func (self *Cell) implicitNumber() int {
+	//Impossibles is in 0-index space, but represents nubmers in 1-indexed space.
+	result := -1
+	for i, counter := range self.impossibles {
+		if counter == 0 {
+			//Is there someone else competing for this? If so there's no implicit number
+			if result != -1 {
+				return 0
+			}
+			result = i
+		}
+	}
+	//convert from 0-indexed to 1-indexed
+	return result + 1
 }
 
 func (self *Cell) Neighbors() []*Cell {
