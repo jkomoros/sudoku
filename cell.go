@@ -26,29 +26,30 @@ func (self *Cell) Neighbors() []*Cell {
 		return nil
 	}
 	if self.neighbors == nil {
-		//We'll have DIM -1 neighbors for row, col, block
-		self.neighbors = make([]*Cell, (DIM-1)*3)
-		outputIndex := 0
+		neighborsMap := make(map[*Cell]bool)
 		for _, cell := range self.grid.Row(self.Row) {
 			if cell == self {
 				continue
 			}
-			self.neighbors[outputIndex] = cell
-			outputIndex++
+			neighborsMap[cell] = true
 		}
 		for _, cell := range self.grid.Col(self.Col) {
 			if cell == self {
 				continue
 			}
-			self.neighbors[outputIndex] = cell
-			outputIndex++
+			neighborsMap[cell] = true
 		}
 		for _, cell := range self.grid.Block(self.Block) {
 			if cell == self {
 				continue
 			}
-			self.neighbors[outputIndex] = cell
-			outputIndex++
+			neighborsMap[cell] = true
+		}
+		self.neighbors = make([]*Cell, len(neighborsMap))
+		i := 0
+		for cell, _ := range neighborsMap {
+			self.neighbors[i] = cell
+			i++
 		}
 	}
 	return self.neighbors

@@ -131,8 +131,8 @@ func TestGridCreation(t *testing.T) {
 
 	neighbors := cell.Neighbors()
 
-	if len(neighbors) != (DIM-1)*3 {
-		t.Log("We got a different number of neighbors than what we were expecting")
+	if len(neighbors) != (DIM-1)*3-(BLOCK_DIM-1)*2 {
+		t.Log("We got a different number of neighbors than what we were expecting: ", len(neighbors))
 		t.Fail()
 	}
 	for _, neighbor := range neighbors {
