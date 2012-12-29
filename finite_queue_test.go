@@ -6,6 +6,7 @@ import (
 
 type SimpleRankedObject struct {
 	rank int
+	id   string
 }
 
 func (self SimpleRankedObject) Rank() int {
@@ -19,7 +20,7 @@ func TestFiniteQueue(t *testing.T) {
 		t.Fail()
 	}
 	//TODO: These two objects don't compare as distinct for some reason. Fix it.
-	objects := [...]SimpleRankedObject{{1}, {2}, {2}, {3}}
+	objects := [...]SimpleRankedObject{{1, "a"}, {2, "b"}, {2, "c"}, {3, "d"}}
 	for _, object := range objects {
 		queue.Insert(object)
 	}
@@ -35,7 +36,8 @@ func TestFiniteQueue(t *testing.T) {
 			t.Fail()
 		}
 		convertedObj, _ := retrievedObj.(SimpleRankedObject)
-		if &convertedObj != &obj {
+		//We tried comparing addresses here, but they weren't the same. Why? Are we copying something somewhere?
+		if convertedObj.id != obj.id {
 			//Note that technically the API doesn't require that items with the same rank come back out in the same order.
 			//So this test will fail even in some valid cases.
 			t.Log("We didn't get back the objects we put in.")
