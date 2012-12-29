@@ -37,4 +37,18 @@ func TestDokugen(t *testing.T) {
 			t.Fail()
 		}
 	}
+
+	//Reset the grid to starting conditions.
+	target.SetNumber(0)
+
+	count := 0
+	queuedCell := grid.queue.Get()
+	for queuedCell != nil {
+		count++
+		queuedCell = grid.queue.Get()
+	}
+	if count != DIM*DIM {
+		t.Log("The grid's queue didn't have the correct number of items in it: ", count)
+		t.Fail()
+	}
 }

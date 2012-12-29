@@ -128,7 +128,6 @@ func TestGridCreation(t *testing.T) {
 			neighborsMap[cell] = true
 		}
 	}
-
 }
 
 func nCopies(in string, copies int) (result []string) {
