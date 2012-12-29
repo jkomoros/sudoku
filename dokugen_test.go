@@ -8,7 +8,7 @@ import (
 func TestCellCreation(t *testing.T) {
 	data := "1"
 	cell := NewCell(nil, 0, 0, data)
-	if cell.Number != 1 {
+	if cell.Number() != 1 {
 		t.Log("Number came back wrong")
 		t.Fail()
 	}
@@ -57,7 +57,7 @@ func TestGridCreation(t *testing.T) {
 		t.Log("The grid round-tripped with different result than data in")
 		t.Fail()
 	}
-	if grid.cells[10].Number != 1 {
+	if grid.cells[10].Number() != 1 {
 		t.Log("A random spot check of a cell had the wrong number: %s", grid.cells[10])
 		t.Fail()
 	}

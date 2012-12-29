@@ -6,8 +6,9 @@ import (
 )
 
 type Cell struct {
-	grid      *Grid
-	Number    int
+	grid *Grid
+	//The number if it's explicitly set. Number() will return it if it's explicitly or implicitly set.
+	number    int
 	Row       int
 	Col       int
 	Block     int
@@ -18,6 +19,11 @@ func NewCell(grid *Grid, row int, col int, data string) Cell {
 	//Format, for now, is just the number itself, or 0 if no number.
 	num, _ := strconv.Atoi(data)
 	return Cell{grid, num, row, col, grid.blockForCell(row, col), nil}
+}
+
+func (self *Cell) Number() int {
+	//A layer of indirection since number could be set explicitly or implicitly.
+	return self.number
 }
 
 func (self *Cell) Neighbors() []*Cell {
@@ -57,9 +63,9 @@ func (self *Cell) Neighbors() []*Cell {
 }
 
 func (self *Cell) DataString() string {
-	return strconv.Itoa(self.Number)
+	return strconv.Itoa(self.Number())
 }
 
 func (self *Cell) String() string {
-	return "Cell[" + strconv.Itoa(self.Row) + "][" + strconv.Itoa(self.Col) + "]:" + strconv.Itoa(self.Number) + "\n"
+	return "Cell[" + strconv.Itoa(self.Row) + "][" + strconv.Itoa(self.Col) + "]:" + strconv.Itoa(self.Number()) + "\n"
 }
