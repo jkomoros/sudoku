@@ -131,8 +131,6 @@ func TestGridCreation(t *testing.T) {
 
 }
 
-//TODO: test that neighbors are alerted correctly about SetNumbers happening.
-
 func nCopies(in string, copies int) (result []string) {
 	for i := 0; i < copies; i++ {
 		result = append(result, in)
