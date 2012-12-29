@@ -67,6 +67,7 @@ func (self *Cell) setPossible(number int) {
 		return
 	}
 	self.impossibles[number]--
+	//TODO: see if this allows us to have an un-set implicitly set number, and alert neighbors if so.
 
 }
 
