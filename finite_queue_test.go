@@ -88,5 +88,4 @@ func TestFiniteQueue(t *testing.T) {
 		t.Log("We were able to get back more objects than what we put in.")
 		t.Fail()
 	}
-	//TODO: test inputting one object, changing its rank, and then getting (to make sure we don't get again).
 }
