@@ -30,7 +30,7 @@ func TestFiniteQueue(t *testing.T) {
 			continue
 		}
 		if retrievedObj.Rank() != obj.Rank() {
-			t.Log("We got back an object with the wrong rank")
+			t.Log("We got back an object with the wrong rank: ", retrievedObj.Rank(), " is not ", obj.Rank())
 			t.Fail()
 		}
 		if retrievedObj != obj {
