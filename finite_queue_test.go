@@ -18,6 +18,7 @@ func TestFiniteQueue(t *testing.T) {
 		t.Log("We didn't get a queue back from the constructor")
 		t.Fail()
 	}
+	//TODO: These two objects don't compare as distinct for some reason. Fix it.
 	objects := [...]SimpleRankedObject{{1}, {2}, {2}, {3}}
 	for _, object := range objects {
 		queue.Insert(object)
