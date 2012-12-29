@@ -30,11 +30,13 @@ func (self *Cell) Load(data string) {
 func (self *Cell) Number() int {
 	//A layer of indirection since number could be set explicitly or implicitly.
 	return self.number
+	//TODO: return the number if there's only one that's possible
 }
 
 func (self *Cell) SetNumber(number int) {
 	//Sets the explicit number. This will affect its neighbors possibles list (in the future).
 	self.number = number
+	//TODO: alert neighbors that it changed.
 }
 
 func (self *Cell) setPossible(number int) {
@@ -58,6 +60,7 @@ func (self *Cell) setImpossible(number int) {
 		return
 	}
 	self.impossibles[number]++
+	//TODO: see if this allows us to have an implicitly set number, and alert neighbors if so.
 }
 
 func (self *Cell) Possible(number int) bool {

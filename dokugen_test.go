@@ -26,6 +26,7 @@ func TestCellCreation(t *testing.T) {
 		t.Fail()
 	}
 	//TODO: test failing for values that are too high.
+	//TODO: test possibles behavior
 }
 
 func TestGridCreation(t *testing.T) {
