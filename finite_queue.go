@@ -44,20 +44,21 @@ func (self *FiniteQueue) Insert(obj RankedObject) {
 
 func (self *FiniteQueue) Get() RankedObject {
 	for i, list := range self.objects {
-		if len(list) == 0 {
-			continue
+		for len(list) > 0 {
+			obj := list[0]
+			if len(list) == 1 {
+				self.objects[i] = nil
+				list = nil
+			} else {
+				self.objects[i] = list[1:]
+				list = list[1:]
+			}
+			//Does this object still have the rank it did when it was inserted?
+			if obj.Rank() == i+self.min {
+				return obj
+			}
+			//otherwise, keep looking.
 		}
-		obj := list[0]
-		if len(list) == 1 {
-			self.objects[i] = nil
-		} else {
-			self.objects[i] = list[1:]
-		}
-		//Does this object still have the rank it did when it was inserted?
-		if obj.Rank() == i+self.min {
-			return obj
-		}
-		//otherwise, keep looking.
 	}
 	return nil
 }

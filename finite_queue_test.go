@@ -9,7 +9,7 @@ type SimpleRankedObject struct {
 	id   string
 }
 
-func (self SimpleRankedObject) Rank() int {
+func (self *SimpleRankedObject) Rank() int {
 	return self.rank
 }
 
@@ -20,7 +20,7 @@ func TestFiniteQueue(t *testing.T) {
 		t.Fail()
 	}
 	//TODO: These two objects don't compare as distinct for some reason. Fix it.
-	objects := [...]SimpleRankedObject{{1, "a"}, {2, "b"}, {2, "c"}, {3, "d"}}
+	objects := [...]*SimpleRankedObject{{1, "a"}, {2, "b"}, {2, "c"}, {3, "d"}}
 	for _, object := range objects {
 		queue.Insert(object)
 	}
@@ -35,7 +35,7 @@ func TestFiniteQueue(t *testing.T) {
 			t.Log("We got back an object with the wrong rank: ", retrievedObj.Rank(), " is not ", obj.Rank())
 			t.Fail()
 		}
-		convertedObj, _ := retrievedObj.(SimpleRankedObject)
+		convertedObj, _ := retrievedObj.(*SimpleRankedObject)
 		//We tried comparing addresses here, but they weren't the same. Why? Are we copying something somewhere?
 		if convertedObj.id != obj.id {
 			//Note that technically the API doesn't require that items with the same rank come back out in the same order.
@@ -73,7 +73,7 @@ func TestFiniteQueue(t *testing.T) {
 			t.Log("We got back an object with the wrong rank: ", retrievedObj.Rank(), " is not ", obj.Rank())
 			t.Fail()
 		}
-		convertedObj, _ := retrievedObj.(SimpleRankedObject)
+		convertedObj, _ := retrievedObj.(*SimpleRankedObject)
 		//We tried comparing addresses here, but they weren't the same. Why? Are we copying something somewhere?
 		if convertedObj.id != obj.id {
 			//Note that technically the API doesn't require that items with the same rank come back out in the same order.
