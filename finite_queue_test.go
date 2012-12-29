@@ -54,7 +54,7 @@ func TestFiniteQueue(t *testing.T) {
 		queue.Insert(obj)
 	}
 
-	objects[1].rank = 4
+	objects[1].rank = 6
 	queue.Insert(objects[1])
 	//We'll sneak in a test for double-inserting here.
 	queue.Insert(objects[1])
