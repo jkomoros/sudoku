@@ -26,7 +26,19 @@ func TestCellCreation(t *testing.T) {
 		t.Fail()
 	}
 	//TODO: test failing for values that are too high.
-	//TODO: test possibles behavior
+	for i := 1; i <= DIM; i++ {
+		if i == 1 {
+			if !cell.Possible(i) {
+				t.Log("We reported back a number we were explicitly set to was impossible")
+				t.Fail()
+			}
+		} else if cell.Possible(i) {
+			t.Log("We reported back that a number was possible when another number had been explicitly set")
+			t.Fail()
+		}
+	}
+	//TODO: test that un-explicitly setting a cell brings it back to normal possibles.
+	//TODO: test that a cell with nothing explicitly set operates like a counter.
 }
 
 func TestGridCreation(t *testing.T) {
