@@ -11,3 +11,5 @@ func TestFiniteQueue(t *testing.T) {
 		t.Fail()
 	}
 }
+
+//TODO: test inserting and getting.
