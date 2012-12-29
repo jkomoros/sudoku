@@ -1,16 +1,18 @@
 package dokugen
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 )
 
 func TestCellCreation(t *testing.T) {
 
-	data := "1"
+	number := 1
+	data := strconv.Itoa(number)
 	cell := NewCell(nil, 0, 0)
 	cell.Load(data)
-	if cell.Number() != 1 {
+	if cell.Number() != number {
 		t.Log("Number came back wrong")
 		t.Fail()
 	}
@@ -28,7 +30,7 @@ func TestCellCreation(t *testing.T) {
 	}
 	//TODO: test failing for values that are too high.
 	for i := 1; i <= DIM; i++ {
-		if i == 1 {
+		if i == number {
 			if !cell.Possible(i) {
 				t.Log("We reported back a number we were explicitly set to was impossible")
 				t.Fail()
@@ -38,7 +40,28 @@ func TestCellCreation(t *testing.T) {
 			t.Fail()
 		}
 	}
-	//TODO: test that moving from one explcitly set number to another looks normal.
+
+	number = 2
+
+	cell.SetNumber(number)
+
+	if cell.Number() != number {
+		t.Log("Number came back wrong after being set with SetNumber")
+		t.Fail()
+	}
+
+	for i := 1; i <= DIM; i++ {
+		if i == number {
+			if !cell.Possible(i) {
+				t.Log("We reported back a number we were explicitly set to was impossible (2nd set)")
+				t.Fail()
+			}
+		} else if cell.Possible(i) {
+			t.Log("We reported back that a number was possible when another number had been explicitly set (2nd set)")
+			t.Fail()
+		}
+	}
+
 	//TODO: test that un-explicitly setting a cell brings it back to normal possibles.
 	//TODO: test that a cell with nothing explicitly set operates like a counter.
 }
