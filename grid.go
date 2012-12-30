@@ -295,13 +295,38 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 	//TODO: this will not save work if the grid is invalid, since that is indistingusihable from an uninited cache.
 	if self.cachedSolutions == nil {
 		copy := self.Copy()
-		self.cachedSolutions = copy.solutions()
+
+		var result []*Grid
+
+		solutions := make(chan *Grid, 0)
+		doneChan := make(chan bool, 0)
+
+		go func() {
+			copy.solutions(doneChan, solutions)
+		}()
+
+		//Here is where we'll break out once we've collected enough solutions.
+		for {
+			select {
+			case solution := <-solutions:
+				result = append(result, solution)
+			case <-doneChan:
+				//A single break here wouldn't get us out.
+				self.cachedSolutions = result
+				return self.cachedSolutions
+			}
+		}
 	}
 	return self.cachedSolutions
 }
 
 //The actual workhorse; solutions DOES modify the current grid.
-func (self *Grid) solutions() (solutions []*Grid) {
+func (self *Grid) solutions(done chan bool, solutions chan *Grid) {
+
+	defer func() {
+		done <- true
+	}()
+
 	//Do a deep check; we might be invalid right at this moment.
 	if self.Invalid() {
 		return
@@ -316,16 +341,11 @@ func (self *Grid) solutions() (solutions []*Grid) {
 	}
 
 	if self.Solved() {
-		return append(solutions, self)
+		solutions <- self
+		return
 	}
 
 	//Well, looks like we're going to have to branch.
-	return self.branchAndSolve()
-}
-
-func (self *Grid) branchAndSolve() (solutions []*Grid) {
-	//Nope, we're going to have to branch.
-	//We'll pick the cell with the smallest number of possibilties.
 	rankedObject := self.queue.Get()
 	if rankedObject == nil {
 		panic("Queue didn't have any cells.")
@@ -337,18 +357,19 @@ func (self *Grid) branchAndSolve() (solutions []*Grid) {
 	}
 
 	possibilities := cell.Possibilities()
-	results := make(chan []*Grid, 0)
+	doneChan := make(chan bool, 0)
 	for _, num := range cell.Possibilities() {
 		copy := self.Copy()
 		copy.Cell(cell.Row, cell.Col).SetNumber(num)
 		go func() {
-			results <- copy.solutions()
+			copy.solutions(doneChan, solutions)
 		}()
 	}
 	for _, _ = range possibilities {
-		solutions = append(solutions, (<-results)...)
+		<-doneChan
 	}
-	return solutions
+	return
+
 }
 
 //Fills in all of the cells it can without branching or doing any advanced
