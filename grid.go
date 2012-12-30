@@ -240,6 +240,12 @@ func (self *Grid) NumSolutions() int {
 	return len(self.Solutions())
 }
 
+//Returns true if the grid has at least one solution. Does not mutate the grid.
+func (self *Grid) HasSolution() bool {
+	//TODO: optimize this to bail as soon as we find a single solution.
+	return self.NumSolutions() > 0
+}
+
 //Returns a slice of grids that represent possible solutions if you were to solve forward this grid. The current grid is not modified.
 //If there are no solutions forward from this location it will return a slice with len() 0.
 func (self *Grid) Solutions() (solutions []*Grid) {
