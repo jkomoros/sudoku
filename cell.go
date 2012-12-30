@@ -2,6 +2,7 @@ package dokugen
 
 import (
 	"log"
+	"math/rand"
 	"strconv"
 	"strings"
 )
@@ -173,6 +174,13 @@ func (self *Cell) Rank() int {
 		}
 	}
 	return count
+}
+
+//Sets ourselves to a random one of our possibilities.
+func (self *Cell) pickRandom() {
+	possibilities := self.Possibilities()
+	choice := possibilities[rand.Intn(len(possibilities))]
+	self.SetNumber(choice)
 }
 
 func (self *Cell) implicitNumber() int {

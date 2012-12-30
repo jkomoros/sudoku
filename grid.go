@@ -2,7 +2,6 @@ package dokugen
 
 import (
 	"log"
-	"math/rand"
 	"strings"
 )
 
@@ -231,22 +230,31 @@ func (self *Grid) cellModified(cell *Cell) {
 // it will return False and leave the grid as it found it. It will not try
 // particularly hard to find a solution, so it's best to call it on a blank grid.
 func (self *Grid) Fill() bool {
+
+	//TODO: This also isn't deterministic; it can get stuck randomly, causing
+	//the tests to pass or not pass non-deterministically.
+
 	//TODO: semantically, this is the same as picking a random solution from
 	//Solutions(), or having solutions figure out which cell and possibiltity
 	//to try randomly. We shouldn't duplicate this.
 	copy := self.Copy()
 
-	for _, cell := range copy.cells {
-		if cell.Number() != 0 {
-			continue
+	copy.Cell(0, 0).pickRandom()
+
+	obj := copy.queue.Get()
+	for obj != nil {
+		cell, ok := obj.(*Cell)
+		if !ok {
+			panic("We got back a non-cell from the queue.")
 		}
-		possibilities := cell.Possibilities()
-		if len(possibilities) == 0 {
-			return false
-		}
-		choice := possibilities[rand.Intn(len(possibilities))]
-		cell.SetNumber(choice)
+		cell.pickRandom()
+		obj = copy.queue.Get()
 	}
+
+	if !copy.Solved() {
+		return false
+	}
+
 	self.Load(copy.DataString())
 	return true
 }
