@@ -181,3 +181,20 @@ func (self *Grid) String() string {
 	}
 	return strings.Join(rows, ROW_SEP)
 }
+
+func (self *Grid) Diagram() string {
+	//TODO: put in block boundaries.
+	var rows []string
+	for r := 0; r < DIM; r++ {
+		var tempRows []string
+		tempRows = self.Cell(r, 0).diagramRows()
+		for c := 1; c < DIM; c++ {
+			cellRows := self.Cell(r, c).diagramRows()
+			for i, row := range tempRows {
+				tempRows[i] = row + cellRows[i]
+			}
+		}
+		rows = append(rows, tempRows...)
+	}
+	return strings.Join(rows, "\n")
+}

@@ -214,7 +214,6 @@ func (self *Cell) positionInBlock() (top, right, bottom, left bool) {
 func (self *Cell) diagramRows() (rows []string) {
 	//We'll only draw barriers at our bottom right edge.
 	_, right, bottom, _ := self.positionInBlock()
-	//TODO: vary printing if the block has neighbors or not.
 	current := 0
 	for r := 0; r < BLOCK_DIM; r++ {
 		row := ""
