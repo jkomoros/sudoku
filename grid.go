@@ -295,19 +295,40 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 	//TODO: this will not save work if the grid is invalid, since that is indistingusihable from an uninited cache.
 	if self.cachedSolutions == nil {
 		copy := self.Copy()
-		self.cachedSolutions = copy.solutions()
+
+		var result []*Grid
+
+		solutions := make(chan *Grid, 0)
+		doneChan := make(chan bool, 0)
+
+		go func() {
+			copy.solutions(doneChan, solutions)
+		}()
+
+		//Here is where we'll break out once we've collected enough solutions.
+		for {
+			select {
+			case solution := <-solutions:
+				result = append(result, solution)
+			case <-doneChan:
+				//TODO: break out of the for loop, too!
+				break
+			}
+		}
+		self.cachedSolutions = result
 	}
 	return self.cachedSolutions
 }
 
 //The actual workhorse; solutions DOES modify the current grid.
-func (self *Grid) solutions(done chan bool, solutions chan []*Grid) {
+func (self *Grid) solutions(done chan bool, solutions chan *Grid) {
 
-	//TODO: Should we use a defer here? What about the last self.branchAndSolve?
+	defer func() {
+		done <- true
+	}()
 
 	//Do a deep check; we might be invalid right at this moment.
 	if self.Invalid() {
-		done <- true
 		return
 	}
 
@@ -316,22 +337,15 @@ func (self *Grid) solutions(done chan bool, solutions chan []*Grid) {
 
 	//Have any cells noticed they were invalid while solving forward?
 	if self.cellsInvalid() {
-		done <- true
 		return
 	}
 
 	if self.Solved() {
-		output <- [...]{self}[]
+		solutions <- self
 		return
 	}
 
 	//Well, looks like we're going to have to branch.
-	return self.branchAndSolve(done, solutions)
-}
-
-func (self *Grid) branchAndSolve(done chan bool, solutions chan[]*Grid) {
-	//Nope, we're going to have to branch.
-	//We'll pick the cell with the smallest number of possibilties.
 	rankedObject := self.queue.Get()
 	if rankedObject == nil {
 		panic("Queue didn't have any cells.")
@@ -343,18 +357,19 @@ func (self *Grid) branchAndSolve(done chan bool, solutions chan[]*Grid) {
 	}
 
 	possibilities := cell.Possibilities()
-	results := make(chan []*Grid, 0)
+	doneChan := make(chan bool, 0)
 	for _, num := range cell.Possibilities() {
 		copy := self.Copy()
 		copy.Cell(cell.Row, cell.Col).SetNumber(num)
 		go func() {
-			results <- copy.solutions()
+			copy.solutions(doneChan, solutions)
 		}()
 	}
 	for _, _ = range possibilities {
-		solutions = append(solutions, (<-results)...)
+		<-doneChan
 	}
-	
+	return
+
 }
 
 //Fills in all of the cells it can without branching or doing any advanced
