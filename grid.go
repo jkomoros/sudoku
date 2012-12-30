@@ -183,18 +183,38 @@ func (self *Grid) String() string {
 }
 
 func (self *Grid) Diagram() string {
-	//TODO: put in block boundaries.
 	var rows []string
+
+	//Generate a block boundary row to use later.
+	var blockBoundaryRow string
+	{
+		var blockBoundarySegments []string
+		blockBoundaryBlockPiece := strings.Repeat(DIAGRAM_BOTTOM, BLOCK_DIM*BLOCK_DIM+BLOCK_DIM-1)
+		for i := 0; i < BLOCK_DIM; i++ {
+			blockBoundarySegments = append(blockBoundarySegments, blockBoundaryBlockPiece)
+		}
+		blockBoundaryRow = strings.Join(blockBoundarySegments, DIAGRAM_CORNER+DIAGRAM_CORNER)
+	}
+
 	for r := 0; r < DIM; r++ {
 		var tempRows []string
 		tempRows = self.Cell(r, 0).diagramRows()
 		for c := 1; c < DIM; c++ {
 			cellRows := self.Cell(r, c).diagramRows()
-			for i, row := range tempRows {
-				tempRows[i] = row + cellRows[i]
+			for i, _ := range tempRows {
+				tempRows[i] += cellRows[i]
+				//Are we at a block boundary?
+				if c%BLOCK_DIM == BLOCK_DIM-1 && c != DIM-1 {
+					tempRows[i] += DIAGRAM_RIGHT + DIAGRAM_RIGHT
+				}
 			}
+
 		}
 		rows = append(rows, tempRows...)
+		//Are we at a block boundary?
+		if r%BLOCK_DIM == BLOCK_DIM-1 && r != DIM-1 {
+			rows = append(rows, blockBoundaryRow, blockBoundaryRow)
+		}
 	}
 	return strings.Join(rows, "\n")
 }
