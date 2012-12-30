@@ -194,3 +194,15 @@ func (self *Cell) DataString() string {
 func (self *Cell) String() string {
 	return "Cell[" + strconv.Itoa(self.Row) + "][" + strconv.Itoa(self.Col) + "]:" + strconv.Itoa(self.Number()) + "\n"
 }
+
+func (self *Cell) positionInBlock() (top, right, bottom, left bool) {
+	if self.grid == nil {
+		return
+	}
+	topRow, topCol, bottomRow, bottomCol := self.grid.blockExtents(self.Block)
+	top = self.Row == topRow
+	right = self.Col == bottomCol
+	bottom = self.Row == bottomRow
+	left = self.Col == topCol
+	return
+}
