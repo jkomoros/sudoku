@@ -7,7 +7,7 @@ import (
 )
 
 const ALT_0 = "."
-const DIAGRAM_IMPOSSIBLE = " "
+const DIAGRAM_IMPOSSIBLE = "•"
 const DIAGRAM_RIGHT = "|"
 const DIAGRAM_BOTTOM = "-"
 const DIAGRAM_CORNER = "+"
@@ -215,20 +215,30 @@ func (self *Cell) diagramRows() (rows []string) {
 	//We'll only draw barriers at our bottom right edge.
 	_, right, bottom, _ := self.positionInBlock()
 	//TODO: vary printing if the block has neighbors or not.
-	//TODO: print differently if the number is filled.
 	current := 0
 	for r := 0; r < BLOCK_DIM; r++ {
 		row := ""
 		for c := 0; c < BLOCK_DIM; c++ {
-			if self.impossibles[current] == 0 {
-				row += strconv.Itoa(current + 1)
+			if self.number != 0 {
+				//Print just the number.
+				if r == BLOCK_DIM/2 && c == BLOCK_DIM/2 {
+					row += strconv.Itoa(self.number)
+				} else {
+					row += " "
+				}
 			} else {
-				row += DIAGRAM_IMPOSSIBLE
+				//Print the possibles.
+				if self.impossibles[current] == 0 {
+					row += strconv.Itoa(current + 1)
+				} else {
+					row += DIAGRAM_IMPOSSIBLE
+				}
 			}
 			current++
 		}
 		rows = append(rows, row)
 	}
+
 	//Do we need to pad each row with | on the right?
 	if !right {
 		for i, data := range rows {

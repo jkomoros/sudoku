@@ -10,9 +10,14 @@ const TOP_LEFT_CELL = `123|
 789|
 ---+`
 
-const TOP_LEFT_CELL_NO_BLOCK_DIM = `12 |
+const TOP_LEFT_CELL_NO_BLOCK_DIM = `12•|
 456|
 789|
+---+`
+
+const TOP_LEFT_CELL_FILLED = `   |
+ 1 |
+   |
 ---+`
 
 func TestCellCreation(t *testing.T) {
@@ -159,14 +164,21 @@ func TestCellCreation(t *testing.T) {
 	}
 
 	if cell.Diagram() != TOP_LEFT_CELL {
-		t.Log("Diagram for the top left cell printed out incorrectly")
+		t.Log("Diagram for the top left cell printed out incorrectly: \n", cell.Diagram())
 		t.Fail()
 	}
 
 	cell.setImpossible(BLOCK_DIM)
 
 	if cell.Diagram() != TOP_LEFT_CELL_NO_BLOCK_DIM {
-		t.Log("Diagram for the top left cell printed out incorrectly")
+		t.Log("Diagram for the top left cell printed out incorrectly: \n", cell.Diagram())
+		t.Fail()
+	}
+
+	cell.SetNumber(1)
+
+	if cell.Diagram() != TOP_LEFT_CELL_FILLED {
+		t.Log("Diagram for the top left cell filled printed out incorrectly: \n", cell.Diagram())
 		t.Fail()
 	}
 }
