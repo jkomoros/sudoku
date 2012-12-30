@@ -301,9 +301,13 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 }
 
 //The actual workhorse; solutions DOES modify the current grid.
-func (self *Grid) solutions() (solutions []*Grid) {
+func (self *Grid) solutions(done chan bool, solutions chan []*Grid) {
+
+	//TODO: Should we use a defer here? What about the last self.branchAndSolve?
+
 	//Do a deep check; we might be invalid right at this moment.
 	if self.Invalid() {
+		done <- true
 		return
 	}
 
@@ -312,18 +316,20 @@ func (self *Grid) solutions() (solutions []*Grid) {
 
 	//Have any cells noticed they were invalid while solving forward?
 	if self.cellsInvalid() {
+		done <- true
 		return
 	}
 
 	if self.Solved() {
-		return append(solutions, self)
+		output <- [...]{self}[]
+		return
 	}
 
 	//Well, looks like we're going to have to branch.
-	return self.branchAndSolve()
+	return self.branchAndSolve(done, solutions)
 }
 
-func (self *Grid) branchAndSolve() (solutions []*Grid) {
+func (self *Grid) branchAndSolve(done chan bool, solutions chan[]*Grid) {
 	//Nope, we're going to have to branch.
 	//We'll pick the cell with the smallest number of possibilties.
 	rankedObject := self.queue.Get()
@@ -348,7 +354,7 @@ func (self *Grid) branchAndSolve() (solutions []*Grid) {
 	for _, _ = range possibilities {
 		solutions = append(solutions, (<-results)...)
 	}
-	return solutions
+	
 }
 
 //Fills in all of the cells it can without branching or doing any advanced
