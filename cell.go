@@ -94,6 +94,8 @@ func (self *Cell) setPossible(number int) {
 	if self.impossibles[number] == 0 && self.grid != nil {
 		//Our rank will have changed.
 		self.grid.queue.Insert(self)
+		//We may have just become valid.
+		self.checkInvalid()
 	}
 
 }
@@ -108,6 +110,8 @@ func (self *Cell) setImpossible(number int) {
 	if self.impossibles[number] == 1 && self.grid != nil {
 		//Our rank will have changed.
 		self.grid.queue.Insert(self)
+		//We may have just become invalid.
+		self.checkInvalid()
 	}
 }
 
@@ -131,6 +135,17 @@ func (self *Cell) Possibilities() (result []int) {
 		}
 	}
 	return result
+}
+
+func (self *Cell) checkInvalid() {
+	if self.grid == nil {
+		return
+	}
+	if self.Invalid() {
+		self.grid.cellIsInvalid(self)
+	} else {
+		self.grid.cellIsValid(self)
+	}
 }
 
 func (self *Cell) Invalid() bool {

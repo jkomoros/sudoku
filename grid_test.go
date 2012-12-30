@@ -271,6 +271,23 @@ func TestGridLoad(t *testing.T) {
 		t.Log("Grid didn't notice it was invalid when it actually was.")
 		t.Fail()
 	}
+
+	cell.SetNumber(cell.Number() - 1)
+
+	if grid.Invalid() {
+		t.Log("Grid didn't noticed when it flipped from being invalid to being valid again.")
+		t.Fail()
+	}
+
+	for i := 1; i <= DIM; i++ {
+		cell.setImpossible(i)
+	}
+
+	if !grid.Invalid() {
+		t.Log("Grid didn't notice when it became invalid because one of its cells has no more possibilities")
+		t.Fail()
+	}
+
 }
 
 func nCopies(in string, copies int) (result []string) {

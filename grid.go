@@ -13,17 +13,19 @@ const COL_SEP = "|"
 const ALT_COL_SEP = "||"
 
 type Grid struct {
-	initalized bool
-	cells      [DIM * DIM]Cell
-	rows       [DIM][]*Cell
-	cols       [DIM][]*Cell
-	blocks     [DIM][]*Cell
-	queue      *FiniteQueue
+	initalized   bool
+	cells        [DIM * DIM]Cell
+	rows         [DIM][]*Cell
+	cols         [DIM][]*Cell
+	blocks       [DIM][]*Cell
+	queue        *FiniteQueue
+	invalidCells map[*Cell]bool
 }
 
 func NewGrid() *Grid {
 	result := &Grid{}
 	result.queue = NewFiniteQueue(1, DIM)
+	result.invalidCells = make(map[*Cell]bool)
 	i := 0
 	for r := 0; r < DIM; r++ {
 		for c := 0; c < DIM; c++ {
@@ -159,6 +161,9 @@ func (self *Grid) Solved() bool {
 //Grid will never be invalid based on moves made by the solver; it will detect times that
 //someone called SetNumber with an impossible number after the fact, though.
 func (self *Grid) Invalid() bool {
+	if len(self.invalidCells) > 0 {
+		return true
+	}
 	for i := 0; i < DIM; i++ {
 		row := self.Row(i)
 		rowCheck := make(map[int]bool)
@@ -195,6 +200,17 @@ func (self *Grid) Invalid() bool {
 		}
 	}
 	return false
+}
+
+//Called by cells when they notice they are invalid and the grid might not know that.
+func (self *Grid) cellIsInvalid(cell *Cell) {
+	//Doesn't matter if it was already set.
+	self.invalidCells[cell] = true
+}
+
+//Called by cells when they notice they are valid and think the grid might not know that.
+func (self *Grid) cellIsValid(cell *Cell) {
+	delete(self.invalidCells, cell)
 }
 
 //Fills in all of the cells it can without branching or doing any advanced
