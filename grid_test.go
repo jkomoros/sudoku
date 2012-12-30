@@ -86,7 +86,8 @@ func TestGridCreation(t *testing.T) {
 	cellData := "1"
 	rowData := strings.Join(nCopies(cellData, DIM), COL_SEP)
 	data := strings.Join(nCopies(rowData, DIM), ROW_SEP)
-	grid := LoadGrid(data)
+	grid := NewGrid()
+	grid.Load(data)
 	if len(grid.cells) != DIM*DIM {
 		t.Log("Didn't generate enough cells")
 		t.Fail()
@@ -191,7 +192,8 @@ func TestGridCreation(t *testing.T) {
 }
 
 func TestGridLoad(t *testing.T) {
-	grid := LoadGrid(TEST_GRID)
+	grid := NewGrid()
+	grid.Load(TEST_GRID)
 
 	cell := grid.Cell(0, 0)
 

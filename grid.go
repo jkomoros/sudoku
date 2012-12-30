@@ -37,16 +37,14 @@ func NewGrid() *Grid {
 	return result
 }
 
-func LoadGrid(data string) *Grid {
-	result := NewGrid()
+func (self *Grid) Load(data string) {
 	data = strings.Replace(data, ALT_COL_SEP, COL_SEP, -1)
 	for r, row := range strings.Split(data, ROW_SEP) {
 		for c, data := range strings.Split(row, COL_SEP) {
-			cell := result.Cell(r, c)
+			cell := self.Cell(r, c)
 			cell.Load(data)
 		}
 	}
-	return result
 }
 
 func (self *Grid) Row(index int) []*Cell {
