@@ -20,7 +20,7 @@ TODO:
 		* For each possibility for that cell, make a copy of the grid. Start a goroutine for each one, passing in a channel for number of solutions down that route. In each of those routines, it first sets the specificed number and then does the Solve again.
 
 * We want NumSolutions, which returns the number of solutions that are forward from here, but we also want a Solve() that leaves the grid in solved state.
-	* We have a Solutions() [] *Grid, which returns a slice of as many solutions as it can find down this path without unfilling anything currently filled.
+	* We have a Solutions() [] *Grid, which returns a slice of as many solutions as it can find down this path without unfilling anything currently filled. NOTE: It actually starts fillSimpleCells on a copy; it doesn't modify the underlying grid.
 	* Solve() just copies the first found solution to the current grid.
 	* NumSolutions() just returns the len of the solutions.
 
