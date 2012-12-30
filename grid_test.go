@@ -65,6 +65,28 @@ const TEST_GRID_DIAGRAM = `•••|•••|•••||   |   |   ||•••
 •5•|   |•1•||  6|   |  6||•9•|•4•|•7•
 •••| 8 |•••||   |   |   ||•••|•••|•••`
 
+//This grid is #102 from Totally Pocket Sudoku. It's included for testing purposes only.
+
+const ADVANCED_TEST_GRID = `.|5|.|.|.|.|7|4|.
+7|2|.|.|3|.|.|.|.
+.|.|1|5|.|.|.|.|8
+.|8|3|.|.|2|.|.|.
+1|.|.|.|5|.|.|.|2
+.|.|.|9|.|.|1|7|.
+9|.|.|.|.|1|4|.|.
+.|.|.|.|8|.|.|9|1
+.|1|6|.|.|.|.|3|.`
+
+const SOLVED_ADVANCED_TEST_GRID = `3|5|8|2|1|6|7|4|9
+7|2|9|8|3|4|5|1|6
+4|6|1|5|9|7|3|2|8
+6|8|3|1|7|2|9|5|4
+1|9|7|4|5|3|8|6|2
+5|4|2|9|6|8|1|7|3
+9|3|5|6|2|1|4|8|7
+2|7|4|3|8|5|6|9|1
+8|1|6|7|4|9|2|3|5`
+
 func TestGridCreation(t *testing.T) {
 
 	blockUpperLeftRow := make([]int, DIM)
@@ -285,6 +307,38 @@ func TestGridLoad(t *testing.T) {
 
 	if !grid.Invalid() {
 		t.Log("Grid didn't notice when it became invalid because one of its cells has no more possibilities")
+		t.Fail()
+	}
+
+}
+
+func TestAdvancedSolve(t *testing.T) {
+	grid := NewGrid()
+	grid.Load(ADVANCED_TEST_GRID)
+
+	if grid.DataString() != ADVANCED_TEST_GRID {
+		t.Log("Advanced grid didn't survive a roundtrip to DataString")
+		t.Fail()
+	}
+
+	copy := grid.Copy()
+
+	copy.fillSimpleCells()
+
+	if copy.Solved() {
+		t.Log("Advanced grid was 'solved' with just fillSimpleCells")
+		t.Fail()
+	}
+
+	solutions := grid.Solutions()
+
+	if len(solutions) != 1 {
+		t.Log("We found the wrong number of solutions in Advanced grid.")
+		t.FailNow()
+	}
+
+	if solutions[0].DataString() != SOLVED_ADVANCED_TEST_GRID {
+		t.Log("Solve found the wrong solution.")
 		t.Fail()
 	}
 
