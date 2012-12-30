@@ -311,11 +311,11 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 			case solution := <-solutions:
 				result = append(result, solution)
 			case <-doneChan:
-				//TODO: break out of the for loop, too!
-				break
+				//A single break here wouldn't get us out.
+				self.cachedSolutions = result
+				return self.cachedSolutions
 			}
 		}
-		self.cachedSolutions = result
 	}
 	return self.cachedSolutions
 }
