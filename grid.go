@@ -125,6 +125,23 @@ func (self *Grid) cellList(rowOne int, colOne int, rowTwo int, colTwo int) []*Ce
 	return result
 }
 
+//Fills in all of the cells it can without branching or doing any advanced
+//techniques that require anything more than a single cell's possibles list.
+func (self *Grid) fillSimpleCells() int {
+	count := 0
+	obj := self.queue.GetSmallerThan(2)
+	for obj != nil {
+		cell, ok := obj.(*Cell)
+		if !ok {
+			continue
+		}
+		cell.SetNumber(cell.implicitNumber())
+		count++
+		obj = self.queue.GetSmallerThan(2)
+	}
+	return count
+}
+
 func (self *Grid) DataString() string {
 	var rows []string
 	for r := 0; r < DIM; r++ {
