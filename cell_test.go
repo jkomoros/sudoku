@@ -33,7 +33,7 @@ func TestCellCreation(t *testing.T) {
 		}
 
 		if cell.Rank() != DIM-1 {
-			t.Log("Cell reported an incorrect rank")
+			t.Log("Cell reported an incorrect rank: ", cell.Rank())
 			t.Fail()
 		}
 
@@ -115,8 +115,8 @@ func TestCellCreation(t *testing.T) {
 		t.Fail()
 	}
 
-	if cell.Rank() != 1 {
-		t.Log("Cell with an explicit number came back with a non-1 Rank")
+	if cell.Rank() != 0 {
+		t.Log("Cell with an explicit number came back with a non-0 Rank")
 		t.Fail()
 	}
 

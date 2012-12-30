@@ -118,6 +118,9 @@ func (self *Cell) Invalid() bool {
 }
 
 func (self *Cell) Rank() int {
+	if self.number != 0 {
+		return 0
+	}
 	count := 0
 	for _, counter := range self.impossibles {
 		if counter == 0 {
