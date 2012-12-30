@@ -5,6 +5,16 @@ import (
 	"testing"
 )
 
+const TOP_LEFT_CELL = `123|
+456|
+789|
+---+`
+
+const TOP_LEFT_CELL_NO_BLOCK_DIM = `12 |
+456|
+789|
+---+`
+
 func TestCellCreation(t *testing.T) {
 
 	number := 1
@@ -146,5 +156,17 @@ func TestCellCreation(t *testing.T) {
 			t.Log("We reported back a number was not possible when 0 had been explicitly set.")
 			t.Fail()
 		}
+	}
+
+	if cell.Diagram() != TOP_LEFT_CELL {
+		t.Log("Diagram for the top left cell printed out incorrectly")
+		t.Fail()
+	}
+
+	cell.setImpossible(BLOCK_DIM)
+
+	if cell.Diagram() != TOP_LEFT_CELL_NO_BLOCK_DIM {
+		t.Log("Diagram for the top left cell printed out incorrectly")
+		t.Fail()
 	}
 }
