@@ -23,6 +23,7 @@ TODO:
 	* We have a Solutions() [] *Grid, which returns a slice of as many solutions as it can find down this path without unfilling anything currently filled. NOTE: It actually starts fillSimpleCells on a copy; it doesn't modify the underlying grid.
 	* Solve() just copies the first found solution to the current grid.
 	* NumSolutions() just returns the len of the solutions.
+	* Solve() and NumSolutions() cache the grids that come back from Solutions() (cells will need to alert Grid every time their number changes.)
 
 
 * Grid should suppot copy operations and have copy-on-write semantics with shared cells.
