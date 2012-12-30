@@ -102,6 +102,15 @@ func (self *Grid) blockForCell(row int, col int) int {
 	return blockRow*BLOCK_DIM + blockCol
 }
 
+func (self *Grid) blockHasNeighbors(index int) (top bool, right bool, bottom bool, left bool) {
+	topRow, topCol, bottomRow, bottomCol := self.blockExtents(index)
+	top = topRow != 0
+	bottom = bottomRow != DIM-1
+	left = topCol != 0
+	right = bottomCol != DIM-1
+	return
+}
+
 func (self *Grid) Cell(row int, col int) *Cell {
 	index := row*DIM + col
 	if index >= DIM*DIM || index < 0 {
