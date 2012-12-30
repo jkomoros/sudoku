@@ -43,6 +43,10 @@ func (self *Cell) Number() int {
 
 func (self *Cell) SetNumber(number int) {
 	//Sets the explicit number. This will affect its neighbors possibles list.
+	if self.number == number {
+		//No work to do now.
+		return
+	}
 	oldNumber := self.number
 	self.number = number
 	if oldNumber > 0 {
