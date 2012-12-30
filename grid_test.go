@@ -347,6 +347,11 @@ func TestAdvancedSolve(t *testing.T) {
 		t.Fail()
 	}
 
+	if grid.NumSolutions() != 1 {
+		t.Log("Grid didn't find any solutions but there is one.")
+		t.Fail()
+	}
+
 	grid.Solve()
 
 	if !grid.Solved() {

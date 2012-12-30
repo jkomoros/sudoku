@@ -235,6 +235,11 @@ func (self *Grid) Solve() bool {
 	return true
 }
 
+//Returns the total number of solutions found in the grid. Does not mutate the grid.
+func (self *Grid) NumSolutions() int {
+	return len(self.Solutions())
+}
+
 //Returns a slice of grids that represent possible solutions if you were to solve forward this grid. The current grid is not modified.
 //If there are no solutions forward from this location it will return a slice with len() 0.
 func (self *Grid) Solutions() (solutions []*Grid) {
