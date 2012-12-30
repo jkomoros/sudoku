@@ -14,9 +14,6 @@ Grid {
 
 TODO:
 
-* Solve() just copies the first found solution to the current grid.
-* NumSolutions() just returns the len of the solutions.
-* Solve() and NumSolutions() cache the grids that come back from Solutions() (cells will need to alert Grid every time their number changes.)
 * In cases where we're only interested in A solution or 2 solutions, we can bail out early. In that case, we'll want to use channels and we'll want to do some kind of best first search  where there are workers that pull grids off the list to operate on next (using FiniteQueue, (no modificaitons necessary to be threadsafe as long as we create a new grid at each branch). In that world, as soon as the main thread branches it will want to end.
 
 * Grid should suppot copy operations and have copy-on-write semantics with shared cells.
