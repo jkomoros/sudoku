@@ -13,6 +13,19 @@ Grid {
 }
 
 TODO:
+* Grid.IsSolved method.
+* Implement branching logic in Solve:
+	* Call fillSimpleCells.
+	* check if grid is solved.
+	* if not, pick a cell with the lowest rank:
+		* For each possibility for that cell, make a copy of the grid. Start a goroutine for each one, passing in a channel for number of solutions down that route. In each of those routines, it first sets the specificed number and then does the Solve again.
+
+* We want NumSolutions, which returns the number of solutions that are forward from here, but we also want a Solve() that leaves the grid in solved state.
+	* We have a Solutions() [] *Grid, which returns a slice of as many solutions as it can find down this path without unfilling anything currently filled.
+	* Solve() just copies the first found solution to the current grid.
+	* NumSolutions() just returns the len of the solutions.
+
+
 * Grid should suppot copy operations and have copy-on-write semantics with shared cells.
 * Have some way for cell.invalid(), when it's been called, to alert back up that an inconsistency has been found.
 * A way to generate filled squares (to start removing things from)
