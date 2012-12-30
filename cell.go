@@ -12,6 +12,7 @@ const DIAGRAM_RIGHT = "|"
 const DIAGRAM_BOTTOM = "-"
 const DIAGRAM_CORNER = "+"
 const DIAGRAM_NUMBER = "•"
+const NUM_NEIGHBORS = (DIM-1)*3 - (BLOCK_DIM-1)*2
 
 type Cell struct {
 	grid *Grid
