@@ -217,8 +217,18 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
+	if grid.IsSolved() {
+		t.Log("Grid reported it was solved when it was not.")
+		t.Fail()
+	}
+
 	if num := grid.fillSimpleCells(); num != 45 {
 		t.Log("We filled simple cells on the test grid but didn't get as many as we were expecting: ", num, "/", 45)
+		t.Fail()
+	}
+
+	if !grid.IsSolved() {
+		t.Log("Grid didn't think it was solved when it was.")
 		t.Fail()
 	}
 

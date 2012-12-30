@@ -13,7 +13,7 @@ Grid {
 }
 
 TODO:
-* Grid.IsSolved method.
+* Grid.Invalid, which checks that each row/block/col has no more than one of each number. 
 * Implement branching logic in Solve:
 	* Call fillSimpleCells.
 	* check if grid is solved.

@@ -141,6 +141,15 @@ func (self *Grid) cellList(rowOne int, colOne int, rowTwo int, colTwo int) []*Ce
 	return result
 }
 
+func (self *Grid) IsSolved() bool {
+	for _, cell := range self.cells {
+		if cell.Number() == 0 {
+			return false
+		}
+	}
+	return true
+}
+
 //Fills in all of the cells it can without branching or doing any advanced
 //techniques that require anything more than a single cell's possibles list.
 func (self *Grid) fillSimpleCells() int {
