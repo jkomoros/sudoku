@@ -201,12 +201,7 @@ func (self *Grid) Invalid() bool {
 
 //Fills in all of the cells it can without branching or doing any advanced
 //techniques that require anything more than a single cell's possibles list.
-func (self *Grid) fillSimpleCells() (numFilled int, foundInvalid bool) {
-	//We make it as buffered as necessary so in the worst case we'll still complete that call and won't block.
-	self.invalidCellFound = make(chan bool, NUM_NEIGHBORS)
-	defer func() {
-		self.invalidCellFound = nil
-	}()
+func (self *Grid) fillSimpleCells() int {
 	count := 0
 	obj := self.queue.GetSmallerThan(2)
 	for obj != nil {
@@ -216,18 +211,9 @@ func (self *Grid) fillSimpleCells() (numFilled int, foundInvalid bool) {
 		}
 		cell.SetNumber(cell.implicitNumber())
 		count++
-
-		//Did any cells notice they were invalid after setting that?
-		select {
-		case <-self.invalidCellFound:
-			return count, true
-		default:
-			//Continue going
-		}
-
 		obj = self.queue.GetSmallerThan(2)
 	}
-	return count, false
+	return count
 }
 
 func (self *Grid) DataString() string {
