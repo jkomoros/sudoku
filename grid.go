@@ -13,19 +13,17 @@ const COL_SEP = "|"
 const ALT_COL_SEP = "||"
 
 type Grid struct {
-	initalized       bool
-	invalidCellFound chan bool
-	cells            [DIM * DIM]Cell
-	rows             [DIM][]*Cell
-	cols             [DIM][]*Cell
-	blocks           [DIM][]*Cell
-	queue            *FiniteQueue
+	initalized bool
+	cells      [DIM * DIM]Cell
+	rows       [DIM][]*Cell
+	cols       [DIM][]*Cell
+	blocks     [DIM][]*Cell
+	queue      *FiniteQueue
 }
 
 func NewGrid() *Grid {
 	result := &Grid{}
 	result.queue = NewFiniteQueue(1, DIM)
-	//We deliberately leave invalidCellFound as nil. If we need to know about it, we'll create one.
 	i := 0
 	for r := 0; r < DIM; r++ {
 		for c := 0; c < DIM; c++ {
