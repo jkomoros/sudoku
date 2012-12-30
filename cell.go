@@ -7,6 +7,10 @@ import (
 )
 
 const ALT_0 = "."
+const DIAGRAM_IMPOSSIBLE = " "
+const DIAGRAM_RIGHT = "|"
+const DIAGRAM_BOTTOM = "-"
+const DIAGRAM_CORNER = "+"
 
 type Cell struct {
 	grid *Grid
@@ -205,4 +209,44 @@ func (self *Cell) positionInBlock() (top, right, bottom, left bool) {
 	bottom = self.Row == bottomRow
 	left = self.Col == topCol
 	return
+}
+
+func (self *Cell) diagramRows() (rows []string) {
+	//We'll only draw barriers at our bottom right edge.
+	_, right, bottom, _ := self.positionInBlock()
+	//TODO: vary printing if the block has neighbors or not.
+	//TODO: print differently if the number is filled.
+	current := 0
+	for r := 0; r < BLOCK_DIM; r++ {
+		row := ""
+		for c := 0; c < BLOCK_DIM; c++ {
+			if self.impossibles[current] == 0 {
+				row += strconv.Itoa(current + 1)
+			} else {
+				row += DIAGRAM_IMPOSSIBLE
+			}
+			current++
+		}
+		rows = append(rows, row)
+	}
+	//Do we need to pad each row with | on the right?
+	if !right {
+		for i, data := range rows {
+			rows[i] = data + DIAGRAM_RIGHT
+		}
+	}
+	//Do we need an extra bottom row? 
+	if !bottom {
+		rows = append(rows, strings.Repeat(DIAGRAM_BOTTOM, BLOCK_DIM))
+		// Does it need a + at the end?
+		if !right {
+			rows[len(rows)-1] = rows[len(rows)-1] + DIAGRAM_CORNER
+		}
+	}
+
+	return rows
+}
+
+func (self *Cell) Diagram() string {
+	return strings.Join(self.diagramRows(), "\n")
 }
