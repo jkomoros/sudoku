@@ -7,7 +7,7 @@ import (
 
 //This grid is #27 from Totally Pocket Sudoku. It's included for testing purposes only.
 
-const testGrid = `6|1|2||.|.|.||4|.|3
+const TEST_GRID = `6|1|2||.|.|.||4|.|3
 .|3|.||4|9|.||.|7|2
 .|.|7||.|.|.||.|6|5
 .|.|.||.|6|1||.|8|.
@@ -143,7 +143,7 @@ func TestGridCreation(t *testing.T) {
 }
 
 func TestGridLoad(t *testing.T) {
-	grid := LoadGrid(testGrid)
+	grid := LoadGrid(TEST_GRID)
 
 	cell := grid.Cell(0, 0)
 
