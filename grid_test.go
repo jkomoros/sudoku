@@ -371,6 +371,19 @@ func TestAdvancedSolve(t *testing.T) {
 
 }
 
+func TestFill(t *testing.T) {
+	grid := NewGrid()
+	if !grid.Fill() {
+		t.Log("We were unable to find a fill for an empty grid.")
+		t.Fail()
+	}
+
+	if !grid.Solved() {
+		t.Log("The grid that came back from fill was not actually fully solved.")
+		t.Fail()
+	}
+}
+
 func nCopies(in string, copies int) (result []string) {
 	for i := 0; i < copies; i++ {
 		result = append(result, in)

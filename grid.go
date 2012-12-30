@@ -2,6 +2,7 @@ package dokugen
 
 import (
 	"log"
+	"math/rand"
 	"strings"
 )
 
@@ -224,6 +225,30 @@ func (self *Grid) cellIsValid(cell *Cell) {
 
 func (self *Grid) cellModified(cell *Cell) {
 	self.cachedSolutions = nil
+}
+
+//Fill will find a random filling of the puzzle that is valid. If it cannot find one,
+// it will return False and leave the grid as it found it. It will not try
+// particularly hard to find a solution, so it's best to call it on a blank grid.
+func (self *Grid) Fill() bool {
+	//TODO: semantically, this is the same as picking a random solution from
+	//Solutions(), or having solutions figure out which cell and possibiltity
+	//to try randomly. We shouldn't duplicate this.
+	copy := self.Copy()
+
+	for _, cell := range copy.cells {
+		if cell.Number() != 0 {
+			continue
+		}
+		possibilities := cell.Possibilities()
+		if len(possibilities) == 0 {
+			return false
+		}
+		choice := possibilities[rand.Intn(len(possibilities))]
+		cell.SetNumber(choice)
+	}
+	self.Load(copy.DataString())
+	return true
 }
 
 //Searches for a solution to the puzzle as it currently exists without
