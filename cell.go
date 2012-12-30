@@ -7,10 +7,11 @@ import (
 )
 
 const ALT_0 = "."
-const DIAGRAM_IMPOSSIBLE = "•"
+const DIAGRAM_IMPOSSIBLE = " "
 const DIAGRAM_RIGHT = "|"
 const DIAGRAM_BOTTOM = "-"
 const DIAGRAM_CORNER = "+"
+const DIAGRAM_NUMBER = "•"
 
 type Cell struct {
 	grid *Grid
@@ -223,7 +224,7 @@ func (self *Cell) diagramRows() (rows []string) {
 				if r == BLOCK_DIM/2 && c == BLOCK_DIM/2 {
 					row += strconv.Itoa(self.number)
 				} else {
-					row += " "
+					row += DIAGRAM_NUMBER
 				}
 			} else {
 				//Print the possibles.

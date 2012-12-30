@@ -10,14 +10,14 @@ const TOP_LEFT_CELL = `123|
 789|
 ---+`
 
-const TOP_LEFT_CELL_NO_BLOCK_DIM = `12•|
+const TOP_LEFT_CELL_NO_BLOCK_DIM = `12 |
 456|
 789|
 ---+`
 
-const TOP_LEFT_CELL_FILLED = `   |
- 1 |
-   |
+const TOP_LEFT_CELL_FILLED = `•••|
+•1•|
+•••|
 ---+`
 
 func TestCellCreation(t *testing.T) {
