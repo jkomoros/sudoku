@@ -77,18 +77,23 @@ func (self *Grid) Block(index int) []*Cell {
 		return nil
 	}
 	if self.blocks[index] == nil {
-		//Conceptually, we'll pretend like the grid is made up of blocks that are arrayed with row/column
-		//Once we find the block r/c, we'll multiply by the actual dim to get the upper left corner.
-
-		blockCol := index % BLOCK_DIM
-		blockRow := (index - blockCol) / BLOCK_DIM
-
-		col := blockCol * BLOCK_DIM
-		row := blockRow * BLOCK_DIM
-
-		self.blocks[index] = self.cellList(row, col, row+BLOCK_DIM-1, col+BLOCK_DIM-1)
+		topRow, topCol, bottomRow, bottomCol := self.blockExtents(index)
+		self.blocks[index] = self.cellList(topRow, topCol, bottomRow, bottomCol)
 	}
 	return self.blocks[index]
+}
+
+func (self *Grid) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
+	//Conceptually, we'll pretend like the grid is made up of blocks that are arrayed with row/column
+	//Once we find the block r/c, we'll multiply by the actual dim to get the upper left corner.
+
+	blockCol := index % BLOCK_DIM
+	blockRow := (index - blockCol) / BLOCK_DIM
+
+	col := blockCol * BLOCK_DIM
+	row := blockRow * BLOCK_DIM
+
+	return row, col, row + BLOCK_DIM - 1, col + BLOCK_DIM - 1
 }
 
 func (self *Grid) blockForCell(row int, col int) int {
