@@ -245,7 +245,7 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
-	if num := grid.fillSimpleCells(); num != 45 {
+	if num, _ := grid.fillSimpleCells(); num != 45 {
 		t.Log("We filled simple cells on the test grid but didn't get as many as we were expecting: ", num, "/", 45)
 		t.Fail()
 	}
