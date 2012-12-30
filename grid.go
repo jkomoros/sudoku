@@ -6,7 +6,7 @@ import (
 )
 
 //TODO: Support non-squared DIMS (logic in Block() would need updating)
-const BLOCK_DIM = 4
+const BLOCK_DIM = 3
 const DIM = BLOCK_DIM * BLOCK_DIM
 const ROW_SEP = "\n"
 const COL_SEP = "|"

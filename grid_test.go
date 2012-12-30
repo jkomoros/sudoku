@@ -154,8 +154,8 @@ func TestGridLoad(t *testing.T) {
 
 	cell = grid.Cell(DIM-1, DIM-1)
 
-	if cell.Number() != 0 {
-		t.Log("The loaded grid did not have a 0 in the bottom right corner")
+	if cell.Number() != 7 {
+		t.Log("The loaded grid did not have a 7 in the bottom right corner")
 		t.Fail()
 	}
 
