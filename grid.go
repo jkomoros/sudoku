@@ -232,31 +232,36 @@ func (self *Grid) cellModified(cell *Cell) {
 func (self *Grid) Fill() bool {
 
 	//TODO: This also isn't deterministic; it can get stuck randomly, causing
-	//the tests to pass or not pass non-deterministically.
+	//the tests to pass or not pass non-deterministically. The chance is
+	//extremely small now that we retry so many times, but technically it's
+	//still flaky.
 
 	//TODO: semantically, this is the same as picking a random solution from
 	//Solutions(), or having solutions figure out which cell and possibiltity
 	//to try randomly. We shouldn't duplicate this.
-	copy := self.Copy()
+	for i := 0; i < 10; i++ {
 
-	copy.Cell(0, 0).pickRandom()
+		copy := self.Copy()
 
-	obj := copy.queue.Get()
-	for obj != nil {
-		cell, ok := obj.(*Cell)
-		if !ok {
-			panic("We got back a non-cell from the queue.")
+		copy.Cell(0, 0).pickRandom()
+
+		obj := copy.queue.Get()
+		for obj != nil {
+			cell, ok := obj.(*Cell)
+			if !ok {
+				panic("We got back a non-cell from the queue.")
+			}
+			cell.pickRandom()
+			obj = copy.queue.Get()
 		}
-		cell.pickRandom()
-		obj = copy.queue.Get()
-	}
 
-	if !copy.Solved() {
-		return false
+		if copy.Solved() {
+			self.Load(copy.DataString())
+			return true
+		}
 	}
-
-	self.Load(copy.DataString())
-	return true
+	//We failed a number of times to find one.
+	return false
 }
 
 //Searches for a solution to the puzzle as it currently exists without
