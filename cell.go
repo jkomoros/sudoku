@@ -187,7 +187,8 @@ func (self *Cell) Neighbors() []*Cell {
 }
 
 func (self *Cell) DataString() string {
-	return strconv.Itoa(self.Number())
+	result := strconv.Itoa(self.Number())
+	return strings.Replace(result, "0", ALT_0, -1)
 }
 
 func (self *Cell) String() string {

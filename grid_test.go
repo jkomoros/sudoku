@@ -7,15 +7,15 @@ import (
 
 //This grid is #27 from Totally Pocket Sudoku. It's included for testing purposes only.
 
-const TEST_GRID = `6|1|2||.|.|.||4|.|3
-.|3|.||4|9|.||.|7|2
-.|.|7||.|.|.||.|6|5
-.|.|.||.|6|1||.|8|.
-1|.|3||.|4|.||2|.|6
-.|6|.||5|2|.||.|.|.
-.|9|.||.|.|.||5|.|.
-7|2|.||.|8|5||.|3|.
-5|.|1||.|.|.||9|4|7`
+const TEST_GRID = `6|1|2|.|.|.|4|.|3
+.|3|.|4|9|.|.|7|2
+.|.|7|.|.|.|.|6|5
+.|.|.|.|6|1|.|8|.
+1|.|3|.|4|.|2|.|6
+.|6|.|5|2|.|.|.|.
+.|9|.|.|.|.|5|.|.
+7|2|.|.|8|5|.|3|.
+5|.|1|.|.|.|9|4|7`
 
 func TestGridCreation(t *testing.T) {
 
@@ -156,6 +156,11 @@ func TestGridLoad(t *testing.T) {
 
 	if cell.Number() != 0 {
 		t.Log("The loaded grid did not have a 0 in the bottom right corner")
+		t.Fail()
+	}
+
+	if grid.DataString() != TEST_GRID {
+		t.Log("The real test grid did not survive a round trip via DataString: \n", grid.DataString(), "\n\n", TEST_GRID)
 		t.Fail()
 	}
 }
