@@ -332,6 +332,11 @@ func TestAdvancedSolve(t *testing.T) {
 
 	solutions := grid.Solutions()
 
+	if grid.DataString() != ADVANCED_TEST_GRID {
+		t.Log("Calling Solutions() modified the original grid.")
+		t.Fail()
+	}
+
 	if len(solutions) != 1 {
 		t.Log("We found the wrong number of solutions in Advanced grid.")
 		t.FailNow()
