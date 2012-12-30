@@ -68,6 +68,9 @@ func (self *Cell) SetNumber(number int) {
 		}
 		self.alertNeighbors(number, false)
 	}
+	if self.grid != nil {
+		self.grid.cellModified(self)
+	}
 }
 
 func (self *Cell) alertNeighbors(number int, possible bool) {

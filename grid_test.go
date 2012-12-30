@@ -364,6 +364,11 @@ func TestAdvancedSolve(t *testing.T) {
 		t.Fail()
 	}
 
+	if grid.cachedSolutions != nil {
+		t.Log("The cache of solutions was supposed to be expired when we copied in the solution, but it wasn't")
+		t.Fail()
+	}
+
 }
 
 func nCopies(in string, copies int) (result []string) {

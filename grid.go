@@ -13,13 +13,14 @@ const COL_SEP = "|"
 const ALT_COL_SEP = "||"
 
 type Grid struct {
-	initalized   bool
-	cells        [DIM * DIM]Cell
-	rows         [DIM][]*Cell
-	cols         [DIM][]*Cell
-	blocks       [DIM][]*Cell
-	queue        *FiniteQueue
-	invalidCells map[*Cell]bool
+	initalized      bool
+	cells           [DIM * DIM]Cell
+	rows            [DIM][]*Cell
+	cols            [DIM][]*Cell
+	blocks          [DIM][]*Cell
+	queue           *FiniteQueue
+	invalidCells    map[*Cell]bool
+	cachedSolutions []*Grid
 }
 
 func NewGrid() *Grid {
@@ -221,6 +222,10 @@ func (self *Grid) cellIsValid(cell *Cell) {
 	delete(self.invalidCells, cell)
 }
 
+func (self *Grid) cellModified(cell *Cell) {
+	self.cachedSolutions = nil
+}
+
 //Searches for a solution to the puzzle as it currently exists without
 //unfilling any cells. If one exists, it will fill in all cells to fit that
 //solution and return true. If there are no solutions the grid will remain
@@ -249,8 +254,12 @@ func (self *Grid) HasSolution() bool {
 //Returns a slice of grids that represent possible solutions if you were to solve forward this grid. The current grid is not modified.
 //If there are no solutions forward from this location it will return a slice with len() 0.
 func (self *Grid) Solutions() (solutions []*Grid) {
-	copy := self.Copy()
-	return copy.solutions()
+	//TODO: this will not save work if the grid is invalid, since that is indistingusihable from an uninited cache.
+	if self.cachedSolutions == nil {
+		copy := self.Copy()
+		self.cachedSolutions = copy.solutions()
+	}
+	return self.cachedSolutions
 }
 
 //The actual workhorse; solutions DOES modify the current grid.
