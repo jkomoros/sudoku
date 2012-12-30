@@ -119,6 +119,19 @@ func (self *Cell) Possible(number int) bool {
 	return self.impossibles[number] == 0
 }
 
+//A slice of ints representing the possibilties for this cell.
+func (self *Cell) Possibilities() (result []int) {
+	if self.number != 0 {
+		return nil
+	}
+	for i := 1; i <= DIM; i++ {
+		if self.Possible(i) {
+			result = append(result, i)
+		}
+	}
+	return result
+}
+
 func (self *Cell) Invalid() bool {
 	//Returns true if no numbers are possible.
 	//TODO: figure out a way to send this back up to the solver when it happens.

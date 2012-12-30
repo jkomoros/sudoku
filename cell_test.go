@@ -31,6 +31,20 @@ func TestCellCreation(t *testing.T) {
 		t.Fail()
 	}
 
+	possibilities := cell.Possibilities()
+
+	if len(possibilities) != DIM {
+		t.Log("We got back the wrong number of possibilities")
+		t.Fail()
+	}
+
+	for i, possibility := range possibilities {
+		if possibility != i+1 {
+			t.Log("The possibilities list was not a monotonically increasing list: ", possibility, "/", i)
+			t.Fail()
+		}
+	}
+
 	for i := 1; i <= DIM; i++ {
 		if !cell.Possible(i) {
 			t.Log("Cell reported ", i, " was impossible even though it hadn't been touched")
@@ -77,6 +91,14 @@ func TestCellCreation(t *testing.T) {
 		cell.setPossible(i)
 		if cell.implicitNumber() != i {
 			t.Log("Implicit number failed to notice that ", i, " should be implict number.")
+			t.Fail()
+		}
+		possibilities := cell.Possibilities()
+		if len(possibilities) != 1 {
+			t.Log("We got the wrong number of possibilities back")
+			t.Fail()
+		} else if possibilities[0] != i {
+			t.Log("We got the wrong possibility back")
 			t.Fail()
 		}
 		cell.setImpossible(i)
