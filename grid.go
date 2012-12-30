@@ -221,6 +221,20 @@ func (self *Grid) cellIsValid(cell *Cell) {
 	delete(self.invalidCells, cell)
 }
 
+//Searches for a solution to the puzzle as it currently exists without
+//unfilling any cells. If one exists, it will fill in all cells to fit that
+//solution and return true. If there are no solutions the grid will remain
+//untouched and it will return false.
+func (self *Grid) Solve() bool {
+	//TODO: Optimization: we only need one, so we can bail as soon as we find a single one.
+	solutions := self.Solutions()
+	if len(solutions) == 0 {
+		return false
+	}
+	self.Load(solutions[0].DataString())
+	return true
+}
+
 //Returns a slice of grids that represent possible solutions if you were to solve forward this grid. The current grid is not modified.
 //If there are no solutions forward from this location it will return a slice with len() 0.
 func (self *Grid) Solutions() (solutions []*Grid) {
@@ -258,10 +272,12 @@ func (self *Grid) branchAndSolve() (solutions []*Grid) {
 	if rankedObject == nil {
 		panic("Queue didn't have any cells.")
 	}
+
 	cell, ok := rankedObject.(*Cell)
 	if !ok {
 		panic("We got back a non-cell from the grid's queue")
 	}
+
 	possibilities := cell.Possibilities()
 	results := make(chan []*Grid, 0)
 	for _, num := range cell.Possibilities() {

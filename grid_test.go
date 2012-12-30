@@ -347,6 +347,13 @@ func TestAdvancedSolve(t *testing.T) {
 		t.Fail()
 	}
 
+	grid.Solve()
+
+	if !grid.Solved() {
+		t.Log("The grid itself didn't get mutated to a solved state.")
+		t.Fail()
+	}
+
 }
 
 func nCopies(in string, copies int) (result []string) {
