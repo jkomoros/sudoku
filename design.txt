@@ -16,6 +16,7 @@ TODO:
 
 * Replace Fill() with a better implementation (isn't there a known polynomial time solution?). In the worst case, the work for the next bullet will unlock it.
 * In cases where we're only interested in A solution or 2 solutions, we can bail out early. In that case, we'll want to use channels and we'll want to do some kind of best first search  where there are workers that pull grids off the list to operate on next (using FiniteQueue, (no modificaitons necessary to be threadsafe as long as we create a new grid at each branch). In that world, as soon as the main thread branches it will want to end.
+* Test how much more slowly the channel implementation of Solutions() goes.
 
 * Grid should suppot copy operations and have copy-on-write semantics with shared cells.
 * A way to generate filled squares (to start removing things from)
