@@ -43,7 +43,14 @@ func (self *FiniteQueue) Insert(obj RankedObject) {
 }
 
 func (self *FiniteQueue) Get() RankedObject {
+	return self.GetSmallerThan(self.max + 1)
+}
+
+func (self *FiniteQueue) GetSmallerThan(max int) RankedObject {
 	for i, list := range self.objects {
+		if i+self.min >= max {
+			return nil
+		}
 		for len(list) > 0 {
 			obj := list[0]
 			if len(list) == 1 {

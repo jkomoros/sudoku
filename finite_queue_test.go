@@ -88,4 +88,22 @@ func TestFiniteQueue(t *testing.T) {
 		t.Log("We were able to get back more objects than what we put in.")
 		t.Fail()
 	}
+
+	for _, obj := range objects {
+		queue.Insert(obj)
+	}
+
+	if queue.GetSmallerThan(5) == nil {
+		t.Log("We expected two items smaller than 5 and got back 0")
+		t.Fail()
+	}
+	if queue.GetSmallerThan(5) == nil {
+		t.Log("We expected two items smaller than 5 and got only one back.")
+		t.Fail()
+	}
+	if queue.GetSmallerThan(5) != nil {
+		t.Log("We expcted only two items smaller than 5 and got more back.")
+		t.Fail()
+	}
+
 }
