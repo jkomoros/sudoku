@@ -23,6 +23,8 @@ func TestGridCreation(t *testing.T) {
 		blockUpperLeftCol[i] = col
 	}
 
+	//TODO: test loading grids. Right now it doesn't work.
+
 	cellData := "1"
 	rowData := strings.Join(nCopies(cellData, DIM), COL_SEP)
 	data := strings.Join(nCopies(rowData, DIM), ROW_SEP)
