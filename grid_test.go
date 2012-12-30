@@ -219,6 +219,22 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
+	//Test copying.
+
+	copy := grid.Copy()
+
+	if grid.DataString() != copy.DataString() {
+		t.Log("Copied grid does not have the same datastring!")
+		t.Fail()
+	}
+
+	copy.Cell(0, 0).SetNumber(5)
+
+	if copy.Cell(0, 0).Number() == grid.Cell(0, 0).Number() {
+		t.Log("When we modified the copy's cell, it also affected the original.")
+		t.Fail()
+	}
+
 	if grid.Solved() {
 		t.Log("Grid reported it was solved when it was not.")
 		t.Fail()

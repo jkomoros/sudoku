@@ -47,6 +47,14 @@ func (self *Grid) Load(data string) {
 	}
 }
 
+//Returns a new grid that has exactly the same numbers placed as the original.
+func (self *Grid) Copy() *Grid {
+	//TODO: ideally we'd have some kind of smart SparseGrid or something that we can return.
+	result := NewGrid()
+	result.Load(self.DataString())
+	return result
+}
+
 func (self *Grid) Row(index int) []*Cell {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Row: ", index)
