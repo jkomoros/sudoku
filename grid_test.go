@@ -5,6 +5,18 @@ import (
 	"testing"
 )
 
+//This grid is #27 from Totally Pocket Sudoku. It's included for testing purposes only.
+
+const testGrid = `6|1|2||.|.|.||4|.|3
+.|3|.||4|9|.||.|7|2
+.|.|7||.|.|.||.|6|5
+.|.|.||.|6|1||.|8|.
+1|.|3||.|4|.||2|.|6
+.|6|.||5|2|.||.|.|.
+.|9|.||.|.|.||5|.|.
+7|2|.||.|8|5||.|3|.
+5|.|1||.|.|.||9|4|7`
+
 func TestGridCreation(t *testing.T) {
 
 	blockUpperLeftRow := make([]int, DIM)
@@ -22,8 +34,6 @@ func TestGridCreation(t *testing.T) {
 		blockUpperLeftRow[i] = row
 		blockUpperLeftCol[i] = col
 	}
-
-	//TODO: test loading grids. Right now it doesn't work.
 
 	cellData := "1"
 	rowData := strings.Join(nCopies(cellData, DIM), COL_SEP)
@@ -129,6 +139,24 @@ func TestGridCreation(t *testing.T) {
 		} else {
 			neighborsMap[cell] = true
 		}
+	}
+}
+
+func TestGridLoad(t *testing.T) {
+	grid := LoadGrid(testGrid)
+
+	cell := grid.Cell(0, 0)
+
+	if cell.Number() != 6 {
+		t.Log("The loaded grid did not have a 6 in the upper left corner")
+		t.Fail()
+	}
+
+	cell = grid.Cell(DIM-1, DIM-1)
+
+	if cell.Number() != 0 {
+		t.Log("The loaded grid did not have a 0 in the bottom right corner")
+		t.Fail()
 	}
 }
 
