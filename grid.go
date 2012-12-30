@@ -147,7 +147,48 @@ func (self *Grid) Solved() bool {
 			return false
 		}
 	}
-	return true
+	return !self.Invalid()
+}
+
+//Grid will never be invalid based on moves made by the solver; it will detect times that
+//someone called SetNumber with an impossible number after the fact, though.
+func (self *Grid) Invalid() bool {
+	for i := 0; i < DIM; i++ {
+		row := self.Row(i)
+		rowCheck := make(map[int]bool)
+		for _, cell := range row {
+			if cell.Number() == 0 {
+				continue
+			}
+			if rowCheck[cell.Number()] {
+				return true
+			}
+			rowCheck[cell.Number()] = true
+		}
+		col := self.Col(i)
+		colCheck := make(map[int]bool)
+		for _, cell := range col {
+			if cell.Number() == 0 {
+				continue
+			}
+			if colCheck[cell.Number()] {
+				return true
+			}
+			colCheck[cell.Number()] = true
+		}
+		block := self.Block(i)
+		blockCheck := make(map[int]bool)
+		for _, cell := range block {
+			if cell.Number() == 0 {
+				continue
+			}
+			if blockCheck[cell.Number()] {
+				return true
+			}
+			blockCheck[cell.Number()] = true
+		}
+	}
+	return false
 }
 
 //Fills in all of the cells it can without branching or doing any advanced

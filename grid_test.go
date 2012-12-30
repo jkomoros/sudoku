@@ -222,8 +222,18 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
+	if grid.Invalid() {
+		t.Log("Grid thought it was invalid when it wasn't: \n", grid.Diagram())
+		t.Fail()
+	}
+
 	if num := grid.fillSimpleCells(); num != 45 {
 		t.Log("We filled simple cells on the test grid but didn't get as many as we were expecting: ", num, "/", 45)
+		t.Fail()
+	}
+
+	if grid.Invalid() {
+		t.Log("fillSimpleCells filled in something that made the grid invalid: \n", grid.Diagram())
 		t.Fail()
 	}
 
@@ -234,6 +244,13 @@ func TestGridLoad(t *testing.T) {
 
 	if grid.DataString() != SOLVED_TEST_GRID {
 		t.Log("After filling simple cells, the grid was not actually solved correctly.")
+		t.Fail()
+	}
+
+	cell.SetNumber(cell.Number() + 1)
+
+	if !grid.Invalid() {
+		t.Log("Grid didn't notice it was invalid when it actually was.")
 		t.Fail()
 	}
 }
