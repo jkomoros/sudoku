@@ -108,6 +108,9 @@ func (self *Cell) setImpossible(number int) {
 		//Our rank will have changed.
 		self.grid.queue.Insert(self)
 	}
+	if self.Invalid() && self.grid != nil && self.grid.invalidCellFound != nil {
+		self.grid.invalidCellFound <- true
+	}
 }
 
 func (self *Cell) Possible(number int) bool {
