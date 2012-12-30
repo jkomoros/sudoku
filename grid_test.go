@@ -217,7 +217,7 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
-	if grid.IsSolved() {
+	if grid.Solved() {
 		t.Log("Grid reported it was solved when it was not.")
 		t.Fail()
 	}
@@ -227,7 +227,7 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
-	if !grid.IsSolved() {
+	if !grid.Solved() {
 		t.Log("Grid didn't think it was solved when it was.")
 		t.Fail()
 	}

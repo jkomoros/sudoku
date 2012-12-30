@@ -141,7 +141,7 @@ func (self *Grid) cellList(rowOne int, colOne int, rowTwo int, colTwo int) []*Ce
 	return result
 }
 
-func (self *Grid) IsSolved() bool {
+func (self *Grid) Solved() bool {
 	for _, cell := range self.cells {
 		if cell.Number() == 0 {
 			return false
