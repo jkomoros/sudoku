@@ -3,7 +3,10 @@ package dokugen
 import (
 	"log"
 	"strconv"
+	"strings"
 )
+
+const ALT_0 = "."
 
 type Cell struct {
 	grid *Grid
@@ -23,6 +26,7 @@ func NewCell(grid *Grid, row int, col int) Cell {
 
 func (self *Cell) Load(data string) {
 	//Format, for now, is just the number itself, or 0 if no number.
+	data = strings.Replace(data, ALT_0, "0", -1)
 	num, _ := strconv.Atoi(data)
 	self.SetNumber(num)
 }

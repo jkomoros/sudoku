@@ -8,8 +8,9 @@ import (
 //TODO: Support non-squared DIMS (logic in Block() would need updating)
 const BLOCK_DIM = 4
 const DIM = BLOCK_DIM * BLOCK_DIM
-const ROW_SEP = "||"
+const ROW_SEP = "\n"
 const COL_SEP = "|"
+const ALT_COL_SEP = "||"
 
 type Grid struct {
 	initalized bool
@@ -38,6 +39,7 @@ func NewGrid() *Grid {
 
 func LoadGrid(data string) *Grid {
 	result := NewGrid()
+	data = strings.Replace(data, ALT_COL_SEP, COL_SEP, -1)
 	for r, row := range strings.Split(data, ROW_SEP) {
 		for c, data := range strings.Split(row, COL_SEP) {
 			cell := result.Cell(r, c)
