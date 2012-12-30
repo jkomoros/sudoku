@@ -13,7 +13,6 @@ Grid {
 }
 
 TODO:
-* Diagram() method on Grid that prints out a diagram of all cells and their possibles that makes it easy to read.
 * Grid should suppot copy operations and have copy-on-write semantics with shared cells.
 * Have some way for cell.invalid(), when it's been called, to alert back up that an inconsistency has been found.
 * A way to generate filled squares (to start removing things from)
