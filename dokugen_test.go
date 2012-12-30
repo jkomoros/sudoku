@@ -55,6 +55,8 @@ func TestDokugen(t *testing.T) {
 	//TODO: test that fillSimpleCells does work for cases where it should be obvious.
 }
 
+//TODO: test solutions() and all related functions.
+
 func consumeCells(queue *FiniteQueue, expected int, msg string, t *testing.T) {
 	count := 0
 	queuedCell := queue.Get()

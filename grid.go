@@ -158,10 +158,18 @@ func (self *Grid) Solved() bool {
 	return !self.Invalid()
 }
 
+//We separate this so that we can call it repeatedly within fillSimpleCells, and because we know we won't break the more expensive tests.
+func (self *Grid) cellsInvalid() bool {
+	if len(self.invalidCells) > 0 {
+		return true
+	}
+	return false
+}
+
 //Grid will never be invalid based on moves made by the solver; it will detect times that
 //someone called SetNumber with an impossible number after the fact, though.
 func (self *Grid) Invalid() bool {
-	if len(self.invalidCells) > 0 {
+	if self.cellsInvalid() {
 		return true
 	}
 	for i := 0; i < DIM; i++ {
@@ -213,12 +221,68 @@ func (self *Grid) cellIsValid(cell *Cell) {
 	delete(self.invalidCells, cell)
 }
 
+//Returns a slice of grids that represent possible solutions if you were to solve forward this grid. The current grid is not modified.
+//If there are no solutions forward from this location it will return a slice with len() 0.
+func (self *Grid) Solutions() (solutions []*Grid) {
+	copy := self.Copy()
+	return copy.solutions()
+}
+
+//The actual workhorse; solutions DOES modify the current grid.
+func (self *Grid) solutions() (solutions []*Grid) {
+	//Do a deep check; we might be invalid right at this moment.
+	if self.Invalid() {
+		return
+	}
+
+	//This will be a noop if we're already solved or invalid.
+	self.fillSimpleCells()
+
+	//Have any cells noticed they were invalid while solving forward?
+	if self.cellsInvalid() {
+		return
+	}
+
+	if self.Solved() {
+		return append(solutions, self)
+	}
+
+	//Well, looks like we're going to have to branch.
+	return self.branchAndSolve()
+}
+
+func (self *Grid) branchAndSolve() (solutions []*Grid) {
+	//Nope, we're going to have to branch.
+	//We'll pick the cell with the smallest number of possibilties.
+	rankedObject := self.queue.Get()
+	if rankedObject == nil {
+		panic("Queue didn't have any cells.")
+	}
+	cell, ok := rankedObject.(*Cell)
+	if !ok {
+		panic("We got back a non-cell from the grid's queue")
+	}
+	possibilities := cell.Possibilities()
+	results := make(chan []*Grid, 0)
+	for _, num := range cell.Possibilities() {
+		copy := self.Copy()
+		copy.Cell(cell.Row, cell.Col).SetNumber(num)
+		go func() {
+			results <- copy.solutions()
+		}()
+	}
+	for _, _ = range possibilities {
+		solutions = append(solutions, (<-results)...)
+	}
+	return solutions
+}
+
 //Fills in all of the cells it can without branching or doing any advanced
 //techniques that require anything more than a single cell's possibles list.
 func (self *Grid) fillSimpleCells() int {
 	count := 0
 	obj := self.queue.GetSmallerThan(2)
-	for obj != nil {
+	for obj != nil && !self.cellsInvalid() {
 		cell, ok := obj.(*Cell)
 		if !ok {
 			continue
