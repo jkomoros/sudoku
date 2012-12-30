@@ -77,7 +77,10 @@ func (self *Cell) setPossible(number int) {
 		return
 	}
 	self.impossibles[number]--
-	//TODO: see if this allows us to have an un-set implicitly set number, and alert neighbors if so.
+	if self.impossibles[number] == 0 && self.grid != nil {
+		//Our rank will have changed.
+		self.grid.queue.Insert(self)
+	}
 
 }
 
@@ -88,7 +91,10 @@ func (self *Cell) setImpossible(number int) {
 		return
 	}
 	self.impossibles[number]++
-	//TODO: see if this allows us to have an implicitly set number, and alert neighbors if so.
+	if self.impossibles[number] == 1 && self.grid != nil {
+		//Our rank will have changed.
+		self.grid.queue.Insert(self)
+	}
 }
 
 func (self *Cell) Possible(number int) bool {

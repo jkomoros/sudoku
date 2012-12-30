@@ -41,14 +41,23 @@ func TestDokugen(t *testing.T) {
 	//Reset the grid to starting conditions.
 	target.SetNumber(0)
 
+	consumeCells(grid.queue, DIM*DIM, "After reset to base", t)
+
+	target.SetNumber(num)
+
+	consumeCells(grid.queue, (DIM-1)*3-(BLOCK_DIM-1)*2+1, "After setting one number", t)
+
+}
+
+func consumeCells(queue *FiniteQueue, expected int, msg string, t *testing.T) {
 	count := 0
-	queuedCell := grid.queue.Get()
+	queuedCell := queue.Get()
 	for queuedCell != nil {
 		count++
-		queuedCell = grid.queue.Get()
+		queuedCell = queue.Get()
 	}
-	if count != DIM*DIM {
-		t.Log("The grid's queue didn't have the correct number of items in it: ", count)
+	if count != expected {
+		t.Log("The grid's queue didn't have the correct number of items in it (", msg, "). Expected ", expected, " but actually got ", count)
 		t.Fail()
 	}
 }
