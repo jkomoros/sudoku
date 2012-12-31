@@ -23,6 +23,44 @@ type Grid struct {
 	cachedSolutions []*Grid
 }
 
+var gridCache chan *Grid
+
+const MAX_GRIDS = 100
+
+func init() {
+	gridCache = make(chan *Grid, MAX_GRIDS)
+}
+
+func GetGrid() *Grid {
+	select {
+	case grid := <-gridCache:
+		return grid
+	default:
+		return NewGrid()
+	}
+	return nil
+}
+
+func DropGrids() {
+	for {
+		select {
+		case <-gridCache:
+			//Keep on going
+		default:
+			return
+		}
+	}
+}
+
+func ReturnGrid(grid *Grid) {
+	select {
+	case gridCache <- grid:
+		//Returned it to the queue.
+	default:
+		//Drop it on the floor.
+	}
+}
+
 func NewGrid() *Grid {
 	result := &Grid{}
 	result.queue = NewFiniteQueue(1, DIM)
@@ -53,7 +91,7 @@ func (self *Grid) Load(data string) {
 //Returns a new grid that has exactly the same numbers placed as the original.
 func (self *Grid) Copy() *Grid {
 	//TODO: ideally we'd have some kind of smart SparseGrid or something that we can return.
-	result := NewGrid()
+	result := GetGrid()
 	result.Load(self.DataString())
 	return result
 }
@@ -303,6 +341,7 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 
 		go func() {
 			copy.solutions(doneChan, solutions)
+			ReturnGrid(copy)
 		}()
 
 		//Here is where we'll break out once we've collected enough solutions.
@@ -363,6 +402,7 @@ func (self *Grid) solutions(done chan bool, solutions chan *Grid) {
 		copy.Cell(cell.Row, cell.Col).SetNumber(num)
 		go func() {
 			copy.solutions(doneChan, solutions)
+			ReturnGrid(copy)
 		}()
 	}
 	for _, _ = range possibilities {
