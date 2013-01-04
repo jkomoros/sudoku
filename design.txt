@@ -22,4 +22,4 @@ TODO:
 * Grid should suppot copy operations and have copy-on-write semantics with shared cells.
 * A way to generate filled squares (to start removing things from)
 * Actualy generate sudokus
-* Rate sudokus based on experienced difficulty.
+* Rate sudokus based on experienced difficulty. (See http://www.longwood.edu/assets/mathematics/Team2975_ProblemB.pdf)
