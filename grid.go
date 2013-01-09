@@ -2,6 +2,7 @@ package dokugen
 
 import (
 	"log"
+	"math/rand"
 	"strings"
 )
 
@@ -441,6 +442,14 @@ func (self *Grid) searchSolutions(gridsToProcess chan *Grid) *Grid {
 	cell, ok := rankedObject.(*Cell)
 	if !ok {
 		panic("We got back a non-cell from the grid's queue")
+	}
+
+	unshuffledPossibilities := cell.Possibilities()
+
+	possibilities := make([]int, len(unshuffledPossibilities))
+
+	for i, j := range rand.Perm(len(unshuffledPossibilities)) {
+		possibilities[i] = unshuffledPossibilities[j]
 	}
 
 	for _, num := range cell.Possibilities() {
