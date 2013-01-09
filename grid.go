@@ -339,14 +339,14 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 		outGrids := make(chan *Grid)
 		//TODO: figure out the proper number for this
 		gridsToProcess := make(chan *Grid, 10000)
-		//TODO: figure out the propper number for this.
-		solutionsChan := make(chan *Grid, 10000)
 
 		done := make(chan bool)
 
 		exit := make(chan bool)
 
 		counter := 0
+
+		var tempSolutions []*Grid
 
 		go func() {
 			for {
@@ -357,7 +357,7 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 				case outGrid := <-outGrids:
 					counter--
 					if outGrid != nil {
-						solutionsChan <- outGrid
+						tempSolutions = append(tempSolutions, outGrid)
 					}
 					if counter == 0 {
 						done <- true
@@ -389,17 +389,7 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 			exit <- true
 		}
 
-		close(solutionsChan)
-
-		solutions := make([]*Grid, len(solutionsChan))
-
-		i := 0
-		for grid := range solutionsChan {
-			solutions[i] = grid
-			i++
-		}
-
-		self.cachedSolutions = solutions
+		self.cachedSolutions = tempSolutions
 
 	}
 
