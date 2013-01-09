@@ -335,12 +335,13 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 
 	if self.cachedSolutions == nil {
 
+		//We'll have a thread that's keeping track of how many grids need to be processed and how many have responded.
 		inGrids := make(chan *Grid)
 		outGrids := make(chan *Grid)
-		//TODO: figure out the proper number for this
 		//Because this is not buffered, threads are not allowed to block on sending to it.
 		gridsToProcess := make(chan *Grid)
 
+		//The way for the main counter thread to signfity we're done
 		done := make(chan bool)
 
 		exit := make(chan bool)
