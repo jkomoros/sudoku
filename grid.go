@@ -338,7 +338,8 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 		inGrids := make(chan *Grid)
 		outGrids := make(chan *Grid)
 		//TODO: figure out the proper number for this
-		gridsToProcess := make(chan *Grid, 10000)
+		//Because this is not buffered, threads are not allowed to block on sending to it.
+		gridsToProcess := make(chan *Grid)
 
 		done := make(chan bool)
 
@@ -353,7 +354,10 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 				select {
 				case inGrid := <-inGrids:
 					counter++
-					gridsToProcess <- inGrid
+					//We've already done the critical counting; put another thing on the thread but don't wait for it because it may block.
+					go func() {
+						gridsToProcess <- inGrid
+					}()
 				case outGrid := <-outGrids:
 					counter--
 					if outGrid != nil {
