@@ -341,39 +341,14 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 		//Because this is not buffered, threads are not allowed to block on sending to it.
 		gridsToProcess := make(chan *Grid)
 
-		//The way for the main counter thread to signfity we're done
-		done := make(chan bool)
-
+		//The way for us to signify to the worker threads to kill themselves.
 		exit := make(chan bool)
 
 		counter := 0
 
 		var tempSolutions []*Grid
 
-		go func() {
-			for {
-				select {
-				case inGrid := <-inGrids:
-					counter++
-					//We've already done the critical counting; put another thing on the thread but don't wait for it because it may block.
-					go func() {
-						gridsToProcess <- inGrid
-					}()
-				case outGrid := <-outGrids:
-					counter--
-					if outGrid != nil {
-						tempSolutions = append(tempSolutions, outGrid)
-					}
-					if counter == 0 {
-						done <- true
-						return
-					}
-				}
-			}
-		}()
-
-		inGrids <- self
-
+		//Kick off NUM_SOLVER_THREADS
 		for i := 0; i < NUM_SOLVER_THREADS; i++ {
 			go func() {
 				for {
@@ -387,9 +362,34 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 			}()
 		}
 
-		//Wait for the counter loop to notice we're done.
-		<-done
+		//This would block because the counter loop hasn't started yet.
+		go func() {
+			inGrids <- self
+		}()
 
+	MainCounterLoop:
+		//This will accept at least one grid, and after that when the counter is 0 it will exit.
+		for {
+			select {
+			case inGrid := <-inGrids:
+				counter++
+				//We've already done the critical counting; put another thing on the thread but don't wait for it because it may block.
+				go func() {
+					gridsToProcess <- inGrid
+				}()
+			case outGrid := <-outGrids:
+				counter--
+				if outGrid != nil {
+					tempSolutions = append(tempSolutions, outGrid)
+				}
+				//TODO: here is where we can bail as soon as we get enough solutions.
+				if counter == 0 {
+					break MainCounterLoop
+				}
+			}
+		}
+
+		//Kill NUM_SOLVER_THREADS processes
 		for i := 0; i < NUM_SOLVER_THREADS; i++ {
 			exit <- true
 		}
