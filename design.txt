@@ -14,8 +14,7 @@ Grid {
 
 TODO:
 * Replace Fill() with a better implementation (isn't there a known polynomial time solution?). In the worst case, the work for the next bullet will unlock it.
-* In cases where we're only interested in A solution or 2 solutions, we can bail out early, as soon as solutions is as long as our desired list.
-* Test how much more slowly the channel implementation of Solutions() goes.
+* Make Solve() go in a random order so that we can use it to implement Fill. Likely will need some randomization in FiniteQueue among equivalent rank. That will require either putting in nils when we grab something not off the front, or an option so you can opt into more expensive shuffleInsert.
 
 * Grid should suppot copy operations and have copy-on-write semantics with shared cells.
 * A way to generate filled squares (to start removing things from)
