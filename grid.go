@@ -326,7 +326,7 @@ func (self *Grid) NumSolutions() int {
 //Returns true if the grid has at least one solution. Does not mutate the grid.
 func (self *Grid) HasSolution() bool {
 	//TODO: optimize this to bail as soon as we find a single solution.
-	return self.NumSolutions() > 0
+	return len(self.nOrFewerSolutions(1)) > 0
 }
 
 //Returns a slice of grids that represent possible solutions if you were to solve forward this grid. The current grid is not modified.
@@ -335,7 +335,7 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 	return self.nOrFewerSolutions(0)
 }
 
-//The actual workhorse of solutions generating. 0 means "as many as you can find"
+//The actual workhorse of solutions generating. 0 means "as many as you can find". It might return more than you asked for, if it already had more results than requested sitting around.
 func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 	if self.cachedSolutions == nil || (max > 0 && len(self.cachedSolutions) < max) {
 
