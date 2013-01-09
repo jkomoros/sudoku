@@ -360,7 +360,9 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 			case outGrid := <-outGrids:
 				fmt.Println("Down : ", counter)
 				counter--
-				solutionsChan <- outGrid
+				if outGrid != nil {
+					solutionsChan <- outGrid
+				}
 				fmt.Println("Now ", counter, ", ", len(gridsToProcess), " in gridsToProcess, ", len(inGrids), " in inGrids, ", len(solutionsChan), " in solutionChan, ", len(inGrids), " in outGrids")
 				if counter == 0 {
 					fmt.Println("Sending to DONE")
@@ -389,9 +391,13 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 	//Wait for the counter loop to notice we're done.
 	<-done
 
+	fmt.Println("Caught Done")
+
 	for i := 0; i < NUM_THREADS; i++ {
 		exit <- true
 	}
+
+	close(solutionsChan)
 
 	solutions = make([]*Grid, len(solutionsChan))
 
