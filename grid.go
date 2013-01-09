@@ -27,6 +27,8 @@ var gridCache chan *Grid
 
 const MAX_GRIDS = 100
 
+const NUM_SOLVER_THREADS = 4
+
 func init() {
 	gridCache = make(chan *Grid, MAX_GRIDS)
 }
@@ -333,8 +335,6 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 
 	if self.cachedSolutions == nil {
 
-		NUM_THREADS := 6
-
 		inGrids := make(chan *Grid)
 		outGrids := make(chan *Grid)
 		//TODO: figure out the proper number for this
@@ -369,7 +369,7 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 
 		inGrids <- self
 
-		for i := 0; i < NUM_THREADS; i++ {
+		for i := 0; i < NUM_SOLVER_THREADS; i++ {
 			go func() {
 				for {
 					select {
@@ -385,7 +385,7 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 		//Wait for the counter loop to notice we're done.
 		<-done
 
-		for i := 0; i < NUM_THREADS; i++ {
+		for i := 0; i < NUM_SOLVER_THREADS; i++ {
 			exit <- true
 		}
 
