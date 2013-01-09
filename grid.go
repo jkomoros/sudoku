@@ -330,58 +330,89 @@ func (self *Grid) HasSolution() bool {
 //Returns a slice of grids that represent possible solutions if you were to solve forward this grid. The current grid is not modified.
 //If there are no solutions forward from this location it will return a slice with len() 0.
 func (self *Grid) Solutions() (solutions []*Grid) {
-	//TODO: this will not save work if the grid is invalid, since that is indistingusihable from an uninited cache.
-	if self.cachedSolutions == nil {
-		copy := self.Copy()
 
-		var result []*Grid
+	//TODO: use cachedSolution.
 
-		solutions := make(chan *Grid, 0)
-		doneChan := make(chan bool, 0)
+	inGrids := make(chan *Grid)
+	outGrids := make(chan *Grid)
+	gridsToProcess := make(chan *Grid)
+	//TODO: figure out the propper number for this.
+	solutionsChan := make(chan *Grid, 10000)
 
-		go func() {
-			copy.solutions(doneChan, solutions)
-			ReturnGrid(copy)
-		}()
+	done := make(chan bool)
 
-		//Here is where we'll break out once we've collected enough solutions.
+	exit := make(chan bool)
+
+	counter := 0
+
+	go func() {
 		for {
 			select {
-			case solution := <-solutions:
-				result = append(result, solution)
-			case <-doneChan:
-				//A single break here wouldn't get us out.
-				self.cachedSolutions = result
-				return self.cachedSolutions
+			case inGrid := <-inGrids:
+				counter++
+				gridsToProcess <- inGrid
+			case outGrid := <-outGrids:
+				counter--
+				solutionsChan <- outGrid
+				if counter == 0 {
+					done <- true
+					return
+				}
 			}
 		}
-	}
-	return self.cachedSolutions
-}
-
-//The actual workhorse; solutions DOES modify the current grid.
-func (self *Grid) solutions(done chan bool, solutions chan *Grid) {
-
-	defer func() {
-		done <- true
 	}()
 
-	//Do a deep check; we might be invalid right at this moment.
-	if self.Invalid() {
-		return
+	inGrids <- self
+
+	for i := 0; i < 4; i++ {
+		go func() {
+			for {
+				select {
+				case <-exit:
+					return
+				case grid := <-gridsToProcess:
+					outGrids <- grid.searchSolutions(inGrids)
+				}
+			}
+		}()
 	}
 
-	//This will be a noop if we're already solved or invalid.
-	self.fillSimpleCells()
+	//Wait for the counter loop to notice we're done.
+	<-done
 
+	for i := 0; i < 4; i++ {
+		exit <- true
+	}
+
+	solutions = make([]*Grid, len(solutionsChan))
+
+	i := 0
+	for grid := range solutionsChan {
+		solutions[i] = grid
+		i++
+	}
+
+	return
+
+}
+
+func (self *Grid) searchSolutions(gridsToProcess chan *Grid) *Grid {
+	//This will only be called by Solutions. 
+	//We will return ourselves if we are a solution, and if not we will return nil.
+	//If there are any sub children, we will send them to counter before we're done.
+
+	if self.Invalid() {
+		return nil
+	}
+
+	self.fillSimpleCells()
 	//Have any cells noticed they were invalid while solving forward?
 	if self.cellsInvalid() {
-		return
+		return nil
 	}
 
 	if self.Solved() {
-		solutions <- self
-		return
+		return self
 	}
 
 	//Well, looks like we're going to have to branch.
@@ -395,20 +426,13 @@ func (self *Grid) solutions(done chan bool, solutions chan *Grid) {
 		panic("We got back a non-cell from the grid's queue")
 	}
 
-	possibilities := cell.Possibilities()
-	doneChan := make(chan bool, 0)
 	for _, num := range cell.Possibilities() {
 		copy := self.Copy()
 		copy.Cell(cell.Row, cell.Col).SetNumber(num)
-		go func() {
-			copy.solutions(doneChan, solutions)
-			ReturnGrid(copy)
-		}()
+		gridsToProcess <- copy
 	}
-	for _, _ = range possibilities {
-		<-doneChan
-	}
-	return
+
+	return nil
 
 }
 
