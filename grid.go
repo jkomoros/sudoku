@@ -395,6 +395,8 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 			}
 		}
 
+		//TODO: do we need to drain inGrids/outGrids/gridsToProcess here?
+
 		//Kill NUM_SOLVER_THREADS processes
 		for i := 0; i < NUM_SOLVER_THREADS; i++ {
 			exit <- true
