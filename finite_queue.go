@@ -1,5 +1,9 @@
 package dokugen
 
+import (
+	"math/rand"
+)
+
 type RankedObject interface {
 	Rank() int
 }
@@ -47,19 +51,37 @@ func (self *FiniteQueue) Get() RankedObject {
 }
 
 func (self *FiniteQueue) GetSmallerThan(max int) RankedObject {
+
 	for i, list := range self.objects {
 		if i+self.min >= max {
 			return nil
 		}
+	ListLoop:
 		for len(list) > 0 {
-			obj := list[0]
-			if len(list) == 1 {
-				self.objects[i] = nil
-				list = nil
-			} else {
-				self.objects[i] = list[1:]
-				list = list[1:]
+
+			//Clear off nils from the front.
+			for list[0] == nil {
+				if len(list) == 1 {
+					self.objects[i] = nil
+					list = nil
+					//There are no more in this list; move to the next.
+					continue ListLoop
+				} else {
+					self.objects[i] = list[1:]
+					list = list[1:]
+				}
 			}
+			//Pick one at random
+			index := rand.Intn(len(list))
+			obj := list[index]
+			//Mark its old location as emptied.
+			list[index] = nil
+
+			//Meh, try again from this list.
+			if obj == nil {
+				continue
+			}
+
 			//Does this object still have the rank it did when it was inserted?
 			if obj.Rank() == i+self.min {
 				return obj
