@@ -1,7 +1,6 @@
 package dokugen
 
 import (
-	"fmt"
 	"log"
 	"strings"
 )
@@ -353,19 +352,14 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 		for {
 			select {
 			case inGrid := <-inGrids:
-				fmt.Println("Up :", counter)
 				counter++
 				gridsToProcess <- inGrid
-				fmt.Println("Now ", counter, ", ", len(gridsToProcess), " in gridsToProcess, ", len(inGrids), " in inGrids, ", len(solutionsChan), " in solutionChan, ", len(inGrids), " in outGrids")
 			case outGrid := <-outGrids:
-				fmt.Println("Down : ", counter)
 				counter--
 				if outGrid != nil {
 					solutionsChan <- outGrid
 				}
-				fmt.Println("Now ", counter, ", ", len(gridsToProcess), " in gridsToProcess, ", len(inGrids), " in inGrids, ", len(solutionsChan), " in solutionChan, ", len(inGrids), " in outGrids")
 				if counter == 0 {
-					fmt.Println("Sending to DONE")
 					done <- true
 					return
 				}
@@ -390,8 +384,6 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 
 	//Wait for the counter loop to notice we're done.
 	<-done
-
-	fmt.Println("Caught Done")
 
 	for i := 0; i < NUM_THREADS; i++ {
 		exit <- true
