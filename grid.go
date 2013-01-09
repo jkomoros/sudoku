@@ -332,8 +332,12 @@ func (self *Grid) HasSolution() bool {
 //Returns a slice of grids that represent possible solutions if you were to solve forward this grid. The current grid is not modified.
 //If there are no solutions forward from this location it will return a slice with len() 0.
 func (self *Grid) Solutions() (solutions []*Grid) {
+	return self.nOrFewerSolutions(0)
+}
 
-	if self.cachedSolutions == nil {
+//The actual workhorse of solutions generating. 0 means "as many as you can find"
+func (self *Grid) nOrFewerSolutions(max int) []*Grid {
+	if self.cachedSolutions == nil || (max > 0 && len(self.cachedSolutions) < max) {
 
 		//We'll have a thread that's keeping track of how many grids need to be processed and how many have responded.
 		inGrids := make(chan *Grid)
@@ -399,7 +403,6 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 	}
 
 	return self.cachedSolutions
-
 }
 
 func (self *Grid) searchSolutions(gridsToProcess chan *Grid) *Grid {
