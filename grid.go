@@ -331,75 +331,79 @@ func (self *Grid) HasSolution() bool {
 //If there are no solutions forward from this location it will return a slice with len() 0.
 func (self *Grid) Solutions() (solutions []*Grid) {
 
-	//TODO: use cachedSolution.
+	if self.cachedSolutions == nil {
 
-	NUM_THREADS := 6
+		NUM_THREADS := 6
 
-	inGrids := make(chan *Grid)
-	outGrids := make(chan *Grid)
-	//TODO: figure out the proper number for this
-	gridsToProcess := make(chan *Grid, 10000)
-	//TODO: figure out the propper number for this.
-	solutionsChan := make(chan *Grid, 10000)
+		inGrids := make(chan *Grid)
+		outGrids := make(chan *Grid)
+		//TODO: figure out the proper number for this
+		gridsToProcess := make(chan *Grid, 10000)
+		//TODO: figure out the propper number for this.
+		solutionsChan := make(chan *Grid, 10000)
 
-	done := make(chan bool)
+		done := make(chan bool)
 
-	exit := make(chan bool)
+		exit := make(chan bool)
 
-	counter := 0
+		counter := 0
 
-	go func() {
-		for {
-			select {
-			case inGrid := <-inGrids:
-				counter++
-				gridsToProcess <- inGrid
-			case outGrid := <-outGrids:
-				counter--
-				if outGrid != nil {
-					solutionsChan <- outGrid
-				}
-				if counter == 0 {
-					done <- true
-					return
-				}
-			}
-		}
-	}()
-
-	inGrids <- self
-
-	for i := 0; i < NUM_THREADS; i++ {
 		go func() {
 			for {
 				select {
-				case <-exit:
-					return
-				case grid := <-gridsToProcess:
-					outGrids <- grid.searchSolutions(inGrids)
+				case inGrid := <-inGrids:
+					counter++
+					gridsToProcess <- inGrid
+				case outGrid := <-outGrids:
+					counter--
+					if outGrid != nil {
+						solutionsChan <- outGrid
+					}
+					if counter == 0 {
+						done <- true
+						return
+					}
 				}
 			}
 		}()
+
+		inGrids <- self
+
+		for i := 0; i < NUM_THREADS; i++ {
+			go func() {
+				for {
+					select {
+					case <-exit:
+						return
+					case grid := <-gridsToProcess:
+						outGrids <- grid.searchSolutions(inGrids)
+					}
+				}
+			}()
+		}
+
+		//Wait for the counter loop to notice we're done.
+		<-done
+
+		for i := 0; i < NUM_THREADS; i++ {
+			exit <- true
+		}
+
+		close(solutionsChan)
+
+		solutions := make([]*Grid, len(solutionsChan))
+
+		i := 0
+		for grid := range solutionsChan {
+			solutions[i] = grid
+			i++
+		}
+
+		self.cachedSolutions = solutions
+
 	}
 
-	//Wait for the counter loop to notice we're done.
-	<-done
-
-	for i := 0; i < NUM_THREADS; i++ {
-		exit <- true
-	}
-
-	close(solutionsChan)
-
-	solutions = make([]*Grid, len(solutionsChan))
-
-	i := 0
-	for grid := range solutionsChan {
-		solutions[i] = grid
-		i++
-	}
-
-	return
+	return self.cachedSolutions
 
 }
 
