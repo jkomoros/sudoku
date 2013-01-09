@@ -374,6 +374,8 @@ func TestAdvancedSolve(t *testing.T) {
 		t.Fail()
 	}
 
+	//TODO: test that nOrFewerSolutions does stop at max.
+
 }
 
 func TestFill(t *testing.T) {
