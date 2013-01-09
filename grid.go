@@ -386,7 +386,9 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 				if outGrid != nil {
 					tempSolutions = append(tempSolutions, outGrid)
 				}
-				//TODO: here is where we can bail as soon as we get enough solutions.
+				if max > 0 && len(tempSolutions) >= max {
+					break MainCounterLoop
+				}
 				if counter == 0 {
 					break MainCounterLoop
 				}
