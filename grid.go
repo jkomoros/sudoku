@@ -27,6 +27,8 @@ var gridCache chan *Grid
 
 const MAX_GRIDS = 100
 
+const NUM_SOLVER_THREADS = 4
+
 func init() {
 	gridCache = make(chan *Grid, MAX_GRIDS)
 }
@@ -330,58 +332,93 @@ func (self *Grid) HasSolution() bool {
 //Returns a slice of grids that represent possible solutions if you were to solve forward this grid. The current grid is not modified.
 //If there are no solutions forward from this location it will return a slice with len() 0.
 func (self *Grid) Solutions() (solutions []*Grid) {
-	//TODO: this will not save work if the grid is invalid, since that is indistingusihable from an uninited cache.
+
 	if self.cachedSolutions == nil {
-		copy := self.Copy()
 
-		var result []*Grid
+		//We'll have a thread that's keeping track of how many grids need to be processed and how many have responded.
+		inGrids := make(chan *Grid)
+		outGrids := make(chan *Grid)
+		//Because this is not buffered, threads are not allowed to block on sending to it.
+		gridsToProcess := make(chan *Grid)
 
-		solutions := make(chan *Grid, 0)
-		doneChan := make(chan bool, 0)
+		//The way for us to signify to the worker threads to kill themselves.
+		exit := make(chan bool)
 
+		counter := 0
+
+		var tempSolutions []*Grid
+
+		//Kick off NUM_SOLVER_THREADS
+		for i := 0; i < NUM_SOLVER_THREADS; i++ {
+			go func() {
+				for {
+					select {
+					case <-exit:
+						return
+					case grid := <-gridsToProcess:
+						outGrids <- grid.searchSolutions(inGrids)
+					}
+				}
+			}()
+		}
+
+		//This would block because the counter loop hasn't started yet.
 		go func() {
-			copy.solutions(doneChan, solutions)
-			ReturnGrid(copy)
+			inGrids <- self
 		}()
 
-		//Here is where we'll break out once we've collected enough solutions.
+	MainCounterLoop:
+		//This will accept at least one grid, and after that when the counter is 0 it will exit.
 		for {
 			select {
-			case solution := <-solutions:
-				result = append(result, solution)
-			case <-doneChan:
-				//A single break here wouldn't get us out.
-				self.cachedSolutions = result
-				return self.cachedSolutions
+			case inGrid := <-inGrids:
+				counter++
+				//We've already done the critical counting; put another thing on the thread but don't wait for it because it may block.
+				go func() {
+					gridsToProcess <- inGrid
+				}()
+			case outGrid := <-outGrids:
+				counter--
+				if outGrid != nil {
+					tempSolutions = append(tempSolutions, outGrid)
+				}
+				//TODO: here is where we can bail as soon as we get enough solutions.
+				if counter == 0 {
+					break MainCounterLoop
+				}
 			}
 		}
+
+		//Kill NUM_SOLVER_THREADS processes
+		for i := 0; i < NUM_SOLVER_THREADS; i++ {
+			exit <- true
+		}
+
+		self.cachedSolutions = tempSolutions
+
 	}
+
 	return self.cachedSolutions
+
 }
 
-//The actual workhorse; solutions DOES modify the current grid.
-func (self *Grid) solutions(done chan bool, solutions chan *Grid) {
+func (self *Grid) searchSolutions(gridsToProcess chan *Grid) *Grid {
+	//This will only be called by Solutions. 
+	//We will return ourselves if we are a solution, and if not we will return nil.
+	//If there are any sub children, we will send them to counter before we're done.
 
-	defer func() {
-		done <- true
-	}()
-
-	//Do a deep check; we might be invalid right at this moment.
 	if self.Invalid() {
-		return
+		return nil
 	}
 
-	//This will be a noop if we're already solved or invalid.
 	self.fillSimpleCells()
-
 	//Have any cells noticed they were invalid while solving forward?
 	if self.cellsInvalid() {
-		return
+		return nil
 	}
 
 	if self.Solved() {
-		solutions <- self
-		return
+		return self
 	}
 
 	//Well, looks like we're going to have to branch.
@@ -395,20 +432,13 @@ func (self *Grid) solutions(done chan bool, solutions chan *Grid) {
 		panic("We got back a non-cell from the grid's queue")
 	}
 
-	possibilities := cell.Possibilities()
-	doneChan := make(chan bool, 0)
 	for _, num := range cell.Possibilities() {
 		copy := self.Copy()
 		copy.Cell(cell.Row, cell.Col).SetNumber(num)
-		go func() {
-			copy.solutions(doneChan, solutions)
-			ReturnGrid(copy)
-		}()
+		gridsToProcess <- copy
 	}
-	for _, _ = range possibilities {
-		<-doneChan
-	}
-	return
+
+	return nil
 
 }
 
