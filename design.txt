@@ -16,6 +16,7 @@ TODO:
 * Replace Fill() with a better implementation (isn't there a known polynomial time solution?). In the worst case, the work for the next bullet will unlock it.
 	* The current implementation is basically a BFS, which is exactly terrible for puzzles with many branch points and many solutions. An ideal solution would fill up NUM_SOLVE_PROCS with work BFS style and then do a DFS if there are no other waiting cores of work. If some kind of inGrids could block, there could be a default case for it to "screw it" and go it alone. But that would require each thread to be able to tell immediately if others want work, which precludes the single-counter-dispatcher model. Hmmmm...
 	* Maybe the main solve func takes an argument of if it needs to signal up on the channel or not when it's done, or if returning up is fine. at the branch point, it tries to push work onto counter (which blocks on other threads picking work off its gridsToProcess queue.) If it can't push it in immediately, (because counter is blocked waiting for another worker to grab something off gridsToProcess), then it calls direclty into the child and takes responsibility for its results (wait, there could be multiple results down there, and we might only want one of them). Hmmmm...
+	* Probably the way to do it is a synchronized FiniteQueue
 
 * Grid should suppot copy operations and have copy-on-write semantics with shared cells.
 * A way to generate filled squares (to start removing things from)
