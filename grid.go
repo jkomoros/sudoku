@@ -1,6 +1,7 @@
 package dokugen
 
 import (
+	"fmt"
 	"log"
 	"strings"
 )
@@ -333,9 +334,12 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 
 	//TODO: use cachedSolution.
 
+	NUM_THREADS := 6
+
 	inGrids := make(chan *Grid)
 	outGrids := make(chan *Grid)
-	gridsToProcess := make(chan *Grid)
+	//TODO: figure out the proper number for this
+	gridsToProcess := make(chan *Grid, 10000)
 	//TODO: figure out the propper number for this.
 	solutionsChan := make(chan *Grid, 10000)
 
@@ -349,12 +353,17 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 		for {
 			select {
 			case inGrid := <-inGrids:
+				fmt.Println("Up :", counter)
 				counter++
 				gridsToProcess <- inGrid
+				fmt.Println("Now ", counter, ", ", len(gridsToProcess), " in gridsToProcess, ", len(inGrids), " in inGrids, ", len(solutionsChan), " in solutionChan, ", len(inGrids), " in outGrids")
 			case outGrid := <-outGrids:
+				fmt.Println("Down : ", counter)
 				counter--
 				solutionsChan <- outGrid
+				fmt.Println("Now ", counter, ", ", len(gridsToProcess), " in gridsToProcess, ", len(inGrids), " in inGrids, ", len(solutionsChan), " in solutionChan, ", len(inGrids), " in outGrids")
 				if counter == 0 {
+					fmt.Println("Sending to DONE")
 					done <- true
 					return
 				}
@@ -364,7 +373,7 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 
 	inGrids <- self
 
-	for i := 0; i < 4; i++ {
+	for i := 0; i < NUM_THREADS; i++ {
 		go func() {
 			for {
 				select {
@@ -380,7 +389,7 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 	//Wait for the counter loop to notice we're done.
 	<-done
 
-	for i := 0; i < 4; i++ {
+	for i := 0; i < NUM_THREADS; i++ {
 		exit <- true
 	}
 
