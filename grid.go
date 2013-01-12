@@ -356,7 +356,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 						return
 					case obj := <-gridsToProcess.Out:
 						grid := obj.(*Grid)
-						outGrids <- grid.searchSolutions(inGrids)
+						outGrids <- grid.searchSolutions(inGrids, max)
 					}
 				}
 			}()
@@ -424,7 +424,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 	return self.cachedSolutions
 }
 
-func (self *Grid) searchSolutions(gridsToProcess chan *Grid) *Grid {
+func (self *Grid) searchSolutions(gridsToProcess chan *Grid, numSoughtSolutions int) *Grid {
 	//This will only be called by Solutions. 
 	//We will return ourselves if we are a solution, and if not we will return nil.
 	//If there are any sub children, we will send them to counter before we're done.
@@ -469,7 +469,11 @@ func (self *Grid) searchSolutions(gridsToProcess chan *Grid) *Grid {
 		copy.Cell(cell.Row, cell.Col).SetNumber(num)
 		if i == 0 {
 			//We'll do the last one ourselves
-			result = copy.searchSolutions(gridsToProcess)
+			result = copy.searchSolutions(gridsToProcess, numSoughtSolutions)
+			if result != nil && numSoughtSolutions == 1 {
+				//No need to spin off other branches, just return up.
+				return result
+			}
 		} else {
 			//But all of the other ones we'll spin off so other threads can take them.
 			gridsToProcess <- copy
