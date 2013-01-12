@@ -341,22 +341,32 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		exit := make(chan bool, NUM_SOLVER_THREADS)
 
 		//Where we'll store the grids that are yet to be processed.
-		//This will help us start as far down the search path as possible when restarting searching, since
-		//solutions are abudnant in many cases.
-		gridsToProcess := NewSyncedFiniteQueue(0, DIM*DIM)
+		//We used to use a SyncedFiniteQueue here, but it was unnecessary now that we explore a thread before
+		//spinning off other threads, since that already approximates a DFS.
+		gridsToProcess := make(chan *Grid, NUM_SOLVER_THREADS*DIM*DIM)
+
+		//If you can grab a true from this then you're the first searchSolutions to run. In that case, you should
+		//spin off more work for everybody else rather than diving down to the bottom.
+		isFirst := make(chan bool, 1)
 
 		counter := 0
 
 		//Kick off NUM_SOLVER_THREADS
 		for i := 0; i < NUM_SOLVER_THREADS; i++ {
 			go func() {
+				var firstRun bool
 				for {
 					select {
 					case <-exit:
 						return
-					case obj := <-gridsToProcess.Out:
-						grid := obj.(*Grid)
-						outGrids <- grid.searchSolutions(inGrids)
+					case grid := <-gridsToProcess:
+						select {
+						case <-isFirst:
+							firstRun = true
+						default:
+							firstRun = false
+						}
+						outGrids <- grid.searchSolutions(inGrids, max, firstRun)
 					}
 				}
 			}()
@@ -377,7 +387,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 					if !exiting {
 						counter++
 						//We've already done the critical counting; put another thing on the thread but don't wait for it because it may block.
-						gridsToProcess.In <- inGrid
+						gridsToProcess <- inGrid
 					}
 				case outGrid := <-outGrids:
 					counter--
@@ -415,8 +425,6 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 			exit <- true
 		}
 
-		gridsToProcess.Exit <- true
-
 		self.cachedSolutions = tempSolutions
 
 	}
@@ -424,7 +432,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 	return self.cachedSolutions
 }
 
-func (self *Grid) searchSolutions(gridsToProcess chan *Grid) *Grid {
+func (self *Grid) searchSolutions(gridsToProcess chan *Grid, numSoughtSolutions int, firstRun bool) *Grid {
 	//This will only be called by Solutions. 
 	//We will return ourselves if we are a solution, and if not we will return nil.
 	//If there are any sub children, we will send them to counter before we're done.
@@ -462,12 +470,18 @@ func (self *Grid) searchSolutions(gridsToProcess chan *Grid) *Grid {
 		possibilities[i] = unshuffledPossibilities[j]
 	}
 
+	var result *Grid
+
 	for i, num := range possibilities {
 		copy := self.Copy()
 		copy.Cell(cell.Row, cell.Col).SetNumber(num)
-		if i == len(possibilities)-1 {
+		if i == 0 && !firstRun {
 			//We'll do the last one ourselves
-			return copy.searchSolutions(gridsToProcess)
+			result = copy.searchSolutions(gridsToProcess, numSoughtSolutions, false)
+			if result != nil && numSoughtSolutions == 1 {
+				//No need to spin off other branches, just return up.
+				return result
+			}
 		} else {
 			//But all of the other ones we'll spin off so other threads can take them.
 			gridsToProcess <- copy
@@ -475,7 +489,7 @@ func (self *Grid) searchSolutions(gridsToProcess chan *Grid) *Grid {
 
 	}
 
-	return nil
+	return result
 
 }
 

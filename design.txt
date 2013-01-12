@@ -18,6 +18,9 @@ TODO:
 
 * There's a leak somewhere in solve or fill. If you fill 500000 grids it runs out of memory.
 
+* Solve performance ideas
+	* At each level, with some randomness (ideally weighted), diverge from DFS by changing which one we dive into and spin off the rest of the work items.
+
 * Grid should suppot copy operations and have copy-on-write semantics with shared cells.
 * A way to generate filled squares (to start removing things from)
 * Actualy generate sudokus
