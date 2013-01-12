@@ -349,11 +349,6 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 			}()
 		}
 
-		//This would block because the counter loop hasn't started yet.
-		go func() {
-			inGrids <- self
-		}()
-
 		//How the counter loop will tell us that we've met the final conditions.
 		results := make(chan []*Grid)
 
@@ -396,6 +391,9 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 			}
 		}()
 
+		//Feed in the first work item and...
+		inGrids <- self
+		//...wait for the results.
 		tempSolutions := <-results
 
 		//Kill NUM_SOLVER_THREADS processes
