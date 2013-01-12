@@ -194,10 +194,8 @@ func (self *Grid) cellList(rowOne int, colOne int, rowTwo int, colTwo int) []*Ce
 
 func (self *Grid) Solved() bool {
 	//TODO: use numFilledCells here.
-	for _, cell := range self.cells {
-		if cell.Number() == 0 {
-			return false
-		}
+	if self.numFilledCells != len(self.cells) {
+		return false
 	}
 	return !self.Invalid()
 }
