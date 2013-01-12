@@ -328,7 +328,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		gridsToProcess := make(chan *Grid)
 
 		//The way for us to signify to the worker threads to kill themselves.
-		exit := make(chan bool)
+		exit := make(chan bool, NUM_SOLVER_THREADS)
 
 		counter := 0
 
@@ -381,6 +381,9 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 
 		//Kill NUM_SOLVER_THREADS processes
 		for i := 0; i < NUM_SOLVER_THREADS; i++ {
+			//Because exit is buffered, we won't have to wait for all threads to acknowledge the kill order before proceeding.
+			//...I'm not entirely sure why we don't have the earlier Fill() problem where other threads would try to post
+			//after the main thread was done. I think now we just have a garbage collected, constantly stuck problem.
 			exit <- true
 		}
 
