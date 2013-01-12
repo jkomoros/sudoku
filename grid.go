@@ -452,7 +452,7 @@ func (self *Grid) searchSolutions(gridsToProcess chan *Grid) *Grid {
 		possibilities[i] = unshuffledPossibilities[j]
 	}
 
-	for _, num := range cell.Possibilities() {
+	for _, num := range possibilities {
 		copy := self.Copy()
 		copy.Cell(cell.Row, cell.Col).SetNumber(num)
 		gridsToProcess <- copy
