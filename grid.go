@@ -364,6 +364,9 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 					if !exiting {
 						counter++
 						//We've already done the critical counting; put another thing on the thread but don't wait for it because it may block.
+						//TODO: this is the location of a leak; we've basically got a buffered channel, but in the form
+						//of blocked go funcs; not idealy (and expensive), and they never go away.
+						//Switching to a queue of gridsToProcess should help here.
 						go func() {
 							gridsToProcess <- inGrid
 						}()
