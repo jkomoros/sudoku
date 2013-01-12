@@ -335,8 +335,6 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 
 		counter := 0
 
-		var tempSolutions []*Grid
-
 		//Kick off NUM_SOLVER_THREADS
 		for i := 0; i < NUM_SOLVER_THREADS; i++ {
 			go func() {
@@ -356,31 +354,49 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 			inGrids <- self
 		}()
 
-	MainCounterLoop:
-		//This will accept at least one grid, and after that when the counter is 0 it will exit.
-		for {
-			select {
-			case inGrid := <-inGrids:
-				counter++
-				//We've already done the critical counting; put another thing on the thread but don't wait for it because it may block.
-				go func() {
-					gridsToProcess <- inGrid
-				}()
-			case outGrid := <-outGrids:
-				counter--
-				if outGrid != nil {
-					tempSolutions = append(tempSolutions, outGrid)
-				}
-				if max > 0 && len(tempSolutions) >= max {
-					break MainCounterLoop
-				}
-				if counter == 0 {
-					break MainCounterLoop
+		//How the counter loop will tell us that we've met the final conditions.
+		results := make(chan []*Grid)
+
+		//Kick off the main counter loop. This will also ensure that we clean up nicely after ourselves and drain all chanenls.
+		go func() {
+			//This will accept at least one grid, and after that when the counter is 0 it will exit.
+			exiting := false
+			var workingSolutions []*Grid
+			for {
+				select {
+				case inGrid := <-inGrids:
+					//If we're exiting no need to put more work in the queue.
+					if !exiting {
+						counter++
+						//We've already done the critical counting; put another thing on the thread but don't wait for it because it may block.
+						go func() {
+							gridsToProcess <- inGrid
+						}()
+					}
+				case outGrid := <-outGrids:
+					counter--
+					if outGrid != nil {
+						workingSolutions = append(workingSolutions, outGrid)
+					}
+					if max > 0 && len(workingSolutions) >= max {
+						//We can early exit but we need to continue consuming stuff off the channels so we don't leak.
+						exiting = true
+						results <- workingSolutions
+						workingSolutions = nil
+					}
+					if counter == 0 {
+						if !exiting {
+							//There wasn't an early exit, so we still need to signal up with the result.
+							results <- workingSolutions
+						}
+						//And now we die.
+						return
+					}
 				}
 			}
-		}
+		}()
 
-		//TODO: do we need to drain inGrids/outGrids/gridsToProcess here?
+		tempSolutions := <-results
 
 		//Kill NUM_SOLVER_THREADS processes
 		for i := 0; i < NUM_SOLVER_THREADS; i++ {

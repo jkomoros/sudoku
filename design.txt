@@ -23,8 +23,6 @@ TODO:
 	* new approach: every thread goes down to an invalid or solution (DFS style), spinning off branch points to the channel as it hits them. Inside the channel is a priority queue pushing in one of the best each time so that when threads come up for more we give them something farther down.
 * Reduce memory usage in cell: row, col, block are rarely asked for so can be derived?
 
-* The reason Fill() fails is due to teardown problems. We find a solution on one thread so the main counter loop stops, but other threads are still going. They find their solution and try to send to outChannel, but it's blocked so they sit there and never get their exit channel.
-
 * Grid should suppot copy operations and have copy-on-write semantics with shared cells.
 * A way to generate filled squares (to start removing things from)
 * Actualy generate sudokus
