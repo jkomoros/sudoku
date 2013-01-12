@@ -128,6 +128,11 @@ func TestGridCreation(t *testing.T) {
 		t.Fail()
 	}
 
+	if grid.numFilledCells != DIM*DIM {
+		t.Log("We didn't think all cells were filled, but they were!")
+		t.Fail()
+	}
+
 	for count := 0; count < DIM; count++ {
 		col := grid.Col(count)
 		if num := len(col); num != DIM {
@@ -326,6 +331,11 @@ func TestAdvancedSolve(t *testing.T) {
 		t.Fail()
 	}
 
+	if grid.numFilledCells != 27 {
+		t.Log("The advanced grid's rank was wrong at load: ", grid.Rank())
+		t.Fail()
+	}
+
 	copy := grid.Copy()
 
 	copy.fillSimpleCells()
@@ -366,6 +376,11 @@ func TestAdvancedSolve(t *testing.T) {
 
 	if !grid.Solved() {
 		t.Log("The grid itself didn't get mutated to a solved state.")
+		t.Fail()
+	}
+
+	if grid.numFilledCells != DIM*DIM {
+		t.Log("After solving, we didn't think all cells were filled.")
 		t.Fail()
 	}
 

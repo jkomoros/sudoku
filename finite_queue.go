@@ -14,9 +14,52 @@ type FiniteQueue struct {
 	objects [][]RankedObject
 }
 
+type SyncedFiniteQueue struct {
+	queue FiniteQueue
+	In    chan RankedObject
+	Out   chan RankedObject
+	Exit  chan bool
+}
+
 //Returns a new queue that will work for items with a rank as low as min or as high as max (inclusive)
 func NewFiniteQueue(min int, max int) *FiniteQueue {
 	return &FiniteQueue{min, max, make([][]RankedObject, max-min+1)}
+}
+
+func NewSyncedFiniteQueue(min int, max int) *SyncedFiniteQueue {
+	result := &SyncedFiniteQueue{*NewFiniteQueue(min, max), make(chan RankedObject), make(chan RankedObject), make(chan bool, 1)}
+	go result.workLoop()
+	return result
+}
+
+func (self *SyncedFiniteQueue) workLoop() {
+	for {
+		firstItem := self.queue.Get()
+		itemSent := false
+		if firstItem == nil {
+			//We can take in new things or accept an exit.
+			select {
+			case <-self.Exit:
+				return
+			case incoming := <-self.In:
+				self.queue.Insert(incoming)
+			}
+		} else {
+			//We can take in new things, send out smallest one, or exit.
+			select {
+			case <-self.Exit:
+				return
+			case incoming := <-self.In:
+				self.queue.Insert(incoming)
+			case self.Out <- firstItem:
+				itemSent = true
+			}
+			//If we didn't send the item out, we need to put it back in.
+			if !itemSent {
+				self.queue.Insert(firstItem)
+			}
+		}
+	}
 }
 
 func (self *FiniteQueue) Min() int {

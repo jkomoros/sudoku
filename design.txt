@@ -13,14 +13,7 @@ Grid {
 }
 
 TODO:
-* Replace Fill() with a better implementation (isn't there a known polynomial time solution?). In the worst case, the work for the next bullet will unlock it.
-	* The current implementation is basically a BFS, which is exactly terrible for puzzles with many branch points and many solutions. An ideal solution would fill up NUM_SOLVE_PROCS with work BFS style and then do a DFS if there are no other waiting cores of work. If some kind of inGrids could block, there could be a default case for it to "screw it" and go it alone. But that would require each thread to be able to tell immediately if others want work, which precludes the single-counter-dispatcher model. Hmmmm...
-	* Maybe the main solve func takes an argument of if it needs to signal up on the channel or not when it's done, or if returning up is fine. at the branch point, it tries to push work onto counter (which blocks on other threads picking work off its gridsToProcess queue.) If it can't push it in immediately, (because counter is blocked waiting for another worker to grab something off gridsToProcess), then it calls direclty into the child and takes responsibility for its results (wait, there could be multiple results down there, and we might only want one of them). Hmmmm...
-	* Probably the way to do it is a synchronized FiniteQueue
-		* We'll need a SynchornizedFiniteQueue to wrap FiniteQueue
-			* Wait, what if just the counter maintains the queue? Then it doesn't need to be synced.
-		* FiniteQueue will need to accept negative numbers (or be able to flip to negative queue)
-	* new approach: every thread goes down to an invalid or solution (DFS style), spinning off branch points to the channel as it hits them. Inside the channel is a priority queue pushing in one of the best each time so that when threads come up for more we give them something farther down.
+* Investigate why using the finite queue isn't making a big dent in Fill() performance.
 * Reduce memory usage in cell: row, col, block are rarely asked for so can be derived?
 
 * There's a leak somewhere in solve or fill. If you fill 500000 grids it runs out of memory.
