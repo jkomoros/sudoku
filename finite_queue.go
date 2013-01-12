@@ -27,7 +27,7 @@ func NewFiniteQueue(min int, max int) *FiniteQueue {
 }
 
 func NewSyncedFiniteQueue(min int, max int) *SyncedFiniteQueue {
-	result := &SyncedFiniteQueue{*NewFiniteQueue(min, max), make(chan RankedObject), make(chan RankedObject), make(chan bool)}
+	result := &SyncedFiniteQueue{*NewFiniteQueue(min, max), make(chan RankedObject), make(chan RankedObject), make(chan bool, 1)}
 	go result.workLoop()
 	return result
 }
