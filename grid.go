@@ -272,36 +272,16 @@ func (self *Grid) cellModified(cell *Cell) {
 // particularly hard to find a solution, so it's best to call it on a blank grid.
 func (self *Grid) Fill() bool {
 
-	//TODO: This also isn't deterministic; it can get stuck randomly, causing
-	//the tests to pass or not pass non-deterministically. The chance is
-	//extremely small now that we retry so many times, but technically it's
-	//still flaky.
+	//TODO: this is WAY slower than it should be if there's ever a branch since it's basically 
+	//repeated DFS's from (near) the root.
 
-	//TODO: semantically, this is the same as picking a random solution from
-	//Solutions(), or having solutions figure out which cell and possibiltity
-	//to try randomly. We shouldn't duplicate this.
-	for i := 0; i < 10; i++ {
+	solutions := self.nOrFewerSolutions(1)
 
-		copy := self.Copy()
-
-		copy.Cell(0, 0).pickRandom()
-
-		obj := copy.queue.Get()
-		for obj != nil {
-			cell, ok := obj.(*Cell)
-			if !ok {
-				panic("We got back a non-cell from the queue.")
-			}
-			cell.pickRandom()
-			obj = copy.queue.Get()
-		}
-
-		if copy.Solved() {
-			self.Load(copy.DataString())
-			return true
-		}
+	if len(solutions) != 0 {
+		self.Load(solutions[0].DataString())
+		return true
 	}
-	//We failed a number of times to find one.
+
 	return false
 }
 
@@ -351,7 +331,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		gridsToProcess := make(chan *Grid)
 
 		//The way for us to signify to the worker threads to kill themselves.
-		exit := make(chan bool)
+		exit := make(chan bool, NUM_SOLVER_THREADS)
 
 		counter := 0
 
@@ -404,6 +384,9 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 
 		//Kill NUM_SOLVER_THREADS processes
 		for i := 0; i < NUM_SOLVER_THREADS; i++ {
+			//Because exit is buffered, we won't have to wait for all threads to acknowledge the kill order before proceeding.
+			//...I'm not entirely sure why we don't have the earlier Fill() problem where other threads would try to post
+			//after the main thread was done. I think now we just have a garbage collected, constantly stuck problem.
 			exit <- true
 		}
 
