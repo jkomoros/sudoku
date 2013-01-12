@@ -415,6 +415,8 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 			exit <- true
 		}
 
+		gridsToProcess.Exit <- true
+
 		self.cachedSolutions = tempSolutions
 
 	}
