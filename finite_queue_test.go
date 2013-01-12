@@ -107,3 +107,26 @@ func TestFiniteQueue(t *testing.T) {
 	}
 
 }
+
+func TestSyncedFiniteQueue(t *testing.T) {
+	queue := NewSyncedFiniteQueue(1, DIM)
+
+	select {
+	case <-queue.Out:
+		t.Log("We got something out of the queue before we got anything back.")
+		t.Fail()
+	default:
+		//Pass
+	}
+
+	select {
+	case queue.Exit <- true:
+		//pass
+	default:
+		t.Log("We couldn't tell the finite queue to exit.")
+		t.Fail()
+	}
+
+	//TODO: Test putting in items and getting them out.
+
+}
