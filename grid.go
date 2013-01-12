@@ -341,9 +341,9 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		exit := make(chan bool, NUM_SOLVER_THREADS)
 
 		//Where we'll store the grids that are yet to be processed.
-		//This will help us start as far down the search path as possible when restarting searching, since
-		//solutions are abudnant in many cases.
-		gridsToProcess := NewSyncedFiniteQueue(0, DIM*DIM)
+		//We used to use a SyncedFiniteQueue here, but it was unnecessary now that we explore a thread before
+		//spinning off other threads, since that already approximates a DFS.
+		gridsToProcess := make(chan *Grid, NUM_SOLVER_THREADS*DIM*DIM)
 
 		counter := 0
 
@@ -354,8 +354,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 					select {
 					case <-exit:
 						return
-					case obj := <-gridsToProcess.Out:
-						grid := obj.(*Grid)
+					case grid := <-gridsToProcess:
 						outGrids <- grid.searchSolutions(inGrids, max)
 					}
 				}
@@ -377,7 +376,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 					if !exiting {
 						counter++
 						//We've already done the critical counting; put another thing on the thread but don't wait for it because it may block.
-						gridsToProcess.In <- inGrid
+						gridsToProcess <- inGrid
 					}
 				case outGrid := <-outGrids:
 					counter--
@@ -414,8 +413,6 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 			//after the main thread was done. I think now we just have a garbage collected, constantly stuck problem.
 			exit <- true
 		}
-
-		gridsToProcess.Exit <- true
 
 		self.cachedSolutions = tempSolutions
 
