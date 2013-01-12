@@ -273,7 +273,7 @@ func (self *Grid) cellModified(cell *Cell) {
 }
 
 func (self *Grid) Rank() int {
-	return self.numFilledCells
+	return len(self.cells) - self.numFilledCells
 }
 
 //Fill will find a random filling of the puzzle that is valid. If it cannot find one,
