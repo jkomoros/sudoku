@@ -34,13 +34,30 @@ func NewSyncedFiniteQueue(min int, max int) *SyncedFiniteQueue {
 
 func (self *SyncedFiniteQueue) workLoop() {
 	for {
-		select {
-		case <-self.Exit:
-			return
-		case incoming := <-self.In:
-			self.queue.Insert(incoming)
-		case self.Out <- self.queue.Get():
-			//... Hmms, this case is going to be hard.
+		firstItem := self.queue.Get()
+		itemSent := false
+		if firstItem == nil {
+			//We can take in new things or accept an exit.
+			select {
+			case <-self.Exit:
+				return
+			case incoming := <-self.In:
+				self.queue.Insert(incoming)
+			}
+		} else {
+			//We can take in new things, send out smallest one, or exit.
+			select {
+			case <-self.Exit:
+				return
+			case incoming := <-self.In:
+				self.queue.Insert(incoming)
+			case self.Out <- firstItem:
+				itemSent = true
+			}
+			//If we didn't send the item out, we need to put it back in.
+			if !itemSent {
+				self.queue.Insert(firstItem)
+			}
 		}
 	}
 }
