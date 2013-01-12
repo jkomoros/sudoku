@@ -336,11 +336,14 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		//We'll have a thread that's keeping track of how many grids need to be processed and how many have responded.
 		inGrids := make(chan *Grid)
 		outGrids := make(chan *Grid)
-		//Because this is not buffered, threads are not allowed to block on sending to it.
-		gridsToProcess := make(chan *Grid)
 
 		//The way for us to signify to the worker threads to kill themselves.
 		exit := make(chan bool, NUM_SOLVER_THREADS)
+
+		//Where we'll store the grids that are yet to be processed.
+		//This will help us start as far down the search path as possible when restarting searching, since
+		//solutions are abudnant in many cases.
+		gridsToProcess := NewSyncedFiniteQueue(0, DIM*DIM)
 
 		counter := 0
 
@@ -351,7 +354,8 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 					select {
 					case <-exit:
 						return
-					case grid := <-gridsToProcess:
+					case obj := <-gridsToProcess.Out:
+						grid := obj.(*Grid)
 						outGrids <- grid.searchSolutions(inGrids)
 					}
 				}
@@ -373,12 +377,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 					if !exiting {
 						counter++
 						//We've already done the critical counting; put another thing on the thread but don't wait for it because it may block.
-						//TODO: this is the location of a leak; we've basically got a buffered channel, but in the form
-						//of blocked go funcs; not idealy (and expensive), and they never go away.
-						//Switching to a queue of gridsToProcess should help here.
-						go func() {
-							gridsToProcess <- inGrid
-						}()
+						gridsToProcess.In <- inGrid
 					}
 				case outGrid := <-outGrids:
 					counter--
