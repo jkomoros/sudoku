@@ -409,6 +409,13 @@ func TestFill(t *testing.T) {
 
 }
 
+func BenchmarkFill(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		grid := NewGrid()
+		grid.Fill()
+	}
+}
+
 func TestGridCache(t *testing.T) {
 	//TODO: these tests aren't that great.
 
