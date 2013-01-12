@@ -345,17 +345,28 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		//spinning off other threads, since that already approximates a DFS.
 		gridsToProcess := make(chan *Grid, NUM_SOLVER_THREADS*DIM*DIM)
 
+		//If you can grab a true from this then you're the first searchSolutions to run. In that case, you should
+		//spin off more work for everybody else rather than diving down to the bottom.
+		isFirst := make(chan bool, 1)
+
 		counter := 0
 
 		//Kick off NUM_SOLVER_THREADS
 		for i := 0; i < NUM_SOLVER_THREADS; i++ {
 			go func() {
+				var firstRun bool
 				for {
 					select {
 					case <-exit:
 						return
 					case grid := <-gridsToProcess:
-						outGrids <- grid.searchSolutions(inGrids, max)
+						select {
+						case <-isFirst:
+							firstRun = true
+						default:
+							firstRun = false
+						}
+						outGrids <- grid.searchSolutions(inGrids, max, firstRun)
 					}
 				}
 			}()
@@ -421,7 +432,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 	return self.cachedSolutions
 }
 
-func (self *Grid) searchSolutions(gridsToProcess chan *Grid, numSoughtSolutions int) *Grid {
+func (self *Grid) searchSolutions(gridsToProcess chan *Grid, numSoughtSolutions int, firstRun bool) *Grid {
 	//This will only be called by Solutions. 
 	//We will return ourselves if we are a solution, and if not we will return nil.
 	//If there are any sub children, we will send them to counter before we're done.
@@ -464,9 +475,9 @@ func (self *Grid) searchSolutions(gridsToProcess chan *Grid, numSoughtSolutions 
 	for i, num := range possibilities {
 		copy := self.Copy()
 		copy.Cell(cell.Row, cell.Col).SetNumber(num)
-		if i == 0 {
+		if i == 0 && !firstRun {
 			//We'll do the last one ourselves
-			result = copy.searchSolutions(gridsToProcess, numSoughtSolutions)
+			result = copy.searchSolutions(gridsToProcess, numSoughtSolutions, false)
 			if result != nil && numSoughtSolutions == 1 {
 				//No need to spin off other branches, just return up.
 				return result
