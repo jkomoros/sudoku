@@ -193,6 +193,7 @@ func (self *Grid) cellList(rowOne int, colOne int, rowTwo int, colTwo int) []*Ce
 }
 
 func (self *Grid) Solved() bool {
+	//TODO: use numFilledCells here.
 	for _, cell := range self.cells {
 		if cell.Number() == 0 {
 			return false
@@ -271,6 +272,10 @@ func (self *Grid) cellModified(cell *Cell) {
 	} else {
 		self.numFilledCells++
 	}
+}
+
+func (self *Grid) Rank() int {
+	return self.numFilledCells
 }
 
 //Fill will find a random filling of the puzzle that is valid. If it cannot find one,
