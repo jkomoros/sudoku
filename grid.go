@@ -462,12 +462,14 @@ func (self *Grid) searchSolutions(gridsToProcess chan *Grid) *Grid {
 		possibilities[i] = unshuffledPossibilities[j]
 	}
 
+	var result *Grid
+
 	for i, num := range possibilities {
 		copy := self.Copy()
 		copy.Cell(cell.Row, cell.Col).SetNumber(num)
-		if i == len(possibilities)-1 {
+		if i == 0 {
 			//We'll do the last one ourselves
-			return copy.searchSolutions(gridsToProcess)
+			result = copy.searchSolutions(gridsToProcess)
 		} else {
 			//But all of the other ones we'll spin off so other threads can take them.
 			gridsToProcess <- copy
@@ -475,7 +477,7 @@ func (self *Grid) searchSolutions(gridsToProcess chan *Grid) *Grid {
 
 	}
 
-	return nil
+	return result
 
 }
 
