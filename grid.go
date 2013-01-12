@@ -272,6 +272,9 @@ func (self *Grid) cellModified(cell *Cell) {
 // particularly hard to find a solution, so it's best to call it on a blank grid.
 func (self *Grid) Fill() bool {
 
+	//TODO: this is WAY slower than it should be if there's ever a branch since it's basically 
+	//repeated DFS's from (near) the root.
+
 	solutions := self.nOrFewerSolutions(1)
 
 	if len(solutions) != 0 {
