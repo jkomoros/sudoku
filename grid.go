@@ -20,6 +20,7 @@ type Grid struct {
 	cols            [DIM][]*Cell
 	blocks          [DIM][]*Cell
 	queue           *FiniteQueue
+	numFilledCells  int
 	invalidCells    map[*Cell]bool
 	cachedSolutions []*Grid
 }
@@ -265,6 +266,11 @@ func (self *Grid) cellIsValid(cell *Cell) {
 
 func (self *Grid) cellModified(cell *Cell) {
 	self.cachedSolutions = nil
+	if cell.Number() == 0 {
+		self.numFilledCells--
+	} else {
+		self.numFilledCells++
+	}
 }
 
 //Fill will find a random filling of the puzzle that is valid. If it cannot find one,
