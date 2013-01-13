@@ -1,4 +1,4 @@
-package dokugen
+package sudoku
 
 import (
 	"log"

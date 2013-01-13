@@ -1,4 +1,4 @@
-package dokugen
+package sudoku
 
 type SolveDirections []*SolveStep
 
