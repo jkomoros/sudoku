@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/ziutek/mymysql/mysql"
 	_ "github.com/ziutek/mymysql/native"
 	"log"
@@ -99,6 +100,7 @@ func main() {
 
 	var userSolves *userSolvesCollection
 	var ok bool
+	var i int
 
 	//First, process all user records in the DB to collect all solves by userName.
 	for {
@@ -117,7 +119,10 @@ func main() {
 		}
 
 		userSolves.addSolve(&solve{row.Int(1), row.Int(2)})
+		i++
 	}
+
+	fmt.Println("Processed ", i, " solves by ", len(solvesByUser), " users.")
 
 	//Now get the relative difficulty for each user's puzzles, and collect them.
 
