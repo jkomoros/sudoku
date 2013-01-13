@@ -141,5 +141,13 @@ func main() {
 	}
 
 	//Now average all of the relative difficulties by puzzle.
+	relativeDifficultyByPuzzle := make(map[int]float32)
+	for puzzleID, difficulties := range relativeDifficultiesByPuzzle {
+		var sum float32
+		for _, difficulty := range difficulties {
+			sum += difficulty
+		}
+		relativeDifficultyByPuzzle[puzzleID] = sum / float32(len(difficulties))
+	}
 
 }
