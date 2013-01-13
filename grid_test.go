@@ -336,6 +336,13 @@ func TestAdvancedSolve(t *testing.T) {
 		t.Fail()
 	}
 
+	grid.HasMultipleSolutions()
+
+	if grid.DataString() != ADVANCED_TEST_GRID {
+		t.Log("HasMultipleSolutions mutated the underlying grid.")
+		t.Fail()
+	}
+
 	copy := grid.Copy()
 
 	copy.fillSimpleCells()
