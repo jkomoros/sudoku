@@ -447,6 +447,25 @@ func TestGridCache(t *testing.T) {
 	}
 }
 
+func TestGenerate(t *testing.T) {
+	grid := GenerateGrid()
+
+	if grid == nil {
+		t.Log("We didn't get back a generated grid")
+		t.Fail()
+	}
+
+	if grid.Solved() {
+		t.Log("We got back a solved generated grid.")
+		t.Fail()
+	}
+
+	if grid.HasMultipleSolutions() {
+		t.Log("We got back a generated grid that has more than one solution.")
+		t.Fail()
+	}
+}
+
 func nCopies(in string, copies int) (result []string) {
 	for i := 0; i < copies; i++ {
 		result = append(result, in)

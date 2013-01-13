@@ -4,24 +4,6 @@ import (
 	"math/rand"
 )
 
-//Fill will find a random filling of the puzzle that is valid. If it cannot find one,
-// it will return False and leave the grid as it found it. It will not try
-// particularly hard to find a solution, so it's best to call it on a blank grid.
-func (self *Grid) Fill() bool {
-
-	//TODO: this is WAY slower than it should be if there's ever a branch since it's basically 
-	//repeated DFS's from (near) the root.
-
-	solutions := self.nOrFewerSolutions(1)
-
-	if len(solutions) != 0 {
-		self.Load(solutions[0].DataString())
-		return true
-	}
-
-	return false
-}
-
 //Searches for a solution to the puzzle as it currently exists without
 //unfilling any cells. If one exists, it will fill in all cells to fit that
 //solution and return true. If there are no solutions the grid will remain
