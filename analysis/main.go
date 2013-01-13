@@ -9,7 +9,7 @@ import (
 const _DB_CONFIG_FILENAME = "db_config.SECRET.json"
 
 type dbConfig struct {
-	Url, Username, Password string
+	Url, Username, Password, DbName string
 }
 
 func main() {
