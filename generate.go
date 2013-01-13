@@ -24,21 +24,32 @@ func GenerateGrid() *Grid {
 	//Do a random fill of the grid
 	grid.Fill()
 
-	keepGoing := 50
+	keepGoing := true
 
-	//TODO: have a more robust exit criteria.
-	for keepGoing > 0 {
-		cell := grid.Cell(rand.Intn(DIM), rand.Intn(DIM))
-		num := cell.Number()
-		if num == 0 {
-			continue
+	for keepGoing {
+		//Unless we make a successful change this loop, don't bother continuing.
+		keepGoing = false
+
+		cells := make([]*Cell, len(grid.cells[:]))
+
+		for i, j := range rand.Perm(len(grid.cells[:])) {
+			cells[i] = &grid.cells[j]
 		}
-		//Unfill it.
-		cell.SetNumber(0)
-		if grid.HasMultipleSolutions() {
-			//Put it back in.
-			cell.SetNumber(num)
-			keepGoing--
+
+		for _, cell := range cells {
+			num := cell.Number()
+			if num == 0 {
+				continue
+			}
+			//Unfill it.
+			cell.SetNumber(0)
+			if grid.HasMultipleSolutions() {
+				//Put it back in.
+				cell.SetNumber(num)
+			} else {
+				//we had a success! keep going around again.
+				keepGoing = true
+			}
 		}
 	}
 
