@@ -3,5 +3,8 @@
 	"username" : "<CHANGEME>",
 	"password" : "<CHANGEME>",
 	"dbname" : "<CHANGEME>",
-	"solvestable" : "<CHANGEME>"
+	"solvestable" : "<CHANGEME>",
+	"solvesid" : "<CHANGEME",
+	"solvestotaltime" : "<CHANGEME>",
+	"solvesuser" : "<CHANGEME>"
 }

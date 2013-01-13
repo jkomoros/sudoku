@@ -11,7 +11,33 @@ import (
 const _DB_CONFIG_FILENAME = "db_config.SECRET.json"
 
 type dbConfig struct {
-	Url, Username, Password, DbName, SolvesTable, SolvesID, SolvesTotalTime string
+	Url, Username, Password, DbName, SolvesTable, SolvesID, SolvesTotalTime, SolvesUser string
+}
+
+type solve struct {
+	puzzleID  int
+	totalTime int
+}
+
+type userSolvesCollection struct {
+	solves []*solve
+	max    int
+	min    int
+}
+
+func (self *userSolvesCollection) addSolve(solve *solve) {
+	self.solves = append(self.solves, solve)
+	if len(self.solves) == 1 {
+		self.max = solve.totalTime
+		self.min = solve.totalTime
+	} else {
+		if self.max < solve.totalTime {
+			self.max = solve.totalTime
+		}
+		if self.min > solve.totalTime {
+			self.min = solve.totalTime
+		}
+	}
 }
 
 func main() {
@@ -35,14 +61,35 @@ func main() {
 		os.Exit(1)
 	}
 
-	rows, _, err := db.Query("select %s, %s from %s limit 100", config.SolvesID, config.SolvesTotalTime, config.SolvesTable)
+	res, err := db.Start("select %s, %s, %s from %s limit 100", config.SolvesUser, config.SolvesID, config.SolvesTotalTime, config.SolvesTable)
 
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
 	}
 
-	for _, row := range rows {
-		log.Println(row.Str(0), row.Str(1))
+	solvesByUser := make(map[string]*userSolvesCollection)
+
+	var userSolves *userSolvesCollection
+	var ok bool
+
+	//First, process all user records in the DB to collect all solves by userName.
+	for {
+
+		row, _ := res.GetRow()
+
+		if row == nil {
+			break
+		}
+
+		userSolves, ok = solvesByUser[row.Str(0)]
+
+		if !ok {
+			userSolves = new(userSolvesCollection)
+			solvesByUser[row.Str(0)] = userSolves
+		}
+
+		userSolves.addSolve(&solve{row.Int(1), row.Int(2)})
 	}
+
 }
