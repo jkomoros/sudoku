@@ -141,7 +141,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		}()
 
 		//Feed in the first work item and...
-		inGrids <- self
+		inGrids <- self.Copy()
 		//...wait for the results.
 		tempSolutions := <-results
 
