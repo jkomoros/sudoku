@@ -25,11 +25,6 @@ type userSolvesCollection struct {
 	min    int
 }
 
-type puzzleRelativeDifficultyCollection struct {
-	puzzleID   int
-	difficulty []float32
-}
-
 func (self *userSolvesCollection) addSolve(solve *solve) {
 	self.solves = append(self.solves, solve)
 	if len(self.solves) == 1 {
@@ -125,5 +120,17 @@ func main() {
 	}
 
 	//Now get the relative difficulty for each user's puzzles, and collect them.
+
+	relativeDifficultiesByPuzzle := make(map[int][]float32)
+
+	for _, collection := range solvesByUser {
+
+		for puzzleID, relativeDifficulty := range collection.relativeDifficulties() {
+			relativeDifficultiesByPuzzle[puzzleID] = append(relativeDifficultiesByPuzzle[puzzleID], relativeDifficulty)
+		}
+
+	}
+
+	//Now average all of the relative difficulties by puzzle.
 
 }
