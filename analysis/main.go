@@ -25,6 +25,11 @@ type userSolvesCollection struct {
 	min    int
 }
 
+type puzzleRelativeDifficultyCollection struct {
+	puzzleID   int
+	difficulty []float32
+}
+
 func (self *userSolvesCollection) addSolve(solve *solve) {
 	self.solves = append(self.solves, solve)
 	if len(self.solves) == 1 {
@@ -38,6 +43,33 @@ func (self *userSolvesCollection) addSolve(solve *solve) {
 			self.min = solve.totalTime
 		}
 	}
+}
+
+func (self *userSolvesCollection) relativeDifficulties() map[int]float32 {
+	//Returns a map of puzzle id to relative difficulty, normalized by our max and min.
+	avgSolveTimes := make(map[int]float32)
+	//Keep track of how many times we've seen each puzzle solved by this user so we can do correct averaging.
+	avgSolveTimesCount := make(map[int]int)
+
+	//First, collect the average solve time (in case the same user has solved more than once the same puzzle)
+
+	for _, solve := range self.solves {
+		currentAvgSolveTime := avgSolveTimes[solve.puzzleID]
+
+		avgSolveTimes[solve.puzzleID] = (currentAvgSolveTime*float32(avgSolveTimesCount[solve.puzzleID])+float32(solve.totalTime))/float32(avgSolveTimesCount[solve.puzzleID]) + 1
+
+		avgSolveTimesCount[solve.puzzleID]++
+	}
+
+	//Now, relativize all of the scores.
+
+	result := make(map[int]float32)
+
+	for puzzleID, avgSolveTime := range avgSolveTimes {
+		result[puzzleID] = (avgSolveTime - float32(self.min)) / float32(self.max-self.min)
+	}
+
+	return result
 }
 
 func main() {
@@ -91,5 +123,7 @@ func main() {
 
 		userSolves.addSolve(&solve{row.Int(1), row.Int(2)})
 	}
+
+	//Now get the relative difficulty for each user's puzzles, and collect them.
 
 }
