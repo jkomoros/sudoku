@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/ziutek/mymysql/mysql"
+	_ "github.com/ziutek/mymysql/native"
 	"log"
 	"os"
 )
@@ -9,7 +11,7 @@ import (
 const _DB_CONFIG_FILENAME = "db_config.SECRET.json"
 
 type dbConfig struct {
-	Url, Username, Password, DbName string
+	Url, Username, Password, DbName, SolvesTable, SolvesID, SolvesTotalTime string
 }
 
 func main() {
@@ -25,6 +27,22 @@ func main() {
 		log.Fatal("There was an error parsing JSON from the config file: ", err)
 		os.Exit(1)
 	}
-	log.Println(config)
 
+	db := mysql.New("tcp", "", config.Url, config.Username, config.Password, config.DbName)
+
+	if err := db.Connect(); err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	rows, _, err := db.Query("select %s, %s from %s limit 100", config.SolvesID, config.SolvesTotalTime, config.SolvesTable)
+
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	for _, row := range rows {
+		log.Println(row.Str(0), row.Str(1))
+	}
 }
