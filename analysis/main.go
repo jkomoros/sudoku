@@ -130,6 +130,10 @@ func main() {
 
 	for _, collection := range solvesByUser {
 
+		if len(collection.solves) < 2 {
+			continue
+		}
+
 		for puzzleID, relativeDifficulty := range collection.relativeDifficulties() {
 			relativeDifficultiesByPuzzle[puzzleID] = append(relativeDifficultiesByPuzzle[puzzleID], relativeDifficulty)
 		}
