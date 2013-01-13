@@ -24,7 +24,7 @@ func GenerateGrid() *Grid {
 	//Do a random fill of the grid
 	grid.Fill()
 
-	keepGoing := 10000
+	keepGoing := 50
 
 	//TODO: have a more robust exit criteria.
 	for keepGoing > 0 {
