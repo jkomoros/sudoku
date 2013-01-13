@@ -52,7 +52,7 @@ func (self *userSolvesCollection) relativeDifficulties() map[int]float32 {
 	for _, solve := range self.solves {
 		currentAvgSolveTime := avgSolveTimes[solve.puzzleID]
 
-		avgSolveTimes[solve.puzzleID] = (currentAvgSolveTime*float32(avgSolveTimesCount[solve.puzzleID])+float32(solve.totalTime))/float32(avgSolveTimesCount[solve.puzzleID]) + 1
+		avgSolveTimes[solve.puzzleID] = (currentAvgSolveTime*float32(avgSolveTimesCount[solve.puzzleID]) + float32(solve.totalTime)) / float32(avgSolveTimesCount[solve.puzzleID]+1)
 
 		avgSolveTimesCount[solve.puzzleID]++
 	}
