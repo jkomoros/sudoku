@@ -128,9 +128,12 @@ func main() {
 
 	relativeDifficultiesByPuzzle := make(map[int][]float32)
 
+	var skippedUsers int
+
 	for _, collection := range solvesByUser {
 
 		if len(collection.solves) < 2 {
+			skippedUsers++
 			continue
 		}
 
@@ -139,6 +142,8 @@ func main() {
 		}
 
 	}
+
+	fmt.Println("Skipped ", skippedUsers, " users because they had only solved one unique puzzle.")
 
 	//Now average all of the relative difficulties by puzzle.
 	relativeDifficultyByPuzzle := make(map[int]float32)
