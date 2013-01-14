@@ -127,6 +127,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	difficutlyRatingsChan := make(chan map[int]int)
+
+	go getPuzzleDifficultyRatings(&config, difficutlyRatingsChan)
+
 	db := mysql.New("tcp", "", config.Url, config.Username, config.Password, config.DbName)
 
 	if err := db.Connect(); err != nil {
@@ -216,6 +220,9 @@ func main() {
 	//Sort the puzzles by relative user difficulty
 	//We actually don't need the wrapper, since it will modify the underlying slice.
 	sort.Sort(byUserRelativeDifficulty{puzzles})
+
+	difficutlyRatings := <-difficutlyRatingsChan
+
 }
 
 func getPuzzleDifficultyRatings(config *dbConfig, result chan map[int]int) {
