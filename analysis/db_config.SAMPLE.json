@@ -11,5 +11,7 @@
 	"solvesuser" : "<CHANGEME>",
 	"puzzlestable" : "<CHANGEME>",
 	"puzzlesid" : "<CHANGEME>",
-	"puzzlesdifficulty": "<CHANGEME>"
+	"puzzlesdifficulty": "<CHANGEME>",
+	"puzzlesname" : "<CHANGEME>",
+	"puzzlespuzzle" : "<CHANGEME>"
 }
