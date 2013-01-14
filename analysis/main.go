@@ -31,7 +31,7 @@ type solve struct {
 }
 
 type userSolvesCollection struct {
-	solves []*solve
+	solves []solve
 	max    int
 	min    int
 }
@@ -59,7 +59,7 @@ func (self byUserRelativeDifficulty) Less(i, j int) bool {
 	return self.puzzles[i].userRelativeDifficulty < self.puzzles[j].userRelativeDifficulty
 }
 
-func (self *userSolvesCollection) addSolve(solve *solve) {
+func (self *userSolvesCollection) addSolve(solve solve) {
 	self.solves = append(self.solves, solve)
 	if len(self.solves) == 1 {
 		self.max = solve.totalTime
@@ -164,7 +164,7 @@ func main() {
 			solvesByUser[row.Str(0)] = userSolves
 		}
 
-		userSolves.addSolve(&solve{row.Int(1), row.Int(2)})
+		userSolves.addSolve(solve{row.Int(1), row.Int(2)})
 		i++
 	}
 
