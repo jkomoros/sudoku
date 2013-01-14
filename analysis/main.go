@@ -74,6 +74,15 @@ func (self *userSolvesCollection) addSolve(solve solve) {
 	}
 }
 
+//Whehter or not this should be included in calculation.
+//Basically, whether the reltaiveDifficulties will all be valid.
+//Normally this returns false if there is only one solve by the user, but could also
+//happen when there are multiple solves but (crazily enough) they all have exactly the same solveTime.
+//This DOES happen in the production dataset.
+func (self *userSolvesCollection) valid() bool {
+	return self.max != self.min
+}
+
 func (self *userSolvesCollection) relativeDifficulties() map[int]float32 {
 	//Returns a map of puzzle id to relative difficulty, normalized by our max and min.
 	avgSolveTimes := make(map[int]float32)
@@ -178,7 +187,7 @@ func main() {
 
 	for _, collection := range solvesByUser {
 
-		if len(collection.solves) < 2 {
+		if !collection.valid() {
 			skippedUsers++
 			continue
 		}
@@ -189,7 +198,7 @@ func main() {
 
 	}
 
-	fmt.Println("Skipped ", skippedUsers, " users because they had only solved one unique puzzle.")
+	fmt.Println("Skipped ", skippedUsers, " users because they had only had a single unique solve time.")
 
 	puzzles := make([]puzzle, len(relativeDifficultiesByPuzzle))
 
