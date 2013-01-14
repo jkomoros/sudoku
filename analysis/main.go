@@ -18,6 +18,10 @@ const _OUTPUT_FILENAME = "output.csv"
 const QUERY_LIMIT = 100
 const _PENALTY_PERCENTAGE_CUTOFF = 0.10
 
+//How many solves a user must have to have their relative scale included.
+//A low value gives you far more very low or very high scores than you shoul get.
+const _MINIMUM_SOLVES = 10
+
 var noLimitFlag bool
 var printPuzzleDataFlag bool
 var cullCheaterPercentageFlag float64
@@ -116,7 +120,15 @@ func (self *userSolvesCollection) addSolve(solve solve) bool {
 //happen when there are multiple solves but (crazily enough) they all have exactly the same solveTime.
 //This DOES happen in the production dataset.
 func (self *userSolvesCollection) valid() bool {
-	return self.max != self.min
+	if self.max == self.min {
+		return false
+	}
+
+	if len(self.solves) < _MINIMUM_SOLVES {
+		return false
+	}
+
+	return true
 }
 
 func (self *userSolvesCollection) relativeDifficulties() map[int]float32 {
@@ -242,7 +254,7 @@ func main() {
 
 	}
 
-	log.Println("Skipped ", skippedUsers, " users because they had only had a single unique solve time.")
+	log.Println("Skipped ", skippedUsers, " users because they did not have enough solve times.")
 
 	puzzles := make([]puzzle, len(relativeDifficultiesByPuzzle))
 
