@@ -24,12 +24,9 @@ TODO:
 * Grid should suppot copy operations and have copy-on-write semantics with shared cells.
 
 * Rate sudokus based on experienced difficulty. (See http://www.longwood.edu/assets/mathematics/Team2975_ProblemB.pdf)
-	* Once there's a tweak-able difficulty twiddler, take all of the puzzles in the database. For each user, order the solved puzzles by time to solve (separately, see if they break down according to QQWing's scoring) and bracket difficulties. Then take all of those puzzles and run a test to score them by their difficulty, see how big the variance is. Explore the space to find the optimal weighting.
-		* By user, take all solves and order by solve time (exluding hints?)
-		* For each user, compute the percentile between low and high that each solve is (ignore users with one solve)
-		* For each puzzle, average their percentiles together.
-		* List puzzles by order of their average percentiles.
 
-* Consider filtering out puzzles where the hint time is more than 10% of solve time.
+
+* Analysis: Run our difficulty grader on the real puzzles and see how well it fits with user perceived difficulty.
+* Analysis: Consider filtering out puzzles where the hint time is more than 10% of solve time.
 
 * Investigate making better grids (fewer clues / more symmetry)
