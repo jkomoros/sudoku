@@ -22,7 +22,7 @@ func init() {
 }
 
 type dbConfig struct {
-	Url, Username, Password, DbName, SolvesTable, SolvesID, SolvesPuzzleID, SolvesTotalTime, SolvesUser string
+	Url, Username, Password, DbName, SolvesTable, SolvesID, SolvesPuzzleID, SolvesTotalTime, SolvesUser, PuzzlesTable, PuzzlesID, PuzzlesDifficulty string
 }
 
 type solve struct {

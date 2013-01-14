@@ -7,5 +7,8 @@
 	"solvesid" : "<CHANGEME",
 	"solvespuzzleid" : "<CHANGEME>",
 	"solvestotaltime" : "<CHANGEME>",
-	"solvesuser" : "<CHANGEME>"
+	"solvesuser" : "<CHANGEME>",
+	"puzzlestable" : "<CHANGEME>",
+	"puzzlesid" : "<CHANGEME>",
+	"puzzlesdifficulty": "<CHANGEME>"
 }
