@@ -1,0 +1,15 @@
+{
+	"url" : "<CHANGEME>",
+	"username" : "<CHANGEME>",
+	"password" : "<CHANGEME>",
+	"dbname" : "<CHANGEME>",
+	"solvestable" : "<CHANGEME>",
+	"solvesid" : "<CHANGEME",
+	"solvespuzzleid" : "<CHANGEME>",
+	"solvestotaltime" : "<CHANGEME>",
+	"solvespenaltytime" : "<CHANGEME>",
+	"solvesuser" : "<CHANGEME>",
+	"puzzlestable" : "<CHANGEME>",
+	"puzzlesid" : "<CHANGEME>",
+	"puzzlesdifficulty": "<CHANGEME>"
+}
