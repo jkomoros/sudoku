@@ -26,6 +26,11 @@ type userSolvesCollection struct {
 	min    int
 }
 
+type puzzle struct {
+	id                     int
+	userRelativeDifficulty float32
+}
+
 func (self *userSolvesCollection) addSolve(solve *solve) {
 	self.solves = append(self.solves, solve)
 	if len(self.solves) == 1 {
@@ -145,14 +150,17 @@ func main() {
 
 	fmt.Println("Skipped ", skippedUsers, " users because they had only solved one unique puzzle.")
 
-	//Now average all of the relative difficulties by puzzle.
-	relativeDifficultyByPuzzle := make(map[int]float32)
+	puzzles := make([]puzzle, len(relativeDifficultiesByPuzzle))
+
+	var index int
+
 	for puzzleID, difficulties := range relativeDifficultiesByPuzzle {
 		var sum float32
 		for _, difficulty := range difficulties {
 			sum += difficulty
 		}
-		relativeDifficultyByPuzzle[puzzleID] = sum / float32(len(difficulties))
+		puzzles[index] = puzzle{puzzleID, sum / float32(len(difficulties))}
+		index++
 	}
 
 }
