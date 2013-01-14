@@ -27,5 +27,9 @@ TODO:
 
 
 * Analysis: Run our difficulty grader on the real puzzles and see how well it fits with user perceived difficulty.
+* Analysis: Throw out any Users who have fewer than n solves (because otherwise their ranges will have very large numbers)
+* Analysis: Throw out outliers for each individual user.
+* Analysis: Make the percentage cheat be a command line flag.
+* Analysis: Allow suppressing the puzzle printing.
 
 * Investigate making better grids (fewer clues / more symmetry)
