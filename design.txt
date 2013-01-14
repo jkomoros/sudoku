@@ -31,5 +31,6 @@ TODO:
 * Analysis: Throw out outliers for each individual user.
 * Analysis: Make the percentage cheat be a command line flag.
 * Analysis: Allow suppressing the puzzle printing.
+* Analysis: Build in plotting
 
 * Investigate making better grids (fewer clues / more symmetry)
