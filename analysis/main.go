@@ -58,6 +58,8 @@ type puzzle struct {
 	id                     int
 	userRelativeDifficulty float32
 	difficultyRating       int
+	name                   string
+	puzzle                 string
 }
 
 type puzzles []puzzle
@@ -157,7 +159,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	difficutlyRatingsChan := make(chan map[int]int)
+	difficutlyRatingsChan := make(chan map[int]puzzle)
 
 	go getPuzzleDifficultyRatings(&config, difficutlyRatingsChan)
 
@@ -247,7 +249,7 @@ func main() {
 		for _, difficulty := range difficulties {
 			sum += difficulty
 		}
-		puzzles[index] = puzzle{puzzleID, sum / float32(len(difficulties)), -1}
+		puzzles[index] = puzzle{id: puzzleID, userRelativeDifficulty: sum / float32(len(difficulties)), difficultyRating: -1}
 		index++
 	}
 
@@ -259,9 +261,11 @@ func main() {
 	difficultyRatings := <-difficutlyRatingsChan
 
 	for i, puzzle := range puzzles {
-		difficulty, ok := difficultyRatings[puzzle.id]
+		info, ok := difficultyRatings[puzzle.id]
 		if ok {
-			puzzle.difficultyRating = difficulty
+			puzzle.difficultyRating = info.difficultyRating
+			puzzle.name = info.name
+			puzzle.puzzle = info.puzzle
 		}
 		//It's not a pointer so we have to copy it back.
 		puzzles[i] = puzzle
@@ -272,14 +276,14 @@ func main() {
 	csvOut := csv.NewWriter(os.Stdout)
 
 	for _, puzzle := range puzzles {
-		csvOut.Write([]string{strconv.Itoa(puzzle.id), strconv.Itoa(puzzle.difficultyRating), fmt.Sprintf("%g", puzzle.userRelativeDifficulty)})
+		csvOut.Write([]string{strconv.Itoa(puzzle.id), strconv.Itoa(puzzle.difficultyRating), fmt.Sprintf("%g", puzzle.userRelativeDifficulty), puzzle.name, puzzle.puzzle})
 	}
 
 	csvOut.Flush()
 
 }
 
-func getPuzzleDifficultyRatings(config *dbConfig, result chan map[int]int) {
+func getPuzzleDifficultyRatings(config *dbConfig, result chan map[int]puzzle) {
 
 	db := mysql.New("tcp", "", config.Url, config.Username, config.Password, config.DbName)
 
@@ -288,14 +292,14 @@ func getPuzzleDifficultyRatings(config *dbConfig, result chan map[int]int) {
 		os.Exit(1)
 	}
 
-	res, err := db.Start("select %s, %s from %s", config.PuzzlesID, config.PuzzlesDifficulty, config.PuzzlesTable)
+	res, err := db.Start("select %s, %s, %s, %s from %s", config.PuzzlesID, config.PuzzlesDifficulty, config.PuzzlesName, config.PuzzlesPuzzle, config.PuzzlesTable)
 
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
 	}
 
-	puzzles := make(map[int]int)
+	puzzles := make(map[int]puzzle)
 
 	for {
 
@@ -305,7 +309,7 @@ func getPuzzleDifficultyRatings(config *dbConfig, result chan map[int]int) {
 			break
 		}
 
-		puzzles[row.Int(0)] = row.Int(1)
+		puzzles[row.Int(0)] = puzzle{id: row.Int(0), difficultyRating: row.Int(1), name: row.Str(2), puzzle: row.Str(3)}
 	}
 
 	result <- puzzles
