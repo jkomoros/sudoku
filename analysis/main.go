@@ -28,8 +28,9 @@ type dbConfig struct {
 }
 
 type solve struct {
-	puzzleID  int
-	totalTime int
+	puzzleID    int
+	totalTime   int
+	penaltyTime int
 }
 
 type userSolvesCollection struct {
@@ -145,13 +146,13 @@ func main() {
 
 	if noLimitFlag {
 		log.Println("Running without a limit for number of solves to retrieve.")
-		solvesQuery = "select %s, %s, %s from %s"
+		solvesQuery = "select %s, %s, %s, %s from %s"
 	} else {
 		log.Println("Running with a limit of ", QUERY_LIMIT, " for number of solves to retrieve.")
-		solvesQuery = "select %s, %s, %s from %s limit " + strconv.Itoa(QUERY_LIMIT)
+		solvesQuery = "select %s, %s, %s, %s from %s limit " + strconv.Itoa(QUERY_LIMIT)
 	}
 
-	res, err := db.Start(solvesQuery, config.SolvesUser, config.SolvesPuzzleID, config.SolvesTotalTime, config.SolvesTable)
+	res, err := db.Start(solvesQuery, config.SolvesUser, config.SolvesPuzzleID, config.SolvesTotalTime, config.SolvesPenaltyTime, config.SolvesTable)
 
 	if err != nil {
 		log.Fatal(err)
@@ -180,7 +181,7 @@ func main() {
 			solvesByUser[row.Str(0)] = userSolves
 		}
 
-		userSolves.addSolve(solve{row.Int(1), row.Int(2)})
+		userSolves.addSolve(solve{row.Int(1), row.Int(2), row.Int(3)})
 		i++
 	}
 
