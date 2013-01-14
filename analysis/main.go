@@ -7,6 +7,7 @@ import (
 	_ "github.com/ziutek/mymysql/native"
 	"log"
 	"os"
+	"sort"
 )
 
 const _DB_CONFIG_FILENAME = "db_config.SECRET.json"
@@ -29,6 +30,24 @@ type userSolvesCollection struct {
 type puzzle struct {
 	id                     int
 	userRelativeDifficulty float32
+}
+
+type puzzles []puzzle
+
+type byUserRelativeDifficulty struct {
+	puzzles
+}
+
+func (self puzzles) Len() int {
+	return len(self)
+}
+
+func (self puzzles) Swap(i, j int) {
+	self[i], self[j] = self[j], self[i]
+}
+
+func (self byUserRelativeDifficulty) Less(i, j int) bool {
+	return self.puzzles[i].userRelativeDifficulty < self.puzzles[j].userRelativeDifficulty
 }
 
 func (self *userSolvesCollection) addSolve(solve *solve) {
@@ -163,4 +182,7 @@ func main() {
 		index++
 	}
 
+	//Sort the puzzles by relative user difficulty
+	//We actually don't need the wrapper, since it will modify the underlying slice.
+	sort.Sort(byUserRelativeDifficulty{puzzles})
 }
