@@ -19,9 +19,11 @@ const QUERY_LIMIT = 100
 const _PENALTY_PERCENTAGE_CUTOFF = 0.10
 
 var noLimitFlag bool
+var printPuzzleDataFlag bool
 
 func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
+	flag.BoolVar(&printPuzzleDataFlag, "p", false, "Specify that you want puzzle data printed out in the output.")
 }
 
 type dbConfig struct {
@@ -276,7 +278,11 @@ func main() {
 	csvOut := csv.NewWriter(os.Stdout)
 
 	for _, puzzle := range puzzles {
-		csvOut.Write([]string{strconv.Itoa(puzzle.id), strconv.Itoa(puzzle.difficultyRating), fmt.Sprintf("%g", puzzle.userRelativeDifficulty), puzzle.name, puzzle.puzzle})
+		temp := []string{strconv.Itoa(puzzle.id), strconv.Itoa(puzzle.difficultyRating), fmt.Sprintf("%g", puzzle.userRelativeDifficulty), puzzle.name}
+		if printPuzzleDataFlag {
+			temp = append(temp, puzzle.puzzle)
+		}
+		csvOut.Write(temp)
 	}
 
 	csvOut.Flush()
