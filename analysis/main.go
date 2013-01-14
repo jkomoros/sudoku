@@ -2,15 +2,24 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/ziutek/mymysql/mysql"
 	_ "github.com/ziutek/mymysql/native"
 	"log"
 	"os"
 	"sort"
+	"strconv"
 )
 
 const _DB_CONFIG_FILENAME = "db_config.SECRET.json"
+const QUERY_LIMIT = 100
+
+var noLimitFlag bool
+
+func init() {
+	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
+}
 
 type dbConfig struct {
 	Url, Username, Password, DbName, SolvesTable, SolvesID, SolvesPuzzleID, SolvesTotalTime, SolvesUser string
@@ -93,6 +102,9 @@ func (self *userSolvesCollection) relativeDifficulties() map[int]float32 {
 }
 
 func main() {
+
+	flag.Parse()
+
 	file, err := os.Open(_DB_CONFIG_FILENAME)
 	if err != nil {
 		log.Fatal("Could not find the config file at ", _DB_CONFIG_FILENAME, ". You should copy the SAMPLE one to that filename and configure.")
@@ -113,7 +125,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	res, err := db.Start("select %s, %s, %s from %s limit 100", config.SolvesUser, config.SolvesPuzzleID, config.SolvesTotalTime, config.SolvesTable)
+	var solvesQuery string
+
+	if noLimitFlag {
+		fmt.Println("Running without a limit for number of solves to retrieve.")
+		solvesQuery = "select %s, %s, %s from %s"
+	} else {
+		fmt.Println("Running with a limit of ", QUERY_LIMIT, " for number of solves to retrieve.")
+		solvesQuery = "select %s, %s, %s from %s limit " + strconv.Itoa(QUERY_LIMIT)
+	}
+
+	res, err := db.Start(solvesQuery, config.SolvesUser, config.SolvesPuzzleID, config.SolvesTotalTime, config.SolvesTable)
 
 	if err != nil {
 		log.Fatal(err)
