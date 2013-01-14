@@ -39,6 +39,7 @@ type userSolvesCollection struct {
 type puzzle struct {
 	id                     int
 	userRelativeDifficulty float32
+	difficultyRating       int
 }
 
 type puzzles []puzzle
@@ -213,7 +214,7 @@ func main() {
 		for _, difficulty := range difficulties {
 			sum += difficulty
 		}
-		puzzles[index] = puzzle{puzzleID, sum / float32(len(difficulties))}
+		puzzles[index] = puzzle{puzzleID, sum / float32(len(difficulties)), -1}
 		index++
 	}
 
@@ -221,7 +222,17 @@ func main() {
 	//We actually don't need the wrapper, since it will modify the underlying slice.
 	sort.Sort(byUserRelativeDifficulty{puzzles})
 
-	difficutlyRatings := <-difficutlyRatingsChan
+	//Merge in the difficulty ratings from the server.
+	difficultyRatings := <-difficutlyRatingsChan
+
+	for i, puzzle := range puzzles {
+		difficulty, ok := difficultyRatings[puzzle.id]
+		if ok {
+			puzzle.difficultyRating = difficulty
+		}
+		//It's not a pointer so we have to copy it back.
+		puzzles[i] = puzzle
+	}
 
 }
 
