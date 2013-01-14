@@ -5,6 +5,7 @@
 	"dbname" : "<CHANGEME>",
 	"solvestable" : "<CHANGEME>",
 	"solvesid" : "<CHANGEME",
+	"solvespuzzleid" : "<CHANGEME>",
 	"solvestotaltime" : "<CHANGEME>",
 	"solvesuser" : "<CHANGEME>"
 }

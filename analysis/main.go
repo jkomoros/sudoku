@@ -13,7 +13,7 @@ import (
 const _DB_CONFIG_FILENAME = "db_config.SECRET.json"
 
 type dbConfig struct {
-	Url, Username, Password, DbName, SolvesTable, SolvesID, SolvesTotalTime, SolvesUser string
+	Url, Username, Password, DbName, SolvesTable, SolvesID, SolvesPuzzleID, SolvesTotalTime, SolvesUser string
 }
 
 type solve struct {
@@ -113,7 +113,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	res, err := db.Start("select %s, %s, %s from %s limit 100", config.SolvesUser, config.SolvesID, config.SolvesTotalTime, config.SolvesTable)
+	res, err := db.Start("select %s, %s, %s from %s limit 100", config.SolvesUser, config.SolvesPuzzleID, config.SolvesTotalTime, config.SolvesTable)
 
 	if err != nil {
 		log.Fatal(err)
