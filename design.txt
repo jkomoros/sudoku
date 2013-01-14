@@ -30,4 +30,6 @@ TODO:
 		* For each puzzle, average their percentiles together.
 		* List puzzles by order of their average percentiles.
 
+* Consider filtering out puzzles where the hint time is more than 10% of solve time.
+
 * Investigate making better grids (fewer clues / more symmetry)
