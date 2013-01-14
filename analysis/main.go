@@ -20,10 +20,12 @@ const _PENALTY_PERCENTAGE_CUTOFF = 0.10
 
 var noLimitFlag bool
 var printPuzzleDataFlag bool
+var cullCheaterPercentageFlag float64
 
 func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
 	flag.BoolVar(&printPuzzleDataFlag, "p", false, "Specify that you want puzzle data printed out in the output.")
+	flag.Float64Var(&cullCheaterPercentageFlag, "c", _PENALTY_PERCENTAGE_CUTOFF, "What percentage of solve time must be penalty for someone to be considered a cheater.")
 }
 
 type dbConfig struct {
@@ -89,7 +91,7 @@ func (self *userSolvesCollection) addSolve(solve solve) bool {
 	}
 
 	//Cull solves that leaned too heavily on hints.
-	if float64(solve.penaltyTime)/float64(solve.totalTime) > _PENALTY_PERCENTAGE_CUTOFF {
+	if float64(solve.penaltyTime)/float64(solve.totalTime) > cullCheaterPercentageFlag {
 		return false
 	}
 
