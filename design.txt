@@ -28,6 +28,7 @@ TODO:
 
 * Analysis: Run our difficulty grader on the real puzzles and see how well it fits with user perceived difficulty.
 * Analysis: Throw out outliers for each individual user.
+* Analysis: Throw out users who don't have a full range of difficulties in their history.
 * Analysis: Build in plotting
 
 * Investigate making better grids (fewer clues / more symmetry)
