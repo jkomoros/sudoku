@@ -16,6 +16,7 @@ import (
 const _DB_CONFIG_FILENAME = "db_config.SECRET.json"
 const _OUTPUT_FILENAME = "output.csv"
 const QUERY_LIMIT = 100
+const _PENALTY_PERCENTAGE_CUTOFF = 0.10
 
 var noLimitFlag bool
 
@@ -63,7 +64,17 @@ func (self byUserRelativeDifficulty) Less(i, j int) bool {
 	return self.puzzles[i].userRelativeDifficulty < self.puzzles[j].userRelativeDifficulty
 }
 
-func (self *userSolvesCollection) addSolve(solve solve) {
+func (self *userSolvesCollection) addSolve(solve solve) bool {
+	//Cull obviously incorrect solves.
+	if solve.totalTime == 0 {
+		return false
+	}
+
+	//Cull solves that leaned too heavily on hints.
+	if float64(solve.penaltyTime)/float64(solve.totalTime) > _PENALTY_PERCENTAGE_CUTOFF {
+		return false
+	}
+
 	self.solves = append(self.solves, solve)
 	if len(self.solves) == 1 {
 		self.max = solve.totalTime
@@ -76,6 +87,7 @@ func (self *userSolvesCollection) addSolve(solve solve) {
 			self.min = solve.totalTime
 		}
 	}
+	return true
 }
 
 //Whehter or not this should be included in calculation.
@@ -164,6 +176,7 @@ func main() {
 	var userSolves *userSolvesCollection
 	var ok bool
 	var i int
+	var skippedSolves int
 
 	//First, process all user records in the DB to collect all solves by userName.
 	for {
@@ -181,11 +194,14 @@ func main() {
 			solvesByUser[row.Str(0)] = userSolves
 		}
 
-		userSolves.addSolve(solve{row.Int(1), row.Int(2), row.Int(3)})
+		if !userSolves.addSolve(solve{row.Int(1), row.Int(2), row.Int(3)}) {
+			skippedSolves++
+		}
 		i++
 	}
 
 	log.Println("Processed ", i, " solves by ", len(solvesByUser), " users.")
+	log.Println("Skipped ", skippedSolves, " solves that cheated too much.")
 
 	//Now get the relative difficulty for each user's puzzles, and collect them.
 

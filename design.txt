@@ -27,6 +27,5 @@ TODO:
 
 
 * Analysis: Run our difficulty grader on the real puzzles and see how well it fits with user perceived difficulty.
-* Analysis: Consider filtering out puzzles where the hint time is more than 10% of solve time.
 
 * Investigate making better grids (fewer clues / more symmetry)
