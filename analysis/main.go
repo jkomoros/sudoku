@@ -144,10 +144,10 @@ func main() {
 	var solvesQuery string
 
 	if noLimitFlag {
-		fmt.Println("Running without a limit for number of solves to retrieve.")
+		log.Println("Running without a limit for number of solves to retrieve.")
 		solvesQuery = "select %s, %s, %s from %s"
 	} else {
-		fmt.Println("Running with a limit of ", QUERY_LIMIT, " for number of solves to retrieve.")
+		log.Println("Running with a limit of ", QUERY_LIMIT, " for number of solves to retrieve.")
 		solvesQuery = "select %s, %s, %s from %s limit " + strconv.Itoa(QUERY_LIMIT)
 	}
 
@@ -184,7 +184,7 @@ func main() {
 		i++
 	}
 
-	fmt.Println("Processed ", i, " solves by ", len(solvesByUser), " users.")
+	log.Println("Processed ", i, " solves by ", len(solvesByUser), " users.")
 
 	//Now get the relative difficulty for each user's puzzles, and collect them.
 
@@ -205,7 +205,7 @@ func main() {
 
 	}
 
-	fmt.Println("Skipped ", skippedUsers, " users because they had only had a single unique solve time.")
+	log.Println("Skipped ", skippedUsers, " users because they had only had a single unique solve time.")
 
 	puzzles := make([]puzzle, len(relativeDifficultiesByPuzzle))
 
