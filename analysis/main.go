@@ -217,3 +217,36 @@ func main() {
 	//We actually don't need the wrapper, since it will modify the underlying slice.
 	sort.Sort(byUserRelativeDifficulty{puzzles})
 }
+
+func getPuzzleDifficultyRatings(config *dbConfig, result chan map[int]int) {
+
+	db := mysql.New("tcp", "", config.Url, config.Username, config.Password, config.DbName)
+
+	if err := db.Connect(); err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	res, err := db.Start("select %s, %s from %s", config.PuzzlesID, config.PuzzlesDifficulty, config.PuzzlesTable)
+
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	puzzles := make(map[int]int)
+
+	for {
+
+		row, _ := res.GetRow()
+
+		if row == nil {
+			break
+		}
+
+		puzzles[row.Int(0)] = row.Int(1)
+	}
+
+	result <- puzzles
+
+}
