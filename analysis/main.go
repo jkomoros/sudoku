@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 )
 
 const _DB_CONFIG_FILENAME = "db_config.SECRET.json"
+const _OUTPUT_FILENAME = "output.csv"
 const QUERY_LIMIT = 100
 
 var noLimitFlag bool
@@ -233,6 +235,16 @@ func main() {
 		//It's not a pointer so we have to copy it back.
 		puzzles[i] = puzzle
 	}
+
+	//Now print the results to stdout.
+
+	csvOut := csv.NewWriter(os.Stdout)
+
+	for _, puzzle := range puzzles {
+		csvOut.Write([]string{strconv.Itoa(puzzle.id), strconv.Itoa(puzzle.difficultyRating), fmt.Sprintf("%g", puzzle.userRelativeDifficulty)})
+	}
+
+	csvOut.Flush()
 
 }
 
