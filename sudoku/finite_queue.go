@@ -60,11 +60,13 @@ func (self *finiteQueueList) getItem() RankedObject {
 	for len(self.objects) > 0 {
 		index := rand.Intn(len(self.objects))
 		obj := self.objects[index]
+		//Mark this object as gathered.
+		self.setNil(index)
 		if obj == nil {
 			continue
 		}
 		if obj.Rank() != self.rank {
-			self.setNil(index)
+			continue
 		}
 		self.trimNils()
 	}
