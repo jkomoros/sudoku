@@ -11,7 +11,13 @@ type RankedObject interface {
 type FiniteQueue struct {
 	min     int
 	max     int
-	objects [][]RankedObject
+	objects []*finiteQueueList
+}
+
+type finiteQueueList struct {
+	objects []RankedObject
+	numNils int
+	rank    int
 }
 
 type SyncedFiniteQueue struct {
@@ -23,13 +29,58 @@ type SyncedFiniteQueue struct {
 
 //Returns a new queue that will work for items with a rank as low as min or as high as max (inclusive)
 func NewFiniteQueue(min int, max int) *FiniteQueue {
-	return &FiniteQueue{min, max, make([][]RankedObject, max-min+1)}
+	result := FiniteQueue{min, max, make([]*finiteQueueList, max-min+1)}
+	for i := 0; i < max-min+1; i++ {
+		result.objects[i] = &finiteQueueList{make([]RankedObject, 1), 0, i + result.min}
+	}
+	return &result
 }
 
 func NewSyncedFiniteQueue(min int, max int) *SyncedFiniteQueue {
 	result := &SyncedFiniteQueue{*NewFiniteQueue(min, max), make(chan RankedObject), make(chan RankedObject), make(chan bool, 1)}
 	go result.workLoop()
 	return result
+}
+
+func (self *finiteQueueList) trimNils() {
+	//TODO: if the numNils is greater than some proportion of len, do a full reallocate.
+	for len(self.objects) > 0 && self.objects[0] == nil {
+		self.objects = self.objects[1:]
+		self.numNils--
+	}
+}
+
+func (self *finiteQueueList) setNil(index int) {
+	self.objects[index] = nil
+	self.numNils++
+}
+
+func (self *finiteQueueList) getItem() RankedObject {
+	self.trimNils()
+	for len(self.objects) > 0 {
+		index := rand.Intn(len(self.objects))
+		obj := self.objects[index]
+		if obj == nil {
+			continue
+		}
+		if obj.Rank() != self.rank {
+			self.setNil(index)
+		}
+		self.trimNils()
+	}
+	return nil
+}
+
+func (self *finiteQueueList) addItem(item RankedObject) {
+	//Scrub the list for this item.
+	for _, obj := range self.objects {
+		//Structs will compare equal if all of their fields are the same.
+		if item == obj {
+			//It's already there, just return.
+			return
+		}
+	}
+	self.objects = append(self.objects, item)
 }
 
 func (self *SyncedFiniteQueue) workLoop() {
@@ -77,16 +128,7 @@ func (self *FiniteQueue) Insert(obj RankedObject) {
 		//Apparently rank wasn't legal.
 		return
 	}
-	//Scrub the list for this item.
-	for _, item := range list {
-		//Structs will compare equal if all of their fields are the same.
-		if item == obj {
-			//It's already there, just return.
-			return
-		}
-	}
-	//If we get to here we need to add the item.
-	self.setList(rank, append(list, obj))
+	list.addItem(obj)
 }
 
 func (self *FiniteQueue) Get() RankedObject {
@@ -103,37 +145,9 @@ func (self *FiniteQueue) getSmallerThan(max int, ignoredObjects map[RankedObject
 		if i+self.min >= max {
 			return nil
 		}
-	ListLoop:
-		for len(list) > 0 {
-
-			//Clear off nils from the front.
-			for list[0] == nil {
-				if len(list) == 1 {
-					self.objects[i] = nil
-					list = nil
-					//There are no more in this list; move to the next.
-					continue ListLoop
-				} else {
-					self.objects[i] = list[1:]
-					list = list[1:]
-				}
-			}
-			//Pick one at random
-			index := rand.Intn(len(list))
-			obj := list[index]
-			//Mark its old location as emptied.
-			list[index] = nil
-
-			//Meh, try again from this list.
-			if obj == nil {
-				continue
-			}
-
-			//Does this object still have the rank it did when it was inserted?
-			if obj.Rank() == i+self.min {
-				return obj
-			}
-			//otherwise, keep looking.
+		result := list.getItem()
+		if result != nil {
+			return result
 		}
 	}
 	return nil
@@ -143,16 +157,9 @@ func (self *FiniteQueue) legalRank(rank int) bool {
 	return rank >= self.min && rank <= self.max
 }
 
-func (self *FiniteQueue) getList(rank int) ([]RankedObject, bool) {
+func (self *FiniteQueue) getList(rank int) (*finiteQueueList, bool) {
 	if !self.legalRank(rank) {
 		return nil, false
 	}
 	return self.objects[rank-self.min], true
-}
-
-func (self *FiniteQueue) setList(rank int, list []RankedObject) {
-	if !self.legalRank(rank) {
-		return
-	}
-	self.objects[rank-self.min] = list
 }
