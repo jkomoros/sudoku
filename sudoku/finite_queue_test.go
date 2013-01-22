@@ -35,14 +35,6 @@ func TestFiniteQueue(t *testing.T) {
 			t.Log("We got back an object with the wrong rank: ", retrievedObj.Rank(), " is not ", obj.Rank())
 			t.Fail()
 		}
-		convertedObj, _ := retrievedObj.(*SimpleRankedObject)
-		//We tried comparing addresses here, but they weren't the same. Why? Are we copying something somewhere?
-		if convertedObj.id != obj.id {
-			//Note that technically the API doesn't require that items with the same rank come back out in the same order.
-			//So this test will fail even in some valid cases.
-			t.Log("We didn't get back the objects we put in.")
-			t.Fail()
-		}
 	}
 	if queue.Get() != nil {
 		t.Log("We were able to get back more objects than what we put in.")
@@ -142,14 +134,6 @@ func TestSyncedFiniteQueue(t *testing.T) {
 		}
 		if retrievedObj.Rank() != obj.Rank() {
 			t.Log("We got back an object with the wrong rank: ", retrievedObj.Rank(), " is not ", obj.Rank())
-			t.Fail()
-		}
-		convertedObj, _ := retrievedObj.(*SimpleRankedObject)
-		//We tried comparing addresses here, but they weren't the same. Why? Are we copying something somewhere?
-		if convertedObj.id != obj.id {
-			//Note that technically the API doesn't require that items with the same rank come back out in the same order.
-			//So this test will fail even in some valid cases.
-			t.Log("We didn't get back the objects we put in.")
 			t.Fail()
 		}
 	}

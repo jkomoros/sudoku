@@ -20,6 +20,8 @@ type finiteQueueList struct {
 	rank    int
 }
 
+const _REALLOCATE_PROPORTION = 0.20
+
 type SyncedFiniteQueue struct {
 	queue FiniteQueue
 	In    chan RankedObject
@@ -43,14 +45,34 @@ func NewSyncedFiniteQueue(min int, max int) *SyncedFiniteQueue {
 }
 
 func (self *finiteQueueList) trimNils() {
-	//TODO: if the numNils is greater than some proportion of len, do a full reallocate.
+	if float64(self.numNils)/float64(len(self.objects)) > _REALLOCATE_PROPORTION {
+		// fmt.Println("Reallocating...")
+		// fmt.Println(self.numNils)
+		// fmt.Println(self.objects)
+		result := make([]RankedObject, len(self.objects)-self.numNils)
+		targetIndex := 0
+		for i := 0; i < len(self.objects); i++ {
+			if self.objects[i] == nil {
+				continue
+			}
+			result[targetIndex] = self.objects[i]
+			targetIndex++
+		}
+		self.objects = result
+		self.numNils = 0
+	}
 	for len(self.objects) > 0 && self.objects[0] == nil {
 		self.objects = self.objects[1:]
 		self.numNils--
 	}
+
 }
 
 func (self *finiteQueueList) setNil(index int) {
+	if self.objects[index] == nil {
+		//We don't want to double-count nils.
+		return
+	}
 	self.objects[index] = nil
 	self.numNils++
 }
