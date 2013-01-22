@@ -27,21 +27,21 @@ var techniques []SolveTechnique
 
 func init() {
 	//TODO: init techniques with enough space
-	techniques = append(techniques, OnlyLegalNumberTechnique{})
+	techniques = append(techniques, onlyLegalNumberTechnique{})
 }
 
-type OnlyLegalNumberTechnique struct {
+type onlyLegalNumberTechnique struct {
 }
 
-func (self OnlyLegalNumberTechnique) Name() string {
+func (self onlyLegalNumberTechnique) Name() string {
 	return "Only Legal Number"
 }
 
-func (self OnlyLegalNumberTechnique) Description(step *SolveStep) string {
+func (self onlyLegalNumberTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is the only remaining valid number for that cell", step.Num)
 }
 
-func (self OnlyLegalNumberTechnique) Apply(grid *Grid) *SolveStep {
+func (self onlyLegalNumberTechnique) Apply(grid *Grid) *SolveStep {
 	//TODO: this assumes that no one has grabbed items from the queue before us.
 	//This will be a random item
 	obj := grid.queue.GetSmallerThan(2)
