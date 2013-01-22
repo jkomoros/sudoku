@@ -18,6 +18,8 @@ TODO:
 
 * There's a leak somewhere in solve or fill. If you fill 500000 grids it runs out of memory.
 
+* Some way to quickly copy queues and then enforce that all gets come from a copy; this will be useful for solver techniques which require a clean queue.
+
 * Solve performance ideas
 	* At each level, with some randomness (ideally weighted), diverge from DFS by changing which one we dive into and spin off the rest of the work items.
 

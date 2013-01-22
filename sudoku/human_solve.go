@@ -42,7 +42,7 @@ func (self onlyLegalNumberTechnique) Description(step *SolveStep) string {
 }
 
 func (self onlyLegalNumberTechnique) Apply(grid *Grid) *SolveStep {
-	//TODO: this assumes that no one has grabbed items from the queue before us.
+	grid.refillQueue()
 	//This will be a random item
 	obj := grid.queue.GetSmallerThan(2)
 	if obj == nil {
