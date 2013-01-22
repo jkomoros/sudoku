@@ -94,7 +94,11 @@ func (self *FiniteQueue) Get() RankedObject {
 }
 
 func (self *FiniteQueue) GetSmallerThan(max int) RankedObject {
+	return self.getSmallerThan(max, make(map[RankedObject]int))
+}
 
+func (self *FiniteQueue) getSmallerThan(max int, ignoredObjects map[RankedObject]int) RankedObject {
+	//TOOD: actually respect ignoredObjects
 	for i, list := range self.objects {
 		if i+self.min >= max {
 			return nil
