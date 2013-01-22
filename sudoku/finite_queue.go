@@ -62,11 +62,8 @@ func (self *finiteQueueList) getItem() RankedObject {
 		obj := self.objects[index]
 		//Mark this object as gathered.
 		self.setNil(index)
-		if obj == nil {
-			continue
-		}
-		if obj.Rank() != self.rank {
-			continue
+		if obj != nil && obj.Rank() == self.rank {
+			return obj
 		}
 		self.trimNils()
 	}
