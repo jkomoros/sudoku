@@ -32,6 +32,7 @@ type SyncedFiniteQueue struct {
 type FiniteQueueGetter struct {
 	queue         *FiniteQueue
 	ignoreObjects map[RankedObject]bool
+	currentList   *finiteQueueList
 }
 
 //Returns a new queue that will work for items with a rank as low as min or as high as max (inclusive)
@@ -140,7 +141,8 @@ func (self *SyncedFiniteQueue) workLoop() {
 }
 
 func (self *FiniteQueue) NewGetter() *FiniteQueueGetter {
-	return &FiniteQueueGetter{self, make(map[RankedObject]bool)}
+	list, _ := self.getList(self.min)
+	return &FiniteQueueGetter{self, make(map[RankedObject]bool), list}
 }
 
 func (self *FiniteQueue) Min() int {
