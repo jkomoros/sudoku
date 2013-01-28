@@ -133,6 +133,18 @@ func (self *finiteQueueBucket) copy() *finiteQueueBucket {
 	return &finiteQueueBucket{newObjects, self.numNils, self.rank}
 }
 
+func (self *finiteQueueBucket) shuffle() {
+	//TODO: test this.
+	//Shuffles the items in place.
+	self.compact()
+	newPositions := rand.Perm(len(self.objects))
+	newObjects := make([]RankedObject, len(self.objects))
+	for i, j := range newPositions {
+		newObjects[j] = self.objects[i]
+	}
+	self.objects = newObjects
+}
+
 func (self *SyncedFiniteQueue) workLoop() {
 	for {
 		firstItem := self.queue.Get()
