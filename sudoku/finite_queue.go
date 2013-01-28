@@ -125,6 +125,14 @@ func (self *finiteQueueBucket) compact() {
 	self.removeNils()
 }
 
+func (self *finiteQueueBucket) copy() *finiteQueueBucket {
+	//TODO: test this
+	self.compact()
+	newObjects := make([]RankedObject, len(self.objects))
+	copy(newObjects, self.objects)
+	return &finiteQueueBucket{newObjects, self.numNils, self.rank}
+}
+
 func (self *SyncedFiniteQueue) workLoop() {
 	for {
 		firstItem := self.queue.Get()
