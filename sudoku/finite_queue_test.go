@@ -100,6 +100,24 @@ func TestFiniteQueue(t *testing.T) {
 
 }
 
+func TestFiniteQueueGetter(t *testing.T) {
+	queue := NewFiniteQueue(1, DIM)
+	//Note that the first item does not fit in the first bucket on purpose.
+	objects := [...]*SimpleRankedObject{{3, "a"}, {4, "b"}, {4, "c"}, {5, "d"}}
+	for _, object := range objects {
+		queue.Insert(object)
+	}
+	getter := queue.NewGetter()
+	if getter == nil {
+		t.Log("We didn't get a getter back from NewGetter")
+		t.Fail()
+	}
+	if getter.queue != queue {
+		t.Log("We got back a getter that didn't have the right queue")
+		t.Fail()
+	}
+}
+
 func TestSyncedFiniteQueue(t *testing.T) {
 	queue := NewSyncedFiniteQueue(1, DIM)
 
