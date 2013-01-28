@@ -156,7 +156,7 @@ func (self *SyncedFiniteQueue) workLoop() {
 }
 
 func (self *FiniteQueue) NewGetter() *FiniteQueueGetter {
-	list, _ := self.getList(self.min)
+	list, _ := self.getBucket(self.min)
 	return &FiniteQueueGetter{self, make(map[RankedObject]bool), list}
 }
 
@@ -170,7 +170,7 @@ func (self *FiniteQueue) Max() int {
 
 func (self *FiniteQueue) Insert(obj RankedObject) {
 	rank := obj.Rank()
-	list, ok := self.getList(rank)
+	list, ok := self.getBucket(rank)
 	if !ok {
 		//Apparently rank wasn't legal.
 		return
@@ -204,7 +204,7 @@ func (self *FiniteQueue) legalRank(rank int) bool {
 	return rank >= self.min && rank <= self.max
 }
 
-func (self *FiniteQueue) getList(rank int) (*finiteQueueBucket, bool) {
+func (self *FiniteQueue) getBucket(rank int) (*finiteQueueBucket, bool) {
 	if !self.legalRank(rank) {
 		return nil, false
 	}
