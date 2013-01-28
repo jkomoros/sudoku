@@ -15,9 +15,9 @@ type FiniteQueue struct {
 }
 
 type finiteQueueBucket struct {
-	objects []RankedObject
-	numNils int
-	rank    int
+	objects  []RankedObject
+	rank     int
+	shuffled bool
 }
 
 const _REALLOCATE_PROPORTION = 0.20
@@ -39,7 +39,7 @@ type FiniteQueueGetter struct {
 func NewFiniteQueue(min int, max int) *FiniteQueue {
 	result := FiniteQueue{min, max, make([]*finiteQueueBucket, max-min+1)}
 	for i := 0; i < max-min+1; i++ {
-		result.objects[i] = &finiteQueueBucket{make([]RankedObject, 1), 0, i + result.min}
+		result.objects[i] = &finiteQueueBucket{make([]RankedObject, 0), i + result.min, true}
 	}
 	return &result
 }
@@ -50,56 +50,26 @@ func NewSyncedFiniteQueue(min int, max int) *SyncedFiniteQueue {
 	return result
 }
 
-func (self *finiteQueueBucket) removeNils() {
-	result := make([]RankedObject, len(self.objects)-self.numNils)
-	targetIndex := 0
-	for i := 0; i < len(self.objects); i++ {
-		if self.objects[i] == nil {
-			continue
-		}
-		result[targetIndex] = self.objects[i]
-		targetIndex++
-	}
-	self.objects = result
-	self.numNils = 0
-}
-
-func (self *finiteQueueBucket) trimNils() {
-	if float64(self.numNils)/float64(len(self.objects)) > _REALLOCATE_PROPORTION {
-		self.removeNils()
-	}
-	for len(self.objects) > 0 && self.objects[0] == nil {
-		self.objects = self.objects[1:]
-		self.numNils--
-	}
-
-}
-
-func (self *finiteQueueBucket) setNil(index int) {
-	if self.objects[index] == nil {
-		//We don't want to double-count nils.
-		return
-	}
-	self.objects[index] = nil
-	self.numNils++
-}
-
 func (self *finiteQueueBucket) getItem() RankedObject {
-	self.trimNils()
+
+	if !self.shuffled {
+		self.shuffle()
+	}
+
 	for len(self.objects) > 0 {
-		index := rand.Intn(len(self.objects))
-		obj := self.objects[index]
-		//Mark this object as gathered.
-		self.setNil(index)
-		if obj != nil && obj.Rank() == self.rank {
-			return obj
+		item := self.objects[0]
+		self.objects = self.objects[1:]
+		if item.Rank() == self.rank {
+			return item
 		}
-		self.trimNils()
 	}
 	return nil
 }
 
 func (self *finiteQueueBucket) addItem(item RankedObject) {
+	if item == nil {
+		return
+	}
 	//Scrub the list for this item.
 	for _, obj := range self.objects {
 		//Structs will compare equal if all of their fields are the same.
@@ -109,40 +79,27 @@ func (self *finiteQueueBucket) addItem(item RankedObject) {
 		}
 	}
 	self.objects = append(self.objects, item)
-}
-
-func (self *finiteQueueBucket) compact() {
-
-	//First, find any i's that don't have the right rank anymore and mark as nils.
-	for i, obj := range self.objects {
-		if obj == nil {
-			continue
-		}
-		if obj.Rank() != self.rank {
-			self.setNil(i)
-		}
-	}
-	self.removeNils()
+	self.shuffled = false
 }
 
 func (self *finiteQueueBucket) copy() *finiteQueueBucket {
 	//TODO: test this
-	self.compact()
 	newObjects := make([]RankedObject, len(self.objects))
 	copy(newObjects, self.objects)
-	return &finiteQueueBucket{newObjects, self.numNils, self.rank}
+	//We set shuffled to false because right now we copy the shuffle order of our copy.
+	return &finiteQueueBucket{newObjects, self.rank, false}
 }
 
 func (self *finiteQueueBucket) shuffle() {
 	//TODO: test this.
 	//Shuffles the items in place.
-	self.compact()
 	newPositions := rand.Perm(len(self.objects))
 	newObjects := make([]RankedObject, len(self.objects))
 	for i, j := range newPositions {
 		newObjects[j] = self.objects[i]
 	}
 	self.objects = newObjects
+	self.shuffled = true
 }
 
 func (self *SyncedFiniteQueue) workLoop() {
