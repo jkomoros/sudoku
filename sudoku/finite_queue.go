@@ -11,10 +11,10 @@ type RankedObject interface {
 type FiniteQueue struct {
 	min     int
 	max     int
-	objects []*finiteQueueList
+	objects []*finiteQueueBucket
 }
 
-type finiteQueueList struct {
+type finiteQueueBucket struct {
 	objects []RankedObject
 	numNils int
 	rank    int
@@ -32,14 +32,14 @@ type SyncedFiniteQueue struct {
 type FiniteQueueGetter struct {
 	queue         *FiniteQueue
 	ignoreObjects map[RankedObject]bool
-	currentList   *finiteQueueList
+	currentList   *finiteQueueBucket
 }
 
 //Returns a new queue that will work for items with a rank as low as min or as high as max (inclusive)
 func NewFiniteQueue(min int, max int) *FiniteQueue {
-	result := FiniteQueue{min, max, make([]*finiteQueueList, max-min+1)}
+	result := FiniteQueue{min, max, make([]*finiteQueueBucket, max-min+1)}
 	for i := 0; i < max-min+1; i++ {
-		result.objects[i] = &finiteQueueList{make([]RankedObject, 1), 0, i + result.min}
+		result.objects[i] = &finiteQueueBucket{make([]RankedObject, 1), 0, i + result.min}
 	}
 	return &result
 }
@@ -50,7 +50,7 @@ func NewSyncedFiniteQueue(min int, max int) *SyncedFiniteQueue {
 	return result
 }
 
-func (self *finiteQueueList) removeNils() {
+func (self *finiteQueueBucket) removeNils() {
 	result := make([]RankedObject, len(self.objects)-self.numNils)
 	targetIndex := 0
 	for i := 0; i < len(self.objects); i++ {
@@ -64,7 +64,7 @@ func (self *finiteQueueList) removeNils() {
 	self.numNils = 0
 }
 
-func (self *finiteQueueList) trimNils() {
+func (self *finiteQueueBucket) trimNils() {
 	if float64(self.numNils)/float64(len(self.objects)) > _REALLOCATE_PROPORTION {
 		self.removeNils()
 	}
@@ -75,7 +75,7 @@ func (self *finiteQueueList) trimNils() {
 
 }
 
-func (self *finiteQueueList) setNil(index int) {
+func (self *finiteQueueBucket) setNil(index int) {
 	if self.objects[index] == nil {
 		//We don't want to double-count nils.
 		return
@@ -84,7 +84,7 @@ func (self *finiteQueueList) setNil(index int) {
 	self.numNils++
 }
 
-func (self *finiteQueueList) getItem() RankedObject {
+func (self *finiteQueueBucket) getItem() RankedObject {
 	self.trimNils()
 	for len(self.objects) > 0 {
 		index := rand.Intn(len(self.objects))
@@ -99,7 +99,7 @@ func (self *finiteQueueList) getItem() RankedObject {
 	return nil
 }
 
-func (self *finiteQueueList) addItem(item RankedObject) {
+func (self *finiteQueueBucket) addItem(item RankedObject) {
 	//Scrub the list for this item.
 	for _, obj := range self.objects {
 		//Structs will compare equal if all of their fields are the same.
@@ -111,7 +111,7 @@ func (self *finiteQueueList) addItem(item RankedObject) {
 	self.objects = append(self.objects, item)
 }
 
-func (self *finiteQueueList) compact() {
+func (self *finiteQueueBucket) compact() {
 
 	//First, find any i's that don't have the right rank anymore and mark as nils.
 	for i, obj := range self.objects {
@@ -204,7 +204,7 @@ func (self *FiniteQueue) legalRank(rank int) bool {
 	return rank >= self.min && rank <= self.max
 }
 
-func (self *FiniteQueue) getList(rank int) (*finiteQueueList, bool) {
+func (self *FiniteQueue) getList(rank int) (*finiteQueueBucket, bool) {
 	if !self.legalRank(rank) {
 		return nil, false
 	}
