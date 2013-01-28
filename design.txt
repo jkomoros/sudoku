@@ -13,6 +13,9 @@ Grid {
 }
 
 TODO:
+
+*Right now finite_queue is slower than it should be and more complicated. Instead, each bucket should have a randomized flag if it's been shuffled. The queue should have a currentBucket property. Whenever a new item is added, we remove that currentBucket. When we want an item and don't have a currentBucket, we walk upwards until we find a bucket with something. If it's not ranodmized, we call shuffle. Then we keep it. Then when we want an item we just slice it off the front. There are no nils in the middle.
+
 * Investigate why using the finite queue isn't making a big dent in Fill() performance.
 * Reduce memory usage in cell: row, col, block are rarely asked for so can be derived?
 
