@@ -50,22 +50,23 @@ func NewSyncedFiniteQueue(min int, max int) *SyncedFiniteQueue {
 	return result
 }
 
+func (self *finiteQueueList) removeNils() {
+	result := make([]RankedObject, len(self.objects)-self.numNils)
+	targetIndex := 0
+	for i := 0; i < len(self.objects); i++ {
+		if self.objects[i] == nil {
+			continue
+		}
+		result[targetIndex] = self.objects[i]
+		targetIndex++
+	}
+	self.objects = result
+	self.numNils = 0
+}
+
 func (self *finiteQueueList) trimNils() {
 	if float64(self.numNils)/float64(len(self.objects)) > _REALLOCATE_PROPORTION {
-		// fmt.Println("Reallocating...")
-		// fmt.Println(self.numNils)
-		// fmt.Println(self.objects)
-		result := make([]RankedObject, len(self.objects)-self.numNils)
-		targetIndex := 0
-		for i := 0; i < len(self.objects); i++ {
-			if self.objects[i] == nil {
-				continue
-			}
-			result[targetIndex] = self.objects[i]
-			targetIndex++
-		}
-		self.objects = result
-		self.numNils = 0
+		self.removeNils()
 	}
 	for len(self.objects) > 0 && self.objects[0] == nil {
 		self.objects = self.objects[1:]
@@ -108,6 +109,20 @@ func (self *finiteQueueList) addItem(item RankedObject) {
 		}
 	}
 	self.objects = append(self.objects, item)
+}
+
+func (self *finiteQueueList) compact() {
+
+	//First, find any i's that don't have the right rank anymore and mark as nils.
+	for i, obj := range self.objects {
+		if obj == nil {
+			continue
+		}
+		if obj.Rank() != self.rank {
+			self.setNil(i)
+		}
+	}
+	self.removeNils()
 }
 
 func (self *SyncedFiniteQueue) workLoop() {
