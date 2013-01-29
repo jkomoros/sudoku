@@ -31,9 +31,9 @@ type SyncedFiniteQueue struct {
 }
 
 type FiniteQueueGetter struct {
-	queue         *FiniteQueue
-	ignoreObjects map[RankedObject]bool
-	currentBucket *finiteQueueBucket
+	queue            *FiniteQueue
+	dispensedObjects map[RankedObject]bool
+	currentBucket    *finiteQueueBucket
 }
 
 //Returns a new queue that will work for items with a rank as low as min or as high as max (inclusive)
@@ -240,18 +240,30 @@ func (self *FiniteQueueGetter) getSmallerThan(max int) RankedObject {
 	}
 
 	item := self.currentBucket.getItem()
-
-	for item == nil {
-		if self.currentBucket.empty() {
-			newBucket, _ := self.queue.getBucket(self.currentBucket.rank + 1)
-			if newBucket == nil || newBucket.rank >= max {
-				//Got to the end
-				return nil
+	for {
+		for item == nil {
+			if self.currentBucket.empty() {
+				newBucket, _ := self.queue.getBucket(self.currentBucket.rank + 1)
+				if newBucket == nil || newBucket.rank >= max {
+					//Got to the end
+					return nil
+				}
+				self.currentBucket = newBucket.copy()
 			}
-			self.currentBucket = newBucket.copy()
+			item = self.currentBucket.getItem()
 		}
-		item = self.currentBucket.getItem()
+		//We have AN item. Is it one we've already dispensed?
+		if _, dispensed := self.dispensedObjects[item]; !dispensed {
+			//It is new. Break out of the loop.
+			break
+		}
+		//Otherwise, loop around again.
 	}
+
+	//TODO: test that we never dispense the same object.
+
+	//Keep track of the fact we dispensed this item.
+	self.dispensedObjects[item] = true
 
 	return item
 }
