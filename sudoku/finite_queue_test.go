@@ -135,6 +135,30 @@ func TestFiniteQueueGetter(t *testing.T) {
 		t.Log("We got back a getter that didn't have the right queue")
 		t.Fail()
 	}
+	for _, obj := range objects {
+		retrievedObj := getter.Get()
+		if retrievedObj == nil {
+			t.Log("We got back a nil before we were expecting to")
+			t.Fail()
+			continue
+		}
+		if retrievedObj.Rank() != obj.Rank() {
+			t.Log("We got back an object with the wrong rank: ", retrievedObj.Rank(), " is not ", obj.Rank())
+			t.Fail()
+		}
+	}
+	//Now ensure that the underlying queue was not touched.
+	for i := 0; i < len(objects); i++ {
+		if queue.Get() == nil {
+			t.Log("The underlying queue had fewer items than we expected.")
+			t.Fail()
+		}
+	}
+	if queue.Get() != nil {
+		t.Log("The underlying queue had MORE objects than we expected.")
+		t.Fail()
+	}
+
 }
 
 func TestSyncedFiniteQueue(t *testing.T) {

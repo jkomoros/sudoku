@@ -219,7 +219,6 @@ func (self *FiniteQueueGetter) GetSmallerThan(max int) RankedObject {
 }
 
 func (self *FiniteQueueGetter) getSmallerThan(max int) RankedObject {
-	//TODO: test this
 	//TODO: test that inserting objects after add works (above and below current point). This will require that we reset our currentBucket when a new insert happens.
 	//^ will require the queue to be aware of us (we'd kill ourselves as soon as the last item was expired), OR a counter that we check to make sure they're in sync.
 
