@@ -207,6 +207,17 @@ func (self *FiniteQueue) getBucket(rank int) (*finiteQueueBucket, bool) {
 	return self.objects[rank-self.min], true
 }
 
+func (self *FiniteQueueGetter) Get() RankedObject {
+	if self.queue == nil {
+		return nil
+	}
+	return self.getSmallerThan(self.queue.max + 1)
+}
+
+func (self *FiniteQueueGetter) GetSmallerThan(max int) RankedObject {
+	return self.GetSmallerThan(max)
+}
+
 func (self *FiniteQueueGetter) getSmallerThan(max int) RankedObject {
 	//TODO: test this
 	//TODO: test that inserting objects after add works (above and below current point). This will require that we reset our currentBucket when a new insert happens.
