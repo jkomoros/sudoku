@@ -190,8 +190,24 @@ func TestFiniteQueueGetter(t *testing.T) {
 		t.Log("Getter returned more items than it should have after insert while read.")
 		t.Fail()
 	}
-
-	//TODO: test that it's resilient to GETs while reading, too.
+	//Test that it's resilient to removes.
+	for _, object := range objects[1:] {
+		queue.Insert(object)
+	}
+	getter = queue.NewGetter()
+	_ = getter.Get()
+	//Get into the second bucket.
+	_ = getter.Get()
+	queue.Get()
+	removedItem := queue.Get()
+	item = getter.Get()
+	for item != nil {
+		if item == removedItem {
+			t.Log("We got an item we shouldn't have gotten because the underlying queue changed.")
+			t.Fail()
+		}
+		item = getter.Get()
+	}
 }
 
 func TestSyncedFiniteQueue(t *testing.T) {
