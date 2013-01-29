@@ -13,6 +13,9 @@ type FiniteQueue struct {
 	max           int
 	objects       []*finiteQueueBucket
 	currentBucket *finiteQueueBucket
+	//Version monotonically increases as changes are made to the underlying queue.
+	//This is how getters ensure that they stay in sync with their underlying queue.
+	version int
 }
 
 type finiteQueueBucket struct {
@@ -34,11 +37,12 @@ type FiniteQueueGetter struct {
 	queue            *FiniteQueue
 	dispensedObjects map[RankedObject]bool
 	currentBucket    *finiteQueueBucket
+	baseVersion      int
 }
 
 //Returns a new queue that will work for items with a rank as low as min or as high as max (inclusive)
 func NewFiniteQueue(min int, max int) *FiniteQueue {
-	result := FiniteQueue{min, max, make([]*finiteQueueBucket, max-min+1), nil}
+	result := FiniteQueue{min, max, make([]*finiteQueueBucket, max-min+1), nil, 0}
 	for i := 0; i < max-min+1; i++ {
 		result.objects[i] = &finiteQueueBucket{make([]RankedObject, 0), i + result.min, true}
 	}
@@ -139,7 +143,7 @@ func (self *SyncedFiniteQueue) workLoop() {
 
 func (self *FiniteQueue) NewGetter() *FiniteQueueGetter {
 	list, _ := self.getBucket(self.min)
-	return &FiniteQueueGetter{self, make(map[RankedObject]bool), list}
+	return &FiniteQueueGetter{self, make(map[RankedObject]bool), list, 0}
 }
 
 func (self *FiniteQueue) Min() int {
@@ -159,6 +163,7 @@ func (self *FiniteQueue) Insert(obj RankedObject) {
 	}
 	list.addItem(obj)
 	self.currentBucket = nil
+	self.version++
 }
 
 func (self *FiniteQueue) Get() RankedObject {
@@ -192,6 +197,7 @@ func (self *FiniteQueue) getSmallerThan(max int) RankedObject {
 		item = self.currentBucket.getItem()
 	}
 
+	self.version++
 	return item
 
 }
@@ -219,9 +225,6 @@ func (self *FiniteQueueGetter) GetSmallerThan(max int) RankedObject {
 }
 
 func (self *FiniteQueueGetter) getSmallerThan(max int) RankedObject {
-	//TODO: test that inserting objects after add works (above and below current point). This will require that we reset our currentBucket when a new insert happens.
-	//^ will require the queue to be aware of us (we'd kill ourselves as soon as the last item was expired), OR a counter that we check to make sure they're in sync.
-
 	//Very similar logic exists in finiteQueue.getSmallerThan.
 
 	//Sanity check
@@ -229,7 +232,11 @@ func (self *FiniteQueueGetter) getSmallerThan(max int) RankedObject {
 		return nil
 	}
 
-	//TODO: check that our version counter equals our queue's version counter, otherwise nil out currentBucket here.
+	//TODO: test that we're resilient to underlying version changes.
+	if self.baseVersion != self.queue.version {
+		self.currentBucket = nil
+		self.baseVersion = self.queue.version
+	}
 
 	if self.currentBucket == nil {
 		newBucket, _ := self.queue.getBucket(self.queue.min)
