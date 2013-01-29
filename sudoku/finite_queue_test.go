@@ -98,6 +98,25 @@ func TestFiniteQueue(t *testing.T) {
 		t.Fail()
 	}
 
+	//Test that inserting while getting works.
+
+	//The ones that are already in should be a no-op
+	for _, obj := range objects {
+		queue.Insert(obj)
+	}
+	if item := queue.Get(); item != objects[0] {
+		t.Log("A subsequent read didn't return the right object")
+		t.Fail()
+	}
+	if item := queue.Get(); item != objects[1] {
+		t.Log("A subsequent read didn't return the right object 1")
+		t.Fail()
+	}
+	queue.Insert(objects[0])
+	if item := queue.Get(); item != objects[0] {
+		t.Log("An insert mid-read stream didn't return the right object")
+		t.Fail()
+	}
 }
 
 func TestFiniteQueueGetter(t *testing.T) {

@@ -173,8 +173,6 @@ func (self *FiniteQueue) getSmallerThan(max int, ignoredObjects map[RankedObject
 
 	//TODO: remove ignoredObjects as an argument.
 
-	//TODO: test that if an item is inserted while we're walking through we return it.
-
 	if self.currentBucket == nil {
 		self.currentBucket, _ = self.getBucket(self.min)
 		if self.currentBucket == nil {
