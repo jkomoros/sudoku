@@ -166,12 +166,10 @@ func (self *FiniteQueue) Get() RankedObject {
 }
 
 func (self *FiniteQueue) GetSmallerThan(max int) RankedObject {
-	return self.getSmallerThan(max, make(map[RankedObject]int))
+	return self.getSmallerThan(max)
 }
 
-func (self *FiniteQueue) getSmallerThan(max int, ignoredObjects map[RankedObject]int) RankedObject {
-
-	//TODO: remove ignoredObjects as an argument.
+func (self *FiniteQueue) getSmallerThan(max int) RankedObject {
 
 	if self.currentBucket == nil {
 		self.currentBucket, _ = self.getBucket(self.min)
