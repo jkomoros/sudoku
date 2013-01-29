@@ -232,7 +232,6 @@ func (self *FiniteQueueGetter) getSmallerThan(max int) RankedObject {
 		return nil
 	}
 
-	//TODO: test that we're resilient to underlying version changes.
 	if self.baseVersion != self.queue.version {
 		self.currentBucket = nil
 		self.baseVersion = self.queue.version
@@ -266,8 +265,6 @@ func (self *FiniteQueueGetter) getSmallerThan(max int) RankedObject {
 		}
 		//Otherwise, loop around again.
 	}
-
-	//TODO: test that we never dispense the same object.
 
 	//Keep track of the fact we dispensed this item.
 	self.dispensedObjects[item] = true

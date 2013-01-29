@@ -156,9 +156,42 @@ func TestFiniteQueueGetter(t *testing.T) {
 	}
 	if queue.Get() != nil {
 		t.Log("The underlying queue had MORE objects than we expected.")
+		//The next test relies on the queue being back to a clean state.
+		t.FailNow()
+	}
+
+	//Test that getting is resilient to new inserts, and also that we don't hand out the same objects again.
+	for _, object := range objects {
+		queue.Insert(object)
+	}
+	getter = queue.NewGetter()
+	seenObjects := make(map[RankedObject]bool)
+	item := getter.Get()
+	seenObjects[item] = true
+	newObject := &SimpleRankedObject{3, "e"}
+	queue.Insert(newObject)
+	item = getter.Get()
+	seenObjects[item] = true
+	if item != newObject {
+		t.Log("The getter did not return a new item inserted after reads started.")
+		t.Fail()
+	}
+	//Consume the rest to check for dupes.
+	for i := 0; i < len(objects)-1; i++ {
+		item = getter.Get()
+		if _, exists := seenObjects[item]; exists {
+			t.Log("Getter returned a dupe.")
+			t.Fail()
+		}
+		seenObjects[item] = true
+	}
+	item = getter.Get()
+	if item != nil {
+		t.Log("Getter returned more items than it should have after insert while read.")
 		t.Fail()
 	}
 
+	//TODO: test that it's resilient to GETs while reading, too.
 }
 
 func TestSyncedFiniteQueue(t *testing.T) {
