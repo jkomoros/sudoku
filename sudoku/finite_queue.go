@@ -232,21 +232,23 @@ func (self *FiniteQueueGetter) getSmallerThan(max int) RankedObject {
 	//TODO: check that our version counter equals our queue's version counter, otherwise nil out currentBucket here.
 
 	if self.currentBucket == nil {
-		self.currentBucket, _ = self.queue.getBucket(self.queue.min)
-		if self.currentBucket == nil {
+		newBucket, _ := self.queue.getBucket(self.queue.min)
+		if newBucket == nil {
 			return nil
 		}
+		self.currentBucket = newBucket.copy()
 	}
 
 	item := self.currentBucket.getItem()
 
 	for item == nil {
 		if self.currentBucket.empty() {
-			self.currentBucket, _ = self.queue.getBucket(self.currentBucket.rank + 1)
-			if self.currentBucket == nil || self.currentBucket.rank >= max {
+			newBucket, _ := self.queue.getBucket(self.currentBucket.rank + 1)
+			if newBucket == nil || newBucket.rank >= max {
 				//Got to the end
 				return nil
 			}
+			self.currentBucket = newBucket.copy()
 		}
 		item = self.currentBucket.getItem()
 	}
