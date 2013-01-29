@@ -245,8 +245,10 @@ func (self *FiniteQueueGetter) getSmallerThan(max int) RankedObject {
 		self.currentBucket = newBucket.copy()
 	}
 
-	item := self.currentBucket.getItem()
+	var item RankedObject
+
 	for {
+		item = self.currentBucket.getItem()
 		for item == nil {
 			if self.currentBucket.empty() {
 				newBucket, _ := self.queue.getBucket(self.currentBucket.rank + 1)
