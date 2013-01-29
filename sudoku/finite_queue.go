@@ -33,7 +33,7 @@ type SyncedFiniteQueue struct {
 type FiniteQueueGetter struct {
 	queue         *FiniteQueue
 	ignoreObjects map[RankedObject]bool
-	currentList   *finiteQueueBucket
+	currentBucket *finiteQueueBucket
 }
 
 //Returns a new queue that will work for items with a rank as low as min or as high as max (inclusive)
@@ -171,6 +171,7 @@ func (self *FiniteQueue) GetSmallerThan(max int) RankedObject {
 
 func (self *FiniteQueue) getSmallerThan(max int) RankedObject {
 
+	//Very similar logic exists in finiteQueueBucket.getSmallerThan.
 	if self.currentBucket == nil {
 		self.currentBucket, _ = self.getBucket(self.min)
 		if self.currentBucket == nil {
@@ -204,4 +205,41 @@ func (self *FiniteQueue) getBucket(rank int) (*finiteQueueBucket, bool) {
 		return nil, false
 	}
 	return self.objects[rank-self.min], true
+}
+
+func (self *FiniteQueueGetter) getSmallerThan(max int) RankedObject {
+	//TODO: test this
+	//TODO: test that inserting objects after add works (above and below current point). This will require that we reset our currentBucket when a new insert happens.
+	//^ will require the queue to be aware of us (we'd kill ourselves as soon as the last item was expired), OR a counter that we check to make sure they're in sync.
+
+	//Very similar logic exists in finiteQueue.getSmallerThan.
+
+	//Sanity check
+	if self.queue == nil {
+		return nil
+	}
+
+	//TODO: check that our version counter equals our queue's version counter, otherwise nil out currentBucket here.
+
+	if self.currentBucket == nil {
+		self.currentBucket, _ = self.queue.getBucket(self.queue.min)
+		if self.currentBucket == nil {
+			return nil
+		}
+	}
+
+	item := self.currentBucket.getItem()
+
+	for item == nil {
+		if self.currentBucket.empty() {
+			self.currentBucket, _ = self.queue.getBucket(self.currentBucket.rank + 1)
+			if self.currentBucket == nil || self.currentBucket.rank >= max {
+				//Got to the end
+				return nil
+			}
+		}
+		item = self.currentBucket.getItem()
+	}
+
+	return item
 }
