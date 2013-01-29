@@ -9,9 +9,10 @@ type RankedObject interface {
 }
 
 type FiniteQueue struct {
-	min     int
-	max     int
-	objects []*finiteQueueBucket
+	min           int
+	max           int
+	objects       []*finiteQueueBucket
+	currentBucket *finiteQueueBucket
 }
 
 type finiteQueueBucket struct {
@@ -37,7 +38,7 @@ type FiniteQueueGetter struct {
 
 //Returns a new queue that will work for items with a rank as low as min or as high as max (inclusive)
 func NewFiniteQueue(min int, max int) *FiniteQueue {
-	result := FiniteQueue{min, max, make([]*finiteQueueBucket, max-min+1)}
+	result := FiniteQueue{min, max, make([]*finiteQueueBucket, max-min+1), nil}
 	for i := 0; i < max-min+1; i++ {
 		result.objects[i] = &finiteQueueBucket{make([]RankedObject, 0), i + result.min, true}
 	}
@@ -64,6 +65,10 @@ func (self *finiteQueueBucket) getItem() RankedObject {
 		}
 	}
 	return nil
+}
+
+func (self *finiteQueueBucket) empty() bool {
+	return len(self.objects) == 0
 }
 
 func (self *finiteQueueBucket) addItem(item RankedObject) {
@@ -153,6 +158,7 @@ func (self *FiniteQueue) Insert(obj RankedObject) {
 		return
 	}
 	list.addItem(obj)
+	self.currentBucket = nil
 }
 
 func (self *FiniteQueue) Get() RankedObject {
@@ -164,17 +170,33 @@ func (self *FiniteQueue) GetSmallerThan(max int) RankedObject {
 }
 
 func (self *FiniteQueue) getSmallerThan(max int, ignoredObjects map[RankedObject]int) RankedObject {
-	//TOOD: actually respect ignoredObjects
-	for i, list := range self.objects {
-		if i+self.min >= max {
+
+	//TODO: remove ignoredObjects as an argument.
+
+	//TODO: test that if an item is inserted while we're walking through we return it.
+
+	if self.currentBucket == nil {
+		self.currentBucket, _ = self.getBucket(self.min)
+		if self.currentBucket == nil {
 			return nil
 		}
-		result := list.getItem()
-		if result != nil {
-			return result
-		}
 	}
-	return nil
+
+	item := self.currentBucket.getItem()
+
+	for item == nil {
+		if self.currentBucket.empty() {
+			self.currentBucket, _ = self.getBucket(self.currentBucket.rank + 1)
+			if self.currentBucket == nil || self.currentBucket.rank >= max {
+				//Got to the end
+				return nil
+			}
+		}
+		item = self.currentBucket.getItem()
+	}
+
+	return item
+
 }
 
 func (self *FiniteQueue) legalRank(rank int) bool {

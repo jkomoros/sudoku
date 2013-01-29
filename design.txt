@@ -14,8 +14,6 @@ Grid {
 
 TODO:
 
-*NEXT STEP: FiniteQueue should maintain a currentBucket and advance that ahead when it's empty instead of searching for the best one eac time. Of course, on Insert we should set currentBucket to nil.
-
 * Investigate why using the finite queue isn't making a big dent in Fill() performance.
 * Reduce memory usage in cell: row, col, block are rarely asked for so can be derived?
 
