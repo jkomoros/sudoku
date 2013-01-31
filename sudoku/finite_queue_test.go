@@ -208,6 +208,23 @@ func TestFiniteQueueGetter(t *testing.T) {
 		}
 		item = getter.Get()
 	}
+
+	//Test that we will get an item back out if its rank changes.
+	for _, object := range objects[1:] {
+		queue.Insert(object)
+	}
+	getter = queue.NewGetter()
+	_ = getter.Get()
+	//Now change its rank and make sure we get again.
+	rawObject := objects[0]
+	rawObject.rank = 1
+	queue.Insert(rawObject)
+	item = getter.Get()
+	if item != rawObject {
+		t.Log("We expected to see the same item again since its rank changed but we did not.")
+		t.Fail()
+	}
+	//Note: queue still has many items in it.
 }
 
 func TestSyncedFiniteQueue(t *testing.T) {
