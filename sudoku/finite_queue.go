@@ -233,7 +233,7 @@ func (self *FiniteQueueGetter) Get() RankedObject {
 }
 
 func (self *FiniteQueueGetter) GetSmallerThan(max int) RankedObject {
-	return self.GetSmallerThan(max)
+	return self.getSmallerThan(max)
 }
 
 func (self *FiniteQueueGetter) getSmallerThan(max int) RankedObject {
