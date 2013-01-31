@@ -271,14 +271,6 @@ func (self *Grid) cellModified(cell *Cell) {
 	}
 }
 
-func (self *Grid) refillQueue() {
-	//TODO: this seems like a horrible API to force people to use.
-	//We can't use range here because it would give us a copy of cell.
-	for i := 0; i < DIM*DIM; i++ {
-		self.queue.Insert(&self.cells[i])
-	}
-}
-
 func (self *Grid) Rank() int {
 	return len(self.cells) - self.numFilledCells
 }

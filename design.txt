@@ -14,9 +14,6 @@ Grid {
 
 TODO:
 
-* NEXT STEP: make solve.go non-destructively use the queue by using a getter. This is actually hard even though queue will return items if their rank has changed; it gets stuck in a loop if you grab a new queue in any of the obvious places.
-	* THEN: remove refillQueue API
-
 * Investigate why using the finite queue isn't making a big dent in Fill() performance.
 * Reduce memory usage in cell: row, col, block are rarely asked for so can be derived?
 
