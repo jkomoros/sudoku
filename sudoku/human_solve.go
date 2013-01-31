@@ -42,9 +42,8 @@ func (self onlyLegalNumberTechnique) Description(step *SolveStep) string {
 }
 
 func (self onlyLegalNumberTechnique) Apply(grid *Grid) *SolveStep {
-	grid.refillQueue()
 	//This will be a random item
-	obj := grid.queue.GetSmallerThan(2)
+	obj := grid.queue.NewGetter().GetSmallerThan(2)
 	if obj == nil {
 		//There weren't any cells with one option.
 		return nil

@@ -162,7 +162,7 @@ func (self *Grid) searchSolutions(gridsToProcess chan *Grid, numSoughtSolutions 
 	}
 
 	//Well, looks like we're going to have to branch.
-	rankedObject := self.queue.Get()
+	rankedObject := self.queue.DefaultGetter().Get()
 	if rankedObject == nil {
 		panic("Queue didn't have any cells.")
 	}
@@ -207,7 +207,8 @@ func (self *Grid) searchSolutions(gridsToProcess chan *Grid, numSoughtSolutions 
 //techniques that require anything more than a single cell's possibles list.
 func (self *Grid) fillSimpleCells() int {
 	count := 0
-	obj := self.queue.GetSmallerThan(2)
+	getter := self.queue.DefaultGetter()
+	obj := getter.GetSmallerThan(2)
 	for obj != nil && !self.cellsInvalid() {
 		cell, ok := obj.(*Cell)
 		if !ok {
@@ -215,7 +216,7 @@ func (self *Grid) fillSimpleCells() int {
 		}
 		cell.SetNumber(cell.implicitNumber())
 		count++
-		obj = self.queue.GetSmallerThan(2)
+		obj = getter.GetSmallerThan(2)
 	}
 	return count
 }

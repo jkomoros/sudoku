@@ -71,6 +71,11 @@ func (self *Cell) SetNumber(number int) {
 	}
 	if self.grid != nil {
 		self.grid.cellModified(self)
+		if (oldNumber > 0 && number == 0) || (oldNumber == 0 && number > 0) {
+			//Our rank will have changed.
+			//TODO: figure out how to test this.
+			self.grid.queue.Insert(self)
+		}
 	}
 }
 
