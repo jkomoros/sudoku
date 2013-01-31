@@ -14,7 +14,7 @@ Grid {
 
 TODO:
 
-* NEXT STEP: make solve.go non-destructively use the queue by using a getter. This is actually hard, because fillSimpleCells (for example) DOES want to get dupes from the queue IF THEIR RANK HAS CHANGED. This suggests that Getter should store the seen objects' rank and return them if they're the same IFF their rank has changed since last time. This will require more tests.
+* NEXT STEP: make solve.go non-destructively use the queue by using a getter. This is actually hard even though queue will return items if their rank has changed; it gets stuck in a loop if you grab a new queue in any of the obvious places.
 	* THEN: remove refillQueue API
 
 * Investigate why using the finite queue isn't making a big dent in Fill() performance.
