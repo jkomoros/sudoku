@@ -76,7 +76,7 @@ func (self necessaryInRowTechnique) Apply(grid *Grid) *SolveStep {
 		row := grid.Row(r)
 		for _, cell := range row {
 			for _, possibility := range cell.Possibilities() {
-				seenInRow[possibility]++
+				seenInRow[possibility-1]++
 			}
 		}
 		//TODO: iterate through this in a random order.
@@ -84,9 +84,9 @@ func (self necessaryInRowTechnique) Apply(grid *Grid) *SolveStep {
 			if seen == 1 {
 				//Okay, we know our target number. Which cell was it?
 				for _, cell := range row {
-					if cell.Possible(i) {
+					if cell.Possible(i + 1) {
 						//Found it!
-						cell.SetNumber(i)
+						cell.SetNumber(i + 1)
 						return &SolveStep{cell.Row, cell.Col, cell.Number(), self}
 					}
 				}
