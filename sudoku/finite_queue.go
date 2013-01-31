@@ -15,7 +15,8 @@ type FiniteQueue struct {
 	currentBucket *finiteQueueBucket
 	//Version monotonically increases as changes are made to the underlying queue.
 	//This is how getters ensure that they stay in sync with their underlying queue.
-	version int
+	version       int
+	defaultGetter *FiniteQueueGetter
 }
 
 type finiteQueueBucket struct {
@@ -42,7 +43,7 @@ type FiniteQueueGetter struct {
 
 //Returns a new queue that will work for items with a rank as low as min or as high as max (inclusive)
 func NewFiniteQueue(min int, max int) *FiniteQueue {
-	result := FiniteQueue{min, max, make([]*finiteQueueBucket, max-min+1), nil, 0}
+	result := FiniteQueue{min, max, make([]*finiteQueueBucket, max-min+1), nil, 0, nil}
 	for i := 0; i < max-min+1; i++ {
 		result.objects[i] = &finiteQueueBucket{make([]RankedObject, 0), i + result.min, true}
 	}
@@ -211,6 +212,17 @@ func (self *FiniteQueue) getBucket(rank int) (*finiteQueueBucket, bool) {
 		return nil, false
 	}
 	return self.objects[rank-self.min], true
+}
+
+func (self *FiniteQueue) DefaultGetter() *FiniteQueueGetter {
+	if self.defaultGetter == nil {
+		self.defaultGetter = self.NewGetter()
+	}
+	return self.defaultGetter
+}
+
+func (self *FiniteQueue) ResetDefaultGetter() {
+	self.defaultGetter = nil
 }
 
 func (self *FiniteQueueGetter) Get() RankedObject {
