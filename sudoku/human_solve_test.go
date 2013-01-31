@@ -78,7 +78,8 @@ func TestNecessaryInRow(t *testing.T) {
 		t.Log("The necessary in row technique identified the wrong number.")
 		t.Fail()
 	}
-	if !grid.Solved() {
+	//Can't check if grid is solved because we un-set all the other cells in the row.
+	if cell.Number() == 0 {
 		t.Log("The necessary in row technique did not actually mutate the grid.")
 		t.Fail()
 	}
