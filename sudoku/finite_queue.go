@@ -35,7 +35,7 @@ type SyncedFiniteQueue struct {
 
 type FiniteQueueGetter struct {
 	queue            *FiniteQueue
-	dispensedObjects map[RankedObject]bool
+	dispensedObjects map[RankedObject]int
 	currentBucket    *finiteQueueBucket
 	baseVersion      int
 }
@@ -143,7 +143,7 @@ func (self *SyncedFiniteQueue) workLoop() {
 
 func (self *FiniteQueue) NewGetter() *FiniteQueueGetter {
 	list, _ := self.getBucket(self.min)
-	return &FiniteQueueGetter{self, make(map[RankedObject]bool), list, 0}
+	return &FiniteQueueGetter{self, make(map[RankedObject]int), list, 0}
 }
 
 func (self *FiniteQueue) Min() int {
@@ -261,15 +261,15 @@ func (self *FiniteQueueGetter) getSmallerThan(max int) RankedObject {
 			item = self.currentBucket.getItem()
 		}
 		//We have AN item. Is it one we've already dispensed?
-		if _, dispensed := self.dispensedObjects[item]; !dispensed {
+		if rank, dispensed := self.dispensedObjects[item]; !dispensed || rank != item.Rank() {
 			//It is new. Break out of the loop.
 			break
 		}
 		//Otherwise, loop around again.
 	}
 
-	//Keep track of the fact we dispensed this item.
-	self.dispensedObjects[item] = true
+	//Keep track of the fact we dispensed this item and keep track of its rank when it was dispensed.
+	self.dispensedObjects[item] = item.Rank()
 
 	return item
 }
