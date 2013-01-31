@@ -162,7 +162,7 @@ func (self *Grid) searchSolutions(gridsToProcess chan *Grid, numSoughtSolutions 
 	}
 
 	//Well, looks like we're going to have to branch.
-	rankedObject := self.queue.Get()
+	rankedObject := self.queue.DefaultGetter().Get()
 	if rankedObject == nil {
 		panic("Queue didn't have any cells.")
 	}
