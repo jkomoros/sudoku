@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"fmt"
+	"math/rand"
 )
 
 type SolveDirections []*SolveStep
@@ -68,10 +69,10 @@ func (self necessaryInRowTechnique) Description(step *SolveStep) string {
 }
 
 func (self necessaryInRowTechnique) Apply(grid *Grid) *SolveStep {
-	//TODO: test this.
 	//This will be a random item
-	//TODO: iterate through rows in a random order.
-	for r := 0; r < DIM; r++ {
+	indexes := rand.Perm(DIM)
+
+	for _, r := range indexes {
 		seenInRow := make([]int, DIM)
 		row := grid.Row(r)
 		for _, cell := range row {
@@ -79,14 +80,15 @@ func (self necessaryInRowTechnique) Apply(grid *Grid) *SolveStep {
 				seenInRow[possibility-1]++
 			}
 		}
-		//TODO: iterate through this in a random order.
-		for i, seen := range seenInRow {
+		seenIndexes := rand.Perm(DIM)
+		for _, index := range seenIndexes {
+			seen := seenInRow[index]
 			if seen == 1 {
 				//Okay, we know our target number. Which cell was it?
 				for _, cell := range row {
-					if cell.Possible(i + 1) {
+					if cell.Possible(index + 1) {
 						//Found it!
-						cell.SetNumber(i + 1)
+						cell.SetNumber(index + 1)
 						return &SolveStep{cell.Row, cell.Col, cell.Number(), self}
 					}
 				}
