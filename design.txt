@@ -14,6 +14,8 @@ Grid {
 
 TODO:
 
+* Consider factoring out Rand methods to use a passthrough so we can test reasonably by setting a seed.
+
 * Investigate why using the finite queue isn't making a big dent in Fill() performance.
 * Reduce memory usage in cell: row, col, block are rarely asked for so can be derived?
 
