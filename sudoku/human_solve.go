@@ -11,11 +11,13 @@ const (
 	ONLY_LEGAL_NUMBER = iota
 	NECESSARY_IN_ROW
 	NECESSARY_IN_COL
+	NECESSARY_IN_BLOCK
 )
 
 type SolveStep struct {
 	Row       int
 	Col       int
+	Block     int
 	Num       int
 	Technique SolveTechnique
 }
@@ -33,6 +35,7 @@ func init() {
 	techniques = append(techniques, onlyLegalNumberTechnique{})
 	techniques = append(techniques, necessaryInRowTechnique{})
 	techniques = append(techniques, necessaryInColTechnique{})
+	techniques = append(techniques, necessaryInBlockTechnique{})
 }
 
 type onlyLegalNumberTechnique struct {
@@ -42,6 +45,9 @@ type necessaryInRowTechnique struct {
 }
 
 type necessaryInColTechnique struct {
+}
+
+type necessaryInBlockTechnique struct {
 }
 
 func (self onlyLegalNumberTechnique) Name() string {
@@ -62,7 +68,7 @@ func (self onlyLegalNumberTechnique) Apply(grid *Grid) *SolveStep {
 	cell := obj.(*Cell)
 
 	cell.SetNumber(cell.implicitNumber())
-	return &SolveStep{cell.Row, cell.Col, cell.Number(), self}
+	return &SolveStep{cell.Row, cell.Col, cell.Block, cell.Number(), self}
 }
 
 func (self necessaryInRowTechnique) Name() string {
@@ -97,6 +103,22 @@ func (self necessaryInColTechnique) Apply(grid *Grid) *SolveStep {
 	return necessaryInCollection(grid, self, getter)
 }
 
+func (self necessaryInBlockTechnique) Name() string {
+	return "Necessary In Block"
+}
+
+func (self necessaryInBlockTechnique) Description(step *SolveStep) string {
+	//TODO: format the text to say "first/second/third/etc"
+	return fmt.Sprintf("%d is required in the %d block, and %d, %d is the only cell it fits", step.Num, step.Block+1, step.Row+1, step.Col+1)
+}
+
+func (self necessaryInBlockTechnique) Apply(grid *Grid) *SolveStep {
+	getter := func(index int) []*Cell {
+		return grid.Block(index)
+	}
+	return necessaryInCollection(grid, self, getter)
+}
+
 func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) []*Cell) *SolveStep {
 	//This will be a random item
 	indexes := rand.Perm(DIM)
@@ -118,7 +140,7 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 					if cell.Possible(index + 1) {
 						//Found it!
 						cell.SetNumber(index + 1)
-						return &SolveStep{cell.Row, cell.Col, cell.Number(), technique}
+						return &SolveStep{cell.Row, cell.Col, cell.Block, cell.Number(), technique}
 					}
 				}
 			}
