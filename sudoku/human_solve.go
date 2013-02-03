@@ -9,6 +9,8 @@ type SolveDirections []*SolveStep
 
 const (
 	ONLY_LEGAL_NUMBER = iota
+	NECESSARY_IN_ROW
+	NECESSARY_IN_COL
 )
 
 type SolveStep struct {
@@ -30,12 +32,16 @@ func init() {
 	//TODO: init techniques with enough space
 	techniques = append(techniques, onlyLegalNumberTechnique{})
 	techniques = append(techniques, necessaryInRowTechnique{})
+	techniques = append(techniques, necessaryInColTechnique{})
 }
 
 type onlyLegalNumberTechnique struct {
 }
 
 type necessaryInRowTechnique struct {
+}
+
+type necessaryInColTechnique struct {
 }
 
 func (self onlyLegalNumberTechnique) Name() string {
@@ -71,6 +77,22 @@ func (self necessaryInRowTechnique) Description(step *SolveStep) string {
 func (self necessaryInRowTechnique) Apply(grid *Grid) *SolveStep {
 	getter := func(index int) []*Cell {
 		return grid.Row(index)
+	}
+	return necessaryInCollection(grid, self, getter)
+}
+
+func (self necessaryInColTechnique) Name() string {
+	return "Necessary In Col"
+}
+
+func (self necessaryInColTechnique) Description(step *SolveStep) string {
+	//TODO: format the text to say "first/second/third/etc"
+	return fmt.Sprintf("%d is required in the %d column, and %d is the only row it fits", step.Num, step.Row+1, step.Col+1)
+}
+
+func (self necessaryInColTechnique) Apply(grid *Grid) *SolveStep {
+	getter := func(index int) []*Cell {
+		return grid.Col(index)
 	}
 	return necessaryInCollection(grid, self, getter)
 }
