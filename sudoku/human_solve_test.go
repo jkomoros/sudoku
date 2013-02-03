@@ -16,7 +16,7 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 
 	solver := &onlyLegalNumberTechnique{}
 
-	step := solver.Apply(grid)
+	step := solver.Find(grid)
 
 	if step == nil {
 		t.Log("The only legal number technique did not solve a puzzle it should have.")
@@ -30,8 +30,8 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 		t.Log("The only legal number technique identified the wrong number.")
 		t.Fail()
 	}
-	if !grid.Solved() {
-		t.Log("The only legal number technique did not actually mutate the grid.")
+	if grid.Solved() {
+		t.Log("The only legal number technique did actually mutate the grid.")
 		t.Fail()
 	}
 }
@@ -64,7 +64,7 @@ func TestNecessaryInRow(t *testing.T) {
 
 	solver := &necessaryInRowTechnique{}
 
-	step := solver.Apply(grid)
+	step := solver.Find(grid)
 
 	if step == nil {
 		t.Log("The necessary in row technique did not solve a puzzle it should have.")
@@ -79,8 +79,8 @@ func TestNecessaryInRow(t *testing.T) {
 		t.Fail()
 	}
 	//Can't check if grid is solved because we un-set all the other cells in the row.
-	if cell.Number() == 0 {
-		t.Log("The necessary in row technique did not actually mutate the grid.")
+	if cell.Number() != 0 {
+		t.Log("The necessary in row technique did actually mutate the grid.")
 		t.Fail()
 	}
 }
@@ -113,7 +113,7 @@ func TestNecessaryInCol(t *testing.T) {
 
 	solver := &necessaryInColTechnique{}
 
-	step := solver.Apply(grid)
+	step := solver.Find(grid)
 
 	if step == nil {
 		t.Log("The necessary in col technique did not solve a puzzle it should have.")
@@ -128,8 +128,8 @@ func TestNecessaryInCol(t *testing.T) {
 		t.Fail()
 	}
 	//Can't check if grid is solved because we un-set all the other cells in the row.
-	if cell.Number() == 0 {
-		t.Log("The necessary in col technique did not actually mutate the grid.")
+	if cell.Number() != 0 {
+		t.Log("The necessary in col technique did actually mutate the grid.")
 		t.Fail()
 	}
 }
@@ -162,7 +162,7 @@ func TestNecessaryInBlock(t *testing.T) {
 
 	solver := &necessaryInBlockTechnique{}
 
-	step := solver.Apply(grid)
+	step := solver.Find(grid)
 
 	if step == nil {
 		t.Log("The necessary in block technique did not solve a puzzle it should have.")
@@ -177,8 +177,8 @@ func TestNecessaryInBlock(t *testing.T) {
 		t.Fail()
 	}
 	//Can't check if grid is solved because we un-set all the other cells in the row.
-	if cell.Number() == 0 {
-		t.Log("The necessary in block technique did not actually mutate the grid.")
+	if cell.Number() != 0 {
+		t.Log("The necessary in block technique did actually mutate the grid.")
 		t.Fail()
 	}
 }

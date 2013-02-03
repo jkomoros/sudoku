@@ -25,7 +25,7 @@ type SolveStep struct {
 type SolveTechnique interface {
 	Name() string
 	Description(*SolveStep) string
-	Apply(*Grid) *SolveStep
+	Find(*Grid) *SolveStep
 }
 
 var techniques []SolveTechnique
@@ -58,7 +58,7 @@ func (self onlyLegalNumberTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is the only remaining valid number for that cell", step.Num)
 }
 
-func (self onlyLegalNumberTechnique) Apply(grid *Grid) *SolveStep {
+func (self onlyLegalNumberTechnique) Find(grid *Grid) *SolveStep {
 	//This will be a random item
 	obj := grid.queue.NewGetter().GetSmallerThan(2)
 	if obj == nil {
@@ -66,9 +66,7 @@ func (self onlyLegalNumberTechnique) Apply(grid *Grid) *SolveStep {
 		return nil
 	}
 	cell := obj.(*Cell)
-
-	cell.SetNumber(cell.implicitNumber())
-	return &SolveStep{cell.Row, cell.Col, cell.Block, cell.Number(), self}
+	return &SolveStep{cell.Row, cell.Col, cell.Block, cell.implicitNumber(), self}
 }
 
 func (self necessaryInRowTechnique) Name() string {
@@ -80,7 +78,7 @@ func (self necessaryInRowTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is required in the %d row, and %d is the only column it fits", step.Num, step.Row+1, step.Col+1)
 }
 
-func (self necessaryInRowTechnique) Apply(grid *Grid) *SolveStep {
+func (self necessaryInRowTechnique) Find(grid *Grid) *SolveStep {
 	getter := func(index int) []*Cell {
 		return grid.Row(index)
 	}
@@ -96,7 +94,7 @@ func (self necessaryInColTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is required in the %d column, and %d is the only row it fits", step.Num, step.Row+1, step.Col+1)
 }
 
-func (self necessaryInColTechnique) Apply(grid *Grid) *SolveStep {
+func (self necessaryInColTechnique) Find(grid *Grid) *SolveStep {
 	getter := func(index int) []*Cell {
 		return grid.Col(index)
 	}
@@ -112,7 +110,7 @@ func (self necessaryInBlockTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is required in the %d block, and %d, %d is the only cell it fits", step.Num, step.Block+1, step.Row+1, step.Col+1)
 }
 
-func (self necessaryInBlockTechnique) Apply(grid *Grid) *SolveStep {
+func (self necessaryInBlockTechnique) Find(grid *Grid) *SolveStep {
 	getter := func(index int) []*Cell {
 		return grid.Block(index)
 	}
@@ -139,8 +137,7 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 				for _, cell := range collection {
 					if cell.Possible(index + 1) {
 						//Found it!
-						cell.SetNumber(index + 1)
-						return &SolveStep{cell.Row, cell.Col, cell.Block, cell.Number(), technique}
+						return &SolveStep{cell.Row, cell.Col, cell.Block, index + 1, technique}
 					}
 				}
 			}
