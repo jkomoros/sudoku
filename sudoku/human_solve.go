@@ -50,6 +50,11 @@ type necessaryInColTechnique struct {
 type necessaryInBlockTechnique struct {
 }
 
+func (self *SolveStep) Apply(grid *Grid) {
+	cell := grid.Cell(self.Row, self.Col)
+	cell.SetNumber(self.Num)
+}
+
 func (self onlyLegalNumberTechnique) Name() string {
 	return "Only Legal Number"
 }
