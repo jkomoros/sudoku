@@ -152,6 +152,26 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 	return nil
 }
 
-func (self *Grid) HumanSolve() *SolveDirections {
-	return nil
+func (self *Grid) HumanSolve() SolveDirections {
+	var results []*SolveStep
+	for !self.Solved() {
+		//TODO: try the techniques in parallel
+		//TODO: pick the technique based on a weighting of how common a human is to pick each one.
+		//TODO: provide hints to the techniques of where to look based on the last filled cell
+		techniqueOrder := rand.Perm(len(techniques))
+		for _, index := range techniqueOrder {
+			technique := techniques[index]
+			step := technique.Find(self)
+			if step != nil {
+				results = append(results, step)
+				step.Apply(self)
+				break
+			}
+		}
+	}
+	if !self.Solved() {
+		//We couldn't solve the puzzle.
+		return nil
+	}
+	return results
 }
