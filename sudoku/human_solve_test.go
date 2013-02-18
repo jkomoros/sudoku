@@ -111,7 +111,7 @@ func TestNecessaryInCol(t *testing.T) {
 
 	//Now that cell should be filled by this technique.
 
-	solver := &necessaryInColTechnique{}
+	solver := &hiddenSingleInCol{}
 
 	step := solver.Find(grid)
 
