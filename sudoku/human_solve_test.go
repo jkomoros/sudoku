@@ -14,7 +14,7 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 
 	//Now that cell should be filled by this technique.
 
-	solver := &onlyLegalNumberTechnique{}
+	solver := &nakedSingleTechnique{}
 
 	step := solver.Find(grid)
 

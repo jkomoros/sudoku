@@ -8,7 +8,7 @@ import (
 type SolveDirections []*SolveStep
 
 const (
-	ONLY_LEGAL_NUMBER = iota
+	NAKED_SINGLE = iota
 	NECESSARY_IN_ROW
 	NECESSARY_IN_COL
 	NECESSARY_IN_BLOCK
@@ -32,13 +32,13 @@ var techniques []SolveTechnique
 
 func init() {
 	//TODO: init techniques with enough space
-	techniques = append(techniques, onlyLegalNumberTechnique{})
+	techniques = append(techniques, nakedSingleTechnique{})
 	techniques = append(techniques, necessaryInRowTechnique{})
 	techniques = append(techniques, necessaryInColTechnique{})
 	techniques = append(techniques, necessaryInBlockTechnique{})
 }
 
-type onlyLegalNumberTechnique struct {
+type nakedSingleTechnique struct {
 }
 
 type necessaryInRowTechnique struct {
@@ -55,15 +55,15 @@ func (self *SolveStep) Apply(grid *Grid) {
 	cell.SetNumber(self.Num)
 }
 
-func (self onlyLegalNumberTechnique) Name() string {
+func (self nakedSingleTechnique) Name() string {
 	return "Only Legal Number"
 }
 
-func (self onlyLegalNumberTechnique) Description(step *SolveStep) string {
+func (self nakedSingleTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is the only remaining valid number for that cell", step.Num)
 }
 
-func (self onlyLegalNumberTechnique) Find(grid *Grid) *SolveStep {
+func (self nakedSingleTechnique) Find(grid *Grid) *SolveStep {
 	//This will be a random item
 	obj := grid.queue.NewGetter().GetSmallerThan(2)
 	if obj == nil {
