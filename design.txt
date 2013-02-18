@@ -31,6 +31,8 @@ TODO:
 
 * Rate sudokus based on experienced difficulty. (See http://www.longwood.edu/assets/mathematics/Team2975_ProblemB.pdf)
 
+* Human solve: Is it worth it to do nakedSingles based on row/col/block as well? Those are obvious in different ways.
+
 * Analysis: Better aggregation of rank. This problem is called "Rank Aggregation" and can be Hard. http://www10.org/cdrom/papers/577/ seems to outline the most workable solution (MarkovChain4).
 * Analysis: Run our difficulty grader on the real puzzles and see how well it fits with user perceived difficulty.
 * Analysis: Throw out outliers for each individual user.
