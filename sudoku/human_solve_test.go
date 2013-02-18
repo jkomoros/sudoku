@@ -62,7 +62,7 @@ func TestNecessaryInRow(t *testing.T) {
 
 	//Now that cell should be filled by this technique.
 
-	solver := &necessaryInRowTechnique{}
+	solver := &hiddenSingleInRow{}
 
 	step := solver.Find(grid)
 

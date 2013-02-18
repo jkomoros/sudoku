@@ -9,7 +9,7 @@ type SolveDirections []*SolveStep
 
 const (
 	NAKED_SINGLE = iota
-	NECESSARY_IN_ROW
+	HIDDEN_SINGLE_IN_ROW
 	NECESSARY_IN_COL
 	NECESSARY_IN_BLOCK
 )
@@ -33,7 +33,7 @@ var techniques []SolveTechnique
 func init() {
 	//TODO: init techniques with enough space
 	techniques = append(techniques, nakedSingleTechnique{})
-	techniques = append(techniques, necessaryInRowTechnique{})
+	techniques = append(techniques, hiddenSingleInRow{})
 	techniques = append(techniques, necessaryInColTechnique{})
 	techniques = append(techniques, necessaryInBlockTechnique{})
 }
@@ -41,7 +41,7 @@ func init() {
 type nakedSingleTechnique struct {
 }
 
-type necessaryInRowTechnique struct {
+type hiddenSingleInRow struct {
 }
 
 type necessaryInColTechnique struct {
@@ -74,16 +74,16 @@ func (self nakedSingleTechnique) Find(grid *Grid) *SolveStep {
 	return &SolveStep{cell.Row, cell.Col, cell.Block, cell.implicitNumber(), self}
 }
 
-func (self necessaryInRowTechnique) Name() string {
+func (self hiddenSingleInRow) Name() string {
 	return "Necessary In Row"
 }
 
-func (self necessaryInRowTechnique) Description(step *SolveStep) string {
+func (self hiddenSingleInRow) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
 	return fmt.Sprintf("%d is required in the %d row, and %d is the only column it fits", step.Num, step.Row+1, step.Col+1)
 }
 
-func (self necessaryInRowTechnique) Find(grid *Grid) *SolveStep {
+func (self hiddenSingleInRow) Find(grid *Grid) *SolveStep {
 	getter := func(index int) []*Cell {
 		return grid.Row(index)
 	}
