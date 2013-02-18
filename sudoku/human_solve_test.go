@@ -160,7 +160,7 @@ func TestNecessaryInBlock(t *testing.T) {
 
 	//Now that cell should be filled by this technique.
 
-	solver := &necessaryInBlockTechnique{}
+	solver := &hiddenSingleInBlock{}
 
 	step := solver.Find(grid)
 
