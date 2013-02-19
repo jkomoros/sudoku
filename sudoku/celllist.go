@@ -36,6 +36,16 @@ func (self CellList) CollectNums(fetcher func(*Cell) int) intList {
 	return result
 }
 
+func (self CellList) Filter(filter func(*Cell) bool) CellList {
+	var result CellList
+	for _, cell := range self {
+		if filter(cell) {
+			result = append(result, cell)
+		}
+	}
+	return result
+}
+
 func (self intList) Same() bool {
 	if len(self) == 0 {
 		return true

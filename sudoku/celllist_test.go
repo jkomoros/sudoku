@@ -53,6 +53,22 @@ func TestBasicCellList(t *testing.T) {
 		t.Log("Collecting rows gave us different numbers/.")
 		t.Fail()
 	}
+
+	isZeroRow := func(cell *Cell) bool {
+		return cell.Row == 0
+	}
+
+	cells := grid.Block(0).Filter(isZeroRow)
+
+	if len(cells) != BLOCK_DIM {
+		t.Log("We got back the wrong number of cells when filtering")
+		t.Fail()
+	}
+
+	if !cells.SameRow() {
+		t.Log("We got back cells not inthe same row.")
+		t.Fail()
+	}
 }
 
 func TestIntList(t *testing.T) {
