@@ -43,6 +43,13 @@ func (self CellList) Col() int {
 	return self[0].Col
 }
 
+func (self CellList) AddExclude(exclude int) {
+	mapper := func(cell *Cell) {
+		cell.setExcluded(exclude, true)
+	}
+	self.Map(mapper)
+}
+
 func (self CellList) FilterByPossible(possible int) CellList {
 	//TODO: test this
 	filter := func(cell *Cell) bool {
@@ -79,6 +86,12 @@ func (self CellList) Filter(filter func(*Cell) bool) CellList {
 		}
 	}
 	return result
+}
+
+func (self CellList) Map(mapper func(*Cell)) {
+	for _, cell := range self {
+		mapper(cell)
+	}
 }
 
 func (self intList) Same() bool {
