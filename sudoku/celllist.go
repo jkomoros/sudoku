@@ -28,6 +28,14 @@ func (self CellList) SameBlock() bool {
 	return self.CollectNums(getBlock).Same()
 }
 
+func (self CellList) FilterByPossible(possible int) CellList {
+	//TODO: test this
+	filter := func(cell *Cell) bool {
+		return cell.Possible(possible)
+	}
+	return self.Filter(filter)
+}
+
 func (self CellList) CollectNums(fetcher func(*Cell) int) intList {
 	var result intList
 	for _, cell := range self {
