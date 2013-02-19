@@ -82,13 +82,19 @@ func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep 
 }
 
 func (self *SolveStep) Apply(grid *Grid) {
-	//TODO: also handle non isFill items.
 	if self.Technique.IsFill() {
 		if len(self.TargetCells) == 0 || len(self.Nums) == 0 {
 			return
 		}
 		cell := self.TargetCells[0].InGrid(grid)
 		cell.SetNumber(self.Nums[0])
+	} else {
+		for _, cell := range self.TargetCells {
+			gridCell := cell.InGrid(grid)
+			for _, exclude := range self.Nums {
+				gridCell.setExcluded(exclude, true)
+			}
+		}
 	}
 }
 
