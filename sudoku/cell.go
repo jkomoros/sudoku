@@ -15,11 +15,6 @@ const DIAGRAM_CORNER = "+"
 const DIAGRAM_NUMBER = "•"
 const NUM_NEIGHBORS = (DIM-1)*3 - (BLOCK_DIM-1)*2
 
-type CellAddress struct {
-	Row int
-	Col int
-}
-
 type Cell struct {
 	grid *Grid
 	//The number if it's explicitly set. Number() will return it if it's explicitly or implicitly set.
@@ -31,17 +26,9 @@ type Cell struct {
 	impossibles [DIM]int
 }
 
-func (self CellAddress) Cell(grid *Grid) *Cell {
-	return grid.Cell(self.Row, self.Col)
-}
-
 func NewCell(grid *Grid, row int, col int) Cell {
 	//TODO: we should not set the number until neighbors are initialized.
 	return Cell{grid: grid, Row: row, Col: col, Block: grid.blockForCell(row, col)}
-}
-
-func (self *Cell) Address() CellAddress {
-	return CellAddress{self.Row, self.Col}
 }
 
 func (self *Cell) Load(data string) {
