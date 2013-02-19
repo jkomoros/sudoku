@@ -15,9 +15,9 @@ const ALT_COL_SEP = "||"
 type Grid struct {
 	initalized      bool
 	cells           [DIM * DIM]Cell
-	rows            [DIM][]*Cell
-	cols            [DIM][]*Cell
-	blocks          [DIM][]*Cell
+	rows            [DIM]CellList
+	cols            [DIM]CellList
+	blocks          [DIM]CellList
 	queue           *FiniteQueue
 	numFilledCells  int
 	invalidCells    map[*Cell]bool
@@ -99,7 +99,7 @@ func (self *Grid) Copy() *Grid {
 	return result
 }
 
-func (self *Grid) Row(index int) []*Cell {
+func (self *Grid) Row(index int) CellList {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Row: ", index)
 		return nil
@@ -110,7 +110,7 @@ func (self *Grid) Row(index int) []*Cell {
 	return self.rows[index]
 }
 
-func (self *Grid) Col(index int) []*Cell {
+func (self *Grid) Col(index int) CellList {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Col: ", index)
 		return nil
@@ -121,7 +121,7 @@ func (self *Grid) Col(index int) []*Cell {
 	return self.cols[index]
 }
 
-func (self *Grid) Block(index int) []*Cell {
+func (self *Grid) Block(index int) CellList {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Block: ", index)
 		return nil
@@ -170,7 +170,7 @@ func (self *Grid) Cell(row int, col int) *Cell {
 	return &self.cells[index]
 }
 
-func (self *Grid) cellList(rowOne int, colOne int, rowTwo int, colTwo int) []*Cell {
+func (self *Grid) cellList(rowOne int, colOne int, rowTwo int, colTwo int) CellList {
 	length := (rowTwo - rowOne + 1) * (colTwo - colOne + 1)
 	result := make([]*Cell, length)
 	currentRow := rowOne
@@ -188,7 +188,7 @@ func (self *Grid) cellList(rowOne int, colOne int, rowTwo int, colTwo int) []*Ce
 			}
 		}
 	}
-	return result
+	return CellList(result)
 }
 
 func (self *Grid) Solved() bool {

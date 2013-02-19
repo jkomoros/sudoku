@@ -15,8 +15,8 @@ const (
 )
 
 type SolveStep struct {
-	TargetCells  []*Cell
-	PointerCells []*Cell
+	TargetCells  CellList
+	PointerCells CellList
 	Nums         []int
 	Technique    SolveTechnique
 }

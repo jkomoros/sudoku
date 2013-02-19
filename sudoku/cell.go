@@ -22,7 +22,7 @@ type Cell struct {
 	Row         int
 	Col         int
 	Block       int
-	neighbors   []*Cell
+	neighbors   CellList
 	impossibles [DIM]int
 }
 
@@ -212,7 +212,7 @@ func (self *Cell) implicitNumber() int {
 	return result + 1
 }
 
-func (self *Cell) Neighbors() []*Cell {
+func (self *Cell) Neighbors() CellList {
 	if self.grid == nil || !self.grid.initalized {
 		return nil
 	}
