@@ -36,6 +36,7 @@ TODO:
 	* Fill steps always have a cell and a number and a technique and that's all you need.
 	* Cull steps have a list of numbers, a list of prelim cells, and a list of result cells where all numbers are removed.
 	* Fill steps are always preferred to cull steps.
+* Human solve: cull steps require a culling of a grid that's only temporary during solving. That should be reset whenever a grid is new'd. A concept of workingLists; that's a manual list of possibles. Possible will only return true if it's possible AND true in working list. Easy to reset workingList.
 
 * Analysis: Better aggregation of rank. This problem is called "Rank Aggregation" and can be Hard. http://www10.org/cdrom/papers/577/ seems to outline the most workable solution (MarkovChain4).
 * Analysis: Run our difficulty grader on the real puzzles and see how well it fits with user perceived difficulty.
