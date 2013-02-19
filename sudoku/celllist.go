@@ -17,6 +17,14 @@ func (self CellList) SameRow() bool {
 	return true
 }
 
+func (self CellList) CollectNums(fetcher func(*Cell) int) intList {
+	var result intList
+	for _, cell := range self {
+		result = append(result, fetcher(cell))
+	}
+	return result
+}
+
 func (self intList) Same() bool {
 	if len(self) == 0 {
 		return true

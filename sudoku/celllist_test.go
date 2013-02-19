@@ -12,6 +12,15 @@ func TestBasicCellList(t *testing.T) {
 		t.Log("The items of a row were not all of the same row.")
 		t.Fail()
 	}
+
+	nums := row.CollectNums(func(cell *Cell) int {
+		return cell.Row
+	})
+
+	if !nums.Same() {
+		t.Log("Collecting rows gave us different numbers/.")
+		t.Fail()
+	}
 }
 
 func TestIntList(t *testing.T) {
