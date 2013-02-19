@@ -13,6 +13,12 @@ func TestBasicCellList(t *testing.T) {
 		t.Fail()
 	}
 
+	col := CellList(grid.Col(2))
+	if !col.SameCol() {
+		t.Log("The items in the col were not int he same col.")
+		t.Fail()
+	}
+
 	nums := row.CollectNums(func(cell *Cell) int {
 		return cell.Row
 	})
