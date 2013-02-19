@@ -297,10 +297,19 @@ func (self *Grid) HumanSolve() SolveDirections {
 		//TODO: try the techniques in parallel
 		//TODO: pick the technique based on a weighting of how common a human is to pick each one.
 		//TODO: provide hints to the techniques of where to look based on the last filled cell
-		//TODO: if no fill techniques work, use a culltechnique.
 		techniqueOrder := rand.Perm(len(fillTechniques))
 		for _, index := range techniqueOrder {
 			technique := fillTechniques[index]
+			step := technique.Find(self)
+			if step != nil {
+				results = append(results, step)
+				step.Apply(self)
+				break
+			}
+		}
+		techniqueOrder = rand.Perm(len(cullTechniques))
+		for _, index := range techniqueOrder {
+			technique := cullTechniques[index]
 			step := technique.Find(self)
 			if step != nil {
 				results = append(results, step)
