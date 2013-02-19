@@ -224,8 +224,10 @@ func (self pointingPairRow) Name() string {
 }
 
 func (self pointingPairRow) Description(step *SolveStep) string {
-	//TODO: implement this
-	return ""
+	if len(step.Nums) == 0 {
+		return ""
+	}
+	return fmt.Sprintf("%d is only possible in row %d of block %d, which means it can't be in any other cell in that row not in that block", step.Nums[0], step.TargetCells.Row(), step.PointerCells.Block())
 }
 
 func (self pointingPairRow) Find(grid *Grid) *SolveStep {
@@ -258,8 +260,10 @@ func (self pointingPairCol) Name() string {
 }
 
 func (self pointingPairCol) Description(step *SolveStep) string {
-	//TODO: implement this
-	return ""
+	if len(step.Nums) == 0 {
+		return ""
+	}
+	return fmt.Sprintf("%d is only possible in column %d of block %d, which means it can't be in any other cell in that column not in that block", step.Nums[0], step.TargetCells.Col(), step.PointerCells.Block())
 }
 
 func (self pointingPairCol) Find(grid *Grid) *SolveStep {
