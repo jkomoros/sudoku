@@ -5,16 +5,10 @@ type CellList []*Cell
 type intList []int
 
 func (self CellList) SameRow() bool {
-	if len(self) == 0 {
-		return true
-	}
-	row := self[0].Row
-	for _, cell := range self {
-		if cell.Row != row {
-			return false
-		}
-	}
-	return true
+	return self.CollectNums(func(cell *Cell) int {
+		return cell.Row
+	}).Same()
+
 }
 
 func (self CellList) CollectNums(fetcher func(*Cell) int) intList {
