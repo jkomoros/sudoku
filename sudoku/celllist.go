@@ -12,12 +12,20 @@ func getCol(cell *Cell) int {
 	return cell.Col
 }
 
+func getBlock(cell *Cell) int {
+	return cell.Block
+}
+
 func (self CellList) SameRow() bool {
 	return self.CollectNums(getRow).Same()
 }
 
 func (self CellList) SameCol() bool {
 	return self.CollectNums(getCol).Same()
+}
+
+func (self CellList) SameBlock() bool {
+	return self.CollectNums(getBlock).Same()
 }
 
 func (self CellList) CollectNums(fetcher func(*Cell) int) intList {

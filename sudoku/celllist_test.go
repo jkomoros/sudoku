@@ -29,6 +29,22 @@ func TestBasicCellList(t *testing.T) {
 		t.Fail()
 	}
 
+	block := CellList(grid.Block(2))
+	if !block.SameBlock() {
+		t.Log("The items in the block were not int he same block.")
+		t.Fail()
+	}
+
+	if block.SameRow() {
+		t.Log("For some reason we thought all the cells in a col were in the same row")
+		t.Fail()
+	}
+
+	if block.SameCol() {
+		t.Log("For some reason we thought all the cells in a block were in the same col")
+		t.Fail()
+	}
+
 	nums := row.CollectNums(func(cell *Cell) int {
 		return cell.Row
 	})
