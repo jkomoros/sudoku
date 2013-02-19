@@ -43,6 +43,13 @@ func (self CellList) Col() int {
 	return self[0].Col
 }
 
+func (self CellList) Block() int {
+	if len(self) == 0 {
+		return 0
+	}
+	return self[0].Block
+}
+
 func (self CellList) AddExclude(exclude int) {
 	mapper := func(cell *Cell) {
 		cell.setExcluded(exclude, true)
