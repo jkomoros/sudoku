@@ -235,8 +235,13 @@ func (self pointingPair) Find(grid *Grid) *SolveStep {
 			//Okay, it's possible it's a match. Are all rows the same?
 			if cells.SameRow() {
 				//Yup!
+				return &SolveStep{grid.Row(cells.Row()).RemoveCells(cells), cells, []int{num + 1}, self}
 			}
 			//Okay, are all cols?
+			if cells.SameCol() {
+				//Yup!
+				return &SolveStep{grid.Col(cells.Col()).RemoveCells(cells), cells, []int{num + 1}, self}
+			}
 		}
 	}
 	return nil
