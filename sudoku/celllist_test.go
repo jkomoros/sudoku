@@ -13,9 +13,19 @@ func TestBasicCellList(t *testing.T) {
 		t.Fail()
 	}
 
+	if row.SameCol() {
+		t.Log("For some reason we thought all the cells in a row were in the same col")
+		t.Fail()
+	}
+
 	col := CellList(grid.Col(2))
 	if !col.SameCol() {
 		t.Log("The items in the col were not int he same col.")
+		t.Fail()
+	}
+
+	if col.SameRow() {
+		t.Log("For some reason we thought all the cells in a col were in the same row")
 		t.Fail()
 	}
 
