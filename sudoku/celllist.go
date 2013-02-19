@@ -28,6 +28,21 @@ func (self CellList) SameBlock() bool {
 	return self.CollectNums(getBlock).Same()
 }
 
+func (self CellList) Row() int {
+	//Will return the row of a random item.
+	if len(self) == 0 {
+		return 0
+	}
+	return self[0].Row
+}
+
+func (self CellList) Col() int {
+	if len(self) == 0 {
+		return 0
+	}
+	return self[0].Col
+}
+
 func (self CellList) FilterByPossible(possible int) CellList {
 	//TODO: test this
 	filter := func(cell *Cell) bool {
