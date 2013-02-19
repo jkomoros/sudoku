@@ -241,7 +241,7 @@ func (self pointingPairRow) Find(grid *Grid) *SolveStep {
 		for num := 0; num < DIM; num++ {
 			cells := block.FilterByPossible(num + 1)
 			//cellList is now a list of all cells that have that number.
-			if len(cells) == 0 || len(cells) > BLOCK_DIM {
+			if len(cells) <= 1 || len(cells) > BLOCK_DIM {
 				//Meh, not a match.
 				continue
 			}
@@ -277,7 +277,7 @@ func (self pointingPairCol) Find(grid *Grid) *SolveStep {
 		for num := 0; num < DIM; num++ {
 			cells := block.FilterByPossible(num + 1)
 			//cellList is now a list of all cells that have that number.
-			if len(cells) == 0 || len(cells) > BLOCK_DIM {
+			if len(cells) <= 1 || len(cells) > BLOCK_DIM {
 				//Meh, not a match.
 				continue
 			}
