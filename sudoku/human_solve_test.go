@@ -22,11 +22,16 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 		t.Log("The only legal number technique did not solve a puzzle it should have.")
 		t.FailNow()
 	}
-	if step.Col != 3 || step.Row != 3 {
+
+	cellFromStep := step.TargetCells[0]
+
+	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
 		t.Log("The only legal number technique identified the wrong cell.")
 		t.Fail()
 	}
-	if step.Num != num {
+	numFromStep := step.Nums[0]
+
+	if numFromStep != num {
 		t.Log("The only legal number technique identified the wrong number.")
 		t.Fail()
 	}
@@ -70,11 +75,17 @@ func TestNecessaryInRow(t *testing.T) {
 		t.Log("The necessary in row technique did not solve a puzzle it should have.")
 		t.FailNow()
 	}
-	if step.Col != 3 || step.Row != 3 {
+
+	cellFromStep := step.TargetCells[0]
+
+	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
 		t.Log("The necessary in row technique identified the wrong cell.")
 		t.Fail()
 	}
-	if step.Num != DIM {
+
+	numFromStep := step.Nums[0]
+
+	if numFromStep != DIM {
 		t.Log("The necessary in row technique identified the wrong number.")
 		t.Fail()
 	}
@@ -119,11 +130,17 @@ func TestNecessaryInCol(t *testing.T) {
 		t.Log("The necessary in col technique did not solve a puzzle it should have.")
 		t.FailNow()
 	}
-	if step.Col != 3 || step.Row != 3 {
+
+	cellFromStep := step.TargetCells[0]
+
+	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
 		t.Log("The necessary in col technique identified the wrong cell.")
 		t.Fail()
 	}
-	if step.Num != DIM {
+
+	numFromStep := step.Nums[0]
+
+	if numFromStep != DIM {
 		t.Log("The necessary in col technique identified the wrong number.")
 		t.Fail()
 	}
@@ -168,11 +185,17 @@ func TestNecessaryInBlock(t *testing.T) {
 		t.Log("The necessary in block technique did not solve a puzzle it should have.")
 		t.FailNow()
 	}
-	if step.Col != 3 || step.Row != 3 {
+
+	cellFromStep := step.TargetCells[0]
+
+	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
 		t.Log("The necessary in block technique identified the wrong cell.")
 		t.Fail()
 	}
-	if step.Num != DIM {
+
+	numFromStep := step.Nums[0]
+
+	if numFromStep != DIM {
 		t.Log("The necessary in block technique identified the wrong number.")
 		t.Fail()
 	}

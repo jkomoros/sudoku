@@ -15,17 +15,20 @@ const (
 )
 
 type SolveStep struct {
-	Row       int
-	Col       int
-	Block     int
-	Num       int
-	Technique SolveTechnique
+	TargetCells  []*Cell
+	PointerCells []*Cell
+	Nums         []int
+	Technique    SolveTechnique
 }
 
 type SolveTechnique interface {
 	Name() string
 	Description(*SolveStep) string
 	Find(*Grid) *SolveStep
+	IsFill() bool
+}
+
+type fillSolveTechnique struct {
 }
 
 var techniques []SolveTechnique
@@ -39,20 +42,41 @@ func init() {
 }
 
 type nakedSingleTechnique struct {
+	*fillSolveTechnique
 }
 
 type hiddenSingleInRow struct {
+	*fillSolveTechnique
 }
 
 type hiddenSingleInCol struct {
+	*fillSolveTechnique
 }
 
 type hiddenSingleInBlock struct {
+	*fillSolveTechnique
+}
+
+func (self *fillSolveTechnique) IsFill() bool {
+	return true
+}
+
+func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
+	//TODO: why do these need to be pulled out separately?
+	cellArr := [...]*Cell{cell}
+	numArr := [...]int{num}
+	return &SolveStep{cellArr[:], nil, numArr[:], technique}
 }
 
 func (self *SolveStep) Apply(grid *Grid) {
-	cell := grid.Cell(self.Row, self.Col)
-	cell.SetNumber(self.Num)
+	//TODO: also handle non isFill items.
+	if self.Technique.IsFill() {
+		if len(self.TargetCells) == 0 || len(self.Nums) == 0 {
+			return
+		}
+		cell := self.TargetCells[0].InGrid(grid)
+		cell.SetNumber(self.Nums[0])
+	}
 }
 
 func (self nakedSingleTechnique) Name() string {
@@ -60,7 +84,11 @@ func (self nakedSingleTechnique) Name() string {
 }
 
 func (self nakedSingleTechnique) Description(step *SolveStep) string {
-	return fmt.Sprintf("%d is the only remaining valid number for that cell", step.Num)
+	if len(step.Nums) == 0 {
+		return ""
+	}
+	num := step.Nums[0]
+	return fmt.Sprintf("%d is the only remaining valid number for that cell", num)
 }
 
 func (self nakedSingleTechnique) Find(grid *Grid) *SolveStep {
@@ -71,7 +99,7 @@ func (self nakedSingleTechnique) Find(grid *Grid) *SolveStep {
 		return nil
 	}
 	cell := obj.(*Cell)
-	return &SolveStep{cell.Row, cell.Col, cell.Block, cell.implicitNumber(), self}
+	return newFillSolveStep(cell, cell.implicitNumber(), self)
 }
 
 func (self hiddenSingleInRow) Name() string {
@@ -80,7 +108,12 @@ func (self hiddenSingleInRow) Name() string {
 
 func (self hiddenSingleInRow) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
-	return fmt.Sprintf("%d is required in the %d row, and %d is the only column it fits", step.Num, step.Row+1, step.Col+1)
+	if len(step.TargetCells) == 0 || len(step.Nums) == 0 {
+		return ""
+	}
+	cell := step.TargetCells[0]
+	num := step.Nums[0]
+	return fmt.Sprintf("%d is required in the %d row, and %d is the only column it fits", num, cell.Row+1, cell.Col+1)
 }
 
 func (self hiddenSingleInRow) Find(grid *Grid) *SolveStep {
@@ -96,7 +129,12 @@ func (self hiddenSingleInCol) Name() string {
 
 func (self hiddenSingleInCol) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
-	return fmt.Sprintf("%d is required in the %d column, and %d is the only row it fits", step.Num, step.Row+1, step.Col+1)
+	if len(step.TargetCells) == 0 || len(step.Nums) == 0 {
+		return ""
+	}
+	cell := step.TargetCells[0]
+	num := step.Nums[0]
+	return fmt.Sprintf("%d is required in the %d column, and %d is the only row it fits", num, cell.Row+1, cell.Col+1)
 }
 
 func (self hiddenSingleInCol) Find(grid *Grid) *SolveStep {
@@ -112,7 +150,12 @@ func (self hiddenSingleInBlock) Name() string {
 
 func (self hiddenSingleInBlock) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
-	return fmt.Sprintf("%d is required in the %d block, and %d, %d is the only cell it fits", step.Num, step.Block+1, step.Row+1, step.Col+1)
+	if len(step.TargetCells) == 0 || len(step.Nums) == 0 {
+		return ""
+	}
+	cell := step.TargetCells[0]
+	num := step.Nums[0]
+	return fmt.Sprintf("%d is required in the %d block, and %d, %d is the only cell it fits", num, cell.Block+1, cell.Row+1, cell.Col+1)
 }
 
 func (self hiddenSingleInBlock) Find(grid *Grid) *SolveStep {
@@ -142,7 +185,7 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 				for _, cell := range collection {
 					if cell.Possible(index + 1) {
 						//Found it!
-						return &SolveStep{cell.Row, cell.Col, cell.Block, index + 1, technique}
+						return newFillSolveStep(cell, index+1, technique)
 					}
 				}
 			}
