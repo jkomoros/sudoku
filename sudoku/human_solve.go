@@ -31,7 +31,11 @@ type SolveTechnique interface {
 type fillSolveTechnique struct {
 }
 
+type cullSolveTechnique struct {
+}
+
 var fillTechniques []SolveTechnique
+var cullTechniques []SolveTechnique
 
 func init() {
 	//TODO: init techniques with enough space
@@ -39,6 +43,7 @@ func init() {
 	fillTechniques = append(fillTechniques, hiddenSingleInRow{})
 	fillTechniques = append(fillTechniques, hiddenSingleInCol{})
 	fillTechniques = append(fillTechniques, hiddenSingleInBlock{})
+	cullTechniques = append(cullTechniques, pointingPair{})
 }
 
 type nakedSingleTechnique struct {
@@ -57,8 +62,16 @@ type hiddenSingleInBlock struct {
 	*fillSolveTechnique
 }
 
+type pointingPair struct {
+	*cullSolveTechnique
+}
+
 func (self *fillSolveTechnique) IsFill() bool {
 	return true
+}
+
+func (self *cullSolveTechnique) IsFill() bool {
+	return false
 }
 
 func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
@@ -195,12 +208,47 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 	return nil
 }
 
+func (self pointingPair) Name() string {
+	return "Pointing pair"
+}
+
+func (self pointingPair) Description(step *SolveStep) string {
+	//TODO: implement this
+	return ""
+}
+
+func (self pointingPair) Find(grid *Grid) *SolveStep {
+	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
+	//TODO: randomize order of blocks.
+	//TODO: should we create a FilterByLegal method on lists of cells?
+	//TODO: finish this!
+	for i := 0; i < DIM; i++ {
+		block := grid.Block(i)
+		//TODO: randomize order of numbers to test for.
+		for num := 0; num < DIM; num++ {
+			cells := block.FilterByPossible(num + 1)
+			//cellList is now a list of all cells that have that number.
+			if len(cells) == 0 || len(cells) > BLOCK_DIM {
+				//Meh, not a match.
+				continue
+			}
+			//Okay, it's possible it's a match. Are all rows the same?
+			if cells.SameRow() {
+				//Yup!
+			}
+			//Okay, are all cols?
+		}
+	}
+	return nil
+}
+
 func (self *Grid) HumanSolve() SolveDirections {
 	var results []*SolveStep
 	for !self.Solved() {
 		//TODO: try the techniques in parallel
 		//TODO: pick the technique based on a weighting of how common a human is to pick each one.
 		//TODO: provide hints to the techniques of where to look based on the last filled cell
+		//TODO: if no fill techniques work, use a culltechnique.
 		techniqueOrder := rand.Perm(len(fillTechniques))
 		for _, index := range techniqueOrder {
 			technique := fillTechniques[index]
