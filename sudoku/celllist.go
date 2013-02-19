@@ -4,10 +4,12 @@ type CellList []*Cell
 
 type intList []int
 
+func getRow(cell *Cell) int {
+	return cell.Row
+}
+
 func (self CellList) SameRow() bool {
-	return self.CollectNums(func(cell *Cell) int {
-		return cell.Row
-	}).Same()
+	return self.CollectNums(getRow).Same()
 
 }
 
