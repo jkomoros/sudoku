@@ -198,6 +198,11 @@ func TestGridCreation(t *testing.T) {
 		t.Fail()
 	}
 
+	if grid.CellFromAddress(cell.Address()) != cell {
+		t.Log("We didn't get back the same cell when passed its address.")
+		t.Fail()
+	}
+
 	neighbors := cell.Neighbors()
 
 	if len(neighbors) != NUM_NEIGHBORS {
