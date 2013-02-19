@@ -4,6 +4,16 @@ import (
 	"testing"
 )
 
+const POINTING_PAIR_COL_GRID = `3|.|6|.|.|.|.|.|.
+.|.|.|.|7|.|.|.|.
+4|.|5|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.`
+
 func TestSolveOnlyLegalNumber(t *testing.T) {
 	grid := NewGrid()
 	//Load up a solved grid
@@ -204,6 +214,22 @@ func TestNecessaryInBlock(t *testing.T) {
 		t.Log("The necessary in block technique did actually mutate the grid.")
 		t.Fail()
 	}
+}
+
+func TestPointingPairCol(t *testing.T) {
+	grid := NewGrid()
+	grid.Load(POINTING_PAIR_COL_GRID)
+	solver := &pointingPairCol{}
+	step := solver.Find(grid)
+	if step == nil {
+		t.Log("The pointing pair col didn't find a cell it should have")
+		t.Fail()
+	}
+	if len(step.TargetCells) != BLOCK_DIM*2 {
+		t.Log("The pointing pair col gave back the wrong number of target cells")
+		t.Fail()
+	}
+	//TODO: more tests
 }
 
 func TestHumanSolve(t *testing.T) {
