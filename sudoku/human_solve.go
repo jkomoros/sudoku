@@ -15,44 +15,92 @@ const (
 )
 
 type SolveStep struct {
-	Row       int
-	Col       int
-	Block     int
-	Num       int
-	Technique SolveTechnique
+	TargetCells  CellList
+	PointerCells CellList
+	Nums         []int
+	Technique    SolveTechnique
 }
 
 type SolveTechnique interface {
 	Name() string
 	Description(*SolveStep) string
 	Find(*Grid) *SolveStep
+	IsFill() bool
 }
 
-var techniques []SolveTechnique
+type fillSolveTechnique struct {
+}
+
+type cullSolveTechnique struct {
+}
+
+var fillTechniques []SolveTechnique
+var cullTechniques []SolveTechnique
 
 func init() {
 	//TODO: init techniques with enough space
-	techniques = append(techniques, nakedSingleTechnique{})
-	techniques = append(techniques, hiddenSingleInRow{})
-	techniques = append(techniques, hiddenSingleInCol{})
-	techniques = append(techniques, hiddenSingleInBlock{})
+	fillTechniques = append(fillTechniques, nakedSingleTechnique{})
+	fillTechniques = append(fillTechniques, hiddenSingleInRow{})
+	fillTechniques = append(fillTechniques, hiddenSingleInCol{})
+	fillTechniques = append(fillTechniques, hiddenSingleInBlock{})
+	cullTechniques = append(cullTechniques, pointingPairRow{})
+	cullTechniques = append(cullTechniques, pointingPairCol{})
 }
 
 type nakedSingleTechnique struct {
+	*fillSolveTechnique
 }
 
 type hiddenSingleInRow struct {
+	*fillSolveTechnique
 }
 
 type hiddenSingleInCol struct {
+	*fillSolveTechnique
 }
 
 type hiddenSingleInBlock struct {
+	*fillSolveTechnique
+}
+
+type pointingPairRow struct {
+	*cullSolveTechnique
+}
+
+type pointingPairCol struct {
+	*cullSolveTechnique
+}
+
+func (self *fillSolveTechnique) IsFill() bool {
+	return true
+}
+
+func (self *cullSolveTechnique) IsFill() bool {
+	return false
+}
+
+func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
+	//TODO: why do these need to be pulled out separately?
+	cellArr := [...]*Cell{cell}
+	numArr := [...]int{num}
+	return &SolveStep{cellArr[:], nil, numArr[:], technique}
 }
 
 func (self *SolveStep) Apply(grid *Grid) {
-	cell := grid.Cell(self.Row, self.Col)
-	cell.SetNumber(self.Num)
+	if self.Technique.IsFill() {
+		if len(self.TargetCells) == 0 || len(self.Nums) == 0 {
+			return
+		}
+		cell := self.TargetCells[0].InGrid(grid)
+		cell.SetNumber(self.Nums[0])
+	} else {
+		for _, cell := range self.TargetCells {
+			gridCell := cell.InGrid(grid)
+			for _, exclude := range self.Nums {
+				gridCell.setExcluded(exclude, true)
+			}
+		}
+	}
 }
 
 func (self nakedSingleTechnique) Name() string {
@@ -60,7 +108,11 @@ func (self nakedSingleTechnique) Name() string {
 }
 
 func (self nakedSingleTechnique) Description(step *SolveStep) string {
-	return fmt.Sprintf("%d is the only remaining valid number for that cell", step.Num)
+	if len(step.Nums) == 0 {
+		return ""
+	}
+	num := step.Nums[0]
+	return fmt.Sprintf("%d is the only remaining valid number for that cell", num)
 }
 
 func (self nakedSingleTechnique) Find(grid *Grid) *SolveStep {
@@ -71,7 +123,7 @@ func (self nakedSingleTechnique) Find(grid *Grid) *SolveStep {
 		return nil
 	}
 	cell := obj.(*Cell)
-	return &SolveStep{cell.Row, cell.Col, cell.Block, cell.implicitNumber(), self}
+	return newFillSolveStep(cell, cell.implicitNumber(), self)
 }
 
 func (self hiddenSingleInRow) Name() string {
@@ -80,7 +132,12 @@ func (self hiddenSingleInRow) Name() string {
 
 func (self hiddenSingleInRow) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
-	return fmt.Sprintf("%d is required in the %d row, and %d is the only column it fits", step.Num, step.Row+1, step.Col+1)
+	if len(step.TargetCells) == 0 || len(step.Nums) == 0 {
+		return ""
+	}
+	cell := step.TargetCells[0]
+	num := step.Nums[0]
+	return fmt.Sprintf("%d is required in the %d row, and %d is the only column it fits", num, cell.Row+1, cell.Col+1)
 }
 
 func (self hiddenSingleInRow) Find(grid *Grid) *SolveStep {
@@ -96,7 +153,12 @@ func (self hiddenSingleInCol) Name() string {
 
 func (self hiddenSingleInCol) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
-	return fmt.Sprintf("%d is required in the %d column, and %d is the only row it fits", step.Num, step.Row+1, step.Col+1)
+	if len(step.TargetCells) == 0 || len(step.Nums) == 0 {
+		return ""
+	}
+	cell := step.TargetCells[0]
+	num := step.Nums[0]
+	return fmt.Sprintf("%d is required in the %d column, and %d is the only row it fits", num, cell.Row+1, cell.Col+1)
 }
 
 func (self hiddenSingleInCol) Find(grid *Grid) *SolveStep {
@@ -112,7 +174,12 @@ func (self hiddenSingleInBlock) Name() string {
 
 func (self hiddenSingleInBlock) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
-	return fmt.Sprintf("%d is required in the %d block, and %d, %d is the only cell it fits", step.Num, step.Block+1, step.Row+1, step.Col+1)
+	if len(step.TargetCells) == 0 || len(step.Nums) == 0 {
+		return ""
+	}
+	cell := step.TargetCells[0]
+	num := step.Nums[0]
+	return fmt.Sprintf("%d is required in the %d block, and %d, %d is the only cell it fits", num, cell.Block+1, cell.Row+1, cell.Col+1)
 }
 
 func (self hiddenSingleInBlock) Find(grid *Grid) *SolveStep {
@@ -142,7 +209,7 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 				for _, cell := range collection {
 					if cell.Possible(index + 1) {
 						//Found it!
-						return &SolveStep{cell.Row, cell.Col, cell.Block, index + 1, technique}
+						return newFillSolveStep(cell, index+1, technique)
 					}
 				}
 			}
@@ -152,15 +219,95 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 	return nil
 }
 
+func (self pointingPairRow) Name() string {
+	return "Pointing pair row"
+}
+
+func (self pointingPairRow) Description(step *SolveStep) string {
+	if len(step.Nums) == 0 {
+		return ""
+	}
+	return fmt.Sprintf("%d is only possible in row %d of block %d, which means it can't be in any other cell in that row not in that block", step.Nums[0], step.TargetCells.Row(), step.PointerCells.Block())
+}
+
+func (self pointingPairRow) Find(grid *Grid) *SolveStep {
+	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
+	//TODO: randomize order of blocks.
+	//TODO: this is substantially duplicated in pointingPaircol
+	for i := 0; i < DIM; i++ {
+		block := grid.Block(i)
+		//TODO: randomize order of numbers to test for.
+		for num := 0; num < DIM; num++ {
+			cells := block.FilterByPossible(num + 1)
+			//cellList is now a list of all cells that have that number.
+			if len(cells) <= 1 || len(cells) > BLOCK_DIM {
+				//Meh, not a match.
+				continue
+			}
+			//Okay, it's possible it's a match. Are all rows the same?
+			if cells.SameRow() {
+				//Yup!
+				return &SolveStep{grid.Row(cells.Row()).RemoveCells(block), cells, []int{num + 1}, self}
+			}
+		}
+	}
+	return nil
+}
+
+func (self pointingPairCol) Name() string {
+	return "Pointing pair col"
+}
+
+func (self pointingPairCol) Description(step *SolveStep) string {
+	if len(step.Nums) == 0 {
+		return ""
+	}
+	return fmt.Sprintf("%d is only possible in column %d of block %d, which means it can't be in any other cell in that column not in that block", step.Nums[0], step.TargetCells.Col(), step.PointerCells.Block())
+}
+
+func (self pointingPairCol) Find(grid *Grid) *SolveStep {
+	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
+	//TODO: randomize order of blocks.
+	//TODO: this is substantially duplicated in pointingPairRow
+	for i := 0; i < DIM; i++ {
+		block := grid.Block(i)
+		//TODO: randomize order of numbers to test for.
+		for num := 0; num < DIM; num++ {
+			cells := block.FilterByPossible(num + 1)
+			//cellList is now a list of all cells that have that number.
+			if len(cells) <= 1 || len(cells) > BLOCK_DIM {
+				//Meh, not a match.
+				continue
+			}
+			//Okay, are all cols?
+			if cells.SameCol() {
+				//Yup!
+				return &SolveStep{grid.Col(cells.Col()).RemoveCells(block), cells, []int{num + 1}, self}
+			}
+		}
+	}
+	return nil
+}
+
 func (self *Grid) HumanSolve() SolveDirections {
 	var results []*SolveStep
 	for !self.Solved() {
 		//TODO: try the techniques in parallel
 		//TODO: pick the technique based on a weighting of how common a human is to pick each one.
 		//TODO: provide hints to the techniques of where to look based on the last filled cell
-		techniqueOrder := rand.Perm(len(techniques))
+		techniqueOrder := rand.Perm(len(fillTechniques))
 		for _, index := range techniqueOrder {
-			technique := techniques[index]
+			technique := fillTechniques[index]
+			step := technique.Find(self)
+			if step != nil {
+				results = append(results, step)
+				step.Apply(self)
+				break
+			}
+		}
+		techniqueOrder = rand.Perm(len(cullTechniques))
+		for _, index := range techniqueOrder {
+			technique := cullTechniques[index]
 			step := technique.Find(self)
 			if step != nil {
 				results = append(results, step)

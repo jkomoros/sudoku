@@ -4,6 +4,25 @@ import (
 	"testing"
 )
 
+const POINTING_PAIR_ROW_GRID = `3|.|6|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+4|.|5|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|7|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.`
+const POINTING_PAIR_COL_GRID = `3|.|6|.|.|.|.|.|.
+.|.|.|.|7|.|.|.|.
+4|.|5|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.`
+
 func TestSolveOnlyLegalNumber(t *testing.T) {
 	grid := NewGrid()
 	//Load up a solved grid
@@ -22,11 +41,16 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 		t.Log("The only legal number technique did not solve a puzzle it should have.")
 		t.FailNow()
 	}
-	if step.Col != 3 || step.Row != 3 {
+
+	cellFromStep := step.TargetCells[0]
+
+	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
 		t.Log("The only legal number technique identified the wrong cell.")
 		t.Fail()
 	}
-	if step.Num != num {
+	numFromStep := step.Nums[0]
+
+	if numFromStep != num {
 		t.Log("The only legal number technique identified the wrong number.")
 		t.Fail()
 	}
@@ -70,11 +94,17 @@ func TestNecessaryInRow(t *testing.T) {
 		t.Log("The necessary in row technique did not solve a puzzle it should have.")
 		t.FailNow()
 	}
-	if step.Col != 3 || step.Row != 3 {
+
+	cellFromStep := step.TargetCells[0]
+
+	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
 		t.Log("The necessary in row technique identified the wrong cell.")
 		t.Fail()
 	}
-	if step.Num != DIM {
+
+	numFromStep := step.Nums[0]
+
+	if numFromStep != DIM {
 		t.Log("The necessary in row technique identified the wrong number.")
 		t.Fail()
 	}
@@ -119,11 +149,17 @@ func TestNecessaryInCol(t *testing.T) {
 		t.Log("The necessary in col technique did not solve a puzzle it should have.")
 		t.FailNow()
 	}
-	if step.Col != 3 || step.Row != 3 {
+
+	cellFromStep := step.TargetCells[0]
+
+	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
 		t.Log("The necessary in col technique identified the wrong cell.")
 		t.Fail()
 	}
-	if step.Num != DIM {
+
+	numFromStep := step.Nums[0]
+
+	if numFromStep != DIM {
 		t.Log("The necessary in col technique identified the wrong number.")
 		t.Fail()
 	}
@@ -168,11 +204,17 @@ func TestNecessaryInBlock(t *testing.T) {
 		t.Log("The necessary in block technique did not solve a puzzle it should have.")
 		t.FailNow()
 	}
-	if step.Col != 3 || step.Row != 3 {
+
+	cellFromStep := step.TargetCells[0]
+
+	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
 		t.Log("The necessary in block technique identified the wrong cell.")
 		t.Fail()
 	}
-	if step.Num != DIM {
+
+	numFromStep := step.Nums[0]
+
+	if numFromStep != DIM {
 		t.Log("The necessary in block technique identified the wrong number.")
 		t.Fail()
 	}
@@ -180,6 +222,76 @@ func TestNecessaryInBlock(t *testing.T) {
 	if cell.Number() != 0 {
 		t.Log("The necessary in block technique did actually mutate the grid.")
 		t.Fail()
+	}
+}
+
+func TestPointingPairCol(t *testing.T) {
+	grid := NewGrid()
+	grid.Load(POINTING_PAIR_COL_GRID)
+	solver := &pointingPairCol{}
+	step := solver.Find(grid)
+	if step == nil {
+		t.Log("The pointing pair col didn't find a cell it should have")
+		t.FailNow()
+	}
+	if len(step.TargetCells) != BLOCK_DIM*2 {
+		t.Log("The pointing pair col gave back the wrong number of target cells")
+		t.Fail()
+	}
+	if len(step.PointerCells) != BLOCK_DIM-1 {
+		t.Log("The pointing pair col gave back the wrong number of pointer cells")
+		t.Fail()
+	}
+	if !step.TargetCells.SameCol() || step.TargetCells.Col() != 1 {
+		t.Log("The target cells in the pointing pair col technique were wrong col")
+		t.Fail()
+	}
+	if len(step.Nums) != 1 || step.Nums[0] != 7 {
+		t.Log("Pointing pair col technique gave the wrong number")
+		t.Fail()
+	}
+	step.Apply(grid)
+	num := step.Nums[0]
+	for _, cell := range step.TargetCells {
+		if cell.Possible(num) {
+			t.Log("The pointing pairs col technique was not applied correclty")
+			t.Fail()
+		}
+	}
+}
+
+func TestPointingPairRow(t *testing.T) {
+	grid := NewGrid()
+	grid.Load(POINTING_PAIR_ROW_GRID)
+	solver := &pointingPairRow{}
+	step := solver.Find(grid)
+	if step == nil {
+		t.Log("The pointing pair row didn't find a cell it should have")
+		t.FailNow()
+	}
+	if len(step.TargetCells) != BLOCK_DIM*2 {
+		t.Log("The pointing pair row gave back the wrong number of target cells")
+		t.Fail()
+	}
+	if len(step.PointerCells) != BLOCK_DIM-1 {
+		t.Log("The pointing pair row gave back the wrong number of pointer cells")
+		t.Fail()
+	}
+	if !step.TargetCells.SameRow() || step.TargetCells.Row() != 1 {
+		t.Log("The target cells in the pointing pair row technique were wrong row")
+		t.Fail()
+	}
+	if len(step.Nums) != 1 || step.Nums[0] != 7 {
+		t.Log("Pointing pair row technique gave the wrong number")
+		t.Fail()
+	}
+	step.Apply(grid)
+	num := step.Nums[0]
+	for _, cell := range step.TargetCells {
+		if cell.Possible(num) {
+			t.Log("The pointing pairs row technique was not applied correclty")
+			t.Fail()
+		}
 	}
 }
 
