@@ -241,6 +241,14 @@ func TestPointingPairCol(t *testing.T) {
 		t.Log("Pointing pair col technique gave the wrong number")
 		t.Fail()
 	}
+	step.Apply(grid)
+	num := step.Nums[0]
+	for _, cell := range step.TargetCells {
+		if cell.Possible(num) {
+			t.Log("The pointing pairs col technique was not applied correclty")
+			t.Fail()
+		}
+	}
 }
 
 func TestHumanSolve(t *testing.T) {
