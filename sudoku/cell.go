@@ -24,6 +24,7 @@ type Cell struct {
 	Block       int
 	neighbors   CellList
 	impossibles [DIM]int
+	excluded    [DIM]bool
 }
 
 func NewCell(grid *Grid, row int, col int) Cell {
@@ -109,6 +110,7 @@ func (self *Cell) setPossible(number int) {
 	}
 	self.impossibles[number]--
 	if self.impossibles[number] == 0 && self.grid != nil {
+		//TODO: should we check exclusion to save work?
 		//Our rank will have changed.
 		self.grid.queue.Insert(self)
 		//We may have just become valid.
@@ -125,9 +127,36 @@ func (self *Cell) setImpossible(number int) {
 	}
 	self.impossibles[number]++
 	if self.impossibles[number] == 1 && self.grid != nil {
+		//TODO: should we check exclusion to save work?
 		//Our rank will have changed.
 		self.grid.queue.Insert(self)
 		//We may have just become invalid.
+		self.checkInvalid()
+	}
+}
+
+func (self *Cell) setExcluded(number int, excluded bool) {
+	number--
+	if number < 0 || number >= DIM {
+		return
+	}
+	self.excluded[number] = excluded
+	//Our rank may have changed.
+	//TODO: should we check if we're invalid already?
+	if self.grid != nil {
+		self.grid.queue.Insert(self)
+		self.checkInvalid()
+	}
+}
+
+func (self *Cell) resetExcludes() {
+	for i := 0; i < DIM; i++ {
+		self.excluded[i] = false
+	}
+	//Our rank may have changed.
+	//TODO: should we check if we're invalid already?
+	if self.grid != nil {
+		self.grid.queue.Insert(self)
 		self.checkInvalid()
 	}
 }
@@ -138,7 +167,7 @@ func (self *Cell) Possible(number int) bool {
 	if number < 0 || number >= DIM {
 		return false
 	}
-	return self.impossibles[number] == 0
+	return self.impossibles[number] == 0 && !self.excluded[number]
 }
 
 //A slice of ints representing the possibilties for this cell.
@@ -168,8 +197,8 @@ func (self *Cell) checkInvalid() {
 func (self *Cell) Invalid() bool {
 	//Returns true if no numbers are possible.
 	//TODO: figure out a way to send this back up to the solver when it happens.
-	for _, counter := range self.impossibles {
-		if counter == 0 {
+	for i, counter := range self.impossibles {
+		if counter == 0 && !self.excluded[i] {
 			return false
 		}
 	}

@@ -37,6 +37,7 @@ func init() {
 func GetGrid() *Grid {
 	select {
 	case grid := <-gridCache:
+		grid.ResetOverrides()
 		return grid
 	default:
 		return NewGrid()
@@ -97,6 +98,12 @@ func (self *Grid) Copy() *Grid {
 	result := GetGrid()
 	result.Load(self.DataString())
 	return result
+}
+
+func (self *Grid) ResetOverrides() {
+	for _, cell := range self.cells {
+		cell.resetExcludes()
+	}
 }
 
 func (self *Grid) Row(index int) CellList {
