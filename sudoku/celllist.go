@@ -51,6 +51,18 @@ func (self CellList) FilterByPossible(possible int) CellList {
 	return self.Filter(filter)
 }
 
+func (self CellList) RemoveCells(targets CellList) CellList {
+	//TODO: test this.
+	targetCells := make(map[*Cell]bool)
+	for _, cell := range targets {
+		targetCells[cell] = true
+	}
+	filterFunc := func(cell *Cell) bool {
+		return !targetCells[cell]
+	}
+	return self.Filter(filterFunc)
+}
+
 func (self CellList) CollectNums(fetcher func(*Cell) int) intList {
 	var result intList
 	for _, cell := range self {
