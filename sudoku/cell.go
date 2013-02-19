@@ -31,6 +31,14 @@ func NewCell(grid *Grid, row int, col int) Cell {
 	return Cell{grid: grid, Row: row, Col: col, Block: grid.blockForCell(row, col)}
 }
 
+func (self *Cell) InGrid(grid *Grid) *Cell {
+	//Returns our analogue in the given grid.
+	if grid == nil {
+		return nil
+	}
+	return grid.Cell(self.Row, self.Col)
+}
+
 func (self *Cell) Load(data string) {
 	//Format, for now, is just the number itself, or 0 if no number.
 	data = strings.Replace(data, ALT_0, "0", -1)
