@@ -198,7 +198,7 @@ func TestGridCreation(t *testing.T) {
 		t.Fail()
 	}
 
-	if grid.CellFromAddress(cell.Address()) != cell {
+	if cell.Address().Cell(grid) != cell {
 		t.Log("We didn't get back the same cell when passed its address.")
 		t.Fail()
 	}

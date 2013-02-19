@@ -170,10 +170,6 @@ func (self *Grid) Cell(row int, col int) *Cell {
 	return &self.cells[index]
 }
 
-func (self *Grid) CellFromAddress(address CellAddress) *Cell {
-	return self.Cell(address.Row, address.Col)
-}
-
 func (self *Grid) cellList(rowOne int, colOne int, rowTwo int, colTwo int) []*Cell {
 	length := (rowTwo - rowOne + 1) * (colTwo - colOne + 1)
 	result := make([]*Cell, length)

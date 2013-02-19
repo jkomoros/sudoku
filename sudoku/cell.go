@@ -31,6 +31,10 @@ type Cell struct {
 	impossibles [DIM]int
 }
 
+func (self CellAddress) Cell(grid *Grid) *Cell {
+	return grid.Cell(self.Row, self.Col)
+}
+
 func NewCell(grid *Grid, row int, col int) Cell {
 	//TODO: we should not set the number until neighbors are initialized.
 	return Cell{grid: grid, Row: row, Col: col, Block: grid.blockForCell(row, col)}
