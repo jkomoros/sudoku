@@ -31,14 +31,14 @@ type SolveTechnique interface {
 type fillSolveTechnique struct {
 }
 
-var techniques []SolveTechnique
+var fillTechniques []SolveTechnique
 
 func init() {
 	//TODO: init techniques with enough space
-	techniques = append(techniques, nakedSingleTechnique{})
-	techniques = append(techniques, hiddenSingleInRow{})
-	techniques = append(techniques, hiddenSingleInCol{})
-	techniques = append(techniques, hiddenSingleInBlock{})
+	fillTechniques = append(fillTechniques, nakedSingleTechnique{})
+	fillTechniques = append(fillTechniques, hiddenSingleInRow{})
+	fillTechniques = append(fillTechniques, hiddenSingleInCol{})
+	fillTechniques = append(fillTechniques, hiddenSingleInBlock{})
 }
 
 type nakedSingleTechnique struct {
@@ -201,9 +201,9 @@ func (self *Grid) HumanSolve() SolveDirections {
 		//TODO: try the techniques in parallel
 		//TODO: pick the technique based on a weighting of how common a human is to pick each one.
 		//TODO: provide hints to the techniques of where to look based on the last filled cell
-		techniqueOrder := rand.Perm(len(techniques))
+		techniqueOrder := rand.Perm(len(fillTechniques))
 		for _, index := range techniqueOrder {
-			technique := techniques[index]
+			technique := fillTechniques[index]
 			step := technique.Find(self)
 			if step != nil {
 				results = append(results, step)
