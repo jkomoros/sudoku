@@ -233,7 +233,6 @@ func (self pointingPairRow) Description(step *SolveStep) string {
 func (self pointingPairRow) Find(grid *Grid) *SolveStep {
 	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
 	//TODO: randomize order of blocks.
-	//TODO: should we create a FilterByLegal method on lists of cells?
 	//TODO: this is substantially duplicated in pointingPaircol
 	for i := 0; i < DIM; i++ {
 		block := grid.Block(i)
@@ -269,7 +268,6 @@ func (self pointingPairCol) Description(step *SolveStep) string {
 func (self pointingPairCol) Find(grid *Grid) *SolveStep {
 	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
 	//TODO: randomize order of blocks.
-	//TODO: should we create a FilterByLegal method on lists of cells?
 	//TODO: this is substantially duplicated in pointingPairRow
 	for i := 0; i < DIM; i++ {
 		block := grid.Block(i)
