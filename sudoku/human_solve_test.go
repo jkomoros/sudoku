@@ -229,7 +229,18 @@ func TestPointingPairCol(t *testing.T) {
 		t.Log("The pointing pair col gave back the wrong number of target cells")
 		t.Fail()
 	}
-	//TODO: more tests
+	if len(step.PointerCells) != BLOCK_DIM-1 {
+		t.Log("The pointing pair col gave back the wrong number of pointer cells")
+		t.Fail()
+	}
+	if !step.TargetCells.SameCol() || step.TargetCells.Col() != 1 {
+		t.Log("The target cells in the pointing pair col technique were wrong col")
+		t.Fail()
+	}
+	if len(step.Nums) != 1 || step.Nums[0] != 7 {
+		t.Log("Pointing pair col technique gave the wrong number")
+		t.Fail()
+	}
 }
 
 func TestHumanSolve(t *testing.T) {
