@@ -43,7 +43,8 @@ func init() {
 	fillTechniques = append(fillTechniques, hiddenSingleInRow{})
 	fillTechniques = append(fillTechniques, hiddenSingleInCol{})
 	fillTechniques = append(fillTechniques, hiddenSingleInBlock{})
-	cullTechniques = append(cullTechniques, pointingPair{})
+	cullTechniques = append(cullTechniques, pointingPairRow{})
+	cullTechniques = append(cullTechniques, pointingPairCol{})
 }
 
 type nakedSingleTechnique struct {
@@ -62,7 +63,11 @@ type hiddenSingleInBlock struct {
 	*fillSolveTechnique
 }
 
-type pointingPair struct {
+type pointingPairRow struct {
+	*cullSolveTechnique
+}
+
+type pointingPairCol struct {
 	*cullSolveTechnique
 }
 
@@ -214,20 +219,20 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 	return nil
 }
 
-func (self pointingPair) Name() string {
-	return "Pointing pair"
+func (self pointingPairRow) Name() string {
+	return "Pointing pair row"
 }
 
-func (self pointingPair) Description(step *SolveStep) string {
+func (self pointingPairRow) Description(step *SolveStep) string {
 	//TODO: implement this
 	return ""
 }
 
-func (self pointingPair) Find(grid *Grid) *SolveStep {
+func (self pointingPairRow) Find(grid *Grid) *SolveStep {
 	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
 	//TODO: randomize order of blocks.
 	//TODO: should we create a FilterByLegal method on lists of cells?
-	//TODO: finish this!
+	//TODO: this is substantially duplicated in pointingPaircol
 	for i := 0; i < DIM; i++ {
 		block := grid.Block(i)
 		//TODO: randomize order of numbers to test for.
@@ -242,6 +247,35 @@ func (self pointingPair) Find(grid *Grid) *SolveStep {
 			if cells.SameRow() {
 				//Yup!
 				return &SolveStep{grid.Row(cells.Row()).RemoveCells(cells), cells, []int{num + 1}, self}
+			}
+		}
+	}
+	return nil
+}
+
+func (self pointingPairCol) Name() string {
+	return "Pointing pair col"
+}
+
+func (self pointingPairCol) Description(step *SolveStep) string {
+	//TODO: implement this
+	return ""
+}
+
+func (self pointingPairCol) Find(grid *Grid) *SolveStep {
+	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
+	//TODO: randomize order of blocks.
+	//TODO: should we create a FilterByLegal method on lists of cells?
+	//TODO: this is substantially duplicated in pointingPairRow
+	for i := 0; i < DIM; i++ {
+		block := grid.Block(i)
+		//TODO: randomize order of numbers to test for.
+		for num := 0; num < DIM; num++ {
+			cells := block.FilterByPossible(num + 1)
+			//cellList is now a list of all cells that have that number.
+			if len(cells) == 0 || len(cells) > BLOCK_DIM {
+				//Meh, not a match.
+				continue
 			}
 			//Okay, are all cols?
 			if cells.SameCol() {
