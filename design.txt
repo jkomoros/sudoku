@@ -28,6 +28,13 @@ TODO:
 	* At each level, with some randomness (ideally weighted), diverge from DFS by changing which one we dive into and spin off the rest of the work items.
 
 * Grid should suppot copy operations and have copy-on-write semantics with shared cells.
+	* This is hard.
+	* Grids can have parents. If they do, they are a "sparse grid".
+		* No, should be a SparseGrid with a *Grid member.
+		* SparseGrid has a Cell() method that looks in its cache. if it doesn't exist, looks to parent for one.
+	* SparseCell is soemthing that looks like a cell but actually is a wrapper around one with a pointer back to the sparseGrid it's from.
+		* Sparsecells have their own trapping of any modifiying calls that then call back to the sparseGrid (they know which it is) with the new cell itself to put in the cache. Then the SparseCell can be thrown away.
+	* Simplest (no caching): Whenever you want a cell, you call grid.Cell(), which sees if it has one, otherwise returns one from another cell.
 
 * Rate sudokus based on experienced difficulty. (See http://www.longwood.edu/assets/mathematics/Team2975_ProblemB.pdf)
 
