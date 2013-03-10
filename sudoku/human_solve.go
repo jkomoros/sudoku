@@ -45,6 +45,7 @@ func init() {
 	fillTechniques = append(fillTechniques, hiddenSingleInBlock{})
 	cullTechniques = append(cullTechniques, pointingPairRow{})
 	cullTechniques = append(cullTechniques, pointingPairCol{})
+	cullTechniques = append(cullTechniques, nakedPairRow{})
 }
 
 type nakedSingleTechnique struct {
@@ -68,6 +69,10 @@ type pointingPairRow struct {
 }
 
 type pointingPairCol struct {
+	*cullSolveTechnique
+}
+
+type nakedPairRow struct {
 	*cullSolveTechnique
 }
 
@@ -285,6 +290,38 @@ func (self pointingPairCol) Find(grid *Grid) *SolveStep {
 				return &SolveStep{grid.Col(cells.Col()).RemoveCells(block), cells, []int{num + 1}, self}
 			}
 		}
+	}
+	return nil
+}
+
+func (self nakedPairRow) Name() string {
+	return "Naked pair row"
+}
+
+func (self nakedPairRow) Description(step *SolveStep) string {
+	//TODO: implement
+	return ""
+}
+
+func (self nakedPairRow) Find(grid *Grid) *SolveStep {
+	//TODO: randomize order we visit things.
+	for i := 0; i < DIM; i++ {
+		//Grab all of the cells in this row that have exactly two possibilities
+		//Note: we can assume that there aren't any cells with a single possibility in cells right now
+		//since those would have already been filled in before we tried this more advanced technique.
+		cells := grid.Row(i).FilterByNumPossibilities(2)
+
+		//Now we compare each cell to every other to see if they are the same list of possibilties.
+		for j, cell := range cells {
+			for k := j + 1; k < len(cells); k++ {
+				otherCell := cells[k]
+				if intList(cell.Possibilities()).SameAs(intList(otherCell.Possibilities())) {
+					twoCells := []*Cell{cell, otherCell}
+					return &SolveStep{grid.Row(cell.Col).RemoveCells(twoCells), twoCells, cell.Possibilities(), self}
+				}
+			}
+		}
+
 	}
 	return nil
 }

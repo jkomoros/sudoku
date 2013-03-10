@@ -65,6 +65,14 @@ func (self CellList) FilterByPossible(possible int) CellList {
 	return self.Filter(filter)
 }
 
+func (self CellList) FilterByNumPossibilities(target int) CellList {
+	//TODO: test this
+	filter := func(cell *Cell) bool {
+		return len(cell.Possibilities()) == target
+	}
+	return self.Filter(filter)
+}
+
 func (self CellList) RemoveCells(targets CellList) CellList {
 	//TODO: test this.
 	targetCells := make(map[*Cell]bool)
@@ -108,6 +116,19 @@ func (self intList) Same() bool {
 	target := self[0]
 	for _, num := range self {
 		if target != num {
+			return false
+		}
+	}
+	return true
+}
+
+func (self intList) SameAs(other intList) bool {
+	//TODO: test this.
+	if len(self) != len(other) {
+		return false
+	}
+	for i, num := range self {
+		if other[i] != num {
 			return false
 		}
 	}

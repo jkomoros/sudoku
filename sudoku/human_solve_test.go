@@ -23,6 +23,17 @@ const POINTING_PAIR_COL_GRID = `3|.|6|.|.|.|.|.|.
 .|.|.|.|.|.|.|.|.
 .|.|.|.|.|.|.|.|.`
 
+//The following example comes from http://www.sadmansoftware.com/sudoku/nakedsubset.htm
+const NAKED_PAIR_ROW_GRID = `3|.|5|.|.|.|7|.|9
+.|9|.|3|7|.|.|.|6
+.|7|.|.|.|1|.|3|.
+6|.|4|.|.|.|3|.|.
+.|.|.|4|.|5|.|.|.
+.|.|9|.|.|.|.|.|4
+.|4|.|1|.|.|9|8|.
+9|.|.|.|8|7|.|.|.
+8|.|2|.|.|.|1|7|5`
+
 func TestSolveOnlyLegalNumber(t *testing.T) {
 	grid := NewGrid()
 	//Load up a solved grid
@@ -293,6 +304,18 @@ func TestPointingPairRow(t *testing.T) {
 			t.Fail()
 		}
 	}
+}
+
+func TestNakedPairRow(t *testing.T) {
+	grid := NewGrid()
+	grid.Load(NAKED_PAIR_ROW_GRID)
+	solver := &nakedPairRow{}
+	step := solver.Find(grid)
+	if step == nil {
+		t.Log("The naked pair row didn't find a cell it should have.")
+		t.Fail()
+	}
+	//TODO: verify it's the RIGHT solution.
 }
 
 func TestHumanSolve(t *testing.T) {
