@@ -317,7 +317,7 @@ func (self nakedPairCol) Find(grid *Grid) *SolveStep {
 				otherCell := cells[k]
 				if intList(cell.Possibilities()).SameAs(intList(otherCell.Possibilities())) {
 					twoCells := []*Cell{cell, otherCell}
-					return &SolveStep{grid.Row(cell.Col).RemoveCells(twoCells), twoCells, cell.Possibilities(), self}
+					return &SolveStep{grid.Col(cell.Col).RemoveCells(twoCells), twoCells, cell.Possibilities(), self}
 				}
 			}
 		}
