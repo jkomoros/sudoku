@@ -39,7 +39,10 @@ TODO:
 * Rate sudokus based on experienced difficulty. (See http://www.longwood.edu/assets/mathematics/Team2975_ProblemB.pdf)
 
 * Human solve: Is it worth it to do nakedSingles based on row/col/block as well? Those are obvious in different ways.
-* Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm
+* Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm. Technqiues I've skipped so far:
+	* NakedPairBlock
+	* NakedTriple{Row,Col}, NakedQuad{Row,Col} -- requires more logic to handle the "subset of the triple" matching (which isn't ever necessary (assuming existing simpler techniques) for pairs)
+	* BlockBlock interactions
 
 * Analysis: Better aggregation of rank. This problem is called "Rank Aggregation" and can be Hard. http://www10.org/cdrom/papers/577/ seems to outline the most workable solution (MarkovChain4).
 * Analysis: Run our difficulty grader on the real puzzles and see how well it fits with user perceived difficulty.
