@@ -342,6 +342,43 @@ func TestNakedPairCol(t *testing.T) {
 	}
 }
 
+func TestNakedPairRow(t *testing.T) {
+	grid := NewGrid()
+	grid.Load(NAKED_PAIR_COL_GRID)
+	grid = grid.transpose()
+	solver := &nakedPairRow{}
+	step := solver.Find(grid)
+	if step == nil {
+		t.Log("The naked pair row didn't find a cell it should have.")
+		t.FailNow()
+	}
+	if len(step.TargetCells) != DIM-2 {
+		t.Log("The naked pair row had the wrong number of target cells")
+		t.Fail()
+	}
+	if len(step.PointerCells) != 2 {
+		t.Log("The naked pair row had the wrong number of pointer clles")
+		t.Fail()
+	}
+	if !step.TargetCells.SameRow() || step.TargetCells.Row() != 8 {
+		t.Log("The target cells in the naked pair row were wrong row")
+		t.Fail()
+	}
+	if len(step.Nums) != 2 || step.Nums[0] != 2 || step.Nums[1] != 3 {
+		t.Log("Naked pair row found the wrong numbers")
+		t.Fail()
+	}
+	step.Apply(grid)
+	firstNum := step.Nums[0]
+	secondNum := step.Nums[1]
+	for _, cell := range step.TargetCells {
+		if cell.Possible(firstNum) || cell.Possible(secondNum) {
+			t.Log("Naked Pair row found was not appleid correctly")
+			t.Fail()
+		}
+	}
+}
+
 func TestHumanSolve(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(TEST_GRID)

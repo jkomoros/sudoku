@@ -46,6 +46,7 @@ func init() {
 	cullTechniques = append(cullTechniques, pointingPairRow{})
 	cullTechniques = append(cullTechniques, pointingPairCol{})
 	cullTechniques = append(cullTechniques, nakedPairCol{})
+	cullTechniques = append(cullTechniques, nakedPairRow{})
 }
 
 type nakedSingleTechnique struct {
@@ -73,6 +74,10 @@ type pointingPairCol struct {
 }
 
 type nakedPairCol struct {
+	*cullSolveTechnique
+}
+
+type nakedPairRow struct {
 	*cullSolveTechnique
 }
 
@@ -308,6 +313,24 @@ func (self nakedPairCol) Description(step *SolveStep) string {
 func (self nakedPairCol) Find(grid *Grid) *SolveStep {
 	colGetter := func(i int) CellList {
 		return grid.Col(i)
+	}
+	return nakedPair(self, colGetter)
+}
+
+func (self nakedPairRow) Name() string {
+	return "Naked pair row"
+}
+
+func (self nakedPairRow) Description(step *SolveStep) string {
+	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
+		return ""
+	}
+	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that they can't be in any other cell in row %d", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Row())
+}
+
+func (self nakedPairRow) Find(grid *Grid) *SolveStep {
+	colGetter := func(i int) CellList {
+		return grid.Row(i)
 	}
 	return nakedPair(self, colGetter)
 }
