@@ -299,8 +299,10 @@ func (self nakedPairCol) Name() string {
 }
 
 func (self nakedPairCol) Description(step *SolveStep) string {
-	//TODO: implement
-	return ""
+	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
+		return ""
+	}
+	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that they can't be in any other cell in column %d", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Col())
 }
 
 func (self nakedPairCol) Find(grid *Grid) *SolveStep {
