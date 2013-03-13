@@ -18,6 +18,16 @@ const TEST_GRID = `6|1|2|.|.|.|4|.|3
 7|2|.|.|8|5|.|3|.
 5|.|1|.|.|.|9|4|7`
 
+const TRANSPOSED_TEST_GRID = `6|.|.|.|1|.|.|7|5
+1|3|.|.|.|6|9|2|.
+2|.|7|.|3|.|.|.|1
+.|4|.|.|.|5|.|.|.
+.|9|.|6|4|2|.|8|.
+.|.|.|1|.|.|.|5|.
+4|.|.|.|2|.|5|.|9
+.|7|6|8|.|.|.|3|4
+3|2|5|.|6|.|.|.|7`
+
 const SOLVED_TEST_GRID = `6|1|2|7|5|8|4|9|3
 8|3|5|4|9|6|1|7|2
 9|4|7|2|1|3|8|6|5
@@ -399,6 +409,24 @@ func TestAdvancedSolve(t *testing.T) {
 	//TODO: test that nOrFewerSolutions does stop at max (unless cached)
 	//TODO: test HasMultipleSolutions
 
+}
+
+func TestTranspose(t *testing.T) {
+	grid := NewGrid()
+	grid.Load(TEST_GRID)
+	transposedGrid := grid.transpose()
+	if transposedGrid == nil {
+		t.Log("Transpose gave us back a nil grid")
+		t.FailNow()
+	}
+	if transposedGrid == grid {
+		t.Log("Transpose did not return a copy")
+		t.Fail()
+	}
+	if transposedGrid.DataString() != TRANSPOSED_TEST_GRID {
+		t.Log("Transpose did not operate correctly")
+		t.Fail()
+	}
 }
 
 func TestFill(t *testing.T) {

@@ -100,6 +100,19 @@ func (self *Grid) Copy() *Grid {
 	return result
 }
 
+func (self *Grid) transpose() *Grid {
+	//Returns a new grid that is the same as this grid (ignoring overrides, which are nulled), but with rows and cols swapped.
+	result := GetGrid()
+	for r := 0; r < DIM; r++ {
+		for c := 0; c < DIM; c++ {
+			original := self.Cell(r, c)
+			copy := result.Cell(c, r)
+			copy.SetNumber(original.Number())
+		}
+	}
+	return result
+}
+
 func (self *Grid) ResetOverrides() {
 	for _, cell := range self.cells {
 		cell.resetExcludes()
