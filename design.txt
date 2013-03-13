@@ -57,3 +57,6 @@ TODO:
 	* Return a list of groups of keys, where each group has at least n keys, and in each group each key have exactly the same values, although any given key may be MISSING some values (no key may have MORE values
 		* In other words, return a list of groups of keys of size N, where the union of all of their values is exactly equal to N.
 	* For naked, the key is cells and the values are the possibilties. For hidden, the possibilty is the key and the values are the cells.
+	* IMPLEMENTATION
+		* One way to do this is to chose every possible subset of keys of the size N, and test if the union of their values is exactly N.
+			* This should work, but gets expensive quickly. 2^DIM. Even culling cells that are already filled doesn't help hugely here.
