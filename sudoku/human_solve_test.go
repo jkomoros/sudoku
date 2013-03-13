@@ -34,6 +34,16 @@ const NAKED_PAIR_GRID = `3|.|5|.|.|.|7|.|9
 9|.|.|.|8|7|.|.|.
 8|.|2|.|.|.|1|7|5`
 
+const NAKED_PAIR_BLOCK_GRID = `.|.|3|.|7|8|9|.|.
+4|5|6|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.`
+
 func TestSolveOnlyLegalNumber(t *testing.T) {
 	grid := NewGrid()
 	//Load up a solved grid
@@ -374,6 +384,42 @@ func TestNakedPairRow(t *testing.T) {
 	for _, cell := range step.TargetCells {
 		if cell.Possible(firstNum) || cell.Possible(secondNum) {
 			t.Log("Naked Pair row found was not appleid correctly")
+			t.Fail()
+		}
+	}
+}
+
+func TestNakedPairBlock(t *testing.T) {
+	grid := NewGrid()
+	grid.Load(NAKED_PAIR_BLOCK_GRID)
+	solver := &nakedPairBlock{}
+	step := solver.Find(grid)
+	if step == nil {
+		t.Log("The naked pair block didn't find a cell it should have.")
+		t.FailNow()
+	}
+	if len(step.TargetCells) != DIM-2 {
+		t.Log("The naked pair block had the wrong number of target cells")
+		t.Fail()
+	}
+	if len(step.PointerCells) != 2 {
+		t.Log("The naked pair block had the wrong number of pointer clles")
+		t.Fail()
+	}
+	if !step.TargetCells.SameBlock() || step.TargetCells.Block() != 0 {
+		t.Log("The target cells in the naked pair block were wrong block")
+		t.Fail()
+	}
+	if len(step.Nums) != 2 || step.Nums[0] != 1 || step.Nums[1] != 2 {
+		t.Log("Naked pair block found the wrong numbers")
+		t.Fail()
+	}
+	step.Apply(grid)
+	firstNum := step.Nums[0]
+	secondNum := step.Nums[1]
+	for _, cell := range step.TargetCells {
+		if cell.Possible(firstNum) || cell.Possible(secondNum) {
+			t.Log("Naked Pair block found was not appleid correctly")
 			t.Fail()
 		}
 	}

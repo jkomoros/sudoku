@@ -40,7 +40,6 @@ TODO:
 
 * Human solve: Is it worth it to do nakedSingles based on row/col/block as well? Those are obvious in different ways.
 * Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm. Technqiues I've skipped so far:
-	* NakedPairBlock
 	* NakedTriple{Row,Col}, NakedQuad{Row,Col} -- requires more logic to handle the "subset of the triple" matching (which isn't ever necessary (assuming existing simpler techniques) for pairs)
 	* BlockBlock interactions
 
