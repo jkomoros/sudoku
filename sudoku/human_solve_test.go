@@ -24,7 +24,7 @@ const POINTING_PAIR_COL_GRID = `3|.|6|.|.|.|.|.|.
 .|.|.|.|.|.|.|.|.`
 
 //The following example comes from http://www.sadmansoftware.com/sudoku/nakedsubset.htm
-const NAKED_PAIR_COL_GRID = `3|.|5|.|.|.|7|.|9
+const NAKED_PAIR_GRID = `3|.|5|.|.|.|7|.|9
 .|9|.|3|7|.|.|.|6
 .|7|.|.|.|1|.|3|.
 6|.|4|.|.|.|3|.|.
@@ -308,7 +308,7 @@ func TestPointingPairRow(t *testing.T) {
 
 func TestNakedPairCol(t *testing.T) {
 	grid := NewGrid()
-	grid.Load(NAKED_PAIR_COL_GRID)
+	grid.Load(NAKED_PAIR_GRID)
 	solver := &nakedPairCol{}
 	step := solver.Find(grid)
 	if step == nil {
@@ -344,7 +344,7 @@ func TestNakedPairCol(t *testing.T) {
 
 func TestNakedPairRow(t *testing.T) {
 	grid := NewGrid()
-	grid.Load(NAKED_PAIR_COL_GRID)
+	grid.Load(NAKED_PAIR_GRID)
 	grid = grid.transpose()
 	solver := &nakedPairRow{}
 	step := solver.Find(grid)
