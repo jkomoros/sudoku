@@ -51,6 +51,8 @@ TODO:
 
 * Investigate making better grids (fewer clues / more symmetry)
 
+* If you force a crash after we do solve, there are tons of goroutines hanging around and not garbage collected.
+
 * SubSets -- Necessary for solving a number of techniques in HumanSolve, like hidden/nakedPair/Triple/Quad
 	* We need to pivot around both numbers (hidden) and cells (naked)
 	* Each item has the key (what to group on), and the value that needs to be the same to match.
