@@ -400,7 +400,7 @@ func subsetIndexes(len int, size int) [][]int {
 		for i := size - 1; i >= 0; i-- {
 
 			counter := counters[i]
-			if counter < size-i+1 {
+			if counter < len-i-1 {
 				//Found one!
 				counters[i]++
 				incremented = true

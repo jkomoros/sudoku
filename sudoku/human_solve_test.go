@@ -428,29 +428,29 @@ func TestNakedPairBlock(t *testing.T) {
 func TestSubsetIndexes(t *testing.T) {
 	result := subsetIndexes(3, 1)
 	if len(result) != 3 {
-		t.Log("subset indexes didn't return enough results for 3,1: %v", result)
+		t.Log("subset indexes didn't return enough results for 3,1: ", result)
 		t.Fail()
 	}
 	for i, item := range result {
 		if len(item) != 1 || item[0] != i {
-			t.Log("subset indexes for 3,1 was not right at %d position, %v", i, result)
+			t.Log("subset indexes for 3,1 was not right at ", i, " position", result)
 			t.Fail()
 		}
 	}
 	result = subsetIndexes(3, 2)
 	expectedResults := [][]int{[]int{0, 1}, []int{0, 2}, []int{1, 2}}
 	if len(result) != 3 {
-		t.Log("subset indexes returned wrong number of results for 3, 2: %v", result)
+		t.Log("subset indexes returned wrong number of results for 3, 2: ", result)
 		t.FailNow()
 	}
 	for i, item := range result {
 		if len(item) != 2 {
-			t.Log("subset indexes returned a result with wrong numbrer of items %d, %v", i, result)
+			t.Log("subset indexes returned a result with wrong numbrer of items ", i, " : ", result)
 			t.FailNow()
 		}
 		for j, value := range item {
 			if value != expectedResults[i][j] {
-				t.Log("Subset indexes had wrong number at %d, %d: %v", i, j, result)
+				t.Log("Subset indexes had wrong number at ", i, ",", j, " : ", result)
 			}
 		}
 	}
