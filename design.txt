@@ -50,3 +50,10 @@ TODO:
 * Analysis: Build in plotting
 
 * Investigate making better grids (fewer clues / more symmetry)
+
+* SubSets -- Necessary for solving a number of techniques in HumanSolve, like hidden/nakedPair/Triple/Quad
+	* We need to pivot around both numbers (hidden) and cells (naked)
+	* Each item has the key (what to group on), and the value that needs to be the same to match.
+	* Return a list of groups of keys, where each group has at least n keys, and in each group each key have exactly the same values, although any given key may be MISSING some values (no key may have MORE values
+		* In other words, return a list of groups of keys of size N, where the union of all of their values is exactly equal to N.
+	* For naked, the key is cells and the values are the possibilties. For hidden, the possibilty is the key and the values are the cells.
