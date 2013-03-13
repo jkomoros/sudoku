@@ -427,30 +427,27 @@ func TestNakedPairBlock(t *testing.T) {
 
 func TestSubsetIndexes(t *testing.T) {
 	result := subsetIndexes(3, 1)
-	if len(result) != 3 {
-		t.Log("subset indexes didn't return enough results for 3,1: ", result)
-		t.Fail()
-	}
-	for i, item := range result {
-		if len(item) != 1 || item[0] != i {
-			t.Log("subset indexes for 3,1 was not right at ", i, " position", result)
-			t.Fail()
-		}
-	}
+	expectedResult := [][]int{[]int{0}, []int{1}, []int{2}}
+	subsetIndexHelper(t, result, expectedResult)
 	result = subsetIndexes(3, 2)
-	expectedResults := [][]int{[]int{0, 1}, []int{0, 2}, []int{1, 2}}
-	if len(result) != 3 {
-		t.Log("subset indexes returned wrong number of results for 3, 2: ", result)
+	expectedResult = [][]int{[]int{0, 1}, []int{0, 2}, []int{1, 2}}
+	subsetIndexHelper(t, result, expectedResult)
+}
+
+func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
+	if len(result) != len(expectedResult) {
+		t.Log("subset indexes returned wrong number of results for: ", result, " :", expectedResult)
 		t.FailNow()
 	}
 	for i, item := range result {
-		if len(item) != 2 {
-			t.Log("subset indexes returned a result with wrong numbrer of items ", i, " : ", result)
+		if len(item) != len(expectedResult[0]) {
+			t.Log("subset indexes returned a result with wrong numbrer of items ", i, " : ", result, " : ", expectedResult)
 			t.FailNow()
 		}
 		for j, value := range item {
-			if value != expectedResults[i][j] {
-				t.Log("Subset indexes had wrong number at ", i, ",", j, " : ", result)
+			if value != expectedResult[i][j] {
+				t.Log("Subset indexes had wrong number at ", i, ",", j, " : ", result, " : ", expectedResult)
+				t.Fail()
 			}
 		}
 	}
