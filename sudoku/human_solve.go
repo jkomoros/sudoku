@@ -304,12 +304,19 @@ func (self nakedPairCol) Description(step *SolveStep) string {
 }
 
 func (self nakedPairCol) Find(grid *Grid) *SolveStep {
+	colGetter := func(i int) CellList {
+		return grid.Col(i)
+	}
+	return nakedPair(self, colGetter)
+}
+
+func nakedPair(technique SolveTechnique, collectionGetter func(int) CellList) *SolveStep {
 	//TODO: randomize order we visit things.
 	for i := 0; i < DIM; i++ {
 		//Grab all of the cells in this row that have exactly two possibilities
 		//Note: we can assume that there aren't any cells with a single possibility in cells right now
 		//since those would have already been filled in before we tried this more advanced technique.
-		cells := grid.Col(i).FilterByNumPossibilities(2)
+		cells := collectionGetter(i).FilterByNumPossibilities(2)
 
 		//Now we compare each cell to every other to see if they are the same list of possibilties.
 		for j, cell := range cells {
@@ -317,7 +324,7 @@ func (self nakedPairCol) Find(grid *Grid) *SolveStep {
 				otherCell := cells[k]
 				if intList(cell.Possibilities()).SameAs(intList(otherCell.Possibilities())) {
 					twoCells := []*Cell{cell, otherCell}
-					return &SolveStep{grid.Col(cell.Col).RemoveCells(twoCells), twoCells, cell.Possibilities(), self}
+					return &SolveStep{collectionGetter(i).RemoveCells(twoCells), twoCells, cell.Possibilities(), technique}
 				}
 			}
 		}
