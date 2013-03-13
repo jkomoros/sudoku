@@ -425,6 +425,22 @@ func TestNakedPairBlock(t *testing.T) {
 	}
 }
 
+func TestSubsetIndexes(t *testing.T) {
+	result := subsetIndexes(3, 1)
+	t.Log(result)
+	if len(result) != 3 {
+		t.Log("subset indexes didn't return enough results for 3,1")
+		t.Fail()
+	}
+	for i, item := range result {
+		if len(item) != 1 || item[0] != i {
+			t.Log("subset indexes for 3,1 was not right at %d position", i)
+			t.Fail()
+		}
+	}
+	//TODO: test more complicated versions.
+}
+
 func TestHumanSolve(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(TEST_GRID)

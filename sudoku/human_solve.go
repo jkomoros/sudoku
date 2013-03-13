@@ -381,6 +381,48 @@ func nakedPair(technique SolveTechnique, collectionGetter func(int) CellList) *S
 	return nil
 }
 
+func subsetIndexes(len int, size int) [][]int {
+	//returns an array of slices of size size that give you all of the subsets of a list of length len
+	result := make([][]int, 0)
+	counters := make([]int, size)
+	for i, _ := range counters {
+		counters[i] = i
+	}
+	for {
+		innerResult := make([]int, size)
+		for i, counter := range counters {
+			innerResult[i] = counter
+		}
+		result = append(result, innerResult)
+		//Now, increment.
+		//Start at the end and try to increment each counter one.
+		incremented := false
+		for i := size - 1; i >= 0; i-- {
+
+			counter := counters[i]
+			if counter < size-i+1 {
+				//Found one!
+				counters[i]++
+				incremented = true
+				if i < size-1 {
+					//It was an inner counter; need to set all of the higher counters to one above the one to the left.
+					base := counters[i] + 1
+					for j := i + 1; j < size; j++ {
+						counters[j] = base
+						base++
+					}
+				}
+				break
+			}
+		}
+		//If we couldn't increment any, there's nothing to do.
+		if !incremented {
+			break
+		}
+	}
+	return result
+}
+
 func (self *Grid) HumanSolve() SolveDirections {
 	var results []*SolveStep
 	for !self.Solved() {
