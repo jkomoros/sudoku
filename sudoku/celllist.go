@@ -115,6 +115,18 @@ func (self CellList) PossibilitiesUnion() intList {
 	return result
 }
 
+func (self CellList) Subset(indexes intList) CellList {
+	result := make(CellList, len(indexes))
+	max := len(self)
+	for i, index := range indexes {
+		if index > max {
+			continue
+		}
+		result[i] = self[index]
+	}
+	return result
+}
+
 func (self CellList) CollectNums(fetcher func(*Cell) int) intList {
 	var result intList
 	for _, cell := range self {
