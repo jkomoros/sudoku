@@ -73,6 +73,15 @@ func (self CellList) FilterByNumPossibilities(target int) CellList {
 	return self.Filter(filter)
 }
 
+func (self CellList) FilterByHasPossibilities() CellList {
+	//Returns a list of cells that have possibilities.
+	//TODO: test this.
+	filter := func(cell *Cell) bool {
+		return len(cell.Possibilities()) > 0
+	}
+	return self.Filter(filter)
+}
+
 func (self CellList) RemoveCells(targets CellList) CellList {
 	//TODO: test this.
 	targetCells := make(map[*Cell]bool)
