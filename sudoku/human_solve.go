@@ -17,7 +17,7 @@ const (
 type SolveStep struct {
 	TargetCells  CellList
 	PointerCells CellList
-	Nums         []int
+	Nums         IntSlice
 	Technique    SolveTechnique
 }
 
