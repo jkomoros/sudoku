@@ -1,5 +1,9 @@
 package sudoku
 
+import (
+	"sort"
+)
+
 type CellList []*Cell
 
 type IntSlice []int
@@ -162,6 +166,28 @@ func (self IntSlice) Same() bool {
 		}
 	}
 	return true
+}
+
+func (self IntSlice) SameContentAs(otherSlice IntSlice) bool {
+	//Same as SameAs, but doesn't care about order.
+	var selfToUse IntSlice
+	if sort.IntsAreSorted(self) {
+		selfToUse = self
+	} else {
+		selfToUse := make(IntSlice, len(self))
+		sort.IntSlice(selfToUse).Sort()
+	}
+
+	var otherToUse IntSlice
+
+	if sort.IntsAreSorted(otherSlice) {
+		otherToUse = otherSlice
+	} else {
+		otherToUse := make(IntSlice, len(otherToUse))
+		sort.IntSlice(otherToUse).Sort()
+	}
+
+	return selfToUse.SameAs(otherToUse)
 }
 
 func (self IntSlice) SameAs(other IntSlice) bool {
