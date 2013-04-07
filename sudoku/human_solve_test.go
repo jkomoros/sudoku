@@ -464,7 +464,7 @@ func TestSubsetCellsWithNPossibilities(t *testing.T) {
 	results := subsetCellsWithNPossibilities(2, grid.Col(DIM-1))
 	if len(results) != 1 {
 		t.Log("Didn't get right number of subset cells with n possibilities: ", len(results))
-		t.Fail()
+		t.FailNow()
 	}
 	result := results[0]
 	if len(result) != 2 {
