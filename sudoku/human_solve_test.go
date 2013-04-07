@@ -375,7 +375,7 @@ func TestNakedPairRow(t *testing.T) {
 		t.Fail()
 	}
 	if len(step.Nums) != 2 || step.Nums[0] != 2 || step.Nums[1] != 3 {
-		t.Log("Naked pair row found the wrong numbers")
+		t.Log("Naked pair row found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
 	step.Apply(grid)
