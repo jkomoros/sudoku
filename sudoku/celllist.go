@@ -2,7 +2,7 @@ package sudoku
 
 type CellList []*Cell
 
-type intList []int
+type IntSlice []int
 
 func getRow(cell *Cell) int {
 	return cell.Row
@@ -94,8 +94,8 @@ func (self CellList) RemoveCells(targets CellList) CellList {
 	return self.Filter(filterFunc)
 }
 
-func (self CellList) PossibilitiesUnion() intList {
-	//Returns an intList of the union of all possibilities.
+func (self CellList) PossibilitiesUnion() IntSlice {
+	//Returns an IntSlice of the union of all possibilities.
 	set := make(map[int]bool)
 
 	for _, cell := range self {
@@ -104,7 +104,7 @@ func (self CellList) PossibilitiesUnion() intList {
 		}
 	}
 
-	result := make(intList, len(set))
+	result := make(IntSlice, len(set))
 
 	i := 0
 	for possibility, _ := range set {
@@ -115,7 +115,7 @@ func (self CellList) PossibilitiesUnion() intList {
 	return result
 }
 
-func (self CellList) Subset(indexes intList) CellList {
+func (self CellList) Subset(indexes IntSlice) CellList {
 	result := make(CellList, len(indexes))
 	max := len(self)
 	for i, index := range indexes {
@@ -127,8 +127,8 @@ func (self CellList) Subset(indexes intList) CellList {
 	return result
 }
 
-func (self CellList) CollectNums(fetcher func(*Cell) int) intList {
-	var result intList
+func (self CellList) CollectNums(fetcher func(*Cell) int) IntSlice {
+	var result IntSlice
 	for _, cell := range self {
 		result = append(result, fetcher(cell))
 	}
@@ -151,7 +151,7 @@ func (self CellList) Map(mapper func(*Cell)) {
 	}
 }
 
-func (self intList) Same() bool {
+func (self IntSlice) Same() bool {
 	if len(self) == 0 {
 		return true
 	}
@@ -164,7 +164,7 @@ func (self intList) Same() bool {
 	return true
 }
 
-func (self intList) SameAs(other intList) bool {
+func (self IntSlice) SameAs(other IntSlice) bool {
 	//TODO: test this.
 	if len(self) != len(other) {
 		return false

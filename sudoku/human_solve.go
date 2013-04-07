@@ -370,7 +370,7 @@ func nakedPair(technique SolveTechnique, collectionGetter func(int) CellList) *S
 		for j, cell := range cells {
 			for k := j + 1; k < len(cells); k++ {
 				otherCell := cells[k]
-				if intList(cell.Possibilities()).SameAs(intList(otherCell.Possibilities())) {
+				if IntSlice(cell.Possibilities()).SameAs(IntSlice(otherCell.Possibilities())) {
 					twoCells := []*Cell{cell, otherCell}
 					return &SolveStep{collectionGetter(i).RemoveCells(twoCells), twoCells, cell.Possibilities(), technique}
 				}

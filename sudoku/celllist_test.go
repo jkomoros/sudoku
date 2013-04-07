@@ -73,12 +73,12 @@ func TestBasicCellList(t *testing.T) {
 
 func TestIntList(t *testing.T) {
 	numArr := [...]int{1, 1, 1}
-	if !intList(numArr[:]).Same() {
+	if !IntSlice(numArr[:]).Same() {
 		t.Log("We didn't think that a num list with all of the same ints was the same.")
 		t.Fail()
 	}
 	differentNumArr := [...]int{1, 2, 1}
-	if intList(differentNumArr[:]).Same() {
+	if IntSlice(differentNumArr[:]).Same() {
 		t.Log("We thought a list of different ints were the same")
 		t.Fail()
 	}
