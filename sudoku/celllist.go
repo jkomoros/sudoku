@@ -94,6 +94,27 @@ func (self CellList) RemoveCells(targets CellList) CellList {
 	return self.Filter(filterFunc)
 }
 
+func (self CellList) PossibilitiesUnion() intList {
+	//Returns an intList of the union of all possibilities.
+	set := make(map[int]bool)
+
+	for _, cell := range self {
+		for _, possibility := range cell.Possibilities() {
+			set[possibility] = true
+		}
+	}
+
+	result := make(intList, len(set))
+
+	i := 0
+	for possibility, _ := range set {
+		result[i] = possibility
+		i++
+	}
+
+	return result
+}
+
 func (self CellList) CollectNums(fetcher func(*Cell) int) intList {
 	var result intList
 	for _, cell := range self {
