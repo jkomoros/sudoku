@@ -395,21 +395,11 @@ func subsetCellsWithNPossibilities(k int, inputCells CellList) []CellList {
 
 	for _, indexes := range subsetIndexes(len(cells), k) {
 		//Build up set of all possibilties in this subset.
-		set := make(map[int]bool)
-		for _, index := range indexes {
-			cell := cells[index]
-			for _, possibility := range cell.Possibilities() {
-				set[possibility] = true
-			}
-		}
+		subset := cells.Subset(indexes)
+		union := subset.PossibilitiesUnion()
 		//Okay, we built up the set. Is it the target size?
-		if len(set) == k {
-			subResult := make(CellList, k)
-			//Yup, add this to the results.
-			for i, index := range indexes {
-				subResult[i] = cells[index]
-			}
-			results = append(results, subResult)
+		if len(union) == k {
+			results = append(results, subset)
 		}
 	}
 
