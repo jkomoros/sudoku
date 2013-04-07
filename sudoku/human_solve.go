@@ -381,6 +381,42 @@ func nakedPair(technique SolveTechnique, collectionGetter func(int) CellList) *S
 	return nil
 }
 
+func subsetCellsWithNPossibilities(k int, inputCells CellList) []CellList {
+	//Given a list of cells (often a row, col, or block) and a target group size K,
+	//returns a list of groups of cells of size K where the union of each group's possibility list
+	//is size K.
+
+	//Note: this function has performance O(n!/k!(n - k)!)
+
+	//First, cull any cells with no possibilities to help minimize n
+	cells := inputCells.FilterByHasPossibilities()
+
+	var results []CellList
+
+	for _, indexes := range subsetIndexes(len(cells), k) {
+		//Build up set of all possibilties in this subset.
+		set := make(map[int]bool)
+		for _, index := range indexes {
+			cell := cells[index]
+			for _, possibility := range cell.Possibilities() {
+				set[possibility] = true
+			}
+		}
+		//Okay, we built up the set. Is it the target size?
+		if len(set) == k {
+			subResult := make(CellList, k)
+			//Yup, add this to the results.
+			for i, index := range indexes {
+				subResult[i] = cells[index]
+			}
+			results = append(results, subResult)
+		}
+	}
+
+	return results
+
+}
+
 func subsetIndexes(len int, size int) [][]int {
 	//returns an array of slices of size size that give you all of the subsets of a list of length len
 	result := make([][]int, 0)

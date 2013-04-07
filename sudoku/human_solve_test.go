@@ -458,6 +458,25 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 	}
 }
 
+func TestSubsetCellsWithNPossibilities(t *testing.T) {
+	grid := NewGrid()
+	grid.Load(NAKED_PAIR_GRID)
+	results := subsetCellsWithNPossibilities(2, grid.Col(DIM-1))
+	if len(results) != 1 {
+		t.Log("Didn't get right number of subset cells with n possibilities: ", len(results))
+		t.Fail()
+	}
+	result := results[0]
+	if len(result) != 2 {
+		t.Log("Number of subset cells did not match k: ", len(result))
+		t.Fail()
+	}
+	if result[0].Row != 6 || result[0].Col != 8 || result[1].Row != 7 || result[1].Col != 8 {
+		t.Log("Subset cells came back with wrong cells: ", result)
+		t.Fail()
+	}
+}
+
 func TestHumanSolve(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(TEST_GRID)
