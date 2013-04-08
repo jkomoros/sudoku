@@ -319,7 +319,7 @@ func (self nakedPairCol) Find(grid *Grid) *SolveStep {
 	colGetter := func(i int) CellList {
 		return grid.Col(i)
 	}
-	return nakedPair(self, colGetter)
+	return nakedSubset(self, 2, colGetter)
 }
 
 func (self nakedPairRow) Name() string {
@@ -337,7 +337,7 @@ func (self nakedPairRow) Find(grid *Grid) *SolveStep {
 	rowGetter := func(i int) CellList {
 		return grid.Row(i)
 	}
-	return nakedPair(self, rowGetter)
+	return nakedSubset(self, 2, rowGetter)
 }
 
 func (self nakedPairBlock) Name() string {
@@ -355,14 +355,14 @@ func (self nakedPairBlock) Find(grid *Grid) *SolveStep {
 	blockGetter := func(i int) CellList {
 		return grid.Block(i)
 	}
-	return nakedPair(self, blockGetter)
+	return nakedSubset(self, 2, blockGetter)
 }
 
-func nakedPair(technique SolveTechnique, collectionGetter func(int) CellList) *SolveStep {
+func nakedSubset(technique SolveTechnique, k int, collectionGetter func(int) CellList) *SolveStep {
 	//TODO: randomize order we visit things.
 	for i := 0; i < DIM; i++ {
 
-		groups := subsetCellsWithNPossibilities(2, collectionGetter(i))
+		groups := subsetCellsWithNPossibilities(k, collectionGetter(i))
 
 		if len(groups) > 0 {
 			//TODO: pick a random one
