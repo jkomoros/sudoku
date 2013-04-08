@@ -176,6 +176,7 @@ func (self IntSlice) SameContentAs(otherSlice IntSlice) bool {
 		selfToUse = self
 	} else {
 		selfToUse := make(IntSlice, len(self))
+		copy(selfToUse, self)
 		sort.IntSlice(selfToUse).Sort()
 	}
 
@@ -185,6 +186,7 @@ func (self IntSlice) SameContentAs(otherSlice IntSlice) bool {
 		otherToUse = otherSlice
 	} else {
 		otherToUse := make(IntSlice, len(otherToUse))
+		copy(otherToUse, otherSlice)
 		sort.IntSlice(otherToUse).Sort()
 	}
 
