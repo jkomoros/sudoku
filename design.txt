@@ -40,7 +40,7 @@ TODO:
 
 * Human solve: Is it worth it to do nakedSingles based on row/col/block as well? Those are obvious in different ways.
 * Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm. Technqiues I've skipped so far:
-	* NakedTriple{Row,Col}, NakedQuad{Row,Col} -- requires more logic to handle the "subset of the triple" matching (which isn't ever necessary (assuming existing simpler techniques) for pairs)
+	* NakedTriple{Row,Col}, NakedQuad{Row,Col}. This now trivial given Subset logic. NEXT STEP
 	* BlockBlock interactions
 
 * Analysis: Better aggregation of rank. This problem is called "Rank Aggregation" and can be Hard. http://www10.org/cdrom/papers/577/ seems to outline the most workable solution (MarkovChain4).
@@ -52,13 +52,3 @@ TODO:
 * Investigate making better grids (fewer clues / more symmetry)
 
 * If you force a crash after we do solve, there are tons of goroutines hanging around and not garbage collected.
-
-* SubSets -- Necessary for solving a number of techniques in HumanSolve, like hidden/nakedPair/Triple/Quad
-	* We need to pivot around both numbers (hidden) and cells (naked)
-	* Each item has the key (what to group on), and the value that needs to be the same to match.
-	* Return a list of groups of keys, where each group has at least n keys, and in each group each key have exactly the same values, although any given key may be MISSING some values (no key may have MORE values
-		* In other words, return a list of groups of keys of size N, where the union of all of their values is exactly equal to N.
-	* For naked, the key is cells and the values are the possibilties. For hidden, the possibilty is the key and the values are the cells.
-	* IMPLEMENTATION
-		* One way to do this is to chose every possible subset of keys of the size N, and test if the union of their values is exactly N.
-			* This should work, but gets expensive quickly. 2^DIM. Even culling cells that are already filled doesn't help hugely here.
