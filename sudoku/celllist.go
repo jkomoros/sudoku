@@ -123,7 +123,8 @@ func (self CellList) Subset(indexes IntSlice) CellList {
 	result := make(CellList, len(indexes))
 	max := len(self)
 	for i, index := range indexes {
-		if index > max {
+		if index >= max {
+			//This probably is indicative of a larger problem.
 			continue
 		}
 		result[i] = self[index]
