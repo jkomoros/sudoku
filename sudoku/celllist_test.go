@@ -83,3 +83,23 @@ func TestIntList(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestSameContentAs(t *testing.T) {
+	one := []int{2, 3, 1}
+	two := []int{2, 1, 3}
+
+	if !IntSlice(one).SameContentAs(two) {
+		t.Log("Didn't think two equivalent slices were the same.")
+		t.Fail()
+	}
+
+	if !IntSlice(one).SameAs([]int{2, 3, 1}) {
+		t.Log("We mutated one")
+		t.Fail()
+	}
+
+	if !IntSlice(two).SameAs([]int{2, 1, 3}) {
+		t.Log("We mutated two")
+		t.Fail()
+	}
+}
