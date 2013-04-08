@@ -51,4 +51,7 @@ TODO:
 
 * Investigate making better grids (fewer clues / more symmetry)
 
-* If you force a crash after we do solve, there are tons of goroutines hanging around and not garbage collected.
+* We never actually call ReturnGrid!
+
+* Low priority: If you panic and look at the stack you'll still almost always see one goroutine that's stuck on self.Invalid somehow.
+
