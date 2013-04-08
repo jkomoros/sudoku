@@ -171,24 +171,14 @@ func (self IntSlice) Same() bool {
 
 func (self IntSlice) SameContentAs(otherSlice IntSlice) bool {
 	//Same as SameAs, but doesn't care about order.
-	var selfToUse IntSlice
-	if sort.IntsAreSorted(self) {
-		selfToUse = self
-	} else {
-		selfToUse := make(IntSlice, len(self))
-		copy(selfToUse, self)
-		sort.IntSlice(selfToUse).Sort()
-	}
 
-	var otherToUse IntSlice
+	selfToUse := make(IntSlice, len(self))
+	copy(selfToUse, self)
+	sort.IntSlice(selfToUse).Sort()
 
-	if sort.IntsAreSorted(otherSlice) {
-		otherToUse = otherSlice
-	} else {
-		otherToUse := make(IntSlice, len(otherToUse))
-		copy(otherToUse, otherSlice)
-		sort.IntSlice(otherToUse).Sort()
-	}
+	otherToUse := make(IntSlice, len(otherSlice))
+	copy(otherToUse, otherSlice)
+	sort.IntSlice(otherToUse).Sort()
 
 	return selfToUse.SameAs(otherToUse)
 }
