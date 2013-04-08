@@ -408,6 +408,11 @@ func subsetCellsWithNPossibilities(k int, inputCells CellList) []CellList {
 }
 
 func subsetIndexes(len int, size int) [][]int {
+	//Sanity check
+	if size > len {
+		return nil
+	}
+
 	//returns an array of slices of size size that give you all of the subsets of a list of length len
 	result := make([][]int, 0)
 	counters := make([]int, size)

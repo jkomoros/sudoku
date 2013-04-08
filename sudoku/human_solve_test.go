@@ -437,6 +437,12 @@ func TestSubsetIndexes(t *testing.T) {
 	result = subsetIndexes(5, 3)
 	expectedResult = [][]int{[]int{0, 1, 2}, []int{0, 1, 3}, []int{0, 1, 4}, []int{0, 2, 3}, []int{0, 2, 4}, []int{0, 3, 4}, []int{1, 2, 3}, []int{1, 2, 4}, []int{1, 3, 4}, []int{2, 3, 4}}
 	subsetIndexHelper(t, result, expectedResult)
+
+	if subsetIndexes(1, 2) != nil {
+		t.Log("Subset indexes returned a subset where the length is greater than the len")
+		t.Fail()
+	}
+
 }
 
 func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
