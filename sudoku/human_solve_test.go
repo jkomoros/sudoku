@@ -337,8 +337,8 @@ func TestNakedPairCol(t *testing.T) {
 		t.Log("The target cells in the naked pair col were wrong col")
 		t.Fail()
 	}
-	if len(step.Nums) != 2 || step.Nums[0] != 2 || step.Nums[1] != 3 {
-		t.Log("Naked pair col found the wrong numbers")
+	if len(step.Nums) != 2 || !step.Nums.SameContentAs([]int{2, 3}) {
+		t.Log("Naked pair col found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
 	step.Apply(grid)
@@ -374,8 +374,8 @@ func TestNakedPairRow(t *testing.T) {
 		t.Log("The target cells in the naked pair row were wrong row")
 		t.Fail()
 	}
-	if len(step.Nums) != 2 || step.Nums[0] != 2 || step.Nums[1] != 3 {
-		t.Log("Naked pair row found the wrong numbers")
+	if len(step.Nums) != 2 || !step.Nums.SameContentAs([]int{2, 3}) {
+		t.Log("Naked pair row found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
 	step.Apply(grid)
@@ -410,8 +410,8 @@ func TestNakedPairBlock(t *testing.T) {
 		t.Log("The target cells in the naked pair block were wrong block")
 		t.Fail()
 	}
-	if len(step.Nums) != 2 || step.Nums[0] != 1 || step.Nums[1] != 2 {
-		t.Log("Naked pair block found the wrong numbers")
+	if len(step.Nums) != 2 || !step.Nums.SameContentAs([]int{1, 2}) {
+		t.Log("Naked pair block found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
 	step.Apply(grid)
@@ -437,6 +437,12 @@ func TestSubsetIndexes(t *testing.T) {
 	result = subsetIndexes(5, 3)
 	expectedResult = [][]int{[]int{0, 1, 2}, []int{0, 1, 3}, []int{0, 1, 4}, []int{0, 2, 3}, []int{0, 2, 4}, []int{0, 3, 4}, []int{1, 2, 3}, []int{1, 2, 4}, []int{1, 3, 4}, []int{2, 3, 4}}
 	subsetIndexHelper(t, result, expectedResult)
+
+	if subsetIndexes(1, 2) != nil {
+		t.Log("Subset indexes returned a subset where the length is greater than the len")
+		t.Fail()
+	}
+
 }
 
 func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
@@ -455,6 +461,25 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 				t.Fail()
 			}
 		}
+	}
+}
+
+func TestSubsetCellsWithNPossibilities(t *testing.T) {
+	grid := NewGrid()
+	grid.Load(NAKED_PAIR_GRID)
+	results := subsetCellsWithNPossibilities(2, grid.Col(DIM-1))
+	if len(results) != 1 {
+		t.Log("Didn't get right number of subset cells with n possibilities: ", len(results))
+		t.FailNow()
+	}
+	result := results[0]
+	if len(result) != 2 {
+		t.Log("Number of subset cells did not match k: ", len(result))
+		t.Fail()
+	}
+	if result[0].Row != 6 || result[0].Col != 8 || result[1].Row != 7 || result[1].Col != 8 {
+		t.Log("Subset cells came back with wrong cells: ", result)
+		t.Fail()
 	}
 }
 

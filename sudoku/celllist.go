@@ -1,8 +1,12 @@
 package sudoku
 
+import (
+	"sort"
+)
+
 type CellList []*Cell
 
-type intList []int
+type IntSlice []int
 
 func getRow(cell *Cell) int {
 	return cell.Row
@@ -73,6 +77,15 @@ func (self CellList) FilterByNumPossibilities(target int) CellList {
 	return self.Filter(filter)
 }
 
+func (self CellList) FilterByHasPossibilities() CellList {
+	//Returns a list of cells that have possibilities.
+	//TODO: test this.
+	filter := func(cell *Cell) bool {
+		return len(cell.Possibilities()) > 0
+	}
+	return self.Filter(filter)
+}
+
 func (self CellList) RemoveCells(targets CellList) CellList {
 	//TODO: test this.
 	targetCells := make(map[*Cell]bool)
@@ -85,8 +98,42 @@ func (self CellList) RemoveCells(targets CellList) CellList {
 	return self.Filter(filterFunc)
 }
 
-func (self CellList) CollectNums(fetcher func(*Cell) int) intList {
-	var result intList
+func (self CellList) PossibilitiesUnion() IntSlice {
+	//Returns an IntSlice of the union of all possibilities.
+	set := make(map[int]bool)
+
+	for _, cell := range self {
+		for _, possibility := range cell.Possibilities() {
+			set[possibility] = true
+		}
+	}
+
+	result := make(IntSlice, len(set))
+
+	i := 0
+	for possibility, _ := range set {
+		result[i] = possibility
+		i++
+	}
+
+	return result
+}
+
+func (self CellList) Subset(indexes IntSlice) CellList {
+	result := make(CellList, len(indexes))
+	max := len(self)
+	for i, index := range indexes {
+		if index >= max {
+			//This probably is indicative of a larger problem.
+			continue
+		}
+		result[i] = self[index]
+	}
+	return result
+}
+
+func (self CellList) CollectNums(fetcher func(*Cell) int) IntSlice {
+	var result IntSlice
 	for _, cell := range self {
 		result = append(result, fetcher(cell))
 	}
@@ -109,7 +156,7 @@ func (self CellList) Map(mapper func(*Cell)) {
 	}
 }
 
-func (self intList) Same() bool {
+func (self IntSlice) Same() bool {
 	if len(self) == 0 {
 		return true
 	}
@@ -122,7 +169,21 @@ func (self intList) Same() bool {
 	return true
 }
 
-func (self intList) SameAs(other intList) bool {
+func (self IntSlice) SameContentAs(otherSlice IntSlice) bool {
+	//Same as SameAs, but doesn't care about order.
+
+	selfToUse := make(IntSlice, len(self))
+	copy(selfToUse, self)
+	sort.IntSlice(selfToUse).Sort()
+
+	otherToUse := make(IntSlice, len(otherSlice))
+	copy(otherToUse, otherSlice)
+	sort.IntSlice(otherToUse).Sort()
+
+	return selfToUse.SameAs(otherToUse)
+}
+
+func (self IntSlice) SameAs(other IntSlice) bool {
 	//TODO: test this.
 	if len(self) != len(other) {
 		return false

@@ -73,13 +73,42 @@ func TestBasicCellList(t *testing.T) {
 
 func TestIntList(t *testing.T) {
 	numArr := [...]int{1, 1, 1}
-	if !intList(numArr[:]).Same() {
+	if !IntSlice(numArr[:]).Same() {
 		t.Log("We didn't think that a num list with all of the same ints was the same.")
 		t.Fail()
 	}
 	differentNumArr := [...]int{1, 2, 1}
-	if intList(differentNumArr[:]).Same() {
+	if IntSlice(differentNumArr[:]).Same() {
 		t.Log("We thought a list of different ints were the same")
 		t.Fail()
 	}
+}
+
+func TestSameContentAs(t *testing.T) {
+	one := IntSlice([]int{2, 3, 1})
+	two := IntSlice([]int{2, 1, 3})
+
+	if !one.SameContentAs(two) {
+		t.Log("Didn't think two equivalent slices were the same.")
+		t.Fail()
+	}
+
+	if !one.SameAs([]int{2, 3, 1}) {
+		t.Log("We mutated one")
+		t.Fail()
+	}
+
+	if !two.SameAs([]int{2, 1, 3}) {
+		t.Log("We mutated two")
+		t.Fail()
+	}
+
+	onePair := IntSlice([]int{3, 2})
+	twoPair := IntSlice([]int{2, 3})
+
+	if !onePair.SameContentAs(twoPair) {
+		t.Log("Didn't think two equivalent pairs were the same.")
+		t.Fail()
+	}
+
 }

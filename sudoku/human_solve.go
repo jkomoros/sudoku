@@ -17,7 +17,7 @@ const (
 type SolveStep struct {
 	TargetCells  CellList
 	PointerCells CellList
-	Nums         []int
+	Nums         IntSlice
 	Technique    SolveTechnique
 }
 
@@ -361,27 +361,51 @@ func (self nakedPairBlock) Find(grid *Grid) *SolveStep {
 func nakedPair(technique SolveTechnique, collectionGetter func(int) CellList) *SolveStep {
 	//TODO: randomize order we visit things.
 	for i := 0; i < DIM; i++ {
-		//Grab all of the cells in this row that have exactly two possibilities
-		//Note: we can assume that there aren't any cells with a single possibility in cells right now
-		//since those would have already been filled in before we tried this more advanced technique.
-		cells := collectionGetter(i).FilterByNumPossibilities(2)
 
-		//Now we compare each cell to every other to see if they are the same list of possibilties.
-		for j, cell := range cells {
-			for k := j + 1; k < len(cells); k++ {
-				otherCell := cells[k]
-				if intList(cell.Possibilities()).SameAs(intList(otherCell.Possibilities())) {
-					twoCells := []*Cell{cell, otherCell}
-					return &SolveStep{collectionGetter(i).RemoveCells(twoCells), twoCells, cell.Possibilities(), technique}
-				}
-			}
+		groups := subsetCellsWithNPossibilities(2, collectionGetter(i))
+
+		if len(groups) > 0 {
+			//TODO: pick a random one
+			group := groups[0]
+			return &SolveStep{collectionGetter(i).RemoveCells(group), group, group.PossibilitiesUnion(), technique}
 		}
 
 	}
 	return nil
 }
 
+func subsetCellsWithNPossibilities(k int, inputCells CellList) []CellList {
+	//Given a list of cells (often a row, col, or block) and a target group size K,
+	//returns a list of groups of cells of size K where the union of each group's possibility list
+	//is size K.
+
+	//Note: this function has performance O(n!/k!(n - k)!)
+
+	//First, cull any cells with no possibilities to help minimize n
+	cells := inputCells.FilterByHasPossibilities()
+
+	var results []CellList
+
+	for _, indexes := range subsetIndexes(len(cells), k) {
+		//Build up set of all possibilties in this subset.
+		subset := cells.Subset(indexes)
+		union := subset.PossibilitiesUnion()
+		//Okay, we built up the set. Is it the target size?
+		if len(union) == k {
+			results = append(results, subset)
+		}
+	}
+
+	return results
+
+}
+
 func subsetIndexes(len int, size int) [][]int {
+	//Sanity check
+	if size > len {
+		return nil
+	}
+
 	//returns an array of slices of size size that give you all of the subsets of a list of length len
 	result := make([][]int, 0)
 	counters := make([]int, size)
