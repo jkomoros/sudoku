@@ -361,20 +361,13 @@ func (self nakedPairBlock) Find(grid *Grid) *SolveStep {
 func nakedPair(technique SolveTechnique, collectionGetter func(int) CellList) *SolveStep {
 	//TODO: randomize order we visit things.
 	for i := 0; i < DIM; i++ {
-		//Grab all of the cells in this row that have exactly two possibilities
-		//Note: we can assume that there aren't any cells with a single possibility in cells right now
-		//since those would have already been filled in before we tried this more advanced technique.
-		cells := collectionGetter(i).FilterByNumPossibilities(2)
 
-		//Now we compare each cell to every other to see if they are the same list of possibilties.
-		for j, cell := range cells {
-			for k := j + 1; k < len(cells); k++ {
-				otherCell := cells[k]
-				if IntSlice(cell.Possibilities()).SameAs(IntSlice(otherCell.Possibilities())) {
-					twoCells := []*Cell{cell, otherCell}
-					return &SolveStep{collectionGetter(i).RemoveCells(twoCells), twoCells, cell.Possibilities(), technique}
-				}
-			}
+		groups := subsetCellsWithNPossibilities(2, collectionGetter(i))
+
+		if len(groups) > 0 {
+			//TODO: pick a random one
+			group := groups[0]
+			return &SolveStep{collectionGetter(i).RemoveCells(group), group, group.PossibilitiesUnion(), technique}
 		}
 
 	}
