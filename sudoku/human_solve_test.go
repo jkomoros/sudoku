@@ -337,7 +337,7 @@ func TestNakedPairCol(t *testing.T) {
 		t.Log("The target cells in the naked pair col were wrong col")
 		t.Fail()
 	}
-	if len(step.Nums) != 2 || step.Nums.SameContentAs([]int{2, 3}) {
+	if len(step.Nums) != 2 || !step.Nums.SameContentAs([]int{2, 3}) {
 		t.Log("Naked pair col found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
@@ -374,7 +374,7 @@ func TestNakedPairRow(t *testing.T) {
 		t.Log("The target cells in the naked pair row were wrong row")
 		t.Fail()
 	}
-	if len(step.Nums) != 2 || step.Nums.SameContentAs([]int{2, 3}) {
+	if len(step.Nums) != 2 || !step.Nums.SameContentAs([]int{2, 3}) {
 		t.Log("Naked pair row found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
@@ -410,7 +410,7 @@ func TestNakedPairBlock(t *testing.T) {
 		t.Log("The target cells in the naked pair block were wrong block")
 		t.Fail()
 	}
-	if len(step.Nums) != 2 || step.Nums.SameContentAs([]int{1, 2}) {
+	if len(step.Nums) != 2 || !step.Nums.SameContentAs([]int{1, 2}) {
 		t.Log("Naked pair block found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
