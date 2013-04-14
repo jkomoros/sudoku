@@ -135,14 +135,6 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 			exit <- true
 		}
 
-		//Close out all channels so no remaining go routines will block.
-		close(inGrids)
-		close(outGrids)
-		close(exit)
-		close(gridsToProcess)
-		close(isFirst)
-		close(results)
-
 		self.cachedSolutions = tempSolutions
 
 	}
