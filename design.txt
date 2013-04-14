@@ -57,3 +57,5 @@ TODO:
 
 * Try to un-revert f29709 (closing open channels)
 
+* Make grid.Load work for puzzles in .sdk format.
+
