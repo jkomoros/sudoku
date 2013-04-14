@@ -48,6 +48,9 @@ func init() {
 	cullTechniques = append(cullTechniques, nakedPairCol{})
 	cullTechniques = append(cullTechniques, nakedPairRow{})
 	cullTechniques = append(cullTechniques, nakedPairBlock{})
+	cullTechniques = append(cullTechniques, nakedTripleCol{})
+	cullTechniques = append(cullTechniques, nakedTripleRow{})
+	cullTechniques = append(cullTechniques, nakedTripleBlock{})
 }
 
 type nakedSingleTechnique struct {
@@ -83,6 +86,18 @@ type nakedPairRow struct {
 }
 
 type nakedPairBlock struct {
+	*cullSolveTechnique
+}
+
+type nakedTripleCol struct {
+	*cullSolveTechnique
+}
+
+type nakedTripleRow struct {
+	*cullSolveTechnique
+}
+
+type nakedTripleBlock struct {
 	*cullSolveTechnique
 }
 
@@ -356,6 +371,60 @@ func (self nakedPairBlock) Find(grid *Grid) *SolveStep {
 		return grid.Block(i)
 	}
 	return nakedSubset(self, 2, blockGetter)
+}
+
+func (self nakedTripleCol) Name() string {
+	return "Naked triple col"
+}
+
+func (self nakedTripleCol) Description(step *SolveStep) string {
+	if len(step.Nums) < 3 || len(step.PointerCells) < 3 {
+		return ""
+	}
+	return fmt.Sprintf("%d, %d, and %d are only possible in (%d,%d), (%d,%d) and (%d,%d), which means that they can't be in any other cell in column %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row +1, step.PointerCells[1].Col + 1, step.TargetCells.Col())
+}
+
+func (self nakedTripleCol) Find(grid *Grid) *SolveStep {
+	colGetter := func(i int) CellList {
+		return grid.Col(i)
+	}
+	return nakedSubset(self, 3, colGetter)
+}
+
+func (self nakedTripleRow) Name() string {
+	return "Naked triple row"
+}
+
+func (self nakedTripleRow) Description(step *SolveStep) string {
+	if len(step.Nums) < 3 || len(step.PointerCells) < 3 {
+		return ""
+	}
+	return fmt.Sprintf("%d, %d, and %d are only possible in (%d,%d), (%d, %d) and (%d,%d), which means that they can't be in any other cell in row %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row + 1, step.PointerCells[2].Col + 1, step.TargetCells.Row())
+}
+
+func (self nakedTripleRow) Find(grid *Grid) *SolveStep {
+	rowGetter := func(i int) CellList {
+		return grid.Row(i)
+	}
+	return nakedSubset(self, 3, rowGetter)
+}
+
+func (self nakedTripleBlock) Name() string {
+	return "Naked triple block"
+}
+
+func (self nakedTripleBlock) Description(step *SolveStep) string {
+	if len(step.Nums) < 3 || len(step.PointerCells) < 3 {
+		return ""
+	}
+	return fmt.Sprintf("%d, %d and %d are only possible in (%d,%d), (%d,%d) and (%d,%d), which means that they can't be in any other cell in block %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row+1, step.PointerCells[2].Col+1, step.TargetCells.Block())
+}
+
+func (self nakedTripleBlock) Find(grid *Grid) *SolveStep {
+	blockGetter := func(i int) CellList {
+		return grid.Block(i)
+	}
+	return nakedSubset(self, 3, blockGetter)
 }
 
 func nakedSubset(technique SolveTechnique, k int, collectionGetter func(int) CellList) *SolveStep {

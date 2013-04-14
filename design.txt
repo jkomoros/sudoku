@@ -40,7 +40,7 @@ TODO:
 
 * Human solve: Is it worth it to do nakedSingles based on row/col/block as well? Those are obvious in different ways.
 * Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm. Technqiues I've skipped so far:
-	* NakedTriple{Row,Col}, NakedQuad{Row,Col}. This now trivial given Subset logic. NEXT STEP
+	* NakedQuad{Row,Col}. This now trivial given Subset logic. NEXT STEP
 	* BlockBlock interactions
 
 * Analysis: Better aggregation of rank. This problem is called "Rank Aggregation" and can be Hard. http://www10.org/cdrom/papers/577/ seems to outline the most workable solution (MarkovChain4).
