@@ -55,7 +55,7 @@ TODO:
 
 * Low priority: If you panic and look at the stack you'll still almost always see one goroutine that's stuck on self.Invalid somehow.
 
-* Try to un-revert f29709 (closing open channels)
+* Try to un-revert f29709 (closing open channels). This is not possible without an architecture change, because it's not possible to close the channels because the workers will try to send to them. Will need some kind of cleanup method.
 
 * Make grid.Load work for puzzles in .sdk format.
 
