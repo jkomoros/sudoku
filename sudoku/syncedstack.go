@@ -9,6 +9,7 @@ type instructionType int
 const (
 	INSERT = iota
 	GET
+	DECREMENT_ACTIVE
 )
 
 type instruction struct {
@@ -24,19 +25,28 @@ type stackItem struct {
 }
 
 type SyncedStack struct {
-	instructions chan instruction
-	numItems     int
-	firstItem    *stackItem
+	instructions   chan instruction
+	numItems       int
+	numActiveItems int
+	firstItem      *stackItem
 }
 
 func NewSyncedStack() *SyncedStack {
-	stack := &SyncedStack{make(chan instruction), 0, nil}
+	stack := &SyncedStack{make(chan instruction), 0, 0, nil}
 	go stack.workLoop()
 	return stack
 }
 
 func (self *SyncedStack) Length() int {
 	return self.numItems
+}
+
+func (self *SyncedStack) NumActiveItems() int {
+	return self.numActiveItems
+}
+
+func (self *SyncedStack) IsDone() bool {
+	return self.numItems == 0 && self.numActiveItems == 0
 }
 
 func (self *SyncedStack) Dispose() {
@@ -52,9 +62,19 @@ func (self *SyncedStack) workLoop() {
 			instruction.result <- nil
 		case GET:
 			instruction.result <- self.doGet(instruction.probability)
+		case DECREMENT_ACTIVE:
+			self.doDecrementActive()
+			instruction.result <- nil
 		}
 		//Drop other instructions on the floor for now.
 	}
+}
+
+func (self *SyncedStack) ItemDone() {
+	result := make(chan interface{})
+	self.instructions <- instruction{result, DECREMENT_ACTIVE, nil, 0.0}
+	<-result
+	return
 }
 
 func (self *SyncedStack) Insert(item interface{}) {
@@ -76,6 +96,13 @@ func (self *SyncedStack) Get(probability float32) interface{} {
 	return <-result
 }
 
+func (self *SyncedStack) doDecrementActive() {
+	//May only be called from workLoop.
+	if self.numActiveItems > 0 {
+		self.numActiveItems--
+	}
+}
+
 func (self *SyncedStack) doInsert(item interface{}) {
 	//May only be called from workLoop
 	wrappedItem := &stackItem{item, self.firstItem}
@@ -92,6 +119,7 @@ func (self *SyncedStack) doGet(probability float32) interface{} {
 		if rand.Float32() < probability {
 			//Found it!
 			self.numItems--
+			self.numActiveItems++
 			//Mend it
 			if lastItem == nil {
 				//It must have been the first item.
@@ -110,6 +138,7 @@ func (self *SyncedStack) doGet(probability float32) interface{} {
 		return nil
 	}
 	self.numItems--
+	self.numActiveItems++
 	if lastLastItem == nil {
 		self.firstItem = nil
 	} else {

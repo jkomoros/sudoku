@@ -14,6 +14,12 @@ func TestBasicSyncedStack(t *testing.T) {
 		t.Log("A new stack did not have a length of one")
 		t.Fail()
 	}
+
+	if !stack.IsDone() {
+		t.Log("Stack doesn't think it's done when nothing has happened yet")
+		t.Fail()
+	}
+
 	item := map[string]int{"a": 1}
 	secondItem := map[string]int{"b": 2}
 	stack.Insert(item)
@@ -21,6 +27,12 @@ func TestBasicSyncedStack(t *testing.T) {
 		t.Log("We inserted an item but the length did not go up by one.")
 		t.Fail()
 	}
+
+	if stack.IsDone() {
+		t.Log("Stack thinks it's done but it has an item.")
+		t.Fail()
+	}
+
 	rawResult := stack.Pop()
 	if rawResult == nil {
 		t.Log("We didn't get back an item from a queue with one item.")
@@ -39,6 +51,19 @@ func TestBasicSyncedStack(t *testing.T) {
 		t.Log("We were able to get another item out of the stack even though there should have only been one.")
 		t.Fail()
 	}
+
+	if stack.IsDone() {
+		t.Log("Stack thinks it's done but we didn't tell it we were done processing one item.")
+		t.Fail()
+	}
+
+	stack.ItemDone()
+
+	if !stack.IsDone() {
+		t.Log("Stack doesn't think it's done even after we told it we processed an item.")
+		t.Fail()
+	}
+
 	stack.Insert(item)
 	stack.Insert(secondItem)
 	rawResult = stack.Pop()
