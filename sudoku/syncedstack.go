@@ -73,15 +73,27 @@ func (self *SyncedStack) workLoop() {
 }
 
 func (self *ChanSyncedStack) workLoop() {
+
+	//This workloop is complicated.
+	//If we ahve an item and there's room in the Output channel, we ALWAYS want to do that.
+	// But if there's not room in the channel, we don't want to just wait for an instruction--
+	// because it's possible that the Output is emptied before we get another instruction.
+	// So try first to fill output, then try either.
+
 	var instruction instruction
 	for {
-		wrappedItem, previous := self.doSelect(self.DefaultProbability)
-		if wrappedItem != nil {
+		if self.numItems > 0 {
+			wrappedItem, previous := self.doSelect(self.DefaultProbability)
 			select {
 			case self.Output <- wrappedItem.item:
 				self.doExtract(wrappedItem, previous)
-			case instruction := <-self.instructions:
-				self.processInstruction(instruction)
+			default:
+				select {
+				case self.Output <- wrappedItem.item:
+					self.doExtract(wrappedItem, previous)
+				case instruction = <-self.instructions:
+					self.processInstruction(instruction)
+				}
 			}
 		} else {
 			instruction = <-self.instructions

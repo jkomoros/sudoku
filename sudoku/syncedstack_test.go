@@ -127,7 +127,7 @@ func TestChanSyncedStack(t *testing.T) {
 
 	select {
 	case result = <-stack.Output:
-		if result.(int) != 2 {
+		if result.(int) != 2 && result.(int) != 1 {
 			t.Log("We got the wrong item out of the queue")
 			t.Fail()
 		}
