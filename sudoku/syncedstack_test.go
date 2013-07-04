@@ -103,3 +103,37 @@ func TestBasicSyncedStack(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestChanSyncedStack(t *testing.T) {
+	stack := NewChanSyncedStack()
+	item := 1
+	secondItem := 2
+	var result interface{}
+	select {
+	case <-stack.Output:
+		t.Log("We got something on output before there was anything to get.")
+		t.Fail()
+	default:
+		//Fine
+	}
+
+	stack.Insert(item)
+	stack.Insert(secondItem)
+
+	if stack.Pop() != nil {
+		t.Log("We were able to get something using Get")
+		t.Fail()
+	}
+
+	select {
+	case result = <-stack.Output:
+		if result.(int) != 2 {
+			t.Log("We got the wrong item out of the queue")
+			t.Fail()
+		}
+	default:
+		t.Log("We didn't get anything out of the queue but we should have.")
+		t.Fail()
+	}
+
+}
