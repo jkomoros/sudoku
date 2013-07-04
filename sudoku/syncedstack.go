@@ -87,6 +87,7 @@ func (self *SyncedStack) doGet(probability float32) interface{} {
 	//May only be called from workLoop
 	wrappedItem := self.firstItem
 	var lastItem *stackItem
+	var lastLastItem *stackItem
 	for wrappedItem != nil {
 		if rand.Float32() < probability {
 			//Found it!
@@ -100,12 +101,19 @@ func (self *SyncedStack) doGet(probability float32) interface{} {
 			}
 			return wrappedItem.item
 		}
+		lastLastItem = lastItem
 		lastItem = wrappedItem
 		wrappedItem = wrappedItem.next
 	}
 	//if we got to here, just return the lastItem.
 	if lastItem == nil {
 		return nil
+	}
+	self.numItems--
+	if lastLastItem == nil {
+		self.firstItem = nil
+	} else {
+		lastLastItem.next = nil
 	}
 	return lastItem.item
 }
