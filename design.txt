@@ -59,3 +59,18 @@ TODO:
 
 * Make grid.Load work for puzzles in .sdk format.
 
+* REdo of threaded solving
+	* Right now we basically have a crazy complicated threading story that does normal threaded work just using channels. We have lots of orphan GoRoutines and it's not possible to drain them. 
+	* Ideally we'd just sping up a few workers and provide them work.
+	* We couldn't do that before because we needed a stack semantic, which we now have.
+	* The basic idea is:
+		* Put one item in the queue
+		* Spin up N workers
+		* Workers grab an item off the output channel of the syncedStack, process it, add more items to the stack, and then call ItemDone().
+		* If a worker finds a solution, it sends it to the main thread with a channel. Once the main thread gets enough solutions it calls dispose which stops accepting new instructions and closes the output channel (signaling the workers to die).
+		* The SyncedStack also has an IsDone channel which will send a bool when all work is done. (No, you should pass in a done flag upon creation, since only one person is allowed to listen.)
+	* SyncedStack should have an Output channel that always has one item in it. After a call to ItemDone, if IsDone is true, call dispose, which closes the channel (so the main threading knows to stop since they'll receive nil, false). Doing this will require a "Peek" which is like a Get, but nondestructive.
+		* NEXT STEP: factor Getting into a Peek + mend.
+
+
+
