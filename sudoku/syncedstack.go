@@ -61,7 +61,8 @@ func (self *SyncedStack) workLoop() {
 			self.doInsert(instruction.item)
 			instruction.result <- nil
 		case GET:
-			instruction.result <- self.doGet(instruction.probability)
+			wrappedItem, previous := self.doSelect(instruction.probability)
+			instruction.result <- self.doExtract(wrappedItem, previous)
 		case DECREMENT_ACTIVE:
 			self.doDecrementActive()
 			instruction.result <- nil
@@ -110,39 +111,37 @@ func (self *SyncedStack) doInsert(item interface{}) {
 	self.numItems++
 }
 
-func (self *SyncedStack) doGet(probability float32) interface{} {
-	//May only be called from workLoop
-	wrappedItem := self.firstItem
+func (self *SyncedStack) doSelect(probability float32) (item *stackItem, previous *stackItem) {
+
 	var lastItem *stackItem
 	var lastLastItem *stackItem
+
+	wrappedItem := self.firstItem
+
 	for wrappedItem != nil {
 		if rand.Float32() < probability {
-			//Found it!
-			self.numItems--
-			self.numActiveItems++
-			//Mend it
-			if lastItem == nil {
-				//It must have been the first item.
-				self.firstItem = wrappedItem.next
-			} else {
-				lastItem.next = wrappedItem.next
-			}
-			return wrappedItem.item
+			return wrappedItem, lastItem
 		}
 		lastLastItem = lastItem
 		lastItem = wrappedItem
 		wrappedItem = wrappedItem.next
 	}
-	//if we got to here, just return the lastItem.
-	if lastItem == nil {
+
+	return lastItem, lastLastItem
+}
+
+func (self *SyncedStack) doExtract(item *stackItem, previous *stackItem) interface{} {
+	//may only be called from within workLoop
+	//Called when we've decided we ware going to take the item.
+	if item == nil {
 		return nil
 	}
-	self.numItems--
 	self.numActiveItems++
-	if lastLastItem == nil {
-		self.firstItem = nil
+	self.numItems--
+	if previous != nil {
+		previous.next = item.next
 	} else {
-		lastLastItem.next = nil
+		self.firstItem = item.next
 	}
-	return lastItem.item
+	return item.item
 }
