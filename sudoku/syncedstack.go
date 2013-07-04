@@ -70,7 +70,6 @@ func (self *SyncedStack) Pop() interface{} {
 }
 
 func (self *SyncedStack) Get(probability float32) interface{} {
-	//TODO: test this in the general (non 1.0) case.
 	//Working from the back, will take each item with probability probability, else move to the next item in the stack.
 	result := make(chan interface{})
 	self.instructions <- instruction{result, GET, nil, probability}

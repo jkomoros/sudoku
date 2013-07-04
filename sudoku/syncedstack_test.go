@@ -15,6 +15,7 @@ func TestBasic(t *testing.T) {
 		t.Fail()
 	}
 	item := map[string]int{"a": 1}
+	secondItem := map[string]int{"b": 2}
 	stack.Insert(item)
 	if stack.Length() != 1 {
 		t.Log("We inserted an item but the length did not go up by one.")
@@ -26,7 +27,7 @@ func TestBasic(t *testing.T) {
 		t.Fail()
 	}
 	result := rawResult.(map[string]int)
-	if result["a"] != item["a"] {
+	if _, ok := result["a"]; !ok {
 		t.Log("We didn't get back the item we put in.")
 		t.Fail()
 	}
@@ -36,6 +37,44 @@ func TestBasic(t *testing.T) {
 	}
 	if stack.Pop() != nil {
 		t.Log("We were able to get another item out of the stack even though there should have only been one.")
+		t.Fail()
+	}
+	stack.Insert(item)
+	stack.Insert(secondItem)
+	rawResult = stack.Pop()
+	if rawResult == nil {
+		t.Log("We didn't get back an item from a queue with two items")
+		t.Fail()
+	}
+	result = rawResult.(map[string]int)
+	if _, ok := result["b"]; !ok {
+		t.Log("We got the wrong item back from a two item queue.")
+		t.Fail()
+	}
+	stack.Insert(secondItem)
+	//This should always be the last item.
+	rawResult = stack.Get(0.0)
+	if rawResult == nil {
+		t.Log("We didn't get back the first item with probability 0")
+		t.Fail()
+	}
+	result = rawResult.(map[string]int)
+	if _, ok := result["a"]; !ok {
+		t.Log("We didn't get back the first item")
+		t.Fail()
+	}
+	if stack.Length() != 1 {
+		t.Log("We got back wrong length for a queue with one item")
+		t.Fail()
+	}
+	rawResult = stack.Get(0.0)
+	if rawResult == nil {
+		t.Log("We didn't get back the only item with probability 0.0")
+		t.Fail()
+	}
+	result = rawResult.(map[string]int)
+	if _, ok := result["b"]; !ok {
+		t.Log("We got the wrong item out of a queue with one item")
 		t.Fail()
 	}
 }
