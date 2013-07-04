@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestBasic(t *testing.T) {
+func TestBasicSyncedStack(t *testing.T) {
 	stack := NewSyncedStack()
 	if stack == nil {
 		t.Log("Didn't get a stack back.")
