@@ -211,7 +211,8 @@ func (self *SyncedStack) doDispose() {
 	//TODO: do we need to close out anything else here?
 	//TODO: the work loops, when they notice the channel is closed, should probably exit.
 	self.closed = true
-	close(self.instructions)
+	//TODO: ... Wait, why can we not close this? If we do close this, we get "send on closed channel"
+	//close(self.instructions)
 }
 
 func (self *SyncedStack) doDecrementActive() {
