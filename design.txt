@@ -62,6 +62,7 @@ TODO:
 * REdo of threaded solving
 	* Why can we not close the instructions queue? (It's currently commented out)
 	* Performance comparison against baseline.
+		* Way worse. Why?
 
 
 

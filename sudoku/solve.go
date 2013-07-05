@@ -56,16 +56,18 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		for i := 0; i < NUM_SOLVER_THREADS; i++ {
 			go func() {
 				//Sovler thread.
+				firstRun := true
 				for {
 					grid, ok := <-stack.Output
 					if !ok {
 						return
 					}
-					result := grid.(*Grid).searchSolutions(stack)
+					result := grid.(*Grid).searchSolutions(stack, firstRun, max)
 					if result != nil {
 						incomingSolutions <- result
 					}
 					stack.ItemDone()
+					firstRun = false
 				}
 			}()
 		}
@@ -94,7 +96,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 
 }
 
-func (self *Grid) searchSolutions(stack *ChanSyncedStack) *Grid {
+func (self *Grid) searchSolutions(stack *ChanSyncedStack, isFirstRun bool, numSoughtSolutions int) *Grid {
 	//This will only be called by Solutions.
 	//We will return ourselves if we are a solution, and if not we will return nil.
 	//If there are any sub children, we will send them to counter before we're done.
@@ -131,14 +133,23 @@ func (self *Grid) searchSolutions(stack *ChanSyncedStack) *Grid {
 	for i, j := range rand.Perm(len(unshuffledPossibilities)) {
 		possibilities[i] = unshuffledPossibilities[j]
 	}
+	var result *Grid
 
-	for _, num := range possibilities {
+	for i, num := range possibilities {
 		copy := self.Copy()
 		copy.Cell(cell.Row, cell.Col).SetNumber(num)
-		stack.Insert(copy)
+		if i == 0 && !isFirstRun {
+			result = copy.searchSolutions(stack, false, numSoughtSolutions)
+			if result != nil && numSoughtSolutions == 1 {
+				return result
+			}
+		} else {
+			stack.Insert(copy)
+		}
+
 	}
 
-	return nil
+	return result
 
 }
 
