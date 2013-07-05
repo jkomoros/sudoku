@@ -28,6 +28,7 @@ type ChanSyncedStack struct {
 	*SyncedStack
 	DefaultProbability float32
 	Output             chan interface{}
+	doneChan           chan bool
 }
 
 type SyncedStack struct {
@@ -38,8 +39,9 @@ type SyncedStack struct {
 	firstItem      *stackItem
 }
 
-func NewChanSyncedStack() *ChanSyncedStack {
-	result := &ChanSyncedStack{&SyncedStack{false, make(chan instruction), 0, 0, nil}, 1.0, make(chan interface{}, 1)}
+func NewChanSyncedStack(doneChan chan bool) *ChanSyncedStack {
+	//WARNING: doneChan should be a buffered channel or else you cloud get deadlock!
+	result := &ChanSyncedStack{&SyncedStack{false, make(chan instruction), 0, 0, nil}, 1.0, make(chan interface{}, 1), doneChan}
 	go result.workLoop()
 	return result
 }
@@ -65,6 +67,7 @@ func (self *SyncedStack) IsDone() bool {
 func (self *ChanSyncedStack) Dispose() {
 	self.SyncedStack.Dispose()
 	close(self.Output)
+	self.doneChan <- true
 }
 
 func (self *SyncedStack) Dispose() {

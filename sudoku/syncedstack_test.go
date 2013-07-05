@@ -105,7 +105,8 @@ func TestBasicSyncedStack(t *testing.T) {
 }
 
 func TestChanSyncedStack(t *testing.T) {
-	stack := NewChanSyncedStack()
+	doneChan := make(chan bool, 1)
+	stack := NewChanSyncedStack(doneChan)
 	item := 1
 	secondItem := 2
 	var result interface{}
@@ -162,5 +163,13 @@ func TestChanSyncedStack(t *testing.T) {
 		t.Log("Nothing was available on the closed channel.")
 		t.Fail()
 
+	}
+
+	select {
+	case <-doneChan:
+		//good
+	default:
+		t.Log("We didn't get anything on doneChan when done")
+		t.Fail()
 	}
 }
