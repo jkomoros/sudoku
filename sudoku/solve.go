@@ -82,7 +82,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 				}
 			case <-stackDone:
 				//Well, that's as good as it's going to get.
-				break
+				break OuterLoop
 			}
 		}
 
