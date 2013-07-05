@@ -66,6 +66,9 @@ func (self *SyncedStack) IsDone() bool {
 }
 
 func (self *SyncedStack) Dispose() {
+	if self.closed {
+		return
+	}
 	self.instructions <- instruction{nil, DISPOSE, nil, 0.0}
 	//Purposefully don't block.
 }
