@@ -80,9 +80,10 @@ func (self *SyncedStack) Dispose() {
 func (self *SyncedStack) workLoop() {
 	for {
 		instruction, ok := <-self.instructions
-		if ok {
-			self.processInstruction(instruction)
+		if !ok {
+			return
 		}
+		self.processInstruction(instruction)
 	}
 }
 
@@ -107,16 +108,18 @@ func (self *ChanSyncedStack) workLoop() {
 				case self.Output <- wrappedItem.item:
 					self.doExtract(wrappedItem, previous)
 				case instruction, ok = <-self.instructions:
-					if ok {
-						self.processInstruction(instruction)
+					if !ok {
+						return
 					}
+					self.processInstruction(instruction)
 				}
 			}
 		} else {
 			instruction, ok = <-self.instructions
-			if ok {
-				self.processInstruction(instruction)
+			if !ok {
+				return
 			}
+			self.processInstruction(instruction)
 		}
 	}
 }
