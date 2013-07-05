@@ -136,4 +136,31 @@ func TestChanSyncedStack(t *testing.T) {
 		t.Fail()
 	}
 
+	select {
+	case result = <-stack.Output:
+		if result.(int) != 2 && result.(int) != 1 {
+			t.Log("We got the wrong item out of the queue the second time.")
+			t.Fail()
+		}
+	}
+
+	stack.ItemDone()
+	stack.ItemDone()
+
+	if !stack.closed {
+		t.Log("The stack should have been closed!")
+		t.Fail()
+	}
+
+	select {
+	case _, ok := <-stack.Output:
+		if ok {
+			t.Log("We were still able to receive on what should have been a closed channel")
+			t.Fail()
+		}
+	default:
+		t.Log("Nothing was available on the closed channel.")
+		t.Fail()
+
+	}
 }

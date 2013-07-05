@@ -31,6 +31,7 @@ type ChanSyncedStack struct {
 }
 
 type SyncedStack struct {
+	closed         bool
 	instructions   chan instruction
 	numItems       int
 	numActiveItems int
@@ -38,13 +39,13 @@ type SyncedStack struct {
 }
 
 func NewChanSyncedStack() *ChanSyncedStack {
-	result := &ChanSyncedStack{&SyncedStack{make(chan instruction), 0, 0, nil}, 1.0, make(chan interface{}, 1)}
+	result := &ChanSyncedStack{&SyncedStack{false, make(chan instruction), 0, 0, nil}, 1.0, make(chan interface{}, 1)}
 	go result.workLoop()
 	return result
 }
 
 func NewSyncedStack() *SyncedStack {
-	stack := &SyncedStack{make(chan instruction), 0, 0, nil}
+	stack := &SyncedStack{false, make(chan instruction), 0, 0, nil}
 	go stack.workLoop()
 	return stack
 }
@@ -61,7 +62,15 @@ func (self *SyncedStack) IsDone() bool {
 	return self.numItems == 0 && self.numActiveItems == 0
 }
 
+func (self *ChanSyncedStack) Dispose() {
+	self.SyncedStack.Dispose()
+	close(self.Output)
+}
+
 func (self *SyncedStack) Dispose() {
+	//TODO: do we need to close out anything else here?
+	//TODO: the work loops, when they notice the channel is closed, should probably exit.
+	self.closed = true
 	close(self.instructions)
 }
 
@@ -117,7 +126,17 @@ func (self *SyncedStack) processInstruction(instruction instruction) {
 	//Drop other instructions on the floor for now.
 }
 
+func (self *ChanSyncedStack) ItemDone() {
+	self.SyncedStack.ItemDone()
+	if self.IsDone() {
+		self.Dispose()
+	}
+}
+
 func (self *SyncedStack) ItemDone() {
+	if self.closed {
+		return
+	}
 	result := make(chan interface{})
 	self.instructions <- instruction{result, DECREMENT_ACTIVE, nil, 0.0}
 	<-result
@@ -125,6 +144,9 @@ func (self *SyncedStack) ItemDone() {
 }
 
 func (self *SyncedStack) Insert(item interface{}) {
+	if self.closed {
+		return
+	}
 	result := make(chan interface{})
 	self.instructions <- instruction{result, INSERT, item, 0.0}
 	<-result
@@ -147,6 +169,9 @@ func (self *ChanSyncedStack) Get(probability float32) interface{} {
 }
 
 func (self *SyncedStack) Get(probability float32) interface{} {
+	if self.closed {
+		return nil
+	}
 	//Working from the back, will take each item with probability probability, else move to the next item in the stack.
 	result := make(chan interface{})
 	self.instructions <- instruction{result, GET, nil, probability}
