@@ -70,6 +70,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 			}()
 		}
 
+	OuterLoop:
 		for {
 			select {
 			case solution := <-incomingSolutions:
@@ -77,7 +78,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 				solutions = append(solutions, solution)
 				if len(solutions) >= max {
 					stack.Dispose()
-					break
+					break OuterLoop
 				}
 			case <-stackDone:
 				//Well, that's as good as it's going to get.
