@@ -79,8 +79,10 @@ func (self *SyncedStack) Dispose() {
 
 func (self *SyncedStack) workLoop() {
 	for {
-		instruction := <-self.instructions
-		self.processInstruction(instruction)
+		instruction, ok := <-self.instructions
+		if ok {
+			self.processInstruction(instruction)
+		}
 	}
 }
 
@@ -93,6 +95,7 @@ func (self *ChanSyncedStack) workLoop() {
 	// So try first to fill output, then try either.
 
 	var instruction instruction
+	var ok bool
 	for {
 		if self.numItems > 0 {
 			wrappedItem, previous := self.doSelect(self.DefaultProbability)
@@ -103,13 +106,17 @@ func (self *ChanSyncedStack) workLoop() {
 				select {
 				case self.Output <- wrappedItem.item:
 					self.doExtract(wrappedItem, previous)
-				case instruction = <-self.instructions:
-					self.processInstruction(instruction)
+				case instruction, ok = <-self.instructions:
+					if ok {
+						self.processInstruction(instruction)
+					}
 				}
 			}
 		} else {
-			instruction = <-self.instructions
-			self.processInstruction(instruction)
+			instruction, ok = <-self.instructions
+			if ok {
+				self.processInstruction(instruction)
+			}
 		}
 	}
 }

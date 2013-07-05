@@ -42,151 +42,55 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 //The actual workhorse of solutions generating. 0 means "as many as you can find". It might return more than you asked for, if it already had more results than requested sitting around.
 func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 
-	stackDone := make(chan bool, 1)
+	if self.cachedSolutions == nil || (max > 0 && len(self.cachedSolutions) < max) {
+		stackDone := make(chan bool, 1)
 
-	stack := NewChanSyncedStack(stackDone)
+		stack := NewChanSyncedStack(stackDone)
 
-	stack.Insert(self.Copy())
+		stack.Insert(self.Copy())
 
-	incomingSolutions := make(chan *Grid)
+		incomingSolutions := make(chan *Grid)
 
-	var solutions []*Grid
+		var solutions []*Grid
 
-	for i := 0; i < NUM_SOLVER_THREADS; i++ {
-		go func() {
-			//Sovler thread.
-			for {
-				grid, ok := <-stack.Output
-				if !ok {
-					return
-				}
-				result := grid.(*Grid).searchSolutions(stack)
-				if result != nil {
-					incomingSolutions <- result
-				}
-				stack.ItemDone()
-			}
-		}()
-	}
-
-	for {
-		select {
-		case solution := <-incomingSolutions:
-			//Add it to results
-			solutions = append(solutions, solution)
-			if len(solutions) >= max {
-				stack.Dispose()
-				break
-			}
-		case <-stackDone:
-			//Well, that's as good as it's going to get.
-			break
-		}
-	}
-
-	return solutions
-
-	/*
-		if self.cachedSolutions == nil || (max > 0 && len(self.cachedSolutions) < max) {
-
-			//We'll have a thread that's keeping track of how many grids need to be processed and how many have responded.
-			inGrids := make(chan *Grid)
-			outGrids := make(chan *Grid)
-
-			//The way for us to signify to the worker threads to kill themselves.
-			exit := make(chan bool, NUM_SOLVER_THREADS)
-
-			//Where we'll store the grids that are yet to be processed.
-			//We used to use a SyncedFiniteQueue here, but it was unnecessary now that we explore a thread before
-			//spinning off other threads, since that already approximates a DFS.
-			gridsToProcess := make(chan *Grid, NUM_SOLVER_THREADS*DIM*DIM)
-
-			//If you can grab a true from this then you're the first searchSolutions to run. In that case, you should
-			//spin off more work for everybody else rather than diving down to the bottom.
-			isFirst := make(chan bool, 1)
-
-			counter := 0
-
-			//Kick off NUM_SOLVER_THREADS
-			for i := 0; i < NUM_SOLVER_THREADS; i++ {
-				go func() {
-					var firstRun bool
-					for {
-						select {
-						case <-exit:
-							return
-						case grid := <-gridsToProcess:
-							select {
-							case <-isFirst:
-								firstRun = true
-							default:
-								firstRun = false
-							}
-							outGrids <- grid.searchSolutions(inGrids, max, firstRun)
-						}
-					}
-				}()
-			}
-
-			//How the counter loop will tell us that we've met the final conditions.
-			results := make(chan []*Grid)
-
-			//Kick off the main counter loop. This will also ensure that we clean up nicely after ourselves and drain all chanenls.
+		for i := 0; i < NUM_SOLVER_THREADS; i++ {
 			go func() {
-				//This will accept at least one grid, and after that when the counter is 0 it will exit.
-				exiting := false
-				var workingSolutions []*Grid
+				//Sovler thread.
 				for {
-					select {
-					case inGrid := <-inGrids:
-						//If we're exiting no need to put more work in the queue.
-						if !exiting {
-							counter++
-							//We've already done the critical counting; put another thing on the thread but don't wait for it because it may block.
-							gridsToProcess <- inGrid
-						}
-					case outGrid := <-outGrids:
-						counter--
-						if outGrid != nil {
-							workingSolutions = append(workingSolutions, outGrid)
-						}
-						if max > 0 && len(workingSolutions) >= max {
-							//We can early exit but we need to continue consuming stuff off the channels so we don't leak.
-							exiting = true
-							results <- workingSolutions
-							workingSolutions = nil
-						}
-						if counter == 0 {
-							if !exiting {
-								//There wasn't an early exit, so we still need to signal up with the result.
-								results <- workingSolutions
-							}
-							//And now we die.
-							return
-						}
+					grid, ok := <-stack.Output
+					if !ok {
+						return
 					}
+					result := grid.(*Grid).searchSolutions(stack)
+					if result != nil {
+						incomingSolutions <- result
+					}
+					stack.ItemDone()
 				}
 			}()
-
-			//Feed in the first work item and...
-			inGrids <- self.Copy()
-			//...wait for the results.
-			tempSolutions := <-results
-
-			//Kill NUM_SOLVER_THREADS processes
-			for i := 0; i < NUM_SOLVER_THREADS; i++ {
-				//Because exit is buffered, we won't have to wait for all threads to acknowledge the kill order before proceeding.
-				//...I'm not entirely sure why we don't have the earlier Fill() problem where other threads would try to post
-				//after the main thread was done. I think now we just have a garbage collected, constantly stuck problem.
-				exit <- true
-			}
-
-			self.cachedSolutions = tempSolutions
-
 		}
 
-		return self.cachedSolutions
-	*/
+		for {
+			select {
+			case solution := <-incomingSolutions:
+				//Add it to results
+				solutions = append(solutions, solution)
+				if len(solutions) >= max {
+					stack.Dispose()
+					break
+				}
+			case <-stackDone:
+				//Well, that's as good as it's going to get.
+				break
+			}
+		}
+
+		self.cachedSolutions = solutions
+
+	}
+
+	return self.cachedSolutions
+
 }
 
 func (self *Grid) searchSolutions(stack *ChanSyncedStack) *Grid {
