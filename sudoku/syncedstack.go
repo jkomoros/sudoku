@@ -10,6 +10,7 @@ const (
 	INSERT = iota
 	GET
 	DECREMENT_ACTIVE
+	DISPOSE
 )
 
 type instruction struct {
@@ -64,17 +65,9 @@ func (self *SyncedStack) IsDone() bool {
 	return self.numItems == 0 && self.numActiveItems == 0
 }
 
-func (self *ChanSyncedStack) Dispose() {
-	self.SyncedStack.Dispose()
-	close(self.Output)
-	self.doneChan <- true
-}
-
 func (self *SyncedStack) Dispose() {
-	//TODO: do we need to close out anything else here?
-	//TODO: the work loops, when they notice the channel is closed, should probably exit.
-	self.closed = true
-	close(self.instructions)
+	self.instructions <- instruction{nil, DISPOSE, nil, 0.0}
+	//Purposefully don't block.
 }
 
 func (self *SyncedStack) workLoop() {
@@ -98,6 +91,9 @@ func (self *ChanSyncedStack) workLoop() {
 	var instruction instruction
 	var ok bool
 	for {
+		if self.closed {
+			return
+		}
 		if self.numItems > 0 {
 			wrappedItem, previous := self.doSelect(self.DefaultProbability)
 			select {
@@ -124,6 +120,14 @@ func (self *ChanSyncedStack) workLoop() {
 	}
 }
 
+func (self *ChanSyncedStack) processInstruction(instruction instruction) {
+	if instruction.instructionType == DISPOSE {
+		self.doDispose()
+	} else {
+		self.SyncedStack.processInstruction(instruction)
+	}
+}
+
 func (self *SyncedStack) processInstruction(instruction instruction) {
 	switch instruction.instructionType {
 	case INSERT:
@@ -135,6 +139,9 @@ func (self *SyncedStack) processInstruction(instruction instruction) {
 	case DECREMENT_ACTIVE:
 		self.doDecrementActive()
 		instruction.result <- nil
+	case DISPOSE:
+		//disposes don't have a channel result.
+		self.doDispose()
 	}
 	//Drop other instructions on the floor for now.
 }
@@ -189,6 +196,19 @@ func (self *SyncedStack) Get(probability float32) interface{} {
 	result := make(chan interface{})
 	self.instructions <- instruction{result, GET, nil, probability}
 	return <-result
+}
+
+func (self *ChanSyncedStack) doDispose() {
+	self.SyncedStack.doDispose()
+	close(self.Output)
+	self.doneChan <- true
+}
+
+func (self *SyncedStack) doDispose() {
+	//TODO: do we need to close out anything else here?
+	//TODO: the work loops, when they notice the channel is closed, should probably exit.
+	self.closed = true
+	close(self.instructions)
 }
 
 func (self *SyncedStack) doDecrementActive() {
