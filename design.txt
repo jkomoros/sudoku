@@ -61,8 +61,6 @@ TODO:
 
 * REdo of threaded solving
 	* Why is performance so slow?
-	* When we panic, we have all of the solver threads hung.
-		* Panic to test it
 	* The Second queue not realizing it's done is racy.
 
 
