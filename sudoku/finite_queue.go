@@ -136,49 +136,43 @@ func (self *SyncedFiniteQueue) IsDone() bool {
 }
 
 func (self *SyncedFiniteQueue) workLoop() {
+
+	//We use this pattern to avoid duplicating code
+	when := func(condition bool, c chan RankedObject) chan RankedObject {
+		if condition {
+			return c
+		}
+		return nil
+	}
+
 	for {
 		firstItem := self.queue.Get()
 		itemSent := false
-		if firstItem == nil {
-			//We can take in new things or accept an exit.
-			select {
-			case <-self.Exit:
-				close(self.Out)
-				return
-			case incoming := <-self.In:
-				self.queue.Insert(incoming)
-				self.items++
-			case <-self.ItemDone:
-				self.activeItems--
-				if self.IsDone() {
-					self.done <- true
-				}
+
+		//We can take in new things, send out smallest one, or exit.
+		select {
+		case <-self.Exit:
+			close(self.Out)
+			return
+		case incoming := <-self.In:
+			self.queue.Insert(incoming)
+			self.items++
+		case <-self.ItemDone:
+			self.activeItems--
+			if self.IsDone() {
+				self.done <- true
 			}
-		} else {
-			//We can take in new things, send out smallest one, or exit.
-			select {
-			case <-self.Exit:
-				close(self.Out)
-				return
-			case incoming := <-self.In:
-				self.queue.Insert(incoming)
-				self.items++
-			case <-self.ItemDone:
-				self.activeItems--
-				if self.IsDone() {
-					self.done <- true
-				}
-			case self.Out <- firstItem:
-				itemSent = true
-				self.items--
-				self.activeItems++
-			}
-			//If we didn't send the item out, we need to put it back in.
-			if !itemSent {
-				self.queue.Insert(firstItem)
-			}
+		case when(firstItem != nil, self.Out) <- firstItem:
+			itemSent = true
+			self.items--
+			self.activeItems++
+		}
+		//If we didn't send the item out, we need to put it back in.
+		if firstItem != nil && !itemSent {
+			self.queue.Insert(firstItem)
 		}
 	}
+
 }
 
 func (self *FiniteQueue) NewGetter() *FiniteQueueGetter {
