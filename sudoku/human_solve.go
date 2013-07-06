@@ -519,6 +519,10 @@ func subsetIndexes(len int, size int) [][]int {
 func (self *Grid) HumanSolve() SolveDirections {
 	var results []*SolveStep
 	numTechniques := len(fillTechniques) + len(cullTechniques)
+
+	//Note: trying these all in parallel is much slower (~15x) than doing them in sequence.
+	//The reason is that in sequence we bailed early as soon as we found one step; now we try them all.
+
 	for !self.Solved() {
 		//TODO: provide hints to the techniques of where to look based on the last filled cell
 
