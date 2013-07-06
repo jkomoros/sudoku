@@ -28,7 +28,8 @@ type finiteQueueBucket struct {
 const _REALLOCATE_PROPORTION = 0.20
 
 type SyncedFiniteQueue struct {
-	queue       FiniteQueue
+	queue FiniteQueue
+	//TODO: should these counts actually be on the basic FiniteQueue?
 	items       int
 	activeItems int
 	In          chan RankedObject
