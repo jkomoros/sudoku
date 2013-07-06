@@ -63,6 +63,7 @@ TODO:
 	* Why can we not close the instructions queue? (It's currently commented out)
 	* Performance comparison against baseline.
 		* Way worse. Why?
+	* WAIT, why not just do a finite queue? 
 
 
 

@@ -228,7 +228,10 @@ func TestFiniteQueueGetter(t *testing.T) {
 }
 
 func TestSyncedFiniteQueue(t *testing.T) {
-	queue := NewSyncedFiniteQueue(1, DIM)
+
+	done := make(chan bool, 1)
+
+	queue := NewSyncedFiniteQueue(1, DIM, done)
 
 	select {
 	case <-queue.Out:
@@ -246,7 +249,7 @@ func TestSyncedFiniteQueue(t *testing.T) {
 		t.Fail()
 	}
 
-	secondQueue := NewSyncedFiniteQueue(1, DIM)
+	secondQueue := NewSyncedFiniteQueue(1, DIM, done)
 	//Note that the first item does not fit in the first bucket on purpose.
 	objects := [...]*SimpleRankedObject{{3, "a"}, {4, "b"}, {4, "c"}, {5, "d"}}
 	for _, object := range objects {
@@ -272,6 +275,23 @@ func TestSyncedFiniteQueue(t *testing.T) {
 	default:
 		//pass
 	}
+
+	if secondQueue.IsDone() {
+		t.Log("The second queue thought it was done even though the items haven't been marked as done.")
+		t.Fail()
+	}
+
+	secondQueue.ItemDone <- true
+	secondQueue.ItemDone <- true
+	secondQueue.ItemDone <- true
+	secondQueue.ItemDone <- true
+
+	if !secondQueue.IsDone() {
+		t.Log("The second queue didn't realize it was done even though all items are marked as done.")
+		t.Fail()
+	}
+
+	<-secondQueue.done
 
 	secondQueue.Exit <- true
 
