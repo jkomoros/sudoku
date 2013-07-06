@@ -133,15 +133,25 @@ func (self *Grid) searchSolutions(queue *SyncedFiniteQueue, isFirstRun bool, num
 		possibilities[i] = unshuffledPossibilities[j]
 	}
 
-	for _, num := range possibilities {
+	var result *Grid
+
+	for i, num := range possibilities {
 		copy := self.Copy()
 		copy.Cell(cell.Row, cell.Col).SetNumber(num)
-
-		queue.In <- copy
-
+		//As an optimization for cases where there are many solutions, we'll just continue a DFS until we barf then unroll back up.
+		//It doesn't appear to slow things down in the general case
+		if i == 0 && !isFirstRun {
+			result = copy.searchSolutions(queue, false, numSoughtSolutions)
+			if result != nil && numSoughtSolutions == 1 {
+				//No need to spin off other branches, just return up.
+				return result
+			}
+		} else {
+			queue.In <- copy
+		}
 	}
 
-	return nil
+	return result
 
 }
 
