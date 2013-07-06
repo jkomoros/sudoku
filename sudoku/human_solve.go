@@ -381,7 +381,7 @@ func (self nakedTripleCol) Description(step *SolveStep) string {
 	if len(step.Nums) < 3 || len(step.PointerCells) < 3 {
 		return ""
 	}
-	return fmt.Sprintf("%d, %d, and %d are only possible in (%d,%d), (%d,%d) and (%d,%d), which means that they can't be in any other cell in column %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row +1, step.PointerCells[1].Col + 1, step.TargetCells.Col())
+	return fmt.Sprintf("%d, %d, and %d are only possible in (%d,%d), (%d,%d) and (%d,%d), which means that they can't be in any other cell in column %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Col())
 }
 
 func (self nakedTripleCol) Find(grid *Grid) *SolveStep {
@@ -399,7 +399,7 @@ func (self nakedTripleRow) Description(step *SolveStep) string {
 	if len(step.Nums) < 3 || len(step.PointerCells) < 3 {
 		return ""
 	}
-	return fmt.Sprintf("%d, %d, and %d are only possible in (%d,%d), (%d, %d) and (%d,%d), which means that they can't be in any other cell in row %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row + 1, step.PointerCells[2].Col + 1, step.TargetCells.Row())
+	return fmt.Sprintf("%d, %d, and %d are only possible in (%d,%d), (%d, %d) and (%d,%d), which means that they can't be in any other cell in row %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row+1, step.PointerCells[2].Col+1, step.TargetCells.Row())
 }
 
 func (self nakedTripleRow) Find(grid *Grid) *SolveStep {
@@ -518,30 +518,43 @@ func subsetIndexes(len int, size int) [][]int {
 
 func (self *Grid) HumanSolve() SolveDirections {
 	var results []*SolveStep
+	numTechniques := len(fillTechniques) + len(cullTechniques)
 	for !self.Solved() {
-		//TODO: try the techniques in parallel
-		//TODO: pick the technique based on a weighting of how common a human is to pick each one.
 		//TODO: provide hints to the techniques of where to look based on the last filled cell
-		techniqueOrder := rand.Perm(len(fillTechniques))
-		for _, index := range techniqueOrder {
-			technique := fillTechniques[index]
-			step := technique.Find(self)
-			if step != nil {
-				results = append(results, step)
-				step.Apply(self)
-				break
+
+		possibilitiesChan := make(chan *SolveStep)
+
+		var possibilities []*SolveStep
+
+		for _, technique := range fillTechniques {
+			go func() {
+				possibilitiesChan <- technique.Find(self)
+			}()
+		}
+
+		for _, technique := range cullTechniques {
+			go func() {
+				possibilitiesChan <- technique.Find(self)
+			}()
+		}
+
+		//Collect all of the results
+
+		for i := 0; i < numTechniques; i++ {
+			possibility := <-possibilitiesChan
+			if possibility != nil {
+				possibilities = append(possibilities, possibility)
 			}
 		}
-		techniqueOrder = rand.Perm(len(cullTechniques))
-		for _, index := range techniqueOrder {
-			technique := cullTechniques[index]
-			step := technique.Find(self)
-			if step != nil {
-				results = append(results, step)
-				step.Apply(self)
-				break
-			}
-		}
+
+		//Now pick one to apply.
+		//TODO: pick the technique based on a weighting of how common a human is to pick each one.
+
+		step := possibilities[rand.Intn(len(possibilities))]
+
+		results = append(results, step)
+		step.Apply(self)
+
 	}
 	if !self.Solved() {
 		//We couldn't solve the puzzle.
