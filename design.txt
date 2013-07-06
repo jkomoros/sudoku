@@ -60,10 +60,8 @@ TODO:
 * Make grid.Load work for puzzles in .sdk format.
 
 * REdo of threaded solving
-	* Why can we not close the instructions queue? (It's currently commented out)
-	* Performance comparison against baseline.
-		* Way worse. Why?
-	* WAIT, why not just do a finite queue? 
+	* Why is performance so slow?
+	* When we panic, we have all of the solver threads hung.
 
 
 
