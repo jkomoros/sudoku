@@ -273,6 +273,21 @@ func TestSyncedFiniteQueue(t *testing.T) {
 		//pass
 	}
 
+	if secondQueue.IsDone() {
+		t.Log("The second queue thought it was done even though the items haven't been marked as done.")
+		t.Fail()
+	}
+
+	secondQueue.ItemDone <- true
+	secondQueue.ItemDone <- true
+	secondQueue.ItemDone <- true
+	secondQueue.ItemDone <- true
+
+	if !secondQueue.IsDone() {
+		t.Log("The second queue didn't realize it was done even though all items are marked as done.")
+		t.Fail()
+	}
+
 	secondQueue.Exit <- true
 
 }

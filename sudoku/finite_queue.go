@@ -28,10 +28,13 @@ type finiteQueueBucket struct {
 const _REALLOCATE_PROPORTION = 0.20
 
 type SyncedFiniteQueue struct {
-	queue FiniteQueue
-	In    chan RankedObject
-	Out   chan RankedObject
-	Exit  chan bool
+	queue       FiniteQueue
+	items       int
+	activeItems int
+	In          chan RankedObject
+	Out         chan RankedObject
+	ItemDone    chan bool
+	Exit        chan bool
 }
 
 type FiniteQueueGetter struct {
@@ -51,7 +54,7 @@ func NewFiniteQueue(min int, max int) *FiniteQueue {
 }
 
 func NewSyncedFiniteQueue(min int, max int) *SyncedFiniteQueue {
-	result := &SyncedFiniteQueue{*NewFiniteQueue(min, max), make(chan RankedObject), make(chan RankedObject), make(chan bool, 1)}
+	result := &SyncedFiniteQueue{*NewFiniteQueue(min, max), 0, 0, make(chan RankedObject), make(chan RankedObject), make(chan bool), make(chan bool, 1)}
 	go result.workLoop()
 	return result
 }
@@ -112,6 +115,10 @@ func (self *finiteQueueBucket) shuffle() {
 	self.shuffled = true
 }
 
+func (self *SyncedFiniteQueue) IsDone() bool {
+	return self.activeItems == 0 && self.items == 0
+}
+
 func (self *SyncedFiniteQueue) workLoop() {
 	for {
 		firstItem := self.queue.Get()
@@ -123,6 +130,9 @@ func (self *SyncedFiniteQueue) workLoop() {
 				return
 			case incoming := <-self.In:
 				self.queue.Insert(incoming)
+				self.items++
+			case <-self.ItemDone:
+				self.activeItems--
 			}
 		} else {
 			//We can take in new things, send out smallest one, or exit.
@@ -131,8 +141,13 @@ func (self *SyncedFiniteQueue) workLoop() {
 				return
 			case incoming := <-self.In:
 				self.queue.Insert(incoming)
+				self.items++
+			case <-self.ItemDone:
+				self.activeItems--
 			case self.Out <- firstItem:
 				itemSent = true
+				self.items--
+				self.activeItems++
 			}
 			//If we didn't send the item out, we need to put it back in.
 			if !itemSent {
