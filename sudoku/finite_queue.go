@@ -143,6 +143,7 @@ func (self *SyncedFiniteQueue) workLoop() {
 			//We can take in new things or accept an exit.
 			select {
 			case <-self.Exit:
+				close(self.Out)
 				return
 			case incoming := <-self.In:
 				self.queue.Insert(incoming)
@@ -157,6 +158,7 @@ func (self *SyncedFiniteQueue) workLoop() {
 			//We can take in new things, send out smallest one, or exit.
 			select {
 			case <-self.Exit:
+				close(self.Out)
 				return
 			case incoming := <-self.In:
 				self.queue.Insert(incoming)

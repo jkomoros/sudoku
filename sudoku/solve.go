@@ -61,7 +61,10 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 				//Sovler thread.
 				firstRun := true
 				for {
-					grid := <-queue.Out
+					grid, ok := <-queue.Out
+					if !ok {
+						return
+					}
 					result := grid.(*Grid).searchSolutions(queue, firstRun, max)
 					if result != nil {
 						incomingSolutions <- result
@@ -86,6 +89,8 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 				break OuterLoop
 			}
 		}
+
+		queue.Exit <- true
 
 		self.cachedSolutions = solutions
 
