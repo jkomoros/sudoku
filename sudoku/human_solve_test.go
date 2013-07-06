@@ -532,6 +532,14 @@ func TestSubsetCellsWithNPossibilities(t *testing.T) {
 	}
 }
 
+func BenchmarkHumanSolve(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		grid := NewGrid()
+		grid.Load(TEST_GRID)
+		grid.HumanSolve()
+	}
+}
+
 func TestHumanSolve(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(TEST_GRID)
