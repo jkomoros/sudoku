@@ -451,6 +451,14 @@ func BenchmarkFill(b *testing.B) {
 	}
 }
 
+func BenchmarkAdvancedSolve(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		grid := NewGrid()
+		grid.Load(ADVANCED_TEST_GRID)
+		grid.Solve()
+	}
+}
+
 func TestGridCache(t *testing.T) {
 	//TODO: these tests aren't that great.
 
