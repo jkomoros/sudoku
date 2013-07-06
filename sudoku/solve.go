@@ -43,30 +43,30 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 
 	if self.cachedSolutions == nil || (max > 0 && len(self.cachedSolutions) < max) {
-		stackDone := make(chan bool, 1)
 
-		stack := NewChanSyncedStack(stackDone)
+		queueDone := make(chan bool, 1)
 
-		stack.Insert(self.Copy())
+		queue := NewSyncedFiniteQueue(0, DIM*DIM, queueDone)
+
+		queue.In <- self.Copy()
 
 		incomingSolutions := make(chan *Grid)
 
 		var solutions []*Grid
+
+		//TODO: figure out a way to kill all of these threads when necessary.
 
 		for i := 0; i < NUM_SOLVER_THREADS; i++ {
 			go func() {
 				//Sovler thread.
 				firstRun := true
 				for {
-					grid, ok := <-stack.Output
-					if !ok {
-						return
-					}
-					result := grid.(*Grid).searchSolutions(stack, firstRun, max)
+					grid := <-queue.Out
+					result := grid.(*Grid).searchSolutions(queue, firstRun, max)
 					if result != nil {
 						incomingSolutions <- result
 					}
-					stack.ItemDone()
+					queue.ItemDone <- true
 					firstRun = false
 				}
 			}()
@@ -79,10 +79,9 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 				//Add it to results
 				solutions = append(solutions, solution)
 				if len(solutions) >= max {
-					stack.Dispose()
 					break OuterLoop
 				}
-			case <-stackDone:
+			case <-queueDone:
 				//Well, that's as good as it's going to get.
 				break OuterLoop
 			}
@@ -96,7 +95,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 
 }
 
-func (self *Grid) searchSolutions(stack *ChanSyncedStack, isFirstRun bool, numSoughtSolutions int) *Grid {
+func (self *Grid) searchSolutions(queue *SyncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) *Grid {
 	//This will only be called by Solutions.
 	//We will return ourselves if we are a solution, and if not we will return nil.
 	//If there are any sub children, we will send them to counter before we're done.
@@ -133,23 +132,16 @@ func (self *Grid) searchSolutions(stack *ChanSyncedStack, isFirstRun bool, numSo
 	for i, j := range rand.Perm(len(unshuffledPossibilities)) {
 		possibilities[i] = unshuffledPossibilities[j]
 	}
-	var result *Grid
 
-	for i, num := range possibilities {
+	for _, num := range possibilities {
 		copy := self.Copy()
 		copy.Cell(cell.Row, cell.Col).SetNumber(num)
-		if i == 0 && !isFirstRun {
-			result = copy.searchSolutions(stack, false, numSoughtSolutions)
-			if result != nil && numSoughtSolutions == 1 {
-				return result
-			}
-		} else {
-			stack.Insert(copy)
-		}
+
+		queue.In <- copy
 
 	}
 
-	return result
+	return nil
 
 }
 
