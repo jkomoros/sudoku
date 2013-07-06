@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"testing"
+	"time"
 )
 
 type SimpleRankedObject struct {
@@ -286,12 +287,19 @@ func TestSyncedFiniteQueue(t *testing.T) {
 	secondQueue.ItemDone <- true
 	secondQueue.ItemDone <- true
 
+	//Having this here helps ensure that the NEXT test's condition is true if ti will be.
+	select {
+	case <-secondQueue.done:
+		//fine
+	case <-time.After(10):
+		t.Log("We didn't get the done signal after some time of waiting.")
+		t.Fail()
+	}
+
 	if !secondQueue.IsDone() {
 		t.Log("The second queue didn't realize it was done even though all items are marked as done.")
 		t.Fail()
 	}
-
-	<-secondQueue.done
 
 	secondQueue.Exit <- true
 

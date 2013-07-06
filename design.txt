@@ -61,7 +61,6 @@ TODO:
 
 * REdo of threaded solving
 	* Why is performance so slow?
-	* The Second queue not realizing it's done is racy.
 
 
 
