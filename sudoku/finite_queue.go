@@ -29,9 +29,16 @@ const _REALLOCATE_PROPORTION = 0.20
 
 type SyncedFiniteQueue struct {
 	queue FiniteQueue
-	In    chan RankedObject
-	Out   chan RankedObject
-	Exit  chan bool
+	//TODO: should these counts actually be on the basic FiniteQueue?
+	items       int
+	activeItems int
+	In          chan RankedObject
+	Out         chan RankedObject
+	ItemDone    chan bool
+	Exit        chan bool
+	//We'll send a true to this every time ItemDone() causes us to be IsDone()
+	//Note: it should be buffered!
+	done chan bool
 }
 
 type FiniteQueueGetter struct {
@@ -43,15 +50,27 @@ type FiniteQueueGetter struct {
 
 //Returns a new queue that will work for items with a rank as low as min or as high as max (inclusive)
 func NewFiniteQueue(min int, max int) *FiniteQueue {
-	result := FiniteQueue{min, max, make([]*finiteQueueBucket, max-min+1), nil, 0, nil}
+	result := FiniteQueue{min,
+		max,
+		make([]*finiteQueueBucket, max-min+1),
+		nil,
+		0,
+		nil}
 	for i := 0; i < max-min+1; i++ {
 		result.objects[i] = &finiteQueueBucket{make([]RankedObject, 0), i + result.min, true}
 	}
 	return &result
 }
 
-func NewSyncedFiniteQueue(min int, max int) *SyncedFiniteQueue {
-	result := &SyncedFiniteQueue{*NewFiniteQueue(min, max), make(chan RankedObject), make(chan RankedObject), make(chan bool, 1)}
+func NewSyncedFiniteQueue(min int, max int, done chan bool) *SyncedFiniteQueue {
+	result := &SyncedFiniteQueue{*NewFiniteQueue(min, max),
+		0,
+		0,
+		make(chan RankedObject),
+		make(chan RankedObject),
+		make(chan bool),
+		make(chan bool, 1),
+		done}
 	go result.workLoop()
 	return result
 }
@@ -112,6 +131,10 @@ func (self *finiteQueueBucket) shuffle() {
 	self.shuffled = true
 }
 
+func (self *SyncedFiniteQueue) IsDone() bool {
+	return self.activeItems == 0 && self.items == 0
+}
+
 func (self *SyncedFiniteQueue) workLoop() {
 	for {
 		firstItem := self.queue.Get()
@@ -123,6 +146,12 @@ func (self *SyncedFiniteQueue) workLoop() {
 				return
 			case incoming := <-self.In:
 				self.queue.Insert(incoming)
+				self.items++
+			case <-self.ItemDone:
+				self.activeItems--
+				if self.IsDone() {
+					self.done <- true
+				}
 			}
 		} else {
 			//We can take in new things, send out smallest one, or exit.
@@ -131,8 +160,16 @@ func (self *SyncedFiniteQueue) workLoop() {
 				return
 			case incoming := <-self.In:
 				self.queue.Insert(incoming)
+				self.items++
+			case <-self.ItemDone:
+				self.activeItems--
+				if self.IsDone() {
+					self.done <- true
+				}
 			case self.Out <- firstItem:
 				itemSent = true
+				self.items--
+				self.activeItems++
 			}
 			//If we didn't send the item out, we need to put it back in.
 			if !itemSent {
