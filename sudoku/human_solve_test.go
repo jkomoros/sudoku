@@ -540,6 +540,25 @@ func BenchmarkHumanSolve(b *testing.B) {
 	}
 }
 
+func TestRandomWeightedIndex(t *testing.T) {
+	result := randomIndexWithNormalizedWeights([]float64{1.0, 0.0})
+	if result != 0 {
+		t.Log("Got wrong result with random weights")
+		t.Fail()
+	}
+	result = randomIndexWithNormalizedWeights([]float64{0.5, 0.0, 0.5})
+	if result != 0 && result != 2 {
+		t.Log("Didn't get one of two legal weights")
+		t.Fail()
+	}
+	result = randomIndexWithNormalizedWeights([]float64{0.0, 0.0, 1.0})
+	if result != 2 {
+		t.Log("Should have gotten last item in random weights; we didn't")
+		t.Fail()
+	}
+
+}
+
 func TestHumanSolve(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(TEST_GRID)

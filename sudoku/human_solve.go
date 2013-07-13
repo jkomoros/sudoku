@@ -516,6 +516,20 @@ func subsetIndexes(len int, size int) [][]int {
 	return result
 }
 
+func randomIndexWithNormalizedWeights(weights []float64) int {
+	//assumes that weights is normalized--that is, weights all sum to 1.
+	sample := rand.Float64()
+	var counter float64
+	for i, weight := range weights {
+		counter += weight
+		if sample <= weight {
+			return i
+		}
+	}
+	//This shouldn't happen if the weights are properly normalized.
+	return len(weights) - 1
+}
+
 func (self *Grid) HumanSolve() SolveDirections {
 	var results []*SolveStep
 	numTechniques := len(fillTechniques) + len(cullTechniques)
