@@ -565,6 +565,11 @@ func TestRandomWeightedIndex(t *testing.T) {
 		t.Fail()
 	}
 
+	weightResult := normalizedWeights([]float64{2.0, 1.0, 1.0})
+	if weightResult[0] != 0.5 || weightResult[1] != 0.25 || weightResult[2] != 0.25 {
+		t.Log("Nomralized weights came back wrong")
+		t.Fail()
+	}
 }
 
 func TestHumanSolve(t *testing.T) {

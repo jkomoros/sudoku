@@ -524,6 +524,21 @@ func weightsNormalized(weights []float64) bool {
 	return sum == 1.0
 }
 
+func normalizedWeights(weights []float64) []float64 {
+	if weightsNormalized(weights) {
+		return weights
+	}
+	var sum float64
+	for _, weight := range weights {
+		sum += weight
+	}
+	result := make([]float64, len(weights))
+	for i, weight := range weights {
+		result[i] = weight / sum
+	}
+	return result
+}
+
 func randomIndexWithNormalizedWeights(weights []float64) int {
 	//assumes that weights is normalized--that is, weights all sum to 1.
 	sample := rand.Float64()
