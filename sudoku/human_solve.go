@@ -516,6 +516,14 @@ func subsetIndexes(len int, size int) [][]int {
 	return result
 }
 
+func weightsNormalized(weights []float64) bool {
+	var sum float64
+	for _, weight := range weights {
+		sum += weight
+	}
+	return sum == 1.0
+}
+
 func randomIndexWithNormalizedWeights(weights []float64) int {
 	//assumes that weights is normalized--that is, weights all sum to 1.
 	sample := rand.Float64()

@@ -556,6 +556,14 @@ func TestRandomWeightedIndex(t *testing.T) {
 		t.Log("Should have gotten last item in random weights; we didn't")
 		t.Fail()
 	}
+	if weightsNormalized([]float64{1.0, 0.000001}) {
+		t.Log("thought weights were normalized when they weren't")
+		t.Fail()
+	}
+	if !weightsNormalized([]float64{0.5, 0.25, 0.25}) {
+		t.Log("Didn't think weights were normalized but they were")
+		t.Fail()
+	}
 
 }
 
