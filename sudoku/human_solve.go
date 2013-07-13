@@ -539,6 +539,11 @@ func normalizedWeights(weights []float64) []float64 {
 	return result
 }
 
+func randomIndexWithWeights(weights []float64) int {
+	//TODO: shouldn't this be called weightedRandomIndex?
+	return randomIndexWithNormalizedWeights(normalizedWeights(weights))
+}
+
 func randomIndexWithNormalizedWeights(weights []float64) int {
 	//assumes that weights is normalized--that is, weights all sum to 1.
 	sample := rand.Float64()

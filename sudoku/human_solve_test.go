@@ -570,6 +570,22 @@ func TestRandomWeightedIndex(t *testing.T) {
 		t.Log("Nomralized weights came back wrong")
 		t.Fail()
 	}
+
+	result = randomIndexWithWeights([]float64{1.0, 0.0})
+	if result != 0 {
+		t.Log("Got wrong result with random weights")
+		t.Fail()
+	}
+	result = randomIndexWithWeights([]float64{5.0, 0.0, 5.0})
+	if result != 0 && result != 2 {
+		t.Log("Didn't get one of two legal weights")
+		t.Fail()
+	}
+	result = randomIndexWithWeights([]float64{0.0, 0.0, 5.0})
+	if result != 2 {
+		t.Log("Should have gotten last item in random weights; we didn't")
+		t.Fail()
+	}
 }
 
 func TestHumanSolve(t *testing.T) {
