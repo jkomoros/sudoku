@@ -83,9 +83,12 @@ func NewGrid() *Grid {
 }
 
 func (self *Grid) Load(data string) {
+	//All col separators are basically just to make it easier to read. Remove them.
 	data = strings.Replace(data, ALT_COL_SEP, COL_SEP, -1)
+	data = strings.Replace(data, COL_SEP, "", -1)
+	//TODO: shouldn't we have more error checking, like for wrong dimensions?
 	for r, row := range strings.Split(data, ROW_SEP) {
-		for c, data := range strings.Split(row, COL_SEP) {
+		for c, data := range strings.Split(row, "") {
 			cell := self.Cell(r, c)
 			cell.Load(data)
 		}
