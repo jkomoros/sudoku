@@ -28,15 +28,9 @@ type SolveTechnique interface {
 	IsFill() bool
 }
 
-type fillSolveTechnique struct {
-	basicSolveTechnique
-}
-
-type cullSolveTechnique struct {
-	basicSolveTechnique
-}
-
 type basicSolveTechnique struct {
+	name   string
+	isFill bool
 }
 
 var techniques []SolveTechnique
@@ -44,75 +38,135 @@ var techniques []SolveTechnique
 func init() {
 
 	techniques = []SolveTechnique{
-		nakedSingleTechnique{},
-		hiddenSingleInRow{},
-		hiddenSingleInCol{},
-		hiddenSingleInBlock{},
-		pointingPairRow{},
-		pointingPairCol{},
-		nakedPairCol{},
-		nakedPairRow{},
-		nakedPairBlock{},
-		nakedTripleCol{},
-		nakedTripleRow{},
-		nakedTripleBlock{},
+		nakedSingleTechnique{
+			basicSolveTechnique{
+				"Only Legal Number",
+				true,
+			},
+		},
+		hiddenSingleInRow{
+			basicSolveTechnique{
+				"Necessary In Row",
+				true,
+			},
+		},
+		hiddenSingleInCol{
+			basicSolveTechnique{
+				"Necessary In Col",
+				true,
+			},
+		},
+		hiddenSingleInBlock{
+			basicSolveTechnique{
+				"Necessary in Block",
+				true,
+			},
+		},
+		pointingPairRow{
+			basicSolveTechnique{
+				"Pointing pair row",
+				false,
+			},
+		},
+		pointingPairCol{
+			basicSolveTechnique{
+				"Pointing pair col",
+				false,
+			},
+		},
+		nakedPairCol{
+			basicSolveTechnique{
+				"Naked pair Row",
+				false,
+			},
+		},
+		nakedPairRow{
+			basicSolveTechnique{
+				"Naked Pair Row",
+				false,
+			},
+		},
+		nakedPairBlock{
+			basicSolveTechnique{
+				"Naked Pair Block",
+				false,
+			},
+		},
+		nakedTripleCol{
+			basicSolveTechnique{
+				"Naked Triple Col",
+				false,
+			},
+		},
+		nakedTripleRow{
+			basicSolveTechnique{
+				"Naked Triple Row",
+				false,
+			},
+		},
+		nakedTripleBlock{
+			basicSolveTechnique{
+				"Naked Triple Block",
+				false,
+			},
+		},
 	}
 }
 
 type nakedSingleTechnique struct {
-	fillSolveTechnique
+	basicSolveTechnique
 }
 
 type hiddenSingleInRow struct {
-	fillSolveTechnique
+	basicSolveTechnique
 }
 
 type hiddenSingleInCol struct {
-	fillSolveTechnique
+	basicSolveTechnique
 }
 
 type hiddenSingleInBlock struct {
-	fillSolveTechnique
+	basicSolveTechnique
 }
 
 type pointingPairRow struct {
-	cullSolveTechnique
+	basicSolveTechnique
 }
 
 type pointingPairCol struct {
-	cullSolveTechnique
+	basicSolveTechnique
 }
 
 type nakedPairCol struct {
-	cullSolveTechnique
+	basicSolveTechnique
 }
 
 type nakedPairRow struct {
-	cullSolveTechnique
+	basicSolveTechnique
 }
 
 type nakedPairBlock struct {
-	cullSolveTechnique
+	basicSolveTechnique
 }
 
 type nakedTripleCol struct {
-	cullSolveTechnique
+	basicSolveTechnique
 }
 
 type nakedTripleRow struct {
-	cullSolveTechnique
+	basicSolveTechnique
 }
 
 type nakedTripleBlock struct {
-	cullSolveTechnique
+	basicSolveTechnique
 }
 
-func (self fillSolveTechnique) IsFill() bool {
-	return true
+func (self basicSolveTechnique) Name() string {
+	return self.name
 }
 
-func (self cullSolveTechnique) IsFill() bool {
-	return false
+func (self basicSolveTechnique) IsFill() bool {
+	return self.isFill
 }
 
 func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
@@ -139,10 +193,6 @@ func (self *SolveStep) Apply(grid *Grid) {
 	}
 }
 
-func (self nakedSingleTechnique) Name() string {
-	return "Only Legal Number"
-}
-
 func (self nakedSingleTechnique) Description(step *SolveStep) string {
 	if len(step.Nums) == 0 {
 		return ""
@@ -162,10 +212,6 @@ func (self nakedSingleTechnique) Find(grid *Grid) *SolveStep {
 	return newFillSolveStep(cell, cell.implicitNumber(), self)
 }
 
-func (self hiddenSingleInRow) Name() string {
-	return "Necessary In Row"
-}
-
 func (self hiddenSingleInRow) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
 	if len(step.TargetCells) == 0 || len(step.Nums) == 0 {
@@ -183,10 +229,6 @@ func (self hiddenSingleInRow) Find(grid *Grid) *SolveStep {
 	return necessaryInCollection(grid, self, getter)
 }
 
-func (self hiddenSingleInCol) Name() string {
-	return "Necessary In Col"
-}
-
 func (self hiddenSingleInCol) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
 	if len(step.TargetCells) == 0 || len(step.Nums) == 0 {
@@ -202,10 +244,6 @@ func (self hiddenSingleInCol) Find(grid *Grid) *SolveStep {
 		return grid.Col(index)
 	}
 	return necessaryInCollection(grid, self, getter)
-}
-
-func (self hiddenSingleInBlock) Name() string {
-	return "Necessary In Block"
 }
 
 func (self hiddenSingleInBlock) Description(step *SolveStep) string {
@@ -255,10 +293,6 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 	return nil
 }
 
-func (self pointingPairRow) Name() string {
-	return "Pointing pair row"
-}
-
 func (self pointingPairRow) Description(step *SolveStep) string {
 	if len(step.Nums) == 0 {
 		return ""
@@ -288,10 +322,6 @@ func (self pointingPairRow) Find(grid *Grid) *SolveStep {
 		}
 	}
 	return nil
-}
-
-func (self pointingPairCol) Name() string {
-	return "Pointing pair col"
 }
 
 func (self pointingPairCol) Description(step *SolveStep) string {
@@ -325,10 +355,6 @@ func (self pointingPairCol) Find(grid *Grid) *SolveStep {
 	return nil
 }
 
-func (self nakedPairCol) Name() string {
-	return "Naked pair col"
-}
-
 func (self nakedPairCol) Description(step *SolveStep) string {
 	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
 		return ""
@@ -341,10 +367,6 @@ func (self nakedPairCol) Find(grid *Grid) *SolveStep {
 		return grid.Col(i)
 	}
 	return nakedSubset(self, 2, colGetter)
-}
-
-func (self nakedPairRow) Name() string {
-	return "Naked pair row"
 }
 
 func (self nakedPairRow) Description(step *SolveStep) string {
@@ -361,10 +383,6 @@ func (self nakedPairRow) Find(grid *Grid) *SolveStep {
 	return nakedSubset(self, 2, rowGetter)
 }
 
-func (self nakedPairBlock) Name() string {
-	return "Naked pair block"
-}
-
 func (self nakedPairBlock) Description(step *SolveStep) string {
 	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
 		return ""
@@ -377,10 +395,6 @@ func (self nakedPairBlock) Find(grid *Grid) *SolveStep {
 		return grid.Block(i)
 	}
 	return nakedSubset(self, 2, blockGetter)
-}
-
-func (self nakedTripleCol) Name() string {
-	return "Naked triple col"
 }
 
 func (self nakedTripleCol) Description(step *SolveStep) string {
@@ -397,10 +411,6 @@ func (self nakedTripleCol) Find(grid *Grid) *SolveStep {
 	return nakedSubset(self, 3, colGetter)
 }
 
-func (self nakedTripleRow) Name() string {
-	return "Naked triple row"
-}
-
 func (self nakedTripleRow) Description(step *SolveStep) string {
 	if len(step.Nums) < 3 || len(step.PointerCells) < 3 {
 		return ""
@@ -413,10 +423,6 @@ func (self nakedTripleRow) Find(grid *Grid) *SolveStep {
 		return grid.Row(i)
 	}
 	return nakedSubset(self, 3, rowGetter)
-}
-
-func (self nakedTripleBlock) Name() string {
-	return "Naked triple block"
 }
 
 func (self nakedTripleBlock) Description(step *SolveStep) string {
