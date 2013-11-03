@@ -26,13 +26,13 @@ type SolveTechnique interface {
 	Description(*SolveStep) string
 	Find(*Grid) *SolveStep
 	IsFill() bool
-	Probability() float32
+	Probability() float64
 }
 
 type basicSolveTechnique struct {
 	name        string
 	isFill      bool
-	probability float32
+	probability float64
 }
 
 var techniques []SolveTechnique
@@ -185,7 +185,7 @@ func (self basicSolveTechnique) IsFill() bool {
 	return self.isFill
 }
 
-func (self basicSolveTechnique) Probability() float32 {
+func (self basicSolveTechnique) Probability() float64 {
 	return self.probability
 }
 
