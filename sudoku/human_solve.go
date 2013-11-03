@@ -29,9 +29,14 @@ type SolveTechnique interface {
 }
 
 type fillSolveTechnique struct {
+	basicSolveTechnique
 }
 
 type cullSolveTechnique struct {
+	basicSolveTechnique
+}
+
+type basicSolveTechnique struct {
 }
 
 var techniques []SolveTechnique
@@ -55,58 +60,58 @@ func init() {
 }
 
 type nakedSingleTechnique struct {
-	*fillSolveTechnique
+	fillSolveTechnique
 }
 
 type hiddenSingleInRow struct {
-	*fillSolveTechnique
+	fillSolveTechnique
 }
 
 type hiddenSingleInCol struct {
-	*fillSolveTechnique
+	fillSolveTechnique
 }
 
 type hiddenSingleInBlock struct {
-	*fillSolveTechnique
+	fillSolveTechnique
 }
 
 type pointingPairRow struct {
-	*cullSolveTechnique
+	cullSolveTechnique
 }
 
 type pointingPairCol struct {
-	*cullSolveTechnique
+	cullSolveTechnique
 }
 
 type nakedPairCol struct {
-	*cullSolveTechnique
+	cullSolveTechnique
 }
 
 type nakedPairRow struct {
-	*cullSolveTechnique
+	cullSolveTechnique
 }
 
 type nakedPairBlock struct {
-	*cullSolveTechnique
+	cullSolveTechnique
 }
 
 type nakedTripleCol struct {
-	*cullSolveTechnique
+	cullSolveTechnique
 }
 
 type nakedTripleRow struct {
-	*cullSolveTechnique
+	cullSolveTechnique
 }
 
 type nakedTripleBlock struct {
-	*cullSolveTechnique
+	cullSolveTechnique
 }
 
-func (self *fillSolveTechnique) IsFill() bool {
+func (self fillSolveTechnique) IsFill() bool {
 	return true
 }
 
-func (self *cullSolveTechnique) IsFill() bool {
+func (self cullSolveTechnique) IsFill() bool {
 	return false
 }
 
