@@ -599,6 +599,11 @@ func (self *Grid) HumanSolve() SolveDirections {
 		}
 
 		//Now pick one to apply.
+		if len(possibilities) == 0 {
+			//Hmm, didn't find any possivbilities. We failed. :-(
+			break
+		}
+
 		//TODO: pick the technique based on a weighting of how common a human is to pick each one.
 
 		step := possibilities[rand.Intn(len(possibilities))]
