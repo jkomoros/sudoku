@@ -625,9 +625,11 @@ func (self *Grid) HumanSolve() SolveDirections {
 			break
 		}
 
-		//TODO: pick the technique based on a weighting of how common a human is to pick each one.
-
-		step := possibilities[rand.Intn(len(possibilities))]
+		possibilitiesWeights := make([]float64, len(possibilities))
+		for i, possibility := range possibilities {
+			possibilitiesWeights[i] = possibility.Technique.Probability()
+		}
+		step := possibilities[randomIndexWithWeights(possibilitiesWeights)]
 
 		results = append(results, step)
 		step.Apply(self)
