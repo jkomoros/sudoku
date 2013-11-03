@@ -26,13 +26,13 @@ type SolveTechnique interface {
 	Description(*SolveStep) string
 	Find(*Grid) *SolveStep
 	IsFill() bool
-	Probability() float64
+	Weight() float64
 }
 
 type basicSolveTechnique struct {
-	name        string
-	isFill      bool
-	probability float64
+	name   string
+	isFill bool
+	weight float64
 }
 
 var techniques []SolveTechnique
@@ -185,8 +185,8 @@ func (self basicSolveTechnique) IsFill() bool {
 	return self.isFill
 }
 
-func (self basicSolveTechnique) Probability() float64 {
-	return self.probability
+func (self basicSolveTechnique) Weight() float64 {
+	return self.weight
 }
 
 func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
@@ -627,7 +627,7 @@ func (self *Grid) HumanSolve() SolveDirections {
 
 		possibilitiesWeights := make([]float64, len(possibilities))
 		for i, possibility := range possibilities {
-			possibilitiesWeights[i] = possibility.Technique.Probability()
+			possibilitiesWeights[i] = possibility.Technique.Weight()
 		}
 		step := possibilities[randomIndexWithWeights(possibilitiesWeights)]
 
