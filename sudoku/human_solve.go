@@ -34,19 +34,15 @@ type fillSolveTechnique struct {
 type cullSolveTechnique struct {
 }
 
-var fillTechniques []SolveTechnique
-var cullTechniques []SolveTechnique
+var techniques []SolveTechnique
 
 func init() {
 
-	fillTechniques = []SolveTechnique{
+	techniques = []SolveTechnique{
 		nakedSingleTechnique{},
 		hiddenSingleInRow{},
 		hiddenSingleInCol{},
 		hiddenSingleInBlock{},
-	}
-
-	cullTechniques = []SolveTechnique{
 		pointingPairRow{},
 		pointingPairCol{},
 		nakedPairCol{},
@@ -565,7 +561,7 @@ func randomIndexWithNormalizedWeights(weights []float64) int {
 
 func (self *Grid) HumanSolve() SolveDirections {
 	var results []*SolveStep
-	numTechniques := len(fillTechniques) + len(cullTechniques)
+	numTechniques := len(techniques)
 
 	//Note: trying these all in parallel is much slower (~15x) than doing them in sequence.
 	//The reason is that in sequence we bailed early as soon as we found one step; now we try them all.
@@ -577,16 +573,10 @@ func (self *Grid) HumanSolve() SolveDirections {
 
 		var possibilities []*SolveStep
 
-		for _, technique := range fillTechniques {
-			go func() {
-				possibilitiesChan <- technique.Find(self)
-			}()
-		}
-
-		for _, technique := range cullTechniques {
-			go func() {
-				possibilitiesChan <- technique.Find(self)
-			}()
+		for _, technique := range techniques {
+			go func(theTechnique SolveTechnique) {
+				possibilitiesChan <- theTechnique.Find(self)
+			}(technique)
 		}
 
 		//Collect all of the results
