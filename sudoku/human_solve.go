@@ -37,9 +37,6 @@ type basicSolveTechnique struct {
 
 var techniques []SolveTechnique
 
-//We'll use this a lot, so we'll only calculate it once.
-var techniqueNormalizedWeights []float64
-
 func init() {
 
 	//TODO: calculate more realistic probabilities.
@@ -130,14 +127,6 @@ func init() {
 			},
 		},
 	}
-
-	techniqueNormalizedWeights = make([]float64, len(techniques))
-
-	for i, technique := range techniques {
-		techniqueNormalizedWeights[i] = technique.Probability()
-	}
-	techniqueNormalizedWeights = normalizedWeights(techniqueNormalizedWeights)
-
 }
 
 type nakedSingleTechnique struct {
