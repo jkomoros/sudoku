@@ -38,19 +38,24 @@ var fillTechniques []SolveTechnique
 var cullTechniques []SolveTechnique
 
 func init() {
-	//TODO: init techniques with enough space
-	fillTechniques = append(fillTechniques, nakedSingleTechnique{})
-	fillTechniques = append(fillTechniques, hiddenSingleInRow{})
-	fillTechniques = append(fillTechniques, hiddenSingleInCol{})
-	fillTechniques = append(fillTechniques, hiddenSingleInBlock{})
-	cullTechniques = append(cullTechniques, pointingPairRow{})
-	cullTechniques = append(cullTechniques, pointingPairCol{})
-	cullTechniques = append(cullTechniques, nakedPairCol{})
-	cullTechniques = append(cullTechniques, nakedPairRow{})
-	cullTechniques = append(cullTechniques, nakedPairBlock{})
-	cullTechniques = append(cullTechniques, nakedTripleCol{})
-	cullTechniques = append(cullTechniques, nakedTripleRow{})
-	cullTechniques = append(cullTechniques, nakedTripleBlock{})
+
+	fillTechniques = []SolveTechnique{
+		nakedSingleTechnique{},
+		hiddenSingleInRow{},
+		hiddenSingleInCol{},
+		hiddenSingleInBlock{},
+	}
+
+	cullTechniques = []SolveTechnique{
+		pointingPairRow{},
+		pointingPairCol{},
+		nakedPairCol{},
+		nakedPairRow{},
+		nakedPairBlock{},
+		nakedTripleCol{},
+		nakedTripleRow{},
+		nakedTripleBlock{},
+	}
 }
 
 type nakedSingleTechnique struct {
