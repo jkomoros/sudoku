@@ -26,88 +26,104 @@ type SolveTechnique interface {
 	Description(*SolveStep) string
 	Find(*Grid) *SolveStep
 	IsFill() bool
+	Probability() float32
 }
 
 type basicSolveTechnique struct {
-	name   string
-	isFill bool
+	name        string
+	isFill      bool
+	probability float32
 }
 
 var techniques []SolveTechnique
 
 func init() {
 
+	//TODO: calculate more realistic probabilities.
+
 	techniques = []SolveTechnique{
 		nakedSingleTechnique{
 			basicSolveTechnique{
 				"Only Legal Number",
 				true,
+				1.0,
 			},
 		},
 		hiddenSingleInRow{
 			basicSolveTechnique{
 				"Necessary In Row",
 				true,
+				0.5,
 			},
 		},
 		hiddenSingleInCol{
 			basicSolveTechnique{
 				"Necessary In Col",
 				true,
+				0.5,
 			},
 		},
 		hiddenSingleInBlock{
 			basicSolveTechnique{
 				"Necessary in Block",
 				true,
+				0.5,
 			},
 		},
 		pointingPairRow{
 			basicSolveTechnique{
 				"Pointing pair row",
 				false,
+				0.2,
 			},
 		},
 		pointingPairCol{
 			basicSolveTechnique{
 				"Pointing pair col",
 				false,
+				0.2,
 			},
 		},
 		nakedPairCol{
 			basicSolveTechnique{
 				"Naked pair Row",
 				false,
+				0.1,
 			},
 		},
 		nakedPairRow{
 			basicSolveTechnique{
 				"Naked Pair Row",
 				false,
+				0.1,
 			},
 		},
 		nakedPairBlock{
 			basicSolveTechnique{
 				"Naked Pair Block",
 				false,
+				0.1,
 			},
 		},
 		nakedTripleCol{
 			basicSolveTechnique{
 				"Naked Triple Col",
 				false,
+				0.05,
 			},
 		},
 		nakedTripleRow{
 			basicSolveTechnique{
 				"Naked Triple Row",
 				false,
+				0.05,
 			},
 		},
 		nakedTripleBlock{
 			basicSolveTechnique{
 				"Naked Triple Block",
 				false,
+				0.05,
 			},
 		},
 	}
@@ -167,6 +183,10 @@ func (self basicSolveTechnique) Name() string {
 
 func (self basicSolveTechnique) IsFill() bool {
 	return self.isFill
+}
+
+func (self basicSolveTechnique) Probability() float32 {
+	return self.probability
 }
 
 func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
