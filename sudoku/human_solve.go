@@ -26,20 +26,25 @@ type SolveTechnique interface {
 	Description(*SolveStep) string
 	Find(*Grid) *SolveStep
 	IsFill() bool
+	//How often a real human would use this technique. 1.0 (extremely common) to 0.0 (not common)
 	Weight() float64
+	//How difficult a real human would say this technique is. Generally inversely related to weight. 0.0 to 1.0.
+	Difficulty() float64
 }
 
 type basicSolveTechnique struct {
-	name   string
-	isFill bool
-	weight float64
+	name       string
+	isFill     bool
+	weight     float64
+	difficulty float64
 }
 
 var techniques []SolveTechnique
 
 func init() {
 
-	//TODO: calculate more realistic probabilities.
+	//TODO: calculate more realistic weights.
+	//TODO: calculate more realistic difficulties.
 
 	techniques = []SolveTechnique{
 		nakedSingleTechnique{
@@ -47,6 +52,7 @@ func init() {
 				"Only Legal Number",
 				true,
 				1.0,
+				0.0,
 			},
 		},
 		hiddenSingleInRow{
@@ -54,6 +60,7 @@ func init() {
 				"Necessary In Row",
 				true,
 				0.5,
+				0.25,
 			},
 		},
 		hiddenSingleInCol{
@@ -61,6 +68,7 @@ func init() {
 				"Necessary In Col",
 				true,
 				0.5,
+				0.25,
 			},
 		},
 		hiddenSingleInBlock{
@@ -68,6 +76,7 @@ func init() {
 				"Necessary in Block",
 				true,
 				0.5,
+				0.20,
 			},
 		},
 		pointingPairRow{
@@ -75,6 +84,7 @@ func init() {
 				"Pointing pair row",
 				false,
 				0.2,
+				0.5,
 			},
 		},
 		pointingPairCol{
@@ -82,6 +92,7 @@ func init() {
 				"Pointing pair col",
 				false,
 				0.2,
+				0.5,
 			},
 		},
 		nakedPairCol{
@@ -89,6 +100,7 @@ func init() {
 				"Naked pair Row",
 				false,
 				0.1,
+				0.6,
 			},
 		},
 		nakedPairRow{
@@ -96,6 +108,7 @@ func init() {
 				"Naked Pair Row",
 				false,
 				0.1,
+				0.6,
 			},
 		},
 		nakedPairBlock{
@@ -103,6 +116,7 @@ func init() {
 				"Naked Pair Block",
 				false,
 				0.1,
+				0.6,
 			},
 		},
 		nakedTripleCol{
@@ -110,6 +124,7 @@ func init() {
 				"Naked Triple Col",
 				false,
 				0.05,
+				0.8,
 			},
 		},
 		nakedTripleRow{
@@ -117,6 +132,7 @@ func init() {
 				"Naked Triple Row",
 				false,
 				0.05,
+				0.8,
 			},
 		},
 		nakedTripleBlock{
@@ -124,6 +140,7 @@ func init() {
 				"Naked Triple Block",
 				false,
 				0.05,
+				0.8,
 			},
 		},
 	}
@@ -187,6 +204,10 @@ func (self basicSolveTechnique) IsFill() bool {
 
 func (self basicSolveTechnique) Weight() float64 {
 	return self.weight
+}
+
+func (self basicSolveTechnique) Difficulty() float64 {
+	return self.difficulty
 }
 
 func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
