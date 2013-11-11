@@ -53,6 +53,8 @@ TODO:
 
 * We never actually call ReturnGrid!
 
+* Implement the "Describe" method on SolveSteps to walk through in prose how to do them.
+
 * Does our use of the Rand convenience funcs in different go routines cause performance problems? (http://stackoverflow.com/questions/14298523/why-does-adding-concurrency-slow-down-this-golang-code)
 
 * Make grid.Load work for puzzles in .sdk format.
