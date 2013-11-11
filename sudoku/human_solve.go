@@ -2,10 +2,15 @@ package sudoku
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 )
 
-const DIFFICULTY_ITERATIONS = 10
+//Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
+const MAX_DIFFICULTY_ITERATIONS = 15
+
+//How close we have to get to the average to feel comfortable our difficulty is converging.
+const DIFFICULTY_CONVERGENCE = 0.05
 
 type SolveDirections []*SolveStep
 
@@ -679,22 +684,34 @@ func (self *Grid) HumanSolve() SolveDirections {
 }
 
 func (self *Grid) Difficulty() float64 {
-	//This is an extremely expensive method. Do not call repeatedly!
+	//This can be an extremely expensive method. Do not call repeatedly!
 	//returns the difficulty of the grid, which is a number between 0.0 and 1.0.
-	//This is a probabilistic measure; repeated calls may return different numbers.
+	//This is a probabilistic measure; repeated calls may return different numbers, although generally we wait for the results to converge.
 
 	//We solve the same puzzle N times, then ask each set of steps for their difficulty, and combine those to come up with the overall difficulty.
 
 	//TODO: come up with a better notion of difficulty than just averaging the difficulties. Perhaps weight higher difficulty runs higher?
 
 	accum := 0.0
+	average := 0.0
 
-	for i := 0; i < DIFFICULTY_ITERATIONS; i++ {
+	for i := 0; i < MAX_DIFFICULTY_ITERATIONS; i++ {
 		grid := self.Copy()
 		steps := grid.HumanSolve()
-		accum += steps.Difficulty()
+		difficulty := steps.Difficulty()
+
+		//We don't change the average yet--we want to ensure that we're close to the average of all the other runs.
+
+		if math.Abs(average-difficulty) < DIFFICULTY_CONVERGENCE {
+			//Okay, we've already converged. Just return early!
+			return average
+		}
+
+		accum += difficulty
+		average = accum / (float64(i) + 1.0)
 	}
 
-	return accum / DIFFICULTY_ITERATIONS
+	//We weren't converging... oh well!
+	return average
 
 }
