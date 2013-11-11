@@ -1,6 +1,8 @@
 package sudoku
 
 import (
+	"container/list"
+	"io/ioutil"
 	"runtime"
 	"strings"
 	"testing"
@@ -8,7 +10,7 @@ import (
 
 //This grid is #27 from Totally Pocket Sudoku. It's included for testing purposes only.
 
-const PUZZLES_DIRECTORY = "../puzzles/sadman/"
+const PUZZLES_DIRECTORY = "../puzzles"
 
 const TEST_GRID = `6|1|2|.|.|.|4|.|3
 .|3|.|4|9|.|.|7|2
@@ -511,9 +513,42 @@ func nCopies(in string, copies int) (result []string) {
 	return
 }
 
+func puzzlePath(name string) string {
+	//Will look for the puzzle in all of the default directories and return its location if it exists. If it doesn't find it, will return ""
+	name = strings.ToLower(name)
+
+	directories := list.New()
+
+	directories.PushFront(PUZZLES_DIRECTORY)
+
+	e := directories.Front()
+
+	for e != nil {
+		directories.Remove(e)
+		directory := e.Value.(string)
+		infos, _ := ioutil.ReadDir(directory)
+		for _, info := range infos {
+			if info.IsDir() {
+				//We'll search this one later.
+				directories.PushBack(directory + "/" + info.Name())
+			} else {
+				//See if it's the file.
+				if strings.ToLower(info.Name()) == name {
+					//Found it!
+					return directory + "/" + info.Name()
+				}
+				//Nope, not it... keep on searching.
+			}
+		}
+		e = directories.Front()
+	}
+	//Hmm, guess we won't find it.
+	return ""
+}
+
 func TestLoadFromFile(t *testing.T) {
 	grid := NewGrid()
-	if !grid.LoadFromFile(PUZZLES_DIRECTORY + "hiddenpair1.sdk") {
+	if !grid.LoadFromFile(puzzlePath("hiddenpair1.sdk")) {
 		t.Log("Grid loading failed.")
 		t.Fail()
 	}
