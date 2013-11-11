@@ -611,6 +611,19 @@ func randomIndexWithNormalizedWeights(weights []float64) int {
 	return len(weights) - 1
 }
 
+func (self SolveDirections) Difficulty() float64 {
+	//How difficult the solve directions described are.
+
+	//TODO: come up with a better measure of difficulty. Perhaps include some notion of how many difficult steps there are?
+	max := 0.0
+	for _, step := range self {
+		if step.Technique.Difficulty() > max {
+			max = step.Technique.Difficulty()
+		}
+	}
+	return max
+}
+
 func (self *Grid) HumanSolve() SolveDirections {
 	var results []*SolveStep
 	numTechniques := len(techniques)
