@@ -8,6 +8,8 @@ import (
 
 //This grid is #27 from Totally Pocket Sudoku. It's included for testing purposes only.
 
+const PUZZLES_DIRECTORY = "../puzzles/sadman/"
+
 const TEST_GRID = `6|1|2|.|.|.|4|.|3
 .|3|.|4|9|.|.|7|2
 .|.|7|.|.|.|.|6|5
@@ -511,7 +513,7 @@ func nCopies(in string, copies int) (result []string) {
 
 func TestLoadFromFile(t *testing.T) {
 	grid := NewGrid()
-	if !grid.LoadFromFile("../puzzles/sadman/hiddenpair1.sdk") {
+	if !grid.LoadFromFile(PUZZLES_DIRECTORY + "hiddenpair1.sdk") {
 		t.Log("Grid loading failed.")
 		t.Fail()
 	}
