@@ -218,10 +218,9 @@ func (self basicSolveTechnique) Difficulty() float64 {
 }
 
 func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
-	//TODO: why do these need to be pulled out separately?
-	cellArr := [...]*Cell{cell}
-	numArr := [...]int{num}
-	return &SolveStep{cellArr[:], nil, numArr[:], technique}
+	cellArr := []*Cell{cell}
+	numArr := []int{num}
+	return &SolveStep{cellArr, nil, numArr, technique}
 }
 
 func (self *SolveStep) Apply(grid *Grid) {
