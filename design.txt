@@ -51,7 +51,9 @@ TODO:
 
 * Investigate making better grids (fewer clues / more symmetry)
 
-* We never actually call ReturnGrid!
+* Make it so NewGrid grabs a grid from grid cache if possible.
+	* Actually call grid.Done() when we're done
+	* We tried to do this but got CRAZY errors, which are hard to track down. Turns out that there is some possibility for slippage in grids, somehow. Need to solve that.
 
 * Implement the "Describe" method on SolveSteps to walk through in prose how to do them.
 
