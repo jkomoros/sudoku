@@ -467,20 +467,20 @@ func TestGridCache(t *testing.T) {
 	//TODO: these tests aren't that great.
 
 	//Make sure we're in a known state.
-	DropGrids()
+	dropGrids()
 
-	grid := GetGrid()
+	grid := getGrid()
 	if grid == nil {
 		t.Log("We got back an empty grid from GetGrid")
 		t.Fail()
 	}
-	other := GetGrid()
+	other := getGrid()
 	if grid == other {
 		t.Log("We got back the same grid without returning it first.")
 		t.Fail()
 	}
-	ReturnGrid(grid)
-	third := GetGrid()
+	returnGrid(grid)
+	third := getGrid()
 	if third != grid {
 		t.Log("We aren't reusing grids as often as we should be.")
 		t.Fail()

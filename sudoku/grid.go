@@ -35,10 +35,9 @@ func init() {
 	gridCache = make(chan *Grid, MAX_GRIDS)
 }
 
-func GetGrid() *Grid {
+func getGrid() *Grid {
 	select {
 	case grid := <-gridCache:
-		grid.ResetOverrides()
 		return grid
 	default:
 		return NewGrid()
@@ -46,7 +45,7 @@ func GetGrid() *Grid {
 	return nil
 }
 
-func DropGrids() {
+func dropGrids() {
 	for {
 		select {
 		case <-gridCache:
@@ -57,7 +56,8 @@ func DropGrids() {
 	}
 }
 
-func ReturnGrid(grid *Grid) {
+func returnGrid(grid *Grid) {
+	grid.ResetOverrides()
 	select {
 	case gridCache <- grid:
 		//Returned it to the queue.
@@ -81,6 +81,11 @@ func NewGrid() *Grid {
 	}
 	result.initalized = true
 	return result
+}
+
+func (self *Grid) Done() {
+	//We're done using this grid; it's okay use to use it again.
+	returnGrid(self)
 }
 
 func (self *Grid) Load(data string) {
@@ -108,14 +113,14 @@ func (self *Grid) LoadFromFile(path string) bool {
 //Returns a new grid that has exactly the same numbers placed as the original.
 func (self *Grid) Copy() *Grid {
 	//TODO: ideally we'd have some kind of smart SparseGrid or something that we can return.
-	result := GetGrid()
+	result := getGrid()
 	result.Load(self.DataString())
 	return result
 }
 
 func (self *Grid) transpose() *Grid {
 	//Returns a new grid that is the same as this grid (ignoring overrides, which are nulled), but with rows and cols swapped.
-	result := GetGrid()
+	result := getGrid()
 	for r := 0; r < DIM; r++ {
 		for c := 0; c < DIM; c++ {
 			original := self.Cell(r, c)
