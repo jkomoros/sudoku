@@ -508,3 +508,15 @@ func nCopies(in string, copies int) (result []string) {
 	}
 	return
 }
+
+func TestLoadFromFile(t *testing.T) {
+	grid := NewGrid()
+	if !grid.LoadFromFile("../puzzles/sadman/hiddenpair1.sdk") {
+		t.Log("Grid loading failed.")
+		t.Fail()
+	}
+	if grid.Cell(0, 1).Number() != 6 {
+		t.Log("We didn't get back a grid looking like what we expected.")
+		t.Fail()
+	}
+}

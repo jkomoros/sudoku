@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"io/ioutil"
 	"log"
 	"strings"
 )
@@ -93,6 +94,15 @@ func (self *Grid) Load(data string) {
 			cell.Load(data)
 		}
 	}
+}
+
+func (self *Grid) LoadFromFile(path string) bool {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return false
+	}
+	self.Load(string(data))
+	return true
 }
 
 //Returns a new grid that has exactly the same numbers placed as the original.
