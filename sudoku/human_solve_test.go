@@ -90,6 +90,8 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 		t.Log("The only legal number technique did actually mutate the grid.")
 		t.Fail()
 	}
+
+	grid.Done()
 }
 
 func TestNecessaryInRow(t *testing.T) {
@@ -145,6 +147,8 @@ func TestNecessaryInRow(t *testing.T) {
 		t.Log("The necessary in row technique did actually mutate the grid.")
 		t.Fail()
 	}
+
+	grid.Done()
 }
 
 func TestNecessaryInCol(t *testing.T) {
@@ -200,6 +204,8 @@ func TestNecessaryInCol(t *testing.T) {
 		t.Log("The necessary in col technique did actually mutate the grid.")
 		t.Fail()
 	}
+
+	grid.Done()
 }
 
 func TestNecessaryInBlock(t *testing.T) {
@@ -255,6 +261,9 @@ func TestNecessaryInBlock(t *testing.T) {
 		t.Log("The necessary in block technique did actually mutate the grid.")
 		t.Fail()
 	}
+
+	grid.Done()
+
 }
 
 func TestPointingPairCol(t *testing.T) {
@@ -290,6 +299,8 @@ func TestPointingPairCol(t *testing.T) {
 			t.Fail()
 		}
 	}
+
+	grid.Done()
 }
 
 func TestPointingPairRow(t *testing.T) {
@@ -325,6 +336,8 @@ func TestPointingPairRow(t *testing.T) {
 			t.Fail()
 		}
 	}
+
+	grid.Done()
 }
 
 func TestNakedPairCol(t *testing.T) {
@@ -361,6 +374,8 @@ func TestNakedPairCol(t *testing.T) {
 			t.Fail()
 		}
 	}
+
+	grid.Done()
 }
 
 func TestNakedPairRow(t *testing.T) {
@@ -398,6 +413,8 @@ func TestNakedPairRow(t *testing.T) {
 			t.Fail()
 		}
 	}
+
+	grid.Done()
 }
 
 func TestNakedPairBlock(t *testing.T) {
@@ -434,6 +451,8 @@ func TestNakedPairBlock(t *testing.T) {
 			t.Fail()
 		}
 	}
+
+	grid.Done()
 }
 
 func TestNakedTriple(t *testing.T) {
@@ -472,6 +491,8 @@ func TestNakedTriple(t *testing.T) {
 			t.Fail()
 		}
 	}
+
+	grid.Done()
 }
 
 func TestSubsetIndexes(t *testing.T) {
@@ -530,6 +551,8 @@ func TestSubsetCellsWithNPossibilities(t *testing.T) {
 		t.Log("Subset cells came back with wrong cells: ", result)
 		t.Fail()
 	}
+
+	grid.Done()
 }
 
 func BenchmarkHumanSolve(b *testing.B) {
@@ -537,6 +560,7 @@ func BenchmarkHumanSolve(b *testing.B) {
 		grid := NewGrid()
 		grid.Load(TEST_GRID)
 		grid.HumanSolve()
+		grid.Done()
 	}
 }
 
@@ -618,6 +642,8 @@ func TestHumanSolve(t *testing.T) {
 		t.Fail()
 	}
 
+	grid.Done()
+
 }
 
 func TestPuzzleDifficulty(t *testing.T) {
@@ -635,4 +661,6 @@ func TestPuzzleDifficulty(t *testing.T) {
 		t.Log("The grid's difficulty was outside of allowed bounds.")
 		t.Fail()
 	}
+
+	grid.Done()
 }

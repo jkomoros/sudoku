@@ -235,6 +235,8 @@ func TestGridCreation(t *testing.T) {
 			neighborsMap[cell] = true
 		}
 	}
+
+	grid.Done()
 }
 
 func TestGridLoad(t *testing.T) {
@@ -334,6 +336,9 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
+	grid.Done()
+	copy.Done()
+
 }
 
 func TestAdvancedSolve(t *testing.T) {
@@ -413,6 +418,9 @@ func TestAdvancedSolve(t *testing.T) {
 	//TODO: test that nOrFewerSolutions does stop at max (unless cached)
 	//TODO: test HasMultipleSolutions
 
+	grid.Done()
+	copy.Done()
+
 }
 
 func TestTranspose(t *testing.T) {
@@ -431,6 +439,7 @@ func TestTranspose(t *testing.T) {
 		t.Log("Transpose did not operate correctly")
 		t.Fail()
 	}
+	grid.Done()
 }
 
 func TestFill(t *testing.T) {
@@ -446,12 +455,15 @@ func TestFill(t *testing.T) {
 		t.Fail()
 	}
 
+	grid.Done()
+
 }
 
 func BenchmarkFill(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		grid := NewGrid()
 		grid.Fill()
+		grid.Done()
 	}
 }
 
@@ -460,6 +472,7 @@ func BenchmarkAdvancedSolve(b *testing.B) {
 		grid := NewGrid()
 		grid.Load(ADVANCED_TEST_GRID)
 		grid.Solve()
+		grid.Done()
 	}
 }
 
@@ -504,6 +517,8 @@ func TestGenerate(t *testing.T) {
 		t.Log("We got back a generated grid that has more than one solution.")
 		t.Fail()
 	}
+
+	grid.Done()
 }
 
 func nCopies(in string, copies int) (result []string) {
@@ -556,4 +571,5 @@ func TestLoadFromFile(t *testing.T) {
 		t.Log("We didn't get back a grid looking like what we expected.")
 		t.Fail()
 	}
+	grid.Done()
 }

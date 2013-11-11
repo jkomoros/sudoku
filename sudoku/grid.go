@@ -113,14 +113,14 @@ func (self *Grid) LoadFromFile(path string) bool {
 //Returns a new grid that has exactly the same numbers placed as the original.
 func (self *Grid) Copy() *Grid {
 	//TODO: ideally we'd have some kind of smart SparseGrid or something that we can return.
-	result := getGrid()
+	result := NewGrid()
 	result.Load(self.DataString())
 	return result
 }
 
 func (self *Grid) transpose() *Grid {
 	//Returns a new grid that is the same as this grid (ignoring overrides, which are nulled), but with rows and cols swapped.
-	result := getGrid()
+	result := NewGrid()
 	for r := 0; r < DIM; r++ {
 		for c := 0; c < DIM; c++ {
 			original := self.Cell(r, c)
