@@ -1,0 +1,1 @@
+The puzzles in this directory come from http://www.sadmansoftware.com/sudoku/solvingtechniques.htm
