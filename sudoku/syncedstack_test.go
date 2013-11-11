@@ -162,7 +162,7 @@ func TestChanSyncedStack(t *testing.T) {
 	select {
 	case <-doneChan:
 		//good
-	case <-time.After(10):
+	case <-time.After(10000):
 		t.Log("We didn't get anything on the done channel after awhile.")
 		t.Fail()
 	}
