@@ -617,4 +617,22 @@ func TestHumanSolve(t *testing.T) {
 		t.Log("We got back a difficulty that was not calculated as we expected it to be.")
 		t.Fail()
 	}
+
+}
+
+func TestPuzzleDifficulty(t *testing.T) {
+	grid := NewGrid()
+	grid.Load(TEST_GRID)
+
+	difficulty := grid.Difficulty()
+
+	if grid.Solved() {
+		t.Log("Difficulty shouldn't have changed the underlying grid, but it did.")
+		t.Fail()
+	}
+
+	if difficulty < 0.0 || difficulty > 1.0 {
+		t.Log("The grid's difficulty was outside of allowed bounds.")
+		t.Fail()
+	}
 }

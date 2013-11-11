@@ -5,6 +5,8 @@ import (
 	"math/rand"
 )
 
+const DIFFICULTY_ITERATIONS = 10
+
 type SolveDirections []*SolveStep
 
 const (
@@ -674,4 +676,25 @@ func (self *Grid) HumanSolve() SolveDirections {
 		return nil
 	}
 	return results
+}
+
+func (self *Grid) Difficulty() float64 {
+	//This is an extremely expensive method. Do not call repeatedly!
+	//returns the difficulty of the grid, which is a number between 0.0 and 1.0.
+	//This is a probabilistic measure; repeated calls may return different numbers.
+
+	//We solve the same puzzle N times, then ask each set of steps for their difficulty, and combine those to come up with the overall difficulty.
+
+	//TODO: come up with a better notion of difficulty than just averaging the difficulties. Perhaps weight higher difficulty runs higher?
+
+	accum := 0.0
+
+	for i := 0; i < DIFFICULTY_ITERATIONS; i++ {
+		grid := self.Copy()
+		steps := grid.HumanSolve()
+		accum += steps.Difficulty()
+	}
+
+	return accum / DIFFICULTY_ITERATIONS
+
 }
