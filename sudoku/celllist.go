@@ -176,6 +176,14 @@ func (self stringSlice) description() string {
 		return ""
 	}
 
+	if len(self) == 1 {
+		return self[0]
+	}
+
+	if len(self) == 2 {
+		return self[0] + " and " + self[1]
+	}
+
 	result := strings.Join(self[:len(self)-1], ", ")
 
 	return result + ", and " + self[len(self)-1]

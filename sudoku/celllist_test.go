@@ -94,6 +94,24 @@ func TestIntList(t *testing.T) {
 		t.Log("Didn't get right description: ", description)
 		t.Fail()
 	}
+
+	oneList := IntSlice{1}
+
+	description = oneList.Description()
+
+	if description != "1" {
+		t.Log("Didn't get the right description for a short intlist: ", description)
+		t.Fail()
+	}
+
+	twoList := IntSlice{1, 1}
+
+	description = twoList.Description()
+
+	if description != "1 and 1" {
+		t.Log("Did'get the the right description for a two-item intList: ", description)
+		t.Fail()
+	}
 }
 
 func TestSameContentAs(t *testing.T) {
