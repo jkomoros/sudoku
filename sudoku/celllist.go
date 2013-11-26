@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -158,6 +159,16 @@ func (self CellList) Map(mapper func(*Cell)) {
 	for _, cell := range self {
 		mapper(cell)
 	}
+}
+
+func (self CellList) Description() string {
+	strings := make(stringSlice, len(self))
+
+	for i, cell := range self {
+		strings[i] = fmt.Sprintf("(%d,%d)", cell.Row, cell.Col)
+	}
+
+	return strings.description()
 }
 
 func (self stringSlice) description() string {

@@ -69,6 +69,13 @@ func TestBasicCellList(t *testing.T) {
 		t.Log("We got back cells not inthe same row.")
 		t.Fail()
 	}
+
+	description := cells.Description()
+
+	if description != "(0,0), (0,1), and (0,2)" {
+		t.Log("Got wrong description of cellList: ", description)
+		t.Fail()
+	}
 }
 
 func TestIntList(t *testing.T) {
