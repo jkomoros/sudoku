@@ -617,6 +617,36 @@ func randomIndexWithNormalizedWeights(weights []float64) int {
 	return len(weights) - 1
 }
 
+func (self SolveDirections) Description() string {
+	result := ""
+
+	if len(self) == 0 {
+		return "We can't solve this puzzle."
+	}
+
+	for i, step := range self {
+		switch i {
+		case 0:
+			result += "First, "
+		case len(self) - 1:
+			result += " Finally, "
+		default:
+			//TODO: switch between "then" and "next" randomly.
+			result += " Next, "
+		}
+		if step.Technique.IsFill() {
+			result += fmt.Sprintf("we put %d in cell %s ", step.Nums.Description(), step.TargetCells.Description())
+		} else {
+			//TODO: pluralize based on length of lists.
+			result += fmt.Sprintf("we remove the possibilities %s from cells %s ", step.Nums.Description(), step.TargetCells.Description())
+		}
+
+		result += "because " + step.Technique.Description(step) + "."
+
+	}
+	return result
+}
+
 func (self SolveDirections) Difficulty() float64 {
 	//How difficult the solve directions described are.
 

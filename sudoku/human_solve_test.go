@@ -642,6 +642,15 @@ func TestHumanSolve(t *testing.T) {
 		t.Fail()
 	}
 
+	description := steps.Description()
+
+	if description != "" {
+		//TODO: this test does NOT work
+		//TODO: make this test deterministic.
+		t.Log("Got wrong human solve description: ", description)
+		t.Fail()
+	}
+
 	grid.Done()
 
 }
