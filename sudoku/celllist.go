@@ -10,6 +10,8 @@ type CellList []*Cell
 
 type IntSlice []int
 
+type stringSlice []string
+
 func getRow(cell *Cell) int {
 	return cell.Row
 }
@@ -158,18 +160,26 @@ func (self CellList) Map(mapper func(*Cell)) {
 	}
 }
 
-func (self IntSlice) Description() string {
+func (self stringSlice) description() string {
 	if len(self) == 0 {
 		return ""
 	}
-	results := make([]string, len(self)-1)
-	for i, num := range self[:len(self)-1] {
-		results[i] = strconv.Itoa(num)
+
+	result := strings.Join(self[:len(self)-1], ", ")
+
+	return result + ", and " + self[len(self)-1]
+}
+
+func (self IntSlice) Description() string {
+
+	strings := make(stringSlice, len(self))
+
+	for i, num := range self {
+		strings[i] = strconv.Itoa(num)
 	}
 
-	result := strings.Join(results, ", ")
+	return strings.description()
 
-	return result + ", and " + strconv.Itoa(self[len(self)-1])
 }
 
 func (self IntSlice) Same() bool {
