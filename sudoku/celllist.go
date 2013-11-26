@@ -2,6 +2,8 @@ package sudoku
 
 import (
 	"sort"
+	"strconv"
+	"strings"
 )
 
 type CellList []*Cell
@@ -154,6 +156,20 @@ func (self CellList) Map(mapper func(*Cell)) {
 	for _, cell := range self {
 		mapper(cell)
 	}
+}
+
+func (self IntSlice) Description() string {
+	if len(self) == 0 {
+		return ""
+	}
+	results := make([]string, len(self)-1)
+	for i, num := range self[:len(self)-1] {
+		results[i] = strconv.Itoa(num)
+	}
+
+	result := strings.Join(results, ", ")
+
+	return result + ", and " + strconv.Itoa(self[len(self)-1])
 }
 
 func (self IntSlice) Same() bool {

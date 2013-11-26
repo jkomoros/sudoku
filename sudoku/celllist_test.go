@@ -82,6 +82,11 @@ func TestIntList(t *testing.T) {
 		t.Log("We thought a list of different ints were the same")
 		t.Fail()
 	}
+	description := IntSlice(numArr[:]).Description()
+	if description != "1, 1, and 1" {
+		t.Log("Didn't get right description: ", description)
+		t.Fail()
+	}
 }
 
 func TestSameContentAs(t *testing.T) {
