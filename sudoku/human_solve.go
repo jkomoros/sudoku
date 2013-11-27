@@ -644,10 +644,10 @@ func (self SolveDirections) Description() []string {
 		case 0:
 			intro = "First, "
 		case len(self) - 1:
-			intro = " Finally, "
+			intro = "Finally, "
 		default:
 			//TODO: switch between "then" and "next" randomly.
-			intro = " Next, "
+			intro = "Next, "
 		}
 		descriptions[i] = intro + strings.ToLower(step.Description())
 
