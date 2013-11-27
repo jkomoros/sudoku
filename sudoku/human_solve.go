@@ -652,7 +652,7 @@ func (self SolveDirections) Description() string {
 		descriptions[i] = intro + strings.ToLower(step.Description())
 
 	}
-	return strings.Join(descriptions, ". ")
+	return strings.Join(descriptions, ".\n")
 }
 
 func (self SolveDirections) Difficulty() float64 {
