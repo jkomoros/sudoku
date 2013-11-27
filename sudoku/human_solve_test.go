@@ -650,7 +650,6 @@ func TestStepsDescription(t *testing.T) {
 
 	grid := NewGrid()
 
-	//TODO: make this a series of step of at least 3 items, witn an is fill and a non-is-fill.
 	steps := SolveDirections{
 		&SolveStep{
 			CellList{
@@ -658,6 +657,26 @@ func TestStepsDescription(t *testing.T) {
 			},
 			nil,
 			IntSlice{1},
+			techniques[0],
+		},
+		&SolveStep{
+			CellList{
+				grid.Cell(1, 0),
+				grid.Cell(1, 1),
+			},
+			CellList{
+				grid.Cell(1, 3),
+				grid.Cell(1, 4),
+			},
+			IntSlice{1, 2},
+			techniques[5],
+		},
+		&SolveStep{
+			CellList{
+				grid.Cell(2, 0),
+			},
+			nil,
+			IntSlice{2},
 			techniques[0],
 		},
 	}
