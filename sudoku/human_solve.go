@@ -668,6 +668,12 @@ func (self SolveDirections) Difficulty() float64 {
 	return max
 }
 
+func (self *Grid) HumanSolution() SolveDirections {
+	clone := self.Copy()
+	defer clone.Done()
+	return clone.HumanSolve()
+}
+
 func (self *Grid) HumanSolve() SolveDirections {
 	var results []*SolveStep
 	numTechniques := len(techniques)

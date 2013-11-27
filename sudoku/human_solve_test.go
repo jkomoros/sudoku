@@ -615,7 +615,20 @@ func TestRandomWeightedIndex(t *testing.T) {
 func TestHumanSolve(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(TEST_GRID)
-	steps := grid.HumanSolve()
+
+	steps := grid.HumanSolution()
+
+	if steps == nil {
+		t.Log("Human solution returned 0 techniques.")
+		t.Fail()
+	}
+
+	if grid.Solved() {
+		t.Log("Human Solutions mutated the grid.")
+		t.Fail()
+	}
+
+	steps = grid.HumanSolve()
 	//TODO: test to make sure that we use a wealth of different techniques. This will require a cooked random for testing.
 	if steps == nil {
 		t.Log("Human solve returned 0 techniques")
