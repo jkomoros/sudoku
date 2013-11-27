@@ -240,6 +240,18 @@ func (self *SolveStep) Apply(grid *Grid) {
 	}
 }
 
+func (self *SolveStep) Description() string {
+	result := ""
+	if self.Technique.IsFill() {
+		result += fmt.Sprintf("we put %d in cell %s ", self.Nums.Description(), self.TargetCells.Description())
+	} else {
+		//TODO: pluralize based on length of lists.
+		result += fmt.Sprintf("we remove the possibilities %s from cells %s ", self.Nums.Description(), self.TargetCells.Description())
+	}
+	result += "because " + self.Technique.Description(self) + "."
+	return result
+}
+
 func (self nakedSingleTechnique) Description(step *SolveStep) string {
 	if len(step.Nums) == 0 {
 		return ""
@@ -634,14 +646,7 @@ func (self SolveDirections) Description() string {
 			//TODO: switch between "then" and "next" randomly.
 			result += " Next, "
 		}
-		if step.Technique.IsFill() {
-			result += fmt.Sprintf("we put %d in cell %s ", step.Nums.Description(), step.TargetCells.Description())
-		} else {
-			//TODO: pluralize based on length of lists.
-			result += fmt.Sprintf("we remove the possibilities %s from cells %s ", step.Nums.Description(), step.TargetCells.Description())
-		}
-
-		result += "because " + step.Technique.Description(step) + "."
+		result += step.Description()
 
 	}
 	return result
