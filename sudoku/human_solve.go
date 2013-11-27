@@ -649,7 +649,7 @@ func (self SolveDirections) Description() string {
 			//TODO: switch between "then" and "next" randomly.
 			intro = " Next, "
 		}
-		descriptions[i] = intro + step.Description()
+		descriptions[i] = intro + strings.ToLower(step.Description())
 
 	}
 	return strings.Join(descriptions, ". ")
