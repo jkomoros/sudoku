@@ -244,7 +244,7 @@ func (self *SolveStep) Apply(grid *Grid) {
 func (self *SolveStep) Description() string {
 	result := ""
 	if self.Technique.IsFill() {
-		result += fmt.Sprintf("We put %d in cell %s ", self.Nums.Description(), self.TargetCells.Description())
+		result += fmt.Sprintf("We put %s in cell %s ", self.Nums.Description(), self.TargetCells.Description())
 	} else {
 		//TODO: pluralize based on length of lists.
 		result += fmt.Sprintf("We remove the possibilities %s from cells %s ", self.Nums.Description(), self.TargetCells.Description())
