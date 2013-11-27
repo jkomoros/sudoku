@@ -664,7 +664,7 @@ func TestStepsDescription(t *testing.T) {
 
 	description := steps.Description()
 
-	if description != "" {
+	if description != "First, we put 1 in cell (0,0) because 1 is the only remaining valid number for that cell." {
 		//TODO: this test does NOT work
 		//TODO: make this test deterministic.
 		t.Log("Got wrong human solve description: ", description)
