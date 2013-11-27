@@ -630,10 +630,10 @@ func randomIndexWithNormalizedWeights(weights []float64) int {
 	return len(weights) - 1
 }
 
-func (self SolveDirections) Description() string {
+func (self SolveDirections) Description() []string {
 
 	if len(self) == 0 {
-		return ""
+		return []string{""}
 	}
 
 	descriptions := make([]string, len(self))
@@ -652,7 +652,7 @@ func (self SolveDirections) Description() string {
 		descriptions[i] = intro + strings.ToLower(step.Description())
 
 	}
-	return strings.Join(descriptions, ".\n")
+	return descriptions
 }
 
 func (self SolveDirections) Difficulty() float64 {

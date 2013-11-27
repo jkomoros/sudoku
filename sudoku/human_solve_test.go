@@ -681,13 +681,19 @@ func TestStepsDescription(t *testing.T) {
 		},
 	}
 
-	description := steps.Description()
+	descriptions := steps.Description()
 
-	if description != "First, we put 1 in cell (0,0) because 1 is the only remaining valid number for that cell." {
-		//TODO: this test does NOT work
-		//TODO: make this test deterministic.
-		t.Log("Got wrong human solve description: ", description)
-		t.Fail()
+	GOLDEN_DESCRIPTIONS := []string{
+		"First, we put 1 in cell (0,0) because 1 is the only remaining valid number for that cell.",
+		"Next, we remove the possibilities 1 and 2 from cells (1,0) and (1,1) because 1 is only possible in column 0 of block 1, which means it can't be in any other cell in that column not in that block.",
+		"Finally, we put 2 in cell (2,0) because 2 is the only remaining valid number for that cell.",
+	}
+
+	for i := 0; i < len(GOLDEN_DESCRIPTIONS); i++ {
+		if descriptions[i] != GOLDEN_DESCRIPTIONS[i] {
+			t.Log("Got wrong human solve description: ", descriptions[i])
+			t.Fail()
+		}
 	}
 }
 
