@@ -646,6 +646,57 @@ func TestHumanSolve(t *testing.T) {
 
 }
 
+func TestStepsDescription(t *testing.T) {
+
+	grid := NewGrid()
+
+	steps := SolveDirections{
+		&SolveStep{
+			CellList{
+				grid.Cell(0, 0),
+			},
+			nil,
+			IntSlice{1},
+			techniques[0],
+		},
+		&SolveStep{
+			CellList{
+				grid.Cell(1, 0),
+				grid.Cell(1, 1),
+			},
+			CellList{
+				grid.Cell(1, 3),
+				grid.Cell(1, 4),
+			},
+			IntSlice{1, 2},
+			techniques[5],
+		},
+		&SolveStep{
+			CellList{
+				grid.Cell(2, 0),
+			},
+			nil,
+			IntSlice{2},
+			techniques[0],
+		},
+	}
+
+	descriptions := steps.Description()
+
+	GOLDEN_DESCRIPTIONS := []string{
+		"First, we put 1 in cell (0,0) because 1 is the only remaining valid number for that cell.",
+		"Next, we remove the possibilities 1 and 2 from cells (1,0) and (1,1) because 1 is only possible in column 0 of block 1, which means it can't be in any other cell in that column not in that block.",
+		"Finally, we put 2 in cell (2,0) because 2 is the only remaining valid number for that cell.",
+	}
+
+	for i := 0; i < len(GOLDEN_DESCRIPTIONS); i++ {
+		if descriptions[i] != GOLDEN_DESCRIPTIONS[i] {
+			t.Log("Got wrong human solve description: ", descriptions[i])
+			t.Fail()
+		}
+	}
+}
+
 func TestPuzzleDifficulty(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(TEST_GRID)

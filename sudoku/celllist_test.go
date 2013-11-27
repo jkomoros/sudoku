@@ -69,6 +69,13 @@ func TestBasicCellList(t *testing.T) {
 		t.Log("We got back cells not inthe same row.")
 		t.Fail()
 	}
+
+	description := cells.Description()
+
+	if description != "(0,0), (0,1), and (0,2)" {
+		t.Log("Got wrong description of cellList: ", description)
+		t.Fail()
+	}
 }
 
 func TestIntList(t *testing.T) {
@@ -80,6 +87,29 @@ func TestIntList(t *testing.T) {
 	differentNumArr := [...]int{1, 2, 1}
 	if IntSlice(differentNumArr[:]).Same() {
 		t.Log("We thought a list of different ints were the same")
+		t.Fail()
+	}
+	description := IntSlice(numArr[:]).Description()
+	if description != "1, 1, and 1" {
+		t.Log("Didn't get right description: ", description)
+		t.Fail()
+	}
+
+	oneList := IntSlice{1}
+
+	description = oneList.Description()
+
+	if description != "1" {
+		t.Log("Didn't get the right description for a short intlist: ", description)
+		t.Fail()
+	}
+
+	twoList := IntSlice{1, 1}
+
+	description = twoList.Description()
+
+	if description != "1 and 1" {
+		t.Log("Did'get the the right description for a two-item intList: ", description)
 		t.Fail()
 	}
 }

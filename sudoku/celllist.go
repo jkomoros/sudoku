@@ -1,12 +1,17 @@
 package sudoku
 
 import (
+	"fmt"
 	"sort"
+	"strconv"
+	"strings"
 )
 
 type CellList []*Cell
 
 type IntSlice []int
+
+type stringSlice []string
 
 func getRow(cell *Cell) int {
 	return cell.Row
@@ -154,6 +159,46 @@ func (self CellList) Map(mapper func(*Cell)) {
 	for _, cell := range self {
 		mapper(cell)
 	}
+}
+
+func (self CellList) Description() string {
+	strings := make(stringSlice, len(self))
+
+	for i, cell := range self {
+		strings[i] = fmt.Sprintf("(%d,%d)", cell.Row, cell.Col)
+	}
+
+	return strings.description()
+}
+
+func (self stringSlice) description() string {
+	if len(self) == 0 {
+		return ""
+	}
+
+	if len(self) == 1 {
+		return self[0]
+	}
+
+	if len(self) == 2 {
+		return self[0] + " and " + self[1]
+	}
+
+	result := strings.Join(self[:len(self)-1], ", ")
+
+	return result + ", and " + self[len(self)-1]
+}
+
+func (self IntSlice) Description() string {
+
+	strings := make(stringSlice, len(self))
+
+	for i, num := range self {
+		strings[i] = strconv.Itoa(num)
+	}
+
+	return strings.description()
+
 }
 
 func (self IntSlice) Same() bool {

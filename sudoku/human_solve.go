@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"strings"
 )
 
 //Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
@@ -238,6 +239,18 @@ func (self *SolveStep) Apply(grid *Grid) {
 			}
 		}
 	}
+}
+
+func (self *SolveStep) Description() string {
+	result := ""
+	if self.Technique.IsFill() {
+		result += fmt.Sprintf("We put %s in cell %s ", self.Nums.Description(), self.TargetCells.Description())
+	} else {
+		//TODO: pluralize based on length of lists.
+		result += fmt.Sprintf("We remove the possibilities %s from cells %s ", self.Nums.Description(), self.TargetCells.Description())
+	}
+	result += "because " + self.Technique.Description(self) + "."
+	return result
 }
 
 func (self nakedSingleTechnique) Description(step *SolveStep) string {
@@ -615,6 +628,31 @@ func randomIndexWithNormalizedWeights(weights []float64) int {
 	}
 	//This shouldn't happen if the weights are properly normalized.
 	return len(weights) - 1
+}
+
+func (self SolveDirections) Description() []string {
+
+	if len(self) == 0 {
+		return []string{""}
+	}
+
+	descriptions := make([]string, len(self))
+
+	for i, step := range self {
+		intro := ""
+		switch i {
+		case 0:
+			intro = "First, "
+		case len(self) - 1:
+			intro = "Finally, "
+		default:
+			//TODO: switch between "then" and "next" randomly.
+			intro = "Next, "
+		}
+		descriptions[i] = intro + strings.ToLower(step.Description())
+
+	}
+	return descriptions
 }
 
 func (self SolveDirections) Difficulty() float64 {
