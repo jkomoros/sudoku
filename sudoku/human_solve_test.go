@@ -642,6 +642,26 @@ func TestHumanSolve(t *testing.T) {
 		t.Fail()
 	}
 
+	grid.Done()
+
+}
+
+func TestStepsDescription(t *testing.T) {
+
+	grid := NewGrid()
+
+	//TODO: make this a series of step of at least 3 items, witn an is fill and a non-is-fill.
+	steps := SolveDirections{
+		&SolveStep{
+			CellList{
+				grid.Cell(0, 0),
+			},
+			nil,
+			IntSlice{1},
+			techniques[0],
+		},
+	}
+
 	description := steps.Description()
 
 	if description != "" {
@@ -650,9 +670,6 @@ func TestHumanSolve(t *testing.T) {
 		t.Log("Got wrong human solve description: ", description)
 		t.Fail()
 	}
-
-	grid.Done()
-
 }
 
 func TestPuzzleDifficulty(t *testing.T) {
