@@ -55,7 +55,9 @@ TODO:
 	* Actually call grid.Done() when we're done
 	* We tried to do this but got CRAZY errors, which are hard to track down. Turns out that there is some possibility for slippage in grids, somehow. Need to solve that.
 
-* Implement the "Describe" method on SolveSteps to walk through in prose how to do them.
+* Test the Description string of each solve step
+
+* Create a way to print out a solve walkthrough
 
 * Does our use of the Rand convenience funcs in different go routines cause performance problems? (http://stackoverflow.com/questions/14298523/why-does-adding-concurrency-slow-down-this-golang-code)
 
