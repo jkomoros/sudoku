@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"strings"
 )
 
 //Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
@@ -243,10 +244,10 @@ func (self *SolveStep) Apply(grid *Grid) {
 func (self *SolveStep) Description() string {
 	result := ""
 	if self.Technique.IsFill() {
-		result += fmt.Sprintf("we put %d in cell %s ", self.Nums.Description(), self.TargetCells.Description())
+		result += fmt.Sprintf("We put %d in cell %s ", self.Nums.Description(), self.TargetCells.Description())
 	} else {
 		//TODO: pluralize based on length of lists.
-		result += fmt.Sprintf("we remove the possibilities %s from cells %s ", self.Nums.Description(), self.TargetCells.Description())
+		result += fmt.Sprintf("We remove the possibilities %s from cells %s ", self.Nums.Description(), self.TargetCells.Description())
 	}
 	result += "because " + self.Technique.Description(self) + "."
 	return result
@@ -630,26 +631,28 @@ func randomIndexWithNormalizedWeights(weights []float64) int {
 }
 
 func (self SolveDirections) Description() string {
-	result := ""
 
 	if len(self) == 0 {
-		return "We can't solve this puzzle."
+		return ""
 	}
+
+	descriptions := make([]string, len(self))
 
 	for i, step := range self {
+		intro := ""
 		switch i {
 		case 0:
-			result += "First, "
+			intro = "First, "
 		case len(self) - 1:
-			result += " Finally, "
+			intro = " Finally, "
 		default:
 			//TODO: switch between "then" and "next" randomly.
-			result += " Next, "
+			intro = " Next, "
 		}
-		result += step.Description()
+		descriptions[i] = intro + step.Description()
 
 	}
-	return result
+	return strings.Join(descriptions, ". ")
 }
 
 func (self SolveDirections) Difficulty() float64 {
