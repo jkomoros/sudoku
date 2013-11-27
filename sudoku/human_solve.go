@@ -668,6 +668,49 @@ func (self SolveDirections) Difficulty() float64 {
 	return max
 }
 
+func (self SolveDirections) Walkthrough(grid *Grid) string {
+
+	//TODO: test this.
+
+	clone := grid.Copy()
+	defer clone.Done()
+
+	DIVIDER := "\n\n--------------------------------------------\n\n"
+
+	intro := fmt.Sprintf("This will take %d steps to solve.", len(self))
+
+	intro += "\nWhen you start, your grid looks like this:\n"
+
+	intro += clone.Diagram()
+
+	intro += "\n"
+
+	intro += DIVIDER
+
+	descriptions := self.Description()
+
+	results := make([]string, len(self))
+
+	for i, description := range descriptions {
+
+		result := description + "\n"
+		result += "After doing that, your grid will look like: \n\n"
+
+		self[i].Apply(clone)
+
+		result += grid.Diagram()
+
+		results[i] = result
+	}
+
+	return intro + strings.Join(results, DIVIDER) + DIVIDER + "Now the puzzle is solved."
+}
+
+func (self *Grid) HumanWalkthrough() string {
+	steps := self.HumanSolution()
+	return steps.Walkthrough(self)
+}
+
 func (self *Grid) HumanSolution() SolveDirections {
 	clone := self.Copy()
 	defer clone.Done()
