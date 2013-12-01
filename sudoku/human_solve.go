@@ -785,23 +785,22 @@ func (self *Grid) Difficulty() float64 {
 
 	accum := 0.0
 	average := 0.0
+	lastAverage := 0.0
 
 	for i := 0; i < MAX_DIFFICULTY_ITERATIONS; i++ {
 		grid := self.Copy()
 		steps := grid.HumanSolve()
 		difficulty := steps.Difficulty()
 
-		//We don't change the average yet--we want to ensure that we're close to the average of all the other runs.
+		accum += difficulty
+		average = accum / (float64(i) + 1.0)
 
-		//TODO: really what we want to do is take a look at the average BEFORE us and AFTER us and see if they're within the error bounds.
-		//Currently, if the average difficulties are not all the same then this will just run as many difficulty runs as the limit allows.
-		if math.Abs(average-difficulty) < DIFFICULTY_CONVERGENCE {
+		if math.Abs(average-lastAverage) < DIFFICULTY_CONVERGENCE {
 			//Okay, we've already converged. Just return early!
 			return average
 		}
 
-		accum += difficulty
-		average = accum / (float64(i) + 1.0)
+		lastAverage = average
 	}
 
 	//We weren't converging... oh well!
