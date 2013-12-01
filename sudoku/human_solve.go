@@ -52,7 +52,7 @@ var techniques []SolveTechnique
 func init() {
 
 	//TODO: calculate more realistic weights.
-	//TODO: calculate more realistic difficulties.
+	//TODO: calculate more realistic difficulties. Now that we do accum weights, these should go up exponentially.
 
 	techniques = []SolveTechnique{
 		nakedSingleTechnique{
@@ -663,13 +663,14 @@ func (self SolveDirections) Difficulty() float64 {
 	//* Number of hard steps
 	//* (kind of) the hardest step: because the difficulties go up expontentionally.
 
-	//TODO: what's a good max bound for difficulty?
+	//TODO: what's a good max bound for difficulty? This should be normalized to 0<->1 based on that.
 
 	accum := 0.0
 	for _, step := range self {
 		accum += step.Technique.Difficulty()
 	}
 	return accum
+
 }
 
 func (self SolveDirections) Walkthrough(grid *Grid) string {
@@ -780,7 +781,7 @@ func (self *Grid) Difficulty() float64 {
 
 	//We solve the same puzzle N times, then ask each set of steps for their difficulty, and combine those to come up with the overall difficulty.
 
-	//TODO: come up with a better notion of difficulty than just averaging the difficulties. Perhaps weight higher difficulty runs higher?
+	//TODO: Now that we do accum difficulty, this will often need a lot of iterations.
 
 	accum := 0.0
 	average := 0.0
@@ -792,6 +793,8 @@ func (self *Grid) Difficulty() float64 {
 
 		//We don't change the average yet--we want to ensure that we're close to the average of all the other runs.
 
+		//TODO: really what we want to do is take a look at the average BEFORE us and AFTER us and see if they're within the error bounds.
+		//Currently, if the average difficulties are not all the same then this will just run as many difficulty runs as the limit allows.
 		if math.Abs(average-difficulty) < DIFFICULTY_CONVERGENCE {
 			//Okay, we've already converged. Just return early!
 			return average
