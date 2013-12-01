@@ -63,6 +63,10 @@ TODO:
 
 * Make grid.Load work for puzzles in .sdk format.
 
+* Make it so the docs generated from dokugen are all useful.
+
+* Make it so in app/ files, MarGo autocompletes.
+
 * REdo of threaded solving
 	* Why is performance so slow?
 
