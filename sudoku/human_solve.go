@@ -8,7 +8,7 @@ import (
 )
 
 //Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
-const MAX_DIFFICULTY_ITERATIONS = 15
+const MAX_DIFFICULTY_ITERATIONS = 50
 
 //How close we have to get to the average to feel comfortable our difficulty is converging.
 const DIFFICULTY_CONVERGENCE = 0.05
