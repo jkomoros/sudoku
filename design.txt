@@ -62,6 +62,9 @@ TODO:
 * Make it so NewGrid grabs a grid from grid cache if possible.
 	* Actually call grid.Done() when we're done
 	* We tried to do this but got CRAZY errors, which are hard to track down. Turns out that there is some possibility for slippage in grids, somehow. Need to solve that.
+* When generating grids, at every step check the difficulty. If it's above the target, go back to the most recent known good difficulty and return that.
+
+* When generating grids, keep a temporary directory of sdk files representing puzzles generated but not vended. When asked for a new puzzle, we first see if we have any in the unvended list that are appropriate difficulty.
 
 * Test the Description string of each solve step
 
