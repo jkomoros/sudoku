@@ -14,7 +14,7 @@ const MAX_DIFFICULTY_ITERATIONS = 50
 //We will use this as our max to return a normalized difficulty.
 //TODO: set this more accurately so we rarely hit it (it's very important to get this right!)
 //This is just set emperically.
-const MAX_RAW_DIFFICULTY = 15000.0
+const MAX_RAW_DIFFICULTY = 18000.0
 
 //How close we have to get to the average to feel comfortable our difficulty is converging.
 const DIFFICULTY_CONVERGENCE = 0.0005
