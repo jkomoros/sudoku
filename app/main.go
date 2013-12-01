@@ -3,6 +3,8 @@ package main
 import (
 	"dokugen/sudoku"
 	"flag"
+	"fmt"
+	"os"
 )
 
 //TODO: let people pass in a filename to export to.
@@ -31,6 +33,8 @@ func main() {
 
 	flag.Parse()
 
+	output := os.Stdout
+
 	if options.HELP {
 		flag.PrintDefaults()
 		return
@@ -39,11 +43,11 @@ func main() {
 	if options.GENERATE {
 		for i := 0; i < options.NUM; i++ {
 			grid := sudoku.GenerateGrid()
-			print(grid.DataString())
-			print("\n\n")
+			fmt.Fprintln(output, grid.DataString())
+			fmt.Fprintln(output, "\n")
 			if options.PRINT_STATS {
-				print("\n\n")
-				print(grid.Difficulty())
+				fmt.Fprintln(output, "\n")
+				fmt.Fprintln(output, grid.Difficulty())
 			}
 		}
 		return
@@ -56,15 +60,15 @@ func main() {
 
 		//TODO: use of this option leads to a busy loop somewhere... Is it related to the generate-multiple-and-difficulty hang?
 		if options.WALKTHROUGH {
-			print(grid.HumanWalkthrough())
-			print("\n\n")
+			fmt.Fprintln(output, grid.HumanWalkthrough())
+			fmt.Fprintln(output, "\n")
 		}
 		if options.PRINT_STATS {
-			print("\n\n")
-			print(grid.Difficulty())
+			fmt.Fprintln(output, "\n")
+			fmt.Fprintln(output, grid.Difficulty())
 		}
 		grid.Solve()
-		print(grid.DataString())
+		fmt.Fprintln(output, grid.DataString())
 
 		return
 	}
