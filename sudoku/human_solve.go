@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"strings"
@@ -674,6 +675,7 @@ func (self SolveDirections) Difficulty() float64 {
 	}
 
 	if accum > MAX_RAW_DIFFICULTY {
+		log.Println("Accumulated difficulty exceeded max difficulty: ", accum)
 		accum = MAX_RAW_DIFFICULTY
 	}
 
