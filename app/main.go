@@ -5,7 +5,6 @@ import (
 	"flag"
 )
 
-//TODO: let people pass in puzzles to solve.
 //TODO: let people pass in a filename to export to.
 
 var GENERATE bool
