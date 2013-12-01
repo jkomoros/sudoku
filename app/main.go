@@ -31,6 +31,8 @@ func main() {
 			grid := sudoku.GenerateGrid()
 			print(grid.DataString())
 			print("\n\n")
+			print(grid.Difficulty())
+			print("\n\n")
 		}
 		return
 	}
