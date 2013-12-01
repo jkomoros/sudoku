@@ -656,16 +656,20 @@ func (self SolveDirections) Description() []string {
 }
 
 func (self SolveDirections) Difficulty() float64 {
-	//How difficult the solve directions described are.
+	//How difficult the solve directions described are. The measure of difficulty we use is
+	//just summing up weights we see; this captures:
+	//* Number of steps
+	//* Average difficulty of steps
+	//* Number of hard steps
+	//* (kind of) the hardest step: because the difficulties go up expontentionally.
 
-	//TODO: come up with a better measure of difficulty. Perhaps include some notion of how many difficult steps there are?
-	max := 0.0
+	//TODO: what's a good max bound for difficulty?
+
+	accum := 0.0
 	for _, step := range self {
-		if step.Technique.Difficulty() > max {
-			max = step.Technique.Difficulty()
-		}
+		accum += step.Technique.Difficulty()
 	}
-	return max
+	return accum
 }
 
 func (self SolveDirections) Walkthrough(grid *Grid) string {
