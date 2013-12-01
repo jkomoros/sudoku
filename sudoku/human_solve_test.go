@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"testing"
+	"time"
 )
 
 const POINTING_PAIR_ROW_GRID = `3|.|6|.|.|.|.|.|.
@@ -727,4 +728,25 @@ func TestPuzzleDifficulty(t *testing.T) {
 	}
 
 	grid.Done()
+
+	otherGrid := NewGrid()
+	otherGrid.LoadFromFile("harddifficulty.sdk")
+
+	after := time.After(time.Second * 5)
+
+	done := make(chan bool)
+
+	go func() {
+		difficulty = otherGrid.Difficulty()
+		done <- true
+	}()
+
+	select {
+	case <-done:
+		//totally fine.
+	case <-after:
+		//Uh oh.
+		t.Log("We never finished solving the hard difficulty puzzle.")
+		t.Fail()
+	}
 }
