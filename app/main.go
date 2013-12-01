@@ -26,6 +26,10 @@ func main() {
 	if GENERATE {
 		grid := sudoku.GenerateGrid()
 		print(grid.DataString())
+		return
 	}
+
+	//If we get to here, print defaults.
+	flag.PrintDefaults()
 
 }
