@@ -15,7 +15,7 @@ const MAX_DIFFICULTY_ITERATIONS = 50
 const MAX_RAW_DIFFICULTY = 100.0
 
 //How close we have to get to the average to feel comfortable our difficulty is converging.
-const DIFFICULTY_CONVERGENCE = 0.05
+const DIFFICULTY_CONVERGENCE = 0.0005
 
 type SolveDirections []*SolveStep
 
