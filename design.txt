@@ -37,6 +37,14 @@ TODO:
 	* Simplest (no caching): Whenever you want a cell, you call grid.Cell(), which sees if it has one, otherwise returns one from another cell.
 
 * Rate sudokus based on experienced difficulty. (See http://www.longwood.edu/assets/mathematics/Team2975_ProblemB.pdf)
+	* Also: http://www.sudokuwiki.org/Sudoku_Creation_and_Grading.pdf
+	* Also: http://zhangroup.aporc.org/images/files/Paper_3485.pdf
+	* Signals:
+		* Number of steps
+		* Steps * normalized difficulty rating of each step
+		* Weight of hardest technique (or index cutoff of highest technique)
+		* Avergae weight of difficulties
+	* Should difficulties go up exponentionally? A technique that requires no candidate marking is WAY, WAY easier than one that requires multiple leaps of logic.
 
 * Human solve: Is it worth it to do nakedSingles based on row/col/block as well? Those are obvious in different ways.
 * Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm. Technqiues I've skipped so far:
