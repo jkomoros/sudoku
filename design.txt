@@ -72,6 +72,8 @@ TODO:
 
 * Add an interactive mode to the command line tool.
 
+* Fix races with go test -race.
+
 * It's pretty easy to get grid.Difficulty() to freak and never compelte on puzzles we generate. Here's a puzzle that does it:
 8|5|.|.|1|.|.|.|.
 .|6|4|.|.|.|.|.|5
