@@ -7,37 +7,41 @@ import (
 
 //TODO: let people pass in a filename to export to.
 
-var GENERATE bool
-var HELP bool
-var PUZZLE_TO_SOLVE string
-var NUM int
-var PRINT_STATS bool
-var WALKTHROUGH bool
+type appOptions struct {
+	GENERATE        bool
+	HELP            bool
+	PUZZLE_TO_SOLVE string
+	NUM             int
+	PRINT_STATS     bool
+	WALKTHROUGH     bool
+}
 
 func main() {
 
 	//TODO: figure out how to test this.
 
-	flag.BoolVar(&GENERATE, "g", false, "if true, will generate a puzzle.")
-	flag.BoolVar(&HELP, "h", false, "If provided, will print help and exit.")
-	flag.IntVar(&NUM, "n", 1, "Number of things to generate")
-	flag.BoolVar(&PRINT_STATS, "p", false, "If provided, will print stats.")
-	flag.StringVar(&PUZZLE_TO_SOLVE, "s", "", "If provided, will solve the puzzle at the given filename and print solution.")
-	flag.BoolVar(&WALKTHROUGH, "w", false, "If provided, will print out a walkthrough to solve the provided puzzle.")
+	var options appOptions
+
+	flag.BoolVar(&options.GENERATE, "g", false, "if true, will generate a puzzle.")
+	flag.BoolVar(&options.HELP, "h", false, "If provided, will print help and exit.")
+	flag.IntVar(&options.NUM, "n", 1, "Number of things to generate")
+	flag.BoolVar(&options.PRINT_STATS, "p", false, "If provided, will print stats.")
+	flag.StringVar(&options.PUZZLE_TO_SOLVE, "s", "", "If provided, will solve the puzzle at the given filename and print solution.")
+	flag.BoolVar(&options.WALKTHROUGH, "w", false, "If provided, will print out a walkthrough to solve the provided puzzle.")
 
 	flag.Parse()
 
-	if HELP {
+	if options.HELP {
 		flag.PrintDefaults()
 		return
 	}
 
-	if GENERATE {
-		for i := 0; i < NUM; i++ {
+	if options.GENERATE {
+		for i := 0; i < options.NUM; i++ {
 			grid := sudoku.GenerateGrid()
 			print(grid.DataString())
 			print("\n\n")
-			if PRINT_STATS {
+			if options.PRINT_STATS {
 				print("\n\n")
 				print(grid.Difficulty())
 			}
@@ -45,17 +49,17 @@ func main() {
 		return
 	}
 
-	if PUZZLE_TO_SOLVE != "" {
+	if options.PUZZLE_TO_SOLVE != "" {
 		grid := sudoku.NewGrid()
-		grid.LoadFromFile(PUZZLE_TO_SOLVE)
+		grid.LoadFromFile(options.PUZZLE_TO_SOLVE)
 		//TODO: detect if the load failed.
 
 		//TODO: use of this option leads to a busy loop somewhere... Is it related to the generate-multiple-and-difficulty hang?
-		if WALKTHROUGH {
+		if options.WALKTHROUGH {
 			print(grid.HumanWalkthrough())
 			print("\n\n")
 		}
-		if PRINT_STATS {
+		if options.PRINT_STATS {
 			print("\n\n")
 			print(grid.Difficulty())
 		}
