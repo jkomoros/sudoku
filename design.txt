@@ -66,5 +66,16 @@ TODO:
 * REdo of threaded solving
 	* Why is performance so slow?
 
+* It's pretty easy to get grid.Difficulty() to freak and never compelte. Here's a puzzle that does it:
+8|5|.|.|1|.|.|.|.
+.|6|4|.|.|.|.|.|5
+.|.|.|.|.|.|7|4|.
+4|.|.|.|.|.|.|2|.
+1|.|.|6|7|.|.|.|.
+.|.|9|.|.|3|.|.|.
+.|1|.|.|8|.|.|7|.
+.|.|6|.|.|.|5|.|3
+.|.|.|5|.|.|.|8|1
+
 
 
