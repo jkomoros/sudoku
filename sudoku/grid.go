@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"strings"
+	"sync"
 )
 
 //TODO: Support non-squared DIMS (logic in Block() would need updating)
@@ -19,6 +20,7 @@ type Grid struct {
 	rows            [DIM]CellList
 	cols            [DIM]CellList
 	blocks          [DIM]CellList
+	cacheMutex      sync.RWMutex
 	queue           *FiniteQueue
 	numFilledCells  int
 	invalidCells    map[*Cell]bool
@@ -142,10 +144,16 @@ func (self *Grid) Row(index int) CellList {
 		log.Println("Invalid index passed to Row: ", index)
 		return nil
 	}
-	if self.rows[index] == nil {
+	self.cacheMutex.RLock()
+	result := self.rows[index]
+	self.cacheMutex.RUnlock()
+	if result == nil {
+		self.cacheMutex.Lock()
 		self.rows[index] = self.cellList(index, 0, index, DIM-1)
+		result = self.rows[index]
+		self.cacheMutex.Unlock()
 	}
-	return self.rows[index]
+	return result
 }
 
 func (self *Grid) Col(index int) CellList {
