@@ -781,8 +781,6 @@ func (self *Grid) Difficulty() float64 {
 
 	//We solve the same puzzle N times, then ask each set of steps for their difficulty, and combine those to come up with the overall difficulty.
 
-	//TODO: Now that we do accum difficulty, this will often need a lot of iterations.
-
 	accum := 0.0
 	average := 0.0
 	lastAverage := 0.0
