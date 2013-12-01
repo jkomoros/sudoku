@@ -639,22 +639,6 @@ func TestHumanSolve(t *testing.T) {
 		t.Log("Human solve failed to solve the simple grid.")
 		t.Fail()
 	}
-	difficulty := steps.Difficulty()
-	if difficulty < 0.0 || difficulty > 1.0 {
-		t.Log("We got an invalid difficulty.")
-		t.Fail()
-	}
-	//This test is very closely tied to the current algorithm for calculating difficulty.
-	max := 0.0
-	for _, step := range steps {
-		if step.Technique.Difficulty() > max {
-			max = step.Technique.Difficulty()
-		}
-	}
-	if difficulty != max {
-		t.Log("We got back a difficulty that was not calculated as we expected it to be.")
-		t.Fail()
-	}
 
 	grid.Done()
 
@@ -671,7 +655,7 @@ func TestStepsDescription(t *testing.T) {
 			},
 			nil,
 			IntSlice{1},
-			techniques[0],
+			techniques[3],
 		},
 		&SolveStep{
 			CellList{
@@ -691,7 +675,7 @@ func TestStepsDescription(t *testing.T) {
 			},
 			nil,
 			IntSlice{2},
-			techniques[0],
+			techniques[3],
 		},
 	}
 

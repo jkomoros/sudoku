@@ -8,10 +8,14 @@ import (
 )
 
 //Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
-const MAX_DIFFICULTY_ITERATIONS = 15
+const MAX_DIFFICULTY_ITERATIONS = 50
+
+//We will use this as our max to return a normalized difficulty.
+//TODO: set this more accurately so we rarely hit it (it's very important to get this right!)
+const MAX_RAW_DIFFICULTY = 100.0
 
 //How close we have to get to the average to feel comfortable our difficulty is converging.
-const DIFFICULTY_CONVERGENCE = 0.05
+const DIFFICULTY_CONVERGENCE = 0.0005
 
 type SolveDirections []*SolveStep
 
@@ -52,23 +56,14 @@ var techniques []SolveTechnique
 func init() {
 
 	//TODO: calculate more realistic weights.
-	//TODO: calculate more realistic difficulties.
 
 	techniques = []SolveTechnique{
-		nakedSingleTechnique{
-			basicSolveTechnique{
-				"Only Legal Number",
-				true,
-				1.0,
-				0.0,
-			},
-		},
 		hiddenSingleInRow{
 			basicSolveTechnique{
 				"Necessary In Row",
 				true,
 				0.5,
-				0.25,
+				0.0,
 			},
 		},
 		hiddenSingleInCol{
@@ -76,7 +71,7 @@ func init() {
 				"Necessary In Col",
 				true,
 				0.5,
-				0.25,
+				0.0,
 			},
 		},
 		hiddenSingleInBlock{
@@ -84,7 +79,15 @@ func init() {
 				"Necessary in Block",
 				true,
 				0.5,
-				0.20,
+				0.0,
+			},
+		},
+		nakedSingleTechnique{
+			basicSolveTechnique{
+				"Only Legal Number",
+				true,
+				1.0,
+				5.0,
 			},
 		},
 		pointingPairRow{
@@ -92,7 +95,7 @@ func init() {
 				"Pointing pair row",
 				false,
 				0.2,
-				0.5,
+				25.0,
 			},
 		},
 		pointingPairCol{
@@ -100,7 +103,7 @@ func init() {
 				"Pointing pair col",
 				false,
 				0.2,
-				0.5,
+				25.0,
 			},
 		},
 		nakedPairCol{
@@ -108,7 +111,7 @@ func init() {
 				"Naked pair Row",
 				false,
 				0.1,
-				0.6,
+				75.0,
 			},
 		},
 		nakedPairRow{
@@ -116,7 +119,7 @@ func init() {
 				"Naked Pair Row",
 				false,
 				0.1,
-				0.6,
+				75.0,
 			},
 		},
 		nakedPairBlock{
@@ -124,7 +127,7 @@ func init() {
 				"Naked Pair Block",
 				false,
 				0.1,
-				0.6,
+				85.0,
 			},
 		},
 		nakedTripleCol{
@@ -132,7 +135,7 @@ func init() {
 				"Naked Triple Col",
 				false,
 				0.05,
-				0.8,
+				125.0,
 			},
 		},
 		nakedTripleRow{
@@ -140,7 +143,7 @@ func init() {
 				"Naked Triple Row",
 				false,
 				0.05,
-				0.8,
+				125.0,
 			},
 		},
 		nakedTripleBlock{
@@ -148,7 +151,7 @@ func init() {
 				"Naked Triple Block",
 				false,
 				0.05,
-				0.8,
+				140.0,
 			},
 		},
 	}
@@ -656,16 +659,26 @@ func (self SolveDirections) Description() []string {
 }
 
 func (self SolveDirections) Difficulty() float64 {
-	//How difficult the solve directions described are.
+	//How difficult the solve directions described are. The measure of difficulty we use is
+	//just summing up weights we see; this captures:
+	//* Number of steps
+	//* Average difficulty of steps
+	//* Number of hard steps
+	//* (kind of) the hardest step: because the difficulties go up expontentionally.
 
-	//TODO: come up with a better measure of difficulty. Perhaps include some notion of how many difficult steps there are?
-	max := 0.0
+	//TODO: what's a good max bound for difficulty? This should be normalized to 0<->1 based on that.
+
+	accum := 0.0
 	for _, step := range self {
-		if step.Technique.Difficulty() > max {
-			max = step.Technique.Difficulty()
-		}
+		accum += step.Technique.Difficulty()
 	}
-	return max
+
+	if accum > MAX_RAW_DIFFICULTY {
+		accum = MAX_RAW_DIFFICULTY
+	}
+
+	return accum / MAX_RAW_DIFFICULTY
+
 }
 
 func (self SolveDirections) Walkthrough(grid *Grid) string {
@@ -776,25 +789,24 @@ func (self *Grid) Difficulty() float64 {
 
 	//We solve the same puzzle N times, then ask each set of steps for their difficulty, and combine those to come up with the overall difficulty.
 
-	//TODO: come up with a better notion of difficulty than just averaging the difficulties. Perhaps weight higher difficulty runs higher?
-
 	accum := 0.0
 	average := 0.0
+	lastAverage := 0.0
 
 	for i := 0; i < MAX_DIFFICULTY_ITERATIONS; i++ {
 		grid := self.Copy()
 		steps := grid.HumanSolve()
 		difficulty := steps.Difficulty()
 
-		//We don't change the average yet--we want to ensure that we're close to the average of all the other runs.
+		accum += difficulty
+		average = accum / (float64(i) + 1.0)
 
-		if math.Abs(average-difficulty) < DIFFICULTY_CONVERGENCE {
+		if math.Abs(average-lastAverage) < DIFFICULTY_CONVERGENCE {
 			//Okay, we've already converged. Just return early!
 			return average
 		}
 
-		accum += difficulty
-		average = accum / (float64(i) + 1.0)
+		lastAverage = average
 	}
 
 	//We weren't converging... oh well!
