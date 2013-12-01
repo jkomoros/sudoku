@@ -66,7 +66,9 @@ TODO:
 * REdo of threaded solving
 	* Why is performance so slow?
 
-* It's pretty easy to get grid.Difficulty() to freak and never compelte. Here's a puzzle that does it:
+* Add an interactive mode to the command line tool.
+
+* It's pretty easy to get grid.Difficulty() to freak and never compelte on puzzles we generate. Here's a puzzle that does it:
 8|5|.|.|1|.|.|.|.
 .|6|4|.|.|.|.|.|5
 .|.|.|.|.|.|7|4|.
@@ -76,6 +78,7 @@ TODO:
 .|1|.|.|8|.|.|7|.
 .|.|6|.|.|.|5|.|3
 .|.|.|5|.|.|.|8|1
+... Um, this one doesn't freeze us like it did when generating... hmmmm...
 
 
 
