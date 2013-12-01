@@ -15,17 +15,18 @@ const COL_SEP = "|"
 const ALT_COL_SEP = "||"
 
 type Grid struct {
-	initalized      bool
-	cells           [DIM * DIM]Cell
-	rows            [DIM]CellList
-	cols            [DIM]CellList
-	blocks          [DIM]CellList
-	cacheRowMutex   sync.RWMutex
-	cacheColMutex   sync.RWMutex
-	queue           *FiniteQueue
-	numFilledCells  int
-	invalidCells    map[*Cell]bool
-	cachedSolutions []*Grid
+	initalized       bool
+	cells            [DIM * DIM]Cell
+	rows             [DIM]CellList
+	cols             [DIM]CellList
+	blocks           [DIM]CellList
+	cacheRowMutex    sync.RWMutex
+	cacheColMutex    sync.RWMutex
+	cacheBlockMutext sync.RWMutex
+	queue            *FiniteQueue
+	numFilledCells   int
+	invalidCells     map[*Cell]bool
+	cachedSolutions  []*Grid
 }
 
 var gridCache chan *Grid
@@ -180,11 +181,19 @@ func (self *Grid) Block(index int) CellList {
 		log.Println("Invalid index passed to Block: ", index)
 		return nil
 	}
-	if self.blocks[index] == nil {
+
+	self.cacheBlockMutext.RLock()
+	result := self.blocks[index]
+	self.cacheBlockMutext.RUnlock()
+
+	if result == nil {
 		topRow, topCol, bottomRow, bottomCol := self.blockExtents(index)
+		self.cacheBlockMutext.Lock()
 		self.blocks[index] = self.cellList(topRow, topCol, bottomRow, bottomCol)
+		result = self.blocks[index]
+		self.cacheBlockMutext.Unlock()
 	}
-	return self.blocks[index]
+	return result
 }
 
 func (self *Grid) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
