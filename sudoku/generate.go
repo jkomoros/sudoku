@@ -32,6 +32,8 @@ func GenerateGrid() *Grid {
 
 		cells := make([]*Cell, len(grid.cells[:]))
 
+		//TODO: remove cells to make the grid well-balanced.
+
 		for i, j := range rand.Perm(len(grid.cells[:])) {
 			cells[i] = &grid.cells[j]
 		}
