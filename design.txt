@@ -71,6 +71,7 @@ TODO:
 * Create a way to print out a solve walkthrough
 
 * Does our use of the Rand convenience funcs in different go routines cause performance problems? (http://stackoverflow.com/questions/14298523/why-does-adding-concurrency-slow-down-this-golang-code)
+	* In any case we want to be able to test randomness.
 
 * Make it so the docs generated from dokugen are all useful.
 
@@ -80,6 +81,8 @@ TODO:
 * Add an interactive mode to the command line tool.
 
 * Fix races with go test -race.
+
+* Test the main app (partially there... just need to minimize randomness now)
 
 * It's pretty easy to get grid.Difficulty() to freak and never compelte on puzzles we generate. Here's a puzzle that does it:
 8|5|.|.|1|.|.|.|.
