@@ -14,6 +14,8 @@ var NUM int
 
 func main() {
 
+	//TODO: figure out how to test this.
+
 	flag.BoolVar(&GENERATE, "g", false, "if true, will generate a puzzle.")
 	flag.BoolVar(&HELP, "h", false, "If provided, will print help and exit.")
 	flag.IntVar(&NUM, "n", 1, "Number of things to generate")
