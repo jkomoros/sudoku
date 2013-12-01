@@ -56,23 +56,14 @@ var techniques []SolveTechnique
 func init() {
 
 	//TODO: calculate more realistic weights.
-	//TODO: calculate more realistic difficulties. Now that we do accum weights, these should go up exponentially.
 
 	techniques = []SolveTechnique{
-		nakedSingleTechnique{
-			basicSolveTechnique{
-				"Only Legal Number",
-				true,
-				1.0,
-				0.0,
-			},
-		},
 		hiddenSingleInRow{
 			basicSolveTechnique{
 				"Necessary In Row",
 				true,
 				0.5,
-				0.25,
+				0.0,
 			},
 		},
 		hiddenSingleInCol{
@@ -80,7 +71,7 @@ func init() {
 				"Necessary In Col",
 				true,
 				0.5,
-				0.25,
+				0.0,
 			},
 		},
 		hiddenSingleInBlock{
@@ -88,7 +79,15 @@ func init() {
 				"Necessary in Block",
 				true,
 				0.5,
-				0.20,
+				0.0,
+			},
+		},
+		nakedSingleTechnique{
+			basicSolveTechnique{
+				"Only Legal Number",
+				true,
+				1.0,
+				5.0,
 			},
 		},
 		pointingPairRow{
@@ -96,7 +95,7 @@ func init() {
 				"Pointing pair row",
 				false,
 				0.2,
-				0.5,
+				25.0,
 			},
 		},
 		pointingPairCol{
@@ -104,7 +103,7 @@ func init() {
 				"Pointing pair col",
 				false,
 				0.2,
-				0.5,
+				25.0,
 			},
 		},
 		nakedPairCol{
@@ -112,7 +111,7 @@ func init() {
 				"Naked pair Row",
 				false,
 				0.1,
-				0.6,
+				75.0,
 			},
 		},
 		nakedPairRow{
@@ -120,7 +119,7 @@ func init() {
 				"Naked Pair Row",
 				false,
 				0.1,
-				0.6,
+				75.0,
 			},
 		},
 		nakedPairBlock{
@@ -128,7 +127,7 @@ func init() {
 				"Naked Pair Block",
 				false,
 				0.1,
-				0.6,
+				85.0,
 			},
 		},
 		nakedTripleCol{
@@ -136,7 +135,7 @@ func init() {
 				"Naked Triple Col",
 				false,
 				0.05,
-				0.8,
+				125.0,
 			},
 		},
 		nakedTripleRow{
@@ -144,7 +143,7 @@ func init() {
 				"Naked Triple Row",
 				false,
 				0.05,
-				0.8,
+				125.0,
 			},
 		},
 		nakedTripleBlock{
@@ -152,7 +151,7 @@ func init() {
 				"Naked Triple Block",
 				false,
 				0.05,
-				0.8,
+				140.0,
 			},
 		},
 	}

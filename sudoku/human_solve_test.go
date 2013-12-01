@@ -655,7 +655,7 @@ func TestStepsDescription(t *testing.T) {
 			},
 			nil,
 			IntSlice{1},
-			techniques[0],
+			techniques[3],
 		},
 		&SolveStep{
 			CellList{
@@ -675,7 +675,7 @@ func TestStepsDescription(t *testing.T) {
 			},
 			nil,
 			IntSlice{2},
-			techniques[0],
+			techniques[3],
 		},
 	}
 
