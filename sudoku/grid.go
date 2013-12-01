@@ -21,6 +21,7 @@ type Grid struct {
 	cols            [DIM]CellList
 	blocks          [DIM]CellList
 	cacheRowMutex   sync.RWMutex
+	cacheColMutex   sync.RWMutex
 	queue           *FiniteQueue
 	numFilledCells  int
 	invalidCells    map[*Cell]bool
@@ -161,10 +162,17 @@ func (self *Grid) Col(index int) CellList {
 		log.Println("Invalid index passed to Col: ", index)
 		return nil
 	}
-	if self.cols[index] == nil {
+	self.cacheColMutex.RLock()
+	result := self.cols[index]
+	self.cacheColMutex.RUnlock()
+
+	if result == nil {
+		self.cacheColMutex.Lock()
 		self.cols[index] = self.cellList(0, index, DIM-1, index)
+		result = self.cols[index]
+		self.cacheColMutex.Unlock()
 	}
-	return self.cols[index]
+	return result
 }
 
 func (self *Grid) Block(index int) CellList {
