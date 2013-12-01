@@ -12,6 +12,7 @@ var HELP bool
 var PUZZLE_TO_SOLVE string
 var NUM int
 var PRINT_STATS bool
+var WALKTHROUGH bool
 
 func main() {
 
@@ -22,6 +23,7 @@ func main() {
 	flag.IntVar(&NUM, "n", 1, "Number of things to generate")
 	flag.BoolVar(&PRINT_STATS, "p", false, "If provided, will print stats.")
 	flag.StringVar(&PUZZLE_TO_SOLVE, "s", "", "If provided, will solve the puzzle at the given filename and print solution.")
+	flag.BoolVar(&WALKTHROUGH, "w", false, "If provided, will print out a walkthrough to solve the provided puzzle.")
 
 	flag.Parse()
 
@@ -47,12 +49,19 @@ func main() {
 		grid := sudoku.NewGrid()
 		grid.LoadFromFile(PUZZLE_TO_SOLVE)
 		//TODO: detect if the load failed.
-		grid.Solve()
-		print(grid.DataString())
+
+		//TODO: use of this option leads to a busy loop somewhere... Is it related to the generate-multiple-and-difficulty hang?
+		if WALKTHROUGH {
+			print(grid.HumanWalkthrough())
+			print("\n\n")
+		}
 		if PRINT_STATS {
 			print("\n\n")
 			print(grid.Difficulty())
 		}
+		grid.Solve()
+		print(grid.DataString())
+
 		return
 	}
 
