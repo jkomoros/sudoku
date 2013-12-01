@@ -706,7 +706,7 @@ func TestPuzzleDifficulty(t *testing.T) {
 		t.Fail()
 	}
 
-	if difficulty < 0.0 {
+	if difficulty < 0.0 || difficulty > 1.0 {
 		t.Log("The grid's difficulty was outside of allowed bounds.")
 		t.Fail()
 	}
