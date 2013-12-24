@@ -93,5 +93,7 @@ TODO:
 
 * Move all of the puzzle constants in tests into SDK files
 
+* Use gofmt to replace all instances of t.Log(a) t.Fail() with t.Error.
+
 
 
