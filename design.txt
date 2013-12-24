@@ -95,5 +95,7 @@ TODO:
 
 * Use gofmt to replace all instances of t.Log(a) t.Fail() with t.Error.
 
+* Running `go run main.go -s ../puzzles/test/harddifficulty.sdk -w` results in a panic.
+
 
 
