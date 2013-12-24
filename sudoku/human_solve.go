@@ -460,7 +460,7 @@ func (self nakedPairCol) Find(grid *Grid) *SolveStep {
 	colGetter := func(i int) CellList {
 		return grid.Col(i)
 	}
-	return nakedSubset(self, 2, colGetter)
+	return nakedSubset(grid, self, 2, colGetter)
 }
 
 func (self nakedPairRow) Description(step *SolveStep) string {
@@ -474,7 +474,7 @@ func (self nakedPairRow) Find(grid *Grid) *SolveStep {
 	rowGetter := func(i int) CellList {
 		return grid.Row(i)
 	}
-	return nakedSubset(self, 2, rowGetter)
+	return nakedSubset(grid, self, 2, rowGetter)
 }
 
 func (self nakedPairBlock) Description(step *SolveStep) string {
@@ -488,7 +488,7 @@ func (self nakedPairBlock) Find(grid *Grid) *SolveStep {
 	blockGetter := func(i int) CellList {
 		return grid.Block(i)
 	}
-	return nakedSubset(self, 2, blockGetter)
+	return nakedSubset(grid, self, 2, blockGetter)
 }
 
 func (self nakedTripleCol) Description(step *SolveStep) string {
@@ -502,7 +502,7 @@ func (self nakedTripleCol) Find(grid *Grid) *SolveStep {
 	colGetter := func(i int) CellList {
 		return grid.Col(i)
 	}
-	return nakedSubset(self, 3, colGetter)
+	return nakedSubset(grid, self, 3, colGetter)
 }
 
 func (self nakedTripleRow) Description(step *SolveStep) string {
@@ -516,7 +516,7 @@ func (self nakedTripleRow) Find(grid *Grid) *SolveStep {
 	rowGetter := func(i int) CellList {
 		return grid.Row(i)
 	}
-	return nakedSubset(self, 3, rowGetter)
+	return nakedSubset(grid, self, 3, rowGetter)
 }
 
 func (self nakedTripleBlock) Description(step *SolveStep) string {
@@ -530,19 +530,27 @@ func (self nakedTripleBlock) Find(grid *Grid) *SolveStep {
 	blockGetter := func(i int) CellList {
 		return grid.Block(i)
 	}
-	return nakedSubset(self, 3, blockGetter)
+	return nakedSubset(grid, self, 3, blockGetter)
 }
 
-func nakedSubset(technique SolveTechnique, k int, collectionGetter func(int) CellList) *SolveStep {
+func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) *SolveStep {
 	//TODO: randomize order we visit things.
+	var result *SolveStep
 	for i := 0; i < DIM; i++ {
 
 		groups := subsetCellsWithNPossibilities(k, collectionGetter(i))
 
 		if len(groups) > 0 {
-			//TODO: pick a random one
-			group := groups[0]
-			return &SolveStep{collectionGetter(i).RemoveCells(group), group, group.PossibilitiesUnion(), technique}
+			//TODO: pick a random one instead of the first useful one.
+
+			for _, group := range groups {
+
+				result = &SolveStep{collectionGetter(i).RemoveCells(group), group, group.PossibilitiesUnion(), technique}
+				if result.IsUseful(grid) {
+					return result
+				}
+				//Hmm, it's not actually useful. Keep going.
+			}
 		}
 
 	}
