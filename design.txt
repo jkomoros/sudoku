@@ -97,5 +97,7 @@ TODO:
 
 * Running `go run main.go -s ../puzzles/test/harddifficulty.sdk -w` results in a panic.
 
+* The difficulties we get when generating puzzles from app are absurdly low (even 0 sometimes!)
+
 
 
