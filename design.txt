@@ -97,7 +97,9 @@ TODO:
 .|.|6|.|.|.|5|.|3
 .|.|.|5|.|.|.|8|1
 ... Um, this one doesn't freeze us like it did when generating... hmmmm...
+	After much investigation, it turns out that pointingPairRow/Col (and maybe other techniques) report that they can do work even when they can't--that is, they say "you can remove 4 from these 5 cells", but none of those cells have a 4 in them! This manifests as basically an infinite loop where HumanSolve thinks it keeps on getting things to do, but nothing ever happens. This SHOULD be detected as a "no more moves". What we should do is make sure that moves only return one if it actually DOES something.
 
+* If HumanSolve gets stuck, it should do a guess as a last resort.
 
 
 * Make it so if any technique takes too long and we already have some answers, we move ahead anyway.
