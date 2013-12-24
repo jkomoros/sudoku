@@ -725,7 +725,10 @@ func TestPuzzleDifficulty(t *testing.T) {
 
 func puzzleDifficultyHelper(filename string, t *testing.T) {
 	otherGrid := NewGrid()
-	otherGrid.LoadFromFile(filename)
+	if !otherGrid.LoadFromFile(filename) {
+		t.Log("Whoops, couldn't load the file to test:", filename)
+		t.Fail()
+	}
 
 	after := time.After(time.Second * 5)
 
