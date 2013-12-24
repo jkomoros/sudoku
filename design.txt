@@ -70,7 +70,7 @@ TODO:
 
 * Create a way to print out a solve walkthrough
 
-* Are difficulty and weight distinct concepts in human solve? And in any case, are the constants set right?
+* Use machine learning to help us set the constants for difficulty correctly
 
 * Does our use of the Rand convenience funcs in different go routines cause performance problems? (http://stackoverflow.com/questions/14298523/why-does-adding-concurrency-slow-down-this-golang-code)
 	* In any case we want to be able to test randomness.

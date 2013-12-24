@@ -40,16 +40,13 @@ type SolveTechnique interface {
 	Description(*SolveStep) string
 	Find(*Grid) *SolveStep
 	IsFill() bool
-	//How often a real human would use this technique. 1.0 (extremely common) to 0.0 (not common)
-	Weight() float64
-	//How difficult a real human would say this technique is. Generally inversely related to weight. 0.0 to 1.0.
+	//How difficult a real human would say this technique is. Generally inversely related to how often a real person would pick it. 0.0 to 1.0.
 	Difficulty() float64
 }
 
 type basicSolveTechnique struct {
 	name       string
 	isFill     bool
-	weight     float64
 	difficulty float64
 }
 
@@ -64,7 +61,6 @@ func init() {
 			basicSolveTechnique{
 				"Necessary In Row",
 				true,
-				0.5,
 				0.0,
 			},
 		},
@@ -72,7 +68,6 @@ func init() {
 			basicSolveTechnique{
 				"Necessary In Col",
 				true,
-				0.5,
 				0.0,
 			},
 		},
@@ -80,7 +75,6 @@ func init() {
 			basicSolveTechnique{
 				"Necessary in Block",
 				true,
-				0.5,
 				0.0,
 			},
 		},
@@ -88,7 +82,6 @@ func init() {
 			basicSolveTechnique{
 				"Only Legal Number",
 				true,
-				1.0,
 				5.0,
 			},
 		},
@@ -96,7 +89,6 @@ func init() {
 			basicSolveTechnique{
 				"Pointing pair row",
 				false,
-				0.2,
 				25.0,
 			},
 		},
@@ -104,7 +96,6 @@ func init() {
 			basicSolveTechnique{
 				"Pointing pair col",
 				false,
-				0.2,
 				25.0,
 			},
 		},
@@ -112,7 +103,6 @@ func init() {
 			basicSolveTechnique{
 				"Naked pair Row",
 				false,
-				0.1,
 				75.0,
 			},
 		},
@@ -120,7 +110,6 @@ func init() {
 			basicSolveTechnique{
 				"Naked Pair Row",
 				false,
-				0.1,
 				75.0,
 			},
 		},
@@ -128,7 +117,6 @@ func init() {
 			basicSolveTechnique{
 				"Naked Pair Block",
 				false,
-				0.1,
 				85.0,
 			},
 		},
@@ -136,7 +124,6 @@ func init() {
 			basicSolveTechnique{
 				"Naked Triple Col",
 				false,
-				0.05,
 				125.0,
 			},
 		},
@@ -144,7 +131,6 @@ func init() {
 			basicSolveTechnique{
 				"Naked Triple Row",
 				false,
-				0.05,
 				125.0,
 			},
 		},
@@ -152,7 +138,6 @@ func init() {
 			basicSolveTechnique{
 				"Naked Triple Block",
 				false,
-				0.05,
 				140.0,
 			},
 		},
@@ -213,10 +198,6 @@ func (self basicSolveTechnique) Name() string {
 
 func (self basicSolveTechnique) IsFill() bool {
 	return self.isFill
-}
-
-func (self basicSolveTechnique) Weight() float64 {
-	return self.weight
 }
 
 func (self basicSolveTechnique) Difficulty() float64 {
@@ -616,6 +597,15 @@ func normalizedWeights(weights []float64) []float64 {
 	return result
 }
 
+func randomIndexWithInvertedWeights(invertedWeights []float64) int {
+	normalizedInvertedWeights := normalizedWeights(invertedWeights)
+	normalizedWeights := make([]float64, len(invertedWeights))
+	for i, weight := range normalizedInvertedWeights {
+		normalizedWeights[i] = 1.0 - weight
+	}
+	return randomIndexWithNormalizedWeights(normalizedWeights)
+}
+
 func randomIndexWithWeights(weights []float64) int {
 	//TODO: shouldn't this be called weightedRandomIndex?
 	return randomIndexWithNormalizedWeights(normalizedWeights(weights))
@@ -770,9 +760,9 @@ func (self *Grid) HumanSolve() SolveDirections {
 
 		possibilitiesWeights := make([]float64, len(possibilities))
 		for i, possibility := range possibilities {
-			possibilitiesWeights[i] = possibility.Technique.Weight()
+			possibilitiesWeights[i] = possibility.Technique.Difficulty()
 		}
-		step := possibilities[randomIndexWithWeights(possibilitiesWeights)]
+		step := possibilities[randomIndexWithInvertedWeights(possibilitiesWeights)]
 
 		results = append(results, step)
 		step.Apply(self)
