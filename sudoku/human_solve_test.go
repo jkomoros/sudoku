@@ -45,17 +45,6 @@ const NAKED_PAIR_BLOCK_GRID = `.|.|3|.|7|8|9|.|.
 .|.|.|.|.|.|.|.|.
 .|.|.|.|.|.|.|.|.`
 
-//The following example comes from http://www.sadmansoftware.com/sudoku/nakedsubset.htm
-const NAKED_TRIPLE_GRID = `8|6|.|1|.|4|.|5|9
-.|.|.|.|.|.|.|.|.
-9|2|.|.|.|.|.|1|7
-4|3|.|9|.|7|.|8|5
-.|.|.|.|.|.|.|.|.
-7|9|.|8|.|5|.|6|4
-6|4|.|.|.|.|.|2|1
-.|.|.|.|.|.|.|.|.
-2|1|.|4|.|3|.|7|6`
-
 func TestSolveOnlyLegalNumber(t *testing.T) {
 	grid := NewGrid()
 	//Load up a solved grid
@@ -459,9 +448,10 @@ func TestNakedPairBlock(t *testing.T) {
 func TestNakedTriple(t *testing.T) {
 	//TODO: test for col and block as well
 	grid := NewGrid()
-	grid.Load(NAKED_TRIPLE_GRID)
+	grid.LoadFromFile(puzzlePath("nakedtriplet2.sdk"))
 	solver := &nakedTripleRow{}
 	step := solver.Find(grid)
+
 	if step == nil {
 		t.Log("The naked triple row didn't find a cell it should have.")
 		t.FailNow()
@@ -474,11 +464,11 @@ func TestNakedTriple(t *testing.T) {
 		t.Log("The naked triple row had the wrong number of pointer clles")
 		t.Fail()
 	}
-	if !step.TargetCells.SameRow() || step.TargetCells.Row() != 0 {
+	if !step.TargetCells.SameRow() || step.TargetCells.Row() != 4 {
 		t.Log("The target cells in the naked triple row were wrong row")
 		t.Fail()
 	}
-	if len(step.Nums) != 3 || !step.Nums.SameContentAs([]int{7, 3, 2}) {
+	if len(step.Nums) != 3 || !step.Nums.SameContentAs([]int{3, 5, 8}) {
 		t.Log("Naked triple row found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
