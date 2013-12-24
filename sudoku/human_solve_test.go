@@ -24,17 +24,6 @@ const POINTING_PAIR_COL_GRID = `3|.|6|.|.|.|.|.|.
 .|.|.|.|.|.|.|.|.
 .|.|.|.|.|.|.|.|.`
 
-//The following example comes from http://www.sadmansoftware.com/sudoku/nakedsubset.htm
-const NAKED_PAIR_GRID = `3|.|5|.|.|.|7|.|9
-.|9|.|3|7|.|.|.|6
-.|7|.|.|.|1|.|3|.
-6|.|4|.|.|.|3|.|.
-.|.|.|4|.|5|.|.|.
-.|.|9|.|.|.|.|.|4
-.|4|.|1|.|.|9|8|.
-9|.|.|.|8|7|.|.|.
-8|.|2|.|.|.|1|7|5`
-
 const NAKED_PAIR_BLOCK_GRID = `.|.|3|.|7|8|9|.|.
 4|5|6|.|.|.|.|.|.
 .|.|.|.|.|.|.|.|.
@@ -332,7 +321,11 @@ func TestPointingPairRow(t *testing.T) {
 
 func TestNakedPairCol(t *testing.T) {
 	grid := NewGrid()
-	grid.Load(NAKED_PAIR_GRID)
+	if !grid.LoadFromFile(puzzlePath("nakedpair3.sdk")) {
+		t.Log("Failed to load nakedpair3.sdk")
+		t.Fail()
+	}
+
 	solver := &nakedPairCol{}
 	step := solver.Find(grid)
 	if step == nil {
@@ -370,7 +363,10 @@ func TestNakedPairCol(t *testing.T) {
 
 func TestNakedPairRow(t *testing.T) {
 	grid := NewGrid()
-	grid.Load(NAKED_PAIR_GRID)
+	if !grid.LoadFromFile(puzzlePath("nakedpair3.sdk")) {
+		t.Log("Failed to load nakedpair3.sdk")
+		t.Fail()
+	}
 	grid = grid.transpose()
 	solver := &nakedPairRow{}
 	step := solver.Find(grid)
@@ -527,7 +523,10 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 
 func TestSubsetCellsWithNPossibilities(t *testing.T) {
 	grid := NewGrid()
-	grid.Load(NAKED_PAIR_GRID)
+	if !grid.LoadFromFile(puzzlePath("nakedpair3.sdk")) {
+		t.Log("Failed to load nakedpair3.sdk")
+		t.Fail()
+	}
 	results := subsetCellsWithNPossibilities(2, grid.Col(DIM-1))
 	if len(results) != 1 {
 		t.Log("Didn't get right number of subset cells with n possibilities: ", len(results))
