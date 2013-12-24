@@ -719,15 +719,20 @@ func TestPuzzleDifficulty(t *testing.T) {
 
 	grid.Done()
 
+	puzzleDifficultyHelper("harddifficulty.sdk", t)
+
+}
+
+func puzzleDifficultyHelper(filename string, t *testing.T) {
 	otherGrid := NewGrid()
-	otherGrid.LoadFromFile("harddifficulty.sdk")
+	otherGrid.LoadFromFile(filename)
 
 	after := time.After(time.Second * 5)
 
 	done := make(chan bool)
 
 	go func() {
-		difficulty = otherGrid.Difficulty()
+		_ = otherGrid.Difficulty()
 		done <- true
 	}()
 
@@ -736,7 +741,7 @@ func TestPuzzleDifficulty(t *testing.T) {
 		//totally fine.
 	case <-after:
 		//Uh oh.
-		t.Log("We never finished solving the hard difficulty puzzle.")
+		t.Log("We never finished solving the hard difficulty puzzle: ", filename)
 		t.Fail()
 	}
 }
