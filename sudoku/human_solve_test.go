@@ -709,8 +709,11 @@ func TestPuzzleDifficulty(t *testing.T) {
 
 	grid.Done()
 
-	puzzleDifficultyHelper("harddifficulty.sdk", t)
+	puzzleFilenames := []string{"harddifficulty.sdk", "harddifficulty2.sdk"}
 
+	for _, filename := range puzzleFilenames {
+		puzzleDifficultyHelper(filename, t)
+	}
 }
 
 func puzzleDifficultyHelper(filename string, t *testing.T) {
