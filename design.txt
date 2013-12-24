@@ -86,8 +86,6 @@ TODO:
 
 * Test the main app (partially there... just need to minimize randomness now)
 
-* Verify so every technique--including the ones that don't use nakedSubset will never return a step that's not useful.
-
 * If HumanSolve gets stuck, it should do a guess as a last resort.
 
 

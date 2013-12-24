@@ -289,7 +289,11 @@ func (self nakedSingleTechnique) Find(grid *Grid) *SolveStep {
 		return nil
 	}
 	cell := obj.(*Cell)
-	return newFillSolveStep(cell, cell.implicitNumber(), self)
+	result := newFillSolveStep(cell, cell.implicitNumber(), self)
+	if result.IsUseful(grid) {
+		return result
+	}
+	return nil
 }
 
 func (self hiddenSingleInRow) Description(step *SolveStep) string {
@@ -347,6 +351,8 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 	//This will be a random item
 	indexes := rand.Perm(DIM)
 
+	var result *SolveStep
+
 	for _, i := range indexes {
 		seenInCollection := make([]int, DIM)
 		collection := collectionGetter(i)
@@ -362,8 +368,12 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 				//Okay, we know our target number. Which cell was it?
 				for _, cell := range collection {
 					if cell.Possible(index + 1) {
-						//Found it!
-						return newFillSolveStep(cell, index+1, technique)
+						//Found it... just make sure it's useful (it would be rare for it to not be).
+						result = newFillSolveStep(cell, index+1, technique)
+						if result.IsUseful(grid) {
+							return result
+						}
+						//Hmm, wasn't useful. Keep trying...
 					}
 				}
 			}
