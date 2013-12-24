@@ -38,6 +38,7 @@ type SolveStep struct {
 type SolveTechnique interface {
 	Name() string
 	Description(*SolveStep) string
+	//IMPORTANT: a step should return a step IFF that step is valid AND the step would cause useful work to be done if applied.
 	Find(*Grid) *SolveStep
 	IsFill() bool
 	//How difficult a real human would say this technique is. Generally inversely related to how often a real person would pick it. 0.0 to 1.0.
@@ -210,7 +211,40 @@ func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep 
 	return &SolveStep{cellArr, nil, numArr, technique}
 }
 
+func (self *SolveStep) IsUseful(grid *Grid) bool {
+	//Returns true IFF calling Apply with this step and the given grid would result in some useful work. Does not modify the gri.d
+
+	//All of this logic is substantially recreated in Apply.
+
+	if self.Technique == nil {
+		return false
+	}
+
+	//TODO: test this.
+	if self.Technique.IsFill() {
+		if len(self.TargetCells) == 0 || len(self.Nums) == 0 {
+			return false
+		}
+		cell := self.TargetCells[0].InGrid(grid)
+		return self.Nums[0] != cell.Number()
+	} else {
+		useful := false
+		for _, cell := range self.TargetCells {
+			gridCell := cell.InGrid(grid)
+			for _, exclude := range self.Nums {
+				//It's right to use Possible because it includes the logic of "it's not possible if there's a number in there already"
+				//TODO: ensure the comment above is correct logically.
+				if gridCell.Possible(exclude) {
+					useful = true
+				}
+			}
+		}
+		return useful
+	}
+}
+
 func (self *SolveStep) Apply(grid *Grid) {
+	//All of this logic is substantially recreated in IsUseful.
 	if self.Technique.IsFill() {
 		if len(self.TargetCells) == 0 || len(self.Nums) == 0 {
 			return
@@ -350,6 +384,9 @@ func (self pointingPairRow) Find(grid *Grid) *SolveStep {
 	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
 	//TODO: randomize order of blocks.
 	//TODO: this is substantially duplicated in pointingPaircol
+
+	var result *SolveStep
+
 	for i := 0; i < DIM; i++ {
 		block := grid.Block(i)
 		//TODO: randomize order of numbers to test for.
@@ -363,7 +400,11 @@ func (self pointingPairRow) Find(grid *Grid) *SolveStep {
 			//Okay, it's possible it's a match. Are all rows the same?
 			if cells.SameRow() {
 				//Yup!
-				return &SolveStep{grid.Row(cells.Row()).RemoveCells(block), cells, []int{num + 1}, self}
+				result = &SolveStep{grid.Row(cells.Row()).RemoveCells(block), cells, []int{num + 1}, self}
+				if result.IsUseful(grid) {
+					return result
+				}
+				//Hmm, guess it found some not-actually useful thing. Keep looking.
 			}
 		}
 	}
@@ -381,6 +422,9 @@ func (self pointingPairCol) Find(grid *Grid) *SolveStep {
 	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
 	//TODO: randomize order of blocks.
 	//TODO: this is substantially duplicated in pointingPairRow
+
+	var result *SolveStep
+
 	for i := 0; i < DIM; i++ {
 		block := grid.Block(i)
 		//TODO: randomize order of numbers to test for.
@@ -394,7 +438,11 @@ func (self pointingPairCol) Find(grid *Grid) *SolveStep {
 			//Okay, are all cols?
 			if cells.SameCol() {
 				//Yup!
-				return &SolveStep{grid.Col(cells.Col()).RemoveCells(block), cells, []int{num + 1}, self}
+				result = &SolveStep{grid.Col(cells.Col()).RemoveCells(block), cells, []int{num + 1}, self}
+				if result.IsUseful(grid) {
+					return result
+				}
+				//Hmm, guess it found some not-actually useful thing. Keep looking.
 			}
 		}
 	}
@@ -412,7 +460,7 @@ func (self nakedPairCol) Find(grid *Grid) *SolveStep {
 	colGetter := func(i int) CellList {
 		return grid.Col(i)
 	}
-	return nakedSubset(self, 2, colGetter)
+	return nakedSubset(grid, self, 2, colGetter)
 }
 
 func (self nakedPairRow) Description(step *SolveStep) string {
@@ -426,7 +474,7 @@ func (self nakedPairRow) Find(grid *Grid) *SolveStep {
 	rowGetter := func(i int) CellList {
 		return grid.Row(i)
 	}
-	return nakedSubset(self, 2, rowGetter)
+	return nakedSubset(grid, self, 2, rowGetter)
 }
 
 func (self nakedPairBlock) Description(step *SolveStep) string {
@@ -440,7 +488,7 @@ func (self nakedPairBlock) Find(grid *Grid) *SolveStep {
 	blockGetter := func(i int) CellList {
 		return grid.Block(i)
 	}
-	return nakedSubset(self, 2, blockGetter)
+	return nakedSubset(grid, self, 2, blockGetter)
 }
 
 func (self nakedTripleCol) Description(step *SolveStep) string {
@@ -454,7 +502,7 @@ func (self nakedTripleCol) Find(grid *Grid) *SolveStep {
 	colGetter := func(i int) CellList {
 		return grid.Col(i)
 	}
-	return nakedSubset(self, 3, colGetter)
+	return nakedSubset(grid, self, 3, colGetter)
 }
 
 func (self nakedTripleRow) Description(step *SolveStep) string {
@@ -468,7 +516,7 @@ func (self nakedTripleRow) Find(grid *Grid) *SolveStep {
 	rowGetter := func(i int) CellList {
 		return grid.Row(i)
 	}
-	return nakedSubset(self, 3, rowGetter)
+	return nakedSubset(grid, self, 3, rowGetter)
 }
 
 func (self nakedTripleBlock) Description(step *SolveStep) string {
@@ -482,19 +530,27 @@ func (self nakedTripleBlock) Find(grid *Grid) *SolveStep {
 	blockGetter := func(i int) CellList {
 		return grid.Block(i)
 	}
-	return nakedSubset(self, 3, blockGetter)
+	return nakedSubset(grid, self, 3, blockGetter)
 }
 
-func nakedSubset(technique SolveTechnique, k int, collectionGetter func(int) CellList) *SolveStep {
+func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) *SolveStep {
 	//TODO: randomize order we visit things.
+	var result *SolveStep
 	for i := 0; i < DIM; i++ {
 
 		groups := subsetCellsWithNPossibilities(k, collectionGetter(i))
 
 		if len(groups) > 0 {
-			//TODO: pick a random one
-			group := groups[0]
-			return &SolveStep{collectionGetter(i).RemoveCells(group), group, group.PossibilitiesUnion(), technique}
+			//TODO: pick a random one instead of the first useful one.
+
+			for _, group := range groups {
+
+				result = &SolveStep{collectionGetter(i).RemoveCells(group), group, group.PossibilitiesUnion(), technique}
+				if result.IsUseful(grid) {
+					return result
+				}
+				//Hmm, it's not actually useful. Keep going.
+			}
 		}
 
 	}
@@ -747,8 +803,13 @@ func (self *Grid) HumanSolve() SolveDirections {
 
 		for i := 0; i < numTechniques; i++ {
 			possibility := <-possibilitiesChan
+
 			if possibility != nil {
-				possibilities = append(possibilities, possibility)
+				if possibility.IsUseful(self) {
+					possibilities = append(possibilities, possibility)
+				} else {
+					log.Println("Rejecting a not useful suggestion: ", possibility)
+				}
 			}
 		}
 
