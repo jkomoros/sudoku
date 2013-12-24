@@ -216,6 +216,10 @@ func (self *SolveStep) IsUseful(grid *Grid) bool {
 
 	//All of this logic is substantially recreated in Apply.
 
+	if self.Technique == nil {
+		return false
+	}
+
 	//TODO: test this.
 	if self.Technique.IsFill() {
 		if len(self.TargetCells) == 0 || len(self.Nums) == 0 {
