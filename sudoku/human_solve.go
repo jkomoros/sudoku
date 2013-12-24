@@ -38,6 +38,7 @@ type SolveStep struct {
 type SolveTechnique interface {
 	Name() string
 	Description(*SolveStep) string
+	//IMPORTANT: a step should return a step IFF that step is valid AND the step would cause useful work to be done if applied.
 	Find(*Grid) *SolveStep
 	IsFill() bool
 	//How difficult a real human would say this technique is. Generally inversely related to how often a real person would pick it. 0.0 to 1.0.
@@ -210,7 +211,36 @@ func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep 
 	return &SolveStep{cellArr, nil, numArr, technique}
 }
 
+func (self *SolveStep) IsUseful(grid *Grid) bool {
+	//Returns true IFF calling Apply with this step and the given grid would result in some useful work. Does not modify the gri.d
+
+	//All of this logic is substantially recreated in Apply.
+
+	//TODO: test this.
+	if self.Technique.IsFill() {
+		if len(self.TargetCells) == 0 || len(self.Nums) == 0 {
+			return false
+		}
+		cell := self.TargetCells[0].InGrid(grid)
+		return self.Nums[0] != cell.Number()
+	} else {
+		useful := false
+		for _, cell := range self.TargetCells {
+			gridCell := cell.InGrid(grid)
+			for _, exclude := range self.Nums {
+				//It's right to use Possible because it includes the logic of "it's not possible if there's a number in there already"
+				//TODO: ensure the comment above is correct logically.
+				if gridCell.Possible(exclude) {
+					useful = true
+				}
+			}
+		}
+		return useful
+	}
+}
+
 func (self *SolveStep) Apply(grid *Grid) {
+	//All of this logic is substantially recreated in IsUseful.
 	if self.Technique.IsFill() {
 		if len(self.TargetCells) == 0 || len(self.Nums) == 0 {
 			return
