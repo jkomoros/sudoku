@@ -380,6 +380,9 @@ func (self pointingPairRow) Find(grid *Grid) *SolveStep {
 	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
 	//TODO: randomize order of blocks.
 	//TODO: this is substantially duplicated in pointingPaircol
+
+	var result *SolveStep
+
 	for i := 0; i < DIM; i++ {
 		block := grid.Block(i)
 		//TODO: randomize order of numbers to test for.
@@ -393,7 +396,11 @@ func (self pointingPairRow) Find(grid *Grid) *SolveStep {
 			//Okay, it's possible it's a match. Are all rows the same?
 			if cells.SameRow() {
 				//Yup!
-				return &SolveStep{grid.Row(cells.Row()).RemoveCells(block), cells, []int{num + 1}, self}
+				result = &SolveStep{grid.Row(cells.Row()).RemoveCells(block), cells, []int{num + 1}, self}
+				if result.IsUseful(grid) {
+					return result
+				}
+				//Hmm, guess it found some not-actually useful thing. Keep looking.
 			}
 		}
 	}
@@ -411,6 +418,9 @@ func (self pointingPairCol) Find(grid *Grid) *SolveStep {
 	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
 	//TODO: randomize order of blocks.
 	//TODO: this is substantially duplicated in pointingPairRow
+
+	var result *SolveStep
+
 	for i := 0; i < DIM; i++ {
 		block := grid.Block(i)
 		//TODO: randomize order of numbers to test for.
@@ -424,7 +434,11 @@ func (self pointingPairCol) Find(grid *Grid) *SolveStep {
 			//Okay, are all cols?
 			if cells.SameCol() {
 				//Yup!
-				return &SolveStep{grid.Col(cells.Col()).RemoveCells(block), cells, []int{num + 1}, self}
+				result = &SolveStep{grid.Col(cells.Col()).RemoveCells(block), cells, []int{num + 1}, self}
+				if result.IsUseful(grid) {
+					return result
+				}
+				//Hmm, guess it found some not-actually useful thing. Keep looking.
 			}
 		}
 	}
