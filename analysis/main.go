@@ -26,12 +26,14 @@ var noLimitFlag bool
 var printPuzzleDataFlag bool
 var cullCheaterPercentageFlag float64
 var minimumSolvesFlag int
+var useMockData bool
 
 func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
 	flag.BoolVar(&printPuzzleDataFlag, "p", false, "Specify that you want puzzle data printed out in the output.")
 	flag.Float64Var(&cullCheaterPercentageFlag, "c", _PENALTY_PERCENTAGE_CUTOFF, "What percentage of solve time must be penalty for someone to be considered a cheater.")
 	flag.IntVar(&minimumSolvesFlag, "n", _MINIMUM_SOLVES, "How many solves a user must have their scores considered.")
+	flag.BoolVar(&useMockData, "m", false, "Use mock data (useful if you don't have a real database to test with).")
 }
 
 type dbConfig struct {
