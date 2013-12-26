@@ -183,7 +183,13 @@ func main() {
 
 	go getPuzzleDifficultyRatings(&config, difficutlyRatingsChan)
 
-	db := mysql.New("tcp", "", config.Url, config.Username, config.Password, config.DbName)
+	var db mysql.Conn
+
+	if useMockData {
+		db = &mockConnection{}
+	} else {
+		db = mysql.New("tcp", "", config.Url, config.Username, config.Password, config.DbName)
+	}
 
 	if err := db.Connect(); err != nil {
 		log.Fatal(err)
