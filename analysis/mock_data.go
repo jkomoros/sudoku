@@ -60,7 +60,7 @@ func (self *mockConnection) SetTimeout(time.Duration) {
 }
 
 func (self *mockConnection) Connect() error {
-	log.Println("Called a method that is not implemented in the mock database object.")
+	//Just pretend everything worked correctly.
 	return nil
 }
 
