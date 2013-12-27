@@ -10,6 +10,9 @@ import (
 type mockConnection struct {
 }
 
+type mockResult struct {
+}
+
 func (self *mockConnection) Start(sql string, params ...interface{}) (mysql.Result, error) {
 	log.Println("Called a method that is not implemented in the mock database object.")
 	return nil, nil
@@ -112,6 +115,88 @@ func (self *mockConnection) FullFieldInfo(full bool) {
 }
 
 func (self *mockConnection) Begin() (mysql.Transaction, error) {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return nil, nil
+}
+
+//Begin mockResult methods
+
+func (self *mockResult) StatusOnly() bool {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return false
+}
+
+func (self *mockResult) ScanRow(mysql.Row) error {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return nil
+}
+
+func (self *mockResult) GetRow() (mysql.Row, error) {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return nil, nil
+}
+
+func (self *mockResult) MoreResults() bool {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return false
+}
+
+func (self *mockResult) NextResult() (mysql.Result, error) {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return nil, nil
+}
+
+func (self *mockResult) Fields() []*mysql.Field {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return nil
+}
+
+func (self *mockResult) Map(string) int {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return 0
+}
+
+func (self *mockResult) Message() string {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return ""
+}
+
+func (self *mockResult) AffectedRows() uint64 {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return 0
+}
+
+func (self *mockResult) InsertId() uint64 {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return 0
+}
+
+func (self *mockResult) WarnCount() int {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return 0
+}
+
+func (self *mockResult) MakeRow() mysql.Row {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return nil
+}
+
+func (self *mockResult) GetRows() ([]mysql.Row, error) {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return nil, nil
+}
+
+func (self *mockResult) End() error {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return nil
+}
+
+func (self *mockResult) GetFirstRow() (mysql.Row, error) {
+	log.Println("Called a method that is not implemented in the mock database object.")
+	return nil, nil
+}
+
+func (self *mockResult) GetLastRow() (mysql.Row, error) {
 	log.Println("Called a method that is not implemented in the mock database object.")
 	return nil, nil
 }
