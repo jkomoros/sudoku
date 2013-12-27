@@ -15,7 +15,7 @@ import (
 
 const _DB_CONFIG_FILENAME = "db_config.SECRET.json"
 const _OUTPUT_FILENAME = "output.csv"
-const QUERY_LIMIT = 100
+const _QUERY_LIMIT = 100
 const _PENALTY_PERCENTAGE_CUTOFF = 0.10
 
 //How many solves a user must have to have their relative scale included.
@@ -27,12 +27,14 @@ var printPuzzleDataFlag bool
 var cullCheaterPercentageFlag float64
 var minimumSolvesFlag int
 var useMockData bool
+var queryLimit int
 
 func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
 	flag.BoolVar(&printPuzzleDataFlag, "p", false, "Specify that you want puzzle data printed out in the output.")
 	flag.Float64Var(&cullCheaterPercentageFlag, "c", _PENALTY_PERCENTAGE_CUTOFF, "What percentage of solve time must be penalty for someone to be considered a cheater.")
-	flag.IntVar(&minimumSolvesFlag, "n", _MINIMUM_SOLVES, "How many solves a user must have their scores considered.")
+	flag.IntVar(&minimumSolvesFlag, "s", _MINIMUM_SOLVES, "How many solves a user must have their scores considered.")
+	flag.IntVar(&queryLimit, "n", _QUERY_LIMIT, "Number of solves to fetch from the database.")
 	flag.BoolVar(&useMockData, "m", false, "Use mock data (useful if you don't have a real database to test with).")
 }
 
@@ -203,8 +205,8 @@ func main() {
 		log.Println("Running without a limit for number of solves to retrieve.")
 		solvesQuery = "select %s, %s, %s, %s from %s"
 	} else {
-		log.Println("Running with a limit of ", QUERY_LIMIT, " for number of solves to retrieve.")
-		solvesQuery = "select %s, %s, %s, %s from %s limit " + strconv.Itoa(QUERY_LIMIT)
+		log.Println("Running with a limit of ", queryLimit, " for number of solves to retrieve.")
+		solvesQuery = "select %s, %s, %s, %s from %s limit " + strconv.Itoa(queryLimit)
 	}
 
 	res, err := db.Start(solvesQuery, config.SolvesUser, config.SolvesPuzzleID, config.SolvesTotalTime, config.SolvesPenaltyTime, config.SolvesTable)
