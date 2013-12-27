@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"fmt"
 	"github.com/ziutek/mymysql/mysql"
 	"log"
 	"net"
@@ -22,10 +23,9 @@ type mockResult struct {
 func (self *mockConnection) Start(sql string, params ...interface{}) (mysql.Result, error) {
 
 	isSolvesTable := false
-	//TODO: fall back on the SAMPLE file if it exists.
 	filename := "mock_data/puzzles_data.csv"
 
-	//TODO: I think the reason this is broken is because we never detect correctly if we are asked for a solves table or not.
+	sql = fmt.Sprintf(sql, params...)
 
 	if strings.Contains(sql, config.SolvesTable) {
 		isSolvesTable = true
