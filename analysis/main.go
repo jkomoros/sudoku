@@ -290,10 +290,13 @@ func main() {
 
 	for _, collection := range solvesByUser {
 
-		if !collection.valid() {
-			skippedUsers++
-			continue
-		}
+		/*
+			//TODO: consider removing this logic and all of skipped users totally.
+				if !collection.valid() {
+					skippedUsers++
+					continue
+				}
+		*/
 
 		for puzzleID, relativeDifficulty := range collection.relativeDifficulties() {
 			relativeDifficultiesByPuzzle[puzzleID] = append(relativeDifficultiesByPuzzle[puzzleID], relativeDifficulty)
@@ -314,6 +317,17 @@ func main() {
 			collectionByPuzzle[puzzle.puzzleID] = collectionMap
 		}
 
+	}
+
+	//Now, create the Markov Transition Matrix, according to algorithm MC4 of http://www.wisdom.weizmann.ac.il/~naor/PAPERS/rank_www10.html
+	//We start by creating a stacked array of float64's that we'll pass to the matrix library.
+
+	numPuzzles := len(collectionByPuzzle)
+
+	matrixData := make([][]float64, numPuzzles)
+
+	for i := range matrixData {
+		matrixData[i] = make([]float64, numPuzzles)
 	}
 
 	log.Println("Skipped ", skippedUsers, " users because they did not have enough solve times.")
