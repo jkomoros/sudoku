@@ -18,6 +18,8 @@ type mockConnection struct {
 type mockResult struct {
 	reader        *csv.Reader
 	isSolvesTable bool
+	limit         int
+	counter       int
 }
 
 func (self *mockConnection) Start(sql string, params ...interface{}) (mysql.Result, error) {
@@ -27,9 +29,23 @@ func (self *mockConnection) Start(sql string, params ...interface{}) (mysql.Resu
 
 	sql = fmt.Sprintf(sql, params...)
 
+	sql = strings.ToLower(sql)
+
 	if strings.Contains(sql, config.SolvesTable) {
 		isSolvesTable = true
 		filename = "mock_data/solves_data.csv"
+	}
+
+	limit := 0
+
+	if strings.Contains(sql, " limit ") {
+		//Process limit
+
+		parts := strings.Split(sql, " limit ")
+		if len(parts) == 2 {
+			//Only continue processing if we know what's going on.
+			limit, _ = strconv.Atoi(parts[1])
+		}
 	}
 
 	file, err := os.Open(filename)
@@ -41,7 +57,7 @@ func (self *mockConnection) Start(sql string, params ...interface{}) (mysql.Resu
 
 	//We'd normally call defer file.Close() here, but we can't because we still have to vend the rows.
 
-	return &mockResult{csv.NewReader(file), isSolvesTable}, nil
+	return &mockResult{csv.NewReader(file), isSolvesTable, limit, 0}, nil
 }
 
 func (self *mockConnection) Prepare(sql string) (mysql.Stmt, error) {
@@ -159,7 +175,14 @@ func (self *mockResult) ScanRow(mysql.Row) error {
 
 func (self *mockResult) GetRow() (mysql.Row, error) {
 
+	if self.limit != 0 && self.counter >= self.limit {
+		//We reached our limit!
+		return nil, nil
+	}
+
 	data, _ := self.reader.Read()
+
+	self.counter++
 
 	if data == nil {
 		return nil, nil
