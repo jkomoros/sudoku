@@ -165,8 +165,6 @@ func (self *mockResult) GetRow() (mysql.Row, error) {
 		return nil, nil
 	}
 
-	log.Println(data)
-
 	if self.isSolvesTable {
 		if len(data) != 4 {
 			log.Fatal("The data in the mock solves table should have four items but at least one row doesn't")
