@@ -359,11 +359,22 @@ func main() {
 			}
 
 			//Next, calculate how many of the collections have q ranked better (lower!) than p.
+			count := 0
+			for _, collection := range intersection {
+				if collection.idPosition[q] < collection.idPosition[p] {
+					count++
+				}
+			}
 
 			//Is it a majority? if so, transition. if not, leave at 0.
+			if count > (len(intersection) / 2) {
+				matrixData[i][j] = 1.0
+			}
 
 		}
 	}
+
+	//Wait, should I go through and normalize so that the rows all sum to 1 probablity wise?
 
 	log.Println("Skipped ", skippedUsers, " users because they did not have enough solve times.")
 
