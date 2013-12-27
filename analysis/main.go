@@ -54,6 +54,8 @@ type dbConfig struct {
 	PuzzlesPuzzle     string
 }
 
+var config dbConfig
+
 type solve struct {
 	puzzleID    int
 	totalTime   int
@@ -173,7 +175,6 @@ func main() {
 	}
 	defer file.Close()
 	decoder := json.NewDecoder(file)
-	var config dbConfig
 	if err := decoder.Decode(&config); err != nil {
 		log.Fatal("There was an error parsing JSON from the config file: ", err)
 		os.Exit(1)
@@ -181,7 +182,7 @@ func main() {
 
 	difficutlyRatingsChan := make(chan map[int]puzzle)
 
-	go getPuzzleDifficultyRatings(&config, difficutlyRatingsChan)
+	go getPuzzleDifficultyRatings(difficutlyRatingsChan)
 
 	var db mysql.Conn
 
@@ -313,7 +314,7 @@ func main() {
 
 }
 
-func getPuzzleDifficultyRatings(config *dbConfig, result chan map[int]puzzle) {
+func getPuzzleDifficultyRatings(result chan map[int]puzzle) {
 
 	var db mysql.Conn
 
