@@ -163,6 +163,8 @@ func (self *mockResult) GetRow() (mysql.Row, error) {
 		return nil, nil
 	}
 
+	log.Println(data)
+
 	if self.isSolvesTable {
 		if len(data) != 4 {
 			log.Fatal("The data in the mock solves table should have four items but at least one row doesn't")
@@ -175,14 +177,14 @@ func (self *mockResult) GetRow() (mysql.Row, error) {
 
 		return mysql.Row{data[0], id, solveTime, penaltyTime}, nil
 	} else {
-		if len(data) != 3 {
-			log.Fatal("The data in the mock puzzles table should have three items but at least one row doesn't.")
+		if len(data) != 4 {
+			log.Fatal("The data in the mock puzzles table should have four items but at least one row doesn't.")
 			os.Exit(1)
 		}
 		id, _ := strconv.Atoi(data[0])
 		difficulty, _ := strconv.Atoi(data[1])
 
-		return mysql.Row{id, difficulty, data[2]}, nil
+		return mysql.Row{id, difficulty, data[2], data[3]}, nil
 	}
 
 }
