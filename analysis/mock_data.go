@@ -25,6 +25,8 @@ func (self *mockConnection) Start(sql string, params ...interface{}) (mysql.Resu
 	//TODO: fall back on the SAMPLE file if it exists.
 	filename := "mock_data/puzzles_data.csv"
 
+	//TODO: I think the reason this is broken is because we never detect correctly if we are asked for a solves table or not.
+
 	if strings.Contains(sql, config.SolvesTable) {
 		isSolvesTable = true
 		filename = "mock_data/solves_data.csv"
