@@ -284,6 +284,8 @@ func main() {
 
 	relativeDifficultiesByPuzzle := make(map[int][]float32)
 
+	collectionByPuzzle := make(map[int]map[*userSolvesCollection]bool)
+
 	var skippedUsers int
 
 	for _, collection := range solvesByUser {
@@ -301,6 +303,16 @@ func main() {
 
 		for i, puzzle := range collection.solves {
 			collection.idPosition[puzzle.puzzleID] = i
+
+			//TODO: NEXT STEP: Test this does what we think it does.
+			collectionMap, ok := collectionByPuzzle[puzzle.puzzleID]
+			if !ok {
+				collectionMap = make(map[*userSolvesCollection]bool)
+			}
+
+			collectionMap[collection] = true
+
+			collectionByPuzzle[puzzle.puzzleID] = collectionMap
 		}
 
 	}
