@@ -220,6 +220,9 @@ func main() {
 	var ok bool
 	var i int
 	var skippedSolves int
+	var skippedDuplicateSolves int
+
+	seenRows := make(map[string]bool)
 
 	//First, process all user records in the DB to collect all solves by userName.
 	for {
@@ -228,6 +231,15 @@ func main() {
 
 		if row == nil {
 			break
+		}
+
+		rowHashValue := fmt.Sprintf("%v", row)
+
+		if _, seen := seenRows[rowHashValue]; seen {
+			skippedDuplicateSolves++
+			continue
+		} else {
+			seenRows[rowHashValue] = true
 		}
 
 		userSolves, ok = solvesByUser[row.Str(0)]
@@ -245,6 +257,7 @@ func main() {
 
 	log.Println("Processed ", i, " solves by ", len(solvesByUser), " users.")
 	log.Println("Skipped ", skippedSolves, " solves that cheated too much.")
+	log.Println("Skipped ", skippedDuplicateSolves, " solves because they were duplicates of solves seen earlier.")
 
 	//Now get the relative difficulty for each user's puzzles, and collect them.
 
