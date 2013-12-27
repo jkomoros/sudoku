@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -155,8 +156,35 @@ func (self *mockResult) ScanRow(mysql.Row) error {
 }
 
 func (self *mockResult) GetRow() (mysql.Row, error) {
-	log.Println("Called a method that is not implemented in the mock database object.")
-	return nil, nil
+
+	data, _ := self.reader.Read()
+
+	if data == nil {
+		return nil, nil
+	}
+
+	if self.isSolvesTable {
+		if len(data) != 4 {
+			log.Fatal("The data in the mock solves table should have four items but at least one row doesn't")
+			os.Exit(1)
+		}
+
+		id, _ := strconv.Atoi(data[1])
+		solveTime, _ := strconv.Atoi(data[2])
+		penaltyTime, _ := strconv.Atoi(data[3])
+
+		return mysql.Row{data[0], id, solveTime, penaltyTime}, nil
+	} else {
+		if len(data) != 3 {
+			log.Fatal("The data in the mock puzzles table should have three items but at least one row doesn't.")
+			os.Exit(1)
+		}
+		id, _ := strconv.Atoi(data[0])
+		difficulty, _ := strconv.Atoi(data[1])
+
+		return mysql.Row{id, difficulty, data[2]}, nil
+	}
+
 }
 
 func (self *mockResult) MoreResults() bool {
