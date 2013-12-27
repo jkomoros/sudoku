@@ -57,6 +57,7 @@ TODO:
 * Analysis: Throw out users who don't have a full range of difficulties in their history.
 * Analysis: Build in plotting
 * Analysis: Discard non-unique puzzle/solve-time/user tuples
+* Analysis: Check in a sample solves_data and puzzles_data
 
 * Investigate making better grids (fewer clues / more symmetry)
 

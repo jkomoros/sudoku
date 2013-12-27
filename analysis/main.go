@@ -26,12 +26,14 @@ var noLimitFlag bool
 var printPuzzleDataFlag bool
 var cullCheaterPercentageFlag float64
 var minimumSolvesFlag int
+var useMockData bool
 
 func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
 	flag.BoolVar(&printPuzzleDataFlag, "p", false, "Specify that you want puzzle data printed out in the output.")
 	flag.Float64Var(&cullCheaterPercentageFlag, "c", _PENALTY_PERCENTAGE_CUTOFF, "What percentage of solve time must be penalty for someone to be considered a cheater.")
 	flag.IntVar(&minimumSolvesFlag, "n", _MINIMUM_SOLVES, "How many solves a user must have their scores considered.")
+	flag.BoolVar(&useMockData, "m", false, "Use mock data (useful if you don't have a real database to test with).")
 }
 
 type dbConfig struct {
@@ -51,6 +53,8 @@ type dbConfig struct {
 	PuzzlesName       string
 	PuzzlesPuzzle     string
 }
+
+var config dbConfig
 
 type solve struct {
 	puzzleID    int
@@ -171,7 +175,6 @@ func main() {
 	}
 	defer file.Close()
 	decoder := json.NewDecoder(file)
-	var config dbConfig
 	if err := decoder.Decode(&config); err != nil {
 		log.Fatal("There was an error parsing JSON from the config file: ", err)
 		os.Exit(1)
@@ -179,9 +182,15 @@ func main() {
 
 	difficutlyRatingsChan := make(chan map[int]puzzle)
 
-	go getPuzzleDifficultyRatings(&config, difficutlyRatingsChan)
+	go getPuzzleDifficultyRatings(difficutlyRatingsChan)
 
-	db := mysql.New("tcp", "", config.Url, config.Username, config.Password, config.DbName)
+	var db mysql.Conn
+
+	if useMockData {
+		db = &mockConnection{}
+	} else {
+		db = mysql.New("tcp", "", config.Url, config.Username, config.Password, config.DbName)
+	}
 
 	if err := db.Connect(); err != nil {
 		log.Fatal(err)
@@ -305,9 +314,15 @@ func main() {
 
 }
 
-func getPuzzleDifficultyRatings(config *dbConfig, result chan map[int]puzzle) {
+func getPuzzleDifficultyRatings(result chan map[int]puzzle) {
 
-	db := mysql.New("tcp", "", config.Url, config.Username, config.Password, config.DbName)
+	var db mysql.Conn
+
+	if useMockData {
+		db = &mockConnection{}
+	} else {
+		db = mysql.New("tcp", "", config.Url, config.Username, config.Password, config.DbName)
+	}
 
 	if err := db.Connect(); err != nil {
 		log.Fatal(err)
