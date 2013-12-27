@@ -96,18 +96,19 @@ func (self byUserRelativeDifficulty) Less(i, j int) bool {
 	return self.puzzles[i].userRelativeDifficulty < self.puzzles[j].userRelativeDifficulty
 }
 
-type bySolveTimeAsc []solve
+type bySolveTimeDsc []solve
 
-func (self bySolveTimeAsc) Len() int {
+func (self bySolveTimeDsc) Len() int {
 	return len(self)
 }
 
-func (self bySolveTimeAsc) Swap(i, j int) {
+func (self bySolveTimeDsc) Swap(i, j int) {
 	self[i], self[j] = self[j], self[i]
 }
 
-func (self bySolveTimeAsc) Less(i, j int) bool {
-	return self[i].totalTime < self[j].totalTime
+func (self bySolveTimeDsc) Less(i, j int) bool {
+	//For the purposes of this algorithm, the "best" has to be lowest rank.
+	return self[i].totalTime > self[j].totalTime
 }
 
 func (self *userSolvesCollection) addSolve(solve solve) bool {
@@ -294,7 +295,7 @@ func main() {
 			relativeDifficultiesByPuzzle[puzzleID] = append(relativeDifficultiesByPuzzle[puzzleID], relativeDifficulty)
 		}
 
-		sort.Sort(bySolveTimeAsc(collection.solves))
+		sort.Sort(bySolveTimeDsc(collection.solves))
 
 	}
 
