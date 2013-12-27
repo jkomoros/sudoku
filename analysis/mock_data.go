@@ -14,8 +14,7 @@ type mockResult struct {
 }
 
 func (self *mockConnection) Start(sql string, params ...interface{}) (mysql.Result, error) {
-	log.Println("Called a method that is not implemented in the mock database object.")
-	return nil, nil
+	return &mockResult{}, nil
 }
 
 func (self *mockConnection) Prepare(sql string) (mysql.Stmt, error) {
