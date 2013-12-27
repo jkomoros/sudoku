@@ -330,6 +330,15 @@ func main() {
 		matrixData[i] = make([]float64, numPuzzles)
 	}
 
+	//Now we will associate each observed puzzleID with an index that it will be associated with in the matrix.
+	puzzleIndex := make([]int, numPuzzles)
+
+	counter := 0
+	for key, _ := range collectionByPuzzle {
+		puzzleIndex[counter] = key
+		counter++
+	}
+
 	log.Println("Skipped ", skippedUsers, " users because they did not have enough solve times.")
 
 	puzzles := make([]puzzle, len(relativeDifficultiesByPuzzle))
