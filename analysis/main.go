@@ -96,6 +96,20 @@ func (self byUserRelativeDifficulty) Less(i, j int) bool {
 	return self.puzzles[i].userRelativeDifficulty < self.puzzles[j].userRelativeDifficulty
 }
 
+type bySolveTimeAsc []solve
+
+func (self bySolveTimeAsc) Len() int {
+	return len(self)
+}
+
+func (self bySolveTimeAsc) Swap(i, j int) {
+	self[i], self[j] = self[j], self[i]
+}
+
+func (self bySolveTimeAsc) Less(i, j int) bool {
+	return self[i].totalTime < self[j].totalTime
+}
+
 func (self *userSolvesCollection) addSolve(solve solve) bool {
 	//Cull obviously incorrect solves.
 	if solve.totalTime == 0 {
@@ -279,6 +293,8 @@ func main() {
 		for puzzleID, relativeDifficulty := range collection.relativeDifficulties() {
 			relativeDifficultiesByPuzzle[puzzleID] = append(relativeDifficultiesByPuzzle[puzzleID], relativeDifficulty)
 		}
+
+		sort.Sort(bySolveTimeAsc(collection.solves))
 
 	}
 
