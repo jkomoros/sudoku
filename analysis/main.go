@@ -339,6 +339,32 @@ func main() {
 		counter++
 	}
 
+	//Now we start to build up the matrix according to the MC4 algorithm.
+
+	for i := 0; i < numPuzzles; i++ {
+		for j := 0; j < numPuzzles; j++ {
+			//Convert the zero-index into the puzzle ID we're actually interested in.
+			p := puzzleIndex[i]
+			q := puzzleIndex[j]
+
+			//Find the intersection of userSolveCollections that contain both p and q.
+			pMap := collectionByPuzzle[p]
+			qMap := collectionByPuzzle[q]
+
+			var intersection []*userSolvesCollection
+			for collection, _ := range pMap {
+				if _, ok := qMap[collection]; ok {
+					intersection = append(intersection, collection)
+				}
+			}
+
+			//Next, calculate how many of the collections have q ranked better (lower!) than p.
+
+			//Is it a majority? if so, transition. if not, leave at 0.
+
+		}
+	}
+
 	log.Println("Skipped ", skippedUsers, " users because they did not have enough solve times.")
 
 	puzzles := make([]puzzle, len(relativeDifficultiesByPuzzle))
