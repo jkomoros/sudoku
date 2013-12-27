@@ -304,7 +304,6 @@ func main() {
 		for i, puzzle := range collection.solves {
 			collection.idPosition[puzzle.puzzleID] = i
 
-			//TODO: NEXT STEP: Test this does what we think it does.
 			collectionMap, ok := collectionByPuzzle[puzzle.puzzleID]
 			if !ok {
 				collectionMap = make(map[*userSolvesCollection]bool)
