@@ -37,7 +37,7 @@ func (self *mockConnection) Start(sql string, params ...interface{}) (mysql.Resu
 		os.Exit(1)
 	}
 
-	defer file.Close()
+	//We'd normally call defer file.Close() here, but we can't because we still have to vend the rows.
 
 	return &mockResult{csv.NewReader(file), isSolvesTable}, nil
 }
