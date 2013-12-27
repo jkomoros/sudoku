@@ -65,9 +65,10 @@ type solve struct {
 }
 
 type userSolvesCollection struct {
-	solves []solve
-	max    int
-	min    int
+	solves     []solve
+	max        int
+	min        int
+	idPosition map[int]int
 }
 
 type puzzle struct {
@@ -265,6 +266,7 @@ func main() {
 
 		if !ok {
 			userSolves = new(userSolvesCollection)
+			userSolves.idPosition = make(map[int]int)
 			solvesByUser[row.Str(0)] = userSolves
 		}
 
@@ -296,6 +298,10 @@ func main() {
 		}
 
 		sort.Sort(bySolveTimeDsc(collection.solves))
+
+		for i, puzzle := range collection.solves {
+			collection.idPosition[puzzle.puzzleID] = i
+		}
 
 	}
 
