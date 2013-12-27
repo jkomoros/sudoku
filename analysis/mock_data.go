@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/csv"
 	"github.com/ziutek/mymysql/mysql"
 	"log"
 	"net"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -11,10 +14,31 @@ type mockConnection struct {
 }
 
 type mockResult struct {
+	reader        *csv.Reader
+	isSolvesTable bool
 }
 
 func (self *mockConnection) Start(sql string, params ...interface{}) (mysql.Result, error) {
-	return &mockResult{}, nil
+
+	isSolvesTable := false
+	//TODO: fall back on the SAMPLE file if it exists.
+	filename := "mock_data/puzzles_data.csv"
+
+	if strings.Contains(sql, config.SolvesTable) {
+		isSolvesTable = true
+		filename = "mock_data/solves_data.csv"
+	}
+
+	file, err := os.Open(filename)
+
+	if err != nil {
+		log.Fatal("Couldn't open the file of mock data: ", filename)
+		os.Exit(1)
+	}
+
+	defer file.Close()
+
+	return &mockResult{csv.NewReader(file), isSolvesTable}, nil
 }
 
 func (self *mockConnection) Prepare(sql string) (mysql.Stmt, error) {
