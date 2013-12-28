@@ -374,7 +374,22 @@ func main() {
 		}
 	}
 
-	//Wait, should I go through and normalize so that the rows all sum to 1 probablity wise?
+	//Go through and normalize the probabilities in each row to sum to 1.
+	for i := 0; i < numPuzzles; i++ {
+		//Count the number of rows that are 1.0.
+		count := 0
+		for j := 0; j < numPuzzles; j++ {
+			if matrixData[i][j] > 0.0 {
+				count++
+			}
+		}
+		probability := 1.0 / float64(count)
+		for j := 0; j < numPuzzles; j++ {
+			if matrixData[i][j] > 0.0 {
+				matrixData[i][j] = probability
+			}
+		}
+	}
 
 	log.Println("Skipped ", skippedUsers, " users because they did not have enough solve times.")
 
