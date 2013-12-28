@@ -463,8 +463,8 @@ func main() {
 
 	csvOut := csv.NewWriter(os.Stdout)
 
-	for i, puzzle := range puzzles {
-		temp := []string{strconv.Itoa(i), strconv.Itoa(puzzle.id), strconv.Itoa(puzzle.difficultyRating), fmt.Sprintf("%g", puzzle.userRelativeDifficulty), puzzle.name}
+	for _, puzzle := range puzzles {
+		temp := []string{strconv.Itoa(puzzle.id), strconv.Itoa(puzzle.difficultyRating), fmt.Sprintf("%g", puzzle.userRelativeDifficulty), puzzle.name}
 		if printPuzzleDataFlag {
 			temp = append(temp, puzzle.puzzle)
 		}
