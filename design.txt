@@ -51,6 +51,7 @@ TODO:
 	* NakedQuad{Row,Col}. This now trivial given Subset logic. NEXT STEP
 	* BlockBlock interactions
 
+* Analysis: Spot check the results of the new markov difficulty grader to see if they intuitively make sense.
 * Analysis: Run our difficulty grader on the real puzzles and see how well it fits with user perceived difficulty.
 * Analysis: Throw out outliers for each individual user.
 * Analysis: Throw out users who don't have a full range of difficulties in their history.
