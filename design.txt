@@ -51,12 +51,12 @@ TODO:
 	* NakedQuad{Row,Col}. This now trivial given Subset logic. NEXT STEP
 	* BlockBlock interactions
 
-* Analysis: Better aggregation of rank. This problem is called "Rank Aggregation" and can be Hard. http://www10.org/cdrom/papers/577/ seems to outline the most workable solution (MarkovChain4).
+* Analysis: Spot check the results of the new markov difficulty grader to see if they intuitively make sense.
 * Analysis: Run our difficulty grader on the real puzzles and see how well it fits with user perceived difficulty.
 * Analysis: Throw out outliers for each individual user.
 * Analysis: Throw out users who don't have a full range of difficulties in their history.
 * Analysis: Build in plotting
-* Analysis: Check in a sample solves_data and puzzles_data
+* Analysis: Seriously refactor the monster (and confusing!) manin method).
 
 * Investigate making better grids (fewer clues / more symmetry)
 
