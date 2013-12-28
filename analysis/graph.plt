@@ -5,7 +5,7 @@ set datafile separator ","
 set logscale y
 
 set title "Puzzle provided difficulty vs markov difficulty"
-set xlabel "Puzzles sorted by Markov Difficulty"
+set xlabel "Puzzle index (sorted by markov difficulty)"
 set ylabel "Markov Difficulty (log scale)"
 set y2label "Provided Difficulty"
 
