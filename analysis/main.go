@@ -502,7 +502,6 @@ func main() {
 		thePuzzle.userRelativeDifficulty = markovChain.Get(0, i)
 		info, ok := difficultyRatings[thePuzzle.id]
 		if ok {
-			//TODO: rename this field; it's no longer accurate.
 			thePuzzle.difficultyRating = info.difficultyRating
 			thePuzzle.name = info.name
 			thePuzzle.puzzle = info.puzzle
