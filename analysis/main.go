@@ -20,7 +20,8 @@ const _DB_CONFIG_FILENAME = "db_config.SECRET.json"
 const _OUTPUT_FILENAME = "output.csv"
 const _QUERY_LIMIT = 100
 const _PENALTY_PERCENTAGE_CUTOFF = 0.01
-const _MATRIX_DIFFERENCE_CUTOFF = 0.000001
+const _MATRIX_DIFFERENCE_CUTOFF = 0.00001
+const _MAX_MATRIX_POWER = 250
 
 //How many solves a user must have to have their relative scale included.
 //A low value gives you far more very low or very high scores than you shoul get.
@@ -412,6 +413,7 @@ func main() {
 
 	//Create an actual matrix with the data.
 	markovChain := matrix.MakeDenseMatrixStacked(matrixData)
+	originalMarkovChain := markovChain.Copy()
 
 	if verbose {
 		log.Println("Beginning matrix multiplication...")
@@ -420,8 +422,8 @@ func main() {
 	//We want to find the stable distribution, so we will raise the matrix to repeatedly high powers.
 	//Over time the matrix will stabalize, at that point every row will look similar to each other.
 	//We'll check for the matrix stabalizing before the end and break early if it does.
-	for i := 0; i < 20; i++ {
-		markovChain = matrix.ParallelProduct(markovChain, markovChain)
+	for i := 0; i < _MAX_MATRIX_POWER; i++ {
+		markovChain = matrix.ParallelProduct(markovChain, originalMarkovChain)
 
 		//Are the rows converged enough for us to bail?
 		difference := 0.0
