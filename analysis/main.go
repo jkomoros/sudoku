@@ -32,6 +32,7 @@ var cullCheaterPercentageFlag float64
 var useMockData bool
 var queryLimit int
 var verbose bool
+var minPuzzleCollections int
 
 func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
@@ -40,6 +41,7 @@ func init() {
 	flag.IntVar(&queryLimit, "n", _QUERY_LIMIT, "Number of solves to fetch from the database.")
 	flag.BoolVar(&useMockData, "m", false, "Use mock data (useful if you don't have a real database to test with).")
 	flag.BoolVar(&verbose, "v", false, "Verbose mode.")
+	flag.IntVar(&minPuzzleCollections, "l", 10, "How many different user collections the puzzle must be included in for it to be included in the output.")
 
 	//We're going to be doing some heavy-duty matrix multiplication, and the matrix package can take advantage of multiple cores.
 	runtime.GOMAXPROCS(6)
@@ -272,6 +274,23 @@ func main() {
 			collectionByPuzzle[puzzle.puzzleID] = collectionMap
 		}
 
+	}
+
+	if minPuzzleCollections != 1 {
+		if verbose {
+			log.Println("Starting to cull puzzles with fewer than", minPuzzleCollections, "userSolveCollections...")
+		}
+		counter := 0
+		for id, collection := range collectionByPuzzle {
+			if len(collection) < minPuzzleCollections {
+				//Remove it
+				delete(collectionByPuzzle, id)
+				counter++
+			}
+		}
+		if verbose {
+			log.Println("Removed", counter, "puzzles because they had too few solves in their collection.")
+		}
 	}
 
 	//Now, create the Markov Transition Matrix, according to algorithm MC4 of http://www.wisdom.weizmann.ac.il/~naor/PAPERS/rank_www10.html
