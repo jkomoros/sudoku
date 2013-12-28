@@ -235,6 +235,8 @@ func main() {
 			break
 		}
 
+		i++
+
 		rowHashValue := fmt.Sprintf("%v", row)
 
 		if _, seen := seenRows[rowHashValue]; seen {
@@ -254,7 +256,7 @@ func main() {
 		if !userSolves.addSolve(solve{row.Int(1), row.Int(2), row.Int(3)}) {
 			skippedSolves++
 		}
-		i++
+
 	}
 
 	log.Println("Processed ", i, " solves by ", len(solvesByUser), " users.")
