@@ -120,6 +120,24 @@ func (self bySolveTimeDsc) Less(i, j int) bool {
 	return self[i].totalTime > self[j].totalTime
 }
 
+type probabilitySortedIDs struct {
+	puzzleIDs []int
+	values    []float64
+}
+
+func (self *probabilitySortedIDs) Len() int {
+	return len(self.puzzleIDs)
+}
+
+func (self *probabilitySortedIDs) Swap(i, j int) {
+	self.puzzleIDs[i], self.puzzleIDs[j] = self.puzzleIDs[j], self.puzzleIDs[i]
+	self.values[i], self.values[j] = self.values[j], self.values[i]
+}
+
+func (self *probabilitySortedIDs) Less(i, j int) bool {
+	return self.values[i] < self.values[j]
+}
+
 func (self *userSolvesCollection) addSolve(solve solve) bool {
 	//Cull obviously incorrect solves.
 	if solve.totalTime == 0 {
@@ -483,6 +501,14 @@ func main() {
 			break
 		}
 	}
+
+	//Now that the matrix has stabalizied, we can sort the puzzle IDs by their values in the top row.
+	//NOTE: using this here will destroy puzzleIndex!
+	puzzlesSorted := probabilitySortedIDs{puzzleIndex, markovChain.RowCopy(0)}
+
+	sort.Sort(&puzzlesSorted)
+
+	sortedPuzzleIDs := puzzlesSorted.puzzleIDs
 
 	log.Println("Skipped ", skippedUsers, " users because they did not have enough solve times.")
 
