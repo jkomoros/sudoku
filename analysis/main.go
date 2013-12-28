@@ -308,6 +308,11 @@ func main() {
 
 	log.Println("Discovered", numPuzzles, "puzzles.")
 
+	if numPuzzles == 0 {
+		log.Fatalln("We filtered away all puzzles, so there's nothing more to do.")
+		os.Exit(1)
+	}
+
 	//Create the stacked array we'll stuff values into.
 	matrixData := make([][]float64, numPuzzles)
 	for i := range matrixData {
