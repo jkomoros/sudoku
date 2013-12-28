@@ -57,6 +57,7 @@ TODO:
 * Analysis: Throw out users who don't have a full range of difficulties in their history.
 * Analysis: Build in plotting
 * Analysis: Seriously refactor the monster (and confusing!) manin method).
+* Analysis: Don't include puzzles that have fewer than N solves (and/or that are disabled)
 
 * Investigate making better grids (fewer clues / more symmetry)
 
