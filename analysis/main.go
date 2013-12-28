@@ -31,6 +31,7 @@ var cullCheaterPercentageFlag float64
 var minimumSolvesFlag int
 var useMockData bool
 var queryLimit int
+var verbose bool
 
 func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
@@ -39,6 +40,7 @@ func init() {
 	flag.IntVar(&minimumSolvesFlag, "s", _MINIMUM_SOLVES, "How many solves a user must have their scores considered.")
 	flag.IntVar(&queryLimit, "n", _QUERY_LIMIT, "Number of solves to fetch from the database.")
 	flag.BoolVar(&useMockData, "m", false, "Use mock data (useful if you don't have a real database to test with).")
+	flag.BoolVar(&verbose, "v", false, "Verbose mode.")
 
 	//We're going to be doing some heavy-duty matrix multiplication, and the matrix package can take advantage of multiple cores.
 	runtime.GOMAXPROCS(6)
@@ -349,6 +351,10 @@ func main() {
 
 	//Now we start to build up the matrix according to the MC4 algorithm.
 
+	if verbose {
+		log.Println("Starting to build up matrix...")
+	}
+
 	for i := 0; i < numPuzzles; i++ {
 		for j := 0; j < numPuzzles; j++ {
 
@@ -388,6 +394,10 @@ func main() {
 		}
 	}
 
+	if verbose {
+		log.Println("Normalizing matrix...")
+	}
+
 	//Go through and normalize the probabilities in each row to sum to 1.
 	for i := 0; i < numPuzzles; i++ {
 		//Count the number of rows that are 1.0.
@@ -411,6 +421,10 @@ func main() {
 	//Create an actual matrix with the data.
 	markovChain := matrix.MakeDenseMatrixStacked(matrixData)
 
+	if verbose {
+		log.Println("Beginning matrix multiplication...")
+	}
+
 	for i := 0; i < 20; i++ {
 		markovChain = matrix.ParallelProduct(markovChain, markovChain)
 
@@ -418,6 +432,9 @@ func main() {
 		difference := 0.0
 		for i := 0; i < numPuzzles; i++ {
 			difference += math.Abs(markovChain.Get(0, i) - markovChain.Get(1, i))
+		}
+		if verbose {
+			log.Println("Finished matrix multiplication #", i+1, ", with a difference of", difference)
 		}
 		if difference < 0.0001 {
 			log.Println("The markov chain converged after", i+1, "mulitplications.")
