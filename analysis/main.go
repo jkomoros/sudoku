@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/skelterjohn/go.matrix"
 	"github.com/ziutek/mymysql/mysql"
 	_ "github.com/ziutek/mymysql/native"
 	"log"
@@ -390,6 +391,15 @@ func main() {
 			}
 		}
 	}
+
+	//Create an actual matrix with the data.
+	markovChain := matrix.MakeDenseMatrixStacked(matrixData)
+
+	for i := 0; i < 5; i++ {
+		markovChain = matrix.ParallelProduct(markovChain, markovChain)
+	}
+
+	//TODO: the markov chain that results here seems to tend very strongly to just 0.
 
 	log.Println("Skipped ", skippedUsers, " users because they did not have enough solve times.")
 
