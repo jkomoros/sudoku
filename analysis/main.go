@@ -74,8 +74,6 @@ type solve struct {
 
 type userSolvesCollection struct {
 	solves     []solve
-	max        int
-	min        int
 	idPosition map[int]int
 }
 
@@ -132,62 +130,7 @@ func (self *userSolvesCollection) addSolve(solve solve) bool {
 	}
 
 	self.solves = append(self.solves, solve)
-	if len(self.solves) == 1 {
-		self.max = solve.totalTime
-		self.min = solve.totalTime
-	} else {
-		if self.max < solve.totalTime {
-			self.max = solve.totalTime
-		}
-		if self.min > solve.totalTime {
-			self.min = solve.totalTime
-		}
-	}
 	return true
-}
-
-//Whehter or not this should be included in calculation.
-//Basically, whether the reltaiveDifficulties will all be valid.
-//Normally this returns false if there is only one solve by the user, but could also
-//happen when there are multiple solves but (crazily enough) they all have exactly the same solveTime.
-//This DOES happen in the production dataset.
-func (self *userSolvesCollection) valid() bool {
-	if self.max == self.min {
-		return false
-	}
-
-	if len(self.solves) < minimumSolvesFlag {
-		return false
-	}
-
-	return true
-}
-
-func (self *userSolvesCollection) relativeDifficulties() map[int]float32 {
-	//Returns a map of puzzle id to relative difficulty, normalized by our max and min.
-	avgSolveTimes := make(map[int]float32)
-	//Keep track of how many times we've seen each puzzle solved by this user so we can do correct averaging.
-	avgSolveTimesCount := make(map[int]int)
-
-	//First, collect the average solve time (in case the same user has solved more than once the same puzzle)
-
-	for _, solve := range self.solves {
-		currentAvgSolveTime := avgSolveTimes[solve.puzzleID]
-
-		avgSolveTimes[solve.puzzleID] = (currentAvgSolveTime*float32(avgSolveTimesCount[solve.puzzleID]) + float32(solve.totalTime)) / float32(avgSolveTimesCount[solve.puzzleID]+1)
-
-		avgSolveTimesCount[solve.puzzleID]++
-	}
-
-	//Now, relativize all of the scores.
-
-	result := make(map[int]float32)
-
-	for puzzleID, avgSolveTime := range avgSolveTimes {
-		result[puzzleID] = (avgSolveTime - float32(self.min)) / float32(self.max-self.min)
-	}
-
-	return result
 }
 
 func main() {
@@ -301,10 +244,6 @@ func main() {
 	log.Println("Skipped", skippedSolves, "solves that cheated too much.")
 	log.Println("Skipped", skippedDuplicateSolves, "solves because they were duplicates of solves seen earlier.")
 
-	//Now get the relative difficulty for each user's puzzles, and collect them.
-
-	relativeDifficultiesByPuzzle := make(map[int][]float32)
-
 	//Later we'll need to grab all of the userCollections that reference a given puzzle.
 	//As we traverse through the userSolveCollections now we'll build that reference up.
 	//This is a map of puzzles to a set of which collections include it.
@@ -321,11 +260,6 @@ func main() {
 					continue
 				}
 		*/
-
-		//This next section is to be removed.
-		for puzzleID, relativeDifficulty := range collection.relativeDifficulties() {
-			relativeDifficultiesByPuzzle[puzzleID] = append(relativeDifficultiesByPuzzle[puzzleID], relativeDifficulty)
-		}
 
 		//Now that we have all of the solves for this user, we can sort them.
 		//For the analysis we'll do later, a harder solve is ranked higher, and a higher rank is actually a LOW rank.
