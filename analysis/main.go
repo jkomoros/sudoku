@@ -10,6 +10,7 @@ import (
 	_ "github.com/ziutek/mymysql/native"
 	"log"
 	"os"
+	"runtime"
 	"sort"
 	"strconv"
 )
@@ -37,6 +38,9 @@ func init() {
 	flag.IntVar(&minimumSolvesFlag, "s", _MINIMUM_SOLVES, "How many solves a user must have their scores considered.")
 	flag.IntVar(&queryLimit, "n", _QUERY_LIMIT, "Number of solves to fetch from the database.")
 	flag.BoolVar(&useMockData, "m", false, "Use mock data (useful if you don't have a real database to test with).")
+
+	//We're going to be doing some heavy-duty matrix multiplication, and the matrix package can take advantage of multiple cores.
+	runtime.GOMAXPROCS(6)
 }
 
 type dbConfig struct {
