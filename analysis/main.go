@@ -9,6 +9,7 @@ import (
 	"github.com/ziutek/mymysql/mysql"
 	_ "github.com/ziutek/mymysql/native"
 	"log"
+	"math"
 	"os"
 	"runtime"
 	"sort"
@@ -410,6 +411,16 @@ func main() {
 
 	for i := 0; i < 20; i++ {
 		markovChain = matrix.ParallelProduct(markovChain, markovChain)
+
+		//Are the rows converged enough for us to bail?
+		difference := 0.0
+		for i := 0; i < numPuzzles; i++ {
+			difference += math.Abs(markovChain.Get(0, i) - markovChain.Get(1, i))
+		}
+		if difference < 0.0001 {
+			log.Println("The markov chain converged after", i+1, "mulitplications.")
+			break
+		}
 	}
 
 	log.Println("Skipped ", skippedUsers, " users because they did not have enough solve times.")
