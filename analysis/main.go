@@ -344,6 +344,12 @@ func main() {
 
 	for i := 0; i < numPuzzles; i++ {
 		for j := 0; j < numPuzzles; j++ {
+
+			if i == j {
+				//The special case; stay in the same state. We'll treat it specially.
+				continue
+			}
+
 			//Convert the zero-index into the puzzle ID we're actually interested in.
 			p := puzzleIndex[i]
 			q := puzzleIndex[j]
@@ -384,9 +390,12 @@ func main() {
 				count++
 			}
 		}
-		probability := 1.0 / float64(count)
+		probability := 1.0 / float64(numPuzzles)
 		for j := 0; j < numPuzzles; j++ {
-			if matrixData[i][j] > 0.0 {
+			if i == j {
+				//The stay in the same space probability
+				matrixData[i][j] = float64(numPuzzles-count) * probability
+			} else if matrixData[i][j] > 0.0 {
 				matrixData[i][j] = probability
 			}
 		}
@@ -395,11 +404,9 @@ func main() {
 	//Create an actual matrix with the data.
 	markovChain := matrix.MakeDenseMatrixStacked(matrixData)
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 20; i++ {
 		markovChain = matrix.ParallelProduct(markovChain, markovChain)
 	}
-
-	//TODO: the markov chain that results here seems to tend very strongly to just 0.
 
 	log.Println("Skipped ", skippedUsers, " users because they did not have enough solve times.")
 
