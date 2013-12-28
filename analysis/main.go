@@ -28,7 +28,6 @@ const _MINIMUM_SOLVES = 10
 var noLimitFlag bool
 var printPuzzleDataFlag bool
 var cullCheaterPercentageFlag float64
-var minimumSolvesFlag int
 var useMockData bool
 var queryLimit int
 var verbose bool
@@ -37,7 +36,6 @@ func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
 	flag.BoolVar(&printPuzzleDataFlag, "p", false, "Specify that you want puzzle data printed out in the output.")
 	flag.Float64Var(&cullCheaterPercentageFlag, "c", _PENALTY_PERCENTAGE_CUTOFF, "What percentage of solve time must be penalty for someone to be considered a cheater.")
-	flag.IntVar(&minimumSolvesFlag, "s", _MINIMUM_SOLVES, "How many solves a user must have their scores considered.")
 	flag.IntVar(&queryLimit, "n", _QUERY_LIMIT, "Number of solves to fetch from the database.")
 	flag.BoolVar(&useMockData, "m", false, "Use mock data (useful if you don't have a real database to test with).")
 	flag.BoolVar(&verbose, "v", false, "Verbose mode.")
@@ -249,17 +247,7 @@ func main() {
 	//This is a map of puzzles to a set of which collections include it.
 	collectionByPuzzle := make(map[int]map[*userSolvesCollection]bool)
 
-	var skippedUsers int
-
 	for _, collection := range solvesByUser {
-
-		/*
-			//TODO: consider removing this logic and all of skipped users totally.
-				if !collection.valid() {
-					skippedUsers++
-					continue
-				}
-		*/
 
 		//Now that we have all of the solves for this user, we can sort them.
 		//For the analysis we'll do later, a harder solve is ranked higher, and a higher rank is actually a LOW rank.
@@ -284,8 +272,6 @@ func main() {
 		}
 
 	}
-
-	log.Println("Skipped ", skippedUsers, " users because they did not have enough solve times.")
 
 	//Now, create the Markov Transition Matrix, according to algorithm MC4 of http://www.wisdom.weizmann.ac.il/~naor/PAPERS/rank_www10.html
 	//The relevant part of the algorithm, from that source:
