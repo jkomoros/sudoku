@@ -20,6 +20,7 @@ const _DB_CONFIG_FILENAME = "db_config.SECRET.json"
 const _OUTPUT_FILENAME = "output.csv"
 const _QUERY_LIMIT = 100
 const _PENALTY_PERCENTAGE_CUTOFF = 0.01
+const _MATRIX_DIFFERENCE_CUTOFF = 0.000001
 
 //How many solves a user must have to have their relative scale included.
 //A low value gives you far more very low or very high scores than you shoul get.
@@ -400,7 +401,7 @@ func main() {
 		if verbose {
 			log.Println("Finished matrix multiplication #", i+1, ", with a difference of", difference)
 		}
-		if difference < 0.0001 {
+		if difference < _MATRIX_DIFFERENCE_CUTOFF {
 			log.Println("The markov chain converged after", i+1, "mulitplications.")
 			break
 		}
