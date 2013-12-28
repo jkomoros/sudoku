@@ -276,6 +276,7 @@ func main() {
 
 	}
 
+	//Cull puzzles where we don't have enough user-solves to have confidence in the rankings.
 	if minPuzzleCollections != 1 {
 		if verbose {
 			log.Println("Starting to cull puzzles with fewer than", minPuzzleCollections, "userSolveCollections...")

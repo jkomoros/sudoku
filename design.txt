@@ -58,7 +58,6 @@ TODO:
 * Analysis: Build in plotting
 * Analysis: Seriously refactor the monster (and confusing!) manin method).
 * Analysis: Don't include puzzles that have fewer than N solves (and/or that are disabled)
-	* Analysis: Don't include puzzles with too few collections (that is, user/solves)
 
 * Investigate making better grids (fewer clues / more symmetry)
 
