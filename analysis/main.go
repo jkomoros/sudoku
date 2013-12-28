@@ -194,6 +194,7 @@ func main() {
 
 	flag.Parse()
 
+	//Load up the Database config.
 	file, err := os.Open(_DB_CONFIG_FILENAME)
 	if err != nil {
 		log.Fatal("Could not find the config file at ", _DB_CONFIG_FILENAME, ". You should copy the SAMPLE one to that filename and configure.")
@@ -208,10 +209,12 @@ func main() {
 
 	difficutlyRatingsChan := make(chan map[int]puzzle)
 
+	//Go fetch the difficulties for each puzzle; we'll need this data at the end.
 	go getPuzzleDifficultyRatings(difficutlyRatingsChan)
 
 	var db mysql.Conn
 
+	//Should we use local mock data or actually hit the server?
 	if useMockData {
 		db = &mockConnection{}
 	} else {
@@ -248,21 +251,27 @@ func main() {
 	var skippedSolves int
 	var skippedDuplicateSolves int
 
+	//We want to skip rows we've already seen; we'll keep a set of used rows in here.
+	//This is necessary because some solves in the production database appear to be dupes.
 	seenRows := make(map[string]bool)
 
-	//First, process all user records in the DB to collect all solves by userName.
+	//Conceptually all of the solves for a specific user show how hard the puzzles are from one user's perspective.
+	//We'll use a markov chain-based analysis later to extract an aggregated rank that merges every user's perspective, to give a global perpsective.
+
+	//First we will visit every solve record and collect them into a collection for each username.
 	for {
 
 		row, _ := res.GetRow()
 
+		//Are we past the edge of the returned results?
 		if row == nil {
 			break
 		}
 
 		i++
 
+		//Check to see if this was a row we've already seen
 		rowHashValue := fmt.Sprintf("%v", row)
-
 		if _, seen := seenRows[rowHashValue]; seen {
 			skippedDuplicateSolves++
 			continue
@@ -270,28 +279,35 @@ func main() {
 			seenRows[rowHashValue] = true
 		}
 
+		//Is this the first time we've seen the user?
 		userSolves, ok = solvesByUser[row.Str(0)]
 
+		//This is the first time; initalize a new userSolvesCollection for them.
 		if !ok {
 			userSolves = new(userSolvesCollection)
 			userSolves.idPosition = make(map[int]int)
 			solvesByUser[row.Str(0)] = userSolves
 		}
 
+		//Add it to the collection. That method might decide to skip it.
 		if !userSolves.addSolve(solve{row.Int(1), row.Int(2), row.Int(3)}) {
 			skippedSolves++
 		}
 
 	}
 
-	log.Println("Processed ", i, " solves by ", len(solvesByUser), " users.")
-	log.Println("Skipped ", skippedSolves, " solves that cheated too much.")
-	log.Println("Skipped ", skippedDuplicateSolves, " solves because they were duplicates of solves seen earlier.")
+	//Now that we've seen all of the solves, give some quick stats.
+	log.Println("Processed", i, "solves by", len(solvesByUser), "users.")
+	log.Println("Skipped", skippedSolves, "solves that cheated too much.")
+	log.Println("Skipped", skippedDuplicateSolves, "solves because they were duplicates of solves seen earlier.")
 
 	//Now get the relative difficulty for each user's puzzles, and collect them.
 
 	relativeDifficultiesByPuzzle := make(map[int][]float32)
 
+	//Later we'll need to grab all of the userCollections that reference a given puzzle.
+	//As we traverse through the userSolveCollections now we'll build that reference up.
+	//This is a map of puzzles to a set of which collections include it.
 	collectionByPuzzle := make(map[int]map[*userSolvesCollection]bool)
 
 	var skippedUsers int
@@ -306,43 +322,57 @@ func main() {
 				}
 		*/
 
+		//This next section is to be removed.
 		for puzzleID, relativeDifficulty := range collection.relativeDifficulties() {
 			relativeDifficultiesByPuzzle[puzzleID] = append(relativeDifficultiesByPuzzle[puzzleID], relativeDifficulty)
 		}
 
+		//Now that we have all of the solves for this user, we can sort them.
+		//For the analysis we'll do later, a harder solve is ranked higher, and a higher rank is actually a LOW rank.
 		sort.Sort(bySolveTimeDsc(collection.solves))
 
 		for i, puzzle := range collection.solves {
+			//Later in the analysis we'll need to know, given a collection and a puzzle id, what its rank within the collection is.
 			collection.idPosition[puzzle.puzzleID] = i
 
+			//Is this the first time we've seen this collection for this puzzle?
 			collectionMap, ok := collectionByPuzzle[puzzle.puzzleID]
+			//Yup, it is. Create a new one.
 			if !ok {
 				collectionMap = make(map[*userSolvesCollection]bool)
 			}
 
+			//Store that we are in the set of collections.
 			collectionMap[collection] = true
 
+			//Store that set back in the larger map.
 			collectionByPuzzle[puzzle.puzzleID] = collectionMap
 		}
 
 	}
 
 	//Now, create the Markov Transition Matrix, according to algorithm MC4 of http://www.wisdom.weizmann.ac.il/~naor/PAPERS/rank_www10.html
+	//The relevant part of the algorithm, from that source:
+	/*
+
+		If the current state is page P, then the next state is chosen as follows: first pick a page Q uniformly from the union of all pages ranked by the search engines. If t(Q) < t(P) for a majority of the lists t that ranked both P and Q, then go to Q, else stay in P.
+
+	*/
 	//We start by creating a stacked array of float64's that we'll pass to the matrix library.
 
+	//This will be the dimensions of the matrix.
 	numPuzzles := len(collectionByPuzzle)
 
 	log.Println("Discovered", numPuzzles, "puzzles.")
 
+	//Create the stacked array we'll stuff values into.
 	matrixData := make([][]float64, numPuzzles)
-
 	for i := range matrixData {
 		matrixData[i] = make([]float64, numPuzzles)
 	}
 
 	//Now we will associate each observed puzzleID with an index that it will be associated with in the matrix.
 	puzzleIndex := make([]int, numPuzzles)
-
 	counter := 0
 	for key, _ := range collectionByPuzzle {
 		puzzleIndex[counter] = key
@@ -350,11 +380,11 @@ func main() {
 	}
 
 	//Now we start to build up the matrix according to the MC4 algorithm.
-
 	if verbose {
 		log.Println("Starting to build up matrix...")
 	}
 
+	//For each cell in the matrix (pairwise comparison of puzzles).
 	for i := 0; i < numPuzzles; i++ {
 		for j := 0; j < numPuzzles; j++ {
 
@@ -368,9 +398,12 @@ func main() {
 			q := puzzleIndex[j]
 
 			//Find the intersection of userSolveCollections that contain both p and q.
+
+			//First, grab the two sets.
 			pMap := collectionByPuzzle[p]
 			qMap := collectionByPuzzle[q]
 
+			//Build the intersection.
 			var intersection []*userSolvesCollection
 			for collection, _ := range pMap {
 				if _, ok := qMap[collection]; ok {
@@ -379,6 +412,7 @@ func main() {
 			}
 
 			//Next, calculate how many of the collections have q ranked better (lower!) than p.
+			//This is fast thanks to the earlier processing.
 			count := 0
 			for _, collection := range intersection {
 				if collection.idPosition[q] < collection.idPosition[p] {
@@ -387,6 +421,7 @@ func main() {
 			}
 
 			//Is it a majority? if so, transition. if not, leave at 0.
+			//These are just a sentinel. Later we'll go through and normalize probabilities.
 			if count > (len(intersection) / 2) {
 				matrixData[i][j] = 1.0
 			}
@@ -399,6 +434,7 @@ func main() {
 	}
 
 	//Go through and normalize the probabilities in each row to sum to 1.
+	//We treat the no-movement case specially; it's 1 - the sum of the probabilties of going to other cells.
 	for i := 0; i < numPuzzles; i++ {
 		//Count the number of rows that are 1.0.
 		count := 0
@@ -407,7 +443,10 @@ func main() {
 				count++
 			}
 		}
+		//Each unit of probability is this size:
 		probability := 1.0 / float64(numPuzzles)
+
+		//Stuff in the final normalized values, treating i,i the same.
 		for j := 0; j < numPuzzles; j++ {
 			if i == j {
 				//The stay in the same space probability
@@ -425,6 +464,9 @@ func main() {
 		log.Println("Beginning matrix multiplication...")
 	}
 
+	//We want to find the stable distribution, so we will raise the matrix to repeatedly high powers.
+	//Over time the matrix will stabalize, at that point every row will look similar to each other.
+	//We'll check for the matrix stabalizing before the end and break early if it does.
 	for i := 0; i < 20; i++ {
 		markovChain = matrix.ParallelProduct(markovChain, markovChain)
 
