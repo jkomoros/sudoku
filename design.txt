@@ -57,6 +57,7 @@ TODO:
 * Analysis: Throw out users who don't have a full range of difficulties in their history.
 * Analysis: Seriously refactor the monster (and confusing!) manin method).
 * Analysis: Don't include puzzles that have fewer than N solves (and/or that are disabled)
+* Analysis: Allow the user to set a max number of multiplies from the command line
 
 * Investigate making better grids (fewer clues / more symmetry)
 
