@@ -81,13 +81,13 @@ type userSolvesCollection struct {
 
 type puzzle struct {
 	id                     int
-	userRelativeDifficulty float32
+	userRelativeDifficulty float64
 	difficultyRating       int
 	name                   string
 	puzzle                 string
 }
 
-type puzzles []puzzle
+type puzzles []*puzzle
 
 type byUserRelativeDifficulty struct {
 	puzzles
@@ -118,24 +118,6 @@ func (self bySolveTimeDsc) Swap(i, j int) {
 func (self bySolveTimeDsc) Less(i, j int) bool {
 	//For the purposes of this algorithm, the "best" has to be lowest rank.
 	return self[i].totalTime > self[j].totalTime
-}
-
-type probabilitySortedIDs struct {
-	puzzleIDs []int
-	values    []float64
-}
-
-func (self *probabilitySortedIDs) Len() int {
-	return len(self.puzzleIDs)
-}
-
-func (self *probabilitySortedIDs) Swap(i, j int) {
-	self.puzzleIDs[i], self.puzzleIDs[j] = self.puzzleIDs[j], self.puzzleIDs[i]
-	self.values[i], self.values[j] = self.values[j], self.values[i]
-}
-
-func (self *probabilitySortedIDs) Less(i, j int) bool {
-	return self.values[i] < self.values[j]
 }
 
 func (self *userSolvesCollection) addSolve(solve solve) bool {
@@ -369,6 +351,8 @@ func main() {
 
 	}
 
+	log.Println("Skipped ", skippedUsers, " users because they did not have enough solve times.")
+
 	//Now, create the Markov Transition Matrix, according to algorithm MC4 of http://www.wisdom.weizmann.ac.il/~naor/PAPERS/rank_www10.html
 	//The relevant part of the algorithm, from that source:
 	/*
@@ -502,46 +486,33 @@ func main() {
 		}
 	}
 
-	//Now that the matrix has stabalizied, we can sort the puzzle IDs by their values in the top row.
-	//NOTE: using this here will destroy puzzleIndex!
-	puzzlesSorted := probabilitySortedIDs{puzzleIndex, markovChain.RowCopy(0)}
+	//Now we'll merge in information about the puzzles
 
-	sort.Sort(&puzzlesSorted)
+	//Collect the results of the second query we kicked off at the beginning,
+	//with meta-information about each puzzle.
+	difficultyRatings := <-difficutlyRatingsChan
 
-	sortedPuzzleIDs := puzzlesSorted.puzzleIDs
+	//This will be our final output.
+	puzzles := make([]*puzzle, numPuzzles)
 
-	log.Println("Skipped ", skippedUsers, " users because they did not have enough solve times.")
-
-	puzzles := make([]puzzle, len(relativeDifficultiesByPuzzle))
-
-	var index int
-
-	for puzzleID, difficulties := range relativeDifficultiesByPuzzle {
-		var sum float32
-		for _, difficulty := range difficulties {
-			sum += difficulty
+	for i := 0; i < numPuzzles; i++ {
+		thePuzzle := new(puzzle)
+		thePuzzle.id = puzzleIndex[i]
+		//TODO: rename this field, it no longer reflects what it really is.
+		thePuzzle.userRelativeDifficulty = markovChain.Get(0, i)
+		info, ok := difficultyRatings[thePuzzle.id]
+		if ok {
+			//TODO: rename this field; it's no longer accurate.
+			thePuzzle.difficultyRating = info.difficultyRating
+			thePuzzle.name = info.name
+			thePuzzle.puzzle = info.puzzle
 		}
-		puzzles[index] = puzzle{id: puzzleID, userRelativeDifficulty: sum / float32(len(difficulties)), difficultyRating: -1}
-		index++
+		puzzles[i] = thePuzzle
 	}
 
 	//Sort the puzzles by relative user difficulty
 	//We actually don't need the wrapper, since it will modify the underlying slice.
 	sort.Sort(byUserRelativeDifficulty{puzzles})
-
-	//Merge in the difficulty ratings from the server.
-	difficultyRatings := <-difficutlyRatingsChan
-
-	for i, puzzle := range puzzles {
-		info, ok := difficultyRatings[puzzle.id]
-		if ok {
-			puzzle.difficultyRating = info.difficultyRating
-			puzzle.name = info.name
-			puzzle.puzzle = info.puzzle
-		}
-		//It's not a pointer so we have to copy it back.
-		puzzles[i] = puzzle
-	}
 
 	//Now print the results to stdout.
 
