@@ -330,6 +330,8 @@ func main() {
 
 	numPuzzles := len(collectionByPuzzle)
 
+	log.Println("Discovered", numPuzzles, "puzzles.")
+
 	matrixData := make([][]float64, numPuzzles)
 
 	for i := range matrixData {
