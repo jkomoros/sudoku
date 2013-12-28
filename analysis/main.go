@@ -125,6 +125,11 @@ func (self *userSolvesCollection) addSolve(solve solve) bool {
 		return false
 	}
 
+	if solve.puzzleID == 0 {
+		//the production database has a zero-id'd puzzle in there for some reason.
+		return false
+	}
+
 	//Cull solves that leaned too heavily on hints.
 	if float64(solve.penaltyTime)/float64(solve.totalTime) > cullCheaterPercentageFlag {
 		return false
