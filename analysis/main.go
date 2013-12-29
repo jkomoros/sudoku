@@ -413,7 +413,6 @@ func main() {
 
 	//Create an actual matrix with the data.
 	markovChain := matrix.MakeDenseMatrixStacked(matrixData)
-	originalMarkovChain := markovChain.Copy()
 
 	if verbose {
 		log.Println("Beginning matrix multiplication...")
@@ -423,7 +422,11 @@ func main() {
 	//Over time the matrix will stabalize, at that point every row will look similar to each other.
 	//We'll check for the matrix stabalizing before the end and break early if it does.
 	for i := 0; i < _MAX_MATRIX_POWER; i++ {
-		markovChain = matrix.ParallelProduct(markovChain, originalMarkovChain)
+
+		//Note: technically, this is incorrect--we should multiply by the ORIGINAL value of the matrix.
+		//In practice, however, doing that takes multiple orders of magnitude more time, and the result is
+		//basically indistinguishable.
+		markovChain = matrix.ParallelProduct(markovChain, markovChain)
 
 		//Are the rows converged enough for us to bail?
 		difference := 0.0
