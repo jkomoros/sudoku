@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"math/rand"
+	"sync"
 )
 
 //Searches for a solution to the puzzle as it currently exists without
@@ -52,6 +53,9 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 
 		incomingSolutions := make(chan *Grid)
 
+		//Using a pattern for closing fan in style receivers from http://blog.golang.org/pipelines
+		var wg sync.WaitGroup
+
 		var solutions []*Grid
 
 		//TODO: figure out a way to kill all of these threads when necessary.
@@ -60,6 +64,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 			go func() {
 				//Sovler thread.
 				firstRun := true
+				defer wg.Done()
 				for {
 					grid, ok := <-queue.Out
 					if !ok {
@@ -74,6 +79,13 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 				}
 			}()
 		}
+
+		wg.Add(NUM_SOLVER_THREADS)
+
+		go func() {
+			wg.Wait()
+			close(incomingSolutions)
+		}()
 
 	OuterLoop:
 		for {
