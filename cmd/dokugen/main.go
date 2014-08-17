@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dokugen/sudoku"
+	"dokugen"
 	"flag"
 	"fmt"
 	"os"

@@ -10,7 +10,7 @@ import (
 
 //This grid is #27 from Totally Pocket Sudoku. It's included for testing purposes only.
 
-const PUZZLES_DIRECTORY = "../puzzles"
+const PUZZLES_DIRECTORY = "puzzles"
 
 const TEST_GRID = `6|1|2|.|.|.|4|.|3
 .|3|.|4|9|.|.|7|2
