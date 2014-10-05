@@ -45,6 +45,17 @@ TODO:
 		* Weight of hardest technique (or index cutoff of highest technique)
 		* Avergae weight of difficulties
 	* Should difficulties go up exponentionally? A technique that requires no candidate marking is WAY, WAY easier than one that requires multiple leaps of logic.
+	* Actually calculating it:
+		* What we have need is a Multiple Linear Regression.
+		* Useful link: http://onlinestatbook.com/2/regression/multiple_regression.html
+		* Useful golang package: https://github.com/sajari/regression
+		* For each puzzle, convert to our normal format and ingest.
+		* Then, solve N times. Then average the number of each kind of technique seen to solve the puzzle
+			* Sanity check: see how different different runs are
+		* Then create a multiple linear regression model where the puzzle's observed difficulty is the dependent variable
+		and the independent variables are average number of times for each technique.
+		* Then solve it to get the output of weights
+			* Sanity check: look at the stat analysis to see which ones are more predictive in the model, as well as correlation.
 
 * Human solve: Is it worth it to do nakedSingles based on row/col/block as well? Those are obvious in different ways.
 * Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm. Technqiues I've skipped so far:
