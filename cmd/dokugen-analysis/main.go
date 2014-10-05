@@ -1,6 +1,7 @@
 package main
 
 import (
+	"dokugen"
 	"encoding/csv"
 	"encoding/json"
 	"flag"
@@ -23,6 +24,7 @@ const _QUERY_LIMIT = 100
 const _PENALTY_PERCENTAGE_CUTOFF = 0.01
 const _MATRIX_DIFFERENCE_CUTOFF = 0.00001
 const _MAX_MATRIX_POWER = 250
+const _NUMBER_OF_HUMAN_SOLVES = 10
 
 //How many solves a user must have to have their relative scale included.
 //A low value gives you far more very low or very high scores than you shoul get.
@@ -88,6 +90,7 @@ type puzzle struct {
 	difficultyRating       int
 	name                   string
 	puzzle                 string
+	solveDirections        []sudoku.SolveDirections
 }
 
 type puzzles []*puzzle
@@ -562,12 +565,29 @@ func calculateRelativeDifficulty() []*puzzle {
 
 func calculateWeights(puzzles []*puzzle) {
 
-	log.Println("TODO: calculate weights here.")
+	for j, thePuzzle := range puzzles {
+
+		if verbose {
+			log.Println("Solving puzzle #", j)
+		}
+
+		grid := sudoku.NewGrid()
+		grid.Load(convertPuzzleString(thePuzzle.puzzle))
+
+		for i := 0; i < _NUMBER_OF_HUMAN_SOLVES; i++ {
+			thePuzzle.solveDirections = append(thePuzzle.solveDirections, grid.HumanSolution())
+		}
+	}
+
+	log.Println("Done doing all of the human solutions.")
+
+	//TODO:continue the caluations.
 }
 
 func convertPuzzleString(input string) string {
 	//Puzzles stored in the database have a weird format. This function converts them into one that the sudoku library understands.
-	//TODO: actually implement this.
+
+	//TODO: also handle odd things like user-provided marks and other things.
 
 	var result string
 
