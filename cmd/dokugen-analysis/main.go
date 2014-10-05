@@ -158,15 +158,73 @@ func main() {
 		log.Fatal("There was an error parsing JSON from the config file: ", err)
 		os.Exit(1)
 	}
-	puzzles := calculateRelativeDifficulty()
+
+	var puzzles []*puzzle
+
+	if flag.Arg(0) == "" {
+		//Default: calculate relativeDifficulty like normal.
+
+		if calcWeights {
+			log.Println("No input CSV provided; calculating relative weights first.")
+		}
+
+		puzzles = calculateRelativeDifficulty()
+
+	} else {
+		//Read puzzles from provided CSV.
+		log.Println("Attempting to load relative difficulties from CSV: ", flag.Arg(0))
+		inputFile, err := os.Open(flag.Arg(0))
+		if err != nil {
+			log.Fatal("Could not open the specified input CSV.")
+		}
+		defer file.Close()
+		csvIn := csv.NewReader(inputFile)
+		records, csvErr := csvIn.ReadAll()
+		if csvErr != nil {
+			log.Fatal("The provided CSV could not be parsed.")
+		}
+		puzzles = make([]*puzzle, len(records))
+		for i, record := range records {
+			thePuzzle := puzzle{}
+			if len(record) < 4 {
+				log.Fatal("Not enough records in row: ", i)
+			}
+
+			if theInt, err := strconv.Atoi(record[0]); err == nil {
+				thePuzzle.id = theInt
+			} else {
+				log.Fatal("First column not a valid int in row ", i)
+			}
+
+			if theInt, err := strconv.Atoi(record[1]); err == nil {
+				thePuzzle.difficultyRating = theInt
+			} else {
+				log.Fatal("Second column not a valid int in row ", i)
+			}
+
+			if theFloat, err := strconv.ParseFloat(record[2], 64); err == nil {
+				thePuzzle.userRelativeDifficulty = theFloat
+			} else {
+				log.Fatal("Third column not a valid float64 in row ", i)
+			}
+
+			thePuzzle.name = record[3]
+
+			if len(record) == 5 {
+				thePuzzle.puzzle = record[4]
+			}
+
+			puzzles[i] = &thePuzzle
+		}
+	}
 
 	if calcWeights {
 		//Okay, apparently we want to take all of that work and use it to calculate weights.
 
-		//TODO: it's weird that we go to calculateWeights and aassume it will do the outputing itself.
+		//TODO: in the end calculateWeights will return its results, which we will then print out here.
 		calculateWeights(puzzles)
 	} else {
-		//Now print the results to stdout.
+		//Apparently we just wanted to print out the relative difficulties, so do that.
 
 		csvOut := csv.NewWriter(os.Stdout)
 
@@ -499,6 +557,8 @@ func calculateRelativeDifficulty() []*puzzle {
 }
 
 func calculateWeights(puzzles []*puzzle) {
+
+	//TODO: check for existence of puzzle string data and gracefully fail if not found.
 	log.Println("TODO: calculate weights here.")
 }
 
