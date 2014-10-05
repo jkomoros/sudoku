@@ -39,6 +39,11 @@ type SolveTechnique interface {
 	Name() string
 	Description(*SolveStep) string
 	//IMPORTANT: a step should return a step IFF that step is valid AND the step would cause useful work to be done if applied.
+
+	//NOTE: this is a critical weakness, because it allows each technique to find only one step, even though multiple might apply.
+	//However, HumanSolve assumes that we will pick a step randomly at any point based on its difficulty proportion. Because we will only
+	//have at max 1 of easy (and more likely) techniques, this will systematically over-prefer more complex techniques.
+	//TODO: fix this.
 	Find(*Grid) *SolveStep
 	IsFill() bool
 	//How difficult a real human would say this technique is. Generally inversely related to how often a real person would pick it. 0.0 to 1.0.
