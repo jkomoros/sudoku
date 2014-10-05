@@ -564,6 +564,12 @@ func calculateWeights(puzzles []*puzzle) {
 	log.Println("TODO: calculate weights here.")
 }
 
+func convertPuzzleString(input string) string {
+	//Puzzles stored in the database have a weird format. This function converts them into one that the sudoku library understands.
+	//TODO: actually implement this.
+	return input
+}
+
 func getPuzzleDifficultyRatings(result chan map[int]puzzle) {
 
 	var db mysql.Conn
