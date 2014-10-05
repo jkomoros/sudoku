@@ -14,6 +14,7 @@ import (
 	"runtime"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 const _DB_CONFIG_FILENAME = "db_config.SECRET.json"
@@ -567,7 +568,24 @@ func calculateWeights(puzzles []*puzzle) {
 func convertPuzzleString(input string) string {
 	//Puzzles stored in the database have a weird format. This function converts them into one that the sudoku library understands.
 	//TODO: actually implement this.
-	return input
+
+	var result string
+
+	rows := strings.Split(input, ";")
+	for _, row := range rows {
+		cols := strings.Split(row, ",")
+		for _, col := range cols {
+			if strings.Contains(col, "!") {
+				result += strings.TrimSuffix(col, "!")
+			} else {
+				result += "."
+			}
+		}
+		result += "\n"
+	}
+
+	//We added an extra \n in the last runthrough, remove it.
+	return strings.TrimSuffix(result, "\n")
 }
 
 func getPuzzleDifficultyRatings(result chan map[int]puzzle) {
