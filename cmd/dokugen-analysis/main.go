@@ -212,6 +212,9 @@ func main() {
 
 			if len(record) == 5 {
 				thePuzzle.puzzle = record[4]
+			} else {
+				//TODO: if it doesn't, fix up the data ourselves with getPuzzleDifficultyData.
+				log.Fatal("The CSV must include puzzle data. Export with -p.")
 			}
 
 			puzzles[i] = &thePuzzle
@@ -558,7 +561,6 @@ func calculateRelativeDifficulty() []*puzzle {
 
 func calculateWeights(puzzles []*puzzle) {
 
-	//TODO: check for existence of puzzle string data and gracefully fail if not found.
 	log.Println("TODO: calculate weights here.")
 }
 
