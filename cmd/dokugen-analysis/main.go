@@ -158,7 +158,32 @@ func main() {
 		log.Fatal("There was an error parsing JSON from the config file: ", err)
 		os.Exit(1)
 	}
+	puzzles := calculateRelativeDifficulty()
 
+	if calcWeights {
+		//Okay, apparently we want to take all of that work and use it to calculate weights.
+
+		//TODO: it's weird that we go to calculateWeights and aassume it will do the outputing itself.
+		calculateWeights(puzzles)
+	} else {
+		//Now print the results to stdout.
+
+		csvOut := csv.NewWriter(os.Stdout)
+
+		for _, puzzle := range puzzles {
+			temp := []string{strconv.Itoa(puzzle.id), strconv.Itoa(puzzle.difficultyRating), fmt.Sprintf("%g", puzzle.userRelativeDifficulty), puzzle.name}
+			if printPuzzleDataFlag {
+				temp = append(temp, puzzle.puzzle)
+			}
+			csvOut.Write(temp)
+		}
+
+		csvOut.Flush()
+	}
+
+}
+
+func calculateRelativeDifficulty() []*puzzle {
 	difficutlyRatingsChan := make(chan map[int]puzzle)
 
 	//Go fetch the difficulties for each puzzle; we'll need this data at the end.
@@ -470,28 +495,7 @@ func main() {
 	//Sort the puzzles by relative user difficulty
 	//We actually don't need the wrapper, since it will modify the underlying slice.
 	sort.Sort(byUserRelativeDifficulty{puzzles})
-
-	if calcWeights {
-		//Okay, apparently we want to take all of that work and use it to calculate weights.
-
-		//TODO: it's weird that we go to calculateWeights and aassume it will do the outputing itself.
-		calculateWeights(puzzles)
-	} else {
-		//Now print the results to stdout.
-
-		csvOut := csv.NewWriter(os.Stdout)
-
-		for _, puzzle := range puzzles {
-			temp := []string{strconv.Itoa(puzzle.id), strconv.Itoa(puzzle.difficultyRating), fmt.Sprintf("%g", puzzle.userRelativeDifficulty), puzzle.name}
-			if printPuzzleDataFlag {
-				temp = append(temp, puzzle.puzzle)
-			}
-			csvOut.Write(temp)
-		}
-
-		csvOut.Flush()
-	}
-
+	return puzzles
 }
 
 func calculateWeights(puzzles []*puzzle) {
