@@ -90,7 +90,6 @@ type puzzle struct {
 	difficultyRating       int
 	name                   string
 	puzzle                 string
-	solveDirections        []sudoku.SolveDirections
 	solveStats             []float64
 }
 
@@ -581,14 +580,16 @@ func calculateWeights(puzzles []*puzzle) {
 		grid := sudoku.NewGrid()
 		grid.Load(convertPuzzleString(thePuzzle.puzzle))
 
+		solveDirections := make([]sudoku.SolveDirections, _NUMBER_OF_HUMAN_SOLVES)
+
 		for i := 0; i < _NUMBER_OF_HUMAN_SOLVES; i++ {
-			thePuzzle.solveDirections = append(thePuzzle.solveDirections, grid.HumanSolution())
+			solveDirections[i] = grid.HumanSolution()
 		}
 
 		thePuzzle.solveStats = make([]float64, len(sudoku.Techniques))
 
 		//Accumulate number of times we've seen each technique across all solves.
-		for _, directions := range thePuzzle.solveDirections {
+		for _, directions := range solveDirections {
 			for _, step := range directions {
 				if index, ok := nameToIndex[step.Technique.Name()]; ok {
 					thePuzzle.solveStats[index] += 1.0
