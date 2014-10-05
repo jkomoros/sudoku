@@ -91,6 +91,7 @@ type puzzle struct {
 	name                   string
 	puzzle                 string
 	solveDirections        []sudoku.SolveDirections
+	solveStats             []float64
 }
 
 type puzzles []*puzzle
@@ -565,6 +566,12 @@ func calculateRelativeDifficulty() []*puzzle {
 
 func calculateWeights(puzzles []*puzzle) {
 
+	//Generate a mapping of technique name to index.
+	nameToIndex := make(map[string]int)
+	for i, technique := range sudoku.Techniques {
+		nameToIndex[technique.Name()] = i
+	}
+
 	for j, thePuzzle := range puzzles {
 
 		if verbose {
@@ -576,6 +583,24 @@ func calculateWeights(puzzles []*puzzle) {
 
 		for i := 0; i < _NUMBER_OF_HUMAN_SOLVES; i++ {
 			thePuzzle.solveDirections = append(thePuzzle.solveDirections, grid.HumanSolution())
+		}
+
+		thePuzzle.solveStats = make([]float64, len(sudoku.Techniques))
+
+		//Accumulate number of times we've seen each technique across all solves.
+		for _, directions := range thePuzzle.solveDirections {
+			for _, step := range directions {
+				if index, ok := nameToIndex[step.Technique.Name()]; ok {
+					thePuzzle.solveStats[index] += 1.0
+				} else {
+					log.Fatal("For some reason we encountered a Technique that wasn't in hte list of Techniques")
+				}
+			}
+		}
+
+		//Convert each technique to an average by dividing by the number of different solves
+		for i, _ := range thePuzzle.solveStats {
+			thePuzzle.solveStats[i] /= _NUMBER_OF_HUMAN_SOLVES
 		}
 	}
 
