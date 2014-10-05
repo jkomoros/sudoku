@@ -56,13 +56,13 @@ type basicSolveTechnique struct {
 	difficulty float64
 }
 
-var techniques []SolveTechnique
+var Techniques []SolveTechnique
 
 func init() {
 
 	//TODO: calculate more realistic weights.
 
-	techniques = []SolveTechnique{
+	Techniques = []SolveTechnique{
 		hiddenSingleInRow{
 			basicSolveTechnique{
 				"Necessary In Row",
@@ -796,7 +796,7 @@ func (self *Grid) HumanSolution() SolveDirections {
 
 func (self *Grid) HumanSolve() SolveDirections {
 	var results []*SolveStep
-	numTechniques := len(techniques)
+	numTechniques := len(Techniques)
 
 	//Note: trying these all in parallel is much slower (~15x) than doing them in sequence.
 	//The reason is that in sequence we bailed early as soon as we found one step; now we try them all.
@@ -808,7 +808,7 @@ func (self *Grid) HumanSolve() SolveDirections {
 
 		var possibilities []*SolveStep
 
-		for _, technique := range techniques {
+		for _, technique := range Techniques {
 			go func(theTechnique SolveTechnique) {
 				possibilitiesChan <- theTechnique.Find(self)
 			}(technique)
