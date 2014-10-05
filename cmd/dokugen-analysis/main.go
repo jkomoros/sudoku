@@ -34,6 +34,7 @@ var useMockData bool
 var queryLimit int
 var verbose bool
 var minPuzzleCollections int
+var calcWeights bool
 
 func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
@@ -43,6 +44,7 @@ func init() {
 	flag.BoolVar(&useMockData, "m", false, "Use mock data (useful if you don't have a real database to test with).")
 	flag.BoolVar(&verbose, "v", false, "Verbose mode.")
 	flag.IntVar(&minPuzzleCollections, "l", 10, "How many different user collections the puzzle must be included in for it to be included in the output.")
+	flag.BoolVar(&calcWeights, "w", false, "Whether the output you want is to calculate technique weights")
 
 	//We're going to be doing some heavy-duty matrix multiplication, and the matrix package can take advantage of multiple cores.
 	runtime.GOMAXPROCS(6)
@@ -469,20 +471,31 @@ func main() {
 	//We actually don't need the wrapper, since it will modify the underlying slice.
 	sort.Sort(byUserRelativeDifficulty{puzzles})
 
-	//Now print the results to stdout.
+	if calcWeights {
+		//Okay, apparently we want to take all of that work and use it to calculate weights.
 
-	csvOut := csv.NewWriter(os.Stdout)
+		//TODO: it's weird that we go to calculateWeights and aassume it will do the outputing itself.
+		calculateWeights(puzzles)
+	} else {
+		//Now print the results to stdout.
 
-	for _, puzzle := range puzzles {
-		temp := []string{strconv.Itoa(puzzle.id), strconv.Itoa(puzzle.difficultyRating), fmt.Sprintf("%g", puzzle.userRelativeDifficulty), puzzle.name}
-		if printPuzzleDataFlag {
-			temp = append(temp, puzzle.puzzle)
+		csvOut := csv.NewWriter(os.Stdout)
+
+		for _, puzzle := range puzzles {
+			temp := []string{strconv.Itoa(puzzle.id), strconv.Itoa(puzzle.difficultyRating), fmt.Sprintf("%g", puzzle.userRelativeDifficulty), puzzle.name}
+			if printPuzzleDataFlag {
+				temp = append(temp, puzzle.puzzle)
+			}
+			csvOut.Write(temp)
 		}
-		csvOut.Write(temp)
+
+		csvOut.Flush()
 	}
 
-	csvOut.Flush()
+}
 
+func calculateWeights(puzzles []*puzzle) {
+	log.Println("TODO: calculate weights here.")
 }
 
 func getPuzzleDifficultyRatings(result chan map[int]puzzle) {
