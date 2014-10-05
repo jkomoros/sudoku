@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/sajari/regression"
 	"github.com/skelterjohn/go.matrix"
 	"github.com/ziutek/mymysql/mysql"
 	_ "github.com/ziutek/mymysql/native"
@@ -599,15 +600,35 @@ func calculateWeights(puzzles []*puzzle) {
 			}
 		}
 
+		//TODO: alternatively, I could just add each solve as its own datapoint in the regression and not bother averaging.
+
 		//Convert each technique to an average by dividing by the number of different solves
 		for i, _ := range thePuzzle.solveStats {
 			thePuzzle.solveStats[i] /= _NUMBER_OF_HUMAN_SOLVES
 		}
 	}
 
-	log.Println("Done doing all of the human solutions.")
+	//Actually do the regression.
 
-	//TODO:continue the caluations.
+	var r regression.Regression
+
+	r.SetObservedName("Real World Difficulty")
+	for i, technique := range sudoku.Techniques {
+		r.SetVarName(i, technique.Name())
+	}
+
+	//TODO: I could just do this in the first loop
+	for _, thePuzzle := range puzzles {
+		r.AddDataPoint(regression.DataPoint{Observed: thePuzzle.userRelativeDifficulty, Variables: thePuzzle.solveStats})
+	}
+
+	r.RunLinearRegression()
+
+	//TODO: don't dump to stdout
+	r.Dump(false)
+
+	//TODO: return the results.
+
 }
 
 func convertPuzzleString(input string) string {
