@@ -53,6 +53,7 @@ TODO:
 		* Further analysis: Difficulty calc has a raw weight that it divides by
 			* ... Won't this always be nessary, given that this is a sum of terms? Maybe we just clamp to 100 and 0.
 		* Is it weird that we have some negative weights coming out of analysis? For example, won't that trip up the weightedrandomIndex?
+		* Another idea: I'm treating the userDifficulty as the actual difficulty, but really all it represents is the ordering. Try assigning a difficulty that is evenly spread across the range linearly (from maybe 0.1 to 0.9) and train on that.
 
 * Human solve: Is it worth it to do nakedSingles based on row/col/block as well? Those are obvious in different ways.
 * Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm. Technqiues I've skipped so far:
