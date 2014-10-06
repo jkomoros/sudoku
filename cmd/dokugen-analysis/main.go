@@ -655,6 +655,7 @@ func calculateWeights(puzzles []*puzzle) *regression.Regression {
 			solveStats[i] /= _NUMBER_OF_HUMAN_SOLVES
 		}
 
+		//Add 1 to make sure every input is at least 1, otherwise we'll get negative numbers which gum up later parts.
 		r.AddDataPoint(regression.DataPoint{Observed: math.Log(thePuzzle.userRelativeDifficulty + 1), Variables: solveStats})
 	}
 
