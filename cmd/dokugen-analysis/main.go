@@ -254,7 +254,7 @@ func main() {
 
 		csvOut := csv.NewWriter(os.Stdout)
 
-		for i, coeff := range result.RegCoeff {
+		for i := 0; i < len(result.RegCoeff); i++ {
 
 			var name string
 
@@ -263,7 +263,7 @@ func main() {
 			} else {
 				name = result.Names.VariableNames[i-1]
 			}
-			csvOut.Write([]string{name, fmt.Sprintf("%g", coeff)})
+			csvOut.Write([]string{name, fmt.Sprintf("%g", result.GetRegCoeff(i))})
 		}
 
 		csvOut.Flush()
