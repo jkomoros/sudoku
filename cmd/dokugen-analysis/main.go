@@ -178,7 +178,7 @@ func main() {
 
 	} else {
 		//Read puzzles from provided CSV.
-		log.Println("Attempting to load relative difficulties from CSV: ", flag.Arg(0))
+		log.Println("Loading relative difficulties from CSV: ", flag.Arg(0))
 		inputFile, err := os.Open(flag.Arg(0))
 		if err != nil {
 			log.Fatal("Could not open the specified input CSV.")
