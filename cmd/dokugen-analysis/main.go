@@ -603,6 +603,20 @@ func calculateRelativeDifficulty() []*puzzle {
 
 func calculateWeights(puzzles []*puzzle) *regression.Regression {
 
+	/*
+		The basic approach is to solve each puzzle many times with our human solver.
+		Then, we summarize how often each technique was required for each puzzle
+		(by averaging all of the solve runs together). Then we set up a multiple
+		linear regression where the dependent var is the LOG of the userRelativelyDifficulty
+		(to linearlize it somewhat) and the dependent vars are the number of times
+		each technique was observed in the solve. Then we run the regression and 
+		return it.
+		
+		For more information on interpreting results from multiple linear regressions,
+		see: http://onlinestatbook.com/2/regression/multiple_regression.html
+	
+	*/
+
 	//Generate a mapping of technique name to index.
 	nameToIndex := make(map[string]int)
 	for i, technique := range sudoku.Techniques {
