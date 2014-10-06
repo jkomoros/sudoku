@@ -79,7 +79,7 @@ func init() {
 		},
 		hiddenSingleInBlock{
 			basicSolveTechnique{
-				"Necessary in Block",
+				"Necessary In Block",
 				true,
 				0.0,
 			},
@@ -93,21 +93,21 @@ func init() {
 		},
 		pointingPairRow{
 			basicSolveTechnique{
-				"Pointing pair row",
+				"Pointing Pair Row",
 				false,
 				25.0,
 			},
 		},
 		pointingPairCol{
 			basicSolveTechnique{
-				"Pointing pair col",
+				"Pointing Pair Col",
 				false,
 				25.0,
 			},
 		},
 		nakedPairCol{
 			basicSolveTechnique{
-				"Naked pair Row",
+				"Naked Pair Col",
 				false,
 				75.0,
 			},
