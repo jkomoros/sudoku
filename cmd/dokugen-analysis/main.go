@@ -25,6 +25,8 @@ const _QUERY_LIMIT = 100
 const _PENALTY_PERCENTAGE_CUTOFF = 0.01
 const _MATRIX_DIFFERENCE_CUTOFF = 0.00001
 const _MAX_MATRIX_POWER = 250
+
+//Making this number much higher does not improve R2.
 const _NUMBER_OF_HUMAN_SOLVES = 10
 
 //How many solves a user must have to have their relative scale included.
@@ -229,7 +231,17 @@ func main() {
 		//Okay, apparently we want to take all of that work and use it to calculate weights.
 
 		//TODO: in the end calculateWeights will return its results, which we will then print out here.
-		calculateWeights(puzzles)
+		result := calculateWeights(puzzles)
+
+		log.Println("Regression done. Results:")
+		log.Println("N =", len(result.Data))
+		log.Println("Variance Observed = ", result.VarianceObserved)
+		log.Println("Variance Predicted = ", result.VariancePredicted)
+		log.Println("R2 = ", result.Rsquared)
+		log.Println("-------------------------")
+
+		//TODO: output coefficients to a CSV
+
 	} else {
 		//Apparently we just wanted to print out the relative difficulties, so do that.
 
@@ -563,7 +575,7 @@ func calculateRelativeDifficulty() []*puzzle {
 	return puzzles
 }
 
-func calculateWeights(puzzles []*puzzle) {
+func calculateWeights(puzzles []*puzzle) *regression.Regression {
 
 	//Generate a mapping of technique name to index.
 	nameToIndex := make(map[string]int)
@@ -623,14 +635,7 @@ func calculateWeights(puzzles []*puzzle) {
 	//Actually do the regression.
 	r.RunLinearRegression()
 
-	log.Println("Regression done. Results:")
-	log.Println("N =", len(r.Data))
-	log.Println("Variance Observed = ", r.VarianceObserved)
-	log.Println("Variance Predicted = ", r.VariancePredicted)
-	log.Println("R2 = ", r.Rsquared)
-	log.Println("-------------------------")
-
-	//TODO: return the results.
+	return &r
 
 }
 
