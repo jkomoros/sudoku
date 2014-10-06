@@ -91,7 +91,6 @@ type puzzle struct {
 	difficultyRating       int
 	name                   string
 	puzzle                 string
-	solveStats             []float64
 }
 
 type puzzles []*puzzle
@@ -572,6 +571,15 @@ func calculateWeights(puzzles []*puzzle) {
 		nameToIndex[technique.Name()] = i
 	}
 
+	//Set up the regression; I'll be adding data points as I go through each puzzle.
+
+	var r regression.Regression
+
+	r.SetObservedName("Real World Difficulty")
+	for i, technique := range sudoku.Techniques {
+		r.SetVarName(i, technique.Name())
+	}
+
 	for j, thePuzzle := range puzzles {
 
 		if verbose {
@@ -583,45 +591,36 @@ func calculateWeights(puzzles []*puzzle) {
 
 		solveDirections := make([]sudoku.SolveDirections, _NUMBER_OF_HUMAN_SOLVES)
 
+		//Note: it appears that the number of solves hits a max R2 around 5 or so.
 		for i := 0; i < _NUMBER_OF_HUMAN_SOLVES; i++ {
 			solveDirections[i] = grid.HumanSolution()
 		}
 
-		thePuzzle.solveStats = make([]float64, len(sudoku.Techniques))
+		solveStats := make([]float64, len(sudoku.Techniques))
 
 		//Accumulate number of times we've seen each technique across all solves.
 		for _, directions := range solveDirections {
 			for _, step := range directions {
 				if index, ok := nameToIndex[step.Technique.Name()]; ok {
-					thePuzzle.solveStats[index] += 1.0
+					solveStats[index] += 1.0
 				} else {
 					log.Fatal("For some reason we encountered a Technique that wasn't in hte list of Techniques")
 				}
 			}
 		}
 
-		//TODO: alternatively, I could just add each solve as its own datapoint in the regression and not bother averaging.
+		//Note: I considered adding each solve for each puzzle as a separate datapoint. However, the R2 i was getting were
+		//consistently much lower than this method.
 
 		//Convert each technique to an average by dividing by the number of different solves
-		for i, _ := range thePuzzle.solveStats {
-			thePuzzle.solveStats[i] /= _NUMBER_OF_HUMAN_SOLVES
+		for i, _ := range solveStats {
+			solveStats[i] /= _NUMBER_OF_HUMAN_SOLVES
 		}
+
+		r.AddDataPoint(regression.DataPoint{Observed: thePuzzle.userRelativeDifficulty, Variables: solveStats})
 	}
 
 	//Actually do the regression.
-
-	var r regression.Regression
-
-	r.SetObservedName("Real World Difficulty")
-	for i, technique := range sudoku.Techniques {
-		r.SetVarName(i, technique.Name())
-	}
-
-	//TODO: I could just do this in the first loop
-	for _, thePuzzle := range puzzles {
-		r.AddDataPoint(regression.DataPoint{Observed: thePuzzle.userRelativeDifficulty, Variables: thePuzzle.solveStats})
-	}
-
 	r.RunLinearRegression()
 
 	//TODO: don't dump to stdout
