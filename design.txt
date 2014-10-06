@@ -49,6 +49,10 @@ TODO:
 		* What we have need is a Multiple Linear Regression.
 		* Useful link: http://onlinestatbook.com/2/regression/multiple_regression.html
 		* Further analysis: Linearize/normalize difficulties from phase 1?
+		* Further analysis: load in difficulty weights into solver and run difficulty calcs again
+		* Further analysis: Difficulty calc has a raw weight that it divides by
+			* ... Won't this always be nessary, given that this is a sum of terms? Maybe we just clamp to 100 and 0.
+		* Is it weird that we have some negative weights coming out of analysis? For example, won't that trip up the weightedrandomIndex?
 
 * Human solve: Is it worth it to do nakedSingles based on row/col/block as well? Those are obvious in different ways.
 * Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm. Technqiues I've skipped so far:
