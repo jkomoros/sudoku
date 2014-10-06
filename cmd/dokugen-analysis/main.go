@@ -150,6 +150,18 @@ func (self *userSolvesCollection) addSolve(solve solve) bool {
 
 func main() {
 
+	/*
+
+		There are two main phases:
+			1) calculating real world difficulties for puzzles in the production database, and
+			2) Calculating difficulties for solve techniques based on that data.
+
+		By default, we do #1 and not #2, outputing the difficulties as a CSV. If you pass -w, we'll do both phases (and skip outputting the intermediate CSV)
+
+		By default, if we do phase #2 we take input from the first phase and feed it into the second phase. However, you can provide a CSV of phase 1 data instead.
+
+	*/
+
 	flag.Parse()
 
 	//Load up the Database config.
@@ -240,7 +252,21 @@ func main() {
 		log.Println("R2 = ", result.Rsquared)
 		log.Println("-------------------------")
 
-		//TODO: output coefficients to a CSV
+		csvOut := csv.NewWriter(os.Stdout)
+
+		for i, coeff := range result.RegCoeff {
+
+			var name string
+
+			if i == 0 {
+				name = "Constant"
+			} else {
+				name = result.Names.VariableNames[i-1]
+			}
+			csvOut.Write([]string{name, fmt.Sprintf("%g", coeff)})
+		}
+
+		csvOut.Flush()
 
 	} else {
 		//Apparently we just wanted to print out the relative difficulties, so do that.
