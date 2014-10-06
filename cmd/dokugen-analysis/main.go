@@ -623,8 +623,12 @@ func calculateWeights(puzzles []*puzzle) {
 	//Actually do the regression.
 	r.RunLinearRegression()
 
-	//TODO: don't dump to stdout
-	r.Dump(false)
+	log.Println("Regression done. Results:")
+	log.Println("N =", len(r.Data))
+	log.Println("Variance Observed = ", r.VarianceObserved)
+	log.Println("Variance Predicted = ", r.VariancePredicted)
+	log.Println("R2 = ", r.Rsquared)
+	log.Println("-------------------------")
 
 	//TODO: return the results.
 
