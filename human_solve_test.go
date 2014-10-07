@@ -579,6 +579,10 @@ func TestRandomWeightedIndex(t *testing.T) {
 		t.Fail()
 	}
 
+	if weightsNormalized([]float64{0.5, -0.25, 0.25}) {
+		t.Error("A negative weight was considered normal.")
+	}
+
 	result = randomIndexWithInvertedWeights([]float64{0.0, 0.0, 1.0})
 	if result == 2 {
 		t.Log("Got the wrong index for inverted weights")
@@ -589,6 +593,16 @@ func TestRandomWeightedIndex(t *testing.T) {
 	if weightResult[0] != 0.5 || weightResult[1] != 0.25 || weightResult[2] != 0.25 {
 		t.Log("Nomralized weights came back wrong")
 		t.Fail()
+	}
+
+	weightResult = normalizedWeights([]float64{1.0, 1.0, -0.5})
+	if weightResult[0] != 0.5 || weightResult[1] != 0.5 || weightResult[2] != 0 {
+		t.Error("Normalized weights with a negative came back wrong: ", weightResult)
+	}
+
+	weightResult = normalizedWeights([]float64{-0.25, -0.5, 0.25})
+	if weightResult[0] != 0.25 || weightResult[1] != 0 || weightResult[2] != 0.75 {
+		t.Error("Normalized weights with two different negative numbers came back wrong: ", weightResult)
 	}
 
 	result = randomIndexWithWeights([]float64{1.0, 0.0})
