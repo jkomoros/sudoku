@@ -609,12 +609,12 @@ func calculateWeights(puzzles []*puzzle) *regression.Regression {
 		(by averaging all of the solve runs together). Then we set up a multiple
 		linear regression where the dependent var is the LOG of the userRelativelyDifficulty
 		(to linearlize it somewhat) and the dependent vars are the number of times
-		each technique was observed in the solve. Then we run the regression and 
+		each technique was observed in the solve. Then we run the regression and
 		return it.
-		
+
 		For more information on interpreting results from multiple linear regressions,
 		see: http://onlinestatbook.com/2/regression/multiple_regression.html
-	
+
 	*/
 
 	//Generate a mapping of technique name to index.
@@ -643,9 +643,21 @@ func calculateWeights(puzzles []*puzzle) *regression.Regression {
 
 		solveDirections := make([]sudoku.SolveDirections, _NUMBER_OF_HUMAN_SOLVES)
 
+		sawNil := 0
+
 		//Note: it appears that the number of solves hits a max R2 around 5 or so.
 		for i := 0; i < _NUMBER_OF_HUMAN_SOLVES; i++ {
-			solveDirections[i] = grid.HumanSolution()
+
+			solution := grid.HumanSolution()
+			if solution == nil {
+				sawNil++
+			}
+			solveDirections[i] = solution
+		}
+
+		if sawNil > 0 {
+			log.Println("Puzzle #", thePuzzle.id, " was not able to be solved on ", sawNil, " of ", _NUMBER_OF_HUMAN_SOLVES, " runthroughs. Skipping.")
+			continue
 		}
 
 		solveStats := make([]float64, len(sudoku.Techniques))

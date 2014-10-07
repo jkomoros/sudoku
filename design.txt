@@ -60,6 +60,7 @@ TODO:
 * Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm. Technqiues I've skipped so far:
 	* NakedQuad{Row,Col}. This now trivial given Subset logic. NEXT STEP
 	* BlockBlock interactions
+	* Implement enough techniques to be able to solve #122, #33, and #138.
 
 * Analysis: Spot check the results of the new markov difficulty grader to see if they intuitively make sense.
 * Analysis: Run our difficulty grader on the real puzzles and see how well it fits with user perceived difficulty.
