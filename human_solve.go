@@ -393,43 +393,6 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 	return results
 }
 
-func DEPRECATEDnecessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) []*Cell) *SolveStep {
-	//TODO: remove this after rearchitecture
-	//This will be a random item
-	indexes := rand.Perm(DIM)
-
-	var result *SolveStep
-
-	for _, i := range indexes {
-		seenInCollection := make([]int, DIM)
-		collection := collectionGetter(i)
-		for _, cell := range collection {
-			for _, possibility := range cell.Possibilities() {
-				seenInCollection[possibility-1]++
-			}
-		}
-		seenIndexes := rand.Perm(DIM)
-		for _, index := range seenIndexes {
-			seen := seenInCollection[index]
-			if seen == 1 {
-				//Okay, we know our target number. Which cell was it?
-				for _, cell := range collection {
-					if cell.Possible(index + 1) {
-						//Found it... just make sure it's useful (it would be rare for it to not be).
-						result = newFillSolveStep(cell, index+1, technique)
-						if result.IsUseful(grid) {
-							return result
-						}
-						//Hmm, wasn't useful. Keep trying...
-					}
-				}
-			}
-		}
-	}
-	//Nope.
-	return nil
-}
-
 func (self pointingPairRow) Description(step *SolveStep) string {
 	if len(step.Nums) == 0 {
 		return ""
@@ -622,32 +585,6 @@ func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter f
 
 	}
 	return results
-}
-
-func DEPRECATEDnakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) *SolveStep {
-	//TODO: remove this
-	//TODO: randomize order we visit things.
-	var result *SolveStep
-	for _, i := range rand.Perm(DIM) {
-
-		groups := subsetCellsWithNPossibilities(k, collectionGetter(i))
-
-		if len(groups) > 0 {
-
-			for _, groupIndex := range rand.Perm(len(groups)) {
-
-				group := groups[groupIndex]
-
-				result = &SolveStep{collectionGetter(i).RemoveCells(group), group, group.PossibilitiesUnion(), technique}
-				if result.IsUseful(grid) {
-					return result
-				}
-				//Hmm, it's not actually useful. Keep going.
-			}
-		}
-
-	}
-	return nil
 }
 
 func subsetCellsWithNPossibilities(k int, inputCells CellList) []CellList {
