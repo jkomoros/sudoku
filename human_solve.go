@@ -45,7 +45,6 @@ type SolveTechnique interface {
 	//have at max 1 of easy (and more likely) techniques, this will systematically over-prefer more complex techniques.
 	//TODO: fix this.
 	MultiFind(*Grid) []*SolveStep
-	Find(*Grid) *SolveStep
 	IsFill() bool
 	//How difficult a real human would say this technique is. Generally inversely related to how often a real person would pick it. 0.0 to 1.0.
 	Difficulty() float64
@@ -211,12 +210,6 @@ func (self basicSolveTechnique) Difficulty() float64 {
 	return self.difficulty
 }
 
-//TODO: remove this; it's temporary during this refactor.
-
-func (self basicSolveTechnique) Find(grid *Grid) *SolveStep {
-	return nil
-}
-
 //TODO: remove this stub after rearchitecture is done.
 func (self basicSolveTechnique) MultiFind(grid *Grid) []*SolveStep {
 	return nil
@@ -298,22 +291,6 @@ func (self nakedSingleTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is the only remaining valid number for that cell", num)
 }
 
-func (self nakedSingleTechnique) Find(grid *Grid) *SolveStep {
-	//TODO: remove this function.
-	//This will be a random item
-	obj := grid.queue.NewGetter().GetSmallerThan(2)
-	if obj == nil {
-		//There weren't any cells with one option.
-		return nil
-	}
-	cell := obj.(*Cell)
-	result := newFillSolveStep(cell, cell.implicitNumber(), self)
-	if result.IsUseful(grid) {
-		return result
-	}
-	return nil
-}
-
 func (self nakedSingleTechnique) MultiFind(grid *Grid) []*SolveStep {
 	//TODO: test that this will find multiple if they exist.
 	var results []*SolveStep
@@ -343,14 +320,6 @@ func (self hiddenSingleInRow) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is required in the %d row, and %d is the only column it fits", num, cell.Row+1, cell.Col+1)
 }
 
-//TODO: remove this
-func (self hiddenSingleInRow) Find(grid *Grid) *SolveStep {
-	getter := func(index int) []*Cell {
-		return grid.Row(index)
-	}
-	return DEPRECATEDnecessaryInCollection(grid, self, getter)
-}
-
 func (self hiddenSingleInRow) MultiFind(grid *Grid) []*SolveStep {
 	//TODO: test that if there are multiple we find them both.
 	getter := func(index int) []*Cell {
@@ -369,14 +338,6 @@ func (self hiddenSingleInCol) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is required in the %d column, and %d is the only row it fits", num, cell.Row+1, cell.Col+1)
 }
 
-//TODO: remove this
-func (self hiddenSingleInCol) Find(grid *Grid) *SolveStep {
-	getter := func(index int) []*Cell {
-		return grid.Col(index)
-	}
-	return DEPRECATEDnecessaryInCollection(grid, self, getter)
-}
-
 func (self hiddenSingleInCol) MultiFind(grid *Grid) []*SolveStep {
 	//TODO: test this will find multiple if they exist.
 	getter := func(index int) []*Cell {
@@ -393,14 +354,6 @@ func (self hiddenSingleInBlock) Description(step *SolveStep) string {
 	cell := step.TargetCells[0]
 	num := step.Nums[0]
 	return fmt.Sprintf("%d is required in the %d block, and %d, %d is the only cell it fits", num, cell.Block+1, cell.Row+1, cell.Col+1)
-}
-
-//TODO: remove this after rearchitecture
-func (self hiddenSingleInBlock) Find(grid *Grid) *SolveStep {
-	getter := func(index int) []*Cell {
-		return grid.Block(index)
-	}
-	return DEPRECATEDnecessaryInCollection(grid, self, getter)
 }
 
 func (self hiddenSingleInBlock) MultiFind(grid *Grid) []*SolveStep {
@@ -523,38 +476,6 @@ func (self pointingPairRow) MultiFind(grid *Grid) []*SolveStep {
 	return results
 }
 
-//TODO: remove this old version.
-func (self pointingPairRow) Find(grid *Grid) *SolveStep {
-	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
-	//TODO: randomize order of blocks.
-	//TODO: this is substantially duplicated in pointingPaircol
-
-	var result *SolveStep
-
-	for _, i := range rand.Perm(DIM) {
-		block := grid.Block(i)
-
-		for _, num := range rand.Perm(DIM) {
-			cells := block.FilterByPossible(num + 1)
-			//cellList is now a list of all cells that have that number.
-			if len(cells) <= 1 || len(cells) > BLOCK_DIM {
-				//Meh, not a match.
-				continue
-			}
-			//Okay, it's possible it's a match. Are all rows the same?
-			if cells.SameRow() {
-				//Yup!
-				result = &SolveStep{grid.Row(cells.Row()).RemoveCells(block), cells, []int{num + 1}, self}
-				if result.IsUseful(grid) {
-					return result
-				}
-				//Hmm, guess it found some not-actually useful thing. Keep looking.
-			}
-		}
-	}
-	return nil
-}
-
 func (self pointingPairCol) Description(step *SolveStep) string {
 	if len(step.Nums) == 0 {
 		return ""
@@ -595,39 +516,6 @@ func (self pointingPairCol) MultiFind(grid *Grid) []*SolveStep {
 	return results
 }
 
-//TODO: remove this old one
-func (self pointingPairCol) Find(grid *Grid) *SolveStep {
-	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
-	//TODO: randomize order of blocks.
-	//TODO: this is substantially duplicated in pointingPairRow
-
-	var result *SolveStep
-
-	for _, i := range rand.Perm(DIM) {
-		block := grid.Block(i)
-		//TODO: randomize order of numbers to test for.
-
-		for _, num := range rand.Perm(DIM) {
-			cells := block.FilterByPossible(num + 1)
-			//cellList is now a list of all cells that have that number.
-			if len(cells) <= 1 || len(cells) > BLOCK_DIM {
-				//Meh, not a match.
-				continue
-			}
-			//Okay, are all cols?
-			if cells.SameCol() {
-				//Yup!
-				result = &SolveStep{grid.Col(cells.Col()).RemoveCells(block), cells, []int{num + 1}, self}
-				if result.IsUseful(grid) {
-					return result
-				}
-				//Hmm, guess it found some not-actually useful thing. Keep looking.
-			}
-		}
-	}
-	return nil
-}
-
 func (self nakedPairCol) Description(step *SolveStep) string {
 	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
 		return ""
@@ -641,14 +529,6 @@ func (self nakedPairCol) MultiFind(grid *Grid) []*SolveStep {
 		return grid.Col(i)
 	}
 	return nakedSubset(grid, self, 2, colGetter)
-}
-
-//TODO: remove this one
-func (self nakedPairCol) Find(grid *Grid) *SolveStep {
-	colGetter := func(i int) CellList {
-		return grid.Col(i)
-	}
-	return DEPRECATEDnakedSubset(grid, self, 2, colGetter)
 }
 
 func (self nakedPairRow) Description(step *SolveStep) string {
@@ -666,14 +546,6 @@ func (self nakedPairRow) MultiFind(grid *Grid) []*SolveStep {
 	return nakedSubset(grid, self, 2, rowGetter)
 }
 
-//TODO: remove this one
-func (self nakedPairRow) Find(grid *Grid) *SolveStep {
-	rowGetter := func(i int) CellList {
-		return grid.Row(i)
-	}
-	return DEPRECATEDnakedSubset(grid, self, 2, rowGetter)
-}
-
 func (self nakedPairBlock) Description(step *SolveStep) string {
 	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
 		return ""
@@ -687,14 +559,6 @@ func (self nakedPairBlock) MultiFind(grid *Grid) []*SolveStep {
 		return grid.Block(i)
 	}
 	return nakedSubset(grid, self, 2, blockGetter)
-}
-
-//TODO: remove this one.
-func (self nakedPairBlock) Find(grid *Grid) *SolveStep {
-	blockGetter := func(i int) CellList {
-		return grid.Block(i)
-	}
-	return DEPRECATEDnakedSubset(grid, self, 2, blockGetter)
 }
 
 func (self nakedTripleCol) Description(step *SolveStep) string {
@@ -712,14 +576,6 @@ func (self nakedTripleCol) MultiFind(grid *Grid) []*SolveStep {
 	return nakedSubset(grid, self, 3, colGetter)
 }
 
-//TODO: remove this one
-func (self nakedTripleCol) Find(grid *Grid) *SolveStep {
-	colGetter := func(i int) CellList {
-		return grid.Col(i)
-	}
-	return DEPRECATEDnakedSubset(grid, self, 3, colGetter)
-}
-
 func (self nakedTripleRow) Description(step *SolveStep) string {
 	if len(step.Nums) < 3 || len(step.PointerCells) < 3 {
 		return ""
@@ -735,14 +591,6 @@ func (self nakedTripleRow) MultiFind(grid *Grid) []*SolveStep {
 	return nakedSubset(grid, self, 3, rowGetter)
 }
 
-//TODO: deprecate this one.
-func (self nakedTripleRow) Find(grid *Grid) *SolveStep {
-	rowGetter := func(i int) CellList {
-		return grid.Row(i)
-	}
-	return DEPRECATEDnakedSubset(grid, self, 3, rowGetter)
-}
-
 func (self nakedTripleBlock) Description(step *SolveStep) string {
 	if len(step.Nums) < 3 || len(step.PointerCells) < 3 {
 		return ""
@@ -756,14 +604,6 @@ func (self nakedTripleBlock) MultiFind(grid *Grid) []*SolveStep {
 		return grid.Block(i)
 	}
 	return nakedSubset(grid, self, 3, blockGetter)
-}
-
-//TODO: remove this one
-func (self nakedTripleBlock) Find(grid *Grid) *SolveStep {
-	blockGetter := func(i int) CellList {
-		return grid.Block(i)
-	}
-	return DEPRECATEDnakedSubset(grid, self, 3, blockGetter)
 }
 
 func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) []*SolveStep {
