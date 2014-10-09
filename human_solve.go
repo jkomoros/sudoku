@@ -402,10 +402,10 @@ func (self pointingPairRow) Find(grid *Grid) *SolveStep {
 
 	var result *SolveStep
 
-	for i := 0; i < DIM; i++ {
+	for _, i := range rand.Perm(DIM) {
 		block := grid.Block(i)
-		//TODO: randomize order of numbers to test for.
-		for num := 0; num < DIM; num++ {
+
+		for _, num := range rand.Perm(DIM) {
 			cells := block.FilterByPossible(num + 1)
 			//cellList is now a list of all cells that have that number.
 			if len(cells) <= 1 || len(cells) > BLOCK_DIM {
@@ -440,10 +440,11 @@ func (self pointingPairCol) Find(grid *Grid) *SolveStep {
 
 	var result *SolveStep
 
-	for i := 0; i < DIM; i++ {
+	for _, i := range rand.Perm(DIM) {
 		block := grid.Block(i)
 		//TODO: randomize order of numbers to test for.
-		for num := 0; num < DIM; num++ {
+
+		for _, num := range rand.Perm(DIM) {
 			cells := block.FilterByPossible(num + 1)
 			//cellList is now a list of all cells that have that number.
 			if len(cells) <= 1 || len(cells) > BLOCK_DIM {
