@@ -750,6 +750,15 @@ func (self nakedTripleBlock) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d, %d and %d are only possible in (%d,%d), (%d,%d) and (%d,%d), which means that they can't be in any other cell in block %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row+1, step.PointerCells[2].Col+1, step.TargetCells.Block())
 }
 
+func (self nakedTripleBlock) MultiFind(grid *Grid) []*SolveStep {
+	//TODO: test that this will find multiple ones if they exist.
+	blockGetter := func(i int) CellList {
+		return grid.Block(i)
+	}
+	return nakedSubset(grid, self, 3, blockGetter)
+}
+
+//TODO: remove this one
 func (self nakedTripleBlock) Find(grid *Grid) *SolveStep {
 	blockGetter := func(i int) CellList {
 		return grid.Block(i)
