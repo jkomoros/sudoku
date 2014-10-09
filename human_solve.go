@@ -1076,22 +1076,21 @@ func (self *Grid) HumanSolve() SolveDirections {
 	for !self.Solved() {
 		//TODO: provide hints to the techniques of where to look based on the last filled cell
 
-		possibilitiesChan := make(chan *SolveStep)
+		possibilitiesChan := make(chan []*SolveStep)
 
 		var possibilities []*SolveStep
 
 		for _, technique := range Techniques {
 			go func(theTechnique SolveTechnique) {
-				possibilitiesChan <- theTechnique.Find(self)
+				possibilitiesChan <- theTechnique.MultiFind(self)
 			}(technique)
 		}
 
 		//Collect all of the results
 
 		for i := 0; i < numTechniques; i++ {
-			possibility := <-possibilitiesChan
 
-			if possibility != nil {
+			for _, possibility := range <-possibilitiesChan {
 				if possibility.IsUseful(self) {
 					possibilities = append(possibilities, possibility)
 				} else {
