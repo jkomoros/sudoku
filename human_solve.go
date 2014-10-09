@@ -681,6 +681,15 @@ func (self nakedPairBlock) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that they can't be in any other cell in block %d", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Block())
 }
 
+func (self nakedPairBlock) MultiFind(grid *Grid) []*SolveStep {
+	//TODO: test that this will return multiple if they exist.
+	blockGetter := func(i int) CellList {
+		return grid.Block(i)
+	}
+	return nakedSubset(grid, self, 2, blockGetter)
+}
+
+//TODO: remove this one.
 func (self nakedPairBlock) Find(grid *Grid) *SolveStep {
 	blockGetter := func(i int) CellList {
 		return grid.Block(i)

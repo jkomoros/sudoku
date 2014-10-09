@@ -427,11 +427,14 @@ func TestNakedPairBlock(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(NAKED_PAIR_BLOCK_GRID)
 	solver := &nakedPairBlock{}
-	step := solver.Find(grid)
-	if step == nil {
+	steps := solver.MultiFind(grid)
+	if len(steps) == 0 {
 		t.Log("The naked pair block didn't find a cell it should have.")
 		t.FailNow()
 	}
+
+	step := steps[0]
+
 	if len(step.TargetCells) != DIM-2 {
 		t.Log("The naked pair block had the wrong number of target cells")
 		t.Fail()
