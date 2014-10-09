@@ -162,12 +162,14 @@ func TestNecessaryInCol(t *testing.T) {
 
 	solver := &hiddenSingleInCol{}
 
-	step := solver.Find(grid)
+	steps := solver.MultiFind(grid)
 
-	if step == nil {
+	if len(steps) == 0 {
 		t.Log("The necessary in col technique did not solve a puzzle it should have.")
 		t.FailNow()
 	}
+
+	step := steps[0]
 
 	cellFromStep := step.TargetCells[0]
 

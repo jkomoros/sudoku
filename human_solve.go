@@ -343,6 +343,7 @@ func (self hiddenSingleInRow) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is required in the %d row, and %d is the only column it fits", num, cell.Row+1, cell.Col+1)
 }
 
+//TODO: remove this
 func (self hiddenSingleInRow) Find(grid *Grid) *SolveStep {
 	getter := func(index int) []*Cell {
 		return grid.Row(index)
@@ -368,11 +369,20 @@ func (self hiddenSingleInCol) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is required in the %d column, and %d is the only row it fits", num, cell.Row+1, cell.Col+1)
 }
 
+//TODO: remove this
 func (self hiddenSingleInCol) Find(grid *Grid) *SolveStep {
 	getter := func(index int) []*Cell {
 		return grid.Col(index)
 	}
 	return DEPRECATEDnecessaryInCollection(grid, self, getter)
+}
+
+func (self hiddenSingleInCol) MultiFind(grid *Grid) []*SolveStep {
+	//TODO: test this will find multiple if they exist.
+	getter := func(index int) []*Cell {
+		return grid.Col(index)
+	}
+	return necessaryInCollection(grid, self, getter)
 }
 
 func (self hiddenSingleInBlock) Description(step *SolveStep) string {
