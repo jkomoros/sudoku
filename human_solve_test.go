@@ -103,12 +103,14 @@ func TestNecessaryInRow(t *testing.T) {
 
 	solver := &hiddenSingleInRow{}
 
-	step := solver.Find(grid)
+	steps := solver.MultiFind(grid)
 
-	if step == nil {
+	if len(steps) == 0 {
 		t.Log("The necessary in row technique did not solve a puzzle it should have.")
 		t.FailNow()
 	}
+
+	step := steps[0]
 
 	cellFromStep := step.TargetCells[0]
 

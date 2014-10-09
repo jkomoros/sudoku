@@ -350,6 +350,14 @@ func (self hiddenSingleInRow) Find(grid *Grid) *SolveStep {
 	return DEPRECATEDnecessaryInCollection(grid, self, getter)
 }
 
+func (self hiddenSingleInRow) MultiFind(grid *Grid) []*SolveStep {
+	//TODO: test that if there are multiple we find them both.
+	getter := func(index int) []*Cell {
+		return grid.Row(index)
+	}
+	return necessaryInCollection(grid, self, getter)
+}
+
 func (self hiddenSingleInCol) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
 	if len(step.TargetCells) == 0 || len(step.Nums) == 0 {
@@ -421,6 +429,7 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 }
 
 func DEPRECATEDnecessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) []*Cell) *SolveStep {
+	//TODO: remove this after rearchitecture
 	//This will be a random item
 	indexes := rand.Perm(DIM)
 
