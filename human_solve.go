@@ -635,6 +635,15 @@ func (self nakedPairCol) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that they can't be in any other cell in column %d", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Col())
 }
 
+func (self nakedPairCol) MultiFind(grid *Grid) []*SolveStep {
+	//TODO: test that this will find multiple if they exist.
+	colGetter := func(i int) CellList {
+		return grid.Col(i)
+	}
+	return nakedSubset(grid, self, 2, colGetter)
+}
+
+//TODO: remove this one
 func (self nakedPairCol) Find(grid *Grid) *SolveStep {
 	colGetter := func(i int) CellList {
 		return grid.Col(i)

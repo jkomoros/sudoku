@@ -341,11 +341,14 @@ func TestNakedPairCol(t *testing.T) {
 	}
 
 	solver := &nakedPairCol{}
-	step := solver.Find(grid)
-	if step == nil {
+	steps := solver.MultiFind(grid)
+	if len(steps) == 0 {
 		t.Log("The naked pair col didn't find a cell it should have.")
 		t.FailNow()
 	}
+
+	step := steps[0]
+
 	if len(step.TargetCells) != DIM-2 {
 		t.Log("The naked pair col had the wrong number of target cells")
 		t.Fail()
