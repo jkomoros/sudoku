@@ -552,14 +552,15 @@ func (self nakedTripleBlock) Find(grid *Grid) *SolveStep {
 func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) *SolveStep {
 	//TODO: randomize order we visit things.
 	var result *SolveStep
-	for i := 0; i < DIM; i++ {
+	for _, i := range rand.Perm(DIM) {
 
 		groups := subsetCellsWithNPossibilities(k, collectionGetter(i))
 
 		if len(groups) > 0 {
-			//TODO: pick a random one instead of the first useful one.
 
-			for _, group := range groups {
+			for _, groupIndex := range rand.Perm(len(groups)) {
+
+				group := groups[groupIndex]
 
 				result = &SolveStep{collectionGetter(i).RemoveCells(group), group, group.PossibilitiesUnion(), technique}
 				if result.IsUseful(grid) {
