@@ -286,19 +286,23 @@ func (self nakedSingleTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is the only remaining valid number for that cell", num)
 }
 
-func (self nakedSingleTechnique) Find(grid *Grid) *SolveStep {
-	//This will be a random item
-	obj := grid.queue.NewGetter().GetSmallerThan(2)
-	if obj == nil {
-		//There weren't any cells with one option.
-		return nil
+func (self nakedSingleTechnique) Find(grid *Grid) []*SolveStep {
+
+	var results []*SolveStep
+	getter := grid.queue.NewGetter()
+	for {
+		obj := getter.GetSmallerThan(2)
+		if obj == nil {
+			//There weren't any cells with one option left.
+			//If there weren't any, period, then results is still nil already.
+			return results
+		}
+		cell := obj.(*Cell)
+		result := newFillSolveStep(cell, cell.implicitNumber(), self)
+		if result.IsUseful(grid) {
+			results = append(results, result)
+		}
 	}
-	cell := obj.(*Cell)
-	result := newFillSolveStep(cell, cell.implicitNumber(), self)
-	if result.IsUseful(grid) {
-		return result
-	}
-	return nil
 }
 
 func (self hiddenSingleInRow) Description(step *SolveStep) string {
