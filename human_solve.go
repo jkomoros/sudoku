@@ -727,6 +727,15 @@ func (self nakedTripleRow) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d, %d, and %d are only possible in (%d,%d), (%d, %d) and (%d,%d), which means that they can't be in any other cell in row %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row+1, step.PointerCells[2].Col+1, step.TargetCells.Row())
 }
 
+func (self nakedTripleRow) MultiFind(grid *Grid) []*SolveStep {
+	//TODO: test that if there are multiple we find them.
+	rowGetter := func(i int) CellList {
+		return grid.Row(i)
+	}
+	return nakedSubset(grid, self, 3, rowGetter)
+}
+
+//TODO: deprecate this one.
 func (self nakedTripleRow) Find(grid *Grid) *SolveStep {
 	rowGetter := func(i int) CellList {
 		return grid.Row(i)

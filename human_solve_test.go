@@ -469,12 +469,15 @@ func TestNakedTriple(t *testing.T) {
 	grid := NewGrid()
 	grid.LoadFromFile(puzzlePath("nakedtriplet2.sdk"))
 	solver := &nakedTripleRow{}
-	step := solver.Find(grid)
+	steps := solver.MultiFind(grid)
 
-	if step == nil {
+	if len(steps) == 0 {
 		t.Log("The naked triple row didn't find a cell it should have.")
 		t.FailNow()
 	}
+
+	step := steps[0]
+
 	if len(step.TargetCells) != DIM-3 {
 		t.Log("The naked triple row had the wrong number of target cells")
 		t.Fail()
