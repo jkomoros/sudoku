@@ -386,11 +386,14 @@ func TestNakedPairRow(t *testing.T) {
 	}
 	grid = grid.transpose()
 	solver := &nakedPairRow{}
-	step := solver.Find(grid)
-	if step == nil {
+	steps := solver.MultiFind(grid)
+	if len(steps) == 0 {
 		t.Log("The naked pair row didn't find a cell it should have.")
 		t.FailNow()
 	}
+
+	step := steps[0]
+
 	if len(step.TargetCells) != DIM-2 {
 		t.Log("The naked pair row had the wrong number of target cells")
 		t.Fail()
