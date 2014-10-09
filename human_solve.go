@@ -44,7 +44,8 @@ type SolveTechnique interface {
 	//However, HumanSolve assumes that we will pick a step randomly at any point based on its difficulty proportion. Because we will only
 	//have at max 1 of easy (and more likely) techniques, this will systematically over-prefer more complex techniques.
 	//TODO: fix this.
-	Find(*Grid) []*SolveStep
+	MultiFind(*Grid) []*SolveStep
+	Find(*Grid) *SolveStep
 	IsFill() bool
 	//How difficult a real human would say this technique is. Generally inversely related to how often a real person would pick it. 0.0 to 1.0.
 	Difficulty() float64
@@ -210,6 +211,17 @@ func (self basicSolveTechnique) Difficulty() float64 {
 	return self.difficulty
 }
 
+//TODO: remove this; it's temporary during this refactor.
+
+func (self basicSolveTechnique) Find(grid *Grid) *SolveStep {
+	return nil
+}
+
+//TODO: remove this stub after rearchitecture is done.
+func (self basicSolveTechnique) MultiFind(grid *Grid) []*SolveStep {
+	return nil
+}
+
 func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
 	cellArr := []*Cell{cell}
 	numArr := []int{num}
@@ -286,8 +298,24 @@ func (self nakedSingleTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is the only remaining valid number for that cell", num)
 }
 
-func (self nakedSingleTechnique) Find(grid *Grid) []*SolveStep {
+func (self nakedSingleTechnique) Find(grid *Grid) *SolveStep {
+	//TODO: remove this function.
+	//This will be a random item
+	obj := grid.queue.NewGetter().GetSmallerThan(2)
+	if obj == nil {
+		//There weren't any cells with one option.
+		return nil
+	}
+	cell := obj.(*Cell)
+	result := newFillSolveStep(cell, cell.implicitNumber(), self)
+	if result.IsUseful(grid) {
+		return result
+	}
+	return nil
+}
 
+func (self nakedSingleTechnique) MultiFind(grid *Grid) []*SolveStep {
+	//TODO: test that this will find multiple if they exist.
 	var results []*SolveStep
 	getter := grid.queue.NewGetter()
 	for {
