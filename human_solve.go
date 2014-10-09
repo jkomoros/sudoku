@@ -395,11 +395,20 @@ func (self hiddenSingleInBlock) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is required in the %d block, and %d, %d is the only cell it fits", num, cell.Block+1, cell.Row+1, cell.Col+1)
 }
 
+//TODO: remove this after rearchitecture
 func (self hiddenSingleInBlock) Find(grid *Grid) *SolveStep {
 	getter := func(index int) []*Cell {
 		return grid.Block(index)
 	}
 	return DEPRECATEDnecessaryInCollection(grid, self, getter)
+}
+
+func (self hiddenSingleInBlock) MultiFind(grid *Grid) []*SolveStep {
+	//TODO: Verify we find multiples if they exist.
+	getter := func(index int) []*Cell {
+		return grid.Block(index)
+	}
+	return necessaryInCollection(grid, self, getter)
 }
 
 func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) []*Cell) []*SolveStep {
