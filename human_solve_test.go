@@ -46,7 +46,7 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 
 	solver := &nakedSingleTechnique{}
 
-	steps := solver.MultiFind(grid)
+	steps := solver.Find(grid)
 
 	if len(steps) == 0 {
 		t.Log("The only legal number technique did not solve a puzzle it should have.")
@@ -103,7 +103,7 @@ func TestNecessaryInRow(t *testing.T) {
 
 	solver := &hiddenSingleInRow{}
 
-	steps := solver.MultiFind(grid)
+	steps := solver.Find(grid)
 
 	if len(steps) == 0 {
 		t.Log("The necessary in row technique did not solve a puzzle it should have.")
@@ -162,7 +162,7 @@ func TestNecessaryInCol(t *testing.T) {
 
 	solver := &hiddenSingleInCol{}
 
-	steps := solver.MultiFind(grid)
+	steps := solver.Find(grid)
 
 	if len(steps) == 0 {
 		t.Log("The necessary in col technique did not solve a puzzle it should have.")
@@ -221,7 +221,7 @@ func TestNecessaryInBlock(t *testing.T) {
 
 	solver := &hiddenSingleInBlock{}
 
-	steps := solver.MultiFind(grid)
+	steps := solver.Find(grid)
 
 	if len(steps) == 0 {
 		t.Log("The necessary in block technique did not solve a puzzle it should have.")
@@ -257,7 +257,7 @@ func TestPointingPairCol(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(POINTING_PAIR_COL_GRID)
 	solver := &pointingPairCol{}
-	steps := solver.MultiFind(grid)
+	steps := solver.Find(grid)
 	if len(steps) == 0 {
 		t.Log("The pointing pair col didn't find a cell it should have")
 		t.FailNow()
@@ -297,7 +297,7 @@ func TestPointingPairRow(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(POINTING_PAIR_ROW_GRID)
 	solver := &pointingPairRow{}
-	steps := solver.MultiFind(grid)
+	steps := solver.Find(grid)
 	if len(steps) == 0 {
 		t.Log("The pointing pair row didn't find a cell it should have")
 		t.FailNow()
@@ -341,7 +341,7 @@ func TestNakedPairCol(t *testing.T) {
 	}
 
 	solver := &nakedPairCol{}
-	steps := solver.MultiFind(grid)
+	steps := solver.Find(grid)
 	if len(steps) == 0 {
 		t.Log("The naked pair col didn't find a cell it should have.")
 		t.FailNow()
@@ -386,7 +386,7 @@ func TestNakedPairRow(t *testing.T) {
 	}
 	grid = grid.transpose()
 	solver := &nakedPairRow{}
-	steps := solver.MultiFind(grid)
+	steps := solver.Find(grid)
 	if len(steps) == 0 {
 		t.Log("The naked pair row didn't find a cell it should have.")
 		t.FailNow()
@@ -427,7 +427,7 @@ func TestNakedPairBlock(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(NAKED_PAIR_BLOCK_GRID)
 	solver := &nakedPairBlock{}
-	steps := solver.MultiFind(grid)
+	steps := solver.Find(grid)
 	if len(steps) == 0 {
 		t.Log("The naked pair block didn't find a cell it should have.")
 		t.FailNow()
@@ -469,7 +469,7 @@ func TestNakedTriple(t *testing.T) {
 	grid := NewGrid()
 	grid.LoadFromFile(puzzlePath("nakedtriplet2.sdk"))
 	solver := &nakedTripleRow{}
-	steps := solver.MultiFind(grid)
+	steps := solver.Find(grid)
 
 	if len(steps) == 0 {
 		t.Log("The naked triple row didn't find a cell it should have.")
