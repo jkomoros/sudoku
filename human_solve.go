@@ -347,7 +347,7 @@ func (self hiddenSingleInRow) Find(grid *Grid) *SolveStep {
 	getter := func(index int) []*Cell {
 		return grid.Row(index)
 	}
-	return necessaryInCollection(grid, self, getter)
+	return DEPRECATEDnecessaryInCollection(grid, self, getter)
 }
 
 func (self hiddenSingleInCol) Description(step *SolveStep) string {
@@ -364,7 +364,7 @@ func (self hiddenSingleInCol) Find(grid *Grid) *SolveStep {
 	getter := func(index int) []*Cell {
 		return grid.Col(index)
 	}
-	return necessaryInCollection(grid, self, getter)
+	return DEPRECATEDnecessaryInCollection(grid, self, getter)
 }
 
 func (self hiddenSingleInBlock) Description(step *SolveStep) string {
@@ -381,10 +381,46 @@ func (self hiddenSingleInBlock) Find(grid *Grid) *SolveStep {
 	getter := func(index int) []*Cell {
 		return grid.Block(index)
 	}
-	return necessaryInCollection(grid, self, getter)
+	return DEPRECATEDnecessaryInCollection(grid, self, getter)
 }
 
-func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) []*Cell) *SolveStep {
+func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) []*Cell) []*SolveStep {
+	//This will be a random item
+	indexes := rand.Perm(DIM)
+
+	var results []*SolveStep
+
+	for _, i := range indexes {
+		seenInCollection := make([]int, DIM)
+		collection := collectionGetter(i)
+		for _, cell := range collection {
+			for _, possibility := range cell.Possibilities() {
+				seenInCollection[possibility-1]++
+			}
+		}
+		seenIndexes := rand.Perm(DIM)
+		for _, index := range seenIndexes {
+			seen := seenInCollection[index]
+			if seen == 1 {
+				//Okay, we know our target number. Which cell was it?
+				for _, cell := range collection {
+					if cell.Possible(index + 1) {
+						//Found it... just make sure it's useful (it would be rare for it to not be).
+						result := newFillSolveStep(cell, index+1, technique)
+						if result.IsUseful(grid) {
+							results = append(results, result)
+							break
+						}
+						//Hmm, wasn't useful. Keep trying...
+					}
+				}
+			}
+		}
+	}
+	return results
+}
+
+func DEPRECATEDnecessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) []*Cell) *SolveStep {
 	//This will be a random item
 	indexes := rand.Perm(DIM)
 
