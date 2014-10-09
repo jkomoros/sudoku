@@ -40,11 +40,9 @@ type SolveTechnique interface {
 	Description(*SolveStep) string
 	//IMPORTANT: a step should return a step IFF that step is valid AND the step would cause useful work to be done if applied.
 
-	//NOTE: this is a critical weakness, because it allows each technique to find only one step, even though multiple might apply.
-	//However, HumanSolve assumes that we will pick a step randomly at any point based on its difficulty proportion. Because we will only
-	//have at max 1 of easy (and more likely) techniques, this will systematically over-prefer more complex techniques.
-	//TODO: fix this.
-	Find(*Grid) *SolveStep
+	//Find returns as many steps as it can find in the grid for that technique. This helps ensure that when we pick a step,
+	//it's more likely to be an "easy" step because there will be more of them at any time.
+	Find(*Grid) []*SolveStep
 	IsFill() bool
 	//How difficult a real human would say this technique is. Generally inversely related to how often a real person would pick it. 0.0 to 1.0.
 	Difficulty() float64
@@ -286,19 +284,23 @@ func (self nakedSingleTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is the only remaining valid number for that cell", num)
 }
 
-func (self nakedSingleTechnique) Find(grid *Grid) *SolveStep {
-	//This will be a random item
-	obj := grid.queue.NewGetter().GetSmallerThan(2)
-	if obj == nil {
-		//There weren't any cells with one option.
-		return nil
+func (self nakedSingleTechnique) Find(grid *Grid) []*SolveStep {
+	//TODO: test that this will find multiple if they exist.
+	var results []*SolveStep
+	getter := grid.queue.NewGetter()
+	for {
+		obj := getter.GetSmallerThan(2)
+		if obj == nil {
+			//There weren't any cells with one option left.
+			//If there weren't any, period, then results is still nil already.
+			return results
+		}
+		cell := obj.(*Cell)
+		result := newFillSolveStep(cell, cell.implicitNumber(), self)
+		if result.IsUseful(grid) {
+			results = append(results, result)
+		}
 	}
-	cell := obj.(*Cell)
-	result := newFillSolveStep(cell, cell.implicitNumber(), self)
-	if result.IsUseful(grid) {
-		return result
-	}
-	return nil
 }
 
 func (self hiddenSingleInRow) Description(step *SolveStep) string {
@@ -311,7 +313,8 @@ func (self hiddenSingleInRow) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is required in the %d row, and %d is the only column it fits", num, cell.Row+1, cell.Col+1)
 }
 
-func (self hiddenSingleInRow) Find(grid *Grid) *SolveStep {
+func (self hiddenSingleInRow) Find(grid *Grid) []*SolveStep {
+	//TODO: test that if there are multiple we find them both.
 	getter := func(index int) []*Cell {
 		return grid.Row(index)
 	}
@@ -328,7 +331,8 @@ func (self hiddenSingleInCol) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is required in the %d column, and %d is the only row it fits", num, cell.Row+1, cell.Col+1)
 }
 
-func (self hiddenSingleInCol) Find(grid *Grid) *SolveStep {
+func (self hiddenSingleInCol) Find(grid *Grid) []*SolveStep {
+	//TODO: test this will find multiple if they exist.
 	getter := func(index int) []*Cell {
 		return grid.Col(index)
 	}
@@ -345,14 +349,52 @@ func (self hiddenSingleInBlock) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is required in the %d block, and %d, %d is the only cell it fits", num, cell.Block+1, cell.Row+1, cell.Col+1)
 }
 
-func (self hiddenSingleInBlock) Find(grid *Grid) *SolveStep {
+func (self hiddenSingleInBlock) Find(grid *Grid) []*SolveStep {
+	//TODO: Verify we find multiples if they exist.
 	getter := func(index int) []*Cell {
 		return grid.Block(index)
 	}
 	return necessaryInCollection(grid, self, getter)
 }
 
-func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) []*Cell) *SolveStep {
+func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) []*Cell) []*SolveStep {
+	//This will be a random item
+	indexes := rand.Perm(DIM)
+
+	var results []*SolveStep
+
+	for _, i := range indexes {
+		seenInCollection := make([]int, DIM)
+		collection := collectionGetter(i)
+		for _, cell := range collection {
+			for _, possibility := range cell.Possibilities() {
+				seenInCollection[possibility-1]++
+			}
+		}
+		seenIndexes := rand.Perm(DIM)
+		for _, index := range seenIndexes {
+			seen := seenInCollection[index]
+			if seen == 1 {
+				//Okay, we know our target number. Which cell was it?
+				for _, cell := range collection {
+					if cell.Possible(index + 1) {
+						//Found it... just make sure it's useful (it would be rare for it to not be).
+						result := newFillSolveStep(cell, index+1, technique)
+						if result.IsUseful(grid) {
+							results = append(results, result)
+							break
+						}
+						//Hmm, wasn't useful. Keep trying...
+					}
+				}
+			}
+		}
+	}
+	return results
+}
+
+func DEPRECATEDnecessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) []*Cell) *SolveStep {
+	//TODO: remove this after rearchitecture
 	//This will be a random item
 	indexes := rand.Perm(DIM)
 
@@ -395,12 +437,13 @@ func (self pointingPairRow) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is only possible in row %d of block %d, which means it can't be in any other cell in that row not in that block", step.Nums[0], step.TargetCells.Row(), step.PointerCells.Block())
 }
 
-func (self pointingPairRow) Find(grid *Grid) *SolveStep {
+func (self pointingPairRow) Find(grid *Grid) []*SolveStep {
 	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
 	//TODO: randomize order of blocks.
 	//TODO: this is substantially duplicated in pointingPaircol
+	//TODO: test this returns multiple if they exist.
 
-	var result *SolveStep
+	var results []*SolveStep
 
 	for _, i := range rand.Perm(DIM) {
 		block := grid.Block(i)
@@ -415,15 +458,15 @@ func (self pointingPairRow) Find(grid *Grid) *SolveStep {
 			//Okay, it's possible it's a match. Are all rows the same?
 			if cells.SameRow() {
 				//Yup!
-				result = &SolveStep{grid.Row(cells.Row()).RemoveCells(block), cells, []int{num + 1}, self}
+				result := &SolveStep{grid.Row(cells.Row()).RemoveCells(block), cells, []int{num + 1}, self}
 				if result.IsUseful(grid) {
-					return result
+					results = append(results, result)
 				}
-				//Hmm, guess it found some not-actually useful thing. Keep looking.
+				//Keep looking for more!
 			}
 		}
 	}
-	return nil
+	return results
 }
 
 func (self pointingPairCol) Description(step *SolveStep) string {
@@ -433,12 +476,13 @@ func (self pointingPairCol) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is only possible in column %d of block %d, which means it can't be in any other cell in that column not in that block", step.Nums[0], step.TargetCells.Col(), step.PointerCells.Block())
 }
 
-func (self pointingPairCol) Find(grid *Grid) *SolveStep {
+func (self pointingPairCol) Find(grid *Grid) []*SolveStep {
 	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
 	//TODO: randomize order of blocks.
 	//TODO: this is substantially duplicated in pointingPairRow
+	//TODO: test this will find multiple if they exist.
 
-	var result *SolveStep
+	var results []*SolveStep
 
 	for _, i := range rand.Perm(DIM) {
 		block := grid.Block(i)
@@ -454,15 +498,15 @@ func (self pointingPairCol) Find(grid *Grid) *SolveStep {
 			//Okay, are all cols?
 			if cells.SameCol() {
 				//Yup!
-				result = &SolveStep{grid.Col(cells.Col()).RemoveCells(block), cells, []int{num + 1}, self}
+				result := &SolveStep{grid.Col(cells.Col()).RemoveCells(block), cells, []int{num + 1}, self}
 				if result.IsUseful(grid) {
-					return result
+					results = append(results, result)
 				}
-				//Hmm, guess it found some not-actually useful thing. Keep looking.
+				//Keep looking!
 			}
 		}
 	}
-	return nil
+	return results
 }
 
 func (self nakedPairCol) Description(step *SolveStep) string {
@@ -472,7 +516,8 @@ func (self nakedPairCol) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that they can't be in any other cell in column %d", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Col())
 }
 
-func (self nakedPairCol) Find(grid *Grid) *SolveStep {
+func (self nakedPairCol) Find(grid *Grid) []*SolveStep {
+	//TODO: test that this will find multiple if they exist.
 	colGetter := func(i int) CellList {
 		return grid.Col(i)
 	}
@@ -486,7 +531,8 @@ func (self nakedPairRow) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that they can't be in any other cell in row %d", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Row())
 }
 
-func (self nakedPairRow) Find(grid *Grid) *SolveStep {
+func (self nakedPairRow) Find(grid *Grid) []*SolveStep {
+	//TODO: test we find multiple if they exist.
 	rowGetter := func(i int) CellList {
 		return grid.Row(i)
 	}
@@ -500,7 +546,8 @@ func (self nakedPairBlock) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that they can't be in any other cell in block %d", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Block())
 }
 
-func (self nakedPairBlock) Find(grid *Grid) *SolveStep {
+func (self nakedPairBlock) Find(grid *Grid) []*SolveStep {
+	//TODO: test that this will return multiple if they exist.
 	blockGetter := func(i int) CellList {
 		return grid.Block(i)
 	}
@@ -514,7 +561,8 @@ func (self nakedTripleCol) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d, %d, and %d are only possible in (%d,%d), (%d,%d) and (%d,%d), which means that they can't be in any other cell in column %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Col())
 }
 
-func (self nakedTripleCol) Find(grid *Grid) *SolveStep {
+func (self nakedTripleCol) Find(grid *Grid) []*SolveStep {
+	//TODO: test we find multiple if they exist.
 	colGetter := func(i int) CellList {
 		return grid.Col(i)
 	}
@@ -528,7 +576,8 @@ func (self nakedTripleRow) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d, %d, and %d are only possible in (%d,%d), (%d, %d) and (%d,%d), which means that they can't be in any other cell in row %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row+1, step.PointerCells[2].Col+1, step.TargetCells.Row())
 }
 
-func (self nakedTripleRow) Find(grid *Grid) *SolveStep {
+func (self nakedTripleRow) Find(grid *Grid) []*SolveStep {
+	//TODO: test that if there are multiple we find them.
 	rowGetter := func(i int) CellList {
 		return grid.Row(i)
 	}
@@ -542,14 +591,41 @@ func (self nakedTripleBlock) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d, %d and %d are only possible in (%d,%d), (%d,%d) and (%d,%d), which means that they can't be in any other cell in block %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row+1, step.PointerCells[2].Col+1, step.TargetCells.Block())
 }
 
-func (self nakedTripleBlock) Find(grid *Grid) *SolveStep {
+func (self nakedTripleBlock) Find(grid *Grid) []*SolveStep {
+	//TODO: test that this will find multiple ones if they exist.
 	blockGetter := func(i int) CellList {
 		return grid.Block(i)
 	}
 	return nakedSubset(grid, self, 3, blockGetter)
 }
 
-func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) *SolveStep {
+func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) []*SolveStep {
+	//TODO: randomize order we visit things.
+	var results []*SolveStep
+	for _, i := range rand.Perm(DIM) {
+
+		groups := subsetCellsWithNPossibilities(k, collectionGetter(i))
+
+		if len(groups) > 0 {
+
+			for _, groupIndex := range rand.Perm(len(groups)) {
+
+				group := groups[groupIndex]
+
+				result := &SolveStep{collectionGetter(i).RemoveCells(group), group, group.PossibilitiesUnion(), technique}
+				if result.IsUseful(grid) {
+					results = append(results, result)
+				}
+				//Keep going
+			}
+		}
+
+	}
+	return results
+}
+
+func DEPRECATEDnakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) *SolveStep {
+	//TODO: remove this
 	//TODO: randomize order we visit things.
 	var result *SolveStep
 	for _, i := range rand.Perm(DIM) {
@@ -824,6 +900,7 @@ func (self *Grid) HumanSolution() SolveDirections {
 }
 
 func (self *Grid) HumanSolve() SolveDirections {
+
 	var results []*SolveStep
 	numTechniques := len(Techniques)
 
@@ -833,7 +910,7 @@ func (self *Grid) HumanSolve() SolveDirections {
 	for !self.Solved() {
 		//TODO: provide hints to the techniques of where to look based on the last filled cell
 
-		possibilitiesChan := make(chan *SolveStep)
+		possibilitiesChan := make(chan []*SolveStep)
 
 		var possibilities []*SolveStep
 
@@ -846,9 +923,8 @@ func (self *Grid) HumanSolve() SolveDirections {
 		//Collect all of the results
 
 		for i := 0; i < numTechniques; i++ {
-			possibility := <-possibilitiesChan
 
-			if possibility != nil {
+			for _, possibility := range <-possibilitiesChan {
 				if possibility.IsUseful(self) {
 					possibilities = append(possibilities, possibility)
 				} else {
@@ -862,6 +938,9 @@ func (self *Grid) HumanSolve() SolveDirections {
 			//Hmm, didn't find any possivbilities. We failed. :-(
 			break
 		}
+
+		//TODO: consider if we should stop picking techniques based on their weight here.
+		//Now that Find returns a slice instead of a single, we're already much more likely to select an "easy" technique. ... Right?
 
 		possibilitiesWeights := make([]float64, len(possibilities))
 		for i, possibility := range possibilities {

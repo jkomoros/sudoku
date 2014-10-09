@@ -46,12 +46,14 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 
 	solver := &nakedSingleTechnique{}
 
-	step := solver.Find(grid)
+	steps := solver.Find(grid)
 
-	if step == nil {
+	if len(steps) == 0 {
 		t.Log("The only legal number technique did not solve a puzzle it should have.")
 		t.FailNow()
 	}
+
+	step := steps[0]
 
 	cellFromStep := step.TargetCells[0]
 
@@ -101,12 +103,14 @@ func TestNecessaryInRow(t *testing.T) {
 
 	solver := &hiddenSingleInRow{}
 
-	step := solver.Find(grid)
+	steps := solver.Find(grid)
 
-	if step == nil {
+	if len(steps) == 0 {
 		t.Log("The necessary in row technique did not solve a puzzle it should have.")
 		t.FailNow()
 	}
+
+	step := steps[0]
 
 	cellFromStep := step.TargetCells[0]
 
@@ -158,12 +162,14 @@ func TestNecessaryInCol(t *testing.T) {
 
 	solver := &hiddenSingleInCol{}
 
-	step := solver.Find(grid)
+	steps := solver.Find(grid)
 
-	if step == nil {
+	if len(steps) == 0 {
 		t.Log("The necessary in col technique did not solve a puzzle it should have.")
 		t.FailNow()
 	}
+
+	step := steps[0]
 
 	cellFromStep := step.TargetCells[0]
 
@@ -215,12 +221,14 @@ func TestNecessaryInBlock(t *testing.T) {
 
 	solver := &hiddenSingleInBlock{}
 
-	step := solver.Find(grid)
+	steps := solver.Find(grid)
 
-	if step == nil {
+	if len(steps) == 0 {
 		t.Log("The necessary in block technique did not solve a puzzle it should have.")
 		t.FailNow()
 	}
+
+	step := steps[0]
 
 	cellFromStep := step.TargetCells[0]
 
@@ -249,11 +257,14 @@ func TestPointingPairCol(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(POINTING_PAIR_COL_GRID)
 	solver := &pointingPairCol{}
-	step := solver.Find(grid)
-	if step == nil {
+	steps := solver.Find(grid)
+	if len(steps) == 0 {
 		t.Log("The pointing pair col didn't find a cell it should have")
 		t.FailNow()
 	}
+
+	step := steps[0]
+
 	if len(step.TargetCells) != BLOCK_DIM*2 {
 		t.Log("The pointing pair col gave back the wrong number of target cells")
 		t.Fail()
@@ -286,11 +297,14 @@ func TestPointingPairRow(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(POINTING_PAIR_ROW_GRID)
 	solver := &pointingPairRow{}
-	step := solver.Find(grid)
-	if step == nil {
+	steps := solver.Find(grid)
+	if len(steps) == 0 {
 		t.Log("The pointing pair row didn't find a cell it should have")
 		t.FailNow()
 	}
+
+	step := steps[0]
+
 	if len(step.TargetCells) != BLOCK_DIM*2 {
 		t.Log("The pointing pair row gave back the wrong number of target cells")
 		t.Fail()
@@ -327,11 +341,14 @@ func TestNakedPairCol(t *testing.T) {
 	}
 
 	solver := &nakedPairCol{}
-	step := solver.Find(grid)
-	if step == nil {
+	steps := solver.Find(grid)
+	if len(steps) == 0 {
 		t.Log("The naked pair col didn't find a cell it should have.")
 		t.FailNow()
 	}
+
+	step := steps[0]
+
 	if len(step.TargetCells) != DIM-2 {
 		t.Log("The naked pair col had the wrong number of target cells")
 		t.Fail()
@@ -369,11 +386,14 @@ func TestNakedPairRow(t *testing.T) {
 	}
 	grid = grid.transpose()
 	solver := &nakedPairRow{}
-	step := solver.Find(grid)
-	if step == nil {
+	steps := solver.Find(grid)
+	if len(steps) == 0 {
 		t.Log("The naked pair row didn't find a cell it should have.")
 		t.FailNow()
 	}
+
+	step := steps[0]
+
 	if len(step.TargetCells) != DIM-2 {
 		t.Log("The naked pair row had the wrong number of target cells")
 		t.Fail()
@@ -407,11 +427,14 @@ func TestNakedPairBlock(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(NAKED_PAIR_BLOCK_GRID)
 	solver := &nakedPairBlock{}
-	step := solver.Find(grid)
-	if step == nil {
+	steps := solver.Find(grid)
+	if len(steps) == 0 {
 		t.Log("The naked pair block didn't find a cell it should have.")
 		t.FailNow()
 	}
+
+	step := steps[0]
+
 	if len(step.TargetCells) != DIM-2 {
 		t.Log("The naked pair block had the wrong number of target cells")
 		t.Fail()
@@ -446,12 +469,15 @@ func TestNakedTriple(t *testing.T) {
 	grid := NewGrid()
 	grid.LoadFromFile(puzzlePath("nakedtriplet2.sdk"))
 	solver := &nakedTripleRow{}
-	step := solver.Find(grid)
+	steps := solver.Find(grid)
 
-	if step == nil {
+	if len(steps) == 0 {
 		t.Log("The naked triple row didn't find a cell it should have.")
 		t.FailNow()
 	}
+
+	step := steps[0]
+
 	if len(step.TargetCells) != DIM-3 {
 		t.Log("The naked triple row had the wrong number of target cells")
 		t.Fail()
