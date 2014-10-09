@@ -44,7 +44,7 @@ type SolveTechnique interface {
 	//However, HumanSolve assumes that we will pick a step randomly at any point based on its difficulty proportion. Because we will only
 	//have at max 1 of easy (and more likely) techniques, this will systematically over-prefer more complex techniques.
 	//TODO: fix this.
-	Find(*Grid) *SolveStep
+	Find(*Grid) []*SolveStep
 	IsFill() bool
 	//How difficult a real human would say this technique is. Generally inversely related to how often a real person would pick it. 0.0 to 1.0.
 	Difficulty() float64
