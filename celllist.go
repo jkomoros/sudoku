@@ -125,6 +125,7 @@ func (self CellList) PossibilitiesUnion() IntSlice {
 }
 
 func (self CellList) Subset(indexes IntSlice) CellList {
+	//IntSlice.Subset is basically a carbon copy.
 	//TODO: what's this behavior if indexes has dupes? What SHOULD it be?
 	result := make(CellList, len(indexes))
 	max := len(self)
@@ -265,4 +266,20 @@ func (self IntSlice) SameAs(other IntSlice) bool {
 		}
 	}
 	return true
+}
+
+func (self IntSlice) Subset(indexes IntSlice) IntSlice {
+	//TODO: test this.
+	//Basically a carbon copy of CellList.Subset
+	//TODO: what's this behavior if indexes has dupes? What SHOULD it be?
+	result := make(IntSlice, len(indexes))
+	max := len(self)
+	for i, index := range indexes {
+		if index >= max {
+			//This probably is indicative of a larger problem.
+			continue
+		}
+		result[i] = self[index]
+	}
+	return result
 }
