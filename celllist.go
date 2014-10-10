@@ -125,6 +125,7 @@ func (self CellList) PossibilitiesUnion() IntSlice {
 }
 
 func (self CellList) Subset(indexes IntSlice) CellList {
+	//TODO: what's this behavior if indexes has dupes? What SHOULD it be?
 	result := make(CellList, len(indexes))
 	max := len(self)
 	for i, index := range indexes {
@@ -134,6 +135,31 @@ func (self CellList) Subset(indexes IntSlice) CellList {
 		}
 		result[i] = self[index]
 	}
+	return result
+}
+
+func (self CellList) InverseSubset(indexes IntSlice) CellList {
+	//TODO: figure out what this should do when presented with dupes.
+
+	//LIke Subset, but returns all of the items NOT called out in indexes.
+	var result CellList
+
+	//Ensure indexes are in sorted order.
+	sort.Ints(indexes)
+
+	//Index into indexes we're considering
+	currentIndex := 0
+
+	for i := 0; i < len(self); i++ {
+		if currentIndex < len(indexes) && i == indexes[currentIndex] {
+			//Skip it!
+			currentIndex++
+		} else {
+			//Output it!
+			result = append(result, self[i])
+		}
+	}
+
 	return result
 }
 

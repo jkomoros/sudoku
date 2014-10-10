@@ -114,6 +114,26 @@ func TestIntList(t *testing.T) {
 	}
 }
 
+func TestInverseSubset(t *testing.T) {
+	grid := NewGrid()
+	cells := grid.Row(0)
+
+	indexes := IntSlice([]int{4, 6, 2})
+
+	subset := cells.InverseSubset(indexes)
+
+	if len(subset) != DIM-3 {
+		t.Error("Inverse subset gave wrong number of results")
+	}
+
+	for _, cell := range subset {
+		if cell.Col == 2 || cell.Col == 4 || cell.Col == 6 {
+			t.Error("Inverse subset included cells it shouldn't have.")
+		}
+	}
+
+}
+
 func TestSameContentAs(t *testing.T) {
 	one := IntSlice([]int{2, 3, 1})
 	two := IntSlice([]int{2, 1, 3})
