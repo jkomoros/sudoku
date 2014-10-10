@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"sort"
 	"testing"
 )
 
@@ -132,6 +133,23 @@ func TestInverseSubset(t *testing.T) {
 		}
 	}
 
+}
+
+func TestIntSliceIntersection(t *testing.T) {
+	one := IntSlice([]int{1, 3, 2, 5})
+	two := IntSlice([]int{2, 7, 6, 5})
+
+	result := one.Intersection(two)
+
+	if len(result) != 2 {
+		t.Error("Intersection had wrong number of items")
+	}
+
+	sort.Ints(result)
+
+	if result[0] != 2 || result[1] != 5 {
+		t.Error("Intersection result was wrong.")
+	}
 }
 
 func TestSameContentAs(t *testing.T) {
