@@ -587,8 +587,11 @@ func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter f
 	return results
 }
 
+//***********
+//TODO: (NEXT STEP) test this!
+//***********
 //TODO: come up with a better name for this HiddenSubset technique helper method
-func subsetCellsWithUniqueNPossibilities(k int, inputCells CellList) ([]CellList, []IntSlice) {
+func subsetCellsWithNUniquePossibilities(k int, inputCells CellList) ([]CellList, []IntSlice) {
 	//Given a list of cells (often a row, col, or block) and a target group size K,
 	//returns a list of groups of cells of size K where all of the cells have K
 	//candidates that don't appear anywhere else in the group.
