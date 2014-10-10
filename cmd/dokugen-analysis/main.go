@@ -26,7 +26,7 @@ const _PENALTY_PERCENTAGE_CUTOFF = 0.01
 const _MATRIX_DIFFERENCE_CUTOFF = 0.00001
 const _MAX_MATRIX_POWER = 250
 
-//Making this number much higher does not improve R2.
+//Making this number much higher does not improve R2, even for very high numbers like 500.
 const _NUMBER_OF_HUMAN_SOLVES = 10
 
 //How many solves a user must have to have their relative scale included.
