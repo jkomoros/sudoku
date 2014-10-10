@@ -587,6 +587,42 @@ func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter f
 	return results
 }
 
+//TODO: come up with a better name for this HiddenSubset technique helper method
+func subsetCellsWithUniqueNPossibilities(k int, inputCells CellList) ([]CellList, []IntSlice) {
+	//Given a list of cells (often a row, col, or block) and a target group size K,
+	//returns a list of groups of cells of size K where all of the cells have K
+	//candidates that don't appear anywhere else in the group.
+
+	//TODO: note the runtime complexity (if it's large)
+
+	//First, cull any cells with no possibilities to help minimize n
+	cells := inputCells.FilterByHasPossibilities()
+
+	var cellResults []CellList
+	var intResults []IntSlice
+
+	for _, indexes := range subsetIndexes(len(cells), k) {
+		subset := cells.Subset(indexes)
+		inverseSubset := cells.InverseSubset(indexes)
+
+		//All of the OTHER numbers
+		possibilitiesUnion := subset.PossibilitiesUnion()
+		inversePossibilitiesUnion := inverseSubset.PossibilitiesUnion()
+
+		//Now try every K-sized subset of possibilitiesUnion
+		//subsetIndexes will detect the case where the set is already too small and return nil
+		for _, possibilitiesIndexes := range subsetIndexes(len(possibilitiesUnion), k) {
+			set := possibilitiesUnion.Subset(possibilitiesIndexes)
+			if len(set.Intersection(inversePossibilitiesUnion)) == 0 {
+				cellResults = append(cellResults, subset)
+				intResults = append(intResults, set)
+
+			}
+		}
+	}
+	return cellResults, intResults
+}
+
 func subsetCellsWithNPossibilities(k int, inputCells CellList) []CellList {
 	//Given a list of cells (often a row, col, or block) and a target group size K,
 	//returns a list of groups of cells of size K where the union of each group's possibility list
