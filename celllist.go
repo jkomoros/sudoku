@@ -13,6 +13,8 @@ type IntSlice []int
 
 type stringSlice []string
 
+type intSet map[int]bool
+
 func getRow(cell *Cell) int {
 	return cell.Row
 }
@@ -284,6 +286,16 @@ func (self IntSlice) Subset(indexes IntSlice) IntSlice {
 	return result
 }
 
+func (self intSet) toSlice() IntSlice {
+	var result IntSlice
+	for item, val := range self {
+		if val {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
 func (self IntSlice) Intersection(other IntSlice) IntSlice {
 	//Returns an IntSlice of the union of both intSlices
 	selfSet := make(map[int]bool)
@@ -296,13 +308,13 @@ func (self IntSlice) Intersection(other IntSlice) IntSlice {
 		otherSet[item] = true
 	}
 
-	var result IntSlice
+	result := make(intSet)
 
 	for item, _ := range selfSet {
 		if _, ok := otherSet[item]; ok {
-			result = append(result, item)
+			result[item] = true
 		}
 	}
 
-	return result
+	return result.toSlice()
 }
