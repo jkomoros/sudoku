@@ -4,6 +4,16 @@ import (
 	"testing"
 )
 
+const NAKED_PAIR_BLOCK_GRID = `.|.|3|.|7|8|9|.|.
+4|5|6|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|.|.|.|.|.`
+
 func TestSubsetCellsWithNPossibilities(t *testing.T) {
 	grid := NewGrid()
 	if !grid.LoadFromFile(puzzlePath("nakedpair3.sdk")) {
