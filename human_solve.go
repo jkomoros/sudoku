@@ -563,6 +563,7 @@ func (self nakedTripleBlock) Find(grid *Grid) []*SolveStep {
 }
 
 func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) []*SolveStep {
+	//NOTE: very similar implemenation in hiddenSubset.
 	//TODO: randomize order we visit things.
 	var results []*SolveStep
 	for _, i := range rand.Perm(DIM) {
@@ -583,6 +584,29 @@ func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter f
 			}
 		}
 
+	}
+	return results
+}
+
+func hiddenSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) []*SolveStep {
+	//NOTE: very similar implemenation in nakedSubset.
+	var results []*SolveStep
+	for _, i := range rand.Perm(DIM) {
+
+		groups, nums := subsetCellsWithNUniquePossibilities(k, collectionGetter(i))
+
+		if len(groups) > 0 {
+			for _, groupIndex := range rand.Perm(len(groups)) {
+
+				numList := nums[groupIndex]
+				group := groups[groupIndex]
+
+				result := &SolveStep{group, group, numList, technique}
+				if result.IsUseful(grid) {
+					results = append(results, result)
+				}
+			}
+		}
 	}
 	return results
 }
