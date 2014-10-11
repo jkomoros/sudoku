@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"sort"
 	"testing"
 )
 
@@ -111,6 +112,54 @@ func TestIntList(t *testing.T) {
 	if description != "1 and 1" {
 		t.Log("Did'get the the right description for a two-item intList: ", description)
 		t.Fail()
+	}
+}
+
+func TestInverseSubset(t *testing.T) {
+	grid := NewGrid()
+	cells := grid.Row(0)
+
+	indexes := IntSlice([]int{4, 6, 2})
+
+	subset := cells.InverseSubset(indexes)
+
+	if len(subset) != DIM-3 {
+		t.Error("Inverse subset gave wrong number of results")
+	}
+
+	for _, cell := range subset {
+		if cell.Col == 2 || cell.Col == 4 || cell.Col == 6 {
+			t.Error("Inverse subset included cells it shouldn't have.")
+		}
+	}
+
+}
+
+func TestIntSliceIntersection(t *testing.T) {
+	one := IntSlice([]int{1, 3, 2, 5})
+	two := IntSlice([]int{2, 7, 6, 5})
+
+	result := one.Intersection(two)
+
+	if len(result) != 2 {
+		t.Error("Intersection had wrong number of items")
+	}
+
+	sort.Ints(result)
+
+	if result[0] != 2 || result[1] != 5 {
+		t.Error("Intersection result was wrong.")
+	}
+}
+
+func TestIntSliceDifference(t *testing.T) {
+	one := IntSlice([]int{1, 2, 3, 4, 5, 6})
+	two := IntSlice([]int{3, 4, 7})
+
+	result := one.Difference(two)
+
+	if !result.SameContentAs(IntSlice([]int{1, 2, 5, 6})) {
+		t.Error("Int slice difference gave wrong result: ", result)
 	}
 }
 

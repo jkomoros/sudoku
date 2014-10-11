@@ -13,6 +13,8 @@ type IntSlice []int
 
 type stringSlice []string
 
+type intSet map[int]bool
+
 func getRow(cell *Cell) int {
 	return cell.Row
 }
@@ -125,6 +127,8 @@ func (self CellList) PossibilitiesUnion() IntSlice {
 }
 
 func (self CellList) Subset(indexes IntSlice) CellList {
+	//IntSlice.Subset is basically a carbon copy.
+	//TODO: what's this behavior if indexes has dupes? What SHOULD it be?
 	result := make(CellList, len(indexes))
 	max := len(self)
 	for i, index := range indexes {
@@ -134,6 +138,31 @@ func (self CellList) Subset(indexes IntSlice) CellList {
 		}
 		result[i] = self[index]
 	}
+	return result
+}
+
+func (self CellList) InverseSubset(indexes IntSlice) CellList {
+	//TODO: figure out what this should do when presented with dupes.
+
+	//LIke Subset, but returns all of the items NOT called out in indexes.
+	var result CellList
+
+	//Ensure indexes are in sorted order.
+	sort.Ints(indexes)
+
+	//Index into indexes we're considering
+	currentIndex := 0
+
+	for i := 0; i < len(self); i++ {
+		if currentIndex < len(indexes) && i == indexes[currentIndex] {
+			//Skip it!
+			currentIndex++
+		} else {
+			//Output it!
+			result = append(result, self[i])
+		}
+	}
+
 	return result
 }
 
@@ -217,6 +246,8 @@ func (self IntSlice) Same() bool {
 func (self IntSlice) SameContentAs(otherSlice IntSlice) bool {
 	//Same as SameAs, but doesn't care about order.
 
+	//TODO: impelement this using intSets. It's easier.
+
 	selfToUse := make(IntSlice, len(self))
 	copy(selfToUse, self)
 	sort.IntSlice(selfToUse).Sort()
@@ -239,4 +270,73 @@ func (self IntSlice) SameAs(other IntSlice) bool {
 		}
 	}
 	return true
+}
+
+func (self IntSlice) Subset(indexes IntSlice) IntSlice {
+	//TODO: test this.
+	//Basically a carbon copy of CellList.Subset
+	//TODO: what's this behavior if indexes has dupes? What SHOULD it be?
+	result := make(IntSlice, len(indexes))
+	max := len(self)
+	for i, index := range indexes {
+		if index >= max {
+			//This probably is indicative of a larger problem.
+			continue
+		}
+		result[i] = self[index]
+	}
+	return result
+}
+
+func (self IntSlice) toIntSet() intSet {
+	result := make(intSet)
+	for _, item := range self {
+		result[item] = true
+	}
+	return result
+}
+
+func (self intSet) toSlice() IntSlice {
+	var result IntSlice
+	for item, val := range self {
+		if val {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+//TODO: test this directly (tested implicitly via intSlice.Intersection)
+func (self intSet) intersection(other intSet) intSet {
+	result := make(intSet)
+	for item, value := range self {
+		if value {
+			if val, ok := other[item]; ok && val {
+				result[item] = true
+			}
+		}
+	}
+	return result
+}
+
+func (self intSet) difference(other intSet) intSet {
+	result := make(intSet)
+	for item, value := range self {
+		if value {
+			if val, ok := other[item]; !ok && !val {
+				result[item] = true
+			}
+		}
+	}
+	return result
+}
+
+func (self IntSlice) Intersection(other IntSlice) IntSlice {
+	//Returns an IntSlice of the union of both intSlices
+
+	return self.toIntSet().intersection(other.toIntSet()).toSlice()
+}
+
+func (self IntSlice) Difference(other IntSlice) IntSlice {
+	return self.toIntSet().difference(other.toIntSet()).toSlice()
 }
