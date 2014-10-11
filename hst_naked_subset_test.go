@@ -4,6 +4,30 @@ import (
 	"testing"
 )
 
+func TestSubsetCellsWithNPossibilities(t *testing.T) {
+	grid := NewGrid()
+	if !grid.LoadFromFile(puzzlePath("nakedpair3.sdk")) {
+		t.Log("Failed to load nakedpair3.sdk")
+		t.Fail()
+	}
+	results := subsetCellsWithNPossibilities(2, grid.Col(DIM-1))
+	if len(results) != 1 {
+		t.Log("Didn't get right number of subset cells with n possibilities: ", len(results))
+		t.FailNow()
+	}
+	result := results[0]
+	if len(result) != 2 {
+		t.Log("Number of subset cells did not match k: ", len(result))
+		t.Fail()
+	}
+	if result[0].Row != 6 || result[0].Col != 8 || result[1].Row != 7 || result[1].Col != 8 {
+		t.Log("Subset cells came back with wrong cells: ", result)
+		t.Fail()
+	}
+
+	grid.Done()
+}
+
 func TestNakedPairCol(t *testing.T) {
 	grid := NewGrid()
 	if !grid.LoadFromFile(puzzlePath("nakedpair3.sdk")) {

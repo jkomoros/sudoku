@@ -4,6 +4,34 @@ import (
 	"testing"
 )
 
+func TestSubsetCellsWithNUniquePossibilities(t *testing.T) {
+	grid := NewGrid()
+	if !grid.LoadFromFile(puzzlePath("hiddenpair1_filled.sdk")) {
+		t.Log("Failed to load hiddenpair1_filled.sdk")
+		t.Fail()
+	}
+	cells, nums := subsetCellsWithNUniquePossibilities(2, grid.Row(4))
+	if len(cells) != 1 {
+		t.Log("Didn't get right number of subset cells unique with n possibilities: ", len(cells))
+		t.FailNow()
+	}
+	cellList := cells[0]
+	numList := nums[0]
+	if len(cellList) != 2 {
+		t.Log("Number of subset cells did not match k: ", len(cellList))
+		t.Fail()
+	}
+	if cellList[0].Row != 4 || cellList[0].Col != 7 || cellList[1].Row != 4 || cellList[1].Col != 8 {
+		t.Log("Subset cells unique came back with wrong cells: ", cellList)
+		t.Fail()
+	}
+	if !numList.SameContentAs(IntSlice([]int{3, 5})) {
+		t.Error("Subset cells unique came back with wrong numbers: ", numList)
+	}
+
+	grid.Done()
+}
+
 func TestHiddenPairRow(t *testing.T) {
 	grid := NewGrid()
 	if !grid.LoadFromFile(puzzlePath("hiddenpair1_filled.sdk")) {

@@ -73,58 +73,6 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 	}
 }
 
-func TestSubsetCellsWithNUniquePossibilities(t *testing.T) {
-	grid := NewGrid()
-	if !grid.LoadFromFile(puzzlePath("hiddenpair1_filled.sdk")) {
-		t.Log("Failed to load hiddenpair1_filled.sdk")
-		t.Fail()
-	}
-	cells, nums := subsetCellsWithNUniquePossibilities(2, grid.Row(4))
-	if len(cells) != 1 {
-		t.Log("Didn't get right number of subset cells unique with n possibilities: ", len(cells))
-		t.FailNow()
-	}
-	cellList := cells[0]
-	numList := nums[0]
-	if len(cellList) != 2 {
-		t.Log("Number of subset cells did not match k: ", len(cellList))
-		t.Fail()
-	}
-	if cellList[0].Row != 4 || cellList[0].Col != 7 || cellList[1].Row != 4 || cellList[1].Col != 8 {
-		t.Log("Subset cells unique came back with wrong cells: ", cellList)
-		t.Fail()
-	}
-	if !numList.SameContentAs(IntSlice([]int{3, 5})) {
-		t.Error("Subset cells unique came back with wrong numbers: ", numList)
-	}
-
-	grid.Done()
-}
-
-func TestSubsetCellsWithNPossibilities(t *testing.T) {
-	grid := NewGrid()
-	if !grid.LoadFromFile(puzzlePath("nakedpair3.sdk")) {
-		t.Log("Failed to load nakedpair3.sdk")
-		t.Fail()
-	}
-	results := subsetCellsWithNPossibilities(2, grid.Col(DIM-1))
-	if len(results) != 1 {
-		t.Log("Didn't get right number of subset cells with n possibilities: ", len(results))
-		t.FailNow()
-	}
-	result := results[0]
-	if len(result) != 2 {
-		t.Log("Number of subset cells did not match k: ", len(result))
-		t.Fail()
-	}
-	if result[0].Row != 6 || result[0].Col != 8 || result[1].Row != 7 || result[1].Col != 8 {
-		t.Log("Subset cells came back with wrong cells: ", result)
-		t.Fail()
-	}
-
-	grid.Done()
-}
-
 func BenchmarkHumanSolve(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		grid := NewGrid()
