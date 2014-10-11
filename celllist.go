@@ -246,6 +246,8 @@ func (self IntSlice) Same() bool {
 func (self IntSlice) SameContentAs(otherSlice IntSlice) bool {
 	//Same as SameAs, but doesn't care about order.
 
+	//TODO: impelement this using intSets. It's easier.
+
 	selfToUse := make(IntSlice, len(self))
 	copy(selfToUse, self)
 	sort.IntSlice(selfToUse).Sort()
