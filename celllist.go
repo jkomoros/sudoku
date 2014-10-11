@@ -286,6 +286,14 @@ func (self IntSlice) Subset(indexes IntSlice) IntSlice {
 	return result
 }
 
+func (self IntSlice) toIntSet() intSet {
+	result := make(intSet)
+	for _, item := range self {
+		result[item] = true
+	}
+	return result
+}
+
 func (self intSet) toSlice() IntSlice {
 	var result IntSlice
 	for item, val := range self {
@@ -296,25 +304,21 @@ func (self intSet) toSlice() IntSlice {
 	return result
 }
 
-func (self IntSlice) Intersection(other IntSlice) IntSlice {
-	//Returns an IntSlice of the union of both intSlices
-	selfSet := make(map[int]bool)
-	otherSet := make(map[int]bool)
-
-	for _, item := range self {
-		selfSet[item] = true
-	}
-	for _, item := range other {
-		otherSet[item] = true
-	}
-
+//TODO: test this directly (tested implicitly via intSlice.Intersection)
+func (self intSet) intersection(other intSet) intSet {
 	result := make(intSet)
-
-	for item, _ := range selfSet {
-		if _, ok := otherSet[item]; ok {
-			result[item] = true
+	for item, value := range self {
+		if value {
+			if val, ok := other[item]; ok && val {
+				result[item] = true
+			}
 		}
 	}
+	return result
+}
 
-	return result.toSlice()
+func (self IntSlice) Intersection(other IntSlice) IntSlice {
+	//Returns an IntSlice of the union of both intSlices
+
+	return self.toIntSet().intersection(other.toIntSet()).toSlice()
 }
