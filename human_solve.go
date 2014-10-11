@@ -145,6 +145,27 @@ func init() {
 				140.0,
 			},
 		},
+		hiddenPairRow{
+			basicSolveTechnique{
+				"Hidden Pair Row",
+				false,
+				300.0,
+			},
+		},
+		hiddenPairCol{
+			basicSolveTechnique{
+				"Hidden Pair Col",
+				false,
+				300.0,
+			},
+		},
+		hiddenPairBlock{
+			basicSolveTechnique{
+				"Hidden Pair Block",
+				false,
+				250.0,
+			},
+		},
 	}
 }
 
@@ -193,6 +214,18 @@ type nakedTripleRow struct {
 }
 
 type nakedTripleBlock struct {
+	basicSolveTechnique
+}
+
+type hiddenPairCol struct {
+	basicSolveTechnique
+}
+
+type hiddenPairRow struct {
+	basicSolveTechnique
+}
+
+type hiddenPairBlock struct {
 	basicSolveTechnique
 }
 
@@ -586,6 +619,52 @@ func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter f
 
 	}
 	return results
+}
+
+func (self hiddenPairCol) Description(step *SolveStep) string {
+	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
+		return ""
+	}
+	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that only those numbers could be in those cells", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Col())
+}
+
+func (self hiddenPairCol) Find(grid *Grid) []*SolveStep {
+	//TODO: test that this will find multiple if they exist.
+	//TODO: factor out colGetter, we use it so often...
+	colGetter := func(i int) CellList {
+		return grid.Col(i)
+	}
+	return hiddenSubset(grid, self, 2, colGetter)
+}
+
+func (self hiddenPairRow) Description(step *SolveStep) string {
+	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
+		return ""
+	}
+	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that only those numbers could be in those cells", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Row())
+}
+
+func (self hiddenPairRow) Find(grid *Grid) []*SolveStep {
+	//TODO: test we find multiple if they exist.
+	rowGetter := func(i int) CellList {
+		return grid.Row(i)
+	}
+	return hiddenSubset(grid, self, 2, rowGetter)
+}
+
+func (self hiddenPairBlock) Description(step *SolveStep) string {
+	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
+		return ""
+	}
+	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that only those numbers could be in those cells", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Block())
+}
+
+func (self hiddenPairBlock) Find(grid *Grid) []*SolveStep {
+	//TODO: test that this will return multiple if they exist.
+	blockGetter := func(i int) CellList {
+		return grid.Block(i)
+	}
+	return hiddenSubset(grid, self, 2, blockGetter)
 }
 
 func hiddenSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) []*SolveStep {

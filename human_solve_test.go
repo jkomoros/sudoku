@@ -508,6 +508,62 @@ func TestNakedTriple(t *testing.T) {
 	grid.Done()
 }
 
+func TestHiddenPairRow(t *testing.T) {
+	grid := NewGrid()
+	if !grid.LoadFromFile(puzzlePath("hiddenpair1_filled.sdk")) {
+		t.Log("Failed to load hiddenpair1_filled.sdk")
+		t.Fail()
+	}
+
+	solver := &hiddenPairRow{}
+	steps := solver.Find(grid)
+	if len(steps) == 0 {
+		t.Log("The hidden pair row didn't find a cell it should have.")
+		t.FailNow()
+	}
+
+	step := steps[0]
+
+	if len(step.TargetCells) != 2 {
+		t.Log("The hidden pair row had the wrong number of target cells: ", len(step.TargetCells))
+		t.FailNow()
+	}
+	if len(step.PointerCells) != 2 {
+		t.Log("The hidden pair row had the wrong number of pointer cells: ", len(step.PointerCells))
+		t.FailNow()
+	}
+	if step.TargetCells[0] != step.PointerCells[0] || step.TargetCells[1] != step.PointerCells[1] {
+		t.Error("Hidden Pair Row did not have the same target and pointer cells")
+	}
+	if !step.TargetCells.SameRow() || step.TargetCells.Row() != 4 {
+		t.Log("The target cells in the hidden pair row were wrong row")
+		t.Fail()
+	}
+	if len(step.Nums) != 2 || !step.Nums.SameContentAs([]int{3, 5}) {
+		t.Log("Hidden pair row found the wrong numbers: ", step.Nums)
+		t.Fail()
+	}
+	step.Apply(grid)
+	firstNum := step.Nums[0]
+	secondNum := step.Nums[1]
+	for _, cell := range step.TargetCells {
+
+		for i := 1; i <= DIM; i++ {
+			if i == firstNum || i == secondNum {
+				if !cell.Possible(i) {
+					t.Error("Hidden Pair Row was not applied correctly; it cleared what should have been possible")
+				}
+			} else {
+				if cell.Possible(i) {
+					t.Error("Hidden Pair Row was not applied correctly; it did not clear other numbers")
+				}
+			}
+		}
+	}
+
+	grid.Done()
+}
+
 func TestSubsetIndexes(t *testing.T) {
 	result := subsetIndexes(3, 1)
 	expectedResult := [][]int{[]int{0}, []int{1}, []int{2}}
