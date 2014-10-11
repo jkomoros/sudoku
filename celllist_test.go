@@ -152,6 +152,17 @@ func TestIntSliceIntersection(t *testing.T) {
 	}
 }
 
+func TestIntSliceDifference(t *testing.T) {
+	one := IntSlice([]int{1, 2, 3, 4, 5, 6})
+	two := IntSlice([]int{3, 4, 7})
+
+	result := one.Difference(two)
+
+	if !result.SameContentAs(IntSlice([]int{1, 2, 5, 6})) {
+		t.Error("Int slice difference gave wrong result: ", result)
+	}
+}
+
 func TestSameContentAs(t *testing.T) {
 	one := IntSlice([]int{2, 3, 1})
 	two := IntSlice([]int{2, 1, 3})

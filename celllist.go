@@ -317,8 +317,24 @@ func (self intSet) intersection(other intSet) intSet {
 	return result
 }
 
+func (self intSet) difference(other intSet) intSet {
+	result := make(intSet)
+	for item, value := range self {
+		if value {
+			if val, ok := other[item]; !ok && !val {
+				result[item] = true
+			}
+		}
+	}
+	return result
+}
+
 func (self IntSlice) Intersection(other IntSlice) IntSlice {
 	//Returns an IntSlice of the union of both intSlices
 
 	return self.toIntSet().intersection(other.toIntSet()).toSlice()
+}
+
+func (self IntSlice) Difference(other IntSlice) IntSlice {
+	return self.toIntSet().difference(other.toIntSet()).toSlice()
 }
