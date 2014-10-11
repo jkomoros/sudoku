@@ -37,12 +37,6 @@ type SolveStep struct {
 	Technique    SolveTechnique
 }
 
-func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
-	cellArr := []*Cell{cell}
-	numArr := []int{num}
-	return &SolveStep{cellArr, nil, numArr, technique}
-}
-
 func (self *SolveStep) IsUseful(grid *Grid) bool {
 	//Returns true IFF calling Apply with this step and the given grid would result in some useful work. Does not modify the gri.d
 
