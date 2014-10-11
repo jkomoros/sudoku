@@ -539,23 +539,20 @@ func TestHiddenPairRow(t *testing.T) {
 		t.Log("The target cells in the hidden pair row were wrong row")
 		t.Fail()
 	}
-	if len(step.Nums) != 2 || !step.Nums.SameContentAs([]int{3, 5}) {
+	if len(step.Nums) != 3 || !step.Nums.SameContentAs([]int{7, 8, 2}) {
 		t.Log("Hidden pair row found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
 	step.Apply(grid)
 	firstNum := step.Nums[0]
 	secondNum := step.Nums[1]
+	thirdNum := step.Nums[2]
 	for _, cell := range step.TargetCells {
 
 		for i := 1; i <= DIM; i++ {
-			if i == firstNum || i == secondNum {
-				if !cell.Possible(i) {
-					t.Error("Hidden Pair Row was not applied correctly; it cleared what should have been possible")
-				}
-			} else {
+			if i == firstNum || i == secondNum || i == thirdNum {
 				if cell.Possible(i) {
-					t.Error("Hidden Pair Row was not applied correctly; it did not clear other numbers")
+					t.Error("Hidden Pair Row was not applied correctly; it did not clear the right numbers.")
 				}
 			}
 		}

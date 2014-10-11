@@ -680,7 +680,11 @@ func hiddenSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter 
 				numList := nums[groupIndex]
 				group := groups[groupIndex]
 
-				result := &SolveStep{group, group, numList, technique}
+				//numList is the numbers we want to KEEP. We need to invertit.
+
+				numsToRemove := group.PossibilitiesUnion().Difference(numList)
+
+				result := &SolveStep{group, group, numsToRemove, technique}
 				if result.IsUseful(grid) {
 					results = append(results, result)
 				}
