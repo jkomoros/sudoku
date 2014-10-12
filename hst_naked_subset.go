@@ -60,32 +60,33 @@ func (self nakedSubsetTechnique) Description(step *SolveStep) string {
 
 func (self nakedPairCol) Find(grid *Grid) []*SolveStep {
 	//TODO: test that this will find multiple if they exist.
-	return nakedSubset(grid, self, 2, self.getter(grid))
+	//TODO: in a perfect world we'd be able to lift this impl into nakedSubsetTechnique... but we can't because we need to pass in the full self technique to nakedSubset.
+	return nakedSubset(grid, self, self.k, self.getter(grid))
 }
 
 func (self nakedPairRow) Find(grid *Grid) []*SolveStep {
 	//TODO: test we find multiple if they exist.
-	return nakedSubset(grid, self, 2, self.getter(grid))
+	return nakedSubset(grid, self, self.k, self.getter(grid))
 }
 
 func (self nakedPairBlock) Find(grid *Grid) []*SolveStep {
 	//TODO: test that this will return multiple if they exist.
-	return nakedSubset(grid, self, 2, self.getter(grid))
+	return nakedSubset(grid, self, self.k, self.getter(grid))
 }
 
 func (self nakedTripleCol) Find(grid *Grid) []*SolveStep {
 	//TODO: test we find multiple if they exist.
-	return nakedSubset(grid, self, 3, self.getter(grid))
+	return nakedSubset(grid, self, self.k, self.getter(grid))
 }
 
 func (self nakedTripleRow) Find(grid *Grid) []*SolveStep {
 	//TODO: test that if there are multiple we find them.
-	return nakedSubset(grid, self, 3, self.getter(grid))
+	return nakedSubset(grid, self, self.k, self.getter(grid))
 }
 
 func (self nakedTripleBlock) Find(grid *Grid) []*SolveStep {
 	//TODO: test that this will find multiple ones if they exist.
-	return nakedSubset(grid, self, 3, self.getter(grid))
+	return nakedSubset(grid, self, self.k, self.getter(grid))
 }
 
 func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) []*SolveStep {
