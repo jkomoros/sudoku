@@ -78,7 +78,7 @@ func TestHiddenPairRow(t *testing.T) {
 	}
 
 	description := solver.Description(step)
-	if description != "3 and 5 are only possible in (4,7) and (4,8), which means that only those numbers could be in those cells" {
+	if description != "3 and 5 are only possible in (4,7) and (4,8) within row 4, which means that only those numbers could be in those cells" {
 		t.Error("Wrong description for ", techniqueName, ": ", description)
 	}
 
@@ -148,7 +148,7 @@ func TestHiddenPairCol(t *testing.T) {
 	}
 
 	description := solver.Description(step)
-	if description != "3 and 5 are only possible in (7,4) and (8,4), which means that only those numbers could be in those cells" {
+	if description != "3 and 5 are only possible in (7,4) and (8,4) within column 4, which means that only those numbers could be in those cells" {
 		t.Error("Wrong description for ", techniqueName, ": ", description)
 	}
 
@@ -216,7 +216,7 @@ func TestHiddenPairBlock(t *testing.T) {
 	}
 
 	description := solver.Description(step)
-	if description != "3 and 5 are only possible in (4,7) and (4,8), which means that only those numbers could be in those cells" {
+	if description != "3 and 5 are only possible in (4,7) and (4,8) within block 5, which means that only those numbers could be in those cells" {
 		t.Error("Wrong description for ", techniqueName, ": ", description)
 	}
 

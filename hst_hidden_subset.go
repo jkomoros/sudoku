@@ -14,8 +14,25 @@ func (self hiddenSubsetTechnique) Description(step *SolveStep) string {
 	if len(step.TargetNums) < self.k || len(step.PointerCells) < self.k {
 		return ""
 	}
-	//TODO: this message should say something about the group and number right after the second %s.
-	return fmt.Sprintf("%s are only possible in %s, which means that only those numbers could be in those cells", step.PointerNums.Description(), step.PointerCells.Description())
+	//TODO: this is substantially duplicated logic in nakedSubsetTechnique
+	var groupName string
+	var groupNum int
+	switch self.groupType {
+	case GROUP_BLOCK:
+		groupName = "block"
+		groupNum = step.TargetCells.Block()
+	case GROUP_ROW:
+		groupName = "row"
+		groupNum = step.TargetCells.Row()
+	case GROUP_COL:
+		groupName = "column"
+		groupNum = step.TargetCells.Col()
+	default:
+		groupName = "<NONE>"
+		groupNum = -1
+	}
+
+	return fmt.Sprintf("%s are only possible in %s within %s %d, which means that only those numbers could be in those cells", step.PointerNums.Description(), step.PointerCells.Description(), groupName, groupNum)
 }
 
 func (self hiddenSubsetTechnique) Find(grid *Grid) []*SolveStep {
