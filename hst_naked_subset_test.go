@@ -45,7 +45,13 @@ func TestNakedPairCol(t *testing.T) {
 		t.Fail()
 	}
 
-	solver := &nakedPairCol{}
+	techniqueName := "Naked Pair Col"
+	solver := techniquesByName[techniqueName]
+
+	if solver == nil {
+		t.Fatal("Couldn't find technique object: ", techniqueName)
+	}
+
 	steps := solver.Find(grid)
 	if len(steps) == 0 {
 		t.Log("The naked pair col didn't find a cell it should have.")
@@ -90,7 +96,14 @@ func TestNakedPairRow(t *testing.T) {
 		t.Fail()
 	}
 	grid = grid.transpose()
-	solver := &nakedPairRow{}
+
+	techniqueName := "Naked Pair Row"
+	solver := techniquesByName[techniqueName]
+
+	if solver == nil {
+		t.Fatal("Couldn't find technique object: ", techniqueName)
+	}
+
 	steps := solver.Find(grid)
 	if len(steps) == 0 {
 		t.Log("The naked pair row didn't find a cell it should have.")
@@ -131,7 +144,14 @@ func TestNakedPairRow(t *testing.T) {
 func TestNakedPairBlock(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(NAKED_PAIR_BLOCK_GRID)
-	solver := &nakedPairBlock{}
+
+	techniqueName := "Naked Pair Block"
+	solver := techniquesByName[techniqueName]
+
+	if solver == nil {
+		t.Fatal("Couldn't find technique object: ", techniqueName)
+	}
+
 	steps := solver.Find(grid)
 	if len(steps) == 0 {
 		t.Log("The naked pair block didn't find a cell it should have.")
@@ -173,7 +193,14 @@ func TestNakedTriple(t *testing.T) {
 	//TODO: test for col and block as well
 	grid := NewGrid()
 	grid.LoadFromFile(puzzlePath("nakedtriplet2.sdk"))
-	solver := &nakedTripleRow{}
+
+	techniqueName := "Naked Triple Row"
+	solver := techniquesByName[techniqueName]
+
+	if solver == nil {
+		t.Fatal("Couldn't find technique object: ", techniqueName)
+	}
+
 	steps := solver.Find(grid)
 
 	if len(steps) == 0 {

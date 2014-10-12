@@ -26,7 +26,14 @@ const POINTING_PAIR_COL_GRID = `3|.|6|.|.|.|.|.|.
 func TestPointingPairCol(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(POINTING_PAIR_COL_GRID)
-	solver := &pointingPairCol{}
+
+	techniqueName := "Pointing Pair Col"
+	solver := techniquesByName[techniqueName]
+
+	if solver == nil {
+		t.Fatal("Couldn't find technique object: ", techniqueName)
+	}
+
 	steps := solver.Find(grid)
 	if len(steps) == 0 {
 		t.Log("The pointing pair col didn't find a cell it should have")
@@ -66,7 +73,14 @@ func TestPointingPairCol(t *testing.T) {
 func TestPointingPairRow(t *testing.T) {
 	grid := NewGrid()
 	grid.Load(POINTING_PAIR_ROW_GRID)
-	solver := &pointingPairRow{}
+
+	techniqueName := "Pointing Pair Row"
+	solver := techniquesByName[techniqueName]
+
+	if solver == nil {
+		t.Fatal("Couldn't find technique object: ", techniqueName)
+	}
+
 	steps := solver.Find(grid)
 	if len(steps) == 0 {
 		t.Log("The pointing pair row didn't find a cell it should have")

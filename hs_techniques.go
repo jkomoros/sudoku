@@ -10,6 +10,11 @@ package sudoku
 
 */
 
+//You shouldn't just create a technique by hand (the interior basicSolveTechnique needs to be initalized with the right values)
+//So in the rare cases where you want to grab a technique by name, grab it from here.
+//TODO: it feels like a pattern smell that there's only a singleton for each technique that you can't cons up on demand.
+var techniquesByName map[string]SolveTechnique
+
 type SolveTechnique interface {
 	Name() string
 	Description(*SolveStep) string
@@ -36,6 +41,7 @@ func init() {
 	Techniques = []SolveTechnique{
 		hiddenSingleInRow{
 			basicSolveTechnique{
+				//TODO: shouldn't this be "Hidden Single Row" (and likewise for others)
 				"Necessary In Row",
 				true,
 				0.0,
@@ -57,6 +63,7 @@ func init() {
 		},
 		nakedSingleTechnique{
 			basicSolveTechnique{
+				//TODO: shouldn't this name be Naked Single for consistency?
 				"Only Legal Number",
 				true,
 				5.0,
@@ -140,6 +147,13 @@ func init() {
 			},
 		},
 	}
+
+	techniquesByName = make(map[string]SolveTechnique)
+
+	for _, technique := range Techniques {
+		techniquesByName[technique.Name()] = technique
+	}
+
 }
 
 func (self basicSolveTechnique) Name() string {

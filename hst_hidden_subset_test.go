@@ -39,7 +39,13 @@ func TestHiddenPairRow(t *testing.T) {
 		t.Fail()
 	}
 
-	solver := &hiddenPairRow{}
+	techniqueName := "Hidden Pair Row"
+	solver := techniquesByName[techniqueName]
+
+	if solver == nil {
+		t.Fatal("Couldn't find technique object: ", techniqueName)
+	}
+
 	steps := solver.Find(grid)
 	if len(steps) == 0 {
 		t.Log("The hidden pair row didn't find a cell it should have.")
@@ -94,7 +100,13 @@ func TestHiddenPairCol(t *testing.T) {
 
 	grid = grid.transpose()
 
-	solver := &hiddenPairCol{}
+	techniqueName := "Hidden Pair Col"
+	solver := techniquesByName[techniqueName]
+
+	if solver == nil {
+		t.Fatal("Couldn't find technique object: ", techniqueName)
+	}
+
 	steps := solver.Find(grid)
 	if len(steps) == 0 {
 		t.Log("The hidden pair col didn't find a cell it should have.")
@@ -147,7 +159,13 @@ func TestHiddenPairBlock(t *testing.T) {
 		t.Fail()
 	}
 
-	solver := &hiddenPairBlock{}
+	techniqueName := "Hidden Pair Block"
+	solver := techniquesByName[techniqueName]
+
+	if solver == nil {
+		t.Fatal("Couldn't find technique object: ", techniqueName)
+	}
+
 	steps := solver.Find(grid)
 	if len(steps) == 0 {
 		t.Log("The hidden pair block didn't find a cell it should have.")

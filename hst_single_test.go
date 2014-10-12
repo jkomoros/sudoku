@@ -14,7 +14,12 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 
 	//Now that cell should be filled by this technique.
 
-	solver := &nakedSingleTechnique{}
+	techniqueName := "Only Legal Number"
+	solver := techniquesByName[techniqueName]
+
+	if solver == nil {
+		t.Fatal("Couldn't find technique object: ", techniqueName)
+	}
 
 	steps := solver.Find(grid)
 
@@ -71,7 +76,12 @@ func TestNecessaryInRow(t *testing.T) {
 
 	//Now that cell should be filled by this technique.
 
-	solver := &hiddenSingleInRow{}
+	techniqueName := "Necessary In Row"
+	solver := techniquesByName[techniqueName]
+
+	if solver == nil {
+		t.Fatal("Couldn't find technique object: ", techniqueName)
+	}
 
 	steps := solver.Find(grid)
 
@@ -130,7 +140,12 @@ func TestNecessaryInCol(t *testing.T) {
 
 	//Now that cell should be filled by this technique.
 
-	solver := &hiddenSingleInCol{}
+	techniqueName := "Necessary In Col"
+	solver := techniquesByName[techniqueName]
+
+	if solver == nil {
+		t.Fatal("Couldn't find technique object: ", techniqueName)
+	}
 
 	steps := solver.Find(grid)
 
@@ -189,7 +204,12 @@ func TestNecessaryInBlock(t *testing.T) {
 
 	//Now that cell should be filled by this technique.
 
-	solver := &hiddenSingleInBlock{}
+	techniqueName := "Necessary In Block"
+	solver := techniquesByName[techniqueName]
+
+	if solver == nil {
+		t.Fatal("Couldn't find technique object: ", techniqueName)
+	}
 
 	steps := solver.Find(grid)
 
