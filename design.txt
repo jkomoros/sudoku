@@ -59,6 +59,8 @@ TODO:
 * NEXT STEPS:
 	* Factor down the tests for the techniques into a test helper (if possible)
 
+* Run dokugen/main.go and then panic at the end. Verify there aren't a billion goroutines hanging out.
+
 * Make a decision about how to represent cell coordinates and row/col/block indexes when presented to user. now we're consistently 0 indexed (mostly), but shouldn't we be 1 indexed when presenting to the user?
 
 * Human solve: Is it worth it to do nakedSingles based on row/col/block as well? Those are obvious in different ways.
@@ -93,10 +95,6 @@ TODO:
 * When generating grids, at every step check the difficulty. If it's above the target, go back to the most recent known good difficulty and return that.
 
 * When generating grids, keep a temporary directory of sdk files representing puzzles generated but not vended. When asked for a new puzzle, we first see if we have any in the unvended list that are appropriate difficulty.
-
-* Test the Description string of each solve step
-
-* Create a way to print out a solve walkthrough
 
 * Use machine learning to help us set the constants for difficulty correctly
 
