@@ -78,7 +78,7 @@ func TestNakedPairCol(t *testing.T) {
 	}
 
 	description := solver.Description(step)
-	if description != "2 and 3 are only possible in (7,9) and (8,9), which means that they can't be in any other cell in column 8" {
+	if description != "2 and 3 are only possible in (6,8) and (7,8), which means that they can't be in any other cell in column 8" {
 		t.Error("Wrong description for ", techniqueName, ": ", description)
 	}
 
@@ -136,7 +136,7 @@ func TestNakedPairRow(t *testing.T) {
 	}
 
 	description := solver.Description(step)
-	if description != "2 and 3 are only possible in (9,7) and (9,8), which means that they can't be in any other cell in row 8" {
+	if description != "2 and 3 are only possible in (8,6) and (8,7), which means that they can't be in any other cell in row 8" {
 		t.Error("Wrong description for ", techniqueName, ": ", description)
 	}
 
@@ -190,7 +190,7 @@ func TestNakedPairBlock(t *testing.T) {
 	}
 
 	description := solver.Description(step)
-	if description != "1 and 2 are only possible in (1,1) and (1,2), which means that they can't be in any other cell in block 0" {
+	if description != "1 and 2 are only possible in (0,0) and (0,1), which means that they can't be in any other cell in block 0" {
 		t.Error("Wrong description for ", techniqueName, ": ", description)
 	}
 
@@ -246,7 +246,7 @@ func TestNakedTriple(t *testing.T) {
 	}
 
 	description := solver.Description(step)
-	if description != "3, 5, and 8 are only possible in (5,4), (5, 5) and (5,6), which means that they can't be in any other cell in row 4" {
+	if description != "3, 5, and 8 are only possible in (4,3), (4,4), and (4,5), which means that they can't be in any other cell in row 4" {
 		t.Error("Wrong description for ", techniqueName, ": ", description)
 	}
 

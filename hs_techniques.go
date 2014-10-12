@@ -42,9 +42,12 @@ const (
 )
 
 type basicSolveTechnique struct {
-	name       string
-	isFill     bool
-	groupType  getterType
+	name      string
+	isFill    bool
+	groupType getterType
+	//Size of set in technique, e.g. single = 1, pair = 2, triple = 3
+	//Used for generating descriptions in some sub-structs.
+	k          int
 	difficulty float64
 }
 
@@ -59,6 +62,7 @@ func init() {
 				"Necessary In Row",
 				true,
 				GROUP_ROW,
+				1,
 				0.0,
 			},
 		},
@@ -67,6 +71,7 @@ func init() {
 				"Necessary In Col",
 				true,
 				GROUP_COL,
+				1,
 				0.0,
 			},
 		},
@@ -75,6 +80,7 @@ func init() {
 				"Necessary In Block",
 				true,
 				GROUP_BLOCK,
+				1,
 				0.0,
 			},
 		},
@@ -84,6 +90,7 @@ func init() {
 				"Only Legal Number",
 				true,
 				GROUP_NONE,
+				1,
 				5.0,
 			},
 		},
@@ -92,6 +99,7 @@ func init() {
 				"Pointing Pair Row",
 				false,
 				GROUP_ROW,
+				2,
 				25.0,
 			},
 		},
@@ -100,55 +108,74 @@ func init() {
 				"Pointing Pair Col",
 				false,
 				GROUP_COL,
+				2,
 				25.0,
 			},
 		},
 		nakedPairCol{
-			basicSolveTechnique{
-				"Naked Pair Col",
-				false,
-				GROUP_COL,
-				75.0,
+			nakedSubsetTechnique{
+				basicSolveTechnique{
+					"Naked Pair Col",
+					false,
+					GROUP_COL,
+					2,
+					75.0,
+				},
 			},
 		},
 		nakedPairRow{
-			basicSolveTechnique{
-				"Naked Pair Row",
-				false,
-				GROUP_ROW,
-				75.0,
+			nakedSubsetTechnique{
+				basicSolveTechnique{
+					"Naked Pair Row",
+					false,
+					GROUP_ROW,
+					2,
+					75.0,
+				},
 			},
 		},
 		nakedPairBlock{
-			basicSolveTechnique{
-				"Naked Pair Block",
-				false,
-				GROUP_BLOCK,
-				85.0,
+			nakedSubsetTechnique{
+				basicSolveTechnique{
+					"Naked Pair Block",
+					false,
+					GROUP_BLOCK,
+					2,
+					85.0,
+				},
 			},
 		},
 		nakedTripleCol{
-			basicSolveTechnique{
-				"Naked Triple Col",
-				false,
-				GROUP_COL,
-				125.0,
+			nakedSubsetTechnique{
+				basicSolveTechnique{
+					"Naked Triple Col",
+					false,
+					GROUP_COL,
+					3,
+					125.0,
+				},
 			},
 		},
 		nakedTripleRow{
-			basicSolveTechnique{
-				"Naked Triple Row",
-				false,
-				GROUP_ROW,
-				125.0,
+			nakedSubsetTechnique{
+				basicSolveTechnique{
+					"Naked Triple Row",
+					false,
+					GROUP_ROW,
+					3,
+					125.0,
+				},
 			},
 		},
 		nakedTripleBlock{
-			basicSolveTechnique{
-				"Naked Triple Block",
-				false,
-				GROUP_BLOCK,
-				140.0,
+			nakedSubsetTechnique{
+				basicSolveTechnique{
+					"Naked Triple Block",
+					false,
+					GROUP_BLOCK,
+					3,
+					140.0,
+				},
 			},
 		},
 		hiddenPairRow{
@@ -156,6 +183,7 @@ func init() {
 				"Hidden Pair Row",
 				false,
 				GROUP_ROW,
+				2,
 				300.0,
 			},
 		},
@@ -164,6 +192,7 @@ func init() {
 				"Hidden Pair Col",
 				false,
 				GROUP_COL,
+				2,
 				300.0,
 			},
 		},
@@ -172,6 +201,7 @@ func init() {
 				"Hidden Pair Block",
 				false,
 				GROUP_BLOCK,
+				2,
 				250.0,
 			},
 		},

@@ -5,37 +5,57 @@ import (
 	"math/rand"
 )
 
-type nakedPairCol struct {
+type nakedSubsetTechnique struct {
 	basicSolveTechnique
+}
+
+type nakedPairCol struct {
+	nakedSubsetTechnique
 }
 
 type nakedPairRow struct {
-	basicSolveTechnique
+	nakedSubsetTechnique
 }
 
 type nakedPairBlock struct {
-	basicSolveTechnique
+	nakedSubsetTechnique
 }
 
 type nakedTripleCol struct {
-	basicSolveTechnique
+	nakedSubsetTechnique
 }
 
 type nakedTripleRow struct {
-	basicSolveTechnique
+	nakedSubsetTechnique
 }
 
 type nakedTripleBlock struct {
-	basicSolveTechnique
+	nakedSubsetTechnique
 }
 
-//TODO: Factor out as much as possible about Description and Find for a class.
-
-func (self nakedPairCol) Description(step *SolveStep) string {
-	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
+func (self nakedSubsetTechnique) Description(step *SolveStep) string {
+	if len(step.Nums) < self.k || len(step.PointerCells) < self.k {
 		return ""
 	}
-	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that they can't be in any other cell in column %d", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Col())
+	//TODO: it feels like this logic should be factored out.
+	var groupName string
+	var groupNum int
+	switch self.groupType {
+	case GROUP_BLOCK:
+		groupName = "block"
+		groupNum = step.TargetCells.Block()
+	case GROUP_ROW:
+		groupName = "row"
+		groupNum = step.TargetCells.Row()
+	case GROUP_COL:
+		groupName = "column"
+		groupNum = step.TargetCells.Col()
+	default:
+		groupName = "<NONE>"
+		groupNum = -1
+	}
+
+	return fmt.Sprintf("%s are only possible in %s, which means that they can't be in any other cell in %s %d", step.Nums.Description(), step.PointerCells.Description(), groupName, groupNum)
 }
 
 func (self nakedPairCol) Find(grid *Grid) []*SolveStep {
@@ -43,23 +63,9 @@ func (self nakedPairCol) Find(grid *Grid) []*SolveStep {
 	return nakedSubset(grid, self, 2, self.getter(grid))
 }
 
-func (self nakedPairRow) Description(step *SolveStep) string {
-	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
-		return ""
-	}
-	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that they can't be in any other cell in row %d", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Row())
-}
-
 func (self nakedPairRow) Find(grid *Grid) []*SolveStep {
 	//TODO: test we find multiple if they exist.
 	return nakedSubset(grid, self, 2, self.getter(grid))
-}
-
-func (self nakedPairBlock) Description(step *SolveStep) string {
-	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
-		return ""
-	}
-	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that they can't be in any other cell in block %d", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Block())
 }
 
 func (self nakedPairBlock) Find(grid *Grid) []*SolveStep {
@@ -67,35 +73,14 @@ func (self nakedPairBlock) Find(grid *Grid) []*SolveStep {
 	return nakedSubset(grid, self, 2, self.getter(grid))
 }
 
-func (self nakedTripleCol) Description(step *SolveStep) string {
-	if len(step.Nums) < 3 || len(step.PointerCells) < 3 {
-		return ""
-	}
-	return fmt.Sprintf("%d, %d, and %d are only possible in (%d,%d), (%d,%d) and (%d,%d), which means that they can't be in any other cell in column %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Col())
-}
-
 func (self nakedTripleCol) Find(grid *Grid) []*SolveStep {
 	//TODO: test we find multiple if they exist.
 	return nakedSubset(grid, self, 3, self.getter(grid))
 }
 
-func (self nakedTripleRow) Description(step *SolveStep) string {
-	if len(step.Nums) < 3 || len(step.PointerCells) < 3 {
-		return ""
-	}
-	return fmt.Sprintf("%d, %d, and %d are only possible in (%d,%d), (%d, %d) and (%d,%d), which means that they can't be in any other cell in row %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row+1, step.PointerCells[2].Col+1, step.TargetCells.Row())
-}
-
 func (self nakedTripleRow) Find(grid *Grid) []*SolveStep {
 	//TODO: test that if there are multiple we find them.
 	return nakedSubset(grid, self, 3, self.getter(grid))
-}
-
-func (self nakedTripleBlock) Description(step *SolveStep) string {
-	if len(step.Nums) < 3 || len(step.PointerCells) < 3 {
-		return ""
-	}
-	return fmt.Sprintf("%d, %d and %d are only possible in (%d,%d), (%d,%d) and (%d,%d), which means that they can't be in any other cell in block %d", step.Nums[0], step.Nums[1], step.Nums[2], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.PointerCells[2].Row+1, step.PointerCells[2].Col+1, step.TargetCells.Block())
 }
 
 func (self nakedTripleBlock) Find(grid *Grid) []*SolveStep {
