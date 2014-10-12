@@ -21,7 +21,7 @@ func (self hiddenPairCol) Description(step *SolveStep) string {
 	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
 		return ""
 	}
-	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that only those numbers could be in those cells", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Col())
+	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that only those numbers could be in those cells", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1)
 }
 
 func (self hiddenPairCol) Find(grid *Grid) []*SolveStep {
@@ -33,7 +33,7 @@ func (self hiddenPairRow) Description(step *SolveStep) string {
 	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
 		return ""
 	}
-	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that only those numbers could be in those cells", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Row())
+	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that only those numbers could be in those cells", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1)
 }
 
 func (self hiddenPairRow) Find(grid *Grid) []*SolveStep {
@@ -45,7 +45,7 @@ func (self hiddenPairBlock) Description(step *SolveStep) string {
 	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
 		return ""
 	}
-	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that only those numbers could be in those cells", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1, step.TargetCells.Block())
+	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that only those numbers could be in those cells", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1)
 }
 
 func (self hiddenPairBlock) Find(grid *Grid) []*SolveStep {
