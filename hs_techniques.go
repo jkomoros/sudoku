@@ -166,7 +166,7 @@ func init() {
 				140.0,
 			},
 		},
-		hiddenPairRow{
+		hiddenSubsetTechnique{
 			basicSolveTechnique{
 				"Hidden Pair Row",
 				false,
@@ -175,7 +175,7 @@ func init() {
 				300.0,
 			},
 		},
-		hiddenPairCol{
+		hiddenSubsetTechnique{
 			basicSolveTechnique{
 				"Hidden Pair Col",
 				false,
@@ -184,7 +184,7 @@ func init() {
 				300.0,
 			},
 		},
-		hiddenPairBlock{
+		hiddenSubsetTechnique{
 			basicSolveTechnique{
 				"Hidden Pair Block",
 				false,

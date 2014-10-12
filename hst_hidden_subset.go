@@ -5,52 +5,23 @@ import (
 	"math/rand"
 )
 
-type hiddenPairCol struct {
+//Different instantiations of this technique represent naked{pair,triple}{row,block,col}
+type hiddenSubsetTechnique struct {
 	basicSolveTechnique
 }
 
-type hiddenPairRow struct {
-	basicSolveTechnique
-}
-
-type hiddenPairBlock struct {
-	basicSolveTechnique
-}
-
-func (self hiddenPairCol) Description(step *SolveStep) string {
-	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
+func (self hiddenSubsetTechnique) Description(step *SolveStep) string {
+	if len(step.Nums) < self.k || len(step.PointerCells) < self.k {
 		return ""
 	}
-	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that only those numbers could be in those cells", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1)
+	//TODO: this message should say something about the group and number right after the second %s.
+	//TODO: also: this message is wrong... the numbers we report are backwards.
+	return fmt.Sprintf("%s are only possible in %s, which means that only those numbers could be in those cells", step.Nums.Description(), step.PointerCells.Description())
 }
 
-func (self hiddenPairCol) Find(grid *Grid) []*SolveStep {
+func (self hiddenSubsetTechnique) Find(grid *Grid) []*SolveStep {
 	//TODO: test that this will find multiple if they exist.
-	return hiddenSubset(grid, self, 2, self.getter(grid))
-}
-
-func (self hiddenPairRow) Description(step *SolveStep) string {
-	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
-		return ""
-	}
-	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that only those numbers could be in those cells", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1)
-}
-
-func (self hiddenPairRow) Find(grid *Grid) []*SolveStep {
-	//TODO: test we find multiple if they exist.
-	return hiddenSubset(grid, self, 2, self.getter(grid))
-}
-
-func (self hiddenPairBlock) Description(step *SolveStep) string {
-	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
-		return ""
-	}
-	return fmt.Sprintf("%d and %d are only possible in (%d,%d) and (%d,%d), which means that only those numbers could be in those cells", step.Nums[0], step.Nums[1], step.PointerCells[0].Row+1, step.PointerCells[0].Col+1, step.PointerCells[1].Row+1, step.PointerCells[1].Col+1)
-}
-
-func (self hiddenPairBlock) Find(grid *Grid) []*SolveStep {
-	//TODO: test that this will return multiple if they exist.
-	return hiddenSubset(grid, self, 2, self.getter(grid))
+	return hiddenSubset(grid, self, self.k, self.getter(grid))
 }
 
 func hiddenSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) []*SolveStep {
