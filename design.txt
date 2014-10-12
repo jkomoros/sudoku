@@ -64,6 +64,12 @@ TODO:
 	* BlockBlock interactions
 	* Should we consider a "guess between two options" to be a possible (extremely expensive) technique?
 		* I don't think this actually works in the model I have (it could be possible to have to unwind.)
+			* I think it's fine if it's a special technique that's not in the techniques array.
+				* We'd want an AllTechniques array as well as NormalTechniques array. Analysis would use the former; solver would use the latter.
+			* In Human Solve, if nothing else works, it Finds() with that Guess technique and randomly applies one.
+			* But because Human Solve was the one that decided to apply it, and knows that it's special, it saves an "unwind to" point.
+			* The unwindTo points will need to be nested (although for a first stab we could just only allow one UnWind and bail otherwise)
+			* As far as SolveDirections et al are concerned, Guess would just be a REALLY expensive technique.
 	* Implement enough techniques to be able to solve #122, #33, and #138.
 
 * Analysis: Spot check the results of the new markov difficulty grader to see if they intuitively make sense.
