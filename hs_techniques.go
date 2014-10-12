@@ -1,5 +1,9 @@
 package sudoku
 
+import (
+	"log"
+)
+
 /*
 	This file is where the basic solve technique infrastructure is defined.
 
@@ -28,9 +32,19 @@ type SolveTechnique interface {
 	Difficulty() float64
 }
 
+type getterType int
+
+const (
+	GROUP_NONE = iota
+	GROUP_ROW
+	GROUP_COL
+	GROUP_BLOCK
+)
+
 type basicSolveTechnique struct {
 	name       string
 	isFill     bool
+	groupType  getterType
 	difficulty float64
 }
 
@@ -44,6 +58,7 @@ func init() {
 				//TODO: shouldn't this be "Hidden Single Row" (and likewise for others)
 				"Necessary In Row",
 				true,
+				GROUP_ROW,
 				0.0,
 			},
 		},
@@ -51,6 +66,7 @@ func init() {
 			basicSolveTechnique{
 				"Necessary In Col",
 				true,
+				GROUP_COL,
 				0.0,
 			},
 		},
@@ -58,6 +74,7 @@ func init() {
 			basicSolveTechnique{
 				"Necessary In Block",
 				true,
+				GROUP_BLOCK,
 				0.0,
 			},
 		},
@@ -66,6 +83,7 @@ func init() {
 				//TODO: shouldn't this name be Naked Single for consistency?
 				"Only Legal Number",
 				true,
+				GROUP_NONE,
 				5.0,
 			},
 		},
@@ -73,6 +91,7 @@ func init() {
 			basicSolveTechnique{
 				"Pointing Pair Row",
 				false,
+				GROUP_ROW,
 				25.0,
 			},
 		},
@@ -80,6 +99,7 @@ func init() {
 			basicSolveTechnique{
 				"Pointing Pair Col",
 				false,
+				GROUP_COL,
 				25.0,
 			},
 		},
@@ -87,6 +107,7 @@ func init() {
 			basicSolveTechnique{
 				"Naked Pair Col",
 				false,
+				GROUP_COL,
 				75.0,
 			},
 		},
@@ -94,6 +115,7 @@ func init() {
 			basicSolveTechnique{
 				"Naked Pair Row",
 				false,
+				GROUP_ROW,
 				75.0,
 			},
 		},
@@ -101,6 +123,7 @@ func init() {
 			basicSolveTechnique{
 				"Naked Pair Block",
 				false,
+				GROUP_BLOCK,
 				85.0,
 			},
 		},
@@ -108,6 +131,7 @@ func init() {
 			basicSolveTechnique{
 				"Naked Triple Col",
 				false,
+				GROUP_COL,
 				125.0,
 			},
 		},
@@ -115,6 +139,7 @@ func init() {
 			basicSolveTechnique{
 				"Naked Triple Row",
 				false,
+				GROUP_ROW,
 				125.0,
 			},
 		},
@@ -122,6 +147,7 @@ func init() {
 			basicSolveTechnique{
 				"Naked Triple Block",
 				false,
+				GROUP_BLOCK,
 				140.0,
 			},
 		},
@@ -129,6 +155,7 @@ func init() {
 			basicSolveTechnique{
 				"Hidden Pair Row",
 				false,
+				GROUP_ROW,
 				300.0,
 			},
 		},
@@ -136,6 +163,7 @@ func init() {
 			basicSolveTechnique{
 				"Hidden Pair Col",
 				false,
+				GROUP_COL,
 				300.0,
 			},
 		},
@@ -143,6 +171,7 @@ func init() {
 			basicSolveTechnique{
 				"Hidden Pair Block",
 				false,
+				GROUP_BLOCK,
 				250.0,
 			},
 		},
@@ -166,6 +195,30 @@ func (self basicSolveTechnique) IsFill() bool {
 
 func (self basicSolveTechnique) Difficulty() float64 {
 	return self.difficulty
+}
+
+func (self basicSolveTechnique) getter(grid *Grid) func(int) CellList {
+	switch self.groupType {
+	case GROUP_ROW:
+		return func(i int) CellList {
+			return grid.Row(i)
+		}
+	case GROUP_COL:
+		return func(i int) CellList {
+			return grid.Col(i)
+		}
+	case GROUP_BLOCK:
+		return func(i int) CellList {
+			return grid.Block(i)
+		}
+	default:
+		//This should never happen in normal execution--the rare techniques where it doesn't work should never call getter.
+		log.Println("Asked for a getter for a function with GROUP_NONE")
+		//Return a shell of  a function just to not trip up things downstream.
+		return func(i int) CellList {
+			return nil
+		}
+	}
 }
 
 //This is useful both for hidden and naked subset techniques

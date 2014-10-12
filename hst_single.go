@@ -66,10 +66,7 @@ func (self hiddenSingleInRow) Description(step *SolveStep) string {
 
 func (self hiddenSingleInRow) Find(grid *Grid) []*SolveStep {
 	//TODO: test that if there are multiple we find them both.
-	getter := func(index int) []*Cell {
-		return grid.Row(index)
-	}
-	return necessaryInCollection(grid, self, getter)
+	return necessaryInCollection(grid, self, self.getter(grid))
 }
 
 func (self hiddenSingleInCol) Description(step *SolveStep) string {
@@ -84,10 +81,7 @@ func (self hiddenSingleInCol) Description(step *SolveStep) string {
 
 func (self hiddenSingleInCol) Find(grid *Grid) []*SolveStep {
 	//TODO: test this will find multiple if they exist.
-	getter := func(index int) []*Cell {
-		return grid.Col(index)
-	}
-	return necessaryInCollection(grid, self, getter)
+	return necessaryInCollection(grid, self, self.getter(grid))
 }
 
 func (self hiddenSingleInBlock) Description(step *SolveStep) string {
@@ -102,13 +96,10 @@ func (self hiddenSingleInBlock) Description(step *SolveStep) string {
 
 func (self hiddenSingleInBlock) Find(grid *Grid) []*SolveStep {
 	//TODO: Verify we find multiples if they exist.
-	getter := func(index int) []*Cell {
-		return grid.Block(index)
-	}
-	return necessaryInCollection(grid, self, getter)
+	return necessaryInCollection(grid, self, self.getter(grid))
 }
 
-func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) []*Cell) []*SolveStep {
+func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellList) []*SolveStep {
 	//This will be a random item
 	indexes := rand.Perm(DIM)
 

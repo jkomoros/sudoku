@@ -26,11 +26,7 @@ func (self hiddenPairCol) Description(step *SolveStep) string {
 
 func (self hiddenPairCol) Find(grid *Grid) []*SolveStep {
 	//TODO: test that this will find multiple if they exist.
-	//TODO: factor out colGetter, we use it so often...
-	colGetter := func(i int) CellList {
-		return grid.Col(i)
-	}
-	return hiddenSubset(grid, self, 2, colGetter)
+	return hiddenSubset(grid, self, 2, self.getter(grid))
 }
 
 func (self hiddenPairRow) Description(step *SolveStep) string {
@@ -42,10 +38,7 @@ func (self hiddenPairRow) Description(step *SolveStep) string {
 
 func (self hiddenPairRow) Find(grid *Grid) []*SolveStep {
 	//TODO: test we find multiple if they exist.
-	rowGetter := func(i int) CellList {
-		return grid.Row(i)
-	}
-	return hiddenSubset(grid, self, 2, rowGetter)
+	return hiddenSubset(grid, self, 2, self.getter(grid))
 }
 
 func (self hiddenPairBlock) Description(step *SolveStep) string {
@@ -57,10 +50,7 @@ func (self hiddenPairBlock) Description(step *SolveStep) string {
 
 func (self hiddenPairBlock) Find(grid *Grid) []*SolveStep {
 	//TODO: test that this will return multiple if they exist.
-	blockGetter := func(i int) CellList {
-		return grid.Block(i)
-	}
-	return hiddenSubset(grid, self, 2, blockGetter)
+	return hiddenSubset(grid, self, 2, self.getter(grid))
 }
 
 func hiddenSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) []*SolveStep {

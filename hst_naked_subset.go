@@ -40,10 +40,7 @@ func (self nakedPairCol) Description(step *SolveStep) string {
 
 func (self nakedPairCol) Find(grid *Grid) []*SolveStep {
 	//TODO: test that this will find multiple if they exist.
-	colGetter := func(i int) CellList {
-		return grid.Col(i)
-	}
-	return nakedSubset(grid, self, 2, colGetter)
+	return nakedSubset(grid, self, 2, self.getter(grid))
 }
 
 func (self nakedPairRow) Description(step *SolveStep) string {
@@ -55,10 +52,7 @@ func (self nakedPairRow) Description(step *SolveStep) string {
 
 func (self nakedPairRow) Find(grid *Grid) []*SolveStep {
 	//TODO: test we find multiple if they exist.
-	rowGetter := func(i int) CellList {
-		return grid.Row(i)
-	}
-	return nakedSubset(grid, self, 2, rowGetter)
+	return nakedSubset(grid, self, 2, self.getter(grid))
 }
 
 func (self nakedPairBlock) Description(step *SolveStep) string {
@@ -70,10 +64,7 @@ func (self nakedPairBlock) Description(step *SolveStep) string {
 
 func (self nakedPairBlock) Find(grid *Grid) []*SolveStep {
 	//TODO: test that this will return multiple if they exist.
-	blockGetter := func(i int) CellList {
-		return grid.Block(i)
-	}
-	return nakedSubset(grid, self, 2, blockGetter)
+	return nakedSubset(grid, self, 2, self.getter(grid))
 }
 
 func (self nakedTripleCol) Description(step *SolveStep) string {
@@ -85,10 +76,7 @@ func (self nakedTripleCol) Description(step *SolveStep) string {
 
 func (self nakedTripleCol) Find(grid *Grid) []*SolveStep {
 	//TODO: test we find multiple if they exist.
-	colGetter := func(i int) CellList {
-		return grid.Col(i)
-	}
-	return nakedSubset(grid, self, 3, colGetter)
+	return nakedSubset(grid, self, 3, self.getter(grid))
 }
 
 func (self nakedTripleRow) Description(step *SolveStep) string {
@@ -100,10 +88,7 @@ func (self nakedTripleRow) Description(step *SolveStep) string {
 
 func (self nakedTripleRow) Find(grid *Grid) []*SolveStep {
 	//TODO: test that if there are multiple we find them.
-	rowGetter := func(i int) CellList {
-		return grid.Row(i)
-	}
-	return nakedSubset(grid, self, 3, rowGetter)
+	return nakedSubset(grid, self, 3, self.getter(grid))
 }
 
 func (self nakedTripleBlock) Description(step *SolveStep) string {
@@ -115,10 +100,7 @@ func (self nakedTripleBlock) Description(step *SolveStep) string {
 
 func (self nakedTripleBlock) Find(grid *Grid) []*SolveStep {
 	//TODO: test that this will find multiple ones if they exist.
-	blockGetter := func(i int) CellList {
-		return grid.Block(i)
-	}
-	return nakedSubset(grid, self, 3, blockGetter)
+	return nakedSubset(grid, self, 3, self.getter(grid))
 }
 
 func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) []*SolveStep {
