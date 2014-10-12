@@ -58,7 +58,6 @@ TODO:
 
 * NEXT STEPS:
 	* Factor down necessaryInRow,Block,Col into necessaryInGroupTechinque
-	* Factor down pointingPairRow,Col into pointingPairGroup
 	* Factor down the tests for the techniques into a test helper (if possible)
 
 * Make a decision about how to represent cell coordinates and row/col/block indexes when presented to user. now we're consistently 0 indexed (mostly), but shouldn't we be 1 indexed when presenting to the user?

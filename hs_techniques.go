@@ -94,7 +94,7 @@ func init() {
 				5.0,
 			},
 		},
-		pointingPairRow{
+		pointingPairTechnique{
 			basicSolveTechnique{
 				"Pointing Pair Row",
 				false,
@@ -103,7 +103,7 @@ func init() {
 				25.0,
 			},
 		},
-		pointingPairCol{
+		pointingPairTechnique{
 			basicSolveTechnique{
 				"Pointing Pair Col",
 				false,
