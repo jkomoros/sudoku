@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-//The actual techniques are intialized in hs_techniques.go, an actually defined in hst_*.go files.
+//The actual techniques are intialized in hs_techniques.go, and actually defined in hst_*.go files.
 var Techniques []SolveTechnique
 
 //Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
@@ -22,13 +22,6 @@ const MAX_RAW_DIFFICULTY = 18000.0
 const DIFFICULTY_CONVERGENCE = 0.0005
 
 type SolveDirections []*SolveStep
-
-const (
-	NAKED_SINGLE = iota
-	HIDDEN_SINGLE_IN_ROW
-	HIDDEN_SINGLE_IN_COL
-	HIDDEN_SINGLE_IN_BLOCK
-)
 
 type SolveStep struct {
 	TargetCells  CellList
