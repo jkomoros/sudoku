@@ -98,7 +98,7 @@ func TestNecessaryInRow(t *testing.T) {
 	step := steps[0]
 
 	description := solver.Description(step)
-	if description != "9 is required in the 4 row, and 4 is the only column it fits" {
+	if description != "9 is required in the 3 row, and 3 is the only column it fits" {
 		t.Error("Wrong description for ", techniqueName, ": ", description)
 	}
 
@@ -167,7 +167,7 @@ func TestNecessaryInCol(t *testing.T) {
 	step := steps[0]
 
 	description := solver.Description(step)
-	if description != "9 is required in the 4 column, and 4 is the only row it fits" {
+	if description != "9 is required in the 3 column, and 3 is the only row it fits" {
 		t.Error("Wrong description for ", techniqueName, ": ", description)
 	}
 
@@ -236,7 +236,7 @@ func TestNecessaryInBlock(t *testing.T) {
 	step := steps[0]
 
 	description := solver.Description(step)
-	if description != "9 is required in the 5 block, and 4, 4 is the only cell it fits" {
+	if description != "9 is required in the 4 block, and 3, 3 is the only cell it fits" {
 		t.Error("Wrong description for ", techniqueName, ": ", description)
 	}
 

@@ -61,7 +61,7 @@ func (self hiddenSingleInRow) Description(step *SolveStep) string {
 	}
 	cell := step.TargetCells[0]
 	num := step.TargetNums[0]
-	return fmt.Sprintf("%d is required in the %d row, and %d is the only column it fits", num, cell.Row+1, cell.Col+1)
+	return fmt.Sprintf("%d is required in the %d row, and %d is the only column it fits", num, cell.Row, cell.Col)
 }
 
 func (self hiddenSingleInRow) Find(grid *Grid) []*SolveStep {
@@ -76,7 +76,7 @@ func (self hiddenSingleInCol) Description(step *SolveStep) string {
 	}
 	cell := step.TargetCells[0]
 	num := step.TargetNums[0]
-	return fmt.Sprintf("%d is required in the %d column, and %d is the only row it fits", num, cell.Row+1, cell.Col+1)
+	return fmt.Sprintf("%d is required in the %d column, and %d is the only row it fits", num, cell.Row, cell.Col)
 }
 
 func (self hiddenSingleInCol) Find(grid *Grid) []*SolveStep {
@@ -91,7 +91,7 @@ func (self hiddenSingleInBlock) Description(step *SolveStep) string {
 	}
 	cell := step.TargetCells[0]
 	num := step.TargetNums[0]
-	return fmt.Sprintf("%d is required in the %d block, and %d, %d is the only cell it fits", num, cell.Block+1, cell.Row+1, cell.Col+1)
+	return fmt.Sprintf("%d is required in the %d block, and %d, %d is the only cell it fits", num, cell.Block, cell.Row, cell.Col)
 }
 
 func (self hiddenSingleInBlock) Find(grid *Grid) []*SolveStep {
