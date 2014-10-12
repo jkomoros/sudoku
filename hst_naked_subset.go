@@ -29,6 +29,8 @@ type nakedTripleBlock struct {
 	basicSolveTechnique
 }
 
+//TODO: Factor out as much as possible about Description and Find for a class.
+
 func (self nakedPairCol) Description(step *SolveStep) string {
 	if len(step.Nums) < 2 || len(step.PointerCells) < 2 {
 		return ""
