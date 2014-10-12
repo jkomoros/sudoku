@@ -73,6 +73,9 @@ func TestHiddenPairRow(t *testing.T) {
 		t.Log("Hidden pair row found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
+	if len(step.PointerNums) != 2 || !step.PointerNums.SameContentAs([]int{3, 5}) {
+		t.Error("Hidden pair row had the wrong pointer numbers: ", step.PointerNums)
+	}
 
 	description := solver.Description(step)
 	if description != "7, 8, and 2 are only possible in (4,7) and (4,8), which means that only those numbers could be in those cells" {
@@ -140,6 +143,9 @@ func TestHiddenPairCol(t *testing.T) {
 		t.Log("Hidden pair col found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
+	if len(step.PointerNums) != 2 || !step.PointerNums.SameContentAs([]int{3, 5}) {
+		t.Error("Hidden pair col had the wrong pointer numbers: ", step.PointerNums)
+	}
 
 	description := solver.Description(step)
 	if description != "7, 8, and 2 are only possible in (7,4) and (8,4), which means that only those numbers could be in those cells" {
@@ -204,6 +210,9 @@ func TestHiddenPairBlock(t *testing.T) {
 	if len(step.Nums) != 3 || !step.Nums.SameContentAs([]int{7, 8, 2}) {
 		t.Log("Hidden pair block found the wrong numbers: ", step.Nums)
 		t.Fail()
+	}
+	if len(step.PointerNums) != 2 || !step.PointerNums.SameContentAs([]int{3, 5}) {
+		t.Error("Hidden pair block had the wrong pointer numbers: ", step.PointerNums)
 	}
 
 	description := solver.Description(step)
