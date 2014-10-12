@@ -5,32 +5,9 @@ import (
 	"math/rand"
 )
 
+//Different instantiations of this technique represent naked{pair,triple}{row,block,col}
 type nakedSubsetTechnique struct {
 	basicSolveTechnique
-}
-
-type nakedPairCol struct {
-	nakedSubsetTechnique
-}
-
-type nakedPairRow struct {
-	nakedSubsetTechnique
-}
-
-type nakedPairBlock struct {
-	nakedSubsetTechnique
-}
-
-type nakedTripleCol struct {
-	nakedSubsetTechnique
-}
-
-type nakedTripleRow struct {
-	nakedSubsetTechnique
-}
-
-type nakedTripleBlock struct {
-	nakedSubsetTechnique
 }
 
 func (self nakedSubsetTechnique) Description(step *SolveStep) string {
@@ -58,34 +35,8 @@ func (self nakedSubsetTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%s are only possible in %s, which means that they can't be in any other cell in %s %d", step.Nums.Description(), step.PointerCells.Description(), groupName, groupNum)
 }
 
-func (self nakedPairCol) Find(grid *Grid) []*SolveStep {
+func (self nakedSubsetTechnique) Find(grid *Grid) []*SolveStep {
 	//TODO: test that this will find multiple if they exist.
-	//TODO: in a perfect world we'd be able to lift this impl into nakedSubsetTechnique... but we can't because we need to pass in the full self technique to nakedSubset.
-	return nakedSubset(grid, self, self.k, self.getter(grid))
-}
-
-func (self nakedPairRow) Find(grid *Grid) []*SolveStep {
-	//TODO: test we find multiple if they exist.
-	return nakedSubset(grid, self, self.k, self.getter(grid))
-}
-
-func (self nakedPairBlock) Find(grid *Grid) []*SolveStep {
-	//TODO: test that this will return multiple if they exist.
-	return nakedSubset(grid, self, self.k, self.getter(grid))
-}
-
-func (self nakedTripleCol) Find(grid *Grid) []*SolveStep {
-	//TODO: test we find multiple if they exist.
-	return nakedSubset(grid, self, self.k, self.getter(grid))
-}
-
-func (self nakedTripleRow) Find(grid *Grid) []*SolveStep {
-	//TODO: test that if there are multiple we find them.
-	return nakedSubset(grid, self, self.k, self.getter(grid))
-}
-
-func (self nakedTripleBlock) Find(grid *Grid) []*SolveStep {
-	//TODO: test that this will find multiple ones if they exist.
 	return nakedSubset(grid, self, self.k, self.getter(grid))
 }
 

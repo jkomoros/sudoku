@@ -112,70 +112,58 @@ func init() {
 				25.0,
 			},
 		},
-		nakedPairCol{
-			nakedSubsetTechnique{
-				basicSolveTechnique{
-					"Naked Pair Col",
-					false,
-					GROUP_COL,
-					2,
-					75.0,
-				},
+		nakedSubsetTechnique{
+			basicSolveTechnique{
+				"Naked Pair Col",
+				false,
+				GROUP_COL,
+				2,
+				75.0,
 			},
 		},
-		nakedPairRow{
-			nakedSubsetTechnique{
-				basicSolveTechnique{
-					"Naked Pair Row",
-					false,
-					GROUP_ROW,
-					2,
-					75.0,
-				},
+		nakedSubsetTechnique{
+			basicSolveTechnique{
+				"Naked Pair Row",
+				false,
+				GROUP_ROW,
+				2,
+				75.0,
 			},
 		},
-		nakedPairBlock{
-			nakedSubsetTechnique{
-				basicSolveTechnique{
-					"Naked Pair Block",
-					false,
-					GROUP_BLOCK,
-					2,
-					85.0,
-				},
+		nakedSubsetTechnique{
+			basicSolveTechnique{
+				"Naked Pair Block",
+				false,
+				GROUP_BLOCK,
+				2,
+				85.0,
 			},
 		},
-		nakedTripleCol{
-			nakedSubsetTechnique{
-				basicSolveTechnique{
-					"Naked Triple Col",
-					false,
-					GROUP_COL,
-					3,
-					125.0,
-				},
+		nakedSubsetTechnique{
+			basicSolveTechnique{
+				"Naked Triple Col",
+				false,
+				GROUP_COL,
+				3,
+				125.0,
 			},
 		},
-		nakedTripleRow{
-			nakedSubsetTechnique{
-				basicSolveTechnique{
-					"Naked Triple Row",
-					false,
-					GROUP_ROW,
-					3,
-					125.0,
-				},
+		nakedSubsetTechnique{
+			basicSolveTechnique{
+				"Naked Triple Row",
+				false,
+				GROUP_ROW,
+				3,
+				125.0,
 			},
 		},
-		nakedTripleBlock{
-			nakedSubsetTechnique{
-				basicSolveTechnique{
-					"Naked Triple Block",
-					false,
-					GROUP_BLOCK,
-					3,
-					140.0,
-				},
+		nakedSubsetTechnique{
+			basicSolveTechnique{
+				"Naked Triple Block",
+				false,
+				GROUP_BLOCK,
+				3,
+				140.0,
 			},
 		},
 		hiddenPairRow{
