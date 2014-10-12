@@ -69,8 +69,8 @@ func TestHiddenPairRow(t *testing.T) {
 		t.Log("The target cells in the hidden pair row were wrong row")
 		t.Fail()
 	}
-	if len(step.Nums) != 3 || !step.Nums.SameContentAs([]int{7, 8, 2}) {
-		t.Log("Hidden pair row found the wrong numbers: ", step.Nums)
+	if len(step.TargetNums) != 3 || !step.TargetNums.SameContentAs([]int{7, 8, 2}) {
+		t.Log("Hidden pair row found the wrong numbers: ", step.TargetNums)
 		t.Fail()
 	}
 	if len(step.PointerNums) != 2 || !step.PointerNums.SameContentAs([]int{3, 5}) {
@@ -83,9 +83,9 @@ func TestHiddenPairRow(t *testing.T) {
 	}
 
 	step.Apply(grid)
-	firstNum := step.Nums[0]
-	secondNum := step.Nums[1]
-	thirdNum := step.Nums[2]
+	firstNum := step.TargetNums[0]
+	secondNum := step.TargetNums[1]
+	thirdNum := step.TargetNums[2]
 	for _, cell := range step.TargetCells {
 
 		for i := 1; i <= DIM; i++ {
@@ -139,8 +139,8 @@ func TestHiddenPairCol(t *testing.T) {
 		t.Log("The target cells in the hidden pair col were wrong row")
 		t.Fail()
 	}
-	if len(step.Nums) != 3 || !step.Nums.SameContentAs([]int{7, 8, 2}) {
-		t.Log("Hidden pair col found the wrong numbers: ", step.Nums)
+	if len(step.TargetNums) != 3 || !step.TargetNums.SameContentAs([]int{7, 8, 2}) {
+		t.Log("Hidden pair col found the wrong numbers: ", step.TargetNums)
 		t.Fail()
 	}
 	if len(step.PointerNums) != 2 || !step.PointerNums.SameContentAs([]int{3, 5}) {
@@ -153,9 +153,9 @@ func TestHiddenPairCol(t *testing.T) {
 	}
 
 	step.Apply(grid)
-	firstNum := step.Nums[0]
-	secondNum := step.Nums[1]
-	thirdNum := step.Nums[2]
+	firstNum := step.TargetNums[0]
+	secondNum := step.TargetNums[1]
+	thirdNum := step.TargetNums[2]
 	for _, cell := range step.TargetCells {
 
 		for i := 1; i <= DIM; i++ {
@@ -207,8 +207,8 @@ func TestHiddenPairBlock(t *testing.T) {
 		t.Log("The target cells in the hidden pair block were wrong row")
 		t.Fail()
 	}
-	if len(step.Nums) != 3 || !step.Nums.SameContentAs([]int{7, 8, 2}) {
-		t.Log("Hidden pair block found the wrong numbers: ", step.Nums)
+	if len(step.TargetNums) != 3 || !step.TargetNums.SameContentAs([]int{7, 8, 2}) {
+		t.Log("Hidden pair block found the wrong numbers: ", step.TargetNums)
 		t.Fail()
 	}
 	if len(step.PointerNums) != 2 || !step.PointerNums.SameContentAs([]int{3, 5}) {
@@ -221,9 +221,9 @@ func TestHiddenPairBlock(t *testing.T) {
 	}
 
 	step.Apply(grid)
-	firstNum := step.Nums[0]
-	secondNum := step.Nums[1]
-	thirdNum := step.Nums[2]
+	firstNum := step.TargetNums[0]
+	secondNum := step.TargetNums[1]
+	thirdNum := step.TargetNums[2]
 	for _, cell := range step.TargetCells {
 
 		for i := 1; i <= DIM; i++ {

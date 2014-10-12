@@ -11,12 +11,12 @@ type hiddenSubsetTechnique struct {
 }
 
 func (self hiddenSubsetTechnique) Description(step *SolveStep) string {
-	if len(step.Nums) < self.k || len(step.PointerCells) < self.k {
+	if len(step.TargetNums) < self.k || len(step.PointerCells) < self.k {
 		return ""
 	}
 	//TODO: this message should say something about the group and number right after the second %s.
 	//TODO: also: this message is wrong... the numbers we report are backwards.
-	return fmt.Sprintf("%s are only possible in %s, which means that only those numbers could be in those cells", step.Nums.Description(), step.PointerCells.Description())
+	return fmt.Sprintf("%s are only possible in %s, which means that only those numbers could be in those cells", step.TargetNums.Description(), step.PointerCells.Description())
 }
 
 func (self hiddenSubsetTechnique) Find(grid *Grid) []*SolveStep {

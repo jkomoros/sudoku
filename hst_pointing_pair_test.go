@@ -54,7 +54,7 @@ func TestPointingPairCol(t *testing.T) {
 		t.Log("The target cells in the pointing pair col technique were wrong col")
 		t.Fail()
 	}
-	if len(step.Nums) != 1 || step.Nums[0] != 7 {
+	if len(step.TargetNums) != 1 || step.TargetNums[0] != 7 {
 		t.Log("Pointing pair col technique gave the wrong number")
 		t.Fail()
 	}
@@ -65,7 +65,7 @@ func TestPointingPairCol(t *testing.T) {
 	}
 
 	step.Apply(grid)
-	num := step.Nums[0]
+	num := step.TargetNums[0]
 	for _, cell := range step.TargetCells {
 		if cell.Possible(num) {
 			t.Log("The pointing pairs col technique was not applied correclty")
@@ -107,7 +107,7 @@ func TestPointingPairRow(t *testing.T) {
 		t.Log("The target cells in the pointing pair row technique were wrong row")
 		t.Fail()
 	}
-	if len(step.Nums) != 1 || step.Nums[0] != 7 {
+	if len(step.TargetNums) != 1 || step.TargetNums[0] != 7 {
 		t.Log("Pointing pair row technique gave the wrong number")
 		t.Fail()
 	}
@@ -118,7 +118,7 @@ func TestPointingPairRow(t *testing.T) {
 	}
 
 	step.Apply(grid)
-	num := step.Nums[0]
+	num := step.TargetNums[0]
 	for _, cell := range step.TargetCells {
 		if cell.Possible(num) {
 			t.Log("The pointing pairs row technique was not applied correclty")

@@ -30,7 +30,7 @@ type SolveStep struct {
 	PointerCells CellList
 	//The numbers we will remove (or, in the case of Fill, add)
 	//TODO: shouldn't this be renamed TargetNums?
-	Nums IntSlice
+	TargetNums IntSlice
 	//The numbers in pointerCells that lead us to remove TargetNums from TargetCells.
 	//This is only very rarely needed (at this time only for hiddenSubset techniques)
 	PointerNums IntSlice
@@ -49,16 +49,16 @@ func (self *SolveStep) IsUseful(grid *Grid) bool {
 
 	//TODO: test this.
 	if self.Technique.IsFill() {
-		if len(self.TargetCells) == 0 || len(self.Nums) == 0 {
+		if len(self.TargetCells) == 0 || len(self.TargetNums) == 0 {
 			return false
 		}
 		cell := self.TargetCells[0].InGrid(grid)
-		return self.Nums[0] != cell.Number()
+		return self.TargetNums[0] != cell.Number()
 	} else {
 		useful := false
 		for _, cell := range self.TargetCells {
 			gridCell := cell.InGrid(grid)
-			for _, exclude := range self.Nums {
+			for _, exclude := range self.TargetNums {
 				//It's right to use Possible because it includes the logic of "it's not possible if there's a number in there already"
 				//TODO: ensure the comment above is correct logically.
 				if gridCell.Possible(exclude) {
@@ -73,15 +73,15 @@ func (self *SolveStep) IsUseful(grid *Grid) bool {
 func (self *SolveStep) Apply(grid *Grid) {
 	//All of this logic is substantially recreated in IsUseful.
 	if self.Technique.IsFill() {
-		if len(self.TargetCells) == 0 || len(self.Nums) == 0 {
+		if len(self.TargetCells) == 0 || len(self.TargetNums) == 0 {
 			return
 		}
 		cell := self.TargetCells[0].InGrid(grid)
-		cell.SetNumber(self.Nums[0])
+		cell.SetNumber(self.TargetNums[0])
 	} else {
 		for _, cell := range self.TargetCells {
 			gridCell := cell.InGrid(grid)
-			for _, exclude := range self.Nums {
+			for _, exclude := range self.TargetNums {
 				gridCell.setExcluded(exclude, true)
 			}
 		}
@@ -91,10 +91,10 @@ func (self *SolveStep) Apply(grid *Grid) {
 func (self *SolveStep) Description() string {
 	result := ""
 	if self.Technique.IsFill() {
-		result += fmt.Sprintf("We put %s in cell %s ", self.Nums.Description(), self.TargetCells.Description())
+		result += fmt.Sprintf("We put %s in cell %s ", self.TargetNums.Description(), self.TargetCells.Description())
 	} else {
 		//TODO: pluralize based on length of lists.
-		result += fmt.Sprintf("We remove the possibilities %s from cells %s ", self.Nums.Description(), self.TargetCells.Description())
+		result += fmt.Sprintf("We remove the possibilities %s from cells %s ", self.TargetNums.Description(), self.TargetCells.Description())
 	}
 	result += "because " + self.Technique.Description(self) + "."
 	return result

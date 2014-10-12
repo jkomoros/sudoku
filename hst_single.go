@@ -28,10 +28,10 @@ func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep 
 }
 
 func (self nakedSingleTechnique) Description(step *SolveStep) string {
-	if len(step.Nums) == 0 {
+	if len(step.TargetNums) == 0 {
 		return ""
 	}
-	num := step.Nums[0]
+	num := step.TargetNums[0]
 	return fmt.Sprintf("%d is the only remaining valid number for that cell", num)
 }
 
@@ -56,11 +56,11 @@ func (self nakedSingleTechnique) Find(grid *Grid) []*SolveStep {
 
 func (self hiddenSingleInRow) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
-	if len(step.TargetCells) == 0 || len(step.Nums) == 0 {
+	if len(step.TargetCells) == 0 || len(step.TargetNums) == 0 {
 		return ""
 	}
 	cell := step.TargetCells[0]
-	num := step.Nums[0]
+	num := step.TargetNums[0]
 	return fmt.Sprintf("%d is required in the %d row, and %d is the only column it fits", num, cell.Row+1, cell.Col+1)
 }
 
@@ -71,11 +71,11 @@ func (self hiddenSingleInRow) Find(grid *Grid) []*SolveStep {
 
 func (self hiddenSingleInCol) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
-	if len(step.TargetCells) == 0 || len(step.Nums) == 0 {
+	if len(step.TargetCells) == 0 || len(step.TargetNums) == 0 {
 		return ""
 	}
 	cell := step.TargetCells[0]
-	num := step.Nums[0]
+	num := step.TargetNums[0]
 	return fmt.Sprintf("%d is required in the %d column, and %d is the only row it fits", num, cell.Row+1, cell.Col+1)
 }
 
@@ -86,11 +86,11 @@ func (self hiddenSingleInCol) Find(grid *Grid) []*SolveStep {
 
 func (self hiddenSingleInBlock) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
-	if len(step.TargetCells) == 0 || len(step.Nums) == 0 {
+	if len(step.TargetCells) == 0 || len(step.TargetNums) == 0 {
 		return ""
 	}
 	cell := step.TargetCells[0]
-	num := step.Nums[0]
+	num := step.TargetNums[0]
 	return fmt.Sprintf("%d is required in the %d block, and %d, %d is the only cell it fits", num, cell.Block+1, cell.Row+1, cell.Col+1)
 }
 

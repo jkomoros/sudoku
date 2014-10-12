@@ -41,7 +41,7 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 		t.Log("The only legal number technique identified the wrong cell.")
 		t.Fail()
 	}
-	numFromStep := step.Nums[0]
+	numFromStep := step.TargetNums[0]
 
 	if numFromStep != num {
 		t.Log("The only legal number technique identified the wrong number.")
@@ -109,7 +109,7 @@ func TestNecessaryInRow(t *testing.T) {
 		t.Fail()
 	}
 
-	numFromStep := step.Nums[0]
+	numFromStep := step.TargetNums[0]
 
 	if numFromStep != DIM {
 		t.Log("The necessary in row technique identified the wrong number.")
@@ -178,7 +178,7 @@ func TestNecessaryInCol(t *testing.T) {
 		t.Fail()
 	}
 
-	numFromStep := step.Nums[0]
+	numFromStep := step.TargetNums[0]
 
 	if numFromStep != DIM {
 		t.Log("The necessary in col technique identified the wrong number.")
@@ -247,7 +247,7 @@ func TestNecessaryInBlock(t *testing.T) {
 		t.Fail()
 	}
 
-	numFromStep := step.Nums[0]
+	numFromStep := step.TargetNums[0]
 
 	if numFromStep != DIM {
 		t.Log("The necessary in block technique identified the wrong number.")

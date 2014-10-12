@@ -14,10 +14,10 @@ type pointingPairCol struct {
 }
 
 func (self pointingPairRow) Description(step *SolveStep) string {
-	if len(step.Nums) == 0 {
+	if len(step.TargetNums) == 0 {
 		return ""
 	}
-	return fmt.Sprintf("%d is only possible in row %d of block %d, which means it can't be in any other cell in that row not in that block", step.Nums[0], step.TargetCells.Row(), step.PointerCells.Block())
+	return fmt.Sprintf("%d is only possible in row %d of block %d, which means it can't be in any other cell in that row not in that block", step.TargetNums[0], step.TargetCells.Row(), step.PointerCells.Block())
 }
 
 func (self pointingPairRow) Find(grid *Grid) []*SolveStep {
@@ -53,10 +53,10 @@ func (self pointingPairRow) Find(grid *Grid) []*SolveStep {
 }
 
 func (self pointingPairCol) Description(step *SolveStep) string {
-	if len(step.Nums) == 0 {
+	if len(step.TargetNums) == 0 {
 		return ""
 	}
-	return fmt.Sprintf("%d is only possible in column %d of block %d, which means it can't be in any other cell in that column not in that block", step.Nums[0], step.TargetCells.Col(), step.PointerCells.Block())
+	return fmt.Sprintf("%d is only possible in column %d of block %d, which means it can't be in any other cell in that column not in that block", step.TargetNums[0], step.TargetCells.Col(), step.PointerCells.Block())
 }
 
 func (self pointingPairCol) Find(grid *Grid) []*SolveStep {

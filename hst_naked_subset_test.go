@@ -72,8 +72,8 @@ func TestNakedPairCol(t *testing.T) {
 		t.Log("The target cells in the naked pair col were wrong col")
 		t.Fail()
 	}
-	if len(step.Nums) != 2 || !step.Nums.SameContentAs([]int{2, 3}) {
-		t.Log("Naked pair col found the wrong numbers: ", step.Nums)
+	if len(step.TargetNums) != 2 || !step.TargetNums.SameContentAs([]int{2, 3}) {
+		t.Log("Naked pair col found the wrong numbers: ", step.TargetNums)
 		t.Fail()
 	}
 
@@ -83,8 +83,8 @@ func TestNakedPairCol(t *testing.T) {
 	}
 
 	step.Apply(grid)
-	firstNum := step.Nums[0]
-	secondNum := step.Nums[1]
+	firstNum := step.TargetNums[0]
+	secondNum := step.TargetNums[1]
 	for _, cell := range step.TargetCells {
 		if cell.Possible(firstNum) || cell.Possible(secondNum) {
 			t.Log("Naked Pair col found was not appleid correctly")
@@ -130,8 +130,8 @@ func TestNakedPairRow(t *testing.T) {
 		t.Log("The target cells in the naked pair row were wrong row")
 		t.Fail()
 	}
-	if len(step.Nums) != 2 || !step.Nums.SameContentAs([]int{2, 3}) {
-		t.Log("Naked pair row found the wrong numbers: ", step.Nums)
+	if len(step.TargetNums) != 2 || !step.TargetNums.SameContentAs([]int{2, 3}) {
+		t.Log("Naked pair row found the wrong numbers: ", step.TargetNums)
 		t.Fail()
 	}
 
@@ -141,8 +141,8 @@ func TestNakedPairRow(t *testing.T) {
 	}
 
 	step.Apply(grid)
-	firstNum := step.Nums[0]
-	secondNum := step.Nums[1]
+	firstNum := step.TargetNums[0]
+	secondNum := step.TargetNums[1]
 	for _, cell := range step.TargetCells {
 		if cell.Possible(firstNum) || cell.Possible(secondNum) {
 			t.Log("Naked Pair row found was not appleid correctly")
@@ -184,8 +184,8 @@ func TestNakedPairBlock(t *testing.T) {
 		t.Log("The target cells in the naked pair block were wrong block")
 		t.Fail()
 	}
-	if len(step.Nums) != 2 || !step.Nums.SameContentAs([]int{1, 2}) {
-		t.Log("Naked pair block found the wrong numbers: ", step.Nums)
+	if len(step.TargetNums) != 2 || !step.TargetNums.SameContentAs([]int{1, 2}) {
+		t.Log("Naked pair block found the wrong numbers: ", step.TargetNums)
 		t.Fail()
 	}
 
@@ -195,8 +195,8 @@ func TestNakedPairBlock(t *testing.T) {
 	}
 
 	step.Apply(grid)
-	firstNum := step.Nums[0]
-	secondNum := step.Nums[1]
+	firstNum := step.TargetNums[0]
+	secondNum := step.TargetNums[1]
 	for _, cell := range step.TargetCells {
 		if cell.Possible(firstNum) || cell.Possible(secondNum) {
 			t.Log("Naked Pair block found was not appleid correctly")
@@ -240,8 +240,8 @@ func TestNakedTriple(t *testing.T) {
 		t.Log("The target cells in the naked triple row were wrong row")
 		t.Fail()
 	}
-	if len(step.Nums) != 3 || !step.Nums.SameContentAs([]int{3, 5, 8}) {
-		t.Log("Naked triple row found the wrong numbers: ", step.Nums)
+	if len(step.TargetNums) != 3 || !step.TargetNums.SameContentAs([]int{3, 5, 8}) {
+		t.Log("Naked triple row found the wrong numbers: ", step.TargetNums)
 		t.Fail()
 	}
 
@@ -251,9 +251,9 @@ func TestNakedTriple(t *testing.T) {
 	}
 
 	step.Apply(grid)
-	firstNum := step.Nums[0]
-	secondNum := step.Nums[1]
-	thirdNum := step.Nums[2]
+	firstNum := step.TargetNums[0]
+	secondNum := step.TargetNums[1]
+	thirdNum := step.TargetNums[2]
 	for _, cell := range step.TargetCells {
 		if cell.Possible(firstNum) || cell.Possible(secondNum) || cell.Possible(thirdNum) {
 			t.Log("Naked triple row found was not appleid correctly")

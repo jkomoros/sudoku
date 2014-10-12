@@ -11,7 +11,7 @@ type nakedSubsetTechnique struct {
 }
 
 func (self nakedSubsetTechnique) Description(step *SolveStep) string {
-	if len(step.Nums) < self.k || len(step.PointerCells) < self.k {
+	if len(step.TargetNums) < self.k || len(step.PointerCells) < self.k {
 		return ""
 	}
 	//TODO: it feels like this logic should be factored out.
@@ -32,7 +32,7 @@ func (self nakedSubsetTechnique) Description(step *SolveStep) string {
 		groupNum = -1
 	}
 
-	return fmt.Sprintf("%s are only possible in %s, which means that they can't be in any other cell in %s %d", step.Nums.Description(), step.PointerCells.Description(), groupName, groupNum)
+	return fmt.Sprintf("%s are only possible in %s, which means that they can't be in any other cell in %s %d", step.TargetNums.Description(), step.PointerCells.Description(), groupName, groupNum)
 }
 
 func (self nakedSubsetTechnique) Find(grid *Grid) []*SolveStep {
