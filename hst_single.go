@@ -24,7 +24,7 @@ type hiddenSingleInBlock struct {
 func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
 	cellArr := []*Cell{cell}
 	numArr := []int{num}
-	return &SolveStep{cellArr, nil, numArr, technique}
+	return &SolveStep{cellArr, nil, numArr, nil, technique}
 }
 
 func (self nakedSingleTechnique) Description(step *SolveStep) string {

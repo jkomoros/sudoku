@@ -56,6 +56,7 @@ func TestStepsDescription(t *testing.T) {
 			},
 			nil,
 			IntSlice{1},
+			nil,
 			Techniques[3],
 		},
 		&SolveStep{
@@ -68,6 +69,7 @@ func TestStepsDescription(t *testing.T) {
 				grid.Cell(1, 4),
 			},
 			IntSlice{1, 2},
+			nil,
 			Techniques[5],
 		},
 		&SolveStep{
@@ -76,6 +78,7 @@ func TestStepsDescription(t *testing.T) {
 			},
 			nil,
 			IntSlice{2},
+			nil,
 			Techniques[3],
 		},
 	}

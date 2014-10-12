@@ -24,10 +24,18 @@ const DIFFICULTY_CONVERGENCE = 0.0005
 type SolveDirections []*SolveStep
 
 type SolveStep struct {
-	TargetCells  CellList
+	//The cells that will be affected by the techinque
+	TargetCells CellList
+	//The cells that together lead the techinque to being valid
 	PointerCells CellList
-	Nums         IntSlice
-	Technique    SolveTechnique
+	//The numbers we will remove (or, in the case of Fill, add)
+	//TODO: shouldn't this be renamed TargetNums?
+	Nums IntSlice
+	//The numbers in pointerCells that lead us to remove TargetNums from TargetCells.
+	//This is only very rarely needed (at this time only for hiddenSubset techniques)
+	PointerNums IntSlice
+	//The general technique that underlies this step.
+	Technique SolveTechnique
 }
 
 func (self *SolveStep) IsUseful(grid *Grid) bool {

@@ -41,7 +41,7 @@ func (self pointingPairRow) Find(grid *Grid) []*SolveStep {
 			//Okay, it's possible it's a match. Are all rows the same?
 			if cells.SameRow() {
 				//Yup!
-				result := &SolveStep{grid.Row(cells.Row()).RemoveCells(block), cells, []int{num + 1}, self}
+				result := &SolveStep{grid.Row(cells.Row()).RemoveCells(block), cells, []int{num + 1}, nil, self}
 				if result.IsUseful(grid) {
 					results = append(results, result)
 				}
@@ -81,7 +81,7 @@ func (self pointingPairCol) Find(grid *Grid) []*SolveStep {
 			//Okay, are all cols?
 			if cells.SameCol() {
 				//Yup!
-				result := &SolveStep{grid.Col(cells.Col()).RemoveCells(block), cells, []int{num + 1}, self}
+				result := &SolveStep{grid.Col(cells.Col()).RemoveCells(block), cells, []int{num + 1}, nil, self}
 				if result.IsUseful(grid) {
 					results = append(results, result)
 				}
