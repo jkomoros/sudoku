@@ -58,6 +58,12 @@ func TestPointingPairCol(t *testing.T) {
 		t.Log("Pointing pair col technique gave the wrong number")
 		t.Fail()
 	}
+
+	description := solver.Description(step)
+	if description != "7 is only possible in column 1 of block 0, which means it can't be in any other cell in that column not in that block" {
+		t.Error("Wrong description for ", techniqueName, ": ", description)
+	}
+
 	step.Apply(grid)
 	num := step.Nums[0]
 	for _, cell := range step.TargetCells {
@@ -105,6 +111,12 @@ func TestPointingPairRow(t *testing.T) {
 		t.Log("Pointing pair row technique gave the wrong number")
 		t.Fail()
 	}
+
+	description := solver.Description(step)
+	if description != "7 is only possible in row 1 of block 0, which means it can't be in any other cell in that row not in that block" {
+		t.Error("Wrong description for ", techniqueName, ": ", description)
+	}
+
 	step.Apply(grid)
 	num := step.Nums[0]
 	for _, cell := range step.TargetCells {

@@ -76,6 +76,12 @@ func TestNakedPairCol(t *testing.T) {
 		t.Log("Naked pair col found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
+
+	description := solver.Description(step)
+	if description != "2 and 3 are only possible in (7,9) and (8,9), which means that they can't be in any other cell in column 8" {
+		t.Error("Wrong description for ", techniqueName, ": ", description)
+	}
+
 	step.Apply(grid)
 	firstNum := step.Nums[0]
 	secondNum := step.Nums[1]
@@ -128,6 +134,12 @@ func TestNakedPairRow(t *testing.T) {
 		t.Log("Naked pair row found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
+
+	description := solver.Description(step)
+	if description != "2 and 3 are only possible in (9,7) and (9,8), which means that they can't be in any other cell in row 8" {
+		t.Error("Wrong description for ", techniqueName, ": ", description)
+	}
+
 	step.Apply(grid)
 	firstNum := step.Nums[0]
 	secondNum := step.Nums[1]
@@ -176,6 +188,12 @@ func TestNakedPairBlock(t *testing.T) {
 		t.Log("Naked pair block found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
+
+	description := solver.Description(step)
+	if description != "1 and 2 are only possible in (1,1) and (1,2), which means that they can't be in any other cell in block 0" {
+		t.Error("Wrong description for ", techniqueName, ": ", description)
+	}
+
 	step.Apply(grid)
 	firstNum := step.Nums[0]
 	secondNum := step.Nums[1]
@@ -226,6 +244,12 @@ func TestNakedTriple(t *testing.T) {
 		t.Log("Naked triple row found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
+
+	description := solver.Description(step)
+	if description != "3, 5, and 8 are only possible in (5,4), (5, 5) and (5,6), which means that they can't be in any other cell in row 4" {
+		t.Error("Wrong description for ", techniqueName, ": ", description)
+	}
+
 	step.Apply(grid)
 	firstNum := step.Nums[0]
 	secondNum := step.Nums[1]

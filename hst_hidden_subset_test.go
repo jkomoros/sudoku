@@ -73,6 +73,12 @@ func TestHiddenPairRow(t *testing.T) {
 		t.Log("Hidden pair row found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
+
+	description := solver.Description(step)
+	if description != "7 and 8 are only possible in (5,8) and (5,9), which means that only those numbers could be in those cells" {
+		t.Error("Wrong description for ", techniqueName, ": ", description)
+	}
+
 	step.Apply(grid)
 	firstNum := step.Nums[0]
 	secondNum := step.Nums[1]
@@ -134,6 +140,12 @@ func TestHiddenPairCol(t *testing.T) {
 		t.Log("Hidden pair col found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
+
+	description := solver.Description(step)
+	if description != "7 and 8 are only possible in (8,5) and (9,5), which means that only those numbers could be in those cells" {
+		t.Error("Wrong description for ", techniqueName, ": ", description)
+	}
+
 	step.Apply(grid)
 	firstNum := step.Nums[0]
 	secondNum := step.Nums[1]
@@ -193,6 +205,12 @@ func TestHiddenPairBlock(t *testing.T) {
 		t.Log("Hidden pair block found the wrong numbers: ", step.Nums)
 		t.Fail()
 	}
+
+	description := solver.Description(step)
+	if description != "7 and 8 are only possible in (5,8) and (5,9), which means that only those numbers could be in those cells" {
+		t.Error("Wrong description for ", techniqueName, ": ", description)
+	}
+
 	step.Apply(grid)
 	firstNum := step.Nums[0]
 	secondNum := step.Nums[1]

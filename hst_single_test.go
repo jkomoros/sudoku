@@ -30,6 +30,11 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 
 	step := steps[0]
 
+	description := solver.Description(step)
+	if description != "3 is the only remaining valid number for that cell" {
+		t.Error("Wrong description for ", techniqueName, ": ", description)
+	}
+
 	cellFromStep := step.TargetCells[0]
 
 	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
@@ -91,6 +96,11 @@ func TestNecessaryInRow(t *testing.T) {
 	}
 
 	step := steps[0]
+
+	description := solver.Description(step)
+	if description != "9 is required in the 4 row, and 4 is the only column it fits" {
+		t.Error("Wrong description for ", techniqueName, ": ", description)
+	}
 
 	cellFromStep := step.TargetCells[0]
 
@@ -156,6 +166,11 @@ func TestNecessaryInCol(t *testing.T) {
 
 	step := steps[0]
 
+	description := solver.Description(step)
+	if description != "9 is required in the 4 column, and 4 is the only row it fits" {
+		t.Error("Wrong description for ", techniqueName, ": ", description)
+	}
+
 	cellFromStep := step.TargetCells[0]
 
 	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
@@ -219,6 +234,11 @@ func TestNecessaryInBlock(t *testing.T) {
 	}
 
 	step := steps[0]
+
+	description := solver.Description(step)
+	if description != "9 is required in the 5 block, and 4, 4 is the only cell it fits" {
+		t.Error("Wrong description for ", techniqueName, ": ", description)
+	}
 
 	cellFromStep := step.TargetCells[0]
 
