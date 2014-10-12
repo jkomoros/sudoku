@@ -57,7 +57,6 @@ TODO:
 		* Another idea: I'm treating the userDifficulty as the actual difficulty, but really all it represents is the ordering. Try assigning a difficulty that is evenly spread across the range linearly (from maybe 0.1 to 0.9) and train on that.
 
 * NEXT STEPS:
-	* Factor down necessaryInRow,Block,Col into necessaryInGroupTechinque
 	* Factor down the tests for the techniques into a test helper (if possible)
 
 * Make a decision about how to represent cell coordinates and row/col/block indexes when presented to user. now we're consistently 0 indexed (mostly), but shouldn't we be 1 indexed when presenting to the user?

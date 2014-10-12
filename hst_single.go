@@ -3,21 +3,14 @@ package sudoku
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 )
 
 type nakedSingleTechnique struct {
 	basicSolveTechnique
 }
 
-type hiddenSingleInRow struct {
-	basicSolveTechnique
-}
-
-type hiddenSingleInCol struct {
-	basicSolveTechnique
-}
-
-type hiddenSingleInBlock struct {
+type hiddenSingleTechnique struct {
 	basicSolveTechnique
 }
 
@@ -54,48 +47,46 @@ func (self nakedSingleTechnique) Find(grid *Grid) []*SolveStep {
 	}
 }
 
-func (self hiddenSingleInRow) Description(step *SolveStep) string {
+func (self hiddenSingleTechnique) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
 	if len(step.TargetCells) == 0 || len(step.TargetNums) == 0 {
 		return ""
 	}
 	cell := step.TargetCells[0]
 	num := step.TargetNums[0]
-	return fmt.Sprintf("%d is required in the %d row, and %d is the only column it fits", num, cell.Row, cell.Col)
+
+	var groupName string
+	var otherGroupName string
+	var groupNum int
+	var otherGroupNum string
+	switch self.groupType {
+	case GROUP_BLOCK:
+		groupName = "block"
+		otherGroupName = "cell"
+		groupNum = step.TargetCells.Block()
+		otherGroupNum = step.TargetCells.Description()
+	case GROUP_ROW:
+		groupName = "row"
+		otherGroupName = "column"
+		groupNum = step.TargetCells.Row()
+		otherGroupNum = strconv.Itoa(cell.Col)
+	case GROUP_COL:
+		groupName = "column"
+		otherGroupName = "row"
+		groupNum = step.TargetCells.Col()
+		otherGroupNum = strconv.Itoa(cell.Row)
+	default:
+		groupName = "<NONE>"
+		otherGroupName = "<NONE>"
+		groupNum = -1
+		otherGroupNum = "<NONE>"
+	}
+
+	return fmt.Sprintf("%d is required in the %d %s, and %s is the only %s it fits", num, groupNum, groupName, otherGroupNum, otherGroupName)
 }
 
-func (self hiddenSingleInRow) Find(grid *Grid) []*SolveStep {
+func (self hiddenSingleTechnique) Find(grid *Grid) []*SolveStep {
 	//TODO: test that if there are multiple we find them both.
-	return necessaryInCollection(grid, self, self.getter(grid))
-}
-
-func (self hiddenSingleInCol) Description(step *SolveStep) string {
-	//TODO: format the text to say "first/second/third/etc"
-	if len(step.TargetCells) == 0 || len(step.TargetNums) == 0 {
-		return ""
-	}
-	cell := step.TargetCells[0]
-	num := step.TargetNums[0]
-	return fmt.Sprintf("%d is required in the %d column, and %d is the only row it fits", num, cell.Row, cell.Col)
-}
-
-func (self hiddenSingleInCol) Find(grid *Grid) []*SolveStep {
-	//TODO: test this will find multiple if they exist.
-	return necessaryInCollection(grid, self, self.getter(grid))
-}
-
-func (self hiddenSingleInBlock) Description(step *SolveStep) string {
-	//TODO: format the text to say "first/second/third/etc"
-	if len(step.TargetCells) == 0 || len(step.TargetNums) == 0 {
-		return ""
-	}
-	cell := step.TargetCells[0]
-	num := step.TargetNums[0]
-	return fmt.Sprintf("%d is required in the %d block, and %d, %d is the only cell it fits", num, cell.Block, cell.Row, cell.Col)
-}
-
-func (self hiddenSingleInBlock) Find(grid *Grid) []*SolveStep {
-	//TODO: Verify we find multiples if they exist.
 	return necessaryInCollection(grid, self, self.getter(grid))
 }
 

@@ -236,7 +236,7 @@ func TestNecessaryInBlock(t *testing.T) {
 	step := steps[0]
 
 	description := solver.Description(step)
-	if description != "9 is required in the 4 block, and 3, 3 is the only cell it fits" {
+	if description != "9 is required in the 4 block, and (3,3) is the only cell it fits" {
 		t.Error("Wrong description for ", techniqueName, ": ", description)
 	}
 

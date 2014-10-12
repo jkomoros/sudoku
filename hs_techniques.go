@@ -56,7 +56,7 @@ func init() {
 	//TODO: calculate more realistic weights.
 
 	Techniques = []SolveTechnique{
-		hiddenSingleInRow{
+		hiddenSingleTechnique{
 			basicSolveTechnique{
 				//TODO: shouldn't this be "Hidden Single Row" (and likewise for others)
 				"Necessary In Row",
@@ -66,7 +66,7 @@ func init() {
 				0.0,
 			},
 		},
-		hiddenSingleInCol{
+		hiddenSingleTechnique{
 			basicSolveTechnique{
 				"Necessary In Col",
 				true,
@@ -75,7 +75,7 @@ func init() {
 				0.0,
 			},
 		},
-		hiddenSingleInBlock{
+		hiddenSingleTechnique{
 			basicSolveTechnique{
 				"Necessary In Block",
 				true,
