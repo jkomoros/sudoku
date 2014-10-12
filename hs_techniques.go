@@ -1,5 +1,15 @@
 package sudoku
 
+/*
+	This file is where the basic solve technique infrastructure is defined.
+
+	The techniques that Human Solve uses are initalized and stored into human_solves.go Techniques slice here.
+
+	Specific techniques are implemented in hst_*.go files (hst == human solve techniques), where there's
+	a separate file for each class of technique.
+
+*/
+
 type SolveTechnique interface {
 	Name() string
 	Description(*SolveStep) string
