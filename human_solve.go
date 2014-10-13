@@ -8,7 +8,11 @@ import (
 )
 
 //The actual techniques are intialized in hs_techniques.go, and actually defined in hst_*.go files.
+//Techniques is ALL technies. CheapTechniques is techniques that are reasonably cheap to compute.
+//ExpensiveTechniques is techniques that should only be used if all else has failed.
 var Techniques []SolveTechnique
+var CheapTechniques []SolveTechnique
+var ExpensiveTechniques []SolveTechnique
 
 //Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
 const MAX_DIFFICULTY_ITERATIONS = 50

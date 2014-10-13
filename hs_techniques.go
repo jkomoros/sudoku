@@ -55,7 +55,7 @@ func init() {
 
 	//TODO: calculate more realistic weights.
 
-	Techniques = []SolveTechnique{
+	CheapTechniques = []SolveTechnique{
 		hiddenSingleTechnique{
 			basicSolveTechnique{
 				//TODO: shouldn't this be "Hidden Single Row" (and likewise for others)
@@ -220,6 +220,9 @@ func init() {
 				250.0,
 			},
 		},
+	}
+
+	ExpensiveTechniques = []SolveTechnique{
 		hiddenSubsetTechnique{
 			basicSolveTechnique{
 				"Hidden Triple Row",
@@ -275,6 +278,8 @@ func init() {
 			},
 		},
 	}
+
+	Techniques = append(CheapTechniques, ExpensiveTechniques...)
 
 	techniquesByName = make(map[string]SolveTechnique)
 
