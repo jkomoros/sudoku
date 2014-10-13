@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"log"
 	"testing"
 )
 
@@ -51,6 +52,7 @@ type solveTechniqueTestHelperOptions struct {
 	targetSame   cellGroupType
 	targetGroup  int
 	description  string
+	debugPrint   bool
 }
 
 func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueName string, options solveTechniqueTestHelperOptions) {
@@ -75,6 +77,10 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 	}
 
 	step := steps[0]
+
+	if options.debugPrint {
+		log.Println(step)
+	}
 
 	if options.targetCells != nil {
 		if !step.TargetCells.sameAsRefs(options.targetCells) {
