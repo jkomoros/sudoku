@@ -29,60 +29,17 @@ func TestSubsetCellsWithNPossibilities(t *testing.T) {
 }
 
 func TestNakedPairCol(t *testing.T) {
-	grid := NewGrid()
-	if !grid.LoadFromFile(puzzlePath("nakedpair3.sdk")) {
-		t.Log("Failed to load nakedpair3.sdk")
-		t.Fail()
-	}
 
-	techniqueName := "Naked Pair Col"
-	solver := techniquesByName[techniqueName]
+	options := solveTechniqueTestHelperOptions{
+		targetCells:  []cellRef{{0, 8}, {1, 8}, {2, 8}, {3, 8}, {4, 8}, {5, 8}, {8, 8}},
+		pointerCells: []cellRef{{6, 8}, {7, 8}},
+		targetSame:   GROUP_COL,
+		targetGroup:  8,
+		targetNums:   IntSlice([]int{2, 3}),
+		description:  "2 and 3 are only possible in (6,8) and (7,8), which means that they can't be in any other cell in column 8",
+	}
+	humanSolveTechniqueTestHelper(t, "nakedpair3.sdk", "Naked Pair Col", options)
 
-	if solver == nil {
-		t.Fatal("Couldn't find technique object: ", techniqueName)
-	}
-
-	steps := solver.Find(grid)
-	if len(steps) == 0 {
-		t.Log("The naked pair col didn't find a cell it should have.")
-		t.FailNow()
-	}
-
-	step := steps[0]
-
-	if len(step.TargetCells) != DIM-2 {
-		t.Log("The naked pair col had the wrong number of target cells")
-		t.Fail()
-	}
-	if len(step.PointerCells) != 2 {
-		t.Log("The naked pair col had the wrong number of pointer clles")
-		t.Fail()
-	}
-	if !step.TargetCells.SameCol() || step.TargetCells.Col() != 8 {
-		t.Log("The target cells in the naked pair col were wrong col")
-		t.Fail()
-	}
-	if len(step.TargetNums) != 2 || !step.TargetNums.SameContentAs([]int{2, 3}) {
-		t.Log("Naked pair col found the wrong numbers: ", step.TargetNums)
-		t.Fail()
-	}
-
-	description := solver.Description(step)
-	if description != "2 and 3 are only possible in (6,8) and (7,8), which means that they can't be in any other cell in column 8" {
-		t.Error("Wrong description for ", techniqueName, ": ", description)
-	}
-
-	step.Apply(grid)
-	firstNum := step.TargetNums[0]
-	secondNum := step.TargetNums[1]
-	for _, cell := range step.TargetCells {
-		if cell.Possible(firstNum) || cell.Possible(secondNum) {
-			t.Log("Naked Pair col found was not appleid correctly")
-			t.Fail()
-		}
-	}
-
-	grid.Done()
 }
 
 func TestNakedPairRow(t *testing.T) {
