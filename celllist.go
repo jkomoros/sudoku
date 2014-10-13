@@ -204,6 +204,30 @@ func (self CellList) Description() string {
 	return strings.description()
 }
 
+func (self CellList) sameAsRefs(refs []cellRef) bool {
+	cellSet := make(map[string]bool)
+	for _, cell := range self {
+		cellSet[cell.ref().String()] = true
+	}
+
+	refSet := make(map[string]bool)
+	for _, ref := range refs {
+		refSet[ref.String()] = true
+	}
+
+	if len(cellSet) != len(refSet) {
+		return false
+	}
+
+	for item, _ := range cellSet {
+		if _, ok := refSet[item]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (self cellRef) Cell(grid *Grid) *Cell {
 	if grid == nil {
 		return nil

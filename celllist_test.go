@@ -19,6 +19,16 @@ func TestBasicCellList(t *testing.T) {
 		t.Fail()
 	}
 
+	var refs []cellRef
+
+	for i := 0; i < DIM; i++ {
+		refs = append(refs, cellRef{2, i})
+	}
+
+	if !row.sameAsRefs(refs) {
+		t.Error("sameAsRefs didn't match values for row 2")
+	}
+
 	col := CellList(grid.Col(2))
 	if !col.SameCol() {
 		t.Log("The items in the col were not int he same col.")
