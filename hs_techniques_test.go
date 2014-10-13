@@ -90,6 +90,10 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		if !step.TargetCells.SameRow() || step.TargetCells.Row() != options.targetGroup {
 			t.Error("The target cells in the ", techniqueName, " were wrong row :", step.TargetCells.Row())
 		}
+	case GROUP_BLOCK:
+		if !step.TargetCells.SameBlock() || step.TargetCells.Block() != options.targetGroup {
+			t.Error("The target cells in the ", techniqueName, " were wrong block :", step.TargetCells.Block())
+		}
 	case GROUP_NONE:
 		//Do nothing
 	default:
