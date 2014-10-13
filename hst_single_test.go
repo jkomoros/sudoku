@@ -55,6 +55,7 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 	grid.Done()
 }
 
+//TODO: use the test solve helper func for these three tests.
 func TestNecessaryInRow(t *testing.T) {
 	grid := NewGrid()
 	//Load up a solved grid
