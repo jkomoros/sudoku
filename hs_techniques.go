@@ -172,7 +172,7 @@ func init() {
 				false,
 				GROUP_COL,
 				4,
-				125.0,
+				250.0,
 			},
 		},
 		nakedSubsetTechnique{
@@ -181,7 +181,7 @@ func init() {
 				false,
 				GROUP_ROW,
 				4,
-				125.0,
+				250.0,
 			},
 		},
 		nakedSubsetTechnique{
@@ -190,7 +190,7 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				4,
-				140.0,
+				280.0,
 			},
 		},
 		hiddenSubsetTechnique{
