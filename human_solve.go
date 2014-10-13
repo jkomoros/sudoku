@@ -201,7 +201,6 @@ func (self *Grid) HumanSolution() SolveDirections {
 func (self *Grid) HumanSolve() SolveDirections {
 
 	var results []*SolveStep
-	numTechniques := len(Techniques)
 
 	//Note: trying these all in parallel is much slower (~15x) than doing them in sequence.
 	//The reason is that in sequence we bailed early as soon as we found one step; now we try them all.
@@ -209,29 +208,7 @@ func (self *Grid) HumanSolve() SolveDirections {
 	for !self.Solved() {
 		//TODO: provide hints to the techniques of where to look based on the last filled cell
 
-		possibilitiesChan := make(chan []*SolveStep)
-
-		var possibilities []*SolveStep
-
-		for _, technique := range Techniques {
-			go func(theTechnique SolveTechnique) {
-				possibilitiesChan <- theTechnique.Find(self)
-			}(technique)
-		}
-
-		//Collect all of the results
-
-		for i := 0; i < numTechniques; i++ {
-
-			for _, possibility := range <-possibilitiesChan {
-				//TODO: don't all techniques now only return useful steps?
-				if possibility.IsUseful(self) {
-					possibilities = append(possibilities, possibility)
-				} else {
-					log.Println("Rejecting a not useful suggestion: ", possibility)
-				}
-			}
-		}
+		possibilities := runTechniques(Techniques, self)
 
 		//Now pick one to apply.
 		if len(possibilities) == 0 {
@@ -257,6 +234,35 @@ func (self *Grid) HumanSolve() SolveDirections {
 		return nil
 	}
 	return results
+}
+
+func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
+	numTechniques := len(techniques)
+	possibilitiesChan := make(chan []*SolveStep)
+
+	var possibilities []*SolveStep
+
+	for _, technique := range techniques {
+		go func(theTechnique SolveTechnique) {
+			possibilitiesChan <- theTechnique.Find(grid)
+		}(technique)
+	}
+
+	//Collect all of the results
+
+	for i := 0; i < numTechniques; i++ {
+
+		for _, possibility := range <-possibilitiesChan {
+			//TODO: don't all techniques now only return useful steps?
+			if possibility.IsUseful(grid) {
+				possibilities = append(possibilities, possibility)
+			} else {
+				log.Println("Rejecting a not useful suggestion: ", possibility)
+			}
+		}
+	}
+
+	return possibilities
 }
 
 func (self *Grid) Difficulty() float64 {
