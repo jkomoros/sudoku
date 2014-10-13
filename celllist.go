@@ -1,7 +1,6 @@
 package sudoku
 
 import (
-	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -199,10 +198,21 @@ func (self CellList) Description() string {
 	strings := make(stringSlice, len(self))
 
 	for i, cell := range self {
-		strings[i] = fmt.Sprintf("(%d,%d)", cell.Row, cell.Col)
+		strings[i] = cell.ref().String()
 	}
 
 	return strings.description()
+}
+
+func (self cellRef) Cell(grid *Grid) *Cell {
+	if grid == nil {
+		return nil
+	}
+	return grid.Cell(self.row, self.col)
+}
+
+func (self cellRef) String() string {
+	return "(" + strconv.Itoa(self.row) + "," + strconv.Itoa(self.col) + ")"
 }
 
 func (self stringSlice) description() string {
