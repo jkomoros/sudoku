@@ -32,7 +32,7 @@ type SolveTechnique interface {
 	Difficulty() float64
 }
 
-type getterType int
+type cellGroupType int
 
 const (
 	GROUP_NONE = iota
@@ -44,7 +44,7 @@ const (
 type basicSolveTechnique struct {
 	name      string
 	isFill    bool
-	groupType getterType
+	groupType cellGroupType
 	//Size of set in technique, e.g. single = 1, pair = 2, triple = 3
 	//Used for generating descriptions in some sub-structs.
 	k          int

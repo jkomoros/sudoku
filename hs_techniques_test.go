@@ -42,3 +42,74 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 		}
 	}
 }
+
+type solveTechniqueTestHelperOptions struct {
+	transpose       bool
+	targetCellsLen  int
+	pointerCellsLen int
+	targetNums      IntSlice
+	targetSame      cellGroupType
+	targetGroup     int
+	description     string
+}
+
+func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueName string, options solveTechniqueTestHelperOptions) {
+	//TODO: test for col and block as well
+	grid := NewGrid()
+	grid.LoadFromFile(puzzlePath(puzzleName))
+
+	if options.transpose {
+		grid = grid.transpose()
+	}
+
+	solver := techniquesByName[techniqueName]
+
+	if solver == nil {
+		t.Fatal("Couldn't find technique object: ", techniqueName)
+	}
+
+	steps := solver.Find(grid)
+
+	if len(steps) == 0 {
+		t.Error(techniqueName, " didn't find a cell it should have.")
+	}
+
+	step := steps[0]
+
+	//TODO: allow a way to pass in the exact cell addreses you expect to get.
+	if len(step.TargetCells) != options.targetCellsLen {
+		t.Error(techniqueName, " had the wrong number of target cells: ", len(step.TargetCells))
+	}
+	if len(step.PointerCells) != options.pointerCellsLen {
+		t.Error(techniqueName, " had the wrong number of pointer cells: ", len(step.PointerCells))
+		t.Fail()
+	}
+
+	switch options.targetSame {
+	case GROUP_ROW:
+		if !step.TargetCells.SameRow() || step.TargetCells.Row() != options.targetGroup {
+			t.Error("The target cells in the ", techniqueName, " were wrong row :", step.TargetCells.Row())
+		}
+	case GROUP_NONE:
+		//Do nothing
+	default:
+		t.Error("human solve technique helper error: unsupported group type: ", options.targetSame)
+	}
+
+	if options.targetNums != nil {
+		if !step.TargetNums.SameContentAs(options.targetNums) {
+			t.Error(techniqueName, " found the wrong numbers: ", step.TargetNums)
+		}
+	}
+
+	if options.description != "" {
+		description := solver.Description(step)
+		if description != options.description {
+			t.Error("Wrong description for ", techniqueName, ": ", description)
+		}
+	}
+
+	//TODO: we should do exhaustive testing of SolveStep application. We used to test it here, but as long as targetCells and targetNums are correct it should be fine.
+
+	grid.Done()
+}

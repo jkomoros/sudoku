@@ -209,57 +209,14 @@ func TestNakedPairBlock(t *testing.T) {
 
 func TestNakedTriple(t *testing.T) {
 	//TODO: test for col and block as well
-	grid := NewGrid()
-	grid.LoadFromFile(puzzlePath("nakedtriplet2.sdk"))
 
-	techniqueName := "Naked Triple Row"
-	solver := techniquesByName[techniqueName]
-
-	if solver == nil {
-		t.Fatal("Couldn't find technique object: ", techniqueName)
+	options := solveTechniqueTestHelperOptions{
+		targetCellsLen:  DIM - 3,
+		pointerCellsLen: 3,
+		targetSame:      GROUP_ROW,
+		targetGroup:     4,
+		targetNums:      IntSlice([]int{3, 5, 8}),
+		description:     "3, 5, and 8 are only possible in (4,3), (4,4), and (4,5), which means that they can't be in any other cell in row 4",
 	}
-
-	steps := solver.Find(grid)
-
-	if len(steps) == 0 {
-		t.Log("The naked triple row didn't find a cell it should have.")
-		t.FailNow()
-	}
-
-	step := steps[0]
-
-	if len(step.TargetCells) != DIM-3 {
-		t.Log("The naked triple row had the wrong number of target cells")
-		t.Fail()
-	}
-	if len(step.PointerCells) != 3 {
-		t.Log("The naked triple row had the wrong number of pointer clles")
-		t.Fail()
-	}
-	if !step.TargetCells.SameRow() || step.TargetCells.Row() != 4 {
-		t.Log("The target cells in the naked triple row were wrong row")
-		t.Fail()
-	}
-	if len(step.TargetNums) != 3 || !step.TargetNums.SameContentAs([]int{3, 5, 8}) {
-		t.Log("Naked triple row found the wrong numbers: ", step.TargetNums)
-		t.Fail()
-	}
-
-	description := solver.Description(step)
-	if description != "3, 5, and 8 are only possible in (4,3), (4,4), and (4,5), which means that they can't be in any other cell in row 4" {
-		t.Error("Wrong description for ", techniqueName, ": ", description)
-	}
-
-	step.Apply(grid)
-	firstNum := step.TargetNums[0]
-	secondNum := step.TargetNums[1]
-	thirdNum := step.TargetNums[2]
-	for _, cell := range step.TargetCells {
-		if cell.Possible(firstNum) || cell.Possible(secondNum) || cell.Possible(thirdNum) {
-			t.Log("Naked triple row found was not appleid correctly")
-			t.Fail()
-		}
-	}
-
-	grid.Done()
+	humanSolveTechniqueTestHelper(t, "nakedtriplet2.sdk", "Naked Triple Row", options)
 }
