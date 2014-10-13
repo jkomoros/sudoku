@@ -36,12 +36,11 @@ func TestHiddenPairRow(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
 		targetCells:  []cellRef{{4, 7}, {4, 8}},
 		pointerCells: []cellRef{{4, 7}, {4, 8}},
-		//Yes, in this case we want them to be the same row.
-		targetSame:  GROUP_ROW,
-		targetGroup: 4,
-		targetNums:  IntSlice([]int{7, 8, 2}),
-		pointerNums: IntSlice([]int{3, 5}),
-		description: "3 and 5 are only possible in (4,7) and (4,8) within row 4, which means that only those numbers could be in those cells",
+		targetSame:   GROUP_ROW,
+		targetGroup:  4,
+		targetNums:   IntSlice([]int{7, 8, 2}),
+		pointerNums:  IntSlice([]int{3, 5}),
+		description:  "3 and 5 are only possible in (4,7) and (4,8) within row 4, which means that only those numbers could be in those cells",
 	}
 	humanSolveTechniqueTestHelper(t, "hiddenpair1_filled.sdk", "Hidden Pair Row", options)
 
@@ -53,12 +52,11 @@ func TestHiddenPairCol(t *testing.T) {
 		transpose:    true,
 		targetCells:  []cellRef{{7, 4}, {8, 4}},
 		pointerCells: []cellRef{{7, 4}, {8, 4}},
-		//Yes, in this case we want them to be the same row.
-		targetSame:  GROUP_COL,
-		targetGroup: 4,
-		targetNums:  IntSlice([]int{7, 8, 2}),
-		pointerNums: IntSlice([]int{3, 5}),
-		description: "3 and 5 are only possible in (7,4) and (8,4) within column 4, which means that only those numbers could be in those cells",
+		targetSame:   GROUP_COL,
+		targetGroup:  4,
+		targetNums:   IntSlice([]int{7, 8, 2}),
+		pointerNums:  IntSlice([]int{3, 5}),
+		description:  "3 and 5 are only possible in (7,4) and (8,4) within column 4, which means that only those numbers could be in those cells",
 	}
 	humanSolveTechniqueTestHelper(t, "hiddenpair1_filled.sdk", "Hidden Pair Col", options)
 
