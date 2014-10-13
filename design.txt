@@ -76,6 +76,8 @@ TODO:
 			* As far as SolveDirections et al are concerned, Guess would just be a REALLY expensive technique.
 	* Implement enough techniques to be able to solve #122, #33, and #138.
 
+* Consider a two-stage technique sweep. Hidden Triple (and to a lesser extent Naked Quad) added a TON of time.
+
 * Analysis: Spot check the results of the new markov difficulty grader to see if they intuitively make sense.
 * Analysis: Run our difficulty grader on the real puzzles and see how well it fits with user perceived difficulty.
 * Analysis: Throw out outliers for each individual user.
