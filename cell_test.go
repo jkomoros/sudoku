@@ -31,6 +31,12 @@ func TestCellCreation(t *testing.T) {
 		t.Fail()
 	}
 
+	ref := cell.ref()
+
+	if ref.col != 0 || ref.row != 0 {
+		t.Error("Cell ref came back wrong")
+	}
+
 	possibilities := cell.Possibilities()
 
 	if len(possibilities) != DIM {

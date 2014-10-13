@@ -218,6 +218,10 @@ func (self *Cell) Rank() int {
 	return count
 }
 
+func (self *Cell) ref() cellRef {
+	return cellRef{self.Row, self.Col}
+}
+
 //Sets ourselves to a random one of our possibilities.
 func (self *Cell) pickRandom() {
 	possibilities := self.Possibilities()
@@ -331,7 +335,7 @@ func (self *Cell) diagramRows() (rows []string) {
 			rows[i] = data + DIAGRAM_RIGHT
 		}
 	}
-	//Do we need an extra bottom row? 
+	//Do we need an extra bottom row?
 	if !bottom {
 		rows = append(rows, strings.Repeat(DIAGRAM_BOTTOM, BLOCK_DIM))
 		// Does it need a + at the end?

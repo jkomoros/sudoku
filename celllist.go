@@ -15,6 +15,11 @@ type stringSlice []string
 
 type intSet map[int]bool
 
+type cellRef struct {
+	row int
+	col int
+}
+
 func getRow(cell *Cell) int {
 	return cell.Row
 }
