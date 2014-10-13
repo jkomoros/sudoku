@@ -224,6 +224,7 @@ func (self *Grid) HumanSolve() SolveDirections {
 		for i := 0; i < numTechniques; i++ {
 
 			for _, possibility := range <-possibilitiesChan {
+				//TODO: don't all techniques now only return useful steps?
 				if possibility.IsUseful(self) {
 					possibilities = append(possibilities, possibility)
 				} else {
