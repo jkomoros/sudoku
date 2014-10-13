@@ -171,69 +171,16 @@ func TestHiddenPairCol(t *testing.T) {
 }
 
 func TestHiddenPairBlock(t *testing.T) {
-	grid := NewGrid()
-	if !grid.LoadFromFile(puzzlePath("hiddenpair1_filled.sdk")) {
-		t.Log("Failed to load hiddenpair1_filled.sdk")
-		t.Fail()
+	options := solveTechniqueTestHelperOptions{
+		targetCells:  []cellRef{{4, 7}, {4, 8}},
+		pointerCells: []cellRef{{4, 7}, {4, 8}},
+		//Yes, in this case we want them to be the same row.
+		targetSame:  GROUP_ROW,
+		targetGroup: 4,
+		targetNums:  IntSlice([]int{7, 8, 2}),
+		pointerNums: IntSlice([]int{3, 5}),
+		description: "3 and 5 are only possible in (4,7) and (4,8) within block 5, which means that only those numbers could be in those cells",
 	}
+	humanSolveTechniqueTestHelper(t, "hiddenpair1_filled.sdk", "Hidden Pair Block", options)
 
-	techniqueName := "Hidden Pair Block"
-	solver := techniquesByName[techniqueName]
-
-	if solver == nil {
-		t.Fatal("Couldn't find technique object: ", techniqueName)
-	}
-
-	steps := solver.Find(grid)
-	if len(steps) == 0 {
-		t.Log("The hidden pair block didn't find a cell it should have.")
-		t.FailNow()
-	}
-
-	step := steps[0]
-
-	if len(step.TargetCells) != 2 {
-		t.Log("The hidden pair block had the wrong number of target cells: ", len(step.TargetCells))
-		t.FailNow()
-	}
-	if len(step.PointerCells) != 2 {
-		t.Log("The hidden pair block had the wrong number of pointer cells: ", len(step.PointerCells))
-		t.FailNow()
-	}
-	if step.TargetCells[0] != step.PointerCells[0] || step.TargetCells[1] != step.PointerCells[1] {
-		t.Error("Hidden Pair block did not have the same target and pointer cells")
-	}
-	if !step.TargetCells.SameRow() || step.TargetCells.Row() != 4 {
-		t.Log("The target cells in the hidden pair block were wrong row")
-		t.Fail()
-	}
-	if len(step.TargetNums) != 3 || !step.TargetNums.SameContentAs([]int{7, 8, 2}) {
-		t.Log("Hidden pair block found the wrong numbers: ", step.TargetNums)
-		t.Fail()
-	}
-	if len(step.PointerNums) != 2 || !step.PointerNums.SameContentAs([]int{3, 5}) {
-		t.Error("Hidden pair block had the wrong pointer numbers: ", step.PointerNums)
-	}
-
-	description := solver.Description(step)
-	if description != "3 and 5 are only possible in (4,7) and (4,8) within block 5, which means that only those numbers could be in those cells" {
-		t.Error("Wrong description for ", techniqueName, ": ", description)
-	}
-
-	step.Apply(grid)
-	firstNum := step.TargetNums[0]
-	secondNum := step.TargetNums[1]
-	thirdNum := step.TargetNums[2]
-	for _, cell := range step.TargetCells {
-
-		for i := 1; i <= DIM; i++ {
-			if i == firstNum || i == secondNum || i == thirdNum {
-				if cell.Possible(i) {
-					t.Error("Hidden Pair block was not applied correctly; it did not clear the right numbers.")
-				}
-			}
-		}
-	}
-
-	grid.Done()
 }

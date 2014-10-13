@@ -49,6 +49,7 @@ type solveTechniqueTestHelperOptions struct {
 	targetCells  []cellRef
 	pointerCells []cellRef
 	targetNums   IntSlice
+	pointerNums  IntSlice
 	targetSame   cellGroupType
 	targetGroup  int
 	description  string
@@ -115,6 +116,12 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 	if options.targetNums != nil {
 		if !step.TargetNums.SameContentAs(options.targetNums) {
 			t.Error(techniqueName, " found the wrong numbers: ", step.TargetNums)
+		}
+	}
+
+	if options.pointerNums != nil {
+		if !step.PointerNums.SameContentAs(options.pointerNums) {
+			t.Error(techniqueName, "found the wrong numbers:", step.PointerNums)
 		}
 	}
 
