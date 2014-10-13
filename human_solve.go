@@ -212,12 +212,16 @@ func (self *Grid) HumanSolve() SolveDirections {
 	for !self.Solved() {
 		//TODO: provide hints to the techniques of where to look based on the last filled cell
 
-		possibilities := runTechniques(Techniques, self)
+		possibilities := runTechniques(CheapTechniques, self)
 
 		//Now pick one to apply.
 		if len(possibilities) == 0 {
-			//Hmm, didn't find any possivbilities. We failed. :-(
-			break
+			//Okay, let's try the ExpensiveTechniques, as a hail mary.
+			possibilities = runTechniques(ExpensiveTechniques, self)
+			if len(possibilities) == 0 {
+				//Hmm, didn't find any possivbilities. We failed. :-(
+				break
+			}
 		}
 
 		//TODO: consider if we should stop picking techniques based on their weight here.
