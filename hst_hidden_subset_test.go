@@ -78,3 +78,5 @@ func TestHiddenPairBlock(t *testing.T) {
 }
 
 //TODO: Test HiddenTriple. The file I have on hand doesn't require the technique up front.
+
+//TODO: Test HiddenQuad. The file I ahve on hand doesn't require the technique up front.

@@ -247,6 +247,33 @@ func init() {
 				500.0,
 			},
 		},
+		hiddenSubsetTechnique{
+			basicSolveTechnique{
+				"Hidden Quad Row",
+				false,
+				GROUP_ROW,
+				4,
+				1200.0,
+			},
+		},
+		hiddenSubsetTechnique{
+			basicSolveTechnique{
+				"Hidden Quad Col",
+				false,
+				GROUP_COL,
+				4,
+				1200.0,
+			},
+		},
+		hiddenSubsetTechnique{
+			basicSolveTechnique{
+				"Hidden Quad Block",
+				false,
+				GROUP_BLOCK,
+				4,
+				1000.0,
+			},
+		},
 	}
 
 	techniquesByName = make(map[string]SolveTechnique)
