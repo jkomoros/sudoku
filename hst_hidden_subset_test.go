@@ -101,73 +101,20 @@ func TestHiddenPairRow(t *testing.T) {
 }
 
 func TestHiddenPairCol(t *testing.T) {
-	grid := NewGrid()
-	if !grid.LoadFromFile(puzzlePath("hiddenpair1_filled.sdk")) {
-		t.Log("Failed to load hiddenpair1_filled.sdk")
-		t.Fail()
-	}
 
-	grid = grid.transpose()
+	options := solveTechniqueTestHelperOptions{
+		transpose:    true,
+		targetCells:  []cellRef{{7, 4}, {8, 4}},
+		pointerCells: []cellRef{{7, 4}, {8, 4}},
+		//Yes, in this case we want them to be the same row.
+		targetSame:  GROUP_COL,
+		targetGroup: 4,
+		targetNums:  IntSlice([]int{7, 8, 2}),
+		pointerNums: IntSlice([]int{3, 5}),
+		description: "3 and 5 are only possible in (7,4) and (8,4) within column 4, which means that only those numbers could be in those cells",
+	}
+	humanSolveTechniqueTestHelper(t, "hiddenpair1_filled.sdk", "Hidden Pair Col", options)
 
-	techniqueName := "Hidden Pair Col"
-	solver := techniquesByName[techniqueName]
-
-	if solver == nil {
-		t.Fatal("Couldn't find technique object: ", techniqueName)
-	}
-
-	steps := solver.Find(grid)
-	if len(steps) == 0 {
-		t.Log("The hidden pair col didn't find a cell it should have.")
-		t.FailNow()
-	}
-
-	step := steps[0]
-
-	if len(step.TargetCells) != 2 {
-		t.Log("The hidden pair col had the wrong number of target cells: ", len(step.TargetCells))
-		t.FailNow()
-	}
-	if len(step.PointerCells) != 2 {
-		t.Log("The hidden pair col had the wrong number of pointer cells: ", len(step.PointerCells))
-		t.FailNow()
-	}
-	if step.TargetCells[0] != step.PointerCells[0] || step.TargetCells[1] != step.PointerCells[1] {
-		t.Error("Hidden Pair col did not have the same target and pointer cells")
-	}
-	if !step.TargetCells.SameCol() || step.TargetCells.Col() != 4 {
-		t.Log("The target cells in the hidden pair col were wrong row")
-		t.Fail()
-	}
-	if len(step.TargetNums) != 3 || !step.TargetNums.SameContentAs([]int{7, 8, 2}) {
-		t.Log("Hidden pair col found the wrong numbers: ", step.TargetNums)
-		t.Fail()
-	}
-	if len(step.PointerNums) != 2 || !step.PointerNums.SameContentAs([]int{3, 5}) {
-		t.Error("Hidden pair col had the wrong pointer numbers: ", step.PointerNums)
-	}
-
-	description := solver.Description(step)
-	if description != "3 and 5 are only possible in (7,4) and (8,4) within column 4, which means that only those numbers could be in those cells" {
-		t.Error("Wrong description for ", techniqueName, ": ", description)
-	}
-
-	step.Apply(grid)
-	firstNum := step.TargetNums[0]
-	secondNum := step.TargetNums[1]
-	thirdNum := step.TargetNums[2]
-	for _, cell := range step.TargetCells {
-
-		for i := 1; i <= DIM; i++ {
-			if i == firstNum || i == secondNum || i == thirdNum {
-				if cell.Possible(i) {
-					t.Error("Hidden Pair col was not applied correctly; it did not clear the right numbers.")
-				}
-			}
-		}
-	}
-
-	grid.Done()
 }
 
 func TestHiddenPairBlock(t *testing.T) {
