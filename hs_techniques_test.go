@@ -74,7 +74,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 	steps := solver.Find(grid)
 
 	if len(steps) == 0 {
-		t.Error(techniqueName, " didn't find a cell it should have.")
+		t.Fatal(techniqueName, " didn't find a cell it should have.")
 	}
 
 	step := steps[0]
