@@ -44,13 +44,13 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 }
 
 type solveTechniqueTestHelperOptions struct {
-	transpose       bool
-	targetCellsLen  int
-	pointerCellsLen int
-	targetNums      IntSlice
-	targetSame      cellGroupType
-	targetGroup     int
-	description     string
+	transpose    bool
+	targetCells  []cellRef
+	pointerCells []cellRef
+	targetNums   IntSlice
+	targetSame   cellGroupType
+	targetGroup  int
+	description  string
 }
 
 func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueName string, options solveTechniqueTestHelperOptions) {
@@ -76,13 +76,15 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 
 	step := steps[0]
 
-	//TODO: allow a way to pass in the exact cell addreses you expect to get.
-	if len(step.TargetCells) != options.targetCellsLen {
-		t.Error(techniqueName, " had the wrong number of target cells: ", len(step.TargetCells))
+	if options.targetCells != nil {
+		if !step.TargetCells.sameAsRefs(options.targetCells) {
+			t.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
+		}
 	}
-	if len(step.PointerCells) != options.pointerCellsLen {
-		t.Error(techniqueName, " had the wrong number of pointer cells: ", len(step.PointerCells))
-		t.Fail()
+	if options.pointerCells != nil {
+		if !step.PointerCells.sameAsRefs(options.pointerCells) {
+			t.Error(techniqueName, " had the wrong pointer cells: ", step.PointerCells)
+		}
 	}
 
 	switch options.targetSame {
