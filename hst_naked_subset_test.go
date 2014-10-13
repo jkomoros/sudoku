@@ -84,3 +84,5 @@ func TestNakedTriple(t *testing.T) {
 	}
 	humanSolveTechniqueTestHelper(t, "nakedtriplet2.sdk", "Naked Triple Row", options)
 }
+
+//TODO: test naked quad techniques. (We don't have an easy one that requires it off hand.)

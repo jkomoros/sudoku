@@ -166,6 +166,33 @@ func init() {
 				140.0,
 			},
 		},
+		nakedSubsetTechnique{
+			basicSolveTechnique{
+				"Naked Quad Col",
+				false,
+				GROUP_COL,
+				4,
+				125.0,
+			},
+		},
+		nakedSubsetTechnique{
+			basicSolveTechnique{
+				"Naked Quad Row",
+				false,
+				GROUP_ROW,
+				4,
+				125.0,
+			},
+		},
+		nakedSubsetTechnique{
+			basicSolveTechnique{
+				"Naked Quad Block",
+				false,
+				GROUP_BLOCK,
+				4,
+				140.0,
+			},
+		},
 		hiddenSubsetTechnique{
 			basicSolveTechnique{
 				"Hidden Pair Row",
