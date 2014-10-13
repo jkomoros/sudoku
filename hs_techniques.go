@@ -220,6 +220,33 @@ func init() {
 				250.0,
 			},
 		},
+		hiddenSubsetTechnique{
+			basicSolveTechnique{
+				"Hidden Triple Row",
+				false,
+				GROUP_ROW,
+				3,
+				600.0,
+			},
+		},
+		hiddenSubsetTechnique{
+			basicSolveTechnique{
+				"Hidden Triple Col",
+				false,
+				GROUP_COL,
+				3,
+				600.0,
+			},
+		},
+		hiddenSubsetTechnique{
+			basicSolveTechnique{
+				"Hidden Triple Block",
+				false,
+				GROUP_BLOCK,
+				3,
+				500.0,
+			},
+		},
 	}
 
 	techniquesByName = make(map[string]SolveTechnique)

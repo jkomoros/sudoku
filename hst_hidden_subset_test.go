@@ -76,3 +76,5 @@ func TestHiddenPairBlock(t *testing.T) {
 	humanSolveTechniqueTestHelper(t, "hiddenpair1_filled.sdk", "Hidden Pair Block", options)
 
 }
+
+//TODO: Test HiddenTriple. The file I have on hand doesn't require the technique up front.
