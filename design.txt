@@ -62,9 +62,6 @@ TODO:
 
 * Human solve: Is it worth it to do nakedSingles based on row/col/block as well? Those are obvious in different ways.
 * Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm. Technqiues I've skipped so far:
-	* NakedQuad{Row,Col}. This now trivial given Subset logic. NEXT STEP
-	* HiddenTriple{Block, Row, Col}
-	* HiddenQuad{Block, Row, Col}
 	* BlockBlock interactions
 	* Should we consider a "guess between two options" to be a possible (extremely expensive) technique?
 		* I don't think this actually works in the model I have (it could be possible to have to unwind.)
