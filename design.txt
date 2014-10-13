@@ -73,6 +73,8 @@ TODO:
 			* As far as SolveDirections et al are concerned, Guess would just be a REALLY expensive technique.
 	* Implement enough techniques to be able to solve #122, #33, and #138.
 
+* Go Test is flaky. The description strings are somehow not matching for various techniques on a flaky basis on my MBP. Odd.
+
 * Analysis: Spot check the results of the new markov difficulty grader to see if they intuitively make sense.
 * Analysis: Run our difficulty grader on the real puzzles and see how well it fits with user perceived difficulty.
 * Analysis: Throw out outliers for each individual user.

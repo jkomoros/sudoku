@@ -257,16 +257,9 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 	}
 
 	//Collect all of the results
-
 	for i := 0; i < numTechniques; i++ {
-
 		for _, possibility := range <-possibilitiesChan {
-			//TODO: don't all techniques now only return useful steps?
-			if possibility.IsUseful(grid) {
-				possibilities = append(possibilities, possibility)
-			} else {
-				log.Println("Rejecting a not useful suggestion: ", possibility)
-			}
+			possibilities = append(possibilities, possibility)
 		}
 	}
 
