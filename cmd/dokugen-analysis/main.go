@@ -41,6 +41,7 @@ var queryLimit int
 var verbose bool
 var minPuzzleCollections int
 var calcWeights bool
+var printPuzzleTechniques bool
 
 func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
@@ -51,6 +52,7 @@ func init() {
 	flag.BoolVar(&verbose, "v", false, "Verbose mode.")
 	flag.IntVar(&minPuzzleCollections, "l", 10, "How many different user collections the puzzle must be included in for it to be included in the output.")
 	flag.BoolVar(&calcWeights, "w", false, "Whether the output you want is to calculate technique weights")
+	flag.BoolVar(&printPuzzleTechniques, "t", false, "If calculating weights, providing this value will output a CSV of linearized score and weight counts.")
 
 	//We're going to be doing some heavy-duty matrix multiplication, and the matrix package can take advantage of multiple cores.
 	runtime.GOMAXPROCS(6)
@@ -254,16 +256,28 @@ func main() {
 
 		csvOut := csv.NewWriter(os.Stdout)
 
-		for i := 0; i < len(result.RegCoeff); i++ {
-
-			var name string
-
-			if i == 0 {
-				name = "Constant"
-			} else {
-				name = result.Names.VariableNames[i-1]
+		if printPuzzleTechniques {
+			//Print the solve tehcnique count, not our weightings
+			for _, dataPoint := range result.Data {
+				stringified := []string{strconv.FormatFloat(dataPoint.Observed, 'f', -1, 64)}
+				for _, variable := range dataPoint.Variables {
+					stringified = append(stringified, strconv.FormatFloat(variable, 'f', -1, 64))
+				}
+				csvOut.Write(stringified)
 			}
-			csvOut.Write([]string{name, fmt.Sprintf("%g", result.GetRegCoeff(i))})
+		} else {
+			//Print the coeffcient weightings.
+			for i := 0; i < len(result.RegCoeff); i++ {
+
+				var name string
+
+				if i == 0 {
+					name = "Constant"
+				} else {
+					name = result.Names.VariableNames[i-1]
+				}
+				csvOut.Write([]string{name, fmt.Sprintf("%g", result.GetRegCoeff(i))})
+			}
 		}
 
 		csvOut.Flush()
