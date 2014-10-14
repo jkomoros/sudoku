@@ -83,6 +83,8 @@ TODO:
 * Analysis: Don't include puzzles that have fewer than N solves (and/or that are disabled)
 * Analysis: Allow the user to set a max number of multiplies from the command line
 
+* Linearilize the data (0.1 to 0.9) that comes out of analysis
+
 * Investigate making better grids (fewer clues / more symmetry)
 
 * Make it so NewGrid grabs a grid from grid cache if possible.
