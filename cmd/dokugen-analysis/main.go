@@ -609,6 +609,42 @@ func calculateRelativeDifficulty() []*puzzle {
 		puzzles[i] = thePuzzle
 	}
 
+	//Lineralize the data, where min == 0.1 and max == 0.9
+	min := math.MaxFloat64
+	max := 0.0
+
+	//Linearize data and figure out min and max so we can scale it to 0.1, 0.9 in next pass
+	for i := 0; i < numPuzzles; i++ {
+		//First, linearlize
+		//Add 1 to make sure every input is at least 1, otherwise we'll get negative numbers which gum up later parts.
+		//The larger the multiplicative constant, the closer to linear it gets. WAT?
+		//TODO figure out what's going on with this constant.
+		difficulty := math.Log(100000000*puzzles[i].userRelativeDifficulty + 1)
+
+		if difficulty < min {
+			min = difficulty
+		}
+		if difficulty > max {
+			max = difficulty
+		}
+
+		puzzles[i].userRelativeDifficulty = difficulty
+	}
+
+	for i := 0; i < numPuzzles; i++ {
+		difficulty := puzzles[i].userRelativeDifficulty
+
+		//First, scale it to 0 to 1.0
+		difficulty -= min
+		difficulty /= (max - min)
+
+		//Now, scale it to 0.1 to 0.9
+		difficulty *= (0.9 - 0.1)
+		difficulty += 0.1
+
+		puzzles[i].userRelativeDifficulty = difficulty
+	}
+
 	//Sort the puzzles by relative user difficulty
 	//We actually don't need the wrapper, since it will modify the underlying slice.
 	sort.Sort(byUserRelativeDifficulty{puzzles})
@@ -695,8 +731,7 @@ func calculateWeights(puzzles []*puzzle) *regression.Regression {
 			solveStats[i] /= _NUMBER_OF_HUMAN_SOLVES
 		}
 
-		//Add 1 to make sure every input is at least 1, otherwise we'll get negative numbers which gum up later parts.
-		r.AddDataPoint(regression.DataPoint{Observed: math.Log(thePuzzle.userRelativeDifficulty + 1), Variables: solveStats})
+		r.AddDataPoint(regression.DataPoint{Observed: thePuzzle.userRelativeDifficulty, Variables: solveStats})
 	}
 
 	//Actually do the regression.

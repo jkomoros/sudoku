@@ -83,7 +83,7 @@ TODO:
 * Analysis: Don't include puzzles that have fewer than N solves (and/or that are disabled)
 * Analysis: Allow the user to set a max number of multiplies from the command line
 
-* Linearilize the data (0.1 to 0.9) that comes out of analysis
+* Now that difficulties coming ouf of analysis are roughly linear from 0.1 to 0.9, clamp SolveDirections.Difficulty () to 0 and 1.0 (report when they would have exceeded) and put in the tuned weights
 
 * Investigate making better grids (fewer clues / more symmetry)
 

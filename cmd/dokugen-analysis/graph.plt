@@ -2,11 +2,9 @@
 # Unfortunately, we can't read from the pipe becuase we need to read from the file twice :-(
 set datafile separator ","
 
-set logscale y
-
 set title "Puzzle provided difficulty vs markov difficulty"
 set xlabel "Puzzle index (sorted by markov difficulty)"
-set ylabel "Markov Difficulty (log scale)"
+set ylabel "Markov Difficulty (normalized)"
 set y2label "Provided Difficulty"
 
 set ytics scale 0.01
