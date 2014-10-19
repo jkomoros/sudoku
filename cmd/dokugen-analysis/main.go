@@ -29,6 +29,9 @@ const _MAX_MATRIX_POWER = 250
 //Making this number much higher does not improve R2, even for very high numbers like 500.
 const _NUMBER_OF_HUMAN_SOLVES = 10
 
+const _NORMALIZED_LOWER_BOUND = 0.1
+const _NORMALIZED_UPPER_BOUND = 0.9
+
 //How many solves a user must have to have their relative scale included.
 //A low value gives you far more very low or very high scores than you shoul get.
 const _MINIMUM_SOLVES = 10
@@ -639,8 +642,8 @@ func calculateRelativeDifficulty() []*puzzle {
 		difficulty /= (max - min)
 
 		//Now, scale it to 0.1 to 0.9
-		difficulty *= (0.9 - 0.1)
-		difficulty += 0.1
+		difficulty *= (_NORMALIZED_UPPER_BOUND - _NORMALIZED_UPPER_BOUND)
+		difficulty += _NORMALIZED_LOWER_BOUND
 
 		puzzles[i].userRelativeDifficulty = difficulty
 	}
