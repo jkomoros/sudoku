@@ -45,6 +45,7 @@ var verbose bool
 var minPuzzleCollections int
 var calcWeights bool
 var printPuzzleTechniques bool
+var inputIsSolveData bool
 
 func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
@@ -54,8 +55,11 @@ func init() {
 	flag.BoolVar(&useMockData, "m", false, "Use mock data (useful if you don't have a real database to test with).")
 	flag.BoolVar(&verbose, "v", false, "Verbose mode.")
 	flag.IntVar(&minPuzzleCollections, "l", 10, "How many different user collections the puzzle must be included in for it to be included in the output.")
+	//TODO: rationalize how you handle the three phases. It's seriously crazy the collection of flags and the spaghetti code.
+	//For example, we should say that you can pass in a start phase and an input for that start phase, and then you saw the output phase you want to run to.
 	flag.BoolVar(&calcWeights, "w", false, "Whether the output you want is to calculate technique weights")
 	flag.BoolVar(&printPuzzleTechniques, "t", false, "If calculating weights, providing this value will output a CSV of linearized score and weight counts.")
+	flag.BoolVar(&inputIsSolveData, "i", false, "If calculating weights, providing this switch will say the input CSV is solve data, not puzzle user difficulty.")
 
 	//We're going to be doing some heavy-duty matrix multiplication, and the matrix package can take advantage of multiple cores.
 	runtime.GOMAXPROCS(6)
@@ -157,13 +161,22 @@ func main() {
 
 	/*
 
-		There are two main phases:
+		There are three main phases:
 			1) calculating real world difficulties for puzzles in the production database, and
-			2) Calculating difficulties for solve techniques based on that data.
+			2) Calculating difficulties for solve techniques based on that data, which is based on two sub-phases:
+				a) Run each puzzle through the human solver _NUMBER_OF_HUMAN_SOLVES times, and output how often we saw each step in the SolveDirections
+				b) Take 2a), use it to configure a Multiple Linear Regression, and then return the coefficients of that.
+
 
 		By default, we do #1 and not #2, outputing the difficulties as a CSV. If you pass -w, we'll do both phases (and skip outputting the intermediate CSV)
 
-		By default, if we do phase #2 we take input from the first phase and feed it into the second phase. However, you can provide a CSV of phase 1 data instead.
+		By default, if we do phase #2 we take input from the first phase and feed it into the second phase. However, you can provide a CSV of phase 1 data instead as arg[0].
+
+		If you pass -w -t then we'll do phase #2 and output the results of 2a and then stop.
+
+		If you pass -w -i then we'll expect the provided CSV to be data from 2a and only run 2b on it.
+
+		//TODO: rationalize the combinations of arguments you can provide.
 
 	*/
 
@@ -183,6 +196,7 @@ func main() {
 	}
 
 	var puzzles []*puzzle
+	var solveData [][]float64
 
 	if flag.Arg(0) == "" {
 		//Default: calculate relativeDifficulty like normal.
@@ -194,8 +208,11 @@ func main() {
 		puzzles = calculateRelativeDifficulty()
 
 	} else {
-		//Read puzzles from provided CSV.
-		log.Println("Loading relative difficulties from CSV: ", flag.Arg(0))
+		if inputIsSolveData {
+			log.Println("Loading solve data from CSV: ", flag.Arg(0))
+		} else {
+			log.Println("Loading relative difficulties data from CSV: ", flag.Arg(0))
+		}
 		inputFile, err := os.Open(flag.Arg(0))
 		if err != nil {
 			log.Fatal("Could not open the specified input CSV.")
@@ -206,70 +223,101 @@ func main() {
 		if csvErr != nil {
 			log.Fatal("The provided CSV could not be parsed.")
 		}
-		puzzles = make([]*puzzle, len(records))
-		for i, record := range records {
-			thePuzzle := puzzle{}
-			if len(record) < 4 {
-				log.Fatal("Not enough records in row: ", i)
+		if inputIsSolveData {
+			//Input is data from phase 2a
+			solveData = make([][]float64, len(records))
+			for i, record := range records {
+				if len(record) != len(sudoku.Techniques)+1 {
+					log.Fatal("We didn't find as many columns as we expected in row: ", i)
+				}
+				solveData[i] = make([]float64, len(record))
+				for j, item := range record {
+					if theFloat, err := strconv.ParseFloat(item, 64); err == nil {
+						solveData[i][j] = theFloat
+					} else {
+						log.Fatal(j, " column not a valid float64 in row ", i)
+					}
+				}
 			}
+		} else {
+			//Input is data from phase 1
+			//Read puzzles from provided CSV.
+			puzzles = make([]*puzzle, len(records))
+			for i, record := range records {
+				thePuzzle := puzzle{}
+				if len(record) < 4 {
+					log.Fatal("Not enough records in row: ", i)
+				}
 
-			if theInt, err := strconv.Atoi(record[0]); err == nil {
-				thePuzzle.id = theInt
-			} else {
-				log.Fatal("First column not a valid int in row ", i)
+				if theInt, err := strconv.Atoi(record[0]); err == nil {
+					thePuzzle.id = theInt
+				} else {
+					log.Fatal("First column not a valid int in row ", i)
+				}
+
+				if theInt, err := strconv.Atoi(record[1]); err == nil {
+					thePuzzle.difficultyRating = theInt
+				} else {
+					log.Fatal("Second column not a valid int in row ", i)
+				}
+
+				if theFloat, err := strconv.ParseFloat(record[2], 64); err == nil {
+					thePuzzle.userRelativeDifficulty = theFloat
+				} else {
+					log.Fatal("Third column not a valid float64 in row ", i)
+				}
+
+				thePuzzle.name = record[3]
+
+				if len(record) == 5 {
+					thePuzzle.puzzle = record[4]
+				} else {
+					//TODO: if it doesn't, fix up the data ourselves with getPuzzleDifficultyData.
+					log.Fatal("The CSV must include puzzle data. Export with -p.")
+				}
+
+				puzzles[i] = &thePuzzle
 			}
-
-			if theInt, err := strconv.Atoi(record[1]); err == nil {
-				thePuzzle.difficultyRating = theInt
-			} else {
-				log.Fatal("Second column not a valid int in row ", i)
-			}
-
-			if theFloat, err := strconv.ParseFloat(record[2], 64); err == nil {
-				thePuzzle.userRelativeDifficulty = theFloat
-			} else {
-				log.Fatal("Third column not a valid float64 in row ", i)
-			}
-
-			thePuzzle.name = record[3]
-
-			if len(record) == 5 {
-				thePuzzle.puzzle = record[4]
-			} else {
-				//TODO: if it doesn't, fix up the data ourselves with getPuzzleDifficultyData.
-				log.Fatal("The CSV must include puzzle data. Export with -p.")
-			}
-
-			puzzles[i] = &thePuzzle
 		}
+
 	}
 
 	if calcWeights {
 		//Okay, apparently we want to take all of that work and use it to calculate weights.
 
-		//TODO: in the end calculateWeights will return its results, which we will then print out here.
-		result := calculateWeights(puzzles)
+		//Are we going to do 2a and 2b, or just 2a, or just 2b?
+		//!printPuzzleTechniques && !inputIsSolveData --> 2a + 2b
+		//printPuzzleTechniques && !inputIsSolveData --> 2a and export
+		//!printPuzzleTechniques && inputIsSolveData --> 2b
+		//printPuzzleTechniques && inputIsSolveData --> invalid
 
-		log.Println("Regression done. Results:")
-		log.Println("N =", len(result.Data))
-		log.Println("Variance Observed = ", result.VarianceObserved)
-		log.Println("Variance Predicted = ", result.VariancePredicted)
-		log.Println("R2 = ", result.Rsquared)
-		log.Println("-------------------------")
+		if len(solveData) == 0 {
+			solveData = solvePuzzles(puzzles)
+		}
+
+		var stringified []string
 
 		csvOut := csv.NewWriter(os.Stdout)
-
 		if printPuzzleTechniques {
-			//Print the solve tehcnique count, not our weightings
-			for _, dataPoint := range result.Data {
-				stringified := []string{strconv.FormatFloat(dataPoint.Observed, 'f', -1, 64)}
-				for _, variable := range dataPoint.Variables {
+			if inputIsSolveData {
+				log.Fatalln("Passing -t, -w, and -i together is not valid.")
+			}
+			//2a and export
+			for _, dataPoint := range solveData {
+				for _, variable := range dataPoint {
 					stringified = append(stringified, strconv.FormatFloat(variable, 'f', -1, 64))
 				}
 				csvOut.Write(stringified)
 			}
 		} else {
-			//Print the coeffcient weightings.
+			//Phase 2b
+			result := calculateWeights(solveData)
+			log.Println("Regression done. Results:")
+			log.Println("N =", len(result.Data))
+			log.Println("Variance Observed = ", result.VarianceObserved)
+			log.Println("Variance Predicted = ", result.VariancePredicted)
+			log.Println("R2 = ", result.Rsquared)
+			log.Println("-------------------------")
 			for i := 0; i < len(result.RegCoeff); i++ {
 
 				var name string
@@ -282,7 +330,6 @@ func main() {
 				csvOut.Write([]string{name, fmt.Sprintf("%g", result.GetRegCoeff(i))})
 			}
 		}
-
 		csvOut.Flush()
 
 	} else {
@@ -654,8 +701,9 @@ func calculateRelativeDifficulty() []*puzzle {
 	return puzzles
 }
 
-func calculateWeights(puzzles []*puzzle) *regression.Regression {
+func solvePuzzles(puzzles []*puzzle) [][]float64 {
 
+	//TODO: update this comment to reflect what we actually do in THIS function.
 	/*
 		The basic approach is to solve each puzzle many times with our human solver.
 		Then, we summarize how often each technique was required for each puzzle
@@ -670,19 +718,12 @@ func calculateWeights(puzzles []*puzzle) *regression.Regression {
 
 	*/
 
+	var result [][]float64
+
 	//Generate a mapping of technique name to index.
 	nameToIndex := make(map[string]int)
 	for i, technique := range sudoku.Techniques {
 		nameToIndex[technique.Name()] = i
-	}
-
-	//Set up the regression; I'll be adding data points as I go through each puzzle.
-
-	var r regression.Regression
-
-	r.SetObservedName("Real World Difficulty")
-	for i, technique := range sudoku.Techniques {
-		r.SetVarName(i, technique.Name())
 	}
 
 	for j, thePuzzle := range puzzles {
@@ -726,22 +767,54 @@ func calculateWeights(puzzles []*puzzle) *regression.Regression {
 			}
 		}
 
-		//Note: I considered adding each solve for each puzzle as a separate datapoint. However, the R2 i was getting were
-		//consistently much lower than this method.
-
 		//Convert each technique to an average by dividing by the number of different solves
 		for i, _ := range solveStats {
 			solveStats[i] /= _NUMBER_OF_HUMAN_SOLVES
 		}
+		result = append(result, solveStats)
 
-		r.AddDataPoint(regression.DataPoint{Observed: thePuzzle.userRelativeDifficulty, Variables: solveStats})
 	}
 
+	return result
+
+}
+
+func calculateWeights(stats [][]float64) *regression.Regression {
+
+	//TODO: update this description to describe what piece we actually do in THIS function.
+	/*
+		The basic approach is to solve each puzzle many times with our human solver.
+		Then, we summarize how often each technique was required for each puzzle
+		(by averaging all of the solve runs together). Then we set up a multiple
+		linear regression where the dependent var is the LOG of the userRelativelyDifficulty
+		(to linearlize it somewhat) and the dependent vars are the number of times
+		each technique was observed in the solve. Then we run the regression and
+		return it.
+
+		For more information on interpreting results from multiple linear regressions,
+		see: http://onlinestatbook.com/2/regression/multiple_regression.html
+
+	*/
+
+	//Set up the regression; I'll be adding data points as I go through each puzzle.
+	var r regression.Regression
+
+	r.SetObservedName("Real World Difficulty")
+	for i, technique := range sudoku.Techniques {
+		r.SetVarName(i, technique.Name())
+	}
+
+	for _, data := range stats {
+		//TODO: remove columns that are all 0.
+		//Note: I considered adding each solve for each puzzle as a separate datapoint. However, the R2 i was getting were
+		//consistently much lower than this method.
+
+		r.AddDataPoint(regression.DataPoint{Observed: data[0], Variables: data[1:]})
+	}
 	//Actually do the regression.
 	r.RunLinearRegression()
 
 	return &r
-
 }
 
 func convertPuzzleString(input string) string {
