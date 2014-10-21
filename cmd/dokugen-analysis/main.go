@@ -779,8 +779,17 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 
 }
 
-func removeZeroedColumns(stats [][]float64) [][]float64 {
+func removeZeroedColumns(stats [][]float64, safeIndexes []int) [][]float64 {
 	nonZeroColumns := make(map[int]bool)
+
+	if safeIndexes != nil {
+		for _, safe := range safeIndexes {
+			if safe >= 0 && safe < len(stats[0]) {
+				nonZeroColumns[safe] = true
+			}
+		}
+	}
+
 	//Walk through all stats and keep track of which columns DO have non-zeros.
 	for _, row := range stats {
 		for i, col := range row {

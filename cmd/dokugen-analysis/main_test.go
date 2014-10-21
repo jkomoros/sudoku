@@ -47,6 +47,10 @@ func TestRemoveZeroedFloats(t *testing.T) {
 			{1.0, 0.0, 2.0, 0.0, 3.0},
 			{3.0, 0.0, 2.0, 0.0, 1.0},
 		},
+		{
+			{1.0, 0.0, 2.0, 0.0, 3.0},
+			{3.0, 0.0, 2.0, 0.0, 1.0},
+		},
 	}
 	expected := [][][]float64{
 		{
@@ -66,10 +70,22 @@ func TestRemoveZeroedFloats(t *testing.T) {
 			{1.0, 2.0, 3.0},
 			{3.0, 2.0, 1.0},
 		},
+		{
+			{1.0, 2.0, 0.0, 3.0},
+			{3.0, 2.0, 0.0, 1.0},
+		},
+	}
+	safeIndexes := [][]int{
+		nil,
+		nil,
+		nil,
+		nil,
+		{3},
 	}
 	for i, test := range input {
 		expect := expected[i]
-		result := removeZeroedColumns(test)
+		safe := safeIndexes[i]
+		result := removeZeroedColumns(test, safe)
 		if !reflect.DeepEqual(expect, result) {
 			t.Error("Didn't equal:", result)
 		}
