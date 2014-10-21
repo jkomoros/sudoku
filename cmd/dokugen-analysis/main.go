@@ -780,8 +780,36 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 }
 
 func removeZeroedColumns(stats [][]float64) [][]float64 {
-	//TODO:implement
-	return stats
+	nonZeroColumns := make(map[int]bool)
+	//Walk through all stats and keep track of which columns DO have non-zeros.
+	for _, row := range stats {
+		for i, col := range row {
+			if col != 0.0 {
+				nonZeroColumns[i] = true
+			}
+		}
+	}
+	indexesToKeep := make([]int, len(nonZeroColumns))
+	i := 0
+	for key, _ := range nonZeroColumns {
+		indexesToKeep[i] = key
+		i++
+	}
+	sort.Ints(indexesToKeep)
+
+	var result [][]float64
+
+	result = make([][]float64, len(stats))
+
+	for i, row := range stats {
+		result[i] = make([]float64, len(indexesToKeep))
+		for j, index := range indexesToKeep {
+			result[i][j] = row[index]
+		}
+	}
+
+	return result
+
 }
 
 func calculateWeights(stats [][]float64) *regression.Regression {
