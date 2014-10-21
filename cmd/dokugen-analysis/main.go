@@ -771,7 +771,12 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 		for i, _ := range solveStats {
 			solveStats[i] /= _NUMBER_OF_HUMAN_SOLVES
 		}
-		result = append(result, solveStats)
+
+		//Put the userRelativeDifficulty in front, as later stages will expect.
+
+		prependedSolveStats := append([]float64{thePuzzle.userRelativeDifficulty}, solveStats...)
+
+		result = append(result, prependedSolveStats)
 
 	}
 
