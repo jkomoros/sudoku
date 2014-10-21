@@ -856,8 +856,8 @@ func calculateWeights(stats [][]float64) *regression.Regression {
 		if techniqueIndex == 0 {
 			continue
 		}
-		//Subtract 1 from the index to normalize it so first column is 0-th technique, etc.
-		r.SetVarName(i, sudoku.Techniques[techniqueIndex-1].Name())
+		//i of 0 is the observed. techniqueIndex has to be subtracted by 1 for the same reason to get it in 0-indexed.
+		r.SetVarName(i-1, sudoku.Techniques[techniqueIndex-1].Name())
 	}
 
 	for _, data := range cleanedStats {
