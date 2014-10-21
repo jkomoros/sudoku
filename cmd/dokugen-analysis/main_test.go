@@ -1,6 +1,7 @@
 package main
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -22,6 +23,55 @@ func TestPuzzleConversion(t *testing.T) {
 	for i, line := range config {
 		if convertPuzzleString(line[0]) != line[1] {
 			t.Error("For row ", i, " expected ", line[1], " got ", line[0])
+		}
+	}
+
+}
+
+func TestRemoveZeroedFloats(t *testing.T) {
+	input := [][][]float64{
+		{
+			{0.0, 1.0, 1.0, 0.0},
+			{1.0, 0.0, 0.0, 0.0},
+			{0.0, 0.0, 0.0, 0.0},
+		},
+		{
+			{1.0, 0.5, 1.0},
+			{0.0, 0.0, 0.0},
+		},
+		{
+			{1.0, 0.0, 0.5},
+			{0.0, 0.0, 0.0},
+		},
+		{
+			{1.0, 0.0, 2.0, 0.0, 3.0},
+			{3.0, 0.0, 2.0, 0.0, 1.0},
+		},
+	}
+	expected := [][][]float64{
+		{
+			{0.0, 1.0, 1.0},
+			{1.0, 0.0, 0.0},
+			{0.0, 0.0, 0.0},
+		},
+		{
+			{1.0, 0.5, 1.0},
+			{0.0, 0.0, 0.0},
+		},
+		{
+			{1.0, 0.5},
+			{0.0, 0.0},
+		},
+		{
+			{1.0, 2.0, 3.0},
+			{3.0, 2.0, 1.0},
+		},
+	}
+	for i, test := range input {
+		expect := expected[i]
+		result := removeZeroedColumns(test)
+		if !reflect.DeepEqual(expect, result) {
+			t.Error("Didn't equal:", result)
 		}
 	}
 
