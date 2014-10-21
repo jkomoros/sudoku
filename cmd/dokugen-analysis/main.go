@@ -779,6 +779,11 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 
 }
 
+func removeZeroedColumns(stats [][]float64) [][]float64 {
+	//TODO:implement
+	return stats
+}
+
 func calculateWeights(stats [][]float64) *regression.Regression {
 
 	//TODO: update this description to describe what piece we actually do in THIS function.

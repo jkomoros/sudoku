@@ -1,6 +1,7 @@
 package main
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -25,4 +26,21 @@ func TestPuzzleConversion(t *testing.T) {
 		}
 	}
 
+}
+
+func TestRemoveZeroedFloats(t *testing.T) {
+	input := [][]float64{
+		{0.0, 1.0, 1.0, 0.0},
+		{1.0, 0.0, 0.0, 0.0},
+		{0.0, 0.0, 0.0, 0.0},
+	}
+	expected := [][]float64{
+		{0.0, 1.0, 1.0},
+		{1.0, 0.0, 0.0},
+		{0.0, 0.0, 0.0},
+	}
+	result := removeZeroedColumns(input)
+	if !reflect.DeepEqual(expected, result) {
+		t.Error("Didn't equal:", result)
+	}
 }
