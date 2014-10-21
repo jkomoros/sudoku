@@ -689,7 +689,7 @@ func calculateRelativeDifficulty() []*puzzle {
 		difficulty /= (max - min)
 
 		//Now, scale it to 0.1 to 0.9
-		difficulty *= (_NORMALIZED_UPPER_BOUND - _NORMALIZED_UPPER_BOUND)
+		difficulty *= (_NORMALIZED_UPPER_BOUND - _NORMALIZED_LOWER_BOUND)
 		difficulty += _NORMALIZED_LOWER_BOUND
 
 		puzzles[i].userRelativeDifficulty = difficulty
