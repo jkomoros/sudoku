@@ -790,6 +790,8 @@ func removeZeroedColumns(stats [][]float64, safeIndexes []int) (newStats [][]flo
 
 	if safeIndexes != nil {
 		for _, safe := range safeIndexes {
+			//Only mark indexes in safeIndexes as existing if they are in safeIndexes AND a valid index.
+			//Later, we'll blindly accept whatever is in nonZeroColumns.
 			if safe >= 0 && safe < len(stats[0]) {
 				nonZeroColumns[safe] = true
 			}
