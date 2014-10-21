@@ -304,6 +304,7 @@ func main() {
 			}
 			//2a and export
 			for _, dataPoint := range solveData {
+				stringified = nil
 				for _, variable := range dataPoint {
 					stringified = append(stringified, strconv.FormatFloat(variable, 'f', -1, 64))
 				}
@@ -846,12 +847,20 @@ func calculateWeights(stats [][]float64) *regression.Regression {
 	//Set up the regression; I'll be adding data points as I go through each puzzle.
 	var r regression.Regression
 
+	//Keep column 0 (the Observed data point)
+	cleanedStats, keptIndexes := removeZeroedColumns(stats, []int{0})
+
 	r.SetObservedName("Real World Difficulty")
-	for i, technique := range sudoku.Techniques {
-		r.SetVarName(i, technique.Name())
+	for i, techniqueIndex := range keptIndexes {
+		//Don't add a label for the observed data
+		if techniqueIndex == 0 {
+			continue
+		}
+		//Subtract 1 from the index to normalize it so first column is 0-th technique, etc.
+		r.SetVarName(i, sudoku.Techniques[techniqueIndex-1].Name())
 	}
 
-	for _, data := range stats {
+	for _, data := range cleanedStats {
 		//TODO: remove columns that are all 0.
 		//Note: I considered adding each solve for each puzzle as a separate datapoint. However, the R2 i was getting were
 		//consistently much lower than this method.
