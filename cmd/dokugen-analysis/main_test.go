@@ -1,6 +1,7 @@
 package main
 
 import (
+	"dokugen"
 	"reflect"
 	"testing"
 )
@@ -82,12 +83,23 @@ func TestRemoveZeroedFloats(t *testing.T) {
 		nil,
 		{3},
 	}
+	keptIndexes := [][]int{
+		{0, 1, 2},
+		{0, 1, 2},
+		{0, 2},
+		{0, 2, 4},
+		{0, 2, 3, 4},
+	}
 	for i, test := range input {
 		expect := expected[i]
 		safe := safeIndexes[i]
-		result := removeZeroedColumns(test, safe)
+		expectedIndexes := sudoku.IntSlice(keptIndexes[i])
+		result, indexes := removeZeroedColumns(test, safe)
 		if !reflect.DeepEqual(expect, result) {
 			t.Error("Didn't equal:", result)
+		}
+		if !expectedIndexes.SameContentAs(sudoku.IntSlice(indexes)) {
+			t.Error("Wrong indexes: ", indexes)
 		}
 	}
 

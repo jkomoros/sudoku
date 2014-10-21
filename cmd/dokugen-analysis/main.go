@@ -779,7 +779,7 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 
 }
 
-func removeZeroedColumns(stats [][]float64, safeIndexes []int) [][]float64 {
+func removeZeroedColumns(stats [][]float64, safeIndexes []int) (newStats [][]float64, keptColumns []int) {
 	nonZeroColumns := make(map[int]bool)
 
 	if safeIndexes != nil {
@@ -817,7 +817,7 @@ func removeZeroedColumns(stats [][]float64, safeIndexes []int) [][]float64 {
 		}
 	}
 
-	return result
+	return result, indexesToKeep
 
 }
 
