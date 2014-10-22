@@ -217,7 +217,7 @@ func main() {
 		if err != nil {
 			log.Fatal("Could not open the specified input CSV.")
 		}
-		defer file.Close()
+		defer inputFile.Close()
 		csvIn := csv.NewReader(inputFile)
 		records, csvErr := csvIn.ReadAll()
 		if csvErr != nil {
