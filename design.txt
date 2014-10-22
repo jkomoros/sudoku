@@ -85,6 +85,8 @@ TODO:
 
 * Now that difficulties coming ouf of analysis are roughly linear from 0.1 to 0.9, clamp SolveDirections.Difficulty () to 0 and 1.0 (report when they would have exceeded) and put in the tuned weights
 
+* Figure out why some of the solve technique tests are flaky on MBP
+
 * run the analysis on old versions and new checkouts and see if the sorted order of the puzzles changes much.
 
 * Investigate making better grids (fewer clues / more symmetry)
