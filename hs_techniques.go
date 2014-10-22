@@ -292,6 +292,7 @@ func init() {
 		techniquesByName[technique.Name()] = technique
 	}
 
+	//TODO: burn in a good set of difficulties, and don't load this file by default.
 	loadDifficulties("difficulties.csv", true)
 
 }
