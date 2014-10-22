@@ -1,7 +1,10 @@
 package sudoku
 
 import (
+	"encoding/csv"
 	"log"
+	"os"
+	"strconv"
 )
 
 /*
@@ -30,6 +33,8 @@ type SolveTechnique interface {
 	IsFill() bool
 	//How difficult a real human would say this technique is. Generally inversely related to how often a real person would pick it. 0.0 to 1.0.
 	Difficulty() float64
+	//Not exported; used for us to late-bind weights from a file.
+	setDifficulty(difficulty float64)
 }
 
 type cellGroupType int
@@ -287,6 +292,71 @@ func init() {
 		techniquesByName[technique.Name()] = technique
 	}
 
+	loadDifficulties("difficulties.csv", true)
+
+}
+
+func loadDifficulties(fileName string, quiet bool) {
+
+	//If quiet is true, won't print to stderr when things happen and won't freak out if the file isn't found.
+	//Quiet should be used when loading default weights.
+
+	//TODO: test that this loading works.
+
+	if !quiet {
+		log.Println("Attempting to configure difficulties from ", fileName)
+	}
+
+	inputFile, err := os.Open(fileName)
+	if err != nil {
+		if !quiet {
+			log.Fatal("Could not open the specified input CSV.")
+		} else {
+			//Meh, whatever.
+			return
+		}
+	}
+	defer inputFile.Close()
+	csvIn := csv.NewReader(inputFile)
+	records, csvErr := csvIn.ReadAll()
+	if csvErr != nil {
+		log.Fatal("The provided CSV could not be parsed.")
+	}
+
+	//Load up the weights into a map.
+	techniqueDifficulties := make(map[string]float64)
+	for i, record := range records {
+		if len(record) != 2 {
+			log.Fatalln("Record in weights csv wasn't right size: ", i)
+		}
+		theFloat, err := strconv.ParseFloat(record[1], 64)
+		if err != nil {
+			log.Fatalln("Record in weights had an invalid float: ", i)
+		}
+		techniqueDifficulties[record[0]] = theFloat
+	}
+
+	validNames := 0
+	//TODO: report on which names were invalid.
+	for name, val := range techniqueDifficulties {
+		technique, ok := techniquesByName[name]
+		if ok {
+			technique.setDifficulty(val)
+			validNames++
+		} else {
+			//TODO: handle "Constant"
+			if !quiet {
+				log.Println("Couldn't find technique provided in weights CSV: ", name)
+			}
+		}
+	}
+	if validNames != len(techniqueDifficulties) && !quiet {
+		log.Println(len(techniqueDifficulties)-validNames, "difficulties were in CSV but did not align with weights.")
+	}
+}
+
+func (self basicSolveTechnique) setDifficulty(difficulty float64) {
+	self.difficulty = difficulty
 }
 
 func (self basicSolveTechnique) Name() string {
