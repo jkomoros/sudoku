@@ -20,11 +20,6 @@ const MAX_DIFFICULTY_ITERATIONS = 50
 //This number is the 'Constant' term from the multiple linear regression to learn the weights.
 var difficultyConstant float64
 
-//We will use this as our max to return a normalized difficulty.
-//TODO: set this more accurately so we rarely hit it (it's very important to get this right!)
-//This is just set emperically.
-const MAX_RAW_DIFFICULTY = 18000.0
-
 //How close we have to get to the average to feel comfortable our difficulty is converging.
 const DIFFICULTY_CONVERGENCE = 0.0005
 
@@ -149,20 +144,24 @@ func (self SolveDirections) Difficulty() float64 {
 	//* Number of hard steps
 	//* (kind of) the hardest step: because the difficulties go up expontentionally.
 
-	//TODO: what's a good max bound for difficulty? This should be normalized to 0<->1 based on that.
+	//This method assumes the weights have been calibrated empirically to give scores between 0.0 and 1.0
+	//without normalization here.
 
 	accum := difficultyConstant
 	for _, step := range self {
 		accum += step.Technique.Difficulty()
 	}
 
-	if accum > MAX_RAW_DIFFICULTY {
-		log.Println("Accumulated difficulty exceeded max difficulty: ", accum)
-		accum = MAX_RAW_DIFFICULTY
+	if accum < 0.0 {
+		log.Println("Accumuldated difficulty snapped to 0.0:", accum, self.summary())
+		accum = 0.0
 	}
 
-	return accum / MAX_RAW_DIFFICULTY
+	if accum > 1.0 {
+		log.Println("Accumulated difficulty snapped to 1.0:", accum, self.summary())
+	}
 
+	return accum
 }
 
 func (self SolveDirections) Walkthrough(grid *Grid) string {
