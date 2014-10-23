@@ -61,8 +61,8 @@ func init() {
 	//TODO: calculate more realistic weights.
 
 	CheapTechniques = []SolveTechnique{
-		hiddenSingleTechnique{
-			basicSolveTechnique{
+		&hiddenSingleTechnique{
+			&basicSolveTechnique{
 				//TODO: shouldn't this be "Hidden Single Row" (and likewise for others)
 				"Necessary In Row",
 				true,
@@ -71,8 +71,8 @@ func init() {
 				0.0,
 			},
 		},
-		hiddenSingleTechnique{
-			basicSolveTechnique{
+		&hiddenSingleTechnique{
+			&basicSolveTechnique{
 				"Necessary In Col",
 				true,
 				GROUP_COL,
@@ -80,8 +80,8 @@ func init() {
 				0.0,
 			},
 		},
-		hiddenSingleTechnique{
-			basicSolveTechnique{
+		&hiddenSingleTechnique{
+			&basicSolveTechnique{
 				"Necessary In Block",
 				true,
 				GROUP_BLOCK,
@@ -89,8 +89,8 @@ func init() {
 				0.0,
 			},
 		},
-		nakedSingleTechnique{
-			basicSolveTechnique{
+		&nakedSingleTechnique{
+			&basicSolveTechnique{
 				//TODO: shouldn't this name be Naked Single for consistency?
 				"Only Legal Number",
 				true,
@@ -99,8 +99,8 @@ func init() {
 				5.0,
 			},
 		},
-		pointingPairTechnique{
-			basicSolveTechnique{
+		&pointingPairTechnique{
+			&basicSolveTechnique{
 				"Pointing Pair Row",
 				false,
 				GROUP_ROW,
@@ -108,8 +108,8 @@ func init() {
 				25.0,
 			},
 		},
-		pointingPairTechnique{
-			basicSolveTechnique{
+		&pointingPairTechnique{
+			&basicSolveTechnique{
 				"Pointing Pair Col",
 				false,
 				GROUP_COL,
@@ -117,8 +117,8 @@ func init() {
 				25.0,
 			},
 		},
-		nakedSubsetTechnique{
-			basicSolveTechnique{
+		&nakedSubsetTechnique{
+			&basicSolveTechnique{
 				"Naked Pair Col",
 				false,
 				GROUP_COL,
@@ -126,8 +126,8 @@ func init() {
 				75.0,
 			},
 		},
-		nakedSubsetTechnique{
-			basicSolveTechnique{
+		&nakedSubsetTechnique{
+			&basicSolveTechnique{
 				"Naked Pair Row",
 				false,
 				GROUP_ROW,
@@ -135,8 +135,8 @@ func init() {
 				75.0,
 			},
 		},
-		nakedSubsetTechnique{
-			basicSolveTechnique{
+		&nakedSubsetTechnique{
+			&basicSolveTechnique{
 				"Naked Pair Block",
 				false,
 				GROUP_BLOCK,
@@ -144,8 +144,8 @@ func init() {
 				85.0,
 			},
 		},
-		nakedSubsetTechnique{
-			basicSolveTechnique{
+		&nakedSubsetTechnique{
+			&basicSolveTechnique{
 				"Naked Triple Col",
 				false,
 				GROUP_COL,
@@ -153,8 +153,8 @@ func init() {
 				125.0,
 			},
 		},
-		nakedSubsetTechnique{
-			basicSolveTechnique{
+		&nakedSubsetTechnique{
+			&basicSolveTechnique{
 				"Naked Triple Row",
 				false,
 				GROUP_ROW,
@@ -162,8 +162,8 @@ func init() {
 				125.0,
 			},
 		},
-		nakedSubsetTechnique{
-			basicSolveTechnique{
+		&nakedSubsetTechnique{
+			&basicSolveTechnique{
 				"Naked Triple Block",
 				false,
 				GROUP_BLOCK,
@@ -171,8 +171,8 @@ func init() {
 				140.0,
 			},
 		},
-		nakedSubsetTechnique{
-			basicSolveTechnique{
+		&nakedSubsetTechnique{
+			&basicSolveTechnique{
 				"Naked Quad Col",
 				false,
 				GROUP_COL,
@@ -180,8 +180,8 @@ func init() {
 				250.0,
 			},
 		},
-		nakedSubsetTechnique{
-			basicSolveTechnique{
+		&nakedSubsetTechnique{
+			&basicSolveTechnique{
 				"Naked Quad Row",
 				false,
 				GROUP_ROW,
@@ -189,8 +189,8 @@ func init() {
 				250.0,
 			},
 		},
-		nakedSubsetTechnique{
-			basicSolveTechnique{
+		&nakedSubsetTechnique{
+			&basicSolveTechnique{
 				"Naked Quad Block",
 				false,
 				GROUP_BLOCK,
@@ -198,8 +198,8 @@ func init() {
 				280.0,
 			},
 		},
-		hiddenSubsetTechnique{
-			basicSolveTechnique{
+		&hiddenSubsetTechnique{
+			&basicSolveTechnique{
 				"Hidden Pair Row",
 				false,
 				GROUP_ROW,
@@ -207,8 +207,8 @@ func init() {
 				300.0,
 			},
 		},
-		hiddenSubsetTechnique{
-			basicSolveTechnique{
+		&hiddenSubsetTechnique{
+			&basicSolveTechnique{
 				"Hidden Pair Col",
 				false,
 				GROUP_COL,
@@ -216,8 +216,8 @@ func init() {
 				300.0,
 			},
 		},
-		hiddenSubsetTechnique{
-			basicSolveTechnique{
+		&hiddenSubsetTechnique{
+			&basicSolveTechnique{
 				"Hidden Pair Block",
 				false,
 				GROUP_BLOCK,
@@ -228,8 +228,8 @@ func init() {
 	}
 
 	ExpensiveTechniques = []SolveTechnique{
-		hiddenSubsetTechnique{
-			basicSolveTechnique{
+		&hiddenSubsetTechnique{
+			&basicSolveTechnique{
 				"Hidden Triple Row",
 				false,
 				GROUP_ROW,
@@ -237,8 +237,8 @@ func init() {
 				600.0,
 			},
 		},
-		hiddenSubsetTechnique{
-			basicSolveTechnique{
+		&hiddenSubsetTechnique{
+			&basicSolveTechnique{
 				"Hidden Triple Col",
 				false,
 				GROUP_COL,
@@ -246,8 +246,8 @@ func init() {
 				600.0,
 			},
 		},
-		hiddenSubsetTechnique{
-			basicSolveTechnique{
+		&hiddenSubsetTechnique{
+			&basicSolveTechnique{
 				"Hidden Triple Block",
 				false,
 				GROUP_BLOCK,
@@ -255,8 +255,8 @@ func init() {
 				500.0,
 			},
 		},
-		hiddenSubsetTechnique{
-			basicSolveTechnique{
+		&hiddenSubsetTechnique{
+			&basicSolveTechnique{
 				"Hidden Quad Row",
 				false,
 				GROUP_ROW,
@@ -264,8 +264,8 @@ func init() {
 				1200.0,
 			},
 		},
-		hiddenSubsetTechnique{
-			basicSolveTechnique{
+		&hiddenSubsetTechnique{
+			&basicSolveTechnique{
 				"Hidden Quad Col",
 				false,
 				GROUP_COL,
@@ -273,8 +273,8 @@ func init() {
 				1200.0,
 			},
 		},
-		hiddenSubsetTechnique{
-			basicSolveTechnique{
+		&hiddenSubsetTechnique{
+			&basicSolveTechnique{
 				"Hidden Quad Block",
 				false,
 				GROUP_BLOCK,
@@ -356,24 +356,23 @@ func loadDifficulties(fileName string) bool {
 	return true
 }
 
-func (self basicSolveTechnique) setDifficulty(difficulty float64) {
-	//TODO: this doesn't actually work, because it's not a pointer receiver.
+func (self *basicSolveTechnique) setDifficulty(difficulty float64) {
 	self.difficulty = difficulty
 }
 
-func (self basicSolveTechnique) Name() string {
+func (self *basicSolveTechnique) Name() string {
 	return self.name
 }
 
-func (self basicSolveTechnique) IsFill() bool {
+func (self *basicSolveTechnique) IsFill() bool {
 	return self.isFill
 }
 
-func (self basicSolveTechnique) Difficulty() float64 {
+func (self *basicSolveTechnique) Difficulty() float64 {
 	return self.difficulty
 }
 
-func (self basicSolveTechnique) getter(grid *Grid) func(int) CellList {
+func (self *basicSolveTechnique) getter(grid *Grid) func(int) CellList {
 	switch self.groupType {
 	case GROUP_ROW:
 		return func(i int) CellList {

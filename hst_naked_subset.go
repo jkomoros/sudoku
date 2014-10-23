@@ -7,10 +7,10 @@ import (
 
 //Different instantiations of this technique represent naked{pair,triple}{row,block,col}
 type nakedSubsetTechnique struct {
-	basicSolveTechnique
+	*basicSolveTechnique
 }
 
-func (self nakedSubsetTechnique) Description(step *SolveStep) string {
+func (self *nakedSubsetTechnique) Description(step *SolveStep) string {
 	if len(step.TargetNums) < self.k || len(step.PointerCells) < self.k {
 		return ""
 	}
@@ -35,7 +35,7 @@ func (self nakedSubsetTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%s are only possible in %s, which means that they can't be in any other cell in %s %d", step.TargetNums.Description(), step.PointerCells.Description(), groupName, groupNum)
 }
 
-func (self nakedSubsetTechnique) Find(grid *Grid) []*SolveStep {
+func (self *nakedSubsetTechnique) Find(grid *Grid) []*SolveStep {
 	//TODO: test that this will find multiple if they exist.
 	return nakedSubset(grid, self, self.k, self.getter(grid))
 }

@@ -7,7 +7,7 @@ import (
 
 //Different instantiations of this technique represent naked{pair,triple}{row,block,col}
 type hiddenSubsetTechnique struct {
-	basicSolveTechnique
+	*basicSolveTechnique
 }
 
 func (self hiddenSubsetTechnique) Description(step *SolveStep) string {
@@ -35,7 +35,7 @@ func (self hiddenSubsetTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%s are only possible in %s within %s %d, which means that only those numbers could be in those cells", step.PointerNums.Description(), step.PointerCells.Description(), groupName, groupNum)
 }
 
-func (self hiddenSubsetTechnique) Find(grid *Grid) []*SolveStep {
+func (self *hiddenSubsetTechnique) Find(grid *Grid) []*SolveStep {
 	//TODO: test that this will find multiple if they exist.
 	return hiddenSubset(grid, self, self.k, self.getter(grid))
 }

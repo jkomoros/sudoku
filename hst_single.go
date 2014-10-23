@@ -7,11 +7,11 @@ import (
 )
 
 type nakedSingleTechnique struct {
-	basicSolveTechnique
+	*basicSolveTechnique
 }
 
 type hiddenSingleTechnique struct {
-	basicSolveTechnique
+	*basicSolveTechnique
 }
 
 func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
@@ -20,7 +20,7 @@ func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep 
 	return &SolveStep{cellArr, nil, numArr, nil, technique}
 }
 
-func (self nakedSingleTechnique) Description(step *SolveStep) string {
+func (self *nakedSingleTechnique) Description(step *SolveStep) string {
 	if len(step.TargetNums) == 0 {
 		return ""
 	}
@@ -28,7 +28,7 @@ func (self nakedSingleTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is the only remaining valid number for that cell", num)
 }
 
-func (self nakedSingleTechnique) Find(grid *Grid) []*SolveStep {
+func (self *nakedSingleTechnique) Find(grid *Grid) []*SolveStep {
 	//TODO: test that this will find multiple if they exist.
 	var results []*SolveStep
 	getter := grid.queue.NewGetter()
@@ -47,7 +47,7 @@ func (self nakedSingleTechnique) Find(grid *Grid) []*SolveStep {
 	}
 }
 
-func (self hiddenSingleTechnique) Description(step *SolveStep) string {
+func (self *hiddenSingleTechnique) Description(step *SolveStep) string {
 	//TODO: format the text to say "first/second/third/etc"
 	if len(step.TargetCells) == 0 || len(step.TargetNums) == 0 {
 		return ""
@@ -85,7 +85,7 @@ func (self hiddenSingleTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is required in the %d %s, and %s is the only %s it fits", num, groupNum, groupName, otherGroupNum, otherGroupName)
 }
 
-func (self hiddenSingleTechnique) Find(grid *Grid) []*SolveStep {
+func (self *hiddenSingleTechnique) Find(grid *Grid) []*SolveStep {
 	//TODO: test that if there are multiple we find them both.
 	return necessaryInCollection(grid, self, self.getter(grid))
 }
