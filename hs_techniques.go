@@ -293,7 +293,12 @@ func init() {
 	}
 
 	//TODO: burn in a good set of difficulties, and don't load this file by default.
-	loadDifficulties("difficulties.csv")
+	if !loadDifficulties("difficulties.csv") {
+		//If you're running one of the cmd's, we need to search higher in the directory.
+		//This is obviously a horrid, horrid hack. I'm only landing it since the whole
+		//auto load of difficulties is temporary for now.
+		loadDifficulties("../../difficulties.csv")
+	}
 
 }
 
