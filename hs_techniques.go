@@ -293,29 +293,21 @@ func init() {
 	}
 
 	//TODO: burn in a good set of difficulties, and don't load this file by default.
-	loadDifficulties("difficulties.csv", true)
+	loadDifficulties("difficulties.csv")
 
 }
 
-func loadDifficulties(fileName string, quiet bool) {
-
-	//If quiet is true, won't print to stderr when things happen and won't freak out if the file isn't found.
-	//Quiet should be used when loading default weights.
+func loadDifficulties(fileName string) {
 
 	//TODO: test that this loading works.
 
-	if !quiet {
-		log.Println("Attempting to configure difficulties from ", fileName)
-	}
+	log.Println("Attempting to configure difficulties from ", fileName)
 
 	inputFile, err := os.Open(fileName)
 	if err != nil {
-		if !quiet {
-			log.Fatal("Could not open the specified input CSV.")
-		} else {
-			//Meh, whatever.
-			return
-		}
+
+		log.Fatal("Could not open the specified input CSV.")
+
 	}
 	defer inputFile.Close()
 	csvIn := csv.NewReader(inputFile)
@@ -346,12 +338,12 @@ func loadDifficulties(fileName string, quiet bool) {
 			validNames++
 		} else {
 			//TODO: handle "Constant"
-			if !quiet {
-				log.Println("Couldn't find technique provided in weights CSV: ", name)
-			}
+
+			log.Println("Couldn't find technique provided in weights CSV: ", name)
+
 		}
 	}
-	if validNames != len(techniqueDifficulties) && !quiet {
+	if validNames != len(techniqueDifficulties) {
 		log.Println(len(techniqueDifficulties)-validNames, "difficulties were in CSV but did not align with weights.")
 	}
 }
