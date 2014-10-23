@@ -357,6 +357,7 @@ func loadDifficulties(fileName string) bool {
 }
 
 func (self basicSolveTechnique) setDifficulty(difficulty float64) {
+	//TODO: this doesn't actually work, because it's not a pointer receiver.
 	self.difficulty = difficulty
 }
 
