@@ -104,6 +104,15 @@ func (self *SolveStep) Description() string {
 	return result
 }
 
+func (self SolveDirections) summary() string {
+	//TODO: test this.
+	techniqueCount := make(map[string]int)
+	for _, step := range self {
+		techniqueCount[step.Technique.Name()] += 1
+	}
+	return fmt.Sprint(techniqueCount)
+}
+
 func (self SolveDirections) Description() []string {
 
 	if len(self) == 0 {
