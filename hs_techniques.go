@@ -346,6 +346,7 @@ func loadDifficulties(fileName string) bool {
 		} else {
 			if name == "Constant" {
 				difficultyConstant = val
+				validNames++
 			} else {
 
 				log.Println("Couldn't find technique provided in weights CSV: ", name)
