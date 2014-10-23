@@ -344,15 +344,19 @@ func loadDifficulties(fileName string) bool {
 			technique.setDifficulty(val)
 			validNames++
 		} else {
-			//TODO: handle "Constant"
+			if name == "Constant" {
+				difficultyConstant = val
+			} else {
 
-			log.Println("Couldn't find technique provided in weights CSV: ", name)
+				log.Println("Couldn't find technique provided in weights CSV: ", name)
+			}
 
 		}
 	}
 	if validNames != len(techniqueDifficulties) {
 		log.Println(len(techniqueDifficulties)-validNames, "difficulties were in CSV but did not align with weights.")
 	}
+
 	return true
 }
 

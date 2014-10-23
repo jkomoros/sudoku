@@ -17,6 +17,9 @@ var ExpensiveTechniques []SolveTechnique
 //Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
 const MAX_DIFFICULTY_ITERATIONS = 50
 
+//This number is the 'Constant' term from the multiple linear regression to learn the weights.
+var difficultyConstant float64
+
 //We will use this as our max to return a normalized difficulty.
 //TODO: set this more accurately so we rarely hit it (it's very important to get this right!)
 //This is just set emperically.
@@ -148,7 +151,7 @@ func (self SolveDirections) Difficulty() float64 {
 
 	//TODO: what's a good max bound for difficulty? This should be normalized to 0<->1 based on that.
 
-	accum := 0.0
+	accum := difficultyConstant
 	for _, step := range self {
 		accum += step.Technique.Difficulty()
 	}
