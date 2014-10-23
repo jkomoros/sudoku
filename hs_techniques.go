@@ -297,7 +297,7 @@ func init() {
 
 }
 
-func loadDifficulties(fileName string) {
+func loadDifficulties(fileName string) bool {
 
 	//TODO: test that this loading works.
 
@@ -306,14 +306,16 @@ func loadDifficulties(fileName string) {
 	inputFile, err := os.Open(fileName)
 	if err != nil {
 
-		log.Fatal("Could not open the specified input CSV.")
+		log.Println("Could not open the specified input CSV.")
+		return false
 
 	}
 	defer inputFile.Close()
 	csvIn := csv.NewReader(inputFile)
 	records, csvErr := csvIn.ReadAll()
 	if csvErr != nil {
-		log.Fatal("The provided CSV could not be parsed.")
+		log.Println("The provided CSV could not be parsed.")
+		return false
 	}
 
 	//Load up the weights into a map.
@@ -346,6 +348,7 @@ func loadDifficulties(fileName string) {
 	if validNames != len(techniqueDifficulties) {
 		log.Println(len(techniqueDifficulties)-validNames, "difficulties were in CSV but did not align with weights.")
 	}
+	return true
 }
 
 func (self basicSolveTechnique) setDifficulty(difficulty float64) {
