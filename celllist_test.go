@@ -87,6 +87,15 @@ func TestBasicCellList(t *testing.T) {
 		t.Log("Got wrong description of cellList: ", description)
 		t.Fail()
 	}
+
+	unsortedList := CellList{grid.Cell(0, 1), grid.Cell(1, 2), grid.Cell(0, 0)}
+	unsortedList.Sort()
+	if unsortedList[0].Row != 0 || unsortedList[0].Col != 0 ||
+		unsortedList[1].Row != 0 || unsortedList[1].Col != 1 ||
+		unsortedList[2].Row != 1 || unsortedList[2].Col != 2 {
+		t.Error("Cell List didn't get sorted: ", unsortedList)
+	}
+
 }
 
 func TestIntList(t *testing.T) {

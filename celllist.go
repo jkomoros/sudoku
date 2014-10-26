@@ -19,6 +19,10 @@ type cellRef struct {
 	col int
 }
 
+type cellListSorter struct {
+	CellList
+}
+
 func getRow(cell *Cell) int {
 	return cell.Row
 }
@@ -170,12 +174,33 @@ func (self CellList) InverseSubset(indexes IntSlice) CellList {
 	return result
 }
 
+func (self CellList) Sort() {
+	sorter := cellListSorter{self}
+	sort.Sort(sorter)
+}
+
 func (self CellList) CollectNums(fetcher func(*Cell) int) IntSlice {
 	var result IntSlice
 	for _, cell := range self {
 		result = append(result, fetcher(cell))
 	}
 	return result
+}
+
+func (self cellListSorter) Len() int {
+	return len(self.CellList)
+}
+
+func (self cellListSorter) Less(i, j int) bool {
+	//Sort based on the index of the cell.
+	one := self.CellList[i]
+	two := self.CellList[j]
+
+	return (one.Row*DIM + one.Col) < (two.Row*DIM + two.Col)
+}
+
+func (self cellListSorter) Swap(i, j int) {
+	self.CellList[i], self.CellList[j] = self.CellList[j], self.CellList[i]
 }
 
 func (self CellList) Filter(filter func(*Cell) bool) CellList {
