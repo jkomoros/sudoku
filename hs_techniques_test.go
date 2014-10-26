@@ -126,6 +126,8 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 	}
 
 	if options.description != "" {
+		//Normalize the step so that the description will be stable for the test.
+		step.normalize()
 		description := solver.Description(step)
 		if description != options.description {
 			t.Error("Wrong description for ", techniqueName, ". Got:*", description, "* expected: *", options.description, "*")

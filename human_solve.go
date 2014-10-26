@@ -102,6 +102,14 @@ func (self *SolveStep) Description() string {
 	return result
 }
 
+func (self *SolveStep) normalize() {
+	//Puts the solve step in its normal status. In practice this means that the various slices are sorted, so that the Description of them is stable.
+	self.PointerCells.Sort()
+	self.TargetCells.Sort()
+	self.TargetNums.Sort()
+	self.PointerNums.Sort()
+}
+
 func (self SolveDirections) summary() string {
 	//TODO: test this.
 	techniqueCount := make(map[string]int)
