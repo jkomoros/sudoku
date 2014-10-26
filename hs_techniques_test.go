@@ -128,7 +128,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 	if options.description != "" {
 		description := solver.Description(step)
 		if description != options.description {
-			t.Error("Wrong description for ", techniqueName, ": ", description)
+			t.Error("Wrong description for ", techniqueName, ". Got:*", description, "* expected: *", options.description, "*")
 		}
 	}
 
