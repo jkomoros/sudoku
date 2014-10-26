@@ -106,6 +106,12 @@ func TestIntList(t *testing.T) {
 		t.Fail()
 	}
 
+	unsortedList := IntSlice{3, 2, 1}
+	unsortedList.Sort()
+	if !unsortedList.SameAs(IntSlice{1, 2, 3}) {
+		t.Error("IntSlice.Sort did not sort the list.")
+	}
+
 	oneList := IntSlice{1}
 
 	description = oneList.Description()

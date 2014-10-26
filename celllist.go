@@ -327,6 +327,10 @@ func (self IntSlice) Subset(indexes IntSlice) IntSlice {
 	return result
 }
 
+func (self IntSlice) Sort() {
+	sort.Ints(self)
+}
+
 func (self IntSlice) toIntSet() intSet {
 	result := make(intSet)
 	for _, item := range self {
