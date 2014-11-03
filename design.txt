@@ -61,6 +61,7 @@ TODO:
 * Make a decision about how to represent cell coordinates and row/col/block indexes when presented to user. now we're consistently 0 indexed (mostly), but shouldn't we be 1 indexed when presenting to the user?
 
 * Human solve: Is it worth it to do nakedSingles based on row/col/block as well? Those are obvious in different ways.
+	* This sounds non-sensical, but I think there's something to it. There's single-hole-in-{row,col,block} and then there's mixed naked single (currently the only one).
 * Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm. Technqiues I've skipped so far:
 	* BlockBlock interactions
 	* Should we consider a "guess between two options" to be a possible (extremely expensive) technique?
@@ -72,6 +73,8 @@ TODO:
 			* The unwindTo points will need to be nested (although for a first stab we could just only allow one UnWind and bail otherwise)
 			* As far as SolveDirections et al are concerned, Guess would just be a REALLY expensive technique.
 	* Implement enough techniques to be able to solve #122, #33, and #138.
+
+* Visualize the ranges of the different userSolveCollections in analysis, to verify that we're getting good coverage and overlap from them.
 
 * Analysis: Spot check the results of the new markov difficulty grader to see if they intuitively make sense.
 * Analysis: Run our difficulty grader on the real puzzles and see how well it fits with user perceived difficulty.
