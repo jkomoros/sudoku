@@ -95,6 +95,7 @@ TODO:
 * run the analysis on old versions and new checkouts and see if the sorted order of the puzzles changes much.
 
 * Investigate making better grids (fewer clues / more symmetry)
+	* Have a Cell.SymetricalPartner method, that returns randomly row/col/both partner when we remove one randomly, see if its partner is also empty and then fill.
 
 * Make it so NewGrid grabs a grid from grid cache if possible.
 	* Actually call grid.Done() when we're done
