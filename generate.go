@@ -19,10 +19,18 @@ func (self *Grid) Fill() bool {
 	return false
 }
 
-func GenerateGrid(symmetry SymmetryType) *Grid {
+func GenerateGrid(symmetry SymmetryType, symmetryPercentage float64) *Grid {
 	grid := NewGrid()
 	//Do a random fill of the grid
 	grid.Fill()
+
+	//Make sure symmetry percentage is within the legal range.
+	if symmetryPercentage < 0.0 {
+		symmetryPercentage = 0.0
+	}
+	if symmetryPercentage > 1.0 {
+		symmetryPercentage = 1.0
+	}
 
 	cells := make([]*Cell, len(grid.cells[:]))
 
@@ -39,10 +47,16 @@ func GenerateGrid(symmetry SymmetryType) *Grid {
 		}
 
 		var otherNum int
-		otherCell := cell.SymmetricalPartner(symmetry)
+		var otherCell *Cell
 
-		if otherCell != nil {
-			otherNum = otherCell.Number()
+		if rand.Float64() < symmetryPercentage {
+
+			//Pick a symmetrical partner for symmetryPercentage number of cells.
+			otherCell = cell.SymmetricalPartner(symmetry)
+
+			if otherCell != nil {
+				otherNum = otherCell.Number()
+			}
 		}
 
 		//Unfill it.

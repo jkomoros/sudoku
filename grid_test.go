@@ -501,7 +501,7 @@ func TestGridCache(t *testing.T) {
 }
 
 func TestGenerate(t *testing.T) {
-	grid := GenerateGrid(SYMMETRY_NONE)
+	grid := GenerateGrid(SYMMETRY_NONE, 0.0)
 
 	if grid == nil {
 		t.Log("We didn't get back a generated grid")
@@ -522,7 +522,7 @@ func TestGenerate(t *testing.T) {
 }
 
 func TestSymmetricalGenerate(t *testing.T) {
-	grid := GenerateGrid(SYMMETRY_VERTICAL)
+	grid := GenerateGrid(SYMMETRY_VERTICAL, 1.0)
 
 	if grid == nil {
 		t.Fatal("Did not get a generated grid back")
