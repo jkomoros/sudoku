@@ -101,6 +101,7 @@ TODO:
 
 * Figure out why, when generating puzzles and having the stats printed out, we get so many with 0.968499 as the difficulty.
 	* Graph the difficulties for a large number of them and see if it follows any particular pattern.
+	* That number,interestingly, is the currently calibrated Constant term
 
 * Use machine learning to help us set the constants for difficulty correctly
 
