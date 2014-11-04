@@ -19,6 +19,7 @@ func (self *Grid) Fill() bool {
 	return false
 }
 
+//TODO: test that the grids returned respect the symmetry type.
 func GenerateGrid(symmetry SymmetryType) *Grid {
 	grid := NewGrid()
 	//Do a random fill of the grid
