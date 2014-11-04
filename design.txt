@@ -90,8 +90,6 @@ TODO:
 
 * Snap difficulties in SolveDirections.Difficulty, and alert of them there (we'll hear about them less)
 
-* Figure out why some of the solve technique tests are flaky on MBP
-
 * run the analysis on old versions and new checkouts and see if the sorted order of the puzzles changes much.
 
 * Investigate making better grids (fewer clues / more symmetry)
