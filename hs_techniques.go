@@ -108,6 +108,15 @@ func init() {
 				0.0,
 			},
 		},
+		&obviousInCollectionTechnique{
+			&basicSolveTechnique{
+				"Obvious In Col",
+				true,
+				GROUP_COL,
+				1,
+				0.0,
+			},
+		},
 		&pointingPairTechnique{
 			&basicSolveTechnique{
 				"Pointing Pair Row",

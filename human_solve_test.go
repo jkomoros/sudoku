@@ -71,7 +71,7 @@ func TestStepsDescription(t *testing.T) {
 			},
 			IntSlice{1, 2},
 			nil,
-			Techniques[6],
+			Techniques[7],
 		},
 		&SolveStep{
 			CellList{

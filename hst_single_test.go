@@ -16,6 +16,19 @@ func TestObviousInCollectionRow(t *testing.T) {
 
 }
 
+func TestObviousInCollectionCol(t *testing.T) {
+	options := solveTechniqueTestHelperOptions{
+		transpose:   true,
+		targetCells: []cellRef{{3, 2}},
+		targetSame:  GROUP_COL,
+		targetGroup: 2,
+		targetNums:  IntSlice([]int{7}),
+		description: "(3,2) is the only cell in column 2 that is unfilled, and it must be 7",
+	}
+	humanSolveTechniqueTestHelper(t, "obviousrow.sdk", "Obvious In Col", options)
+
+}
+
 func TestSolveOnlyLegalNumber(t *testing.T) {
 	grid := NewGrid()
 	//Load up a solved grid
