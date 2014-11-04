@@ -14,10 +14,41 @@ type hiddenSingleTechnique struct {
 	*basicSolveTechnique
 }
 
+type obviousInCollectionTechnique struct {
+	*basicSolveTechnique
+}
+
 func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
 	cellArr := []*Cell{cell}
 	numArr := []int{num}
 	return &SolveStep{cellArr, nil, numArr, nil, technique}
+}
+
+func (self *obviousInCollectionTechnique) Description(step *SolveStep) string {
+	if len(step.TargetNums) == 0 {
+		return ""
+	}
+	num := step.TargetNums[0]
+	groupName := "<NONE>"
+	groupNumber := 0
+	switch self.groupType {
+	case GROUP_BLOCK:
+		groupName = "block"
+		groupNumber = step.TargetCells.Block()
+	case GROUP_COL:
+		groupName = "column"
+		groupNumber = step.TargetCells.Col()
+	case GROUP_ROW:
+		groupName = "row"
+		groupNumber = step.TargetCells.Row()
+	}
+
+	return fmt.Sprintf("%s is the only cell in %s %d that is unfilled, and it must be %d", step.TargetCells.Description(), groupName, groupNumber, num)
+}
+
+func (self *obviousInCollectionTechnique) Find(grid *Grid) []*SolveStep {
+	//TODO: implement this.
+	return nil
 }
 
 func (self *nakedSingleTechnique) Description(step *SolveStep) string {
