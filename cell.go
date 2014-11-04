@@ -245,6 +245,24 @@ func (self *Cell) implicitNumber() int {
 	return result + 1
 }
 
+func (self *Cell) SymmetricalPartners() CellList {
+	var result CellList
+	//horizontal partner
+	if cell := self.grid.Cell(self.Row, DIM-self.Col-1); cell != self {
+		result = append(result, cell)
+	}
+	//Vertical partner
+	if cell := self.grid.Cell(DIM-self.Row-1, self.Col); cell != self {
+		result = append(result, cell)
+	}
+	//Diagonal partner
+	if cell := self.grid.Cell(DIM-self.Row-1, DIM-self.Col-1); cell != self {
+		result = append(result, cell)
+	}
+
+	return result
+}
+
 func (self *Cell) Neighbors() CellList {
 	if self.grid == nil || !self.grid.initalized {
 		return nil

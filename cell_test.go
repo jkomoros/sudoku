@@ -220,3 +220,24 @@ func TestCellCreation(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestSymmetry(t *testing.T) {
+	grid := NewGrid()
+
+	cell := grid.Cell(3, 3)
+
+	partners := cell.SymmetricalPartners()
+
+	if !partners.sameAsRefs([]cellRef{{5, 5}, {3, 5}, {5, 3}}) {
+		t.Error("Got wrong symmetrical partners back for 3,3: ", partners)
+	}
+
+	cell = grid.Cell(4, 4)
+
+	partners = cell.SymmetricalPartners()
+
+	if len(partners) != 0 {
+		t.Error("The middle cell had symmetrical partners when it shouldn't have: ", partners)
+	}
+
+}
