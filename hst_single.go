@@ -52,7 +52,6 @@ func (self *obviousInCollectionTechnique) Find(grid *Grid) []*SolveStep {
 }
 
 func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellList) []*SolveStep {
-	//TODO: test this!
 	indexes := rand.Perm(DIM)
 	var results []*SolveStep
 	for _, index := range indexes {
