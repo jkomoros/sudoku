@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"strconv"
 )
@@ -47,8 +48,33 @@ func (self *obviousInCollectionTechnique) Description(step *SolveStep) string {
 }
 
 func (self *obviousInCollectionTechnique) Find(grid *Grid) []*SolveStep {
-	//TODO: implement this.
-	return nil
+	return obviousInCollection(grid, self, self.getter(grid))
+}
+
+func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellList) []*SolveStep {
+	//TODO: test this!
+	indexes := rand.Perm(DIM)
+	var results []*SolveStep
+	for _, index := range indexes {
+		collection := collectionGetter(index)
+		openCells := collection.FilterByHasPossibilities()
+		if len(openCells) == 1 {
+			//Okay, only one cell in this collection has an opening, which must mean it has one possibilty.
+			cell := openCells[0]
+			possibilities := cell.Possibilities()
+			if len(possibilities) != 1 {
+				log.Fatalln("Expected the cell to only have one possibility")
+			} else {
+				possibility := possibilities[0]
+				step := newFillSolveStep(cell, possibility, technique)
+				if step.IsUseful(grid) {
+					results = append(results, step)
+				}
+			}
+
+		}
+	}
+	return results
 }
 
 func (self *nakedSingleTechnique) Description(step *SolveStep) string {
