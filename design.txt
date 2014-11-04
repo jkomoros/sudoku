@@ -60,8 +60,6 @@ TODO:
 
 * Make a decision about how to represent cell coordinates and row/col/block indexes when presented to user. now we're consistently 0 indexed (mostly), but shouldn't we be 1 indexed when presenting to the user?
 
-* Human solve: Is it worth it to do nakedSingles based on row/col/block as well? Those are obvious in different ways.
-	* This sounds non-sensical, but I think there's something to it. There's single-hole-in-{row,col,block} and then there's mixed naked single (currently the only one).
 * Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm. Technqiues I've skipped so far:
 	* BlockBlock interactions
 	* Should we consider a "guess between two options" to be a possible (extremely expensive) technique?
@@ -85,8 +83,6 @@ TODO:
 * Analysis: Allow the user to set a max number of multiplies from the command line
 
 * Now that difficulties coming ouf of analysis are roughly linear from 0.1 to 0.9, clamp SolveDirections.Difficulty () to 0 and 1.0 (report when they would have exceeded) and put in the tuned weights
-
-* NEXT STEP: Add, Test obviousInColumn and block
 
 * With current weights, many generated puzzles are coming back with very low weights--they only need a small number of techniques to solve them. Why is that?
 
