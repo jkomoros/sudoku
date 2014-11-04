@@ -36,26 +36,6 @@ TODO:
 		* Sparsecells have their own trapping of any modifiying calls that then call back to the sparseGrid (they know which it is) with the new cell itself to put in the cache. Then the SparseCell can be thrown away.
 	* Simplest (no caching): Whenever you want a cell, you call grid.Cell(), which sees if it has one, otherwise returns one from another cell.
 
-* Rate sudokus based on experienced difficulty. (See http://www.longwood.edu/assets/mathematics/Team2975_ProblemB.pdf)
-	* Also: http://www.sudokuwiki.org/Sudoku_Creation_and_Grading.pdf
-	* Also: http://zhangroup.aporc.org/images/files/Paper_3485.pdf
-	* Signals:
-		* Number of steps
-		* Steps * normalized difficulty rating of each step
-		* Weight of hardest technique (or index cutoff of highest technique)
-		* Avergae weight of difficulties
-	* Should difficulties go up exponentionally? A technique that requires no candidate marking is WAY, WAY easier than one that requires multiple leaps of logic.
-	* Actually calculating it:
-		* What we have need is a Multiple Linear Regression.
-		* Useful link: http://onlinestatbook.com/2/regression/multiple_regression.html
-		* Further analysis: Linearize/normalize difficulties from phase 1?
-		* Further analysis: load in difficulty weights into solver and run difficulty calcs again
-		* Further analysis: Difficulty calc has a raw weight that it divides by
-			* ... Won't this always be nessary, given that this is a sum of terms? Maybe we just clamp to 100 and 0.
-		* Is it weird that we have some negative weights coming out of analysis? For example, won't that trip up the weightedrandomIndex?
-			* Yes, it looks like negative weights will trip it up. If we find a negative weight we should run through and add -1 * the negative weight to all of them.
-		* Another idea: I'm treating the userDifficulty as the actual difficulty, but really all it represents is the ordering. Try assigning a difficulty that is evenly spread across the range linearly (from maybe 0.1 to 0.9) and train on that.
-
 * Run dokugen/main.go and then panic at the end. Verify there aren't a billion goroutines hanging out.
 
 * Make a decision about how to represent cell coordinates and row/col/block indexes when presented to user. now we're consistently 0 indexed (mostly), but shouldn't we be 1 indexed when presenting to the user?
@@ -68,6 +48,7 @@ TODO:
 				* We'd want an AllTechniques array as well as NormalTechniques array. Analysis would use the former; solver would use the latter.
 			* In Human Solve, if nothing else works, it Finds() with that Guess technique and randomly applies one.
 			* But because Human Solve was the one that decided to apply it, and knows that it's special, it saves an "unwind to" point.
+				* It would also have to know the "other" path to take at the unwind point.
 			* The unwindTo points will need to be nested (although for a first stab we could just only allow one UnWind and bail otherwise)
 			* As far as SolveDirections et al are concerned, Guess would just be a REALLY expensive technique.
 	* Implement enough techniques to be able to solve #122, #33, and #138.
@@ -101,8 +82,6 @@ TODO:
 
 * Figure out why, when generating puzzles and having the stats printed out, we get so many with 0.968499 as the difficulty.
 	* Graph the difficulties for a large number of them and see if it follows any particular pattern.
-
-* Use machine learning to help us set the constants for difficulty correctly
 
 * Does our use of the Rand convenience funcs in different go routines cause performance problems? (http://stackoverflow.com/questions/14298523/why-does-adding-concurrency-slow-down-this-golang-code)
 	* In any case we want to be able to test randomness.
