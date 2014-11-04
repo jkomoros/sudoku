@@ -3,6 +3,7 @@ package sudoku
 import (
 	"container/list"
 	"io/ioutil"
+	"math"
 	"runtime"
 	"strings"
 	"testing"
@@ -540,6 +541,43 @@ func TestSymmetricalGenerate(t *testing.T) {
 				t.Error("Cell ", cell.ref().String(), "'s partner IS filled and should be empty")
 			}
 		}
+	}
+
+	//Now test a non 1.0 symmetry
+	percentage := 0.5
+	grid = GenerateGrid(SYMMETRY_VERTICAL, percentage)
+
+	if grid == nil {
+		t.Fatal("Did not get a generated grid back with 0.5 symmetry")
+	}
+
+	//Counter of how many cells were the opposite of what they should be.
+	numWrong := 0.0
+	base := 0.0
+
+	for r := 0; r < DIM; r++ {
+		//Go through all left side columns, skipping middle column.
+		for c := 0; c < (DIM / 2); c++ {
+			cell := grid.Cell(r, c)
+			otherCell := cell.SymmetricalPartner(SYMMETRY_VERTICAL)
+
+			base++
+
+			if cell.Number() != 0 && otherCell.Number() == 0 {
+				numWrong++
+			}
+			if cell.Number() == 0 && otherCell.Number() != 0 {
+				numWrong++
+			}
+		}
+	}
+
+	//We've only looked at some percentage of cells, so that's the target we should be close to.
+	percentageMultiplier := base / (DIM * DIM)
+
+	//Note: this test is inherently flaky because there's randomness.
+	if math.Abs((numWrong/base)-(percentage*percentageMultiplier)) > 0.1 {
+		t.Error("More than the allowable percentage were not symmetrical within the tolerance", numWrong/base)
 	}
 }
 
