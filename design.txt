@@ -86,6 +86,8 @@ TODO:
 * Does our use of the Rand convenience funcs in different go routines cause performance problems? (http://stackoverflow.com/questions/14298523/why-does-adding-concurrency-slow-down-this-golang-code)
 	* In any case we want to be able to test randomness.
 
+* In generator, make it so it's not STRICT about symmetry (the puzzles look too perfect now)
+
 * Make it so the docs generated from dokugen are all useful.
 
 * REdo of threaded solving
