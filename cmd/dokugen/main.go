@@ -42,7 +42,8 @@ func main() {
 
 	if options.GENERATE {
 		for i := 0; i < options.NUM; i++ {
-			grid := sudoku.GenerateGrid()
+			//TODO: allow the type of symmetry to be configured.
+			grid := sudoku.GenerateGrid(sudoku.SYMMETRY_NONE)
 			fmt.Fprintln(output, grid.DataString())
 			fmt.Fprintln(output, "\n")
 			if options.PRINT_STATS {

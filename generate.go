@@ -19,7 +19,7 @@ func (self *Grid) Fill() bool {
 	return false
 }
 
-func GenerateGrid() *Grid {
+func GenerateGrid(symmetry SymmetryType) *Grid {
 	grid := NewGrid()
 	//Do a random fill of the grid
 	grid.Fill()
@@ -43,11 +43,25 @@ func GenerateGrid() *Grid {
 			if num == 0 {
 				continue
 			}
+
+			var otherNum int
+			otherCell := cell.SymmetricalPartner(symmetry)
+
+			if otherCell != nil {
+				otherNum = otherCell.Number()
+			}
+
 			//Unfill it.
 			cell.SetNumber(0)
+			if otherCell != nil {
+				otherCell.SetNumber(0)
+			}
 			if grid.HasMultipleSolutions() {
 				//Put it back in.
 				cell.SetNumber(num)
+				if otherCell != nil {
+					otherCell.SetNumber(otherNum)
+				}
 			} else {
 				//we had a success! keep going around again.
 				keepGoing = true
