@@ -250,6 +250,12 @@ func TestSymmetry(t *testing.T) {
 		t.Error("Didn't get back a symmerical partner for (any) for 3,3")
 	}
 
+	partner = cell.SymmetricalPartner(SYMMETRY_NONE)
+
+	if partner != nil {
+		t.Error("Should have gotten back nil for SYMMETRY_NONE for 3,3, got: ", partner)
+	}
+
 	cell = grid.Cell(4, 4)
 
 	if cell.SymmetricalPartner(SYMMETRY_BOTH) != nil || cell.SymmetricalPartner(SYMMETRY_HORIZONTAL) != nil || cell.SymmetricalPartner(SYMMETRY_VERTICAL) != nil {
