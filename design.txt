@@ -82,6 +82,8 @@ TODO:
 * Analysis: Don't include puzzles that have fewer than N solves (and/or that are disabled)
 * Analysis: Allow the user to set a max number of multiplies from the command line
 
+* A way for technique finders to import the results of other techniques. For example, onlylegalnumber should import obviousincollection results and not duplicate those. And hiddensubset and nakedsubset should trade their results as input to the others. It's not clear if this additional layers of calculation is worth it or not...
+
 * Now that difficulties coming ouf of analysis are roughly linear from 0.1 to 0.9, clamp SolveDirections.Difficulty () to 0 and 1.0 (report when they would have exceeded) and put in the tuned weights
 
 * With current weights, many generated puzzles are coming back with very low weights--they only need a small number of techniques to solve them. Why is that?
