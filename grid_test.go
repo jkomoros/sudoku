@@ -521,6 +521,28 @@ func TestGenerate(t *testing.T) {
 	grid.Done()
 }
 
+func TestSymmetricalGenerate(t *testing.T) {
+	grid := GenerateGrid(SYMMETRY_VERTICAL)
+
+	if grid == nil {
+		t.Fatal("Did not get a generated grid back")
+	}
+
+	for r := 0; r < DIM; r++ {
+		//Go through all left side columns, skipping middle column.
+		for c := 0; c < (DIM / 2); c++ {
+			cell := grid.Cell(r, c)
+			otherCell := cell.SymmetricalPartner(SYMMETRY_VERTICAL)
+			if cell.Number() != 0 && otherCell.Number() == 0 {
+				t.Error("Cell ", cell.ref().String(), "'s partner not filled but should be")
+			}
+			if cell.Number() == 0 && otherCell.Number() != 0 {
+				t.Error("Cell ", cell.ref().String(), "'s partner IS filled and should be empty")
+			}
+		}
+	}
+}
+
 func nCopies(in string, copies int) (result []string) {
 	for i := 0; i < copies; i++ {
 		result = append(result, in)
