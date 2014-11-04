@@ -102,6 +102,8 @@ TODO:
 
 * When generating grids, keep a temporary directory of sdk files representing puzzles generated but not vended. When asked for a new puzzle, we first see if we have any in the unvended list that are appropriate difficulty.
 
+* Figure out why, when generating puzzles and having the stats printed out, we get so many with 0.968499 as the difficulty.
+
 * Use machine learning to help us set the constants for difficulty correctly
 
 * Does our use of the Rand convenience funcs in different go routines cause performance problems? (http://stackoverflow.com/questions/14298523/why-does-adding-concurrency-slow-down-this-golang-code)
