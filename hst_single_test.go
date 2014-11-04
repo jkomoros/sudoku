@@ -29,6 +29,18 @@ func TestObviousInCollectionCol(t *testing.T) {
 
 }
 
+func TestObviousInCollectionBlock(t *testing.T) {
+	options := solveTechniqueTestHelperOptions{
+		targetCells: []cellRef{{4, 1}},
+		targetSame:  GROUP_BLOCK,
+		targetGroup: 3,
+		targetNums:  IntSlice([]int{9}),
+		description: "(4,1) is the only cell in block 3 that is unfilled, and it must be 9",
+	}
+	humanSolveTechniqueTestHelper(t, "obviousblock.sdk", "Obvious In Block", options)
+
+}
+
 func TestSolveOnlyLegalNumber(t *testing.T) {
 	grid := NewGrid()
 	//Load up a solved grid

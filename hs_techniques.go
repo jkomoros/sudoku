@@ -117,6 +117,15 @@ func init() {
 				0.0,
 			},
 		},
+		&obviousInCollectionTechnique{
+			&basicSolveTechnique{
+				"Obvious In Block",
+				true,
+				GROUP_BLOCK,
+				1,
+				0.0,
+			},
+		},
 		&pointingPairTechnique{
 			&basicSolveTechnique{
 				"Pointing Pair Row",
