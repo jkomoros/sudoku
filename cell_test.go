@@ -226,18 +226,34 @@ func TestSymmetry(t *testing.T) {
 
 	cell := grid.Cell(3, 3)
 
-	partners := cell.SymmetricalPartners()
+	partner := cell.SymmetricalPartner(SYMMETRY_BOTH)
 
-	if !partners.sameAsRefs([]cellRef{{5, 5}, {3, 5}, {5, 3}}) {
-		t.Error("Got wrong symmetrical partners back for 3,3: ", partners)
+	if partner.Row != 5 || partner.Col != 5 {
+		t.Error("Got wrong symmetrical partner (both) for 3,3: ", partner)
+	}
+
+	partner = cell.SymmetricalPartner(SYMMETRY_HORIZONTAL)
+
+	if partner.Row != 5 || partner.Col != 3 {
+		t.Error("Got wrong symmetrical partner (horizontal) for 3,3: ", partner)
+	}
+
+	partner = cell.SymmetricalPartner(SYMMETRY_VERTICAL)
+
+	if partner.Row != 3 || partner.Col != 5 {
+		t.Error("Got wrong symmetrical partner (vertical) for 3,3: ", partner)
+	}
+
+	partner = cell.SymmetricalPartner(SYMMETRY_ANY)
+
+	if partner == nil {
+		t.Error("Didn't get back a symmerical partner for (any) for 3,3")
 	}
 
 	cell = grid.Cell(4, 4)
 
-	partners = cell.SymmetricalPartners()
-
-	if len(partners) != 0 {
-		t.Error("The middle cell had symmetrical partners when it shouldn't have: ", partners)
+	if cell.SymmetricalPartner(SYMMETRY_BOTH) != nil || cell.SymmetricalPartner(SYMMETRY_HORIZONTAL) != nil || cell.SymmetricalPartner(SYMMETRY_VERTICAL) != nil {
+		t.Error("Middle cell got a symmetrical partner for some kind of symmetry.")
 	}
 
 }

@@ -15,6 +15,15 @@ const DIAGRAM_CORNER = "+"
 const DIAGRAM_NUMBER = "•"
 const NUM_NEIGHBORS = (DIM-1)*3 - (BLOCK_DIM-1)*2
 
+type SymmetryType int
+
+const (
+	SYMMETRY_ANY = iota
+	SYMMETRY_HORIZONTAL
+	SYMMETRY_VERTICAL
+	SYMMETRY_BOTH
+)
+
 type Cell struct {
 	grid *Grid
 	//The number if it's explicitly set. Number() will return it if it's explicitly or implicitly set.
@@ -245,22 +254,30 @@ func (self *Cell) implicitNumber() int {
 	return result + 1
 }
 
-func (self *Cell) SymmetricalPartners() CellList {
-	var result CellList
-	//horizontal partner
-	if cell := self.grid.Cell(self.Row, DIM-self.Col-1); cell != self {
-		result = append(result, cell)
-	}
-	//Vertical partner
-	if cell := self.grid.Cell(DIM-self.Row-1, self.Col); cell != self {
-		result = append(result, cell)
-	}
-	//Diagonal partner
-	if cell := self.grid.Cell(DIM-self.Row-1, DIM-self.Col-1); cell != self {
-		result = append(result, cell)
+func (self *Cell) SymmetricalPartner(symmetry SymmetryType) *Cell {
+
+	if symmetry == SYMMETRY_ANY {
+		//TODO: don't chose a type of smmetry that doesn't have a partner
+		typesOfSymmetry := []SymmetryType{SYMMETRY_BOTH, SYMMETRY_HORIZONTAL, SYMMETRY_HORIZONTAL, SYMMETRY_VERTICAL}
+		symmetry = typesOfSymmetry[rand.Intn(len(typesOfSymmetry))]
 	}
 
-	return result
+	switch symmetry {
+	case SYMMETRY_BOTH:
+		if cell := self.grid.Cell(DIM-self.Row-1, DIM-self.Col-1); cell != self {
+			return cell
+		}
+	case SYMMETRY_HORIZONTAL:
+		if cell := self.grid.Cell(DIM-self.Row-1, self.Col); cell != self {
+			return cell
+		}
+	case SYMMETRY_VERTICAL:
+		if cell := self.grid.Cell(self.Row, DIM-self.Col-1); cell != self {
+			return cell
+		}
+	}
+
+	return nil
 }
 
 func (self *Cell) Neighbors() CellList {
