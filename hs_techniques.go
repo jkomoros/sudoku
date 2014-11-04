@@ -99,6 +99,33 @@ func init() {
 				5.0,
 			},
 		},
+		&obviousInCollectionTechnique{
+			&basicSolveTechnique{
+				"Obvious In Row",
+				true,
+				GROUP_ROW,
+				1,
+				0.0,
+			},
+		},
+		&obviousInCollectionTechnique{
+			&basicSolveTechnique{
+				"Obvious In Col",
+				true,
+				GROUP_COL,
+				1,
+				0.0,
+			},
+		},
+		&obviousInCollectionTechnique{
+			&basicSolveTechnique{
+				"Obvious In Block",
+				true,
+				GROUP_BLOCK,
+				1,
+				0.0,
+			},
+		},
 		&pointingPairTechnique{
 			&basicSolveTechnique{
 				"Pointing Pair Row",

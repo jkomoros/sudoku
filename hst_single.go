@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"strconv"
 )
@@ -14,10 +15,65 @@ type hiddenSingleTechnique struct {
 	*basicSolveTechnique
 }
 
+type obviousInCollectionTechnique struct {
+	*basicSolveTechnique
+}
+
 func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
 	cellArr := []*Cell{cell}
 	numArr := []int{num}
 	return &SolveStep{cellArr, nil, numArr, nil, technique}
+}
+
+func (self *obviousInCollectionTechnique) Description(step *SolveStep) string {
+	if len(step.TargetNums) == 0 {
+		return ""
+	}
+	num := step.TargetNums[0]
+	groupName := "<NONE>"
+	groupNumber := 0
+	switch self.groupType {
+	case GROUP_BLOCK:
+		groupName = "block"
+		groupNumber = step.TargetCells.Block()
+	case GROUP_COL:
+		groupName = "column"
+		groupNumber = step.TargetCells.Col()
+	case GROUP_ROW:
+		groupName = "row"
+		groupNumber = step.TargetCells.Row()
+	}
+
+	return fmt.Sprintf("%s is the only cell in %s %d that is unfilled, and it must be %d", step.TargetCells.Description(), groupName, groupNumber, num)
+}
+
+func (self *obviousInCollectionTechnique) Find(grid *Grid) []*SolveStep {
+	return obviousInCollection(grid, self, self.getter(grid))
+}
+
+func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellList) []*SolveStep {
+	indexes := rand.Perm(DIM)
+	var results []*SolveStep
+	for _, index := range indexes {
+		collection := collectionGetter(index)
+		openCells := collection.FilterByHasPossibilities()
+		if len(openCells) == 1 {
+			//Okay, only one cell in this collection has an opening, which must mean it has one possibilty.
+			cell := openCells[0]
+			possibilities := cell.Possibilities()
+			if len(possibilities) != 1 {
+				log.Fatalln("Expected the cell to only have one possibility")
+			} else {
+				possibility := possibilities[0]
+				step := newFillSolveStep(cell, possibility, technique)
+				if step.IsUseful(grid) {
+					results = append(results, step)
+				}
+			}
+
+		}
+	}
+	return results
 }
 
 func (self *nakedSingleTechnique) Description(step *SolveStep) string {
