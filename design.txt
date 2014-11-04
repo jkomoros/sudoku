@@ -86,6 +86,8 @@ TODO:
 
 * Now that difficulties coming ouf of analysis are roughly linear from 0.1 to 0.9, clamp SolveDirections.Difficulty () to 0 and 1.0 (report when they would have exceeded) and put in the tuned weights
 
+* NEXT STEP: Add, Test obviousInColumn and block
+
 * With current weights, many generated puzzles are coming back with very low weights--they only need a small number of techniques to solve them. Why is that?
 
 * Snap difficulties in SolveDirections.Difficulty, and alert of them there (we'll hear about them less)
