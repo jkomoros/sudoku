@@ -25,47 +25,37 @@ func GenerateGrid(symmetry SymmetryType) *Grid {
 	//Do a random fill of the grid
 	grid.Fill()
 
-	keepGoing := true
+	cells := make([]*Cell, len(grid.cells[:]))
 
-	for keepGoing {
-		//Unless we make a successful change this loop, don't bother continuing.
-		keepGoing = false
+	//TODO: remove cells to make the grid well-balanced.
 
-		cells := make([]*Cell, len(grid.cells[:]))
+	for i, j := range rand.Perm(len(grid.cells[:])) {
+		cells[i] = &grid.cells[j]
+	}
 
-		//TODO: remove cells to make the grid well-balanced.
-
-		for i, j := range rand.Perm(len(grid.cells[:])) {
-			cells[i] = &grid.cells[j]
+	for _, cell := range cells {
+		num := cell.Number()
+		if num == 0 {
+			continue
 		}
 
-		for _, cell := range cells {
-			num := cell.Number()
-			if num == 0 {
-				continue
-			}
+		var otherNum int
+		otherCell := cell.SymmetricalPartner(symmetry)
 
-			var otherNum int
-			otherCell := cell.SymmetricalPartner(symmetry)
+		if otherCell != nil {
+			otherNum = otherCell.Number()
+		}
 
+		//Unfill it.
+		cell.SetNumber(0)
+		if otherCell != nil {
+			otherCell.SetNumber(0)
+		}
+		if grid.HasMultipleSolutions() {
+			//Put it back in.
+			cell.SetNumber(num)
 			if otherCell != nil {
-				otherNum = otherCell.Number()
-			}
-
-			//Unfill it.
-			cell.SetNumber(0)
-			if otherCell != nil {
-				otherCell.SetNumber(0)
-			}
-			if grid.HasMultipleSolutions() {
-				//Put it back in.
-				cell.SetNumber(num)
-				if otherCell != nil {
-					otherCell.SetNumber(otherNum)
-				}
-			} else {
-				//we had a success! keep going around again.
-				keepGoing = true
+				otherCell.SetNumber(otherNum)
 			}
 		}
 	}
