@@ -4,7 +4,9 @@ import (
 	"dokugen"
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"strings"
 )
 
 //TODO: let people pass in a filename to export to.
@@ -16,6 +18,8 @@ type appOptions struct {
 	NUM             int
 	PRINT_STATS     bool
 	WALKTHROUGH     bool
+	RAW_SYMMETRY    string
+	SYMMETRY        sudoku.SymmetryType
 }
 
 func main() {
@@ -30,8 +34,23 @@ func main() {
 	flag.BoolVar(&options.PRINT_STATS, "p", false, "If provided, will print stats.")
 	flag.StringVar(&options.PUZZLE_TO_SOLVE, "s", "", "If provided, will solve the puzzle at the given filename and print solution.")
 	flag.BoolVar(&options.WALKTHROUGH, "w", false, "If provided, will print out a walkthrough to solve the provided puzzle.")
+	flag.StringVar(&options.RAW_SYMMETRY, "y", "vertical", "Valid values: 'none', 'both', 'horizontal', 'vertical")
 
 	flag.Parse()
+
+	options.RAW_SYMMETRY = strings.ToLower(options.RAW_SYMMETRY)
+	switch options.RAW_SYMMETRY {
+	case "none":
+		options.SYMMETRY = sudoku.SYMMETRY_NONE
+	case "both":
+		options.SYMMETRY = sudoku.SYMMETRY_BOTH
+	case "horizontal":
+		options.SYMMETRY = sudoku.SYMMETRY_HORIZONTAL
+	case "vertical":
+		options.SYMMETRY = sudoku.SYMMETRY_VERTICAL
+	default:
+		log.Fatal("Unknown symmetry flag: ", options.RAW_SYMMETRY)
+	}
 
 	output := os.Stdout
 
@@ -43,7 +62,7 @@ func main() {
 	if options.GENERATE {
 		for i := 0; i < options.NUM; i++ {
 			//TODO: allow the type of symmetry to be configured.
-			grid := sudoku.GenerateGrid(sudoku.SYMMETRY_NONE)
+			grid := sudoku.GenerateGrid(options.SYMMETRY)
 			fmt.Fprintln(output, grid.DataString())
 			fmt.Fprintln(output, "\n")
 			if options.PRINT_STATS {
