@@ -49,6 +49,7 @@ func TestStepsDescription(t *testing.T) {
 
 	grid := NewGrid()
 
+	//It's really brittle that we load techniques in this way... it changes every time we add a new early technique!
 	steps := SolveDirections{
 		&SolveStep{
 			CellList{
@@ -70,7 +71,7 @@ func TestStepsDescription(t *testing.T) {
 			},
 			IntSlice{1, 2},
 			nil,
-			Techniques[5],
+			Techniques[6],
 		},
 		&SolveStep{
 			CellList{
