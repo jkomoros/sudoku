@@ -4,6 +4,18 @@ import (
 	"testing"
 )
 
+func TestObviousInCollectionRow(t *testing.T) {
+	options := solveTechniqueTestHelperOptions{
+		targetCells: []cellRef{{2, 3}},
+		targetSame:  GROUP_ROW,
+		targetGroup: 2,
+		targetNums:  IntSlice([]int{7}),
+		description: "(2,3) is the only cell in row 2 that is unfilled, and it must be 7",
+	}
+	humanSolveTechniqueTestHelper(t, "obviousrow.sdk", "Obvious In Row", options)
+
+}
+
 func TestSolveOnlyLegalNumber(t *testing.T) {
 	grid := NewGrid()
 	//Load up a solved grid
