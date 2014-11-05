@@ -84,6 +84,8 @@ TODO:
 
 NEXT STEP:
 * Retrain difficulties with the fixed solver, they're clearly wrong.
+	* Start out with everything having a constant weight and then run a few times from there.
+		* Should that re-running from constant weight be baked in?
 
 * Does our use of the Rand convenience funcs in different go routines cause performance problems? (http://stackoverflow.com/questions/14298523/why-does-adding-concurrency-slow-down-this-golang-code)
 	* In any case we want to be able to test randomness.
