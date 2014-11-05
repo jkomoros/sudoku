@@ -3,6 +3,7 @@ package sudoku
 import (
 	"encoding/csv"
 	"log"
+	"math"
 	"os"
 	"strconv"
 )
@@ -400,8 +401,32 @@ func (self *basicSolveTechnique) IsFill() bool {
 	return self.isFill
 }
 
-func (self *basicSolveTechnique) Difficulty() float64 {
-	return self.difficulty
+func (self *basicSolveTechnique) difficultyHelper(baseDifficulty float64) float64 {
+	//Embedding structs should call into this to provide their own Difficulty
+	//If we have a non-default difficulty, just return that.
+
+	if self.difficulty != 0.0 {
+		return self.difficulty
+	}
+
+	//TODO: the default difficulties, as configured, will mean that SolveDirection's Difficulty() will almost always clamp to 1.0.
+	//They're only useful in terms of a reasonable picking of techniques when multiple apply.
+
+	groupMultiplier := 1.0
+
+	switch self.groupType {
+	case GROUP_ROW:
+		//Rows are easier to scan because most humans are used to reading LTR
+		groupMultiplier = 1.0
+	case GROUP_COL:
+		//Cols are easy to scan because the eye can move in one line
+		groupMultiplier = 1.05
+	case GROUP_BLOCK:
+		//Blocks are harder to notice because the eye has to zag at least twice.
+		groupMultiplier = 1.5
+	}
+
+	return groupMultiplier * math.Pow(baseDifficulty, float64(self.k))
 }
 
 func (self *basicSolveTechnique) getter(grid *Grid) func(int) CellList {

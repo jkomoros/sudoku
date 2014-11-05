@@ -10,6 +10,10 @@ type nakedSubsetTechnique struct {
 	*basicSolveTechnique
 }
 
+func (self *nakedSubsetTechnique) Difficulty() float64 {
+	return self.difficultyHelper(3.0)
+}
+
 func (self *nakedSubsetTechnique) Description(step *SolveStep) string {
 	if len(step.TargetNums) < self.k || len(step.PointerCells) < self.k {
 		return ""

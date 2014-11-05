@@ -10,6 +10,10 @@ type hiddenSubsetTechnique struct {
 	*basicSolveTechnique
 }
 
+func (self *hiddenSubsetTechnique) Difficulty() float64 {
+	return self.difficultyHelper(6.0)
+}
+
 func (self hiddenSubsetTechnique) Description(step *SolveStep) string {
 	if len(step.TargetNums) < self.k || len(step.PointerCells) < self.k {
 		return ""

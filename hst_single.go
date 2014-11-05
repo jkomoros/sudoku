@@ -25,6 +25,10 @@ func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep 
 	return &SolveStep{cellArr, nil, numArr, nil, technique}
 }
 
+func (self *obviousInCollectionTechnique) Difficulty() float64 {
+	return self.difficultyHelper(1.0)
+}
+
 func (self *obviousInCollectionTechnique) Description(step *SolveStep) string {
 	if len(step.TargetNums) == 0 {
 		return ""
@@ -76,6 +80,10 @@ func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter 
 	return results
 }
 
+func (self *nakedSingleTechnique) Difficulty() float64 {
+	return self.difficultyHelper(1.5)
+}
+
 func (self *nakedSingleTechnique) Description(step *SolveStep) string {
 	if len(step.TargetNums) == 0 {
 		return ""
@@ -101,6 +109,10 @@ func (self *nakedSingleTechnique) Find(grid *Grid) []*SolveStep {
 			results = append(results, result)
 		}
 	}
+}
+
+func (self *hiddenSingleTechnique) Difficulty() float64 {
+	return self.difficultyHelper(2.0)
 }
 
 func (self *hiddenSingleTechnique) Description(step *SolveStep) string {

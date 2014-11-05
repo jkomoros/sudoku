@@ -9,6 +9,10 @@ type pointingPairTechnique struct {
 	*basicSolveTechnique
 }
 
+func (self *pointingPairTechnique) Difficulty() float64 {
+	return self.difficultyHelper(2.5)
+}
+
 func (self *pointingPairTechnique) Description(step *SolveStep) string {
 	if len(step.TargetNums) == 0 {
 		return ""
