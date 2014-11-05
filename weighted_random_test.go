@@ -1,10 +1,12 @@
 package sudoku
 
 import (
+	"math/rand"
 	"testing"
 )
 
 func TestRandomWeightedIndex(t *testing.T) {
+
 	result := randomIndexWithNormalizedWeights([]float64{1.0, 0.0})
 	if result != 0 {
 		t.Log("Got wrong result with random weights")
@@ -33,14 +35,14 @@ func TestRandomWeightedIndex(t *testing.T) {
 		t.Error("A negative weight was considered normal.")
 	}
 
+	rand.Seed(1)
 	result = randomIndexWithInvertedWeights([]float64{0.0, 0.0, 1.0})
 	if result == 2 {
-		t.Log("Got the wrong index for inverted weights")
-		t.Fail()
+		t.Error("Got the wrong index for inverted weights")
 	}
 
-	//TODO: this test is inherently flaky
 	for i := 0; i < 10; i++ {
+		rand.Seed(int64(i))
 		result = randomIndexWithInvertedWeights([]float64{0.5, 1.0, 0.0})
 		if result == 1 {
 			t.Error("RandominzedIndexWithInvertedWeights returned wrong result")
