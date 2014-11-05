@@ -82,7 +82,9 @@ TODO:
 
 * Figure out why, when generating puzzles and having the stats printed out, we get so many with 0.968499 as the difficulty.
 	* Graph the difficulties for a large number of them and see if it follows any particular pattern.
-	* That number,interestingly, is the currently calibrated Constant term
+	* That number is showing up when the puzzle is unsolvable with the current suite of HumanSolve puzzles.
+
+* Running `dokugen -g -p -n 10` shows that the vast majority of puzzles just require Necessary In Row a whole bunch. :-/
 
 * Does our use of the Rand convenience funcs in different go routines cause performance problems? (http://stackoverflow.com/questions/14298523/why-does-adding-concurrency-slow-down-this-golang-code)
 	* In any case we want to be able to test randomness.
