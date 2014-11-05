@@ -118,10 +118,19 @@ func (self SolveDirections) Stats() []string {
 	}
 	var result []string
 
+	//TODO: use a standard divider across the codebase
+	divider := "-------------------------"
+
+	result = append(result, divider)
+	result = append(result, fmt.Sprintf("Difficulty : %f", self.Difficulty()))
+	result = append(result, divider)
+
 	//We want a stable ordering for technique counts.
 	for _, technique := range Techniques {
 		result = append(result, fmt.Sprintf("%s : %d", technique.Name(), techniqueCount[technique.Name()]))
 	}
+
+	result = append(result, divider)
 
 	return result
 }
