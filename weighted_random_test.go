@@ -39,6 +39,15 @@ func TestRandomWeightedIndex(t *testing.T) {
 		t.Fail()
 	}
 
+	//TODO: this test is inherently flaky
+	for i := 0; i < 10; i++ {
+		result = randomIndexWithInvertedWeights([]float64{0.5, 1.0, 0.0})
+		if result == 2 {
+			t.Error("RandominzedIndexWithInvertedWeights returned wrong result")
+			break
+		}
+	}
+
 	weightResult := normalizedWeights([]float64{2.0, 1.0, 1.0})
 	if weightResult[0] != 0.5 || weightResult[1] != 0.25 || weightResult[2] != 0.25 {
 		t.Log("Nomralized weights came back wrong")
