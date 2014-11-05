@@ -61,25 +61,19 @@ func main() {
 		return
 	}
 
-	if options.GENERATE {
-		for i := 0; i < options.NUM; i++ {
-			//TODO: allow the type of symmetry to be configured.
-			grid := sudoku.GenerateGrid(options.SYMMETRY, options.SYMMETRY_PROPORTION)
+	var grid *sudoku.Grid
+
+	for i := 0; i < options.NUM; i++ {
+		//TODO: allow the type of symmetry to be configured.
+		if options.GENERATE {
+			grid = sudoku.GenerateGrid(options.SYMMETRY, options.SYMMETRY_PROPORTION)
 			fmt.Fprintln(output, grid.DataString())
 			fmt.Fprintln(output, "\n")
-			if options.PRINT_STATS {
-				fmt.Fprintln(output, "\n")
-				fmt.Fprintln(output, grid.Difficulty())
-			}
+		} else if options.PUZZLE_TO_SOLVE != "" {
+			//TODO: detect if the load failed.
+			grid := sudoku.NewGrid()
+			grid.LoadFromFile(options.PUZZLE_TO_SOLVE)
 		}
-		return
-	}
-
-	if options.PUZZLE_TO_SOLVE != "" {
-		grid := sudoku.NewGrid()
-		grid.LoadFromFile(options.PUZZLE_TO_SOLVE)
-		//TODO: detect if the load failed.
-
 		//TODO: use of this option leads to a busy loop somewhere... Is it related to the generate-multiple-and-difficulty hang?
 		if options.WALKTHROUGH {
 			fmt.Fprintln(output, grid.HumanWalkthrough())
@@ -89,13 +83,12 @@ func main() {
 			fmt.Fprintln(output, "\n")
 			fmt.Fprintln(output, grid.Difficulty())
 		}
-		grid.Solve()
-		fmt.Fprintln(output, grid.DataString())
-
-		return
+		if options.PUZZLE_TO_SOLVE != "" {
+			grid.Solve()
+			fmt.Fprintln(output, grid.DataString())
+			//If we're asked to solve, n could only be 1 anyway.
+			return
+		}
 	}
-
-	//If we get to here, print defaults.
-	flag.PrintDefaults()
 
 }
