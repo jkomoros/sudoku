@@ -124,6 +124,8 @@ func (self SolveDirections) Stats() []string {
 	result = append(result, divider)
 	result = append(result, fmt.Sprintf("Difficulty : %f", self.Difficulty()))
 	result = append(result, divider)
+	result = append(result, fmt.Sprintf("Step count: %d", len(self)))
+	result = append(result, divider)
 
 	//We want a stable ordering for technique counts.
 	for _, technique := range Techniques {
