@@ -82,6 +82,9 @@ func main() {
 		if options.PRINT_STATS {
 			fmt.Fprintln(output, "\n")
 			fmt.Fprintln(output, grid.Difficulty())
+			fmt.Fprintln(output, "\n")
+			directions := grid.HumanSolution()
+			fmt.Fprintln(output, strings.Join(directions.Stats(), "\n"))
 		}
 		if options.PUZZLE_TO_SOLVE != "" {
 			grid.Solve()
