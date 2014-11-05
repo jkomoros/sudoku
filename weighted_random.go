@@ -55,13 +55,11 @@ func normalizedWeights(weights []float64) []float64 {
 }
 
 func randomIndexWithInvertedWeights(invertedWeights []float64) int {
-	//Convert it to 0...1 to make it easy to invert
-	normalizedInvertedWeights := normalizedWeights(invertedWeights)
 	weights := make([]float64, len(invertedWeights))
 
 	//Invert
-	for i, weight := range normalizedInvertedWeights {
-		weights[i] = 1.0 - weight
+	for i, weight := range invertedWeights {
+		weights[i] = weight * -1
 	}
 
 	//But now you need to renormalize since they won't sum to 1.
