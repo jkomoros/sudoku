@@ -80,9 +80,7 @@ TODO:
 
 * When generating grids, keep a temporary directory of sdk files representing puzzles generated but not vended. When asked for a new puzzle, we first see if we have any in the unvended list that are appropriate difficulty.
 
-* Figure out why, when generating puzzles and having the stats printed out, we get so many with 0.968499 as the difficulty.
-	* Graph the difficulties for a large number of them and see if it follows any particular pattern.
-	* That number is showing up when the puzzle is unsolvable with the current suite of HumanSolve puzzles.
+* Graph the difficulties for a large number of generated puzzles and see if it follows any particular pattern.
 
 * Running `dokugen -g -p -n 10` shows that the vast majority of puzzles just require Necessary In Row a whole bunch. :-/
 

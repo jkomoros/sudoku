@@ -171,6 +171,11 @@ func (self SolveDirections) Difficulty() float64 {
 	//This method assumes the weights have been calibrated empirically to give scores between 0.0 and 1.0
 	//without normalization here.
 
+	if len(self) == 0 {
+		//The puzzle was not able to be solved, apparently.
+		return 1.0
+	}
+
 	accum := difficultyConstant
 	for _, step := range self {
 		accum += step.Technique.Difficulty()
