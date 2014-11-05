@@ -182,12 +182,12 @@ func (self SolveDirections) Difficulty() float64 {
 	}
 
 	if accum < 0.0 {
-		log.Println("Accumuldated difficulty snapped to 0.0:", accum, strings.Join(self.Stats(), "\n"))
+		log.Println("Accumuldated difficulty snapped to 0.0:", accum)
 		accum = 0.0
 	}
 
 	if accum > 1.0 {
-		log.Println("Accumulated difficulty snapped to 1.0:", accum, strings.Join(self.Stats(), "\n"))
+		log.Println("Accumulated difficulty snapped to 1.0:", accum)
 	}
 
 	return accum
