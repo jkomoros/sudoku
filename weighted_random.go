@@ -79,7 +79,7 @@ func randomIndexWithNormalizedWeights(weights []float64) int {
 	var counter float64
 	for i, weight := range weights {
 		counter += weight
-		if sample <= weight {
+		if sample <= counter {
 			return i
 		}
 	}
