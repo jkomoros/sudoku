@@ -188,6 +188,7 @@ func (self SolveDirections) Difficulty() float64 {
 
 	if accum > 1.0 {
 		log.Println("Accumulated difficulty snapped to 1.0:", accum)
+		accum = 1.0
 	}
 
 	return accum
