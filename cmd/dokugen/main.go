@@ -68,7 +68,6 @@ func main() {
 		if options.GENERATE {
 			grid = sudoku.GenerateGrid(options.SYMMETRY, options.SYMMETRY_PROPORTION)
 			fmt.Fprintln(output, grid.DataString())
-			fmt.Fprintln(output, "\n")
 		} else if options.PUZZLE_TO_SOLVE != "" {
 			//TODO: detect if the load failed.
 			grid := sudoku.NewGrid()
@@ -77,12 +76,9 @@ func main() {
 		//TODO: use of this option leads to a busy loop somewhere... Is it related to the generate-multiple-and-difficulty hang?
 		if options.WALKTHROUGH {
 			fmt.Fprintln(output, grid.HumanWalkthrough())
-			fmt.Fprintln(output, "\n")
 		}
 		if options.PRINT_STATS {
-			fmt.Fprintln(output, "\n")
 			fmt.Fprintln(output, grid.Difficulty())
-			fmt.Fprintln(output, "\n")
 			directions := grid.HumanSolution()
 			fmt.Fprintln(output, strings.Join(directions.Stats(), "\n"))
 		}
