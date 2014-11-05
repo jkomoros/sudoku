@@ -85,6 +85,7 @@ TODO:
 * Running `dokugen -g -p -n 10` shows that the vast majority of puzzles just require Necessary In Row a whole bunch. :-/
 	* This occurs even when we generate with horizontal symmetry. That's really odd and shouldn't be happening.
 	* And it doesn't happen for puzzles from the production database.
+	* After some investigation, it looks like randomIndexWithNormalizedWeights is being passed unnormalized weights, so it's disproportionately picking hte first one--which happens to be necessary in row.
 
 * Does our use of the Rand convenience funcs in different go routines cause performance problems? (http://stackoverflow.com/questions/14298523/why-does-adding-concurrency-slow-down-this-golang-code)
 	* In any case we want to be able to test randomness.
