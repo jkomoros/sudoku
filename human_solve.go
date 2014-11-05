@@ -110,13 +110,20 @@ func (self *SolveStep) normalize() {
 	self.PointerNums.Sort()
 }
 
-func (self SolveDirections) summary() string {
+func (self SolveDirections) Stats() []string {
 	//TODO: test this.
 	techniqueCount := make(map[string]int)
 	for _, step := range self {
 		techniqueCount[step.Technique.Name()] += 1
 	}
-	return fmt.Sprint(techniqueCount)
+	var result []string
+
+	//We want a stable ordering for technique counts.
+	for _, technique := range Techniques {
+		result = append(result, fmt.Sprintf("%s : %d", technique.Name(), techniqueCount[technique.Name()]))
+	}
+
+	return result
 }
 
 func (self SolveDirections) Description() []string {
@@ -161,12 +168,12 @@ func (self SolveDirections) Difficulty() float64 {
 	}
 
 	if accum < 0.0 {
-		log.Println("Accumuldated difficulty snapped to 0.0:", accum, self.summary())
+		log.Println("Accumuldated difficulty snapped to 0.0:", accum, strings.Join(self.Stats(), "\n"))
 		accum = 0.0
 	}
 
 	if accum > 1.0 {
-		log.Println("Accumulated difficulty snapped to 1.0:", accum, self.summary())
+		log.Println("Accumulated difficulty snapped to 1.0:", accum, strings.Join(self.Stats(), "\n"))
 	}
 
 	return accum
