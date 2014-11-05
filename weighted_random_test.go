@@ -22,6 +22,7 @@ func TestRandomWeightedIndex(t *testing.T) {
 		t.Log("Should have gotten last item in random weights; we didn't")
 		t.Fail()
 	}
+
 	if weightsNormalized([]float64{1.0, 0.000001}) {
 		t.Log("thought weights were normalized when they weren't")
 		t.Fail()
@@ -80,5 +81,19 @@ func TestRandomWeightedIndex(t *testing.T) {
 	if result != 2 {
 		t.Log("Should have gotten last item in random weights; we didn't")
 		t.Fail()
+	}
+	for i := 0; i < 100; i++ {
+		rand.Seed(int64(i))
+		result = randomIndexWithWeights([]float64{1.0, 10.0, 0.5, -1.0, 0.0, 6.4})
+		if result == 3 {
+			t.Error("Random index with weights picked wrong index with seed ", i)
+		}
+	}
+	for i := 0; i < 100; i++ {
+		rand.Seed(int64(i))
+		result = randomIndexWithWeights([]float64{1.0, 10.0, 0.5, 1.0, 0.0, 6.4, 0.0})
+		if result == 4 || result == 6 {
+			t.Error("Random index with weights that ended in zero picked wrong index with seed ", i)
+		}
 	}
 }
