@@ -42,7 +42,7 @@ func TestRandomWeightedIndex(t *testing.T) {
 	//TODO: this test is inherently flaky
 	for i := 0; i < 10; i++ {
 		result = randomIndexWithInvertedWeights([]float64{0.5, 1.0, 0.0})
-		if result == 2 {
+		if result == 1 {
 			t.Error("RandominzedIndexWithInvertedWeights returned wrong result")
 			break
 		}
