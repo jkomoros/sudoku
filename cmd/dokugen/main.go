@@ -12,14 +12,15 @@ import (
 //TODO: let people pass in a filename to export to.
 
 type appOptions struct {
-	GENERATE        bool
-	HELP            bool
-	PUZZLE_TO_SOLVE string
-	NUM             int
-	PRINT_STATS     bool
-	WALKTHROUGH     bool
-	RAW_SYMMETRY    string
-	SYMMETRY        sudoku.SymmetryType
+	GENERATE            bool
+	HELP                bool
+	PUZZLE_TO_SOLVE     string
+	NUM                 int
+	PRINT_STATS         bool
+	WALKTHROUGH         bool
+	RAW_SYMMETRY        string
+	SYMMETRY            sudoku.SymmetryType
+	SYMMETRY_PROPORTION float64
 }
 
 func main() {
@@ -35,6 +36,7 @@ func main() {
 	flag.StringVar(&options.PUZZLE_TO_SOLVE, "s", "", "If provided, will solve the puzzle at the given filename and print solution.")
 	flag.BoolVar(&options.WALKTHROUGH, "w", false, "If provided, will print out a walkthrough to solve the provided puzzle.")
 	flag.StringVar(&options.RAW_SYMMETRY, "y", "vertical", "Valid values: 'none', 'both', 'horizontal', 'vertical")
+	flag.Float64Var(&options.SYMMETRY_PROPORTION, "r", 1.0, "What proportion of cells should be filled according to symmetry")
 
 	flag.Parse()
 
@@ -59,25 +61,19 @@ func main() {
 		return
 	}
 
-	if options.GENERATE {
-		for i := 0; i < options.NUM; i++ {
-			//TODO: allow the type of symmetry to be configured.
-			grid := sudoku.GenerateGrid(options.SYMMETRY)
+	var grid *sudoku.Grid
+
+	for i := 0; i < options.NUM; i++ {
+		//TODO: allow the type of symmetry to be configured.
+		if options.GENERATE {
+			grid = sudoku.GenerateGrid(options.SYMMETRY, options.SYMMETRY_PROPORTION)
 			fmt.Fprintln(output, grid.DataString())
 			fmt.Fprintln(output, "\n")
-			if options.PRINT_STATS {
-				fmt.Fprintln(output, "\n")
-				fmt.Fprintln(output, grid.Difficulty())
-			}
+		} else if options.PUZZLE_TO_SOLVE != "" {
+			//TODO: detect if the load failed.
+			grid := sudoku.NewGrid()
+			grid.LoadFromFile(options.PUZZLE_TO_SOLVE)
 		}
-		return
-	}
-
-	if options.PUZZLE_TO_SOLVE != "" {
-		grid := sudoku.NewGrid()
-		grid.LoadFromFile(options.PUZZLE_TO_SOLVE)
-		//TODO: detect if the load failed.
-
 		//TODO: use of this option leads to a busy loop somewhere... Is it related to the generate-multiple-and-difficulty hang?
 		if options.WALKTHROUGH {
 			fmt.Fprintln(output, grid.HumanWalkthrough())
@@ -87,13 +83,12 @@ func main() {
 			fmt.Fprintln(output, "\n")
 			fmt.Fprintln(output, grid.Difficulty())
 		}
-		grid.Solve()
-		fmt.Fprintln(output, grid.DataString())
-
-		return
+		if options.PUZZLE_TO_SOLVE != "" {
+			grid.Solve()
+			fmt.Fprintln(output, grid.DataString())
+			//If we're asked to solve, n could only be 1 anyway.
+			return
+		}
 	}
-
-	//If we get to here, print defaults.
-	flag.PrintDefaults()
 
 }
