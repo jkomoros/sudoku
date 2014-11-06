@@ -402,7 +402,7 @@ func TestGridLoad(t *testing.T) {
 
 func TestAdvancedSolve(t *testing.T) {
 	grid := NewGrid()
-	grid.LoadFromFile("advancedtestgrid.sdk")
+	grid.LoadFromFile(puzzlePath("advancedtestgrid.sdk"))
 
 	if grid.DataString() != ADVANCED_TEST_GRID {
 		t.Log("Advanced grid didn't survive a roundtrip to DataString")
