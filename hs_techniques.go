@@ -2,8 +2,10 @@ package sudoku
 
 import (
 	"encoding/csv"
+	"fmt"
 	"log"
 	"math"
+	"math/rand"
 	"os"
 	"strconv"
 )
@@ -55,6 +57,11 @@ type basicSolveTechnique struct {
 	//Used for generating descriptions in some sub-structs.
 	k          int
 	difficulty float64
+}
+
+//TODO: this should be defined in a separate file.
+type guessTechnique struct {
+	*basicSolveTechnique
 }
 
 func init() {
@@ -312,11 +319,23 @@ func init() {
 		},
 	}
 
+	GuessTechnique = &guessTechnique{
+		&basicSolveTechnique{
+			"Guess",
+			true,
+			GROUP_NONE,
+			1,
+			0.0,
+		},
+	}
+
 	Techniques = append(CheapTechniques, ExpensiveTechniques...)
+
+	AllTechniques = append(Techniques, GuessTechnique)
 
 	techniquesByName = make(map[string]SolveTechnique)
 
-	for _, technique := range Techniques {
+	for _, technique := range AllTechniques {
 		techniquesByName[technique.Name()] = technique
 	}
 
@@ -451,6 +470,38 @@ func (self *basicSolveTechnique) getter(grid *Grid) func(int) CellList {
 			return nil
 		}
 	}
+}
+
+//TODO: test this
+func (self *guessTechnique) Difficulty() float64 {
+	return self.difficultyHelper(1000.0)
+}
+
+func (self *guessTechnique) Description(step *SolveStep) string {
+	return fmt.Sprintf("we have no other moves to make, so we randomly pick a cell with the smallest number of possibilities, %s, and pick one of its possibilities", step.TargetCells.Description())
+}
+
+func (self *guessTechnique) Find(grid *Grid) []*SolveStep {
+
+	getter := grid.queue.NewGetter()
+
+	var results []*SolveStep
+
+	for {
+		obj := getter.Get()
+		if obj == nil {
+			break
+		}
+		//Convert RankedObject to a cell
+		cell := obj.(*Cell)
+		possibilities := cell.Possibilities()
+		step := newFillSolveStep(cell, possibilities[rand.Intn(len(possibilities))], self)
+		if step.IsUseful(grid) {
+			results = append(results, step)
+		}
+	}
+
+	return results
 }
 
 //This is useful both for hidden and naked subset techniques

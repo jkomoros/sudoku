@@ -14,6 +14,11 @@ var Techniques []SolveTechnique
 var CheapTechniques []SolveTechnique
 var ExpensiveTechniques []SolveTechnique
 
+var GuessTechnique SolveTechnique
+
+//EVERY technique, even the weird one like Guess
+var AllTechniques []SolveTechnique
+
 //Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
 const MAX_DIFFICULTY_ITERATIONS = 50
 
@@ -128,7 +133,7 @@ func (self SolveDirections) Stats() []string {
 	result = append(result, divider)
 
 	//We want a stable ordering for technique counts.
-	for _, technique := range Techniques {
+	for _, technique := range AllTechniques {
 		result = append(result, fmt.Sprintf("%s : %d", technique.Name(), techniqueCount[technique.Name()]))
 	}
 
