@@ -91,8 +91,6 @@ NEXT STEP:
 	* In any case we want to be able to test randomness.
 	* I tried it in Solve and was finding that generating a new r per thread was actually taking 110% of the time of just using the global one, oddly...
 
-* In generator, make it so it's not STRICT about symmetry (the puzzles look too perfect now)
-
 * Make it so the docs generated from dokugen are all useful.
 
 * REdo of threaded solving
