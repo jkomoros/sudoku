@@ -97,7 +97,7 @@ func init() {
 				true,
 				GROUP_NONE,
 				1,
-				5.0,
+				0.0,
 			},
 		},
 		&obviousInCollectionTechnique{
@@ -133,7 +133,7 @@ func init() {
 				false,
 				GROUP_ROW,
 				2,
-				25.0,
+				0.0,
 			},
 		},
 		&pointingPairTechnique{
@@ -142,7 +142,7 @@ func init() {
 				false,
 				GROUP_COL,
 				2,
-				25.0,
+				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -151,7 +151,7 @@ func init() {
 				false,
 				GROUP_COL,
 				2,
-				75.0,
+				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -160,7 +160,7 @@ func init() {
 				false,
 				GROUP_ROW,
 				2,
-				75.0,
+				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -169,7 +169,7 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				2,
-				85.0,
+				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -178,7 +178,7 @@ func init() {
 				false,
 				GROUP_COL,
 				3,
-				125.0,
+				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -187,7 +187,7 @@ func init() {
 				false,
 				GROUP_ROW,
 				3,
-				125.0,
+				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -196,7 +196,7 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				3,
-				140.0,
+				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -205,7 +205,7 @@ func init() {
 				false,
 				GROUP_COL,
 				4,
-				250.0,
+				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -214,7 +214,7 @@ func init() {
 				false,
 				GROUP_ROW,
 				4,
-				250.0,
+				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -223,7 +223,7 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				4,
-				280.0,
+				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -232,7 +232,7 @@ func init() {
 				false,
 				GROUP_ROW,
 				2,
-				300.0,
+				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -241,7 +241,7 @@ func init() {
 				false,
 				GROUP_COL,
 				2,
-				300.0,
+				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -250,7 +250,7 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				2,
-				250.0,
+				0.0,
 			},
 		},
 	}
@@ -262,7 +262,7 @@ func init() {
 				false,
 				GROUP_ROW,
 				3,
-				600.0,
+				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -271,7 +271,7 @@ func init() {
 				false,
 				GROUP_COL,
 				3,
-				600.0,
+				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -280,7 +280,7 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				3,
-				500.0,
+				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -289,7 +289,7 @@ func init() {
 				false,
 				GROUP_ROW,
 				4,
-				1200.0,
+				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -298,7 +298,7 @@ func init() {
 				false,
 				GROUP_COL,
 				4,
-				1200.0,
+				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -307,7 +307,7 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				4,
-				1000.0,
+				0.0,
 			},
 		},
 	}
