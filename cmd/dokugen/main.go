@@ -70,9 +70,15 @@ func main() {
 			fmt.Fprintln(output, grid.DataString())
 		} else if options.PUZZLE_TO_SOLVE != "" {
 			//TODO: detect if the load failed.
-			grid := sudoku.NewGrid()
+			grid = sudoku.NewGrid()
 			grid.LoadFromFile(options.PUZZLE_TO_SOLVE)
 		}
+
+		if grid == nil {
+			//No grid to do anything with.
+			log.Fatalln("No grid loaded.")
+		}
+
 		//TODO: use of this option leads to a busy loop somewhere... Is it related to the generate-multiple-and-difficulty hang?
 		if options.WALKTHROUGH {
 			fmt.Fprintln(output, grid.HumanWalkthrough())
