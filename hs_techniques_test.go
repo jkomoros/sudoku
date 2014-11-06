@@ -44,8 +44,17 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 	}
 }
 
+type solveTechniqueMatchMode int
+
+const (
+	solveTechniqueMatchModeAll = iota
+	solveTechniqueMatchModeAny
+)
+
 type solveTechniqueTestHelperOptions struct {
-	transpose    bool
+	transpose bool
+	//Whether the descriptions of cells are a list of legal possible individual values, or must all match.
+	matchMode    solveTechniqueMatchMode
 	targetCells  []cellRef
 	pointerCells []cellRef
 	targetNums   IntSlice
@@ -83,45 +92,48 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		log.Println(step)
 	}
 
-	if options.targetCells != nil {
-		if !step.TargetCells.sameAsRefs(options.targetCells) {
-			t.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
-		}
-	}
-	if options.pointerCells != nil {
-		if !step.PointerCells.sameAsRefs(options.pointerCells) {
-			t.Error(techniqueName, " had the wrong pointer cells: ", step.PointerCells)
-		}
-	}
+	if options.matchMode == solveTechniqueMatchModeAll {
 
-	switch options.targetSame {
-	case GROUP_ROW:
-		if !step.TargetCells.SameRow() || step.TargetCells.Row() != options.targetGroup {
-			t.Error("The target cells in the ", techniqueName, " were wrong row :", step.TargetCells.Row())
+		if options.targetCells != nil {
+			if !step.TargetCells.sameAsRefs(options.targetCells) {
+				t.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
+			}
 		}
-	case GROUP_BLOCK:
-		if !step.TargetCells.SameBlock() || step.TargetCells.Block() != options.targetGroup {
-			t.Error("The target cells in the ", techniqueName, " were wrong block :", step.TargetCells.Block())
+		if options.pointerCells != nil {
+			if !step.PointerCells.sameAsRefs(options.pointerCells) {
+				t.Error(techniqueName, " had the wrong pointer cells: ", step.PointerCells)
+			}
 		}
-	case GROUP_COL:
-		if !step.TargetCells.SameCol() || step.TargetCells.Col() != options.targetGroup {
-			t.Error("The target cells in the ", techniqueName, " were wrong col :", step.TargetCells.Col())
-		}
-	case GROUP_NONE:
-		//Do nothing
-	default:
-		t.Error("human solve technique helper error: unsupported group type: ", options.targetSame)
-	}
 
-	if options.targetNums != nil {
-		if !step.TargetNums.SameContentAs(options.targetNums) {
-			t.Error(techniqueName, " found the wrong numbers: ", step.TargetNums)
+		switch options.targetSame {
+		case GROUP_ROW:
+			if !step.TargetCells.SameRow() || step.TargetCells.Row() != options.targetGroup {
+				t.Error("The target cells in the ", techniqueName, " were wrong row :", step.TargetCells.Row())
+			}
+		case GROUP_BLOCK:
+			if !step.TargetCells.SameBlock() || step.TargetCells.Block() != options.targetGroup {
+				t.Error("The target cells in the ", techniqueName, " were wrong block :", step.TargetCells.Block())
+			}
+		case GROUP_COL:
+			if !step.TargetCells.SameCol() || step.TargetCells.Col() != options.targetGroup {
+				t.Error("The target cells in the ", techniqueName, " were wrong col :", step.TargetCells.Col())
+			}
+		case GROUP_NONE:
+			//Do nothing
+		default:
+			t.Error("human solve technique helper error: unsupported group type: ", options.targetSame)
 		}
-	}
 
-	if options.pointerNums != nil {
-		if !step.PointerNums.SameContentAs(options.pointerNums) {
-			t.Error(techniqueName, "found the wrong numbers:", step.PointerNums)
+		if options.targetNums != nil {
+			if !step.TargetNums.SameContentAs(options.targetNums) {
+				t.Error(techniqueName, " found the wrong numbers: ", step.TargetNums)
+			}
+		}
+
+		if options.pointerNums != nil {
+			if !step.PointerNums.SameContentAs(options.pointerNums) {
+				t.Error(techniqueName, "found the wrong numbers:", step.PointerNums)
+			}
 		}
 	}
 
