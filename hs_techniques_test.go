@@ -62,6 +62,7 @@ type solveTechniqueTestHelperOptions struct {
 	targetSame   cellGroupType
 	targetGroup  int
 	description  string
+	descriptions []string
 	debugPrint   bool
 }
 
@@ -93,6 +94,8 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 	}
 
 	if options.matchMode == solveTechniqueMatchModeAll {
+
+		//All must match
 
 		if options.targetCells != nil {
 			if !step.TargetCells.sameAsRefs(options.targetCells) {
@@ -135,6 +138,50 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 				t.Error(techniqueName, "found the wrong numbers:", step.PointerNums)
 			}
 		}
+	} else if options.matchMode == solveTechniqueMatchModeAny {
+
+		foundMatch := false
+
+		if options.targetCells != nil {
+			foundMatch = false
+			for _, ref := range options.targetCells {
+				for _, cell := range step.TargetCells {
+					if ref.Cell(grid) == cell {
+						//TODO: break out early
+						foundMatch = true
+					}
+				}
+			}
+			if !foundMatch {
+				t.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
+			}
+		}
+		if options.pointerCells != nil {
+			t.Error("Pointer cells in match mode any not yet supported.")
+		}
+
+		if options.targetSame != GROUP_NONE {
+			t.Error("Target Same in match mode any not yet supported.")
+		}
+
+		if options.targetNums != nil {
+			foundMatch = false
+			for _, targetNum := range options.targetNums {
+				for _, num := range step.TargetNums {
+					if targetNum == num {
+						foundMatch = true
+						//TODO: break early here.
+					}
+				}
+			}
+			if !foundMatch {
+				t.Error(techniqueName, " had the wrong target nums: ", step.TargetNums)
+			}
+		}
+
+		if options.pointerNums != nil {
+			t.Error("Pointer nums in match mode any not yet supported.")
+		}
 	}
 
 	if options.description != "" {
@@ -143,6 +190,18 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		description := solver.Description(step)
 		if description != options.description {
 			t.Error("Wrong description for ", techniqueName, ". Got:*", description, "* expected: *", options.description, "*")
+		}
+	} else if options.descriptions != nil {
+		foundMatch := false
+		step.normalize()
+		description := solver.Description(step)
+		for _, targetDescription := range options.descriptions {
+			if description == targetDescription {
+				foundMatch = true
+			}
+		}
+		if !foundMatch {
+			t.Error("No descriptions matched for ", techniqueName, ". Got:*", description)
 		}
 	}
 
