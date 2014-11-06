@@ -61,7 +61,10 @@ type solveTechniqueTestHelperOptions struct {
 	pointerNums  IntSlice
 	targetSame   cellGroupType
 	targetGroup  int
-	description  string
+	//If description provided, the description MUST match.
+	description string
+	//If descriptions provided, ONE of the descriptions must match.
+	//generally used in conjunction with solveTechniqueMatchModeAny.
 	descriptions []string
 	debugPrint   bool
 }
