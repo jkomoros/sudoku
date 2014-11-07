@@ -51,7 +51,11 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 
 		queue.In <- self.Copy()
 
-		incomingSolutions := make(chan *Grid)
+		//In the past this wasn't buffered, but then when we finished early other items would try to go into it
+		//and block, which prevented them from looping back up and getting the signal to shut down.
+		//Since there's only a known number of threads, we'll make sure they all ahve a place to leave their work
+		//without blocking so they can get the signal to shut down.
+		incomingSolutions := make(chan *Grid, NUM_SOLVER_THREADS)
 
 		//Using a pattern for closing fan in style receivers from http://blog.golang.org/pipelines
 		var wg sync.WaitGroup
@@ -101,6 +105,9 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 				break OuterLoop
 			}
 		}
+
+		//There might be some things waiting to go into incomingSolutions here, but because it has a slot
+		//for every thread to be buffered, it's OK, we can just stop now.
 
 		queue.Exit <- true
 
