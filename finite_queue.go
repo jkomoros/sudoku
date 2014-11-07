@@ -145,6 +145,8 @@ func (self *SyncedFiniteQueue) workLoop() {
 		return nil
 	}
 
+	exiting := false
+
 	for {
 		firstItem := self.queue.Get()
 		itemSent := false
@@ -152,8 +154,12 @@ func (self *SyncedFiniteQueue) workLoop() {
 		//We can take in new things, send out smallest one, or exit.
 		select {
 		case <-self.Exit:
+			exiting = true
 			close(self.Out)
-			return
+			if self.IsDone() {
+				//Drain all of the incoming ones?
+				return
+			}
 		case incoming := <-self.In:
 			self.queue.Insert(incoming)
 			self.items++
@@ -161,8 +167,11 @@ func (self *SyncedFiniteQueue) workLoop() {
 			self.activeItems--
 			if self.IsDone() {
 				self.done <- true
+				if exiting {
+					return
+				}
 			}
-		case when(firstItem != nil, self.Out) <- firstItem:
+		case when(firstItem != nil && !exiting, self.Out) <- firstItem:
 			itemSent = true
 			self.items--
 			self.activeItems++
