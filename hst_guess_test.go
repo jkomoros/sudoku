@@ -4,8 +4,9 @@ import (
 	"testing"
 )
 
-//TODO: test guess technique here
 func TestGuessTechnique(t *testing.T) {
+
+	//TODO: this test doesn't exercise whether pointerNums is the right value. The test case to do so would be too hard.
 	options := solveTechniqueTestHelperOptions{
 		matchMode:   solveTechniqueMatchModeAny,
 		targetCells: []cellRef{{0, 0}, {1, 0}},

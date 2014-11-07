@@ -31,7 +31,9 @@ func (self *guessTechnique) Find(grid *Grid) []*SolveStep {
 		//Convert RankedObject to a cell
 		cell := obj.(*Cell)
 		possibilities := cell.Possibilities()
-		step := newFillSolveStep(cell, possibilities[rand.Intn(len(possibilities))], self)
+		num := possibilities[rand.Intn(len(possibilities))]
+		step := newFillSolveStep(cell, num, self)
+		step.PointerNums = IntSlice(possibilities).Difference(IntSlice{num})
 		if step.IsUseful(grid) {
 			results = append(results, step)
 		}
