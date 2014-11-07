@@ -45,6 +45,9 @@ func TestHumanSolve(t *testing.T) {
 
 }
 
+//TODO: Test Branch point solve
+//Test that applying the solution steps results in the solved puzzle correctly. (to test that we throw out the wrong branch steps)
+
 func TestStepsDescription(t *testing.T) {
 
 	grid := NewGrid()
