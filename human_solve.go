@@ -250,22 +250,25 @@ func (self *Grid) HumanSolution() SolveDirections {
 	return clone.HumanSolve()
 }
 
+type branchPoint struct {
+	//The point at which we branched for a guess. non-nil if we are in a branch.
+	grid *Grid
+	//The step we'll apply to get us into the branch point.
+	step *SolveStep
+	//Ther other numbers to try from the branch point.
+	otherNums IntSlice
+	//The steps we've taken since the branch point.
+	branchSteps []*SolveStep
+	//The earlier branch point
+	previousBranchPoint *branchPoint
+	nextBranchPoint     *branchPoint
+}
+
 func (self *Grid) HumanSolve() SolveDirections {
 
 	var results []*SolveStep
 
-	//TODO: this supports just a single branch point, but in theory we should be able to branch an arbitrary number of times if necessary.
-	//The point at which we branched for a guess. non-nil if we are in a branch.
-	var branchPoint *Grid
-
-	//The step we'll apply to get us into the branch point.
-	var branchPointStep *SolveStep
-
-	//Ther other numbers to try from the branch point.
-	var otherNums IntSlice
-
-	//The steps we've taken since the branch point.
-	var branchSteps []*SolveStep
+	var branch *branchPoint
 
 	//Note: trying these all in parallel is much slower (~15x) than doing them in sequence.
 	//The reason is that in sequence we bailed early as soon as we found one step; now we try them all.
@@ -274,30 +277,31 @@ func (self *Grid) HumanSolve() SolveDirections {
 
 		var possibilities []*SolveStep
 
-		if branchPoint != nil && self.Invalid() {
+		if branch != nil && self.Invalid() {
 			//We're in a branch, and got to a point where we found an invalidity.
 			//We chose the wrong branch. We should unwind to the branch point and go down the other branch.
 
 			//Unwind ourselves
-			self.Load(branchPoint.DataString())
+			self.Load(branch.grid.DataString())
 
 			//Throwout the steps down the wrong branch we took.
-			branchSteps = nil
+			branch.branchSteps = nil
 
-			if len(otherNums) > 0 {
+			if len(branch.otherNums) > 0 {
 
 				//Pop off the nextNum to do
-				nextNum := otherNums[0]
-				otherNums = otherNums[1:]
+				nextNum := branch.otherNums[0]
+				branch.otherNums = branch.otherNums[1:]
 
 				//Stuff it into the TargetNums for the branch step.
-				branchPointStep.TargetNums = IntSlice{nextNum}
+				branch.step.TargetNums = IntSlice{nextNum}
 
-				//Stuff the possibility list with the mangled branchPointStep.
-				possibilities = []*SolveStep{branchPointStep}
+				//Stuff the possibility list with the mangled branch.step.
+				possibilities = []*SolveStep{branch.step}
 			} else {
 				//Well, crap. We're out of luck, nothing more for us to do.
-				//TODO: pick a different guess operation at this grid state.
+				//TODO: pick a DIFFERENT guess operation at this grid state.
+				//TODO: we could also unravel this sub-branch and go up to a higher branching level.
 			}
 
 		} else {
@@ -315,35 +319,38 @@ func (self *Grid) HumanSolve() SolveDirections {
 			if len(possibilities) == 0 {
 				//Hmm, didn't find any possivbilities. We're getting to be out of options...
 
-				if branchPoint == nil {
-					//Try to guess as a hail mary
-					possibilities = runTechniques([]SolveTechnique{GuessTechnique}, self)
+				//Try to guess as a hail mary
+				possibilities = runTechniques([]SolveTechnique{GuessTechnique}, self)
 
-					if len(possibilities) == 0 {
-						//Okay, we're well and truly done--not even any guesses came up with something. Nothing we can do.
-						break
-					} else {
-						//Yay, found something! remember the branch point, so we can jump back to it.
-
-						//We're just going to choose the first one.
-						possibilities = possibilities[0:1]
-
-						//TODO: this doesn't hold our special excludes, which we might have worked quite a bit to set up.
-						//Ideally we'd have a way to keep those overrides.
-						//The worst case is that we have a few unnecessary Cull steps just before the branch point.
-						branchPoint = self.Copy()
-						branchPointStep = possibilities[0]
-						otherNums = branchPointStep.PointerNums
-
-						//Null out the branchPointStep's pointerNums; their only point was to communicate out the other possibilities.
-						//And from now on they'll just be confusing.
-						branchPointStep.PointerNums = nil
-					}
+				if len(possibilities) == 0 {
+					//Okay, we're well and truly done--not even any guesses came up with something. Nothing we can do.
+					break
 				} else {
-					//looks like we got to a point where we're in a branch and would really like to branch again.
-					//We can't handle that now, so just bail out in the worst possible way.
-					//TODO: handle multiple nested branch points better
-					panic("Human solve ran into a case where a double branch point would have been useful.")
+					//Yay, found something! remember the branch point, so we can jump back to it.
+
+					//Push new branch point onto the doubly-linked list of branch points
+					newBranch := &branchPoint{
+						previousBranchPoint: branch,
+					}
+					if branch != nil {
+						branch.nextBranchPoint = newBranch
+					}
+					branch = newBranch
+
+					//We're just going to choose the first one.
+					possibilities = possibilities[0:1]
+
+					//TODO: this doesn't hold our special excludes, which we might have worked quite a bit to set up.
+					//Ideally we'd have a way to keep those overrides.
+					//The worst case is that we have a few unnecessary Cull steps just before the branch point.
+					branch.grid = self.Copy()
+					branch.step = possibilities[0]
+					branch.otherNums = branch.step.PointerNums
+
+					//Null out the branchPointStep's pointerNums; their only point was to communicate out the other possibilities.
+					//And from now on they'll just be confusing.
+					branch.step.PointerNums = nil
+
 				}
 			}
 		}
@@ -357,24 +364,40 @@ func (self *Grid) HumanSolve() SolveDirections {
 		}
 		step := possibilities[randomIndexWithInvertedWeights(possibilitiesWeights)]
 
-		if branchPoint == nil {
+		if branch == nil {
 			results = append(results, step)
 		} else {
 			//We're in a branch point; we don't know if it's the RIGHT branch
 			//So keep the steps somewhere else so we can throw them out if we unwind.
-			branchSteps = append(branchSteps, step)
+			branch.branchSteps = append(branch.branchSteps, step)
 		}
 		step.Apply(self)
 
 	}
+
 	if !self.Solved() {
 		//We couldn't solve the puzzle.
 		return nil
 	}
 
-	if len(branchSteps) > 0 {
+	if branch != nil {
 		//Apparently we're in the branch where the solution acutally lay. commit those steps and return them.
-		results = append(results, branchSteps...)
+
+		//Walk up to the first branch.
+		currentBranch := branch
+		for {
+			if currentBranch.previousBranchPoint == nil {
+				break
+			}
+			currentBranch = currentBranch.previousBranchPoint
+		}
+
+		//now currentBranch is the earliest branch point
+		//Walk down the list and copy in all of those steps
+		for currentBranch != nil {
+			results = append(results, currentBranch.branchSteps...)
+			currentBranch = currentBranch.nextBranchPoint
+		}
 	}
 
 	return results
