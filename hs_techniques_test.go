@@ -72,7 +72,9 @@ type solveTechniqueTestHelperOptions struct {
 func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueName string, options solveTechniqueTestHelperOptions) {
 	//TODO: test for col and block as well
 	grid := NewGrid()
-	grid.LoadFromFile(puzzlePath(puzzleName))
+	if !grid.LoadFromFile(puzzlePath(puzzleName)) {
+		t.Fatal("Couldn't load puzzle ", puzzleName)
+	}
 
 	if options.transpose {
 		grid = grid.transpose()
