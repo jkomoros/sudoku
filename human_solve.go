@@ -270,6 +270,8 @@ func (self *Grid) HumanSolve() SolveDirections {
 
 	var branch *branchPoint
 
+	numBranches := 0
+
 	//Note: trying these all in parallel is much slower (~15x) than doing them in sequence.
 	//The reason is that in sequence we bailed early as soon as we found one step; now we try them all.
 
@@ -327,6 +329,12 @@ func (self *Grid) HumanSolve() SolveDirections {
 					break
 				} else {
 					//Yay, found something! remember the branch point, so we can jump back to it.
+
+					//If we branch more than a few times, things are probably REALLY wrong.
+					numBranches++
+					if numBranches >= 10 {
+						panic("Too many branches")
+					}
 
 					//Push new branch point onto the doubly-linked list of branch points
 					newBranch := &branchPoint{
