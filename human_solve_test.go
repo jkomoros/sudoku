@@ -46,9 +46,12 @@ func TestHumanSolve(t *testing.T) {
 }
 
 func TestHumanSolveWithGuess(t *testing.T) {
+
 	grid := NewGrid()
 
-	grid.LoadFromFile(puzzlePath("harddificulty.sdk"))
+	if !grid.LoadFromFile(puzzlePath("harddificulty.sdk")) {
+		t.Fatal("harddifficulty.sdk wasn't loaded")
+	}
 
 	//TODO: this grid is empty here. Fix it!
 
