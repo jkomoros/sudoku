@@ -38,6 +38,12 @@ func (self *guessTechnique) Find(grid *Grid) []*SolveStep {
 		//Convert RankedObject to a cell
 		cell := obj.(*Cell)
 		possibilities := cell.Possibilities()
+
+		if len(possibilities) == 0 {
+			//Not entirely sure why this would happen, but it can...
+			continue
+		}
+
 		num := possibilities[rand.Intn(len(possibilities))]
 		step := newFillSolveStep(cell, num, self)
 
