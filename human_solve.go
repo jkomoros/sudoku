@@ -345,7 +345,6 @@ func (self *Grid) HumanSolve() SolveDirections {
 					//TODO: handle multiple nested branch points better
 					panic("Human solve ran into a case where a double branch point would have been useful.")
 				}
-				break
 			}
 		}
 
