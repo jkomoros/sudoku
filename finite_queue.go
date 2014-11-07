@@ -156,8 +156,8 @@ func (self *SyncedFiniteQueue) workLoop() {
 		case <-self.Exit:
 			exiting = true
 			close(self.Out)
-			if self.activeItems == 0 {
-				//TODO: should we drain all of the incoming ones?
+			if self.IsDone() {
+				//Drain all of the incoming ones?
 				return
 			}
 		case incoming := <-self.In:
@@ -167,10 +167,9 @@ func (self *SyncedFiniteQueue) workLoop() {
 			self.activeItems--
 			if self.IsDone() {
 				self.done <- true
-
-			}
-			if self.activeItems == 0 && exiting {
-				return
+				if exiting {
+					return
+				}
 			}
 		case when(firstItem != nil && !exiting, self.Out) <- firstItem:
 			itemSent = true
