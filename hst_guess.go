@@ -28,6 +28,13 @@ func (self *guessTechnique) Find(grid *Grid) []*SolveStep {
 		if obj == nil {
 			break
 		}
+
+		if obj.Rank() > 3 {
+			fmt.Println("Guess chose a really bad cell with rank ", obj.Rank())
+			fmt.Println(grid)
+			return nil
+		}
+
 		//Convert RankedObject to a cell
 		cell := obj.(*Cell)
 		possibilities := cell.Possibilities()
