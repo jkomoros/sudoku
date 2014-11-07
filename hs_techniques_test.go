@@ -183,7 +183,18 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		}
 
 		if options.pointerNums != nil {
-			t.Error("Pointer nums in match mode any not yet supported.")
+			foundMatch = false
+			for _, pointerNum := range options.pointerNums {
+				for _, num := range step.PointerNums {
+					if pointerNum == num {
+						foundMatch = true
+						//TODO: break early here
+					}
+				}
+			}
+			if !foundMatch {
+				t.Error(techniqueName, " had the wrong pointer nums: ", step.PointerNums)
+			}
 		}
 	}
 
