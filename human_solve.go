@@ -333,7 +333,9 @@ func (self *Grid) HumanSolve() SolveDirections {
 					//If we branch more than a few times, things are probably REALLY wrong.
 					numBranches++
 					if numBranches >= 10 {
-						panic("Too many branches")
+						//F this.
+
+						return nil
 					}
 
 					//Push new branch point onto the doubly-linked list of branch points
