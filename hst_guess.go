@@ -31,10 +31,8 @@ func (self *guessTechnique) Find(grid *Grid) []*SolveStep {
 
 		//This WILL happen, since guess will return a bunch of possible guesses you could make.
 		if obj.Rank() > 3 {
-			fmt.Println("Guess chose a really bad cell with rank ", obj.Rank())
-			fmt.Println(grid)
 			//Given that this WILL happen, it's important to return results so far, whatever they are.
-			return results
+			break
 		}
 
 		//Convert RankedObject to a cell
