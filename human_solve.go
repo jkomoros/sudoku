@@ -332,6 +332,8 @@ func (self *Grid) HumanSolve() SolveDirections {
 
 					//If we branch more than a few times, things are probably REALLY wrong.
 					numBranches++
+
+					//TODO: this is probably too low. Some puzzles really honestly do require tons of branching if we're totally stumped.
 					if numBranches >= 10 {
 						//F this.
 
