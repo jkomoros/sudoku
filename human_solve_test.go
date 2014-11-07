@@ -50,6 +50,8 @@ func TestHumanSolveWithGuess(t *testing.T) {
 
 	grid.LoadFromFile(puzzlePath("harddificulty.sdk"))
 
+	//TODO: this grid is empty here. Fix it!
+
 	steps := grid.HumanSolution()
 
 	if steps == nil {
