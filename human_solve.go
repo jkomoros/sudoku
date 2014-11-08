@@ -264,6 +264,95 @@ type branchPoint struct {
 	nextBranchPoint     *branchPoint
 }
 
+/*
+ * The HumanSolve method is very complex due to guessing logic.
+ *
+ * Without guessing, the approach is very straightforward. Every move either fills a cell
+ * or removes possibilities. But nothing does anything contradictory, so if they diverge
+ * in path, it doesn't matter--they're still working towards the same end state (denoted by @)
+ *
+ *
+ *
+ *                   |
+ *                  /|\
+ *                 / | \
+ *                |  |  |
+ *                \  |  /
+ *                 \ | /
+ *                  \|/
+ *                   |
+ *                   V
+ *                   @
+ *
+ *
+ * For simplicity, we'll just show paths like this as a single line, even though realistically they could diverge arbitrarily.
+ *
+ * This all changes when you introduce branching, because at a branch point you could have chosen the wrong path
+ * and at some point down that path you will discover an invalidity, which tells you you chose wrong, and
+ * you'll have to unwind.
+ *
+ *
+ * Let's explore a puzzle that needs one branch point.
+ *
+ * We explore with normal techniques until we run into a point where none of hte normal techinques work.
+ * We then run the guess technique, which proposes multiple guess steps (big O's) that we could take.
+ *
+ * The technique will choose cells with only a small number of possibilities, to reduce the branching factor.
+ *
+ *                  |
+ *                  |
+ *                  V
+ *                  O O O O O ...
+ *
+ * We will randomly pick one, and then explore all of its possibilities.
+ * CRUCIALLY, at a branch point, we never have to pick another cell to explore its possibilities; for each cell,
+ * if you plug in each of the possibilites and solve forward, it must result in either an invalidity (at which
+ * point you try another possibility, or if they're all gone you unwind if there's a branch point above), or
+ * you picked correctly and the solution lies that way. But it's never the case that picking THIS cell won't uncover
+ * either the invalidity or the solution.
+ * So in reality, when we come to a branch point, we can choose one cell to focus on and throw out all of the others.
+ *
+ *                  |
+ *                  |
+ *                  V
+ *                  O
+ *
+ * But within that cell, there are multiple possibilty branches to consider.
+ *
+ *
+ *                  |
+ *                  |
+ *                  V
+ *                  O
+ *                 / \
+ *                1   3
+ *               /     \
+ *              |       |
+ *
+ * We go through each in turn and play forward until we find either an invalidity or a solution.
+ * Within each branch, we use the normal techniques as normal--remember it's actually branching but
+ * converging, like in the first diagram.
+ *
+ *                  |
+ *                  |
+ *                  V
+ *                  O
+ *                 / \
+ *                1   3
+ *               /     \
+ *              |       |
+ *              X       @
+ *
+ * When we uncover an invalidity, we unwind back to the branch point and then try the next possibility.
+ * We should never have to unwind above the top branch, because down one of the branches (possibly somewhere deep)
+ * There MUST be a solution (assuming the puzzle is valid)
+ * Obviously if we find the solution on our branch, we're good.
+ *
+ * But what happens if we run out of normal techinques down one of our branches and have to branch again?
+ *
+ * TO BE CONTINUED...
+ */
+
 func (self *Grid) HumanSolve() SolveDirections {
 
 	var results []*SolveStep
