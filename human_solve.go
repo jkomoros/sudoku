@@ -285,6 +285,10 @@ type branchPoint struct {
  *                   @
  *
  *
+ * In human solve, we first try the cheap techniques, and if we can't find enough options, we then additionally try
+ * the expensive set of techniques. But both cheap and expensive techniques are similar in that they move us
+ * towards the end state.
+ *
  * For simplicity, we'll just show paths like this as a single line, even though realistically they could diverge arbitrarily.
  *
  * This all changes when you introduce branching, because at a branch point you could have chosen the wrong path
