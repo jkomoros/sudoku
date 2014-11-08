@@ -304,6 +304,7 @@ func (self *Grid) HumanSolve() SolveDirections {
 				//Well, crap. We're out of luck, nothing more for us to do.
 				//TODO: pick a DIFFERENT guess operation at this grid state.
 				//TODO: we could also unravel this sub-branch and go up to a higher branching level.
+				break
 			}
 
 		} else {
