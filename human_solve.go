@@ -295,10 +295,11 @@ type branchPoint struct {
  * and at some point down that path you will discover an invalidity, which tells you you chose wrong, and
  * you'll have to unwind.
  *
- *
  * Let's explore a puzzle that needs one branch point.
  *
  * We explore with normal techniques until we run into a point where none of hte normal techinques work.
+ * This is a DIRE point, and in some cases we might just give up. But we have one last thing to try:
+ * branching.
  * We then run the guess technique, which proposes multiple guess steps (big O's) that we could take.
  *
  * The technique will choose cells with only a small number of possibilities, to reduce the branching factor.
@@ -354,7 +355,29 @@ type branchPoint struct {
  *
  * But what happens if we run out of normal techinques down one of our branches and have to branch again?
  *
- * TO BE CONTINUED...
+ * Nothing much changes, except that you DO unravel if you uncover that all of the possibilities down this
+ * side lead to invalidities. You just never unravel past the first branch point.
+ *
+ *                  |
+ *                  |
+ *                  V
+ *                  O
+ *                 / \
+ *                1   3
+ *               /     \
+ *              |       |
+ *              O       O
+ *             / \     / \
+ *            4   5   6   7
+ *           /    |   |    \
+ *          |     |   |     |
+ *          X     X   X     @
+ *
+ * Down one of the paths MUST lie a solution.
+ *
+ * The search will fail if we have a max depth limit of branching to try, because then we might not discover a
+ * solution down one of the branches. A good sanity point is DIM*DIM branch points is the absolute highest; an
+ * assert at that level makes sense.
  */
 
 func (self *Grid) HumanSolve() SolveDirections {
