@@ -386,8 +386,6 @@ func (self *Grid) HumanSolve() SolveDirections {
 
 	var branch *branchPoint
 
-	numBranches := 0
-
 	//Note: trying these all in parallel is much slower (~15x) than doing them in sequence.
 	//The reason is that in sequence we bailed early as soon as we found one step; now we try them all.
 
@@ -418,9 +416,19 @@ func (self *Grid) HumanSolve() SolveDirections {
 				possibilities = []*SolveStep{branch.step}
 			} else {
 				//Well, crap. We're out of luck, nothing more for us to do.
-				//TODO: pick a DIFFERENT guess operation at this grid state.
-				//TODO: we could also unravel this sub-branch and go up to a higher branching level.
-				break
+				if branch.previousBranchPoint == nil {
+					//We're at the first branchpoint. This really shouldn't have happened... oh well.
+					break
+				} else {
+					//Roll back up one level of branching, apparently everything below us leads to invalidity.
+					branch = branch.previousBranchPoint
+					branch.nextBranchPoint = nil
+
+					//Leave the puzzle in an invalid state; this will cause the next run through to load us
+					//back up the next number and continue.
+					continue
+
+				}
 			}
 
 		} else {
@@ -446,16 +454,6 @@ func (self *Grid) HumanSolve() SolveDirections {
 					break
 				} else {
 					//Yay, found something! remember the branch point, so we can jump back to it.
-
-					//If we branch more than a few times, things are probably REALLY wrong.
-					numBranches++
-
-					//TODO: this is probably too low. Some puzzles really honestly do require tons of branching if we're totally stumped.
-					if numBranches >= 10 {
-						//F this.
-
-						return nil
-					}
 
 					//Push new branch point onto the doubly-linked list of branch points
 					newBranch := &branchPoint{
