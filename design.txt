@@ -87,6 +87,11 @@ NEXT STEP:
 	* Start out with everything having a constant weight and then run a few times from there.
 		* Should that re-running from constant weight be baked in?
 
+NEXT STEP:
+* Make grid.Copy() return a copy with the overrides as well (still do the same thing as now, then just loop through cells)
+* Makd a grid.Replace(otherGrid) that does the reverse of Copy().
+ 	* This will help us fix what MAY be the problem in just-guess branch.
+
 * Does our use of the Rand convenience funcs in different go routines cause performance problems? (http://stackoverflow.com/questions/14298523/why-does-adding-concurrency-slow-down-this-golang-code)
 	* In any case we want to be able to test randomness.
 	* I tried it in Solve and was finding that generating a new r per thread was actually taking 110% of the time of just using the global one, oddly...
