@@ -289,6 +289,9 @@ func TestGridLoad(t *testing.T) {
 
 	for c, cell := range grid.cells {
 		copyCell := cell.InGrid(copy)
+		if !IntSlice(cell.impossibles[:]).SameAs(IntSlice(copyCell.impossibles[:])) {
+			t.Error("Cells at position", c, "had different impossibles:", cell.impossibles, copyCell.impossibles)
+		}
 		for i := 1; i <= DIM; i++ {
 			if cell.Possible(i) != copyCell.Possible(i) {
 				t.Error("The copy of the grid did not have the same possible at cell ", c, " i ", i)
