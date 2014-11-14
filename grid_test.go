@@ -268,6 +268,9 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
+	//Twiddle an exclude to make sure it copies over correctly.
+	grid.Cell(2, 0).setExcluded(4, true)
+
 	//Test copying.
 
 	copy := grid.Copy()
@@ -282,6 +285,15 @@ func TestGridLoad(t *testing.T) {
 	if copy.Cell(0, 0).Number() == grid.Cell(0, 0).Number() {
 		t.Log("When we modified the copy's cell, it also affected the original.")
 		t.Fail()
+	}
+
+	for c, cell := range grid.cells {
+		copyCell := cell.InGrid(copy)
+		for i := 1; i <= DIM; i++ {
+			if cell.Possible(i) != copyCell.Possible(i) {
+				t.Error("The copy of the grid did not have the same possible at cell ", c, " i ", i)
+			}
+		}
 	}
 
 	if grid.Solved() {

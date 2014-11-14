@@ -119,6 +119,13 @@ func (self *Grid) Copy() *Grid {
 	//TODO: ideally we'd have some kind of smart SparseGrid or something that we can return.
 	result := NewGrid()
 	result.Load(self.DataString())
+	//Also set excludes
+	for _, cell := range self.cells {
+		resultCell := cell.InGrid(result)
+		for i := 0; i < DIM; i++ {
+			resultCell.excluded[i] = cell.excluded[i]
+		}
+	}
 	return result
 }
 
