@@ -380,6 +380,8 @@ type branchPoint struct {
  * assert at that level makes sense.
  */
 
+//TODO: guessing logic will be much cleaner if we just a recursive helper.
+
 func (self *Grid) HumanSolve() SolveDirections {
 
 	var results []*SolveStep
