@@ -280,13 +280,6 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
-	copy.Cell(0, 0).SetNumber(5)
-
-	if copy.Cell(0, 0).Number() == grid.Cell(0, 0).Number() {
-		t.Log("When we modified the copy's cell, it also affected the original.")
-		t.Fail()
-	}
-
 	for c, cell := range grid.cells {
 		copyCell := cell.InGrid(copy)
 		if !IntSlice(cell.impossibles[:]).SameAs(IntSlice(copyCell.impossibles[:])) {
@@ -297,6 +290,13 @@ func TestGridLoad(t *testing.T) {
 				t.Error("The copy of the grid did not have the same possible at cell ", c, " i ", i)
 			}
 		}
+	}
+
+	copy.Cell(0, 0).SetNumber(5)
+
+	if copy.Cell(0, 0).Number() == grid.Cell(0, 0).Number() {
+		t.Log("When we modified the copy's cell, it also affected the original.")
+		t.Fail()
 	}
 
 	if grid.Solved() {
