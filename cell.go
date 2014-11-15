@@ -355,7 +355,7 @@ func (self *Cell) diagramRows() (rows []string) {
 				}
 			} else {
 				//Print the possibles.
-				if self.impossibles[current] == 0 {
+				if self.Possible(current + 1) {
 					row += strconv.Itoa(current + 1)
 				} else {
 					row += DIAGRAM_IMPOSSIBLE
