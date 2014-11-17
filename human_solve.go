@@ -205,6 +205,10 @@ func (self SolveDirections) Walkthrough(grid *Grid) string {
 
 	//TODO: test this.
 
+	if len(self) == 0 {
+		return "The puzzle could not be solved with any of the techniques we're aware of."
+	}
+
 	clone := grid.Copy()
 	defer clone.Done()
 
