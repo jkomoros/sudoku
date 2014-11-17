@@ -167,7 +167,7 @@ func puzzleDifficultyHelper(filename string, t *testing.T) {
 		t.Fail()
 	}
 
-	after := time.After(time.Second * 5)
+	after := time.After(time.Second * 60)
 
 	done := make(chan bool)
 
