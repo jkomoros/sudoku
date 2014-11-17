@@ -179,6 +179,17 @@ func (self CellList) Sort() {
 	sort.Sort(sorter)
 }
 
+func (self CellList) FilledNums() IntSlice {
+	set := make(intSet)
+	for _, cell := range self {
+		if cell.Number() == 0 {
+			continue
+		}
+		set[cell.Number()] = true
+	}
+	return set.toSlice()
+}
+
 func (self CellList) CollectNums(fetcher func(*Cell) int) IntSlice {
 	var result IntSlice
 	for _, cell := range self {
