@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"fmt"
 	"math/rand"
 )
 
@@ -106,8 +107,40 @@ func (self *blockBlockInteractionTechnique) Find(grid *Grid) []*SolveStep {
 }
 
 func (self *blockBlockInteractionTechnique) Description(step *SolveStep) string {
-	//TODO: implement and test this.
-	return ""
+	if len(step.TargetNums) != 1 {
+		return ""
+	}
+
+	blockNums := step.PointerCells.CollectNums(getBlock).Unique()
+	if len(blockNums) != 2 {
+		return ""
+	}
+	//make sure we get a stable order
+	blockNums.Sort()
+
+	grid := step.TargetCells[0].grid
+	var majorAxisIsRow bool
+	rowOne, colOne, _, _ := grid.blockExtents(blockNums[0])
+	rowTwo, colTwo, _, _ := grid.blockExtents(blockNums[1])
+
+	if rowOne == rowTwo {
+		majorAxisIsRow = true
+	} else if colOne == colTwo {
+		majorAxisIsRow = false
+	} else {
+		panic(1)
+	}
+
+	var groupName string
+
+	if majorAxisIsRow {
+		groupName = "rows"
+	} else {
+		groupName = "columns"
+	}
+
+	//TODO: explain this better. It's a confusing technique, and this description could be clearer.
+	return fmt.Sprintf("%d can only be in two different %s in blocks %s, which means that %d can't be in any other cells in those %s that aren't in blocks %s", step.TargetNums[0], groupName, blockNums.Description(), step.TargetNums[0], groupName, blockNums.Description())
 }
 
 //Technically in the future different grids could have different blcok partioning schemes
