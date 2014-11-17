@@ -41,7 +41,6 @@ TODO:
 * Make a decision about how to represent cell coordinates and row/col/block indexes when presented to user. now we're consistently 0 indexed (mostly), but shouldn't we be 1 indexed when presenting to the user?
 
 * Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm. Technqiues I've skipped so far:
-	* BlockBlock interactions
 	* Implement enough techniques to be able to solve #122, #33, and #138.
 
 * Visualize the ranges of the different userSolveCollections in analysis, to verify that we're getting good coverage and overlap from them.

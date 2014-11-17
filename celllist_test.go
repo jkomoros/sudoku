@@ -98,6 +98,20 @@ func TestBasicCellList(t *testing.T) {
 
 }
 
+func TestFilledNums(t *testing.T) {
+	grid := NewGrid()
+	if !grid.LoadFromFile(puzzlePath("nakedpairblock1.sdk")) {
+		t.Fatal("Couldn't load file")
+	}
+
+	filledNums := grid.Row(0).FilledNums()
+
+	if !filledNums.SameContentAs(IntSlice{3, 7, 8, 9}) {
+		t.Error("Filled nums had wrong nums", filledNums)
+	}
+
+}
+
 func TestIntList(t *testing.T) {
 	numArr := [...]int{1, 1, 1}
 	if !IntSlice(numArr[:]).Same() {

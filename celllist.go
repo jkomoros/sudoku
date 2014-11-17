@@ -179,6 +179,17 @@ func (self CellList) Sort() {
 	sort.Sort(sorter)
 }
 
+func (self CellList) FilledNums() IntSlice {
+	set := make(intSet)
+	for _, cell := range self {
+		if cell.Number() == 0 {
+			continue
+		}
+		set[cell.Number()] = true
+	}
+	return set.toSlice()
+}
+
 func (self CellList) CollectNums(fetcher func(*Cell) int) IntSlice {
 	var result IntSlice
 	for _, cell := range self {
@@ -294,6 +305,12 @@ func (self IntSlice) Description() string {
 
 }
 
+//returns an IntSlice like self, but with any dupes removed.
+func (self IntSlice) Unique() IntSlice {
+	//TODO: test this.
+	return self.toIntSet().toSlice()
+}
+
 func (self IntSlice) Same() bool {
 	if len(self) == 0 {
 		return true
@@ -395,6 +412,18 @@ func (self intSet) difference(other intSet) intSet {
 				result[item] = true
 			}
 		}
+	}
+	return result
+}
+
+//TODO: test this.
+func (self intSet) union(other intSet) intSet {
+	result := make(intSet)
+	for item, value := range self {
+		result[item] = value
+	}
+	for item, value := range other {
+		result[item] = value
 	}
 	return result
 }
