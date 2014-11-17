@@ -473,7 +473,7 @@ func humanSolveGuess(grid *Grid) []*SolveStep {
 			//Success!
 			//Make ourselves look like that grid (to pass back the state of what the solution was) and return.
 			grid.replace(gridCopy)
-			return solveSteps
+			return append([]*SolveStep{guess}, solveSteps...)
 		}
 		//We need to try the next solution.
 
