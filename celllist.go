@@ -305,6 +305,12 @@ func (self IntSlice) Description() string {
 
 }
 
+//returns an IntSlice like self, but with any dupes removed.
+func (self IntSlice) Unique() IntSlice {
+	//TODO: test this.
+	return self.toIntSet().toSlice()
+}
+
 func (self IntSlice) Same() bool {
 	if len(self) == 0 {
 		return true
