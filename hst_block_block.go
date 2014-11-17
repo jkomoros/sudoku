@@ -1,5 +1,9 @@
 package sudoku
 
+import (
+	"math/rand"
+)
+
 type blockBlockInteractionTechnique struct {
 	*basicSolveTechnique
 }
@@ -10,8 +14,95 @@ func (self *blockBlockInteractionTechnique) Difficulty() float64 {
 }
 
 func (self *blockBlockInteractionTechnique) Find(grid *Grid) []*SolveStep {
-	//TODO implement and test this.
-	return nil
+
+	var results []*SolveStep
+
+	pairs := pairwiseBlocks(grid)
+
+	//We're going to be looking at a lot of blocks again and again, so might as well cache this.
+	unfilledCellsForBlock := make([]CellList, DIM)
+	filledNumsForBlock := make([]IntSlice, DIM)
+	for i := 0; i < DIM; i++ {
+		unfilledCellsForBlock[i] = grid.Block(i).FilterByHasPossibilities()
+		filledNumsForBlock[i] = grid.Block(i).FilledNums()
+	}
+
+	//For each pair of blocks (in random order)
+	for _, pairIndex := range rand.Perm(len(pairs)) {
+		pair := pairs[pairIndex]
+		excludeNums := filledNumsForBlock[pair[0]].toIntSet().union(filledNumsForBlock[pair[1]].toIntSet())
+		for _, i := range rand.Perm(DIM) {
+			//Skip numbers entirely where either of the blocks has a cell with it set, since there obviously
+			//won't be any cells in both blocks that have that possibility.
+			if _, ok := excludeNums[i]; !ok {
+				continue
+			}
+			//Find cells in each block that have that possibility.
+			firstBlockCells := unfilledCellsForBlock[pair[0]].FilterByPossible(i)
+			secondBlockCells := unfilledCellsForBlock[pair[1]].FilterByPossible(i)
+
+			//Now we need to figure out if these blocks are in the same row or same col
+			var majorAxisIsRow bool
+			rowOne, colOne, _, _ := grid.blockExtents(pair[0])
+			rowTwo, colTwo, _, _ := grid.blockExtents(pair[1])
+
+			if rowOne == rowTwo {
+				majorAxisIsRow = true
+			} else if colOne == colTwo {
+				majorAxisIsRow = false
+			} else {
+				panic("This shouldn't happen")
+			}
+
+			var blockOneIndexes IntSlice
+			var blockTwoIndexes IntSlice
+
+			if majorAxisIsRow {
+				blockOneIndexes = firstBlockCells.CollectNums(getRow).Unique()
+				blockTwoIndexes = secondBlockCells.CollectNums(getRow).Unique()
+			} else {
+				blockOneIndexes = firstBlockCells.CollectNums(getCol).Unique()
+				blockTwoIndexes = secondBlockCells.CollectNums(getCol).Unique()
+			}
+
+			if len(blockOneIndexes) != 2 || len(blockTwoIndexes) != 2 {
+				//There can only be two rows or columns in play for this technique to work.
+				continue
+			}
+
+			if !blockOneIndexes.SameContentAs(blockTwoIndexes) {
+				//Meh, they didn't line up into the same major axis cells.
+				continue
+			}
+
+			var targetCells CellList
+
+			if majorAxisIsRow {
+				targetCells = grid.Row(blockOneIndexes[0])
+				targetCells = append(targetCells, grid.Row(blockOneIndexes[0])...)
+				targetCells = targetCells.RemoveCells(grid.Block(pair[0])).RemoveCells(grid.Block(pair[1]))
+			} else {
+				targetCells = grid.Col(blockOneIndexes[0])
+				targetCells = append(targetCells, grid.Col(blockOneIndexes[0])...)
+				targetCells = targetCells.RemoveCells(grid.Block(pair[0])).RemoveCells(grid.Block(pair[1]))
+			}
+
+			//Okay, we have a possible set. Now we need to create a step.
+			step := &SolveStep{
+				targetCells,
+				append(firstBlockCells, secondBlockCells...),
+				[]int{i},
+				nil,
+				self,
+			}
+
+			if step.IsUseful(grid) {
+				results = append(results, step)
+			}
+		}
+
+	}
+	return results
 }
 
 func (self *blockBlockInteractionTechnique) Description(step *SolveStep) string {
