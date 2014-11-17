@@ -226,7 +226,7 @@ func (self SolveDirections) Walkthrough(grid *Grid) string {
 
 		self[i].Apply(clone)
 
-		result += grid.Diagram()
+		result += clone.Diagram()
 
 		results[i] = result
 	}
