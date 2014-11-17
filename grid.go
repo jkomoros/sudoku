@@ -114,19 +114,24 @@ func (self *Grid) LoadFromFile(path string) bool {
 	return true
 }
 
-//Returns a new grid that has exactly the same numbers placed as the original.
+//Returns a new grid that has exactly the same numbers placed as the original, and same excludes.
 func (self *Grid) Copy() *Grid {
 	//TODO: ideally we'd have some kind of smart SparseGrid or something that we can return.
 	result := NewGrid()
-	result.Load(self.DataString())
+	result.replace(self)
+	return result
+}
+
+//Copies the state of the other grid into self, so they look the same.
+func (self *Grid) replace(other *Grid) {
+	self.Load(other.DataString())
 	//Also set excludes
-	for _, cell := range self.cells {
-		resultCell := cell.InGrid(result)
+	for _, otherCell := range other.cells {
+		selfCell := otherCell.InGrid(self)
 		for i := 0; i < DIM; i++ {
-			resultCell.excluded[i] = cell.excluded[i]
+			selfCell.excluded[i] = otherCell.excluded[i]
 		}
 	}
-	return result
 }
 
 func (self *Grid) transpose() *Grid {
