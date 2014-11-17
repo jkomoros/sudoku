@@ -34,7 +34,7 @@ func (self *blockBlockInteractionTechnique) Find(grid *Grid) []*SolveStep {
 		for _, i := range rand.Perm(DIM) {
 			//Skip numbers entirely where either of the blocks has a cell with it set, since there obviously
 			//won't be any cells in both blocks that have that possibility.
-			if _, ok := excludeNums[i]; !ok {
+			if _, ok := excludeNums[i]; ok {
 				continue
 			}
 			//Find cells in each block that have that possibility.
