@@ -410,6 +410,18 @@ func (self intSet) difference(other intSet) intSet {
 	return result
 }
 
+//TODO: test this.
+func (self intSet) union(other intSet) intSet {
+	result := make(intSet)
+	for item, value := range self {
+		result[item] = value
+	}
+	for item, value := range other {
+		result[item] = value
+	}
+	return result
+}
+
 func (self IntSlice) Intersection(other IntSlice) IntSlice {
 	//Returns an IntSlice of the union of both intSlices
 
