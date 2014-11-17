@@ -411,7 +411,6 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 			possibilities = runTechniques(ExpensiveTechniques, grid)
 			if len(possibilities) == 0 {
 				//Hmm, didn't find any possivbilities. We failed. :-(
-				//TODO: This is where we will call into guess logic.
 				break
 			}
 		}
@@ -431,9 +430,69 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 	}
 	if !grid.Solved() {
 		//We couldn't solve the puzzle.
-		return nil
+		//But let's do one last ditch effort and try guessing.
+		guessSteps := humanSolveGuess(grid)
+		if len(guessSteps) == 0 {
+			//Okay, we just totally failed.
+			return nil
+		}
+		return append(results, guessSteps...)
 	}
 	return results
+}
+
+//Called when we have run out of options at a given state and need to guess.
+func humanSolveGuess(grid *Grid) []*SolveStep {
+
+	//TODO: consider doing a normal solve forward from here to figure out what the right branch is and just do that.
+	guesses := GuessTechnique.Find(grid)
+
+	if len(guesses) == 0 {
+		//Coludn't find a guess step, oddly enough.
+		return nil
+	}
+
+	//Take just the first guess step and forget about the other ones.
+	guess := guesses[0]
+
+	//The guess technique passes back the other nums as PointerNums, which is a hack.
+	//Unpack them and then nil it out to prevent confusing other people in the future with them.
+	otherNums := guess.PointerNums
+	guess.PointerNums = nil
+
+	var gridCopy *Grid
+
+	for {
+		gridCopy = grid.Copy()
+
+		guess.Apply(gridCopy)
+
+		solveSteps := humanSolveHelper(gridCopy)
+
+		if len(solveSteps) != 0 {
+			//Success!
+			//Make ourselves look like that grid (to pass back the state of what the solution was) and return.
+			grid.replace(gridCopy)
+			return solveSteps
+		}
+		//We need to try the next solution.
+
+		if len(otherNums) == 0 {
+			//No more numbers to try. We failed!
+			break
+		}
+
+		nextNum := otherNums[0]
+		otherNums = otherNums[1:]
+
+		//Stuff it into the TargetNums for the branch step.
+		guess.TargetNums = IntSlice{nextNum}
+
+	}
+
+	//We failed to find anything (which should never happen...)
+	return nil
+
 }
 
 func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
