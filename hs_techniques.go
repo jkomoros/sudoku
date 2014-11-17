@@ -145,6 +145,15 @@ func init() {
 				0.0,
 			},
 		},
+		&blockBlockInteractionTechnique{
+			&basicSolveTechnique{
+				"Block Block Interactions",
+				false,
+				GROUP_BLOCK,
+				2,
+				0.0,
+			},
+		},
 		&nakedSubsetTechnique{
 			&basicSolveTechnique{
 				"Naked Pair Col",
