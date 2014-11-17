@@ -250,20 +250,6 @@ func (self *Grid) HumanSolution() SolveDirections {
 	return clone.HumanSolve()
 }
 
-type branchPoint struct {
-	//The point at which we branched for a guess. non-nil if we are in a branch.
-	grid *Grid
-	//The step we'll apply to get us into the branch point.
-	step *SolveStep
-	//Ther other numbers to try from the branch point.
-	otherNums IntSlice
-	//The steps we've taken since the branch point.
-	branchSteps []*SolveStep
-	//The earlier branch point
-	previousBranchPoint *branchPoint
-	nextBranchPoint     *branchPoint
-}
-
 /*
  * The HumanSolve method is very complex due to guessing logic.
  *
@@ -378,14 +364,17 @@ type branchPoint struct {
  * The search will fail if we have a max depth limit of branching to try, because then we might not discover a
  * solution down one of the branches. A good sanity point is DIM*DIM branch points is the absolute highest; an
  * assert at that level makes sense.
+ *
+ * In this implementation, humanSolveHelper does the work of exploring any branch up to a point where a guess must happen.
+ * If we run out of ideas on a branch, we call into guess helper, which will pick a guess and then try all of the versions of it
+ * until finding one that works. This keeps humanSolveHelper pretty straighforward and keeps most of the complex guess logic out.
  */
-
-//TODO: guessing logic will be much cleaner if we just a recursive helper.
 
 func (self *Grid) HumanSolve() SolveDirections {
 	return humanSolveHelper(self)
 }
 
+//Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
 //The core worker of human solve, it does all of the solving between branch points.
 func humanSolveHelper(grid *Grid) []*SolveStep {
 
