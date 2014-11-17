@@ -93,7 +93,7 @@ func (self *Cell) SetNumber(number int) {
 		if (oldNumber > 0 && number == 0) || (oldNumber == 0 && number > 0) {
 			//Our rank will have changed.
 			//TODO: figure out how to test this.
-			self.grid.queue.Insert(self)
+			self.grid.cellRankChanged(self)
 		}
 	}
 }
@@ -122,7 +122,7 @@ func (self *Cell) setPossible(number int) {
 	if self.impossibles[number] == 0 && self.grid != nil {
 		//TODO: should we check exclusion to save work?
 		//Our rank will have changed.
-		self.grid.queue.Insert(self)
+		self.grid.cellRankChanged(self)
 		//We may have just become valid.
 		self.checkInvalid()
 	}
@@ -139,7 +139,7 @@ func (self *Cell) setImpossible(number int) {
 	if self.impossibles[number] == 1 && self.grid != nil {
 		//TODO: should we check exclusion to save work?
 		//Our rank will have changed.
-		self.grid.queue.Insert(self)
+		self.grid.cellRankChanged(self)
 		//We may have just become invalid.
 		self.checkInvalid()
 	}
@@ -154,7 +154,7 @@ func (self *Cell) setExcluded(number int, excluded bool) {
 	//Our rank may have changed.
 	//TODO: should we check if we're invalid already?
 	if self.grid != nil {
-		self.grid.queue.Insert(self)
+		self.grid.cellRankChanged(self)
 		self.checkInvalid()
 	}
 }
@@ -166,7 +166,7 @@ func (self *Cell) resetExcludes() {
 	//Our rank may have changed.
 	//TODO: should we check if we're invalid already?
 	if self.grid != nil {
-		self.grid.queue.Insert(self)
+		self.grid.cellRankChanged(self)
 		self.checkInvalid()
 	}
 }

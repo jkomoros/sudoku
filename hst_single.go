@@ -95,7 +95,7 @@ func (self *nakedSingleTechnique) Description(step *SolveStep) string {
 func (self *nakedSingleTechnique) Find(grid *Grid) []*SolveStep {
 	//TODO: test that this will find multiple if they exist.
 	var results []*SolveStep
-	getter := grid.queue.NewGetter()
+	getter := grid.queue().NewGetter()
 	for {
 		obj := getter.GetSmallerThan(2)
 		if obj == nil {

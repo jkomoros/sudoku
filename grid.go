@@ -23,7 +23,7 @@ type Grid struct {
 	cacheRowMutex    sync.RWMutex
 	cacheColMutex    sync.RWMutex
 	cacheBlockMutext sync.RWMutex
-	queue            *FiniteQueue
+	theQueue         *FiniteQueue
 	numFilledCells   int
 	invalidCells     map[*Cell]bool
 	cachedSolutions  []*Grid
@@ -72,19 +72,30 @@ func returnGrid(grid *Grid) {
 
 func NewGrid() *Grid {
 	result := &Grid{}
-	result.queue = NewFiniteQueue(1, DIM)
+
 	result.invalidCells = make(map[*Cell]bool)
+
 	i := 0
 	for r := 0; r < DIM; r++ {
 		for c := 0; c < DIM; c++ {
 			result.cells[i] = NewCell(result, r, c)
 			//The cell can't insert itself because it doesn't know where it will actually live in memory yet.
-			result.queue.Insert(&result.cells[i])
 			i++
 		}
 	}
 	result.initalized = true
 	return result
+}
+
+func (self *Grid) queue() *FiniteQueue {
+	if self.theQueue == nil {
+		self.theQueue = NewFiniteQueue(1, DIM)
+		for i := range self.cells {
+			//If we did i, cell, cell would just be the temp variable. So we'll grab it via the index.
+			self.theQueue.Insert(&self.cells[i])
+		}
+	}
+	return self.theQueue
 }
 
 func (self *Grid) Done() {
@@ -343,6 +354,12 @@ func (self *Grid) cellModified(cell *Cell) {
 		self.numFilledCells--
 	} else {
 		self.numFilledCells++
+	}
+}
+
+func (self *Grid) cellRankChanged(cell *Cell) {
+	if self.theQueue != nil {
+		self.theQueue.Insert(cell)
 	}
 }
 

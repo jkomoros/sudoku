@@ -139,7 +139,7 @@ func (self *Grid) searchSolutions(queue *SyncedFiniteQueue, isFirstRun bool, num
 	}
 
 	//Well, looks like we're going to have to branch.
-	rankedObject := self.queue.DefaultGetter().Get()
+	rankedObject := self.queue().DefaultGetter().Get()
 	if rankedObject == nil {
 		panic("Queue didn't have any cells.")
 	}
@@ -183,7 +183,7 @@ func (self *Grid) searchSolutions(queue *SyncedFiniteQueue, isFirstRun bool, num
 //techniques that require anything more than a single cell's possibles list.
 func (self *Grid) fillSimpleCells() int {
 	count := 0
-	getter := self.queue.DefaultGetter()
+	getter := self.queue().DefaultGetter()
 	obj := getter.GetSmallerThan(2)
 	for obj != nil && !self.cellsInvalid() {
 		cell, ok := obj.(*Cell)

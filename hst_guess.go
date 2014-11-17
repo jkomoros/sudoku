@@ -19,7 +19,7 @@ func (self *guessTechnique) Description(step *SolveStep) string {
 
 func (self *guessTechnique) Find(grid *Grid) []*SolveStep {
 
-	getter := grid.queue.NewGetter()
+	getter := grid.queue().NewGetter()
 
 	var results []*SolveStep
 
