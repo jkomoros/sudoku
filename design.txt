@@ -106,8 +106,6 @@ NEXT STEP:
 
 * Test the main app (partially there... just need to minimize randomness now)
 
-* If HumanSolve gets stuck, it should do a guess as a last resort.
-
 
 * Make it so if any technique takes too long and we already have some answers, we move ahead anyway.
 
