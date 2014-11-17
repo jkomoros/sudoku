@@ -79,11 +79,11 @@ func (self *blockBlockInteractionTechnique) Find(grid *Grid) []*SolveStep {
 
 			if majorAxisIsRow {
 				targetCells = grid.Row(blockOneIndexes[0])
-				targetCells = append(targetCells, grid.Row(blockOneIndexes[0])...)
+				targetCells = append(targetCells, grid.Row(blockOneIndexes[1])...)
 				targetCells = targetCells.RemoveCells(grid.Block(pair[0])).RemoveCells(grid.Block(pair[1]))
 			} else {
 				targetCells = grid.Col(blockOneIndexes[0])
-				targetCells = append(targetCells, grid.Col(blockOneIndexes[0])...)
+				targetCells = append(targetCells, grid.Col(blockOneIndexes[1])...)
 				targetCells = targetCells.RemoveCells(grid.Block(pair[0])).RemoveCells(grid.Block(pair[1]))
 			}
 
