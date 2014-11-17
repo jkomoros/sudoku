@@ -312,11 +312,23 @@ func init() {
 		},
 	}
 
+	GuessTechnique = &guessTechnique{
+		&basicSolveTechnique{
+			"Guess",
+			true,
+			GROUP_NONE,
+			1,
+			0.0,
+		},
+	}
+
 	Techniques = append(CheapTechniques, ExpensiveTechniques...)
+
+	AllTechniques = append(Techniques, GuessTechnique)
 
 	techniquesByName = make(map[string]SolveTechnique)
 
-	for _, technique := range Techniques {
+	for _, technique := range AllTechniques {
 		techniquesByName[technique.Name()] = technique
 	}
 

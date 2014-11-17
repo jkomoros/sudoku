@@ -121,6 +121,7 @@ const TEST_GRID_EXCLUDED_DIAGRAM = `•••|•••|•••||   |   |   ||
 
 //This grid is #102 from Totally Pocket Sudoku. It's included for testing purposes only.
 
+//This is also in a costant because we want to just string compare it to the loaded file.
 const ADVANCED_TEST_GRID = `.|5|.|.|.|.|7|4|.
 7|2|.|.|3|.|.|.|.
 .|.|1|5|.|.|.|.|8
@@ -401,7 +402,7 @@ func TestGridLoad(t *testing.T) {
 
 func TestAdvancedSolve(t *testing.T) {
 	grid := NewGrid()
-	grid.Load(ADVANCED_TEST_GRID)
+	grid.LoadFromFile(puzzlePath("advancedtestgrid.sdk"))
 
 	if grid.DataString() != ADVANCED_TEST_GRID {
 		t.Log("Advanced grid didn't survive a roundtrip to DataString")

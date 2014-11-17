@@ -51,6 +51,9 @@ TODO:
 				* It would also have to know the "other" path to take at the unwind point.
 			* The unwindTo points will need to be nested (although for a first stab we could just only allow one UnWind and bail otherwise)
 			* As far as SolveDirections et al are concerned, Guess would just be a REALLY expensive technique.
+	* IMPLEMENTATION notes
+		* We don't have a good "remember my state and reload it" to unwind back to the branch point.
+			* Load doesn't take into account excludes that have been set. 
 	* Implement enough techniques to be able to solve #122, #33, and #138.
 
 * Visualize the ranges of the different userSolveCollections in analysis, to verify that we're getting good coverage and overlap from them.

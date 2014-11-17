@@ -45,6 +45,41 @@ func TestHumanSolve(t *testing.T) {
 
 }
 
+func TestHumanSolveWithGuess(t *testing.T) {
+
+	grid := NewGrid()
+
+	if !grid.LoadFromFile(puzzlePath("harddifficulty.sdk")) {
+		t.Fatal("harddifficulty.sdk wasn't loaded")
+	}
+
+	steps := grid.HumanSolution()
+
+	if steps == nil {
+		t.Fatal("Didn't find a solution to a grid that should have needed a guess")
+	}
+
+	foundGuess := false
+	for i, step := range steps {
+		if step.Technique.Name() == "Guess" {
+			foundGuess = true
+		}
+		step.Apply(grid)
+		if grid.Invalid() {
+			t.Fatal("A solution with a guess in it got us into an invalid grid state. step", i)
+		}
+	}
+
+	if !foundGuess {
+		t.Error("Solution that should have used guess didn't have any guess.")
+	}
+
+	if !grid.Solved() {
+		t.Error("A solution with a guess said it should solve the puzzle, but it didn't.")
+	}
+
+}
+
 func TestStepsDescription(t *testing.T) {
 
 	grid := NewGrid()
@@ -132,7 +167,7 @@ func puzzleDifficultyHelper(filename string, t *testing.T) {
 		t.Fail()
 	}
 
-	after := time.After(time.Second * 5)
+	after := time.After(time.Second * 60)
 
 	done := make(chan bool)
 
