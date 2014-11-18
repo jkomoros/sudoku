@@ -47,7 +47,7 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 type solveTechniqueMatchMode int
 
 const (
-	solveTechniqueMatchModeAll = iota
+	solveTechniqueMatchModeAll solveTechniqueMatchMode = iota
 	solveTechniqueMatchModeAny
 )
 
