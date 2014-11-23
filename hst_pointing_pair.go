@@ -10,7 +10,7 @@ type pointingPairTechnique struct {
 }
 
 func (self *pointingPairTechnique) Difficulty() float64 {
-	return self.difficultyHelper(2.5)
+	return self.difficultyHelper(5.0)
 }
 
 func (self *pointingPairTechnique) Description(step *SolveStep) string {

@@ -11,7 +11,7 @@ type nakedSubsetTechnique struct {
 }
 
 func (self *nakedSubsetTechnique) Difficulty() float64 {
-	return self.difficultyHelper(3.0)
+	return self.difficultyHelper(6.0)
 }
 
 func (self *nakedSubsetTechnique) Description(step *SolveStep) string {

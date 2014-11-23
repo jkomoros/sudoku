@@ -81,7 +81,7 @@ func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter 
 }
 
 func (self *nakedSingleTechnique) Difficulty() float64 {
-	return self.difficultyHelper(1.5)
+	return self.difficultyHelper(2.0)
 }
 
 func (self *nakedSingleTechnique) Description(step *SolveStep) string {
@@ -112,7 +112,7 @@ func (self *nakedSingleTechnique) Find(grid *Grid) []*SolveStep {
 }
 
 func (self *hiddenSingleTechnique) Difficulty() float64 {
-	return self.difficultyHelper(2.0)
+	return self.difficultyHelper(1.8)
 }
 
 func (self *hiddenSingleTechnique) Description(step *SolveStep) string {

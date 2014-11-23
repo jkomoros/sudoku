@@ -11,7 +11,7 @@ type hiddenSubsetTechnique struct {
 }
 
 func (self *hiddenSubsetTechnique) Difficulty() float64 {
-	return self.difficultyHelper(6.0)
+	return self.difficultyHelper(12.0)
 }
 
 func (self hiddenSubsetTechnique) Description(step *SolveStep) string {
