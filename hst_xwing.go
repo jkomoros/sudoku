@@ -31,6 +31,10 @@ func (self *xwingTechnique) Description(step *SolveStep) string {
 		minorGroups = step.PointerCells.CollectNums(getRow).Unique()
 	}
 
+	//Ensure a stable description; Unique() doesn't have a guranteed order.
+	majorGroups.Sort()
+	minorGroups.Sort()
+
 	return fmt.Sprintf("in %s %s, %d is only possible in %s %s, and %d must be in one of those cells per %s, so it can't be in any other cells in those %s",
 		majorAxis,
 		majorGroups.Description(),
