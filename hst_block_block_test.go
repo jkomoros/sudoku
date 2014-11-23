@@ -4,6 +4,8 @@ import (
 	"testing"
 )
 
+//TODO: test a few more block/block puzzles to make sure I'm handling all cases right.
+
 func TestPairwiseBlocks(t *testing.T) {
 	grid := NewGrid()
 	result := pairwiseBlocks(grid)

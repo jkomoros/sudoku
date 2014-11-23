@@ -262,6 +262,24 @@ func init() {
 				0.0,
 			},
 		},
+		&xwingTechnique{
+			&basicSolveTechnique{
+				"XWing Row",
+				false,
+				GROUP_ROW,
+				2,
+				0.0,
+			},
+		},
+		&xwingTechnique{
+			&basicSolveTechnique{
+				"XWing Col",
+				false,
+				GROUP_COL,
+				2,
+				0.0,
+			},
+		},
 	}
 
 	ExpensiveTechniques = []SolveTechnique{
