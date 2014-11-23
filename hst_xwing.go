@@ -27,6 +27,10 @@ func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
 	for _, i := range rand.Perm(DIM) {
 		//In comments we'll say "Row" for the major group type, and "col" for minor group type, just for easier comprehension.
 		//Look for each row that has that number possible in only two cells.
+
+		//i is zero indexed right now
+		i++
+
 		var majorGroups []CellList
 
 		for groupIndex := 0; groupIndex < DIM; groupIndex++ {
