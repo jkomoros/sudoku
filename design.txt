@@ -69,6 +69,7 @@ TODO:
 	* Actually call grid.Done() when we're done
 	* We tried to do this but got CRAZY errors, which are hard to track down. Turns out that there is some possibility for slippage in grids, somehow. Need to solve that.
 		* It's possible these come from some of the tests that dig deep into grids/cells and set things weird. Will have to audit.
+			* hst_single_test looks like a good candidate.
 * When generating grids, at every step check the difficulty. If it's above the target, go back to the most recent known good difficulty and return that.
 
 * When generating grids, keep a temporary directory of sdk files representing puzzles generated but not vended. When asked for a new puzzle, we first see if we have any in the unvended list that are appropriate difficulty.
