@@ -91,6 +91,8 @@ NEXT STEP:
 
 * Fix races with go test -race.
 
+* Consider splitting out the liklihood of a user picking a technique from its difficulty. Right now it's weird that when you load the learned weights they are WAY different from the straightforwardly-generated ones. Also, anecdotally we don't appear to be as likely as we should be to pick easy techniques.
+
 * Test the main app (partially there... just need to minimize randomness now)
 
 
