@@ -47,3 +47,16 @@ func TestBlockBlockInteractionAgain(t *testing.T) {
 	}
 	humanSolveTechniqueTestHelper(t, "blockblocktest1.sdk", "Block Block Interactions", options)
 }
+
+func TestBlockInteractionFlipped(t *testing.T) {
+	options := solveTechniqueTestHelperOptions{
+		transpose:    true,
+		targetCells:  []cellRef{{3, 6}, {4, 6}, {3, 7}, {4, 7}, {3, 8}, {4, 8}},
+		pointerCells: []cellRef{{3, 2}, {4, 2}, {4, 3}, {3, 5}},
+		targetSame:   GROUP_BLOCK,
+		targetGroup:  5,
+		targetNums:   IntSlice([]int{3}),
+		description:  "3 can only be in two different rows in blocks 3 and 4, which means that 3 can't be in any other cells in those rows that aren't in blocks 3 and 4",
+	}
+	humanSolveTechniqueTestHelper(t, "blockblocktest.sdk", "Block Block Interactions", options)
+}
