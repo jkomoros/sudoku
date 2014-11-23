@@ -107,6 +107,7 @@ func main() {
 			//If we're asked to solve, n could only be 1 anyway.
 			return
 		}
+		grid.Done()
 	}
 
 }
