@@ -94,6 +94,9 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 //TODO: use the test solve helper func for these three tests.
 func TestNecessaryInRow(t *testing.T) {
 	grid := NewGrid()
+
+	//We DON'T call grid.done because we will have poked some unrealistic values into the cells.
+
 	//Load up a solved grid
 	grid.Load(SOLVED_TEST_GRID)
 
@@ -157,13 +160,13 @@ func TestNecessaryInRow(t *testing.T) {
 		t.Log("The necessary in row technique did actually mutate the grid.")
 		t.Fail()
 	}
-
-	grid.Done()
 }
 
 func TestNecessaryInCol(t *testing.T) {
 	grid := NewGrid()
-	defer grid.Done()
+
+	//We DON'T call grid.done because we will have poked some unrealistic values into the cells.
+
 	//Load up a solved grid
 	grid.Load(SOLVED_TEST_GRID)
 
@@ -231,7 +234,9 @@ func TestNecessaryInCol(t *testing.T) {
 
 func TestNecessaryInBlock(t *testing.T) {
 	grid := NewGrid()
-	defer grid.Done()
+
+	//We DON'T call grid.done because we will have poked some unrealistic values into the cells.
+
 	//Load up a solved grid
 	grid.Load(SOLVED_TEST_GRID)
 
