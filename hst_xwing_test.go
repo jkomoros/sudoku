@@ -4,6 +4,8 @@ import (
 	"testing"
 )
 
+//TODO: test a few more puzzles to make sure I'm exercising it correctly.
+
 func TestXWingRow(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
 		targetCells:  []cellRef{{1, 4}, {1, 7}, {8, 4}},
