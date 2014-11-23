@@ -100,7 +100,7 @@ NEXT STEP:
 
 * Use gofmt to replace all instances of t.Log(a) t.Fail() with t.Error.
 
-* Running `go run main.go -s ../puzzles/test/harddifficulty.sdk -w` says that the puzzle can't be solved... but should a guess happen??
+* Running `go run main.go -s ../puzzles/test/harddifficulty.sdk -w` says that the puzzle can't be solved... but should a guess happen?? (It has multiple solutions, but that shouldn't matter)
 
 * The difficulties we get when generating puzzles from app are absurdly low (even 0 sometimes!)
 
