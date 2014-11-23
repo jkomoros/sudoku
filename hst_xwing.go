@@ -79,6 +79,9 @@ func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
 			targetCells = targetCells.RemoveCells(currentGroups[0])
 			targetCells = targetCells.RemoveCells(currentGroups[1])
 
+			//And remove the cells that don't have the target number to remove (to keep the set tight; technically it's OK to include them it would just be a no-op for those cells)
+			targetCells = targetCells.FilterByPossible(i)
+
 			//Okay, we found a pair that works. Create a step for it (if it's useful)
 			step := &SolveStep{targetCells, append(currentGroups[0], currentGroups[1]...), IntSlice{i}, nil, self}
 			if step.IsUseful(grid) {
