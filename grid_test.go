@@ -564,6 +564,8 @@ func TestGridCache(t *testing.T) {
 func TestGenerate(t *testing.T) {
 	grid := GenerateGrid(SYMMETRY_NONE, 0.0)
 
+	defer grid.Done()
+
 	if grid == nil {
 		t.Log("We didn't get back a generated grid")
 		t.Fail()
@@ -578,12 +580,12 @@ func TestGenerate(t *testing.T) {
 		t.Log("We got back a generated grid that has more than one solution.")
 		t.Fail()
 	}
-
-	grid.Done()
 }
 
 func TestSymmetricalGenerate(t *testing.T) {
 	grid := GenerateGrid(SYMMETRY_VERTICAL, 1.0)
+
+	defer grid.Done()
 
 	if grid == nil {
 		t.Fatal("Did not get a generated grid back")
@@ -602,6 +604,9 @@ func TestSymmetricalGenerate(t *testing.T) {
 			}
 		}
 	}
+
+	//We're going to clobber this variable with another grid.
+	grid.Done()
 
 	//Now test a non 1.0 symmetry
 	percentage := 0.5
