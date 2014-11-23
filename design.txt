@@ -36,6 +36,8 @@ TODO:
 		* Sparsecells have their own trapping of any modifiying calls that then call back to the sparseGrid (they know which it is) with the new cell itself to put in the cache. Then the SparseCell can be thrown away.
 	* Simplest (no caching): Whenever you want a cell, you call grid.Cell(), which sees if it has one, otherwise returns one from another cell.
 
+* An alternate version of a sparseGrid that's must easier is a grid that is immutable, and when you make a new change it returns a new grid. Even this is hard; impossible counts will change quite a bit even if only one number is put in.
+
 * Run dokugen/main.go and then panic at the end. Verify there aren't a billion goroutines hanging out.
 
 * Make a decision about how to represent cell coordinates and row/col/block indexes when presented to user. now we're consistently 0 indexed (mostly), but shouldn't we be 1 indexed when presenting to the user?
