@@ -43,43 +43,49 @@ func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
 		}
 
 		//Okay, did we have two rows?
-		if len(majorGroups) != 2 {
-			//Nope, continue on to next number.
+		if len(majorGroups) < 2 {
+			//Not enough rows
 			continue
 		}
 
-		var targetCells CellList
+		//Now look at each pair of rows and see if their numbers line up.
+		for _, subsets := range subsetIndexes(len(majorGroups), 2) {
+			var targetCells CellList
 
-		//Are the possibilities in each row in the same column as the one above?
-		//We need to do this differently depending on if we're row or col.
-		if self.groupType == GROUP_ROW {
-			//TODO: figure out a way to factor group row and col better so we don't duplicate code like this.
-			if majorGroups[0][0].Col != majorGroups[1][0].Col || majorGroups[0][1].Col != majorGroups[1][1].Col {
-				//Nope, the cells didn't line up.
-				continue
+			currentGroups := []CellList{majorGroups[subsets[0]], majorGroups[subsets[1]]}
+
+			//Are the possibilities in each row in the same column as the one above?
+			//We need to do this differently depending on if we're row or col.
+			if self.groupType == GROUP_ROW {
+				//TODO: figure out a way to factor group row and col better so we don't duplicate code like this.
+				if currentGroups[0][0].Col != currentGroups[1][0].Col || currentGroups[0][1].Col != currentGroups[1][1].Col {
+					//Nope, the cells didn't line up.
+					continue
+				}
+				//All of the cells in those two columns
+				targetCells = append(grid.Col(currentGroups[0][0].Col), grid.Col(currentGroups[1][0].Col)...)
+
+			} else if self.groupType == GROUP_COL {
+				if currentGroups[0][0].Row != currentGroups[1][0].Row || currentGroups[0][1].Row != currentGroups[1][1].Row {
+					//Nope, the cells didn't line up.
+					continue
+				}
+				//All of the cells in those two columns
+				targetCells = append(grid.Row(currentGroups[0][0].Row), grid.Row(currentGroups[1][0].Row)...)
+
 			}
-			//All of the cells in those two columns
-			targetCells = append(grid.Col(majorGroups[0][0].Col), grid.Col(majorGroups[1][0].Col)...)
 
-		} else if self.groupType == GROUP_COL {
-			if majorGroups[0][0].Row != majorGroups[1][0].Row || majorGroups[0][1].Row != majorGroups[1][1].Row {
-				//Nope, the cells didn't line up.
-				continue
+			//Then remove the cells that are the pointerCells
+			targetCells = targetCells.RemoveCells(currentGroups[0])
+			targetCells = targetCells.RemoveCells(currentGroups[1])
+
+			//Okay, we found a pair that works. Create a step for it (if it's useful)
+			step := &SolveStep{targetCells, append(currentGroups[0], currentGroups[1]...), IntSlice{i}, nil, self}
+			if step.IsUseful(grid) {
+				results = append(results, step)
 			}
-			//All of the cells in those two columns
-			targetCells = append(grid.Row(majorGroups[0][0].Row), grid.Row(majorGroups[1][0].Row)...)
-
 		}
 
-		//Then remove the cells that are the pointerCells
-		targetCells = targetCells.RemoveCells(majorGroups[0])
-		targetCells = targetCells.RemoveCells(majorGroups[1])
-
-		//Okay, we found a pair that works. Create a step for it (if it's useful)
-		step := &SolveStep{targetCells, append(majorGroups[0], majorGroups[1]...), IntSlice{i}, nil, self}
-		if step.IsUseful(grid) {
-			results = append(results, step)
-		}
 	}
 	return results
 }
