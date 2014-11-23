@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"fmt"
 	"math/rand"
 )
 
@@ -13,8 +14,33 @@ func (self *xwingTechnique) Difficulty() float64 {
 }
 
 func (self *xwingTechnique) Description(step *SolveStep) string {
-	//TODO: implement this
-	return ""
+	majorAxis := "NONE"
+	minorAxis := "NONE"
+	var majorGroups IntSlice
+	var minorGroups IntSlice
+	switch self.groupType {
+	case GROUP_ROW:
+		majorAxis = "rows"
+		minorAxis = "columns"
+		majorGroups = step.PointerCells.CollectNums(getRow).Unique()
+		minorGroups = step.PointerCells.CollectNums(getCol).Unique()
+	case GROUP_COL:
+		majorAxis = "columns"
+		minorAxis = "rows"
+		majorGroups = step.PointerCells.CollectNums(getCol).Unique()
+		minorGroups = step.PointerCells.CollectNums(getRow).Unique()
+	}
+
+	return fmt.Sprintf("in %s %s, %d is only possible in %s %s, and %d must be in one of those cells per %s, so it can't be in any other cells in those %s",
+		majorAxis,
+		majorGroups.Description(),
+		step.TargetNums[0],
+		minorAxis,
+		minorGroups.Description(),
+		step.TargetNums[0],
+		majorAxis,
+		minorAxis,
+	)
 }
 
 func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {

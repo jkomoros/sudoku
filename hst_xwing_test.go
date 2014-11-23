@@ -5,11 +5,11 @@ import (
 )
 
 func TestXWingRow(t *testing.T) {
-	//TODO: test descrption
 	options := solveTechniqueTestHelperOptions{
 		targetCells:  []cellRef{{1, 4}, {1, 7}, {8, 4}},
 		pointerCells: []cellRef{{0, 4}, {0, 7}, {7, 4}, {7, 7}},
 		targetNums:   IntSlice([]int{9}),
+		description:  "in rows 0 and 7, 9 is only possible in columns 4 and 7, and 9 must be in one of those cells per rows, so it can't be in any other cells in those columns",
 	}
 	humanSolveTechniqueTestHelper(t, "xwingtest.sdk", "XWing Row", options)
 
