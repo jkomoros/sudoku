@@ -7,6 +7,7 @@ import (
 
 func TestBasicCellList(t *testing.T) {
 	grid := NewGrid()
+	defer grid.Done()
 	grid.Load(SOLVED_TEST_GRID)
 	row := CellList(grid.Row(2))
 	if !row.SameRow() {
@@ -100,6 +101,7 @@ func TestBasicCellList(t *testing.T) {
 
 func TestFilledNums(t *testing.T) {
 	grid := NewGrid()
+	defer grid.Done()
 	if !grid.LoadFromFile(puzzlePath("nakedpairblock1.sdk")) {
 		t.Fatal("Couldn't load file")
 	}
@@ -156,6 +158,7 @@ func TestIntList(t *testing.T) {
 
 func TestInverseSubset(t *testing.T) {
 	grid := NewGrid()
+	defer grid.Done()
 	cells := grid.Row(0)
 
 	indexes := IntSlice([]int{4, 6, 2})

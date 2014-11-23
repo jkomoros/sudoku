@@ -8,14 +8,15 @@ import (
 func BenchmarkHumanSolve(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		grid := NewGrid()
+		defer grid.Done()
 		grid.Load(TEST_GRID)
 		grid.HumanSolve()
-		grid.Done()
 	}
 }
 
 func TestHumanSolve(t *testing.T) {
 	grid := NewGrid()
+	defer grid.Done()
 	grid.Load(TEST_GRID)
 
 	steps := grid.HumanSolution()
@@ -41,13 +42,12 @@ func TestHumanSolve(t *testing.T) {
 		t.Fail()
 	}
 
-	grid.Done()
-
 }
 
 func TestHumanSolveWithGuess(t *testing.T) {
 
 	grid := NewGrid()
+	defer grid.Done()
 
 	if !grid.LoadFromFile(puzzlePath("harddifficulty.sdk")) {
 		t.Fatal("harddifficulty.sdk wasn't loaded")
@@ -83,6 +83,7 @@ func TestHumanSolveWithGuess(t *testing.T) {
 func TestStepsDescription(t *testing.T) {
 
 	grid := NewGrid()
+	defer grid.Done()
 
 	//It's really brittle that we load techniques in this way... it changes every time we add a new early technique!
 	steps := SolveDirections{
@@ -137,6 +138,7 @@ func TestStepsDescription(t *testing.T) {
 
 func TestPuzzleDifficulty(t *testing.T) {
 	grid := NewGrid()
+	defer grid.Done()
 	grid.Load(TEST_GRID)
 
 	difficulty := grid.Difficulty()
@@ -150,8 +152,6 @@ func TestPuzzleDifficulty(t *testing.T) {
 		t.Log("The grid's difficulty was outside of allowed bounds.")
 		t.Fail()
 	}
-
-	grid.Done()
 
 	puzzleFilenames := []string{"harddifficulty.sdk", "harddifficulty2.sdk"}
 

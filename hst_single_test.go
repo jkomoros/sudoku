@@ -43,6 +43,7 @@ func TestObviousInCollectionBlock(t *testing.T) {
 
 func TestSolveOnlyLegalNumber(t *testing.T) {
 	grid := NewGrid()
+	defer grid.Done()
 	//Load up a solved grid
 	grid.Load(SOLVED_TEST_GRID)
 	cell := grid.Cell(3, 3)
@@ -88,8 +89,6 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 		t.Log("The only legal number technique did actually mutate the grid.")
 		t.Fail()
 	}
-
-	grid.Done()
 }
 
 //TODO: use the test solve helper func for these three tests.
@@ -164,6 +163,7 @@ func TestNecessaryInRow(t *testing.T) {
 
 func TestNecessaryInCol(t *testing.T) {
 	grid := NewGrid()
+	defer grid.Done()
 	//Load up a solved grid
 	grid.Load(SOLVED_TEST_GRID)
 
@@ -227,12 +227,11 @@ func TestNecessaryInCol(t *testing.T) {
 		t.Log("The necessary in col technique did actually mutate the grid.")
 		t.Fail()
 	}
-
-	grid.Done()
 }
 
 func TestNecessaryInBlock(t *testing.T) {
 	grid := NewGrid()
+	defer grid.Done()
 	//Load up a solved grid
 	grid.Load(SOLVED_TEST_GRID)
 
@@ -296,7 +295,5 @@ func TestNecessaryInBlock(t *testing.T) {
 		t.Log("The necessary in block technique did actually mutate the grid.")
 		t.Fail()
 	}
-
-	grid.Done()
 
 }

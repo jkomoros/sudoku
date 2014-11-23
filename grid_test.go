@@ -402,6 +402,7 @@ func TestGridLoad(t *testing.T) {
 
 func TestAdvancedSolve(t *testing.T) {
 	grid := NewGrid()
+	defer grid.Done()
 	grid.LoadFromFile(puzzlePath("advancedtestgrid.sdk"))
 
 	if grid.DataString() != ADVANCED_TEST_GRID {
@@ -484,6 +485,7 @@ func TestAdvancedSolve(t *testing.T) {
 
 func TestTranspose(t *testing.T) {
 	grid := NewGrid()
+	defer grid.Done()
 	grid.Load(TEST_GRID)
 	transposedGrid := grid.transpose()
 	if transposedGrid == nil {

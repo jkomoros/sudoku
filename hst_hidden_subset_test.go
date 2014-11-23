@@ -6,6 +6,7 @@ import (
 
 func TestSubsetCellsWithNUniquePossibilities(t *testing.T) {
 	grid := NewGrid()
+	defer grid.Done()
 	if !grid.LoadFromFile(puzzlePath("hiddenpair1_filled.sdk")) {
 		t.Log("Failed to load hiddenpair1_filled.sdk")
 		t.Fail()
@@ -28,8 +29,6 @@ func TestSubsetCellsWithNUniquePossibilities(t *testing.T) {
 	if !numList.SameContentAs(IntSlice([]int{3, 5})) {
 		t.Error("Subset cells unique came back with wrong numbers: ", numList)
 	}
-
-	grid.Done()
 }
 
 func TestHiddenPairRow(t *testing.T) {
