@@ -63,7 +63,7 @@ func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
 					continue
 				}
 				//All of the cells in those two columns
-				targetCells = append(grid.Col(currentGroups[0][0].Col), grid.Col(currentGroups[1][0].Col)...)
+				targetCells = append(grid.Col(currentGroups[0][0].Col), grid.Col(currentGroups[0][1].Col)...)
 
 			} else if self.groupType == GROUP_COL {
 				if currentGroups[0][0].Row != currentGroups[1][0].Row || currentGroups[0][1].Row != currentGroups[1][1].Row {
@@ -71,7 +71,7 @@ func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
 					continue
 				}
 				//All of the cells in those two columns
-				targetCells = append(grid.Row(currentGroups[0][0].Row), grid.Row(currentGroups[1][0].Row)...)
+				targetCells = append(grid.Row(currentGroups[0][0].Row), grid.Row(currentGroups[0][1].Row)...)
 
 			}
 
