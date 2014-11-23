@@ -77,7 +77,9 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 	}
 
 	if options.transpose {
-		grid = grid.transpose()
+		newGrid := grid.transpose()
+		grid.Done()
+		grid = newGrid
 	}
 
 	solver := techniquesByName[techniqueName]

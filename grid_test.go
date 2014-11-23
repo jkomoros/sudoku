@@ -423,6 +423,7 @@ func TestAdvancedSolve(t *testing.T) {
 	}
 
 	copy := grid.Copy()
+	defer copy.Done()
 
 	copy.fillSimpleCells()
 
@@ -478,9 +479,6 @@ func TestAdvancedSolve(t *testing.T) {
 	//TODO: test that nOrFewerSolutions does stop at max (unless cached)
 	//TODO: test HasMultipleSolutions
 
-	grid.Done()
-	copy.Done()
-
 }
 
 func TestTranspose(t *testing.T) {
@@ -488,6 +486,7 @@ func TestTranspose(t *testing.T) {
 	defer grid.Done()
 	grid.Load(TEST_GRID)
 	transposedGrid := grid.transpose()
+	defer transposedGrid.Done()
 	if transposedGrid == nil {
 		t.Log("Transpose gave us back a nil grid")
 		t.FailNow()
@@ -500,7 +499,6 @@ func TestTranspose(t *testing.T) {
 		t.Log("Transpose did not operate correctly")
 		t.Fail()
 	}
-	grid.Done()
 }
 
 func TestFill(t *testing.T) {
