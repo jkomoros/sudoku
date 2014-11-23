@@ -80,12 +80,18 @@ func main() {
 		}
 
 		//TODO: use of this option leads to a busy loop somewhere... Is it related to the generate-multiple-and-difficulty hang?
+
+		var directions sudoku.SolveDirections
+
+		if options.WALKTHROUGH || options.PRINT_STATS {
+			directions = grid.HumanSolution()
+		}
+
 		if options.WALKTHROUGH {
-			fmt.Fprintln(output, grid.HumanWalkthrough())
+			fmt.Fprintln(output, directions.Walkthrough(grid))
 		}
 		if options.PRINT_STATS {
 			fmt.Fprintln(output, grid.Difficulty())
-			directions := grid.HumanSolution()
 			fmt.Fprintln(output, strings.Join(directions.Stats(), "\n"))
 		}
 		if options.PUZZLE_TO_SOLVE != "" {
