@@ -466,6 +466,7 @@ func humanSolveGuess(grid *Grid) []*SolveStep {
 			//Success!
 			//Make ourselves look like that grid (to pass back the state of what the solution was) and return.
 			grid.replace(gridCopy)
+			gridCopy.Done()
 			return append([]*SolveStep{guess}, solveSteps...)
 		}
 		//We need to try the next solution.
@@ -481,7 +482,11 @@ func humanSolveGuess(grid *Grid) []*SolveStep {
 		//Stuff it into the TargetNums for the branch step.
 		guess.TargetNums = IntSlice{nextNum}
 
+		gridCopy.Done()
+
 	}
+
+	gridCopy.Done()
 
 	//We failed to find anything (which should never happen...)
 	return nil
@@ -531,10 +536,12 @@ func (self *Grid) Difficulty() float64 {
 
 		if math.Abs(average-lastAverage) < DIFFICULTY_CONVERGENCE {
 			//Okay, we've already converged. Just return early!
+			grid.Done()
 			return average
 		}
 
 		lastAverage = average
+		grid.Done()
 	}
 
 	//We weren't converging... oh well!

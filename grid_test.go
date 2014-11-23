@@ -281,6 +281,7 @@ func TestGridCreation(t *testing.T) {
 
 func TestGridLoad(t *testing.T) {
 	grid := NewGrid()
+	defer grid.Done()
 	grid.Load(TEST_GRID)
 
 	cell := grid.Cell(0, 0)
@@ -317,6 +318,7 @@ func TestGridLoad(t *testing.T) {
 	//Test copying.
 
 	copy := grid.Copy()
+	defer copy.Done()
 
 	if grid.DataString() != copy.DataString() {
 		t.Log("Copied grid does not have the same datastring!")
@@ -394,9 +396,6 @@ func TestGridLoad(t *testing.T) {
 		t.Log("Grid didn't notice when it became invalid because one of its cells has no more possibilities")
 		t.Fail()
 	}
-
-	grid.Done()
-	copy.Done()
 
 }
 

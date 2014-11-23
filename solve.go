@@ -75,6 +75,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 						return
 					}
 					result := grid.(*Grid).searchSolutions(queue, firstRun, max)
+					grid.(*Grid).Done()
 					if result != nil {
 						incomingSolutions <- result
 					}
@@ -109,6 +110,8 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		//There might be some things waiting to go into incomingSolutions here, but because it has a slot
 		//for every thread to be buffered, it's OK, we can just stop now.
 
+		//TODO: the grids waiting in the queue will never have their .Done called. This isn't a big deal--GC should reclaim them--
+		//but we won't have as many that we could reuse.
 		queue.Exit <- true
 
 		self.cachedSolutions = solutions
