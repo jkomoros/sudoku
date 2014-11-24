@@ -58,6 +58,7 @@ TODO:
 * Add more signals for difficulty (and train them)
 	* Will need a generalized pipeline and lookup (and some way for the CSV of intermediate training to say which column is which)
 	* More techniques that are for simple fill steps (that reflect how humans actually detect them). It's easier to reason through what these kinds of steps would be when playing puzzles by yourself
+	* Feed into solve steps which number and where it was filled recently (to more accurately express chaining)
 	* additional ideas:
 		* Number of steps
 		* number of non-fill steps (ideally compared to number of fill steps)
