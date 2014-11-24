@@ -763,7 +763,7 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 				if index, ok := nameToIndex[step.Technique.Name()]; ok {
 					solveStats[index] += 1.0
 				} else {
-					log.Fatal("For some reason we encountered a Technique that wasn't in hte list of Techniques")
+					log.Fatal("For some reason we encountered a Technique that wasn't in hte list of Techniques: ", step.Technique.Name())
 				}
 			}
 		}
