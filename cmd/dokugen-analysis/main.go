@@ -859,7 +859,7 @@ func calculateWeights(stats [][]float64) *regression.Regression {
 			continue
 		}
 		//i of 0 is the observed. techniqueIndex has to be subtracted by 1 for the same reason to get it in 0-indexed.
-		r.SetVarName(i-1, sudoku.Techniques[techniqueIndex-1].Name())
+		r.SetVarName(i-1, sudoku.AllTechniques[techniqueIndex-1].Name())
 	}
 
 	for _, data := range cleanedStats {
