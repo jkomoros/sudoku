@@ -227,7 +227,7 @@ func main() {
 			//Input is data from phase 2a
 			solveData = make([][]float64, len(records))
 			for i, record := range records {
-				if len(record) != len(sudoku.Techniques)+1 {
+				if len(record) != len(sudoku.AllTechniques)+1 {
 					log.Fatal("We didn't find as many columns as we expected in row: ", i)
 				}
 				solveData[i] = make([]float64, len(record))
