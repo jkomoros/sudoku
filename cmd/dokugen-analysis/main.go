@@ -723,7 +723,7 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 
 	//Generate a mapping of technique name to index.
 	nameToIndex := make(map[string]int)
-	for i, technique := range sudoku.Techniques {
+	for i, technique := range sudoku.AllTechniques {
 		nameToIndex[technique.Name()] = i
 	}
 
@@ -755,7 +755,7 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 			continue
 		}
 
-		solveStats := make([]float64, len(sudoku.Techniques))
+		solveStats := make([]float64, len(sudoku.AllTechniques))
 
 		//Accumulate number of times we've seen each technique across all solves.
 		for _, directions := range solveDirections {
