@@ -67,6 +67,16 @@ TODO:
 		* Number of steps before a non-fill is required
 		* How many cells are filled at the beginning
 		* How many cells at beginning have naked singles
+	* General design
+		* SolveStep .Difficulty() --> Weight (and it's inverse weight of how likely a human is to pick them, NOT difficulty)
+		* SolveDirections moves to a separate file
+		* Create DifficultySignal(SolveDirections) map[string]float64 type. Run it over the solvedirections, get a map of signals out of it, merge those signals 
+		into the global list. Then you can multiply those by the weights for the different signals.
+			* Constant becomes a signal that just returns "Constant" "1.0"
+		* Add a signal generator that goes through all SolveTechniques and accumulates the counts.
+		* Load the signals from difficulties.csv (named signals.csv now) into a map of SignalWeights that's loaded at run time.
+		* Difficulty then becomes running all Signals across solvedirections and accuming hte counts, then multiplying by weights and summing.
+		* Remove setDifficulty() from SolveStep
 
 
 * A way for technique finders to import the results of other techniques. For example, onlylegalnumber should import obviousincollection results and not duplicate those. And hiddensubset and nakedsubset should trade their results as input to the others. It's not clear if this additional layers of calculation is worth it or not...
