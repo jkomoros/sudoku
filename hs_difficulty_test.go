@@ -49,12 +49,17 @@ func TestDifficultySignals(t *testing.T) {
 
 func TestSolveDirectionsSignals(t *testing.T) {
 	result := sampleSolveDirections.Signals()
-	golden := DifficultySignals{
-		"Constant":               1.0,
-		"Guess Count":            2.0,
-		"Naked Pair Block Count": 1.0,
-		"Number of Steps":        3.0,
+	golden := DifficultySignals{}
+
+	for _, technique := range AllTechniques {
+		golden[technique.Name()+" Count"] = 0.0
 	}
+
+	golden["Constant"] = 1.0
+	golden["Guess Count"] = 2.0
+	golden["Naked Pair Block Count"] = 1.0
+	golden["Number of Steps"] = 3.0
+
 	if !reflect.DeepEqual(result, golden) {
 		t.Error("SolveDirections.Signals on sampleSolveDirections didn't return right value. Got: ", result, " expected: ", golden)
 	}
@@ -64,10 +69,14 @@ func TestTechniqueSignal(t *testing.T) {
 
 	result := signalTechnique(sampleSolveDirections)
 
-	golden := DifficultySignals{
-		"Guess Count":            2.0,
-		"Naked Pair Block Count": 1.0,
+	golden := DifficultySignals{}
+
+	for _, technique := range AllTechniques {
+		golden[technique.Name()+" Count"] = 0.0
 	}
+
+	golden["Guess Count"] = 2.0
+	golden["Naked Pair Block Count"] = 1.0
 
 	if !reflect.DeepEqual(result, golden) {
 		t.Error("Technique signal didn't work as expected. Got", result, "expected", golden)

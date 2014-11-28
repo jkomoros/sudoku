@@ -237,7 +237,11 @@ func (self DifficultySignals) Add(other DifficultySignals) {
 //Rest of file is different Signals
 
 func signalTechnique(directions SolveDirections) DifficultySignals {
+	//Our contract is to always return every signal name, even if it's 0.0.
 	result := DifficultySignals{}
+	for _, technique := range AllTechniques {
+		result[technique.Name()+" Count"] = 0.0
+	}
 	for _, step := range directions {
 		result[step.Technique.Name()+" Count"]++
 	}
