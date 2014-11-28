@@ -727,7 +727,14 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 		nameToIndex[technique.Name()] = i
 	}
 
+	i := 0
+
 	for j, thePuzzle := range puzzles {
+
+		if !noLimitFlag && queryLimit <= i {
+			log.Println("Stopping solve since we hit the configured limit.")
+			break
+		}
 
 		if verbose {
 			log.Println("Solving puzzle #", j)
@@ -778,6 +785,8 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 		prependedSolveStats := append([]float64{thePuzzle.userRelativeDifficulty}, solveStats...)
 
 		result = append(result, prependedSolveStats)
+
+		i++
 
 	}
 
