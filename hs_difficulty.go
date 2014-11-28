@@ -14,12 +14,15 @@ type DifficultySignals map[string]float64
 type DifficultySignalGenerator func(directions SolveDirections) DifficultySignals
 
 var DifficultySignalGenerators []DifficultySignalGenerator
+var DifficultySignalWeights map[string]float64
 
 func init() {
 	DifficultySignalGenerators = []DifficultySignalGenerator{
 		signalTechnique,
 		signalConstant,
 	}
+
+	//TODO: set reasonable DifficultySignalWeights here after we have training data we feel confident in.
 }
 
 func (self SolveDirections) Stats() []string {
@@ -129,12 +132,18 @@ func (self SolveDirections) Difficulty() float64 {
 
 	if len(self) == 0 {
 		//The puzzle was not able to be solved, apparently.
-		return 1.0
+		return 0.0
 	}
 
-	accum := difficultyConstant
-	for _, step := range self {
-		accum += step.Technique.HumanLikelihood()
+	accum := 0.0
+
+	signals := self.Signals()
+
+	for signal, val := range signals {
+		//We can discard the OK because 0 is a reasonable thing to do with weights we aren't aware of.
+		weight, _ := DifficultySignalWeights[signal]
+
+		accum += val * weight
 	}
 
 	if accum < 0.0 {
