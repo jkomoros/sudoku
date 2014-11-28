@@ -16,3 +16,40 @@ func TestDifficultySignals(t *testing.T) {
 		t.Error("Signals when added didn't have right values. Got", signals, "expected", golden)
 	}
 }
+
+func TestTechniqueSignal(t *testing.T) {
+	directions := SolveDirections{
+		&SolveStep{
+			nil,
+			nil,
+			nil,
+			nil,
+			techniquesByName["Guess"],
+		},
+		&SolveStep{
+			nil,
+			nil,
+			nil,
+			nil,
+			techniquesByName["Naked Pair Block"],
+		},
+		&SolveStep{
+			nil,
+			nil,
+			nil,
+			nil,
+			techniquesByName["Guess"],
+		},
+	}
+
+	result := techniqueSignal(directions)
+
+	golden := DifficultySignals{
+		"Guess":            2.0,
+		"Naked Pair Block": 1.0,
+	}
+
+	if !reflect.DeepEqual(result, golden) {
+		t.Error("Technique signal didn't work as expected. Got", result, "expected", golden)
+	}
+}

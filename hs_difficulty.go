@@ -8,6 +8,9 @@ import (
 
 type DifficultySignals map[string]float64
 
+//A difficulty signal generator can return more than one difficutly signal, so it doesn't just return float64
+type DifficultySignalGenerator func(directions SolveDirections) DifficultySignals
+
 func (self SolveDirections) Stats() []string {
 	//TODO: test this.
 	techniqueCount := make(map[string]int)
@@ -140,4 +143,14 @@ func (self DifficultySignals) Add(other DifficultySignals) {
 	for key, val := range other {
 		self[key] = val
 	}
+}
+
+//Rest of file is different Signals
+
+func techniqueSignal(directions SolveDirections) DifficultySignals {
+	result := DifficultySignals{}
+	for _, step := range directions {
+		result[step.Technique.Name()]++
+	}
+	return result
 }
