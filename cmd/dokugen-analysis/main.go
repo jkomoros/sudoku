@@ -46,6 +46,7 @@ var minPuzzleCollections int
 var calcWeights bool
 var printPuzzleTechniques bool
 var inputIsSolveData bool
+var outputSolveHeader bool
 
 func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
@@ -60,6 +61,7 @@ func init() {
 	flag.BoolVar(&calcWeights, "w", false, "Whether the output you want is to calculate technique weights")
 	flag.BoolVar(&printPuzzleTechniques, "t", false, "If calculating weights, providing this value will output a CSV of linearized score and weight counts.")
 	flag.BoolVar(&inputIsSolveData, "i", false, "If calculating weights, providing this switch will say the input CSV is solve data, not puzzle user difficulty.")
+	flag.BoolVar(&outputSolveHeader, "h", false, "If true and outputting solve data, will include a header row.")
 
 	//We're going to be doing some heavy-duty matrix multiplication, and the matrix package can take advantage of multiple cores.
 	runtime.GOMAXPROCS(6)
@@ -304,6 +306,10 @@ func main() {
 		if printPuzzleTechniques {
 			if inputIsSolveData {
 				log.Fatalln("Passing -t, -w, and -i together is not valid.")
+			}
+
+			if outputSolveHeader {
+				csvOut.Write(allSignalNames())
 			}
 			//2a and export
 			for _, dataPoint := range solveData {
