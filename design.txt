@@ -79,6 +79,7 @@ TODO:
 		* Remove setDifficulty() from SolveStep
 	* Next steps:
 		* Figure out why f9e1e7242012229fc1299e64296bea11032f0f42 commit (where we again load realistic weights) leads to such high `go test` times. Is it just that it's taking longer to converge??
+		* Figure out a way to enumerate all possible signal names.
 		* Make it so the trainer will output a column for each DifficultySignal value (safe to assume that it will always return the same signal names)
 
 
