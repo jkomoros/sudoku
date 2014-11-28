@@ -150,7 +150,7 @@ func (self DifficultySignals) Add(other DifficultySignals) {
 func techniqueSignal(directions SolveDirections) DifficultySignals {
 	result := DifficultySignals{}
 	for _, step := range directions {
-		result[step.Technique.Name()]++
+		result[step.Technique.Name()+" Count"]++
 	}
 	return result
 }

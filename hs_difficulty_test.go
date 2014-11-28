@@ -45,8 +45,8 @@ func TestTechniqueSignal(t *testing.T) {
 	result := techniqueSignal(directions)
 
 	golden := DifficultySignals{
-		"Guess":            2.0,
-		"Naked Pair Block": 1.0,
+		"Guess Count":            2.0,
+		"Naked Pair Block Count": 1.0,
 	}
 
 	if !reflect.DeepEqual(result, golden) {
