@@ -28,6 +28,7 @@ func init() {
 		signalConstant,
 		signalNumberOfSteps,
 		signalPercentageFilledSteps,
+		signalNumberUnfilled,
 	}
 
 	//TODO: set reasonable DifficultySignalWeights here after we have training data we feel confident in.
@@ -274,5 +275,21 @@ func signalPercentageFilledSteps(directions SolveDirections) DifficultySignals {
 
 	return DifficultySignals{
 		"Percentage Fill Steps": numerator / denominator,
+	}
+}
+
+func signalNumberUnfilled(directions SolveDirections) DifficultySignals {
+
+	//We don't have access to the underlying grid, so we'll just count how many fill steps (since each can only add one number, and no numbers are ever unfilled)
+
+	count := 0.0
+	for _, step := range directions {
+		if step.Technique.IsFill() {
+			count++
+		}
+	}
+
+	return DifficultySignals{
+		"Number Unfilled Cells": count,
 	}
 }

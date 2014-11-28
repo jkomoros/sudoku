@@ -68,6 +68,7 @@ func TestSolveDirectionsSignals(t *testing.T) {
 	golden["Naked Pair Block Count"] = 1.0
 	golden["Number of Steps"] = 4.0
 	golden["Percentage Fill Steps"] = 0.75
+	golden["Number Unfilled Cells"] = 3.0
 
 	if !reflect.DeepEqual(result, golden) {
 		t.Error("SolveDirections.Signals on sampleSolveDirections didn't return right value. Got: ", result, " expected: ", golden)
@@ -121,4 +122,15 @@ func TestSignalPercentageFillSteps(t *testing.T) {
 	if !reflect.DeepEqual(result, golden) {
 		t.Error("Percentage fill steps didn't work as expected. Got ", result, " expected ", golden)
 	}
+}
+
+func TestSignalNumberUnfilled(t *testing.T) {
+	result := signalNumberUnfilled(sampleSolveDirections)
+	golden := DifficultySignals{
+		"Number Unfilled Cells": 3.0,
+	}
+	if !reflect.DeepEqual(result, golden) {
+		t.Error("Number unfilled cells didn't work as expected. Got", result, "expected ", golden)
+	}
+
 }
