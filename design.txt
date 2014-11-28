@@ -59,7 +59,7 @@ TODO:
 		* How many cells at beginning have naked singles
 		* Consider having a 1.0 or 0.0 for "has a step" so it's not how MANY, but whether it's in there at all.
 
-* Verify that the regression treats Constant correctly. (I don't think it does; it comes in the signal)
+* Verify that the regression treats Constant correctly. (I think it does now)
 
 * A way for technique finders to import the results of other techniques. For example, onlylegalnumber should import obviousincollection results and not duplicate those. And hiddensubset and nakedsubset should trade their results as input to the others. It's not clear if this additional layers of calculation is worth it or not...
 

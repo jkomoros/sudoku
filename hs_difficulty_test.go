@@ -61,8 +61,6 @@ func TestSolveDirectionsSignals(t *testing.T) {
 	for _, technique := range AllTechniques {
 		golden[technique.Name()+" Count"] = 0.0
 	}
-
-	golden["Constant"] = 1.0
 	golden["Guess Count"] = 2.0
 	golden["Necessary In Row Count"] = 1.0
 	golden["Naked Pair Block Count"] = 1.0
@@ -92,16 +90,6 @@ func TestTechniqueSignal(t *testing.T) {
 
 	if !reflect.DeepEqual(result, golden) {
 		t.Error("Technique signal didn't work as expected. Got", result, "expected", golden)
-	}
-}
-
-func TestConstantSignal(t *testing.T) {
-	result := signalConstant(sampleSolveDirections)
-	golden := DifficultySignals{
-		"Constant": 1.0,
-	}
-	if !reflect.DeepEqual(result, golden) {
-		t.Error("Constant signal didn't work as expected. Got", result, "expected", golden)
 	}
 }
 

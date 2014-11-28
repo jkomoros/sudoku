@@ -25,7 +25,6 @@ var DifficultySignalWeights map[string]float64
 func init() {
 	DifficultySignalGenerators = []DifficultySignalGenerator{
 		signalTechnique,
-		signalConstant,
 		signalNumberOfSteps,
 		signalPercentageFilledSteps,
 		signalNumberUnfilled,
@@ -199,6 +198,12 @@ func (self SolveDirections) Difficulty() float64 {
 
 	accum := 0.0
 
+	if constant, ok := DifficultySignalWeights["Constant"]; ok {
+		accum = constant
+	} else {
+		log.Println("Didn't have the constant term loaded.")
+	}
+
 	signals := self.Signals()
 
 	for signal, val := range signals {
@@ -252,14 +257,6 @@ func signalTechnique(directions SolveDirections) DifficultySignals {
 		result[step.Technique.Name()+" Count"]++
 	}
 	return result
-}
-
-//This signal just returns always returns 1.0. This is how we factor Constants in.
-func signalConstant(directions SolveDirections) DifficultySignals {
-	//Just return 1.0 for everything
-	return DifficultySignals{
-		"Constant": 1.0,
-	}
 }
 
 //This signal is just number of steps. More steps is PROBABLY a harder puzzle.
