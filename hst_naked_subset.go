@@ -10,7 +10,7 @@ type nakedSubsetTechnique struct {
 	*basicSolveTechnique
 }
 
-func (self *nakedSubsetTechnique) Difficulty() float64 {
+func (self *nakedSubsetTechnique) UserLikelihood() float64 {
 	return self.difficultyHelper(6.0)
 }
 

@@ -32,8 +32,10 @@ type SolveTechnique interface {
 	//it's more likely to be an "easy" step because there will be more of them at any time.
 	Find(*Grid) []*SolveStep
 	IsFill() bool
-	//How difficult a real human would say this technique is. Generally inversely related to how often a real person would pick it. 0.0 to 1.0.
-	Difficulty() float64
+	//How likely a user would be to pick this technique. Generally inversely related to difficulty (but not perfectly).
+	//This value will be used to pick which technique to apply.
+	//The value is inversely related to how often it will be picked.
+	UserLikelihood() float64
 }
 
 type cellGroupType int
@@ -397,6 +399,7 @@ func (self *basicSolveTechnique) IsFill() bool {
 	return self.isFill
 }
 
+//TOOD: this is now named incorrectly. (It should be likelihoodHelper)
 func (self *basicSolveTechnique) difficultyHelper(baseDifficulty float64) float64 {
 	//Embedding structs should call into this to provide their own Difficulty
 

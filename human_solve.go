@@ -283,7 +283,7 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 
 		possibilitiesWeights := make([]float64, len(possibilities))
 		for i, possibility := range possibilities {
-			possibilitiesWeights[i] = possibility.Technique.Difficulty()
+			possibilitiesWeights[i] = possibility.Technique.UserLikelihood()
 		}
 		step := possibilities[randomIndexWithInvertedWeights(possibilitiesWeights)]
 
