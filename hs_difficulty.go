@@ -154,3 +154,10 @@ func techniqueSignal(directions SolveDirections) DifficultySignals {
 	}
 	return result
 }
+
+func constantSignal(directions SolveDirections) DifficultySignals {
+	//Just return 1.0 for everything
+	return DifficultySignals{
+		"Constant": 1.0,
+	}
+}

@@ -5,20 +5,10 @@ import (
 	"testing"
 )
 
-func TestDifficultySignals(t *testing.T) {
-	signals := DifficultySignals{"a": 1.0, "b": 5.0}
-	other := DifficultySignals{"a": 3.2, "c": 6.0}
+var sampleSolveDirections SolveDirections
 
-	golden := DifficultySignals{"a": 3.2, "b": 5.0, "c": 6.0}
-	signals.Add(other)
-
-	if !reflect.DeepEqual(signals, golden) {
-		t.Error("Signals when added didn't have right values. Got", signals, "expected", golden)
-	}
-}
-
-func TestTechniqueSignal(t *testing.T) {
-	directions := SolveDirections{
+func init() {
+	sampleSolveDirections = SolveDirections{
 		&SolveStep{
 			nil,
 			nil,
@@ -41,8 +31,23 @@ func TestTechniqueSignal(t *testing.T) {
 			techniquesByName["Guess"],
 		},
 	}
+}
 
-	result := techniqueSignal(directions)
+func TestDifficultySignals(t *testing.T) {
+	signals := DifficultySignals{"a": 1.0, "b": 5.0}
+	other := DifficultySignals{"a": 3.2, "c": 6.0}
+
+	golden := DifficultySignals{"a": 3.2, "b": 5.0, "c": 6.0}
+	signals.Add(other)
+
+	if !reflect.DeepEqual(signals, golden) {
+		t.Error("Signals when added didn't have right values. Got", signals, "expected", golden)
+	}
+}
+
+func TestTechniqueSignal(t *testing.T) {
+
+	result := techniqueSignal(sampleSolveDirections)
 
 	golden := DifficultySignals{
 		"Guess Count":            2.0,
@@ -51,5 +56,15 @@ func TestTechniqueSignal(t *testing.T) {
 
 	if !reflect.DeepEqual(result, golden) {
 		t.Error("Technique signal didn't work as expected. Got", result, "expected", golden)
+	}
+}
+
+func TestConstantSignal(t *testing.T) {
+	result := constantSignal(sampleSolveDirections)
+	golden := DifficultySignals{
+		"Constant": 1.0,
+	}
+	if !reflect.DeepEqual(result, golden) {
+		t.Error("Constant signal didn't work as expected. Got", result, "expected", golden)
 	}
 }
