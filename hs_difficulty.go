@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+type DifficultySignals map[string]float64
+
 func (self SolveDirections) Stats() []string {
 	//TODO: test this.
 	techniqueCount := make(map[string]int)
@@ -132,4 +134,10 @@ func (self SolveDirections) Difficulty() float64 {
 	}
 
 	return accum
+}
+
+func (self DifficultySignals) Add(other DifficultySignals) {
+	for key, val := range other {
+		self[key] = val
+	}
 }
