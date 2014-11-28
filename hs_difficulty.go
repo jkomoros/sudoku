@@ -1,8 +1,11 @@
 package sudoku
 
 import (
+	"encoding/csv"
 	"fmt"
 	"log"
+	"os"
+	"strconv"
 	"strings"
 )
 
@@ -12,6 +15,8 @@ type DifficultySignals map[string]float64
 //Each signal generator should always return a map with the SAME keys--so if you've called it once you know what the
 //next calls will have as keys.
 type DifficultySignalGenerator func(directions SolveDirections) DifficultySignals
+
+const DIFFICULTY_WEIGHT_FILENAME = "difficulties.csv"
 
 var DifficultySignalGenerators []DifficultySignalGenerator
 var DifficultySignalWeights map[string]float64
@@ -23,6 +28,53 @@ func init() {
 	}
 
 	//TODO: set reasonable DifficultySignalWeights here after we have training data we feel confident in.
+	worked := false
+	difficultyFile := DIFFICULTY_WEIGHT_FILENAME
+
+	//For now, just search upwards until we find a difficulty CSV.
+	for !worked {
+		worked = loadDifficultyWeights(difficultyFile)
+		if worked {
+			break
+		}
+		difficultyFile = "../" + difficultyFile
+		//TODO: when should this end?
+	}
+}
+
+func loadDifficultyWeights(fileName string) bool {
+
+	//TODO: test that this loading works.
+
+	inputFile, err := os.Open(fileName)
+	if err != nil {
+
+		log.Println("Could not open the specified input CSV.")
+		return false
+
+	}
+	defer inputFile.Close()
+	csvIn := csv.NewReader(inputFile)
+	records, csvErr := csvIn.ReadAll()
+	if csvErr != nil {
+		log.Println("The provided CSV could not be parsed.")
+		return false
+	}
+
+	//Load up the weights into a map.
+	DifficultySignalWeights = make(map[string]float64)
+	for i, record := range records {
+		if len(record) != 2 {
+			log.Fatalln("Record in weights csv wasn't right size: ", i)
+		}
+		theFloat, err := strconv.ParseFloat(record[1], 64)
+		if err != nil {
+			log.Fatalln("Record in weights had an invalid float: ", i)
+		}
+		DifficultySignalWeights[record[0]] = theFloat
+	}
+
+	return true
 }
 
 func (self SolveDirections) Stats() []string {

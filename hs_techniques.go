@@ -1,11 +1,8 @@
 package sudoku
 
 import (
-	"encoding/csv"
 	"log"
 	"math"
-	"os"
-	"strconv"
 )
 
 /*
@@ -327,68 +324,6 @@ func init() {
 		techniquesByName[technique.Name()] = technique
 	}
 
-}
-
-func loadDifficulties(fileName string) bool {
-
-	//TODO: this is now no longer used. Bring the modified version in to load DifficultySignalWeights.
-
-	//TODO: test that this loading works.
-
-	log.Println("Attempting to configure difficulties from ", fileName)
-
-	inputFile, err := os.Open(fileName)
-	if err != nil {
-
-		log.Println("Could not open the specified input CSV.")
-		return false
-
-	}
-	defer inputFile.Close()
-	csvIn := csv.NewReader(inputFile)
-	records, csvErr := csvIn.ReadAll()
-	if csvErr != nil {
-		log.Println("The provided CSV could not be parsed.")
-		return false
-	}
-
-	//Load up the weights into a map.
-	techniqueDifficulties := make(map[string]float64)
-	for i, record := range records {
-		if len(record) != 2 {
-			log.Fatalln("Record in weights csv wasn't right size: ", i)
-		}
-		theFloat, err := strconv.ParseFloat(record[1], 64)
-		if err != nil {
-			log.Fatalln("Record in weights had an invalid float: ", i)
-		}
-		techniqueDifficulties[record[0]] = theFloat
-	}
-
-	validNames := 0
-	//TODO: report on which names were invalid.
-	for name, _ := range techniqueDifficulties {
-		//technique, ok := techniquesByName[name]
-		_, ok := techniquesByName[name]
-		if ok {
-			//technique.setDifficulty(val)
-			validNames++
-		} else {
-			if name == "Constant" {
-				//difficultyConstant = val
-				validNames++
-			} else {
-
-				log.Println("Couldn't find technique provided in weights CSV: ", name)
-			}
-
-		}
-	}
-	if validNames != len(techniqueDifficulties) {
-		log.Println(len(techniqueDifficulties)-validNames, "difficulties were in CSV but did not align with weights.")
-	}
-
-	return true
 }
 
 func (self *basicSolveTechnique) Name() string {
