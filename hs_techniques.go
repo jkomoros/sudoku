@@ -34,8 +34,6 @@ type SolveTechnique interface {
 	IsFill() bool
 	//How difficult a real human would say this technique is. Generally inversely related to how often a real person would pick it. 0.0 to 1.0.
 	Difficulty() float64
-	//Not exported; used for us to late-bind weights from a file.
-	setDifficulty(difficulty float64)
 }
 
 type cellGroupType int
@@ -53,8 +51,7 @@ type basicSolveTechnique struct {
 	groupType cellGroupType
 	//Size of set in technique, e.g. single = 1, pair = 2, triple = 3
 	//Used for generating descriptions in some sub-structs.
-	k          int
-	difficulty float64
+	k int
 }
 
 func init() {
@@ -69,7 +66,6 @@ func init() {
 				true,
 				GROUP_ROW,
 				1,
-				0.0,
 			},
 		},
 		&hiddenSingleTechnique{
@@ -78,7 +74,6 @@ func init() {
 				true,
 				GROUP_COL,
 				1,
-				0.0,
 			},
 		},
 		&hiddenSingleTechnique{
@@ -87,7 +82,6 @@ func init() {
 				true,
 				GROUP_BLOCK,
 				1,
-				0.0,
 			},
 		},
 		&nakedSingleTechnique{
@@ -97,7 +91,6 @@ func init() {
 				true,
 				GROUP_NONE,
 				1,
-				0.0,
 			},
 		},
 		&obviousInCollectionTechnique{
@@ -106,7 +99,6 @@ func init() {
 				true,
 				GROUP_ROW,
 				1,
-				0.0,
 			},
 		},
 		&obviousInCollectionTechnique{
@@ -115,7 +107,6 @@ func init() {
 				true,
 				GROUP_COL,
 				1,
-				0.0,
 			},
 		},
 		&obviousInCollectionTechnique{
@@ -124,7 +115,6 @@ func init() {
 				true,
 				GROUP_BLOCK,
 				1,
-				0.0,
 			},
 		},
 		&pointingPairTechnique{
@@ -133,7 +123,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				2,
-				0.0,
 			},
 		},
 		&pointingPairTechnique{
@@ -142,7 +131,6 @@ func init() {
 				false,
 				GROUP_COL,
 				2,
-				0.0,
 			},
 		},
 		&blockBlockInteractionTechnique{
@@ -151,7 +139,6 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				2,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -160,7 +147,6 @@ func init() {
 				false,
 				GROUP_COL,
 				2,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -169,7 +155,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				2,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -178,7 +163,6 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				2,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -187,7 +171,6 @@ func init() {
 				false,
 				GROUP_COL,
 				3,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -196,7 +179,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				3,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -205,7 +187,6 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				3,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -214,7 +195,6 @@ func init() {
 				false,
 				GROUP_COL,
 				4,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -223,7 +203,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				4,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -232,7 +211,6 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				4,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -241,7 +219,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				2,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -250,7 +227,6 @@ func init() {
 				false,
 				GROUP_COL,
 				2,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -259,7 +235,6 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				2,
-				0.0,
 			},
 		},
 		&xwingTechnique{
@@ -268,7 +243,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				2,
-				0.0,
 			},
 		},
 		&xwingTechnique{
@@ -277,7 +251,6 @@ func init() {
 				false,
 				GROUP_COL,
 				2,
-				0.0,
 			},
 		},
 	}
@@ -289,7 +262,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				3,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -298,7 +270,6 @@ func init() {
 				false,
 				GROUP_COL,
 				3,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -307,7 +278,6 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				3,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -316,7 +286,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				4,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -325,7 +294,6 @@ func init() {
 				false,
 				GROUP_COL,
 				4,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -334,7 +302,6 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				4,
-				0.0,
 			},
 		},
 	}
@@ -345,7 +312,6 @@ func init() {
 			true,
 			GROUP_NONE,
 			1,
-			0.0,
 		},
 	}
 
@@ -359,17 +325,11 @@ func init() {
 		techniquesByName[technique.Name()] = technique
 	}
 
-	//TODO: burn in a good set of difficulties, and don't load this file by default.
-	if !loadDifficulties("difficulties.csv") {
-		//If you're running one of the cmd's, we need to search higher in the directory.
-		//This is obviously a horrid, horrid hack. I'm only landing it since the whole
-		//auto load of difficulties is temporary for now.
-		loadDifficulties("../../difficulties.csv")
-	}
-
 }
 
 func loadDifficulties(fileName string) bool {
+
+	//TODO: this is now no longer used. Bring the modified version in to load DifficultySignalWeights.
 
 	//TODO: test that this loading works.
 
@@ -406,9 +366,10 @@ func loadDifficulties(fileName string) bool {
 	validNames := 0
 	//TODO: report on which names were invalid.
 	for name, val := range techniqueDifficulties {
-		technique, ok := techniquesByName[name]
+		//technique, ok := techniquesByName[name]
+		_, ok := techniquesByName[name]
 		if ok {
-			technique.setDifficulty(val)
+			//technique.setDifficulty(val)
 			validNames++
 		} else {
 			if name == "Constant" {
@@ -428,10 +389,6 @@ func loadDifficulties(fileName string) bool {
 	return true
 }
 
-func (self *basicSolveTechnique) setDifficulty(difficulty float64) {
-	self.difficulty = difficulty
-}
-
 func (self *basicSolveTechnique) Name() string {
 	return self.name
 }
@@ -442,11 +399,6 @@ func (self *basicSolveTechnique) IsFill() bool {
 
 func (self *basicSolveTechnique) difficultyHelper(baseDifficulty float64) float64 {
 	//Embedding structs should call into this to provide their own Difficulty
-	//If we have a non-default difficulty, just return that.
-
-	if self.difficulty != 0.0 {
-		return self.difficulty
-	}
 
 	//TODO: the default difficulties, as configured, will mean that SolveDirection's Difficulty() will almost always clamp to 1.0.
 	//They're only useful in terms of a reasonable picking of techniques when multiple apply.
