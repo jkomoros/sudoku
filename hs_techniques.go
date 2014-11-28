@@ -1,11 +1,8 @@
 package sudoku
 
 import (
-	"encoding/csv"
 	"log"
 	"math"
-	"os"
-	"strconv"
 )
 
 /*
@@ -32,10 +29,10 @@ type SolveTechnique interface {
 	//it's more likely to be an "easy" step because there will be more of them at any time.
 	Find(*Grid) []*SolveStep
 	IsFill() bool
-	//How difficult a real human would say this technique is. Generally inversely related to how often a real person would pick it. 0.0 to 1.0.
-	Difficulty() float64
-	//Not exported; used for us to late-bind weights from a file.
-	setDifficulty(difficulty float64)
+	//How likely a user would be to pick this technique. Generally inversely related to difficulty (but not perfectly).
+	//This value will be used to pick which technique to apply.
+	//The value is inversely related to how often it will be picked.
+	HumanLikelihood() float64
 }
 
 type cellGroupType int
@@ -53,8 +50,7 @@ type basicSolveTechnique struct {
 	groupType cellGroupType
 	//Size of set in technique, e.g. single = 1, pair = 2, triple = 3
 	//Used for generating descriptions in some sub-structs.
-	k          int
-	difficulty float64
+	k int
 }
 
 func init() {
@@ -69,7 +65,6 @@ func init() {
 				true,
 				GROUP_ROW,
 				1,
-				0.0,
 			},
 		},
 		&hiddenSingleTechnique{
@@ -78,7 +73,6 @@ func init() {
 				true,
 				GROUP_COL,
 				1,
-				0.0,
 			},
 		},
 		&hiddenSingleTechnique{
@@ -87,7 +81,6 @@ func init() {
 				true,
 				GROUP_BLOCK,
 				1,
-				0.0,
 			},
 		},
 		&nakedSingleTechnique{
@@ -97,7 +90,6 @@ func init() {
 				true,
 				GROUP_NONE,
 				1,
-				0.0,
 			},
 		},
 		&obviousInCollectionTechnique{
@@ -106,7 +98,6 @@ func init() {
 				true,
 				GROUP_ROW,
 				1,
-				0.0,
 			},
 		},
 		&obviousInCollectionTechnique{
@@ -115,7 +106,6 @@ func init() {
 				true,
 				GROUP_COL,
 				1,
-				0.0,
 			},
 		},
 		&obviousInCollectionTechnique{
@@ -124,7 +114,6 @@ func init() {
 				true,
 				GROUP_BLOCK,
 				1,
-				0.0,
 			},
 		},
 		&pointingPairTechnique{
@@ -133,7 +122,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				2,
-				0.0,
 			},
 		},
 		&pointingPairTechnique{
@@ -142,7 +130,6 @@ func init() {
 				false,
 				GROUP_COL,
 				2,
-				0.0,
 			},
 		},
 		&blockBlockInteractionTechnique{
@@ -151,7 +138,6 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				2,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -160,7 +146,6 @@ func init() {
 				false,
 				GROUP_COL,
 				2,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -169,7 +154,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				2,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -178,7 +162,6 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				2,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -187,7 +170,6 @@ func init() {
 				false,
 				GROUP_COL,
 				3,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -196,7 +178,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				3,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -205,7 +186,6 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				3,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -214,7 +194,6 @@ func init() {
 				false,
 				GROUP_COL,
 				4,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -223,7 +202,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				4,
-				0.0,
 			},
 		},
 		&nakedSubsetTechnique{
@@ -232,7 +210,6 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				4,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -241,7 +218,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				2,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -250,7 +226,6 @@ func init() {
 				false,
 				GROUP_COL,
 				2,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -259,7 +234,6 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				2,
-				0.0,
 			},
 		},
 		&xwingTechnique{
@@ -268,7 +242,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				2,
-				0.0,
 			},
 		},
 		&xwingTechnique{
@@ -277,7 +250,6 @@ func init() {
 				false,
 				GROUP_COL,
 				2,
-				0.0,
 			},
 		},
 	}
@@ -289,7 +261,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				3,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -298,7 +269,6 @@ func init() {
 				false,
 				GROUP_COL,
 				3,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -307,7 +277,6 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				3,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -316,7 +285,6 @@ func init() {
 				false,
 				GROUP_ROW,
 				4,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -325,7 +293,6 @@ func init() {
 				false,
 				GROUP_COL,
 				4,
-				0.0,
 			},
 		},
 		&hiddenSubsetTechnique{
@@ -334,7 +301,6 @@ func init() {
 				false,
 				GROUP_BLOCK,
 				4,
-				0.0,
 			},
 		},
 	}
@@ -345,7 +311,6 @@ func init() {
 			true,
 			GROUP_NONE,
 			1,
-			0.0,
 		},
 	}
 
@@ -359,77 +324,6 @@ func init() {
 		techniquesByName[technique.Name()] = technique
 	}
 
-	//TODO: burn in a good set of difficulties, and don't load this file by default.
-	if !loadDifficulties("difficulties.csv") {
-		//If you're running one of the cmd's, we need to search higher in the directory.
-		//This is obviously a horrid, horrid hack. I'm only landing it since the whole
-		//auto load of difficulties is temporary for now.
-		loadDifficulties("../../difficulties.csv")
-	}
-
-}
-
-func loadDifficulties(fileName string) bool {
-
-	//TODO: test that this loading works.
-
-	log.Println("Attempting to configure difficulties from ", fileName)
-
-	inputFile, err := os.Open(fileName)
-	if err != nil {
-
-		log.Println("Could not open the specified input CSV.")
-		return false
-
-	}
-	defer inputFile.Close()
-	csvIn := csv.NewReader(inputFile)
-	records, csvErr := csvIn.ReadAll()
-	if csvErr != nil {
-		log.Println("The provided CSV could not be parsed.")
-		return false
-	}
-
-	//Load up the weights into a map.
-	techniqueDifficulties := make(map[string]float64)
-	for i, record := range records {
-		if len(record) != 2 {
-			log.Fatalln("Record in weights csv wasn't right size: ", i)
-		}
-		theFloat, err := strconv.ParseFloat(record[1], 64)
-		if err != nil {
-			log.Fatalln("Record in weights had an invalid float: ", i)
-		}
-		techniqueDifficulties[record[0]] = theFloat
-	}
-
-	validNames := 0
-	//TODO: report on which names were invalid.
-	for name, val := range techniqueDifficulties {
-		technique, ok := techniquesByName[name]
-		if ok {
-			technique.setDifficulty(val)
-			validNames++
-		} else {
-			if name == "Constant" {
-				difficultyConstant = val
-				validNames++
-			} else {
-
-				log.Println("Couldn't find technique provided in weights CSV: ", name)
-			}
-
-		}
-	}
-	if validNames != len(techniqueDifficulties) {
-		log.Println(len(techniqueDifficulties)-validNames, "difficulties were in CSV but did not align with weights.")
-	}
-
-	return true
-}
-
-func (self *basicSolveTechnique) setDifficulty(difficulty float64) {
-	self.difficulty = difficulty
 }
 
 func (self *basicSolveTechnique) Name() string {
@@ -440,13 +334,9 @@ func (self *basicSolveTechnique) IsFill() bool {
 	return self.isFill
 }
 
+//TOOD: this is now named incorrectly. (It should be likelihoodHelper)
 func (self *basicSolveTechnique) difficultyHelper(baseDifficulty float64) float64 {
 	//Embedding structs should call into this to provide their own Difficulty
-	//If we have a non-default difficulty, just return that.
-
-	if self.difficulty != 0.0 {
-		return self.difficulty
-	}
 
 	//TODO: the default difficulties, as configured, will mean that SolveDirection's Difficulty() will almost always clamp to 1.0.
 	//They're only useful in terms of a reasonable picking of techniques when multiple apply.

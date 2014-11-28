@@ -25,7 +25,7 @@ func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep 
 	return &SolveStep{cellArr, nil, numArr, nil, technique}
 }
 
-func (self *obviousInCollectionTechnique) Difficulty() float64 {
+func (self *obviousInCollectionTechnique) HumanLikelihood() float64 {
 	return self.difficultyHelper(1.0)
 }
 
@@ -80,7 +80,7 @@ func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter 
 	return results
 }
 
-func (self *nakedSingleTechnique) Difficulty() float64 {
+func (self *nakedSingleTechnique) HumanLikelihood() float64 {
 	return self.difficultyHelper(2.0)
 }
 
@@ -111,7 +111,7 @@ func (self *nakedSingleTechnique) Find(grid *Grid) []*SolveStep {
 	}
 }
 
-func (self *hiddenSingleTechnique) Difficulty() float64 {
+func (self *hiddenSingleTechnique) HumanLikelihood() float64 {
 	return self.difficultyHelper(1.8)
 }
 

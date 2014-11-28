@@ -141,7 +141,8 @@ func TestPuzzleDifficulty(t *testing.T) {
 	defer grid.Done()
 	grid.Load(TEST_GRID)
 
-	difficulty := grid.Difficulty()
+	//We use the cheaper one for testing so it completes faster.
+	difficulty := grid.calcluateDifficulty(false)
 
 	if grid.Solved() {
 		t.Log("Difficulty shouldn't have changed the underlying grid, but it did.")
@@ -172,7 +173,8 @@ func puzzleDifficultyHelper(filename string, t *testing.T) {
 	done := make(chan bool)
 
 	go func() {
-		_ = otherGrid.Difficulty()
+		//We use the cheaper one for testing so it completes faster
+		_ = otherGrid.calcluateDifficulty(false)
 		done <- true
 	}()
 

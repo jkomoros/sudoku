@@ -2,9 +2,7 @@ package sudoku
 
 import (
 	"fmt"
-	"log"
 	"math"
-	"strings"
 )
 
 //The actual techniques are intialized in hs_techniques.go, and actually defined in hst_*.go files.
@@ -21,9 +19,6 @@ var AllTechniques []SolveTechnique
 
 //Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
 const MAX_DIFFICULTY_ITERATIONS = 50
-
-//This number is the 'Constant' term from the multiple linear regression to learn the weights.
-var difficultyConstant float64
 
 //How close we have to get to the average to feel comfortable our difficulty is converging.
 const DIFFICULTY_CONVERGENCE = 0.0005
@@ -113,134 +108,6 @@ func (self *SolveStep) normalize() {
 	self.TargetCells.Sort()
 	self.TargetNums.Sort()
 	self.PointerNums.Sort()
-}
-
-func (self SolveDirections) Stats() []string {
-	//TODO: test this.
-	techniqueCount := make(map[string]int)
-	for _, step := range self {
-		techniqueCount[step.Technique.Name()] += 1
-	}
-	var result []string
-
-	//TODO: use a standard divider across the codebase
-	divider := "-------------------------"
-
-	result = append(result, divider)
-	result = append(result, fmt.Sprintf("Difficulty : %f", self.Difficulty()))
-	result = append(result, divider)
-	result = append(result, fmt.Sprintf("Step count: %d", len(self)))
-	result = append(result, divider)
-
-	//We want a stable ordering for technique counts.
-	for _, technique := range AllTechniques {
-		result = append(result, fmt.Sprintf("%s : %d", technique.Name(), techniqueCount[technique.Name()]))
-	}
-
-	result = append(result, divider)
-
-	return result
-}
-
-func (self SolveDirections) Description() []string {
-
-	if len(self) == 0 {
-		return []string{""}
-	}
-
-	descriptions := make([]string, len(self))
-
-	for i, step := range self {
-		intro := ""
-		switch i {
-		case 0:
-			intro = "First, "
-		case len(self) - 1:
-			intro = "Finally, "
-		default:
-			//TODO: switch between "then" and "next" randomly.
-			intro = "Next, "
-		}
-		descriptions[i] = intro + strings.ToLower(step.Description())
-
-	}
-	return descriptions
-}
-
-func (self SolveDirections) Difficulty() float64 {
-	//How difficult the solve directions described are. The measure of difficulty we use is
-	//just summing up weights we see; this captures:
-	//* Number of steps
-	//* Average difficulty of steps
-	//* Number of hard steps
-	//* (kind of) the hardest step: because the difficulties go up expontentionally.
-
-	//This method assumes the weights have been calibrated empirically to give scores between 0.0 and 1.0
-	//without normalization here.
-
-	if len(self) == 0 {
-		//The puzzle was not able to be solved, apparently.
-		return 1.0
-	}
-
-	accum := difficultyConstant
-	for _, step := range self {
-		accum += step.Technique.Difficulty()
-	}
-
-	if accum < 0.0 {
-		log.Println("Accumuldated difficulty snapped to 0.0:", accum)
-		accum = 0.0
-	}
-
-	if accum > 1.0 {
-		log.Println("Accumulated difficulty snapped to 1.0:", accum)
-		accum = 1.0
-	}
-
-	return accum
-}
-
-func (self SolveDirections) Walkthrough(grid *Grid) string {
-
-	//TODO: test this.
-
-	if len(self) == 0 {
-		return "The puzzle could not be solved with any of the techniques we're aware of."
-	}
-
-	clone := grid.Copy()
-	defer clone.Done()
-
-	DIVIDER := "\n\n--------------------------------------------\n\n"
-
-	intro := fmt.Sprintf("This will take %d steps to solve.", len(self))
-
-	intro += "\nWhen you start, your grid looks like this:\n"
-
-	intro += clone.Diagram()
-
-	intro += "\n"
-
-	intro += DIVIDER
-
-	descriptions := self.Description()
-
-	results := make([]string, len(self))
-
-	for i, description := range descriptions {
-
-		result := description + "\n"
-		result += "After doing that, your grid will look like: \n\n"
-
-		self[i].Apply(clone)
-
-		result += clone.Diagram()
-
-		results[i] = result
-	}
-
-	return intro + strings.Join(results, DIVIDER) + DIVIDER + "Now the puzzle is solved."
 }
 
 func (self *Grid) HumanWalkthrough() string {
@@ -413,7 +280,7 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 
 		possibilitiesWeights := make([]float64, len(possibilities))
 		for i, possibility := range possibilities {
-			possibilitiesWeights[i] = possibility.Technique.Difficulty()
+			possibilitiesWeights[i] = possibility.Technique.HumanLikelihood()
 		}
 		step := possibilities[randomIndexWithInvertedWeights(possibilitiesWeights)]
 
@@ -516,6 +383,12 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 }
 
 func (self *Grid) Difficulty() float64 {
+	//This is so expensive and during testing we don't care if converges.
+	//So we split out the meat of the method separately.
+	return self.calcluateDifficulty(true)
+}
+
+func (self *Grid) calcluateDifficulty(accurate bool) float64 {
 	//This can be an extremely expensive method. Do not call repeatedly!
 	//returns the difficulty of the grid, which is a number between 0.0 and 1.0.
 	//This is a probabilistic measure; repeated calls may return different numbers, although generally we wait for the results to converge.
@@ -526,7 +399,13 @@ func (self *Grid) Difficulty() float64 {
 	average := 0.0
 	lastAverage := 0.0
 
-	for i := 0; i < MAX_DIFFICULTY_ITERATIONS; i++ {
+	//Since this is so expensive, in testing situations we want to run it in less accurate mode (so it goes fast!)
+	maxIterations := MAX_DIFFICULTY_ITERATIONS
+	if !accurate {
+		maxIterations = 5.0
+	}
+
+	for i := 0; i < maxIterations; i++ {
 		grid := self.Copy()
 		steps := grid.HumanSolve()
 		difficulty := steps.Difficulty()
@@ -546,5 +425,4 @@ func (self *Grid) Difficulty() float64 {
 
 	//We weren't converging... oh well!
 	return average
-
 }
