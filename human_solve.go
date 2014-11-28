@@ -18,14 +18,10 @@ var GuessTechnique SolveTechnique
 var AllTechniques []SolveTechnique
 
 //Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
-var MAX_DIFFICULTY_ITERATIONS int
+const MAX_DIFFICULTY_ITERATIONS = 50
 
 //How close we have to get to the average to feel comfortable our difficulty is converging.
 const DIFFICULTY_CONVERGENCE = 0.0005
-
-func init() {
-	MAX_DIFFICULTY_ITERATIONS = 50
-}
 
 type SolveDirections []*SolveStep
 
