@@ -47,7 +47,7 @@ func TestDifficultySignals(t *testing.T) {
 
 func TestTechniqueSignal(t *testing.T) {
 
-	result := techniqueSignal(sampleSolveDirections)
+	result := signalTechnique(sampleSolveDirections)
 
 	golden := DifficultySignals{
 		"Guess Count":            2.0,
@@ -60,7 +60,7 @@ func TestTechniqueSignal(t *testing.T) {
 }
 
 func TestConstantSignal(t *testing.T) {
-	result := constantSignal(sampleSolveDirections)
+	result := signalConstant(sampleSolveDirections)
 	golden := DifficultySignals{
 		"Constant": 1.0,
 	}

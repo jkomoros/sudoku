@@ -147,7 +147,7 @@ func (self DifficultySignals) Add(other DifficultySignals) {
 
 //Rest of file is different Signals
 
-func techniqueSignal(directions SolveDirections) DifficultySignals {
+func signalTechnique(directions SolveDirections) DifficultySignals {
 	result := DifficultySignals{}
 	for _, step := range directions {
 		result[step.Technique.Name()+" Count"]++
@@ -155,7 +155,7 @@ func techniqueSignal(directions SolveDirections) DifficultySignals {
 	return result
 }
 
-func constantSignal(directions SolveDirections) DifficultySignals {
+func signalConstant(directions SolveDirections) DifficultySignals {
 	//Just return 1.0 for everything
 	return DifficultySignals{
 		"Constant": 1.0,
