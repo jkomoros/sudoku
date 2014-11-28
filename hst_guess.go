@@ -9,7 +9,7 @@ type guessTechnique struct {
 	*basicSolveTechnique
 }
 
-func (self *guessTechnique) UserLikelihood() float64 {
+func (self *guessTechnique) HumanLikelihood() float64 {
 	return self.difficultyHelper(1000.0)
 }
 

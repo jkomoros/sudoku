@@ -9,7 +9,7 @@ type blockBlockInteractionTechnique struct {
 	*basicSolveTechnique
 }
 
-func (self *blockBlockInteractionTechnique) UserLikelihood() float64 {
+func (self *blockBlockInteractionTechnique) HumanLikelihood() float64 {
 	//TODO: think more about how difficult this technique is.
 	return self.difficultyHelper(6.0)
 }

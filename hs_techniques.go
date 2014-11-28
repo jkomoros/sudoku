@@ -35,7 +35,7 @@ type SolveTechnique interface {
 	//How likely a user would be to pick this technique. Generally inversely related to difficulty (but not perfectly).
 	//This value will be used to pick which technique to apply.
 	//The value is inversely related to how often it will be picked.
-	UserLikelihood() float64
+	HumanLikelihood() float64
 }
 
 type cellGroupType int

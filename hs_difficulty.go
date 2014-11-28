@@ -118,7 +118,7 @@ func (self SolveDirections) Difficulty() float64 {
 
 	accum := difficultyConstant
 	for _, step := range self {
-		accum += step.Technique.UserLikelihood()
+		accum += step.Technique.HumanLikelihood()
 	}
 
 	if accum < 0.0 {
