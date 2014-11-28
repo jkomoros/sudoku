@@ -14,6 +14,13 @@ func init() {
 			nil,
 			nil,
 			nil,
+			techniquesByName["Necessary In Row"],
+		},
+		&SolveStep{
+			nil,
+			nil,
+			nil,
+			nil,
 			techniquesByName["Guess"],
 		},
 		&SolveStep{
@@ -57,8 +64,10 @@ func TestSolveDirectionsSignals(t *testing.T) {
 
 	golden["Constant"] = 1.0
 	golden["Guess Count"] = 2.0
+	golden["Necessary In Row Count"] = 1.0
 	golden["Naked Pair Block Count"] = 1.0
-	golden["Number of Steps"] = 3.0
+	golden["Number of Steps"] = 4.0
+	golden["Percentage Fill Steps"] = 0.75
 
 	if !reflect.DeepEqual(result, golden) {
 		t.Error("SolveDirections.Signals on sampleSolveDirections didn't return right value. Got: ", result, " expected: ", golden)
@@ -76,6 +85,7 @@ func TestTechniqueSignal(t *testing.T) {
 	}
 
 	golden["Guess Count"] = 2.0
+	golden["Necessary In Row Count"] = 1.0
 	golden["Naked Pair Block Count"] = 1.0
 
 	if !reflect.DeepEqual(result, golden) {
@@ -96,9 +106,19 @@ func TestConstantSignal(t *testing.T) {
 func TestSignalNumberOfSteps(t *testing.T) {
 	result := signalNumberOfSteps(sampleSolveDirections)
 	golden := DifficultySignals{
-		"Number of Steps": 3,
+		"Number of Steps": 4.0,
 	}
 	if !reflect.DeepEqual(result, golden) {
 		t.Error("Number of steps signal didn't work as expected. Got ", result, "expected", golden)
+	}
+}
+
+func TestSignalPercentageFillSteps(t *testing.T) {
+	result := signalPercentageFilledSteps(sampleSolveDirections)
+	golden := DifficultySignals{
+		"Percentage Fill Steps": 0.75,
+	}
+	if !reflect.DeepEqual(result, golden) {
+		t.Error("Percentage fill steps didn't work as expected. Got ", result, " expected ", golden)
 	}
 }

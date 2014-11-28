@@ -27,6 +27,7 @@ func init() {
 		signalTechnique,
 		signalConstant,
 		signalNumberOfSteps,
+		signalPercentageFilledSteps,
 	}
 
 	//TODO: set reasonable DifficultySignalWeights here after we have training data we feel confident in.
@@ -258,5 +259,20 @@ func signalConstant(directions SolveDirections) DifficultySignals {
 func signalNumberOfSteps(directions SolveDirections) DifficultySignals {
 	return DifficultySignals{
 		"Number of Steps": float64(len(directions)),
+	}
+}
+
+func signalPercentageFilledSteps(directions SolveDirections) DifficultySignals {
+	numerator := 0.0
+	denominator := float64(len(directions))
+
+	for _, step := range directions {
+		if step.Technique.IsFill() {
+			numerator += 1.0
+		}
+	}
+
+	return DifficultySignals{
+		"Percentage Fill Steps": numerator / denominator,
 	}
 }
