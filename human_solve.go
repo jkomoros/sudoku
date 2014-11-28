@@ -20,9 +20,6 @@ var AllTechniques []SolveTechnique
 //Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
 const MAX_DIFFICULTY_ITERATIONS = 50
 
-//This number is the 'Constant' term from the multiple linear regression to learn the weights.
-var difficultyConstant float64
-
 //How close we have to get to the average to feel comfortable our difficulty is converging.
 const DIFFICULTY_CONVERGENCE = 0.0005
 

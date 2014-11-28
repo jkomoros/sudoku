@@ -367,7 +367,7 @@ func loadDifficulties(fileName string) bool {
 
 	validNames := 0
 	//TODO: report on which names were invalid.
-	for name, val := range techniqueDifficulties {
+	for name, _ := range techniqueDifficulties {
 		//technique, ok := techniquesByName[name]
 		_, ok := techniquesByName[name]
 		if ok {
@@ -375,7 +375,7 @@ func loadDifficulties(fileName string) bool {
 			validNames++
 		} else {
 			if name == "Constant" {
-				difficultyConstant = val
+				//difficultyConstant = val
 				validNames++
 			} else {
 
