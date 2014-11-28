@@ -9,6 +9,8 @@ import (
 type DifficultySignals map[string]float64
 
 //A difficulty signal generator can return more than one difficutly signal, so it doesn't just return float64
+//Each signal generator should always return a map with the SAME keys--so if you've called it once you know what the
+//next calls will have as keys.
 type DifficultySignalGenerator func(directions SolveDirections) DifficultySignals
 
 var DifficultySignalGenerators []DifficultySignalGenerator
@@ -148,6 +150,8 @@ func (self SolveDirections) Difficulty() float64 {
 	return accum
 }
 
+//Because of the contract of a DifficultySignalGenerator (that it always returns the same keys), as long as DifficultySignalGenerators stays constant
+//it's reasonable for callers to assume that one call to Signals() will return all of the string keys you'll see any time you call Signals()
 func (self SolveDirections) Signals() DifficultySignals {
 	result := DifficultySignals{}
 	for _, generator := range DifficultySignalGenerators {

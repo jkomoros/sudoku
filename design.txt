@@ -77,6 +77,10 @@ TODO:
 		* Load the signals from difficulties.csv (named signals.csv now) into a map of SignalWeights that's loaded at run time.
 		* Difficulty then becomes running all Signals across solvedirections and accuming hte counts, then multiplying by weights and summing.
 		* Remove setDifficulty() from SolveStep
+	* Next steps:
+		* Define DifficultySignalWeights, and make Difficulty return based on that value
+		* Load up DifficultySignalWeights from difficulties.csv
+		* Make it so the trainer will output a column for each DifficultySignal value (safe to assume that it will always return the same signal names)
 
 
 * A way for technique finders to import the results of other techniques. For example, onlylegalnumber should import obviousincollection results and not duplicate those. And hiddensubset and nakedsubset should trade their results as input to the others. It's not clear if this additional layers of calculation is worth it or not...
