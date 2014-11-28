@@ -53,6 +53,7 @@ func TestSolveDirectionsSignals(t *testing.T) {
 		"Constant":               1.0,
 		"Guess Count":            2.0,
 		"Naked Pair Block Count": 1.0,
+		"Number of Steps":        3.0,
 	}
 	if !reflect.DeepEqual(result, golden) {
 		t.Error("SolveDirections.Signals on sampleSolveDirections didn't return right value. Got: ", result, " expected: ", golden)
@@ -80,5 +81,15 @@ func TestConstantSignal(t *testing.T) {
 	}
 	if !reflect.DeepEqual(result, golden) {
 		t.Error("Constant signal didn't work as expected. Got", result, "expected", golden)
+	}
+}
+
+func TestSignalNumberOfSteps(t *testing.T) {
+	result := signalNumberOfSteps(sampleSolveDirections)
+	golden := DifficultySignals{
+		"Number of Steps": 3,
+	}
+	if !reflect.DeepEqual(result, golden) {
+		t.Error("Number of steps signal didn't work as expected. Got ", result, "expected", golden)
 	}
 }

@@ -26,6 +26,7 @@ func init() {
 	DifficultySignalGenerators = []DifficultySignalGenerator{
 		signalTechnique,
 		signalConstant,
+		signalNumberOfSteps,
 	}
 
 	//TODO: set reasonable DifficultySignalWeights here after we have training data we feel confident in.
@@ -247,5 +248,11 @@ func signalConstant(directions SolveDirections) DifficultySignals {
 	//Just return 1.0 for everything
 	return DifficultySignals{
 		"Constant": 1.0,
+	}
+}
+
+func signalNumberOfSteps(directions SolveDirections) DifficultySignals {
+	return DifficultySignals{
+		"Number of Steps": float64(len(directions)),
 	}
 }
