@@ -59,8 +59,6 @@ TODO:
 		* How many cells at beginning have naked singles
 		* Consider having a 1.0 or 0.0 for "has a step" so it's not how MANY, but whether it's in there.
 
-* Comment on the existing signals to explain what they do and why it might be interesting.
-
 * A way for technique finders to import the results of other techniques. For example, onlylegalnumber should import obviousincollection results and not duplicate those. And hiddensubset and nakedsubset should trade their results as input to the others. It's not clear if this additional layers of calculation is worth it or not...
 
 * Now that difficulties coming ouf of analysis are roughly linear from 0.1 to 0.9, clamp SolveDirections.Difficulty () to 0 and 1.0 (report when they would have exceeded) and put in the tuned weights

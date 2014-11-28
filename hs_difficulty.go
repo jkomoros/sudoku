@@ -239,6 +239,9 @@ func (self DifficultySignals) Add(other DifficultySignals) {
 
 //Rest of file is different Signals
 
+//This technique returns a count of how many each type of technique is seen.
+//Different techniques are different "difficulties" so seeing more of a hard technique will
+//Lead to a higher overall difficulty.
 func signalTechnique(directions SolveDirections) DifficultySignals {
 	//Our contract is to always return every signal name, even if it's 0.0.
 	result := DifficultySignals{}
@@ -251,6 +254,7 @@ func signalTechnique(directions SolveDirections) DifficultySignals {
 	return result
 }
 
+//This signal just returns always returns 1.0. This is how we factor Constants in.
 func signalConstant(directions SolveDirections) DifficultySignals {
 	//Just return 1.0 for everything
 	return DifficultySignals{
@@ -258,12 +262,14 @@ func signalConstant(directions SolveDirections) DifficultySignals {
 	}
 }
 
+//This signal is just number of steps. More steps is PROBABLY a harder puzzle.
 func signalNumberOfSteps(directions SolveDirections) DifficultySignals {
 	return DifficultySignals{
 		"Number of Steps": float64(len(directions)),
 	}
 }
 
+//This signal is how many steps are filled out of all steps. Presumably harder puzzles will have more non-fill steps.
 func signalPercentageFilledSteps(directions SolveDirections) DifficultySignals {
 	numerator := 0.0
 	denominator := float64(len(directions))
@@ -279,6 +285,7 @@ func signalPercentageFilledSteps(directions SolveDirections) DifficultySignals {
 	}
 }
 
+//This signal is how many cells are unfilled at the beginning. Presumably harder puzzles will have fewer cells filled (although obviously this isn't necessarily true)
 func signalNumberUnfilled(directions SolveDirections) DifficultySignals {
 
 	//We don't have access to the underlying grid, so we'll just count how many fill steps (since each can only add one number, and no numbers are ever unfilled)
@@ -295,6 +302,8 @@ func signalNumberUnfilled(directions SolveDirections) DifficultySignals {
 	}
 }
 
+//This signal is how many steps into the solve directions before you encounter your first non-fill step. Non-fill steps are harder, so this signal
+//captures how easy the start of the puzzle is.
 func signalStepsUntilNonFill(directions SolveDirections) DifficultySignals {
 	count := 0.0
 	for _, step := range directions {
