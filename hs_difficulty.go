@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -38,7 +39,14 @@ func init() {
 			break
 		}
 		difficultyFile = "../" + difficultyFile
-		//TODO: when should this end?
+		//We're just making an ever-longer ../../../ ... FILENAME, but if we absolutized it now, we couldn't easily continue
+		//prepending ../ . So just test the absFile, but still operate on difficultyFile.
+		absFile, _ := filepath.Abs(difficultyFile)
+		if absFile == "/"+DIFFICULTY_WEIGHT_FILENAME {
+			//We're already at the top.
+			log.Println("Couldn't find a difficulty weights file.")
+			break
+		}
 	}
 }
 
@@ -48,10 +56,8 @@ func loadDifficultyWeights(fileName string) bool {
 
 	inputFile, err := os.Open(fileName)
 	if err != nil {
-
-		log.Println("Could not open the specified input CSV.")
+		//This error will be common because we'll be calling into this repeatedly in init with filenames that we don't know are valid.
 		return false
-
 	}
 	defer inputFile.Close()
 	csvIn := csv.NewReader(inputFile)
