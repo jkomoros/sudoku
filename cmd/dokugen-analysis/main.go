@@ -198,6 +198,8 @@ func main() {
 	var puzzles []*puzzle
 	var solveData [][]float64
 
+	signalNames := allSignalNames()
+
 	if flag.Arg(0) == "" {
 		//Default: calculate relativeDifficulty like normal.
 
@@ -228,7 +230,7 @@ func main() {
 			solveData = make([][]float64, len(records))
 			for i, record := range records {
 				//TODO: this is the wrong len to check for.
-				if len(record) != len(sudoku.AllTechniques)+1 {
+				if len(record) != len(signalNames)+1 {
 					log.Fatal("We didn't find as many columns as we expected in row: ", i)
 				}
 				solveData[i] = make([]float64, len(record))
@@ -722,14 +724,7 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 
 	var result [][]float64
 
-	//TODO: this seems like a hacky way to enumerate all the signal names.
-	signals := sudoku.SolveDirections{}.Signals()
-	var signalNames []string
-
-	for name, _ := range signals {
-		signalNames = append(signalNames, name)
-	}
-	sort.Strings(signalNames)
+	signalNames := allSignalNames()
 
 	//Generate a mapping of technique name to index.
 	nameToIndex := make(map[string]int)
@@ -871,6 +866,8 @@ func calculateWeights(stats [][]float64) *regression.Regression {
 	//Keep column 0 (the Observed data point)
 	cleanedStats, keptIndexes := removeZeroedColumns(stats, []int{0})
 
+	signalNames := allSignalNames()
+
 	r.SetObservedName("Real World Difficulty")
 	for i, techniqueIndex := range keptIndexes {
 		//Don't add a label for the observed data
@@ -878,8 +875,7 @@ func calculateWeights(stats [][]float64) *regression.Regression {
 			continue
 		}
 		//i of 0 is the observed. techniqueIndex has to be subtracted by 1 for the same reason to get it in 0-indexed.
-		//This is the wrong data; it should be all signals, sorted alphabetically
-		r.SetVarName(i-1, sudoku.AllTechniques[techniqueIndex-1].Name())
+		r.SetVarName(i-1, signalNames[techniqueIndex-1])
 	}
 
 	for _, data := range cleanedStats {
@@ -917,6 +913,24 @@ func convertPuzzleString(input string) string {
 
 	//We added an extra \n in the last runthrough, remove it.
 	return strings.TrimSuffix(result, "\n")
+}
+
+var cachedAllSignalNames []string
+
+func allSignalNames() []string {
+	if cachedAllSignalNames == nil {
+		//The canonical list of all signals
+		//TODO: this seems like a hacky way to enumerate all the signal names.
+		signals := sudoku.SolveDirections{}.Signals()
+		var signalNames []string
+
+		for name, _ := range signals {
+			signalNames = append(signalNames, name)
+		}
+		sort.Strings(signalNames)
+		cachedAllSignalNames = signalNames
+	}
+	return cachedAllSignalNames
 }
 
 func getPuzzleDifficultyRatings(result chan map[int]puzzle) {
