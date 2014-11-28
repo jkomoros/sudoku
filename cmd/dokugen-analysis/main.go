@@ -227,6 +227,7 @@ func main() {
 			//Input is data from phase 2a
 			solveData = make([][]float64, len(records))
 			for i, record := range records {
+				//TODO: this is the wrong len to check for.
 				if len(record) != len(sudoku.AllTechniques)+1 {
 					log.Fatal("We didn't find as many columns as we expected in row: ", i)
 				}
@@ -721,10 +722,19 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 
 	var result [][]float64
 
+	//TODO: this seems like a hacky way to enumerate all the signal names.
+	signals := sudoku.SolveDirections{}.Signals()
+	var signalNames []string
+
+	for name, _ := range signals {
+		signalNames = append(signalNames, name)
+	}
+	sort.Strings(signalNames)
+
 	//Generate a mapping of technique name to index.
 	nameToIndex := make(map[string]int)
-	for i, technique := range sudoku.AllTechniques {
-		nameToIndex[technique.Name()] = i
+	for i, signalName := range signalNames {
+		nameToIndex[signalName] = i
 	}
 
 	i := 0
@@ -762,15 +772,15 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 			continue
 		}
 
-		solveStats := make([]float64, len(sudoku.AllTechniques))
+		solveStats := make([]float64, len(signalNames))
 
 		//Accumulate number of times we've seen each technique across all solves.
 		for _, directions := range solveDirections {
-			for _, step := range directions {
-				if index, ok := nameToIndex[step.Technique.Name()]; ok {
-					solveStats[index] += 1.0
+			for name, val := range directions.Signals() {
+				if index, ok := nameToIndex[name]; ok {
+					solveStats[index] += val
 				} else {
-					log.Fatal("For some reason we encountered a Technique that wasn't in hte list of Techniques: ", step.Technique.Name())
+					log.Fatal("For some reason we encountered a signal name that wasn't in hte list of signal names: ", name)
 				}
 			}
 		}
