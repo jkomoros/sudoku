@@ -11,6 +11,15 @@ type DifficultySignals map[string]float64
 //A difficulty signal generator can return more than one difficutly signal, so it doesn't just return float64
 type DifficultySignalGenerator func(directions SolveDirections) DifficultySignals
 
+var DifficultySignalGenerators []DifficultySignalGenerator
+
+func init() {
+	DifficultySignalGenerators = []DifficultySignalGenerator{
+		signalTechnique,
+		signalConstant,
+	}
+}
+
 func (self SolveDirections) Stats() []string {
 	//TODO: test this.
 	techniqueCount := make(map[string]int)
@@ -137,6 +146,14 @@ func (self SolveDirections) Difficulty() float64 {
 	}
 
 	return accum
+}
+
+func (self SolveDirections) Signals() DifficultySignals {
+	result := DifficultySignals{}
+	for _, generator := range DifficultySignalGenerators {
+		result.Add(generator(self))
+	}
+	return result
 }
 
 func (self DifficultySignals) Add(other DifficultySignals) {

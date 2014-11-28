@@ -33,6 +33,8 @@ func init() {
 	}
 }
 
+//TODO: the other solvedirections tests should be in this file.
+
 func TestDifficultySignals(t *testing.T) {
 	signals := DifficultySignals{"a": 1.0, "b": 5.0}
 	other := DifficultySignals{"a": 3.2, "c": 6.0}
@@ -42,6 +44,18 @@ func TestDifficultySignals(t *testing.T) {
 
 	if !reflect.DeepEqual(signals, golden) {
 		t.Error("Signals when added didn't have right values. Got", signals, "expected", golden)
+	}
+}
+
+func TestSolveDirectionsSignals(t *testing.T) {
+	result := sampleSolveDirections.Signals()
+	golden := DifficultySignals{
+		"Constant":               1.0,
+		"Guess Count":            2.0,
+		"Naked Pair Block Count": 1.0,
+	}
+	if !reflect.DeepEqual(result, golden) {
+		t.Error("SolveDirections.Signals on sampleSolveDirections didn't return right value. Got: ", result, " expected: ", golden)
 	}
 }
 
