@@ -383,6 +383,12 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 }
 
 func (self *Grid) Difficulty() float64 {
+	//This is so expensive and during testing we don't care if converges.
+	//So we split out the meat of the method separately.
+	return self.calcluateDifficulty(true)
+}
+
+func (self *Grid) calcluateDifficulty(accurate bool) float64 {
 	//This can be an extremely expensive method. Do not call repeatedly!
 	//returns the difficulty of the grid, which is a number between 0.0 and 1.0.
 	//This is a probabilistic measure; repeated calls may return different numbers, although generally we wait for the results to converge.
@@ -393,7 +399,13 @@ func (self *Grid) Difficulty() float64 {
 	average := 0.0
 	lastAverage := 0.0
 
-	for i := 0; i < MAX_DIFFICULTY_ITERATIONS; i++ {
+	//Since this is so expensive, in testing situations we want to run it in less accurate mode (so it goes fast!)
+	maxIterations := MAX_DIFFICULTY_ITERATIONS
+	if !accurate {
+		maxIterations = 5.0
+	}
+
+	for i := 0; i < maxIterations; i++ {
 		grid := self.Copy()
 		steps := grid.HumanSolve()
 		difficulty := steps.Difficulty()
@@ -413,5 +425,4 @@ func (self *Grid) Difficulty() float64 {
 
 	//We weren't converging... oh well!
 	return average
-
 }
