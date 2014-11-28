@@ -59,6 +59,8 @@ TODO:
 		* How many cells at beginning have naked singles
 		* Consider having a 1.0 or 0.0 for "has a step" so it's not how MANY, but whether it's in there at all.
 
+* Consider just giving up and doing some python with scikit.py for learning the weights. Its documentation is much better...
+
 * Verify that the regression treats Constant correctly. (I think it does now)
 
 * Figure out why the regression coefficients look so fishy (similar ones for many of the techniques)
