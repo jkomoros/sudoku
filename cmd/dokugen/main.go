@@ -21,6 +21,8 @@ type appOptions struct {
 	RAW_SYMMETRY        string
 	SYMMETRY            sudoku.SymmetryType
 	SYMMETRY_PROPORTION float64
+	MIN_DIFFICULTY      float64
+	MAX_DIFFICULTY      float64
 }
 
 func main() {
@@ -37,6 +39,8 @@ func main() {
 	flag.BoolVar(&options.WALKTHROUGH, "w", false, "If provided, will print out a walkthrough to solve the provided puzzle.")
 	flag.StringVar(&options.RAW_SYMMETRY, "y", "vertical", "Valid values: 'none', 'both', 'horizontal', 'vertical")
 	flag.Float64Var(&options.SYMMETRY_PROPORTION, "r", 0.7, "What proportion of cells should be filled according to symmetry")
+	flag.Float64Var(&options.MIN_DIFFICULTY, "min", 0.0, "Minimum difficulty for generated puzzle")
+	flag.Float64Var(&options.MAX_DIFFICULTY, "max", 1.0, "Maximum difficulty for generated puzzle")
 
 	flag.Parse()
 
@@ -66,7 +70,7 @@ func main() {
 	for i := 0; i < options.NUM; i++ {
 		//TODO: allow the type of symmetry to be configured.
 		if options.GENERATE {
-			grid = sudoku.GenerateGrid(options.SYMMETRY, options.SYMMETRY_PROPORTION)
+			grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION)
 			fmt.Fprintln(output, grid.DataString())
 		} else if options.PUZZLE_TO_SOLVE != "" {
 			//TODO: detect if the load failed.
@@ -110,4 +114,25 @@ func main() {
 		grid.Done()
 	}
 
+}
+
+func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) *sudoku.Grid {
+	var result *sudoku.Grid
+	count := 0
+	for {
+		log.Println("Attempt", count, "at generating puzzle.")
+
+		result = sudoku.GenerateGrid(symmetryType, symmetryPercentage)
+
+		difficulty := result.Difficulty()
+
+		if difficulty >= min && difficulty <= max {
+			return result
+		}
+
+		log.Println("Rejecting grid of difficulty", difficulty)
+
+		count++
+	}
+	return nil
 }
