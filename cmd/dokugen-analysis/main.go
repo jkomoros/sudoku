@@ -787,7 +787,7 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 
 		//Convert each technique to an average by dividing by the number of different solves
 		for i, _ := range solveStats {
-			solveStats[i] /= numSolvesToAverage
+			solveStats[i] /= float64(numSolvesToAverage)
 		}
 
 		//Put the userRelativeDifficulty in front, as later stages will expect.
