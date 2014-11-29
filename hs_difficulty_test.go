@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"math"
 	"reflect"
 	"testing"
 )
@@ -76,6 +77,28 @@ func TestSolveDirectionsSignals(t *testing.T) {
 	if !reflect.DeepEqual(result, golden) {
 		t.Error("SolveDirections.Signals on sampleSolveDirections didn't return right value. Got: ", result, " expected: ", golden)
 	}
+
+	//We're going to swap out the real difficulty signal weights for the test.
+	realWeights := DifficultySignalWeights
+	defer func() {
+		DifficultySignalWeights = realWeights
+	}()
+
+	DifficultySignalWeights = map[string]float64{
+		"Constant":               0.5,
+		"Guess Count":            -0.09,
+		"Necessary In Row Count": -0.07,
+		"Naked Pair Block Count": 0.13,
+		"Number of Steps":        0.11,
+	}
+
+	difficulty := result.Difficulty()
+	expectedDifficulty := 0.82
+
+	if math.Abs(difficulty-expectedDifficulty) > 0.00000000001 {
+		t.Error("Got wrong difficulty from baked signals: ", difficulty, "expected", 0.82)
+	}
+
 }
 
 func TestTechniqueSignal(t *testing.T) {
