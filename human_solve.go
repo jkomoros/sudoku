@@ -5,6 +5,10 @@ import (
 	"math"
 )
 
+//The number of solves we should average the signals together for before asking them for their difficulty
+//Note: this should be set to the num-solves parameter used to train the currently configured weights.
+const _NUM_SOLVES_FOR_DIFFICULTY = 10
+
 //The actual techniques are intialized in hs_techniques.go, and actually defined in hst_*.go files.
 //Techniques is ALL technies. CheapTechniques is techniques that are reasonably cheap to compute.
 //ExpensiveTechniques is techniques that should only be used if all else has failed.
@@ -408,27 +412,51 @@ func (self *Grid) calcluateDifficulty(accurate bool) float64 {
 	//Since this is so expensive, in testing situations we want to run it in less accurate mode (so it goes fast!)
 	maxIterations := MAX_DIFFICULTY_ITERATIONS
 	if !accurate {
-		maxIterations = 5.0
+		maxIterations = 1
 	}
 
 	for i := 0; i < maxIterations; i++ {
-		grid := self.Copy()
-		steps := grid.HumanSolve()
-		difficulty := steps.Signals().Difficulty()
+		difficulty := gridDifficultyHelper(self)
 
 		accum += difficulty
 		average = accum / (float64(i) + 1.0)
 
 		if math.Abs(average-lastAverage) < DIFFICULTY_CONVERGENCE {
 			//Okay, we've already converged. Just return early!
-			grid.Done()
 			return average
 		}
 
 		lastAverage = average
-		grid.Done()
 	}
 
 	//We weren't converging... oh well!
 	return average
+}
+
+//This function will HumanSolve _NUM_SOLVES_FOR_DIFFICULTY times, then average the signals together, then
+//give the difficulty for THAT. This is more accurate becuase the weights were trained on such averaged signals.
+func gridDifficultyHelper(grid *Grid) float64 {
+
+	collector := make(chan DifficultySignals, _NUM_SOLVES_FOR_DIFFICULTY)
+	//Might as well run all of the human solutions in parallel
+	for i := 0; i < _NUM_SOLVES_FOR_DIFFICULTY; i++ {
+		go func(gridToUse *Grid) {
+			collector <- gridToUse.HumanSolution().Signals()
+		}(grid)
+	}
+
+	combinedSignals := DifficultySignals{}
+
+	for i := 0; i < _NUM_SOLVES_FOR_DIFFICULTY; i++ {
+		signals := <-collector
+		combinedSignals.Sum(signals)
+	}
+
+	//Now average all of the signal values
+	for key, _ := range combinedSignals {
+		combinedSignals[key] /= _NUM_SOLVES_FOR_DIFFICULTY
+	}
+
+	return combinedSignals.Difficulty()
+
 }

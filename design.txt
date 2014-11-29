@@ -110,8 +110,6 @@ TODO:
 
 * Fix races with go test -race.
 
-* Consider generating an average Signals for a puzzle by running it multiple times before scoring it in Difficulty (since we generate an average and score that in generating weights anyway)
-
 * Test the main app (partially there... just need to minimize randomness now)
 
 * Start rolling out some of the generated puzzles into production to start accumulating solves on them
