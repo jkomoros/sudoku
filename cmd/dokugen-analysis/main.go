@@ -309,7 +309,7 @@ func main() {
 			}
 
 			if outputSolveHeader {
-				csvOut.Write(allSignalNames())
+				csvOut.Write(append([]string{"Difficulty"}, allSignalNames()...))
 			}
 			//2a and export
 			for _, dataPoint := range solveData {
