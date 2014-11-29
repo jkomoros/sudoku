@@ -60,6 +60,7 @@ func TestSolveDirectionsSignals(t *testing.T) {
 
 	for _, technique := range AllTechniques {
 		golden[technique.Name()+" Count"] = 0.0
+		golden[technique.Name()+" Percentage"] = 0.0
 	}
 	golden["Guess Count"] = 2.0
 	golden["Necessary In Row Count"] = 1.0
@@ -68,6 +69,9 @@ func TestSolveDirectionsSignals(t *testing.T) {
 	golden["Percentage Fill Steps"] = 0.75
 	golden["Number Unfilled Cells"] = 3.0
 	golden["Steps Until Nonfill"] = 2.0
+	golden["Guess Percentage"] = 0.5
+	golden["Necessary In Row Percentage"] = 0.25
+	golden["Naked Pair Block Percentage"] = 0.25
 
 	if !reflect.DeepEqual(result, golden) {
 		t.Error("SolveDirections.Signals on sampleSolveDirections didn't return right value. Got: ", result, " expected: ", golden)
@@ -90,6 +94,25 @@ func TestTechniqueSignal(t *testing.T) {
 
 	if !reflect.DeepEqual(result, golden) {
 		t.Error("Technique signal didn't work as expected. Got", result, "expected", golden)
+	}
+}
+
+func TestTechniqueSignalPercentage(t *testing.T) {
+
+	result := signalTechniquePercentage(sampleSolveDirections)
+
+	golden := DifficultySignals{}
+
+	for _, technique := range AllTechniques {
+		golden[technique.Name()+" Percentage"] = 0.0
+	}
+
+	golden["Guess Percentage"] = 0.5
+	golden["Necessary In Row Percentage"] = 0.25
+	golden["Naked Pair Block Percentage"] = 0.25
+
+	if !reflect.DeepEqual(result, golden) {
+		t.Error("Technique signal percentage didn't work as expected. Got", result, "expected", golden)
 	}
 }
 

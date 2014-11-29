@@ -26,6 +26,7 @@ func init() {
 	DifficultySignalGenerators = []DifficultySignalGenerator{
 		signalTechnique,
 		signalNumberOfSteps,
+		signalTechniquePercentage,
 		signalPercentageFilledSteps,
 		signalNumberUnfilled,
 		signalStepsUntilNonFill,
@@ -264,6 +265,32 @@ func signalNumberOfSteps(directions SolveDirections) DifficultySignals {
 	return DifficultySignals{
 		"Number of Steps": float64(len(directions)),
 	}
+}
+
+//This signal is like signalTechnique, except it returns the count divided by the TOTAL number of steps.
+func signalTechniquePercentage(directions SolveDirections) DifficultySignals {
+	//Our contract is to always return every signal name, even if it's 0.0.
+	result := DifficultySignals{}
+	for _, technique := range AllTechniques {
+		result[technique.Name()+" Percentage"] = 0.0
+	}
+
+	count := len(directions)
+
+	if count == 0 {
+		return result
+	}
+
+	for _, step := range directions {
+		result[step.Technique.Name()+" Percentage"]++
+	}
+
+	//Now normalize all of them
+	for name, _ := range result {
+		result[name] /= float64(count)
+	}
+
+	return result
 }
 
 //This signal is how many steps are filled out of all steps. Presumably harder puzzles will have more non-fill steps.
