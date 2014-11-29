@@ -109,6 +109,7 @@ func main() {
 		}
 		if options.PRINT_STATS {
 			fmt.Fprintln(output, grid.Difficulty())
+			//TODO: consider actually printing out the Signals stats (with a Stats method on signals)
 			fmt.Fprintln(output, strings.Join(directions.Stats(), "\n"))
 		}
 		if options.PUZZLE_TO_SOLVE != "" {
