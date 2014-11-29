@@ -24,6 +24,7 @@ var AllTechniques []SolveTechnique
 //Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
 const MAX_DIFFICULTY_ITERATIONS = 50
 
+//TODO: consider relaxing this even more.
 //How close we have to get to the average to feel comfortable our difficulty is converging.
 const DIFFICULTY_CONVERGENCE = 0.005
 
