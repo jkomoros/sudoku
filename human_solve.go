@@ -242,6 +242,12 @@ func (self *Grid) HumanSolution() SolveDirections {
  */
 
 func (self *Grid) HumanSolve() SolveDirections {
+
+	//Short circuit solving if it has multiple solutions.
+	if self.HasMultipleSolutions() {
+		return nil
+	}
+
 	return humanSolveHelper(self)
 }
 
