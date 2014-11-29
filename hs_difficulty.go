@@ -99,7 +99,7 @@ func (self SolveDirections) Stats() []string {
 	divider := "-------------------------"
 
 	result = append(result, divider)
-	result = append(result, fmt.Sprintf("Difficulty : %f", self.Difficulty()))
+	result = append(result, fmt.Sprintf("Difficulty : %f", self.Signals().Difficulty()))
 	result = append(result, divider)
 	result = append(result, fmt.Sprintf("Step count: %d", len(self)))
 	result = append(result, divider)
@@ -181,22 +181,23 @@ func (self SolveDirections) Walkthrough(grid *Grid) string {
 	return intro + strings.Join(results, DIVIDER) + DIVIDER + "Now the puzzle is solved."
 }
 
-func (self SolveDirections) Difficulty() float64 {
-	//How difficult the solve directions described are. The measure of difficulty we use is
-	//just summing up weights we see; this captures:
-	//* Number of steps
-	//* Average difficulty of steps
-	//* Number of hard steps
-	//* (kind of) the hardest step: because the difficulties go up expontentionally.
-
-	//This method assumes the weights have been calibrated empirically to give scores between 0.0 and 1.0
-	//without normalization here.
-
-	if len(self) == 0 {
-		//The puzzle was not able to be solved, apparently.
-		return 0.0
+//Because of the contract of a DifficultySignalGenerator (that it always returns the same keys), as long as DifficultySignalGenerators stays constant
+//it's reasonable for callers to assume that one call to Signals() will return all of the string keys you'll see any time you call Signals()
+func (self SolveDirections) Signals() DifficultySignals {
+	result := DifficultySignals{}
+	for _, generator := range DifficultySignalGenerators {
+		result.Add(generator(self))
 	}
+	return result
+}
 
+func (self DifficultySignals) Add(other DifficultySignals) {
+	for key, val := range other {
+		self[key] = val
+	}
+}
+
+func (self DifficultySignals) Difficulty() float64 {
 	accum := 0.0
 
 	if constant, ok := DifficultySignalWeights["Constant"]; ok {
@@ -205,9 +206,7 @@ func (self SolveDirections) Difficulty() float64 {
 		log.Println("Didn't have the constant term loaded.")
 	}
 
-	signals := self.Signals()
-
-	for signal, val := range signals {
+	for signal, val := range self {
 		//We can discard the OK because 0 is a reasonable thing to do with weights we aren't aware of.
 		weight, _ := DifficultySignalWeights[signal]
 
@@ -225,22 +224,6 @@ func (self SolveDirections) Difficulty() float64 {
 	}
 
 	return accum
-}
-
-//Because of the contract of a DifficultySignalGenerator (that it always returns the same keys), as long as DifficultySignalGenerators stays constant
-//it's reasonable for callers to assume that one call to Signals() will return all of the string keys you'll see any time you call Signals()
-func (self SolveDirections) Signals() DifficultySignals {
-	result := DifficultySignals{}
-	for _, generator := range DifficultySignalGenerators {
-		result.Add(generator(self))
-	}
-	return result
-}
-
-func (self DifficultySignals) Add(other DifficultySignals) {
-	for key, val := range other {
-		self[key] = val
-	}
 }
 
 //Rest of file is different Signals

@@ -414,7 +414,7 @@ func (self *Grid) calcluateDifficulty(accurate bool) float64 {
 	for i := 0; i < maxIterations; i++ {
 		grid := self.Copy()
 		steps := grid.HumanSolve()
-		difficulty := steps.Difficulty()
+		difficulty := steps.Signals().Difficulty()
 
 		accum += difficulty
 		average = accum / (float64(i) + 1.0)
