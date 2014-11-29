@@ -26,9 +26,6 @@ const _PENALTY_PERCENTAGE_CUTOFF = 0.01
 const _MATRIX_DIFFERENCE_CUTOFF = 0.00001
 const _MAX_MATRIX_POWER = 250
 
-//Making this number much higher does not improve R2, even for very high numbers like 500.
-const _NUMBER_OF_HUMAN_SOLVES = 10
-
 const _NORMALIZED_LOWER_BOUND = 0.1
 const _NORMALIZED_UPPER_BOUND = 0.9
 
@@ -47,6 +44,7 @@ var calcWeights bool
 var printPuzzleTechniques bool
 var inputIsSolveData bool
 var outputSolveHeader bool
+var numSolvesToAverage int
 
 func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
@@ -62,6 +60,7 @@ func init() {
 	flag.BoolVar(&printPuzzleTechniques, "t", false, "If calculating weights, providing this value will output a CSV of linearized score and weight counts.")
 	flag.BoolVar(&inputIsSolveData, "i", false, "If calculating weights, providing this switch will say the input CSV is solve data, not puzzle user difficulty.")
 	flag.BoolVar(&outputSolveHeader, "h", false, "If true and outputting solve data, will include a header row.")
+	flag.IntVar(&numSolvesToAverage, "num-solves", 10, "Number of solves to run and then average together")
 
 	//We're going to be doing some heavy-duty matrix multiplication, and the matrix package can take advantage of multiple cores.
 	runtime.GOMAXPROCS(6)
@@ -166,7 +165,7 @@ func main() {
 		There are three main phases:
 			1) calculating real world difficulties for puzzles in the production database, and
 			2) Calculating difficulties for solve techniques based on that data, which is based on two sub-phases:
-				a) Run each puzzle through the human solver _NUMBER_OF_HUMAN_SOLVES times, and output how often we saw each step in the SolveDirections
+				a) Run each puzzle through the human solver numberOfSolvesToAverage times, and output how often we saw each step in the SolveDirections
 				b) Take 2a), use it to configure a Multiple Linear Regression, and then return the coefficients of that.
 
 
@@ -754,12 +753,12 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 		grid := sudoku.NewGrid()
 		grid.Load(convertPuzzleString(thePuzzle.puzzle))
 
-		solveDirections := make([]sudoku.SolveDirections, _NUMBER_OF_HUMAN_SOLVES)
+		solveDirections := make([]sudoku.SolveDirections, numSolvesToAverage)
 
 		sawNil := 0
 
 		//Note: it appears that the number of solves hits a max R2 around 5 or so.
-		for i := 0; i < _NUMBER_OF_HUMAN_SOLVES; i++ {
+		for i := 0; i < numSolvesToAverage; i++ {
 
 			solution := grid.HumanSolution()
 			if solution == nil {
@@ -769,7 +768,7 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 		}
 
 		if sawNil > 0 {
-			log.Println("Puzzle #", thePuzzle.id, " was not able to be solved on ", sawNil, " of ", _NUMBER_OF_HUMAN_SOLVES, " runthroughs. Skipping.")
+			log.Println("Puzzle #", thePuzzle.id, " was not able to be solved on ", sawNil, " of ", numSolvesToAverage, " runthroughs. Skipping.")
 			continue
 		}
 
@@ -788,7 +787,7 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 
 		//Convert each technique to an average by dividing by the number of different solves
 		for i, _ := range solveStats {
-			solveStats[i] /= _NUMBER_OF_HUMAN_SOLVES
+			solveStats[i] /= numSolvesToAverage
 		}
 
 		//Put the userRelativeDifficulty in front, as later stages will expect.
