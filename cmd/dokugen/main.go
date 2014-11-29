@@ -93,7 +93,7 @@ func main() {
 				//We couldn't solve it. Let's check and see if the puzzle is well formed.
 				if grid.HasMultipleSolutions() {
 					//TODO: figure out why guesses wouldn't be used here effectively.
-					fmt.Println("The puzzle had multiple solutions; that means it's not well-formed")
+					log.Println("The puzzle had multiple solutions; that means it's not well-formed")
 				}
 			}
 		}
