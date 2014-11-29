@@ -55,6 +55,28 @@ func TestDifficultySignals(t *testing.T) {
 	}
 }
 
+func TestSumDifficultySignals(t *testing.T) {
+	signals := DifficultySignals{
+		"a": 0.5,
+		"b": 1.0,
+		"c": 0.6,
+	}
+	other := DifficultySignals{
+		"b": 2.0,
+		"d": 1.0,
+	}
+	golden := DifficultySignals{
+		"a": 0.5,
+		"b": 3.0,
+		"c": 0.6,
+		"d": 1.0,
+	}
+	signals.Sum(other)
+	if !reflect.DeepEqual(signals, golden) {
+		t.Error("Signas when summed didn't have right values. Got", signals, "expected", golden)
+	}
+}
+
 func TestSolveDirectionsSignals(t *testing.T) {
 	result := sampleSolveDirections.Signals()
 	golden := DifficultySignals{}

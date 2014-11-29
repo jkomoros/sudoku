@@ -191,9 +191,20 @@ func (self SolveDirections) Signals() DifficultySignals {
 	return result
 }
 
+//This will overwrite colliding values
+//TODO: this is confusingly named
 func (self DifficultySignals) Add(other DifficultySignals) {
 	for key, val := range other {
 		self[key] = val
+	}
+}
+
+//For keys in both, will sum them together.
+//TODO: this is confusingly named (compared to Add)
+// Do we really need both Sum and Add?
+func (self DifficultySignals) Sum(other DifficultySignals) {
+	for key, val := range other {
+		self[key] += val
 	}
 }
 
