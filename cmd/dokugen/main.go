@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -23,6 +24,11 @@ type appOptions struct {
 	SYMMETRY_PROPORTION float64
 	MIN_DIFFICULTY      float64
 	MAX_DIFFICULTY      float64
+}
+
+func init() {
+	//grid.Difficulty can make use of a number of processes simultaneously.
+	runtime.GOMAXPROCS(6)
 }
 
 func main() {
