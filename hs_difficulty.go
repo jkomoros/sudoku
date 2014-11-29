@@ -99,6 +99,7 @@ func (self SolveDirections) Stats() []string {
 	divider := "-------------------------"
 
 	result = append(result, divider)
+	//TODO: we shouldn't even include this... it's not meaningful to report the difficulty of a single solve.
 	result = append(result, fmt.Sprintf("Difficulty : %f", self.Signals().Difficulty()))
 	result = append(result, divider)
 	result = append(result, fmt.Sprintf("Step count: %d", len(self)))
