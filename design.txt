@@ -99,6 +99,8 @@ TODO:
 
 * Add an interactive mode to the command line tool.
 
+* Grid.Difficulty can return NaN sometimes (not sure when)
+
 * Dokugen should have a difficulty argument that can be Gentle, Easy, Intermediate, Hard, Impossible which sets the difficulties.
 
 * GenerateGrid should take a maxDifficulty parameter, and as it's generating puzzles we stop removing cells as soon as it crosses that barrier.
