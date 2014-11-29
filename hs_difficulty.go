@@ -74,11 +74,11 @@ func loadDifficultyWeights(fileName string) bool {
 	DifficultySignalWeights = make(map[string]float64)
 	for i, record := range records {
 		if len(record) != 2 {
-			log.Fatalln("Record in weights csv wasn't right size: ", i)
+			log.Fatalln("Record in weights csv wasn't right size: ", i, record)
 		}
 		theFloat, err := strconv.ParseFloat(record[1], 64)
 		if err != nil {
-			log.Fatalln("Record in weights had an invalid float: ", i)
+			log.Fatalln("Record in weights had an invalid float: ", i, record, err)
 		}
 		DifficultySignalWeights[record[0]] = theFloat
 	}
