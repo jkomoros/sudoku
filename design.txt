@@ -111,6 +111,10 @@ NEXT STEP:
 
 * Test the main app (partially there... just need to minimize randomness now)
 
+* Start rolling out some of the generated puzzles into production to start accumulating solves on them
+
+* Verify that userSolveRanges have a reasonable overlap
+
 * Make it so if any technique takes too long and we already have some answers, we move ahead anyway.
 
 * Move all of the puzzle constants in tests into SDK files
