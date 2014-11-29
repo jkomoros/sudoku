@@ -25,7 +25,7 @@ var AllTechniques []SolveTechnique
 const MAX_DIFFICULTY_ITERATIONS = 50
 
 //How close we have to get to the average to feel comfortable our difficulty is converging.
-const DIFFICULTY_CONVERGENCE = 0.0005
+const DIFFICULTY_CONVERGENCE = 0.005
 
 type SolveDirections []*SolveStep
 
