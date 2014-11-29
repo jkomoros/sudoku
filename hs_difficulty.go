@@ -107,6 +107,7 @@ func (self SolveDirections) Stats() []string {
 
 	//We want a stable ordering for technique counts.
 	for _, technique := range AllTechniques {
+		//TODO: pad the technique name with enough spaces so the colon lines up.
 		result = append(result, fmt.Sprintf("%s : %d", technique.Name(), techniqueCount[technique.Name()]))
 	}
 
