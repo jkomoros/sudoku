@@ -100,15 +100,16 @@ func TestBasicCellList(t *testing.T) {
 }
 
 type chainTestConfiguration struct {
-	name string
-	one  []cellRef
-	two  []cellRef
+	name                 string
+	one                  []cellRef
+	two                  []cellRef
+	equivalentToPrevious bool
 }
 
 type chainTestResult struct {
-	name          string
-	originalIndex int
-	value         float64
+	name             string
+	value            float64
+	equivalenceGroup int
 }
 
 type chainTestResults []chainTestResult
@@ -136,45 +137,51 @@ func TestChainDissimilarity(t *testing.T) {
 			"same row same block",
 			[]cellRef{{0, 0}},
 			[]cellRef{{0, 1}},
+			false,
 		},
 		//this next one verifies that it doesn't matter which of self or other you do first.
 		{
 			"same row same block, just flipped self and other",
 			[]cellRef{{0, 1}},
 			[]cellRef{{0, 0}},
+			true,
 		},
 		//These next two should be the same difficulty.
-		//TODO: might need to generalize the test to allow me to say
-		//that two can be equivalent.
 		{
 			"same block 2 in same row 2 in same col 2 total",
 			[]cellRef{{0, 0}},
 			[]cellRef{{0, 1}, {1, 0}},
+			false,
 		},
 		{
 			"two full rows at opposite ends",
 			[]cellRef{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 8}},
 			[]cellRef{{7, 0}, {7, 1}, {7, 2}, {7, 3}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}},
+			true,
 		},
 		{
 			"same row different blocks",
 			[]cellRef{{0, 0}, {0, 1}},
 			[]cellRef{{0, 3}, {0, 4}},
+			true,
 		},
 		{
 			"same col different blocks",
 			[]cellRef{{0, 0}, {1, 0}},
 			[]cellRef{{3, 0}, {4, 0}},
+			true,
 		},
 		{
 			"same row different blocks, 2 vs 3",
 			[]cellRef{{0, 0}, {0, 1}},
 			[]cellRef{{0, 3}, {0, 4}, {0, 5}},
+			true,
 		},
 		{
 			"single cell opposite corners",
 			[]cellRef{{0, 0}},
 			[]cellRef{{8, 8}},
+			false,
 		},
 	}
 
@@ -184,7 +191,12 @@ func TestChainDissimilarity(t *testing.T) {
 
 	var results chainTestResults
 
-	for i, test := range tests {
+	equivalenceGroup := -1
+
+	for _, test := range tests {
+		if !test.equivalentToPrevious {
+			equivalenceGroup++
+		}
 		var listOne CellList
 		var listTwo CellList
 		for _, ref := range test.one {
@@ -200,17 +212,19 @@ func TestChainDissimilarity(t *testing.T) {
 		if dissimilarity > 1.0 {
 			t.Fatal(test.name, "failed with a dissimilarity great than 1.0:", dissimilarity)
 		}
-		result := chainTestResult{test.name, i, dissimilarity}
+		result := chainTestResult{test.name, dissimilarity, equivalenceGroup}
 		results = append(results, result)
 	}
 
 	//sort them and see if their originalIndexes are now now in order.
 	sort.Sort(results)
 
-	for i, result := range results {
-		if result.originalIndex != i {
-			t.Error(result.name, "was in position", i, " but it was supposed to be in position", result.originalIndex, ". Value:", result.value)
+	lastEquivalenceGroup := 0
+	for _, result := range results {
+		if result.equivalenceGroup < lastEquivalenceGroup {
+			t.Error(result.name, "was in equivalence group", result.equivalenceGroup, " but it was smaller than last group seen:", equivalenceGroup, ". Value:", result.value)
 		}
+		lastEquivalenceGroup = result.equivalenceGroup
 	}
 
 }
