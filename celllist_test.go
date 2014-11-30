@@ -1,7 +1,6 @@
 package sudoku
 
 import (
-	"github.com/davecgh/go-spew/spew"
 	"sort"
 	"testing"
 )
@@ -207,8 +206,6 @@ func TestChainDissimilarity(t *testing.T) {
 
 	//sort them and see if their originalIndexes are now now in order.
 	sort.Sort(results)
-
-	spew.Dump(results)
 
 	for i, result := range results {
 		if result.originalIndex != i {
