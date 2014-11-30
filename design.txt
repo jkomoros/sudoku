@@ -115,8 +115,6 @@ TODO:
 * GenerateGrid should take a maxDifficulty parameter, and as it's generating puzzles we stop removing cells as soon as it crosses that barrier.
 	* This is hard since our difficulty weights are heavingly trained on realistic puzzles (with 50 filled cells or more)
 
-* Our likelihood calculation should put blocks easier than rows and cols; yes there are scanning horizontal and vertical, but your eye doesn' thave to travel as far.
-
 * Our current difficulty is only tuned for 'realistic' puzzles: puzzles that actually have a large number of cells filled.
 	* We should include a lot of trivially easy puzzles in the difficulty training set (and really really hard ones, requiring tons of guesses) to make 
 	sure we're training for a broad range of puzzles. We should inject these in (optionally) after phase 1.

@@ -344,15 +344,15 @@ func (self *basicSolveTechnique) difficultyHelper(baseDifficulty float64) float6
 	groupMultiplier := 1.0
 
 	switch self.groupType {
-	case GROUP_ROW:
-		//Rows are easier to scan because most humans are used to reading LTR
-		groupMultiplier = 1.0
-	case GROUP_COL:
-		//Cols are easy to scan because the eye can move in one line
-		groupMultiplier = 1.05
 	case GROUP_BLOCK:
-		//Blocks are harder to notice because the eye has to zag at least twice.
-		groupMultiplier = 1.5
+		//Blocks are the easiest to notice; although they require zig-zag scanning, the eye doesn't have to move far.
+		groupMultiplier = 1.0
+	case GROUP_ROW:
+		//Rows are easier to scan than columns because most humans are used to reading LTR
+		groupMultiplier = 1.25
+	case GROUP_COL:
+		//Cols are easy to scan because the eye can move in one line, but they have to move a long way in an unnatural direction
+		groupMultiplier = 1.3
 	}
 
 	return groupMultiplier * math.Pow(baseDifficulty, float64(self.k))
