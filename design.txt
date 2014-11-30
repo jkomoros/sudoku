@@ -124,6 +124,7 @@ TODO:
 * Start rolling out some of the generated puzzles into production to start accumulating solves on them
 
 * Figure out why tweakChains in human solve doesn't appear to have much of a difference in the average dissimilarity of steps returned.
+	* Even multiplying the tweaks by a large constant doesn't change the number much ... which should be obvious?
 
 * Verify that userSolveRanges have a reasonable overlap
 
