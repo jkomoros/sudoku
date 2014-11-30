@@ -82,8 +82,6 @@ TODO:
 			* hst_single_test looks like a good candidate.
 * When generating grids, at every step check the difficulty. If it's above the target, go back to the most recent known good difficulty and return that.
 
-* When generating grids, keep a temporary directory of sdk files representing puzzles generated but not vended. When asked for a new puzzle, we first see if we have any in the unvended list that are appropriate difficulty.
-
 * Graph the difficulties for a large number of generated puzzles and see if it follows any particular pattern.
 
 * Use golearn (or even scikit.py, if necessary) to train the difficulties, instead of relying on Weka.
