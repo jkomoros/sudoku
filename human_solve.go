@@ -270,7 +270,6 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 	var lastStep *SolveStep
 
 	for !grid.Solved() {
-		//TODO: provide hints to the techniques of where to look based on the last filled cell
 
 		if grid.Invalid() {
 			//We much have been in a branch and found an invalidity.
