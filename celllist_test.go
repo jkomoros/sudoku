@@ -132,6 +132,8 @@ func TestChainDissimilarity(t *testing.T) {
 	//We should add cases here in the order of similar to dissimilar. The test will then verify
 	//they come out in that order.
 
+	//TODO: test more cases
+
 	tests := []chainTestConfiguration{
 		{
 			"same row same block",
@@ -175,6 +177,12 @@ func TestChainDissimilarity(t *testing.T) {
 			"same row different blocks, 2 vs 3",
 			[]cellRef{{0, 0}, {0, 1}},
 			[]cellRef{{0, 3}, {0, 4}, {0, 5}},
+			true,
+		},
+		{
+			"same block opposite corners 1 x 1",
+			[]cellRef{{0, 0}},
+			[]cellRef{{2, 2}},
 			true,
 		},
 		{
