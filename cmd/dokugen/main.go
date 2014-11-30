@@ -195,14 +195,18 @@ func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symm
 		for _, file := range files {
 			//See what this actually returns.
 			filenameParts := strings.Split(file.Name(), ".")
+
+			//Remember: there's a dot in the filename due to the float seperator.
 			//TODO: shouldn't "sdk" be in a constant somewhere?
-			if len(filenameParts) != 2 || filenameParts[1] != "sdk" {
+			if len(filenameParts) != 3 || filenameParts[2] != "sdk" {
 				continue
 			}
-			difficulty, err := strconv.ParseFloat(filenameParts[0], 64)
+
+			difficulty, err := strconv.ParseFloat(strings.Join(filenameParts[0:2], "."), 64)
 			if err != nil {
 				continue
 			}
+
 			if min <= difficulty && difficulty <= max {
 				//Found a puzzle!
 				grid := sudoku.NewGrid()
