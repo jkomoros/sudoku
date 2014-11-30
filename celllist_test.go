@@ -137,10 +137,18 @@ func TestChainDissimilarity(t *testing.T) {
 			[]cellRef{{0, 0}},
 			[]cellRef{{0, 1}},
 		},
+		//These next two should be the same difficulty.
+		//TODO: might need to generalize the test to allow me to say
+		//that two can be equivalent.
 		{
 			"same row different blocks",
 			[]cellRef{{0, 0}, {0, 1}},
 			[]cellRef{{0, 3}, {0, 4}},
+		},
+		{
+			"same col different blocks",
+			[]cellRef{{0, 0}, {1, 0}},
+			[]cellRef{{3, 0}, {4, 0}},
 		},
 		{
 			"single cell opposite corners",
