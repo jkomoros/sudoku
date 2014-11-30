@@ -196,6 +196,7 @@ func TestChainDissimilarity(t *testing.T) {
 	//Now run the tests
 
 	grid := NewGrid()
+	defer grid.Done()
 
 	var results chainTestResults
 
