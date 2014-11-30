@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -183,8 +184,33 @@ func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.Symm
 	return true
 }
 
+func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) *sudoku.Grid {
+	directory := filepath.Join(puzzleDirectoryParts(symmetryType, symmetryPercentage)...)
+
+	if files, err := ioutil.ReadDir(directory); os.IsNotExist(err) {
+		//The directory doesn't exist.
+		return nil
+	} else {
+		//OK, the directory exists, now see which puzzles are there and if any fit. If one does, vend it and delete the file.
+		for _, file := range files {
+			//See what this actually returns.
+			log.Println(file.Name())
+		}
+	}
+	return nil
+}
+
 func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) *sudoku.Grid {
 	var result *sudoku.Grid
+
+	result = vendPuzzle(min, max, symmetryType, symmetryPercentage)
+
+	if result != nil {
+		log.Println("Vending a puzzle from the cache.")
+		return result
+	}
+
+	//We'll have to generate one ourselves.
 	count := 0
 	for {
 		log.Println("Attempt", count, "at generating puzzle.")
