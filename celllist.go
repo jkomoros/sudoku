@@ -313,7 +313,12 @@ func (self CellList) ChainDissimilarity(other CellList) float64 {
 	//Divide by 4 + 2 + 1 = 7
 	result /= 7.0
 
-	return result
+	//Calculating the real upper bound is tricky, so we'll just assume it's 2.0 for simplicity and normalize based on that.
+	if result > 2.0 {
+		result = 2.0
+	}
+
+	return result / 2.0
 
 }
 
