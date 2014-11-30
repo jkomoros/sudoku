@@ -43,6 +43,7 @@ func main() {
 
 	var options appOptions
 
+	//TODO: there should be an option to not vend any stored puzzles.
 	flag.BoolVar(&options.GENERATE, "g", false, "if true, will generate a puzzle.")
 	flag.BoolVar(&options.HELP, "h", false, "If provided, will print help and exit.")
 	flag.IntVar(&options.NUM, "n", 1, "Number of things to generate")
