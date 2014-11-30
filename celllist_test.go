@@ -156,6 +156,11 @@ func TestChainDissimilarity(t *testing.T) {
 			[]cellRef{{3, 0}, {4, 0}},
 		},
 		{
+			"same row different blocks, 2 vs 3",
+			[]cellRef{{0, 0}, {0, 1}},
+			[]cellRef{{0, 3}, {0, 4}, {0, 5}},
+		},
+		{
 			"single cell opposite corners",
 			[]cellRef{{0, 0}},
 			[]cellRef{{8, 8}},
