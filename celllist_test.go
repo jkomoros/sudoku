@@ -99,36 +99,50 @@ func TestBasicCellList(t *testing.T) {
 
 }
 
+type chainTestConfiguration struct {
+	name string
+	one  []cellRef
+	two  []cellRef
+}
+
+type chainTestResult struct {
+	name          string
+	originalIndex int
+	value         float64
+}
+
+type chainTestResults []chainTestResult
+
+func (self chainTestResults) Len() int {
+	return len(self)
+}
+
+func (self chainTestResults) Less(i, j int) bool {
+	return self[i].value < self[j].value
+}
+
+func (self chainTestResults) Swap(i, j int) {
+	self[i], self[j] = self[j], self[i]
+}
+
 func TestChainDissimilarity(t *testing.T) {
 
-	type chainTestConfiguration struct {
-		name string
-		one  []cellRef
-		two  []cellRef
-	}
-
-	type chainTestResult struct {
-		name          string
-		originalIndex int
-		value         float64
-	}
-
 	tests := []chainTestConfiguration{
-		{
-			"single cell opposite corners",
-			[]cellRef{{0, 0}},
-			[]cellRef{{8, 8}},
-		},
 		{
 			"same row different blocks",
 			[]cellRef{{0, 0}, {0, 1}},
 			[]cellRef{{0, 3}, {0, 4}},
 		},
+		{
+			"single cell opposite corners",
+			[]cellRef{{0, 0}},
+			[]cellRef{{8, 8}},
+		},
 	}
 
 	grid := NewGrid()
 
-	var results []chainTestResult
+	var results chainTestResults
 
 	for i, test := range tests {
 		var listOne CellList
@@ -151,9 +165,13 @@ func TestChainDissimilarity(t *testing.T) {
 	}
 
 	//TODO: sort them and see if their originalIndexes are now now in order.
+	sort.Sort(results)
 
-	//...But for now just spew.
-	t.Error(results)
+	for i, result := range results {
+		if result.originalIndex != i {
+			t.Error(result.name, "was in position", i, " but it was supposed to be in position", result.originalIndex, ". Value:", result.value)
+		}
+	}
 
 }
 
