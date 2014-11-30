@@ -54,7 +54,6 @@ func normalizedWeights(weights []float64) []float64 {
 	return result
 }
 
-//TODO: isn't the easier way to do this just to do 1 / weight?
 func randomIndexWithInvertedWeights(invertedWeights []float64) int {
 	weights := make([]float64, len(invertedWeights))
 
