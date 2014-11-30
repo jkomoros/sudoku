@@ -398,6 +398,8 @@ func tweakChainedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, w
 		possibility := possibilities[i]
 		//Tweak every weight by how related they are.
 		//Remember: these are INVERTED weights, so tweaking them down is BETTER.
+
+		//TODO: consider attentuating the effect of this; chaining is nice but shouldn't totally change the calculation for hard techniques.
 		weights[i] *= possibility.TargetCells.ChainDissimilarity(lastStep.TargetCells)
 	}
 }
