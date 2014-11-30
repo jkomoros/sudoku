@@ -4,6 +4,7 @@ import (
 	"dokugen"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -154,13 +155,26 @@ func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.Symm
 	fileName := filepath.Join(pathSoFar, fileNamePart)
 
 	file, err := os.Create(fileName)
+
 	if err != nil {
 		log.Println(err)
+		return
+	}
+
+	puzzleText := grid.DataString()
+
+	n, err := io.WriteString(file, puzzleText)
+
+	if err != nil {
+		log.Println(err)
+	} else {
+		if n < len(puzzleText) {
+			log.Println("Didn't write full file, only wrote", n, "bytes of", len(puzzleText))
+		}
 	}
 
 	//TODO: write the puzzle to disk
 	file.Close()
-
 }
 
 func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) *sudoku.Grid {
