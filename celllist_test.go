@@ -133,6 +133,7 @@ func TestChainDissimilarity(t *testing.T) {
 	//they come out in that order.
 
 	//TODO: test more cases
+	// For example, ones with cells that overlap.
 
 	tests := []chainTestConfiguration{
 		{
