@@ -137,6 +137,12 @@ func TestChainDissimilarity(t *testing.T) {
 			[]cellRef{{0, 0}},
 			[]cellRef{{0, 1}},
 		},
+		//this next one verifies that it doesn't matter which of self or other you do first.
+		{
+			"same row same block, just flipped self and other",
+			[]cellRef{{0, 1}},
+			[]cellRef{{0, 0}},
+		},
 		//These next two should be the same difficulty.
 		//TODO: might need to generalize the test to allow me to say
 		//that two can be equivalent.
