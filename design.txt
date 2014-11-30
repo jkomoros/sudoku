@@ -127,6 +127,8 @@ TODO:
 	* Even multiplying the tweaks by a large constant doesn't change the number much ... which should be obvious?
 	* Also, squaring them after tweaking doesn't help (it should accentuate sub-1 vs over 1)
 
+* Incorporate a notion of closeness into ChainDissimilarity. Right now it treats a column miss, for example, as a total failure.
+
 * Verify that userSolveRanges have a reasonable overlap
 
 * Make it so if any technique takes too long and we already have some answers, we move ahead anyway.
