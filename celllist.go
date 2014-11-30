@@ -300,6 +300,7 @@ func (self CellList) ChainDissimilarity(other CellList) float64 {
 	sort.Float64s(diffs)
 
 	//We care about the lowest diff the most (capturing the notion that if they line up in row but nothing else, that's still quite good!)
+	//So we';; basically put the lowest one into the average 4 times, 2 times for next, and 1 time for last.
 	weights := []int{4, 2, 1}
 
 	result := 0.0
@@ -310,7 +311,7 @@ func (self CellList) ChainDissimilarity(other CellList) float64 {
 		}
 	}
 
-	//Divide by 4 + 2 + 1 = 7
+	//Divide by 4 + 2 + 1 = 7 to make it a weighted average
 	result /= 7.0
 
 	//Calculating the real upper bound is tricky, so we'll just assume it's 2.0 for simplicity and normalize based on that.
