@@ -377,7 +377,7 @@ func humanSolveGuess(grid *Grid) []*SolveStep {
 // is 'related' to the last step. For example, if the last step had targetCells that shared a row, then a step with
 //target cells in that same row will be more likely this step. This captures the fact that humans, in practice,
 //will have 'chains' of steps that are all related.
-func tweakRelatedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, weights []float64) {
+func tweakChainedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, weights []float64) {
 
 	if len(possibilities) != len(weights) {
 		log.Println("Mismatched lenghts of weights and possibilities: ", possibilities, weights)
