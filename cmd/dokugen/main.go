@@ -194,7 +194,23 @@ func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symm
 		//OK, the directory exists, now see which puzzles are there and if any fit. If one does, vend it and delete the file.
 		for _, file := range files {
 			//See what this actually returns.
-			log.Println(file.Name())
+			filenameParts := strings.Split(file.Name(), ".")
+			//TODO: shouldn't "sdk" be in a constant somewhere?
+			if len(filenameParts) != 2 || filenameParts[1] != "sdk" {
+				continue
+			}
+			difficulty, err := strconv.ParseFloat(filenameParts[0], 64)
+			if err != nil {
+				continue
+			}
+			if min <= difficulty && difficulty <= max {
+				//Found a puzzle!
+				grid := sudoku.NewGrid()
+				fullFileName := filepath.Join(directory, file.Name())
+				grid.LoadFromFile(fullFileName)
+				os.Remove(fullFileName)
+				return grid
+			}
 		}
 	}
 	return nil
