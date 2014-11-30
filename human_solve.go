@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"fmt"
+	"log"
 	"math"
 )
 
@@ -246,6 +247,7 @@ func (self *Grid) HumanSolution() SolveDirections {
  * until finding one that works. This keeps humanSolveHelper pretty straighforward and keeps most of the complex guess logic out.
  */
 
+//TODO: there are lots of options to HumanSolve, like how hard to search, whether to weight based on chaining, etc. Should there be a way to configure those options?
 func (self *Grid) HumanSolve() SolveDirections {
 
 	//Short circuit solving if it has multiple solutions.
@@ -265,8 +267,9 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 	//Note: trying these all in parallel is much slower (~15x) than doing them in sequence.
 	//The reason is that in sequence we bailed early as soon as we found one step; now we try them all.
 
+	var lastStep *SolveStep
+
 	for !grid.Solved() {
-		//TODO: provide hints to the techniques of where to look based on the last filled cell
 
 		if grid.Invalid() {
 			//We much have been in a branch and found an invalidity.
@@ -293,9 +296,13 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 		for i, possibility := range possibilities {
 			possibilitiesWeights[i] = possibility.Technique.HumanLikelihood()
 		}
+
+		tweakChainedStepsWeights(lastStep, possibilities, possibilitiesWeights)
+
 		step := possibilities[randomIndexWithInvertedWeights(possibilitiesWeights)]
 
 		results = append(results, step)
+		lastStep = step
 		step.Apply(grid)
 
 	}
@@ -369,6 +376,31 @@ func humanSolveGuess(grid *Grid) []*SolveStep {
 	//We failed to find anything (which should never happen...)
 	return nil
 
+}
+
+//This function will tweak weights quite a bit to make it more likely that we will pick a subsequent step that
+// is 'related' to the last step. For example, if the last step had targetCells that shared a row, then a step with
+//target cells in that same row will be more likely this step. This captures the fact that humans, in practice,
+//will have 'chains' of steps that are all related.
+func tweakChainedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, weights []float64) {
+
+	if len(possibilities) != len(weights) {
+		log.Println("Mismatched lenghts of weights and possibilities: ", possibilities, weights)
+		return
+	}
+
+	if lastStep == nil || len(possibilities) == 0 {
+		return
+	}
+
+	for i := 0; i < len(possibilities); i++ {
+		possibility := possibilities[i]
+		//Tweak every weight by how related they are.
+		//Remember: these are INVERTED weights, so tweaking them down is BETTER.
+
+		//TODO: consider attentuating the effect of this; chaining is nice but shouldn't totally change the calculation for hard techniques.
+		weights[i] *= possibility.TargetCells.ChainDissimilarity(lastStep.TargetCells)
+	}
 }
 
 func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {

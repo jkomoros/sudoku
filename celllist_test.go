@@ -99,6 +99,146 @@ func TestBasicCellList(t *testing.T) {
 
 }
 
+type chainTestConfiguration struct {
+	name                 string
+	one                  []cellRef
+	two                  []cellRef
+	equivalentToPrevious bool
+}
+
+type chainTestResult struct {
+	name             string
+	value            float64
+	equivalenceGroup int
+}
+
+type chainTestResults []chainTestResult
+
+func (self chainTestResults) Len() int {
+	return len(self)
+}
+
+func (self chainTestResults) Less(i, j int) bool {
+	return self[i].value < self[j].value
+}
+
+func (self chainTestResults) Swap(i, j int) {
+	self[i], self[j] = self[j], self[i]
+}
+
+func TestChainDissimilarity(t *testing.T) {
+
+	//The first bit is where we configure the tests.
+	//We should add cases here in the order of similar to dissimilar. The test will then verify
+	//they come out in that order.
+
+	//TODO: test more cases
+	// For example, ones with cells that overlap.
+
+	tests := []chainTestConfiguration{
+		{
+			"same row same block",
+			[]cellRef{{0, 0}},
+			[]cellRef{{0, 1}},
+			false,
+		},
+		//this next one verifies that it doesn't matter which of self or other you do first.
+		{
+			"same row same block, just flipped self and other",
+			[]cellRef{{0, 1}},
+			[]cellRef{{0, 0}},
+			true,
+		},
+		//These next two should be the same difficulty.
+		{
+			"same block 2 in same row 2 in same col 2 total",
+			[]cellRef{{0, 0}},
+			[]cellRef{{0, 1}, {1, 0}},
+			false,
+		},
+		{
+			"two full rows at opposite ends",
+			[]cellRef{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 8}},
+			[]cellRef{{7, 0}, {7, 1}, {7, 2}, {7, 3}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}},
+			true,
+		},
+		{
+			"same row different blocks",
+			[]cellRef{{0, 0}, {0, 1}},
+			[]cellRef{{0, 3}, {0, 4}},
+			true,
+		},
+		{
+			"same col different blocks",
+			[]cellRef{{0, 0}, {1, 0}},
+			[]cellRef{{3, 0}, {4, 0}},
+			true,
+		},
+		{
+			"same row different blocks, 2 vs 3",
+			[]cellRef{{0, 0}, {0, 1}},
+			[]cellRef{{0, 3}, {0, 4}, {0, 5}},
+			true,
+		},
+		{
+			"same block opposite corners 1 x 1",
+			[]cellRef{{0, 0}},
+			[]cellRef{{2, 2}},
+			true,
+		},
+		{
+			"single cell opposite corners",
+			[]cellRef{{0, 0}},
+			[]cellRef{{8, 8}},
+			false,
+		},
+	}
+
+	//Now run the tests
+
+	grid := NewGrid()
+	defer grid.Done()
+
+	var results chainTestResults
+
+	equivalenceGroup := -1
+
+	for _, test := range tests {
+		if !test.equivalentToPrevious {
+			equivalenceGroup++
+		}
+		var listOne CellList
+		var listTwo CellList
+		for _, ref := range test.one {
+			listOne = append(listOne, ref.Cell(grid))
+		}
+		for _, ref := range test.two {
+			listTwo = append(listTwo, ref.Cell(grid))
+		}
+		dissimilarity := listOne.ChainDissimilarity(listTwo)
+		if dissimilarity < 0.0 {
+			t.Fatal(test.name, "failed with a dissimilarity less than 0.0: ", dissimilarity)
+		}
+		if dissimilarity > 1.0 {
+			t.Fatal(test.name, "failed with a dissimilarity great than 1.0:", dissimilarity)
+		}
+		result := chainTestResult{test.name, dissimilarity, equivalenceGroup}
+		results = append(results, result)
+	}
+
+	//sort them and see if their originalIndexes are now now in order.
+	sort.Sort(results)
+
+	lastEquivalenceGroup := 0
+	for _, result := range results {
+		if result.equivalenceGroup < lastEquivalenceGroup {
+			t.Error(result.name, "was in equivalence group", result.equivalenceGroup, " but it was smaller than last group seen:", equivalenceGroup, ". Value:", result.value)
+		}
+		lastEquivalenceGroup = result.equivalenceGroup
+	}
+
+}
+
 func TestFilledNums(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()

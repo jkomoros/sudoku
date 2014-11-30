@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -228,6 +229,97 @@ func (self CellList) Map(mapper func(*Cell)) {
 	for _, cell := range self {
 		mapper(cell)
 	}
+}
+
+//TODO: should this be in this file? It's awfully specific to HumanSolve needs, and extremely complex.
+//TODO: is this how you spell this?
+func (self CellList) ChainDissimilarity(other CellList) float64 {
+	//Returns a value between 0.0 and 1.0 depending on how 'similar' the cellLists are.
+
+	if other == nil || len(self) == 0 || len(other) == 0 {
+		return 1.0
+	}
+
+	//Note: it doesn't ACTUALLY guarantee a value lower than 1.0 (it might be possible to hit those; reasoning about the maximum value is tricky).
+
+	//Note: a 0.0 means extremely similar, and 1.0 means extremely dissimilar. (This is natural because HumanSolve wnats invertedWeights)
+
+	//Similarity, here, does not mean the overlap of cells that are in both sets--it means how related the blocks/rows/groups are
+	//to one another. This is used in HumanSolve to boost the likelihood of picking steps that are some how 'chained' to the step
+	//before them.
+	//An example with a very high similarity would be if two cells in a row in a block were in self, and other consisted of a DIFFERENT cell
+	//in the same row in the same block.
+	//An example with a very low similarity would be cells that don't share any of the same row/col/block.
+
+	//The overall approach is for self to create three []float64 of DIM length, one for row,col, block id's. Then, go through
+	//And record the proprotion of the targetCells that fell in that group.
+	//Then, you do the same for other.
+	//Then, you sum up the differences in all of the vectors and record a diff for row, block, and col.
+	//Then, you sort the diffs so that the one with the lowest is weighted at 4, 2, 1. This last bit captures the fact that if they're
+	//all in the same row (but different columns) that's still quite good.
+	//Then, we normalize the result based on the highest and lowest possible scores.
+
+	selfRow := make([]float64, DIM)
+	selfCol := make([]float64, DIM)
+	selfBlock := make([]float64, DIM)
+
+	otherRow := make([]float64, DIM)
+	otherCol := make([]float64, DIM)
+	otherBlock := make([]float64, DIM)
+
+	//How much to add each time we find a cell with that row/col/block.
+	//This saves us from having to loop through again to compute the average
+	selfProportion := float64(1) / float64(len(self))
+	otherProportion := float64(1) / float64(len(other))
+
+	for _, cell := range self {
+		selfRow[cell.Row] += selfProportion
+		selfCol[cell.Col] += selfProportion
+		selfBlock[cell.Block] += selfProportion
+	}
+
+	for _, cell := range other {
+		otherRow[cell.Row] += otherProportion
+		otherCol[cell.Col] += otherProportion
+		otherBlock[cell.Block] += otherProportion
+	}
+
+	rowDiff := 0.0
+	colDiff := 0.0
+	blockDiff := 0.0
+
+	//Now, compute the diffs.
+	for i := 0; i < DIM; i++ {
+		rowDiff += math.Abs(selfRow[i] - otherRow[i])
+		colDiff += math.Abs(selfCol[i] - otherCol[i])
+		blockDiff += math.Abs(selfBlock[i] - otherBlock[i])
+	}
+
+	//Now sort the diffs; we care disproportionately about the one that matches best.
+	diffs := []float64{rowDiff, colDiff, blockDiff}
+	sort.Float64s(diffs)
+
+	//We care about the lowest diff the most (capturing the notion that if they line up in row but nothing else, that's still quite good!)
+	weights := []int{4, 2, 1}
+
+	result := 0.0
+
+	for i := 0; i < 3; i++ {
+		for j := 0; j < weights[i]; j++ {
+			result += diffs[i]
+		}
+	}
+
+	//Divide by 4 + 2 + 1 = 7
+	result /= 7.0
+
+	//Calculating the real upper bound is tricky, so we'll just assume it's 2.0 for simplicity and normalize based on that.
+	if result > 2.0 {
+		result = 2.0
+	}
+
+	return result / 2.0
+
 }
 
 func (self CellList) Description() string {
