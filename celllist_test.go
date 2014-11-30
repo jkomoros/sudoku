@@ -99,6 +99,64 @@ func TestBasicCellList(t *testing.T) {
 
 }
 
+func TestChainDissimilarity(t *testing.T) {
+
+	type chainTestConfiguration struct {
+		name string
+		one  []cellRef
+		two  []cellRef
+	}
+
+	type chainTestResult struct {
+		name          string
+		originalIndex int
+		value         float64
+	}
+
+	tests := []chainTestConfiguration{
+		{
+			"single cell opposite corners",
+			[]cellRef{{0, 0}},
+			[]cellRef{{DIM, DIM}},
+		},
+		{
+			"same row different blocks",
+			[]cellRef{{0, 0}, {0, 1}},
+			[]cellRef{{0, 3}, {0, 4}},
+		},
+	}
+
+	grid := NewGrid()
+
+	var results []chainTestResult
+
+	for i, test := range tests {
+		var listOne CellList
+		var listTwo CellList
+		for _, ref := range test.one {
+			listOne = append(listOne, ref.Cell(grid))
+		}
+		for _, ref := range test.two {
+			listTwo = append(listTwo, ref.Cell(grid))
+		}
+		dissimilarity := listOne.ChainDissimilarity(listTwo)
+		if dissimilarity < 0.0 {
+			t.Fatal(test.name, "failed with a dissimilarity less than 0.0: ", dissimilarity)
+		}
+		if dissimilarity > 1.0 {
+			t.Fatal(test.name, "failed with a dissimilarity great than 1.0:", dissimilarity)
+		}
+		result := chainTestResult{test.name, i, dissimilarity}
+		results = append(results, result)
+	}
+
+	//TODO: sort them and see if their originalIndexes are now now in order.
+
+	//...But for now just spew.
+	t.Error(results)
+
+}
+
 func TestFilledNums(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
