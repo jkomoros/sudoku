@@ -127,7 +127,16 @@ func (self chainTestResults) Swap(i, j int) {
 
 func TestChainDissimilarity(t *testing.T) {
 
+	//The first bit is where we configure the tests.
+	//We should add cases here in the order of similar to dissimilar. The test will then verify
+	//they come out in that order.
+
 	tests := []chainTestConfiguration{
+		{
+			"same row same block",
+			[]cellRef{{0, 0}},
+			[]cellRef{{0, 1}},
+		},
 		{
 			"same row different blocks",
 			[]cellRef{{0, 0}, {0, 1}},
@@ -139,6 +148,8 @@ func TestChainDissimilarity(t *testing.T) {
 			[]cellRef{{8, 8}},
 		},
 	}
+
+	//Now run the tests
 
 	grid := NewGrid()
 
