@@ -319,7 +319,11 @@ func (self CellList) ChainDissimilarity(other CellList) float64 {
 		result = 2.0
 	}
 
-	return result / 2.0
+	//We strengthen the effect quite a bit here, otherwise we don't see much of an impact in SolveDirections.
+	//The lower the dissimilarity, the stronger the effect will be.
+	//TODO: logically this should belong in tweakChainedSteps, but for some reason when we do the math.Pow there it doesn't
+	//appear to actually make a difference, which is maddening.
+	return math.Pow(result/2.0, 10)
 
 }
 
