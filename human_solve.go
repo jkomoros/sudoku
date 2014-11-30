@@ -267,6 +267,8 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 	//Note: trying these all in parallel is much slower (~15x) than doing them in sequence.
 	//The reason is that in sequence we bailed early as soon as we found one step; now we try them all.
 
+	var lastStep *SolveStep
+
 	for !grid.Solved() {
 		//TODO: provide hints to the techniques of where to look based on the last filled cell
 
@@ -295,9 +297,13 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 		for i, possibility := range possibilities {
 			possibilitiesWeights[i] = possibility.Technique.HumanLikelihood()
 		}
+
+		tweakChainedStepsWeights(lastStep, possibilities, possibilitiesWeights)
+
 		step := possibilities[randomIndexWithInvertedWeights(possibilitiesWeights)]
 
 		results = append(results, step)
+		lastStep = step
 		step.Apply(grid)
 
 	}

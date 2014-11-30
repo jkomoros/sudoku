@@ -182,6 +182,7 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 		10.0,
 		10.0,
 	}
+
 	tweakChainedStepsWeights(lastStep, possibilities, weights)
 
 	if weights[0] >= weights[1] {
