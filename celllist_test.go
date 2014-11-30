@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"sort"
 	"testing"
 )
@@ -152,6 +153,11 @@ func TestChainDissimilarity(t *testing.T) {
 			[]cellRef{{0, 1}, {1, 0}},
 		},
 		{
+			"two full rows at opposite ends",
+			[]cellRef{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 8}},
+			[]cellRef{{7, 0}, {7, 1}, {7, 2}, {7, 3}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}},
+		},
+		{
 			"same row different blocks",
 			[]cellRef{{0, 0}, {0, 1}},
 			[]cellRef{{0, 3}, {0, 4}},
@@ -201,6 +207,8 @@ func TestChainDissimilarity(t *testing.T) {
 
 	//sort them and see if their originalIndexes are now now in order.
 	sort.Sort(results)
+
+	spew.Dump(results)
 
 	for i, result := range results {
 		if result.originalIndex != i {
