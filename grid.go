@@ -27,6 +27,7 @@ type Grid struct {
 	numFilledCells   int
 	invalidCells     map[*Cell]bool
 	cachedSolutions  []*Grid
+	cachedDifficulty float64
 }
 
 var gridCache chan *Grid
@@ -350,6 +351,7 @@ func (self *Grid) cellIsValid(cell *Cell) {
 
 func (self *Grid) cellModified(cell *Cell) {
 	self.cachedSolutions = nil
+	self.cachedDifficulty = 0.0
 	if cell.Number() == 0 {
 		self.numFilledCells--
 	} else {

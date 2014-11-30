@@ -110,8 +110,6 @@ TODO:
 		* The way to accomplish this is for Human Solve to sort a given cell's possibilities by how "close" they are to the last TargetCells, and tweak their probability
 		to make the more quite a bit more likely.
 
-* Grids should cache their difficulty, so they don't have to recalculate it
-
 * GenerateGrid should take a maxDifficulty parameter, and as it's generating puzzles we stop removing cells as soon as it crosses that barrier.
 	* This is hard since our difficulty weights are heavingly trained on realistic puzzles (with 50 filled cells or more)
 

@@ -393,10 +393,18 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 	return possibilities
 }
 
+//TODO: test that the memoization works (that is, the cached value is thrown out if the grid is modified)
+//It's hard to test because self.calculateDifficulty(true) is so expensive to run.
 func (self *Grid) Difficulty() float64 {
 	//This is so expensive and during testing we don't care if converges.
 	//So we split out the meat of the method separately.
-	return self.calcluateDifficulty(true)
+
+	//Yes, this memoization will fail in the (rare!) cases where a grid's actual difficulty is 0.0, but
+	//the worst case scenario is that we just return the same value.
+	if self.cachedDifficulty == 0.0 {
+		self.cachedDifficulty = self.calcluateDifficulty(true)
+	}
+	return self.cachedDifficulty
 }
 
 func (self *Grid) calcluateDifficulty(accurate bool) float64 {
