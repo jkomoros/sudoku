@@ -384,6 +384,10 @@ func tweakChainedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, w
 		return
 	}
 
+	if lastStep == nil || len(possibilities) == 0 {
+		return
+	}
+
 	for i := 0; i < len(possibilities); i++ {
 		possibility := possibilities[i]
 		//Tweak every weight by how related they are.
