@@ -2,7 +2,6 @@ package sudoku
 
 import (
 	"fmt"
-	"log"
 	"math"
 )
 
@@ -418,9 +417,8 @@ func (self *Grid) calcluateDifficulty(accurate bool) float64 {
 	}
 
 	for i := 0; i < maxIterations; i++ {
-
 		difficulty := gridDifficultyHelper(self)
-		log.Println(i, average, difficulty)
+
 		accum += difficulty
 		average = accum / (float64(i) + 1.0)
 
@@ -431,8 +429,6 @@ func (self *Grid) calcluateDifficulty(accurate bool) float64 {
 
 		lastAverage = average
 	}
-
-	log.Println("bail")
 
 	//We weren't converging... oh well!
 	return average
