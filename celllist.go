@@ -236,6 +236,10 @@ func (self CellList) Map(mapper func(*Cell)) {
 func (self CellList) ChainDissimilarity(other CellList) float64 {
 	//Returns a value between 0.0 and 1.0 depending on how 'similar' the cellLists are.
 
+	if other == nil || len(self) == 0 || len(other) == 0 {
+		return 1.0
+	}
+
 	//Note: it doesn't ACTUALLY guarantee a value lower than 1.0 (it might be possible to hit those; reasoning about the maximum value is tricky).
 
 	//Note: a 0.0 means extremely similar, and 1.0 means extremely dissimilar. (This is natural because HumanSolve wnats invertedWeights)
