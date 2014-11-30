@@ -128,7 +128,7 @@ func main() {
 
 }
 
-func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) {
+func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) bool {
 	//TODO: we should include a hashed version of our difficulty weights file so we don't cache ones with old weights.
 	directoryParts := []string{
 		STORED_PUZZLES_DIRECTORY,
@@ -158,8 +158,10 @@ func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.Symm
 
 	if err != nil {
 		log.Println(err)
-		return
+		return false
 	}
+
+	defer file.Close()
 
 	puzzleText := grid.DataString()
 
@@ -167,14 +169,14 @@ func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.Symm
 
 	if err != nil {
 		log.Println(err)
+		return false
 	} else {
 		if n < len(puzzleText) {
 			log.Println("Didn't write full file, only wrote", n, "bytes of", len(puzzleText))
+			return false
 		}
 	}
-
-	//TODO: write the puzzle to disk
-	file.Close()
+	return true
 }
 
 func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) *sudoku.Grid {
@@ -192,7 +194,9 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 		}
 
 		log.Println("Rejecting grid of difficulty", difficulty)
-		storePuzzle(result, difficulty, symmetryType, symmetryPercentage)
+		if storePuzzle(result, difficulty, symmetryType, symmetryPercentage) {
+			log.Println("Stored the puzzle for future use.")
+		}
 
 		count++
 	}
