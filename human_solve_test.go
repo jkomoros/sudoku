@@ -170,6 +170,15 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 		},
 		&SolveStep{
 			cellRefsToCells([]cellRef{
+				{2, 2},
+			}, grid),
+			nil,
+			nil,
+			nil,
+			nil,
+		},
+		&SolveStep{
+			cellRefsToCells([]cellRef{
 				{7, 7},
 			}, grid),
 			nil,
@@ -181,12 +190,17 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 	weights := []float64{
 		10.0,
 		10.0,
+		10.0,
 	}
 
 	tweakChainedStepsWeights(lastStep, possibilities, weights)
 
-	if weights[0] >= weights[1] {
-		t.Error("Tweak Chained Steps Weights didn't tweak things in the right direction: ", weights)
+	lastWeight := 0.0
+	for i, weight := range weights {
+		if weight <= lastWeight {
+			t.Error("Tweak Chained Steps Weights didn't tweak things in the right direction: ", weights, "at", i)
+		}
+		lastWeight = weight
 	}
 }
 
