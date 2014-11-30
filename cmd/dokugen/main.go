@@ -128,6 +128,7 @@ func main() {
 }
 
 func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) {
+	//TODO: we should include a hashed version of our difficulty weights file so we don't cache ones with old weights.
 	fileName := filepath.Join(STORED_PUZZLES_DIRECTORY, "SYM_TYPE_"+strconv.Itoa(int(symmetryType)), "SYM_PERCENTAGE_"+
 		strconv.FormatFloat(symmetryPercentage, 'f', -1, 64), strconv.FormatFloat(difficulty, 'f', -1, 64)+".sdk")
 
