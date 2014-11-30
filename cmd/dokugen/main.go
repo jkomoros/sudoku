@@ -7,10 +7,13 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
 //TODO: let people pass in a filename to export to.
+
+const STORED_PUZZLES_DIRECTORY = ".puzzles"
 
 type appOptions struct {
 	GENERATE            bool
@@ -123,6 +126,20 @@ func main() {
 
 }
 
+func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) {
+	fileName := STORED_PUZZLES_DIRECTORY + "/SYM_TYPE_" + strconv.Itoa(int(symmetryType)) + "/SYM_PERCENTAGE_" +
+		strconv.FormatFloat(symmetryPercentage, 'f', -1, 64) + "/" + strconv.FormatFloat(difficulty, 'f', -1, 64) + ".sdk"
+
+	file, err := os.Create(fileName)
+	if err != nil {
+		log.Println(err)
+	}
+
+	//TODO: write the puzzle to disk
+	file.Close()
+
+}
+
 func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) *sudoku.Grid {
 	var result *sudoku.Grid
 	count := 0
@@ -138,6 +155,7 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 		}
 
 		log.Println("Rejecting grid of difficulty", difficulty)
+		storePuzzle(result, difficulty, symmetryType, symmetryPercentage)
 
 		count++
 	}
