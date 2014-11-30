@@ -126,6 +126,7 @@ TODO:
 * Figure out why tweakChains in human solve doesn't appear to have much of a difference in the average dissimilarity of steps returned.
 	* Even multiplying the tweaks by a large constant doesn't change the number much ... which should be obvious?
 	* Also, squaring them after tweaking doesn't help (it should accentuate sub-1 vs over 1)
+	* We should test randomIndex and make sure that over large numbers of tests for a distribution the indexes are what we'd expect.
 
 * Incorporate a notion of closeness into ChainDissimilarity. Right now it treats a column miss, for example, as a total failure.
 
