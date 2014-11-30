@@ -136,6 +136,59 @@ func TestStepsDescription(t *testing.T) {
 	}
 }
 
+//TODO: this is useful. Should we use this in other tests?
+func cellRefsToCells(refs []cellRef, grid *Grid) CellList {
+	var result CellList
+	for _, ref := range refs {
+		result = append(result, ref.Cell(grid))
+	}
+	return result
+}
+
+func TestTweakChainedStepsWeights(t *testing.T) {
+
+	//TODO: test other, harder cases as well.
+	grid := NewGrid()
+	lastStep := &SolveStep{
+		cellRefsToCells([]cellRef{
+			{0, 0},
+		}, grid),
+		nil,
+		nil,
+		nil,
+		nil,
+	}
+	possibilities := []*SolveStep{
+		&SolveStep{
+			cellRefsToCells([]cellRef{
+				{1, 0},
+			}, grid),
+			nil,
+			nil,
+			nil,
+			nil,
+		},
+		&SolveStep{
+			cellRefsToCells([]cellRef{
+				{7, 7},
+			}, grid),
+			nil,
+			nil,
+			nil,
+			nil,
+		},
+	}
+	weights := []float64{
+		10.0,
+		10.0,
+	}
+	tweakRelatedStepsWeights(lastStep, possibilities, weights)
+
+	if weights[0] >= weights[1] {
+		t.Error("Tweak Chained Steps Weights didn't tweak things in the right direction: ", weights)
+	}
+}
+
 func TestPuzzleDifficulty(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
