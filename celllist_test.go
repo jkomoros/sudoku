@@ -141,6 +141,11 @@ func TestChainDissimilarity(t *testing.T) {
 		//TODO: might need to generalize the test to allow me to say
 		//that two can be equivalent.
 		{
+			"same block 2 in same row 2 in same col 2 total",
+			[]cellRef{{0, 0}},
+			[]cellRef{{0, 1}, {1, 0}},
+		},
+		{
 			"same row different blocks",
 			[]cellRef{{0, 0}, {0, 1}},
 			[]cellRef{{0, 3}, {0, 4}},
@@ -183,7 +188,7 @@ func TestChainDissimilarity(t *testing.T) {
 		results = append(results, result)
 	}
 
-	//TODO: sort them and see if their originalIndexes are now now in order.
+	//sort them and see if their originalIndexes are now now in order.
 	sort.Sort(results)
 
 	for i, result := range results {
