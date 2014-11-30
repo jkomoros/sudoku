@@ -82,8 +82,6 @@ TODO:
 			* hst_single_test looks like a good candidate.
 * When generating grids, at every step check the difficulty. If it's above the target, go back to the most recent known good difficulty and return that.
 
-* When generating grids, keep a temporary directory of sdk files representing puzzles generated but not vended. When asked for a new puzzle, we first see if we have any in the unvended list that are appropriate difficulty.
-
 * Graph the difficulties for a large number of generated puzzles and see if it follows any particular pattern.
 
 * Use golearn (or even scikit.py, if necessary) to train the difficulties, instead of relying on Weka.
@@ -93,6 +91,9 @@ TODO:
 	* I tried it in Solve and was finding that generating a new r per thread was actually taking 110% of the time of just using the global one, oddly...
 
 * Make it so the docs generated from dokugen are all useful.
+
+* Stored puzzles should go in a folder named with a hash of the difficultiesweights loaded up. That way, we won't vend puzzles generated with different weights.
+	* Probably makes the most sense for the base library to expose a DifficultiesHash that it populates when we load the difficulties, and have dokugen use that.
 
 * REdo of threaded solving
 	* Why is performance so slow?

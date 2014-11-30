@@ -4,13 +4,19 @@ import (
 	"dokugen"
 	"flag"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
 //TODO: let people pass in a filename to export to.
+
+const STORED_PUZZLES_DIRECTORY = ".puzzles"
 
 type appOptions struct {
 	GENERATE            bool
@@ -37,6 +43,7 @@ func main() {
 
 	var options appOptions
 
+	//TODO: there should be an option to not vend any stored puzzles.
 	flag.BoolVar(&options.GENERATE, "g", false, "if true, will generate a puzzle.")
 	flag.BoolVar(&options.HELP, "h", false, "If provided, will print help and exit.")
 	flag.IntVar(&options.NUM, "n", 1, "Number of things to generate")
@@ -123,8 +130,108 @@ func main() {
 
 }
 
+func puzzleDirectoryParts(symmetryType sudoku.SymmetryType, symmetryPercentage float64) []string {
+	return []string{
+		STORED_PUZZLES_DIRECTORY,
+		"SYM_TYPE_" + strconv.Itoa(int(symmetryType)),
+		"SYM_PERCENTAGE_" + strconv.FormatFloat(symmetryPercentage, 'f', -1, 64),
+	}
+}
+
+func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) bool {
+	//TODO: we should include a hashed version of our difficulty weights file so we don't cache ones with old weights.
+	directoryParts := puzzleDirectoryParts(symmetryType, symmetryPercentage)
+
+	fileNamePart := strconv.FormatFloat(difficulty, 'f', -1, 64) + ".sdk"
+
+	pathSoFar := ""
+
+	for i, part := range directoryParts {
+		if i == 0 {
+			pathSoFar = part
+		} else {
+			pathSoFar = filepath.Join(pathSoFar, part)
+		}
+		if _, err := os.Stat(pathSoFar); os.IsNotExist(err) {
+			//need to create it.
+			os.Mkdir(pathSoFar, 0700)
+		}
+	}
+
+	fileName := filepath.Join(pathSoFar, fileNamePart)
+
+	file, err := os.Create(fileName)
+
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	defer file.Close()
+
+	puzzleText := grid.DataString()
+
+	n, err := io.WriteString(file, puzzleText)
+
+	if err != nil {
+		log.Println(err)
+		return false
+	} else {
+		if n < len(puzzleText) {
+			log.Println("Didn't write full file, only wrote", n, "bytes of", len(puzzleText))
+			return false
+		}
+	}
+	return true
+}
+
+func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) *sudoku.Grid {
+	directory := filepath.Join(puzzleDirectoryParts(symmetryType, symmetryPercentage)...)
+
+	if files, err := ioutil.ReadDir(directory); os.IsNotExist(err) {
+		//The directory doesn't exist.
+		return nil
+	} else {
+		//OK, the directory exists, now see which puzzles are there and if any fit. If one does, vend it and delete the file.
+		for _, file := range files {
+			//See what this actually returns.
+			filenameParts := strings.Split(file.Name(), ".")
+
+			//Remember: there's a dot in the filename due to the float seperator.
+			//TODO: shouldn't "sdk" be in a constant somewhere?
+			if len(filenameParts) != 3 || filenameParts[2] != "sdk" {
+				continue
+			}
+
+			difficulty, err := strconv.ParseFloat(strings.Join(filenameParts[0:2], "."), 64)
+			if err != nil {
+				continue
+			}
+
+			if min <= difficulty && difficulty <= max {
+				//Found a puzzle!
+				grid := sudoku.NewGrid()
+				fullFileName := filepath.Join(directory, file.Name())
+				grid.LoadFromFile(fullFileName)
+				os.Remove(fullFileName)
+				return grid
+			}
+		}
+	}
+	return nil
+}
+
 func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) *sudoku.Grid {
 	var result *sudoku.Grid
+
+	result = vendPuzzle(min, max, symmetryType, symmetryPercentage)
+
+	if result != nil {
+		log.Println("Vending a puzzle from the cache.")
+		return result
+	}
+
+	//We'll have to generate one ourselves.
 	count := 0
 	for {
 		log.Println("Attempt", count, "at generating puzzle.")
@@ -138,6 +245,9 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 		}
 
 		log.Println("Rejecting grid of difficulty", difficulty)
+		if storePuzzle(result, difficulty, symmetryType, symmetryPercentage) {
+			log.Println("Stored the puzzle for future use.")
+		}
 
 		count++
 	}
