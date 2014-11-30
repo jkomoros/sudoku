@@ -123,6 +123,8 @@ TODO:
 
 * Start rolling out some of the generated puzzles into production to start accumulating solves on them
 
+* Figure out why tweakChains in human solve doesn't appear to have much of a difference in the average dissimilarity of steps returned.
+
 * Verify that userSolveRanges have a reasonable overlap
 
 * Make it so if any technique takes too long and we already have some answers, we move ahead anyway.
