@@ -92,6 +92,9 @@ TODO:
 
 * Make it so the docs generated from dokugen are all useful.
 
+* Stored puzzles should go in a folder named with a hash of the difficultiesweights loaded up. That way, we won't vend puzzles generated with different weights.
+	* Probably makes the most sense for the base library to expose a DifficultiesHash that it populates when we load the difficulties, and have dokugen use that.
+
 * REdo of threaded solving
 	* Why is performance so slow?
 
