@@ -107,6 +107,10 @@ TODO:
 
 * In a perfect world, NonFill steps that don't end up being necessary to actually place a cell in the future would not be included.
 	* This may be a side effect of other techinques taking a "key" cell (the cells affected last move) to focus more intensely on. This mirrors human behavior more closely.
+		* The way to accomplish this is for Human Solve to sort a given cell's possibilities by how "close" they are to the last TargetCells, and tweak their probability
+		to make the more quite a bit more likely.
+
+* Picking an InverseWeightedIndex should probably use 1/x, not 1 -x.
 
 * Grids should cache their difficulty, so they don't have to recalculate it
 
