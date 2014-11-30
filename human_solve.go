@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"fmt"
+	"log"
 	"math"
 )
 
@@ -370,6 +371,25 @@ func humanSolveGuess(grid *Grid) []*SolveStep {
 	//We failed to find anything (which should never happen...)
 	return nil
 
+}
+
+//This function will tweak weights quite a bit to make it more likely that we will pick a subsequent step that
+// is 'related' to the last step. For example, if the last step had targetCells that shared a row, then a step with
+//target cells in that same row will be more likely this step. This captures the fact that humans, in practice,
+//will have 'chains' of steps that are all related.
+func tweakRelatedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, weights []float64) {
+
+	if len(possibilities) != len(weights) {
+		log.Println("Mismatched lenghts of weights and possibilities: ", possibilities, weights)
+		return
+	}
+
+	for i := 0; i < len(possibilities); i++ {
+		possibility := possibilities[i]
+		//Tweak every weight by how related they are.
+		//Remember: these are INVERTED weights, so tweaking them down is BETTER.
+		weights[i] *= possibility.TargetCells.ChainDissimilarity(lastStep.TargetCells)
+	}
 }
 
 func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
