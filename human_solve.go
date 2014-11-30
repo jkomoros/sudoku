@@ -246,6 +246,7 @@ func (self *Grid) HumanSolution() SolveDirections {
  * until finding one that works. This keeps humanSolveHelper pretty straighforward and keeps most of the complex guess logic out.
  */
 
+//TODO: there are lots of options to HumanSolve, like how hard to search, whether to weight based on chaining, etc. Should there be a way to configure those options?
 func (self *Grid) HumanSolve() SolveDirections {
 
 	//Short circuit solving if it has multiple solutions.
