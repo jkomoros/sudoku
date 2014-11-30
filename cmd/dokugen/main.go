@@ -138,6 +138,7 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 		}
 
 		log.Println("Rejecting grid of difficulty", difficulty)
+		log.Println(strings.Join(result.HumanSolution().Stats(), "\n"))
 
 		count++
 	}
