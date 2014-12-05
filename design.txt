@@ -126,6 +126,16 @@ TODO:
 
 * Start rolling out some of the generated puzzles into production to start accumulating solves on them
 
+* Split SolveTechniques into tranches (we already ahve two: normal and expensive). Only run the tranche at a time, and only go up to the next tranche if there's nothing returned. 
+	* Is it better to just do the weightings correctly in the step selection?
+	* Do weights handle a lot of the same technique correctly?
+		* How many steps are we choosing between, on average?
+	* Tranches:
+		* FillTechniques
+		* CheapNonFill
+		* ExpensiveNonFill
+		* Guess
+
 * Figure out why tweakChains in human solve doesn't appear to have much of a difference in the average dissimilarity of steps returned.
 	* Even multiplying the tweaks by a large constant doesn't change the number much ... which should be obvious?
 	* Also, squaring them after tweaking doesn't help (it should accentuate sub-1 vs over 1)
