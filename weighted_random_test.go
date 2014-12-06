@@ -189,6 +189,11 @@ func TestWeightedRandomDistribution(t *testing.T) {
 				100.0,
 				400.0,
 			},
+			//TODO: think about this hard... This probability seems wrong for what we're trying to accomplish.
+			// The precense of the very high numbers makes it so that the early items are picked at a similar
+			//rate to the later ones that should be an order of magnitude less likely. This kind of condition
+			//happens a lot in HumanSolve (all you need is one high weighted technique), and would explain why
+			//we have kind of odd selections of steps.
 			[]float64{
 				0.13331094694426,
 				0.13331094694426,
