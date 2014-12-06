@@ -177,7 +177,31 @@ func TestWeightedRandomDistribution(t *testing.T) {
 			},
 			"1.0, 100.0, 0.5, -1.0, 0.0, 6.4",
 		},
-		//next: many of the same number
+		{
+			[]float64{
+				3.0,
+				3.0,
+				4.0,
+				4.0,
+				4.0,
+				4.0,
+				100.0,
+				100.0,
+				400.0,
+			},
+			[]float64{
+				0.13331094694426,
+				0.13331094694426,
+				0.13297515110813,
+				0.13297515110813,
+				0.13297515110813,
+				0.13297515110813,
+				0.10073875083949,
+				0.10073875083949,
+				0.0,
+			},
+			"Many at same weight; exponential incrase",
+		},
 	}
 
 	for _, testCase := range cases {
