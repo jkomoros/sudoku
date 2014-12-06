@@ -1,9 +1,13 @@
 package sudoku
 
 import (
+	"math"
 	"math/rand"
 	"testing"
 )
+
+const _NUM_RUNS_TEST_WEIGHTED_DISTRIBUTION = 1000
+const _ALLOWABLE_DIFF_WEIGHTED_DISTRIBUTION = 0.01
 
 func TestRandomWeightedIndex(t *testing.T) {
 
@@ -96,4 +100,35 @@ func TestRandomWeightedIndex(t *testing.T) {
 			t.Error("Random index with weights that ended in zero picked wrong index with seed ", i)
 		}
 	}
+}
+
+func randomIndexDistributionHelper(t *testing.T, theFunc func([]float64) int, input []float64, expectedDistribution []float64, testCase string) {
+
+	if len(input) != len(expectedDistribution) {
+		t.Fatal("Given differently sized input and expected distribution")
+	}
+
+	//collect the results
+	results := make([]int, len(expectedDistribution))
+	for i := 0; i < _NUM_RUNS_TEST_WEIGHTED_DISTRIBUTION; i++ {
+		rand.Seed(int64(i))
+		result := theFunc(input)
+		results[result]++
+	}
+
+	//normalize the results and then calculate the diffs from expected.
+
+	diffAccum := 0.0
+
+	normalizedResults := make([]float64, len(results))
+
+	for i, result := range results {
+		normalizedResults[i] = float64(result) / _NUM_RUNS_TEST_WEIGHTED_DISTRIBUTION
+		diffAccum += math.Abs(normalizedResults[i] - expectedDistribution[i])
+	}
+
+	if diffAccum > _ALLOWABLE_DIFF_WEIGHTED_DISTRIBUTION {
+		t.Error("More than allowable difference observed in weighted random distribution:", diffAccum, testCase, "Got", normalizedResults, "Expected", expectedDistribution)
+	}
+
 }
