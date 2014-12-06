@@ -355,7 +355,14 @@ func (self *basicSolveTechnique) difficultyHelper(baseDifficulty float64) float6
 		groupMultiplier = 1.3
 	}
 
-	return groupMultiplier * math.Pow(baseDifficulty, float64(self.k))
+	//TODO: Arguably, the "fill-ness" of a technique should be encoded in the baseDifficulty, and this is a hack to quickly change it for all fill techniques.
+	fillMultiplier := 1.0
+
+	if !self.IsFill() {
+		fillMultiplier = 5.0
+	}
+
+	return groupMultiplier * fillMultiplier * math.Pow(baseDifficulty, float64(self.k))
 }
 
 func (self *basicSolveTechnique) getter(grid *Grid) func(int) CellList {
