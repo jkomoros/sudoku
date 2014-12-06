@@ -217,6 +217,20 @@ func TestWeightedRandomDistribution(t *testing.T) {
 				8.0,
 				16.0,
 			},
+			/*
+				//What I'd expect the weights to be:
+				//Just the weights of the input non inverted, reversed.
+				//It's easier to reason about in this case since each one clearly has a dual; not
+				//immediately clear how to generalize it.
+				[]float64{
+					0.51612903225806,
+					0.25806451612903,
+					0.12903225806452,
+					0.06451612903226,
+					0.03225806451613,
+					0.0,
+				},
+			*/
 			[]float64{
 				0.24615384615385,
 				0.23076923076923,
@@ -225,7 +239,7 @@ func TestWeightedRandomDistribution(t *testing.T) {
 				0.12307692307692,
 				0.0,
 			},
-			"Straight power of two increase 65",
+			"Straight power of two increase 31",
 		},
 	}
 
