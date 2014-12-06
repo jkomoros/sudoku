@@ -55,6 +55,7 @@ func normalizedWeights(weights []float64) []float64 {
 }
 
 func randomIndexWithInvertedWeights(invertedWeights []float64) int {
+	//TODO: this function means that the worst weighted item will have a weight of 0.0. Isn't that wrong? Maybe it should be +1 to everythign?
 	weights := make([]float64, len(invertedWeights))
 
 	//Invert
