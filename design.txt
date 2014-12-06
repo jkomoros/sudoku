@@ -130,6 +130,10 @@ TODO:
 	* Is it better to just do the weightings correctly in the step selection?
 	* Do weights handle a lot of the same technique correctly?
 		* How many steps are we choosing between, on average?
+			* Just ran a few runs:
+				* Average length of possibilities 30.00248447204969
+				* Average fill percentage 0.6302824639372018
+				* Total fills picked:  0.6807453416149069
 	* Tranches:
 		* FillTechniques
 		* CheapNonFill
