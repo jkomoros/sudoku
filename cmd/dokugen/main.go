@@ -238,7 +238,10 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 	//We'll have to generate one ourselves.
 	count := 0
 	for {
-		log.Println("Attempt", count, "at generating puzzle.")
+		//The first time we don't bother saying what number attemp it is, because if the first run is likely to generate a useable puzzle it's just noise.
+		if count != 0 {
+			log.Println("Attempt", count, "at generating puzzle.")
+		}
 
 		result = sudoku.GenerateGrid(symmetryType, symmetryPercentage)
 
