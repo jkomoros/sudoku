@@ -207,6 +207,26 @@ func TestWeightedRandomDistribution(t *testing.T) {
 			},
 			"Many at same weight; exponential incrase",
 		},
+		//This demonstrates the same problem as the case above, but is more pure
+		{
+			[]float64{
+				0.0,
+				1.0,
+				2.0,
+				4.0,
+				8.0,
+				16.0,
+			},
+			[]float64{
+				0.24615384615385,
+				0.23076923076923,
+				0.21538461538462,
+				0.18461538461538,
+				0.12307692307692,
+				0.0,
+			},
+			"Straight power of two increase 65",
+		},
 	}
 
 	for _, testCase := range cases {
