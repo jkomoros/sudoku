@@ -222,6 +222,18 @@ func TestWeightedRandomDistribution(t *testing.T) {
 				//Just the weights of the input non inverted, reversed.
 				//It's easier to reason about in this case since each one clearly has a dual; not
 				//immediately clear how to generalize it.
+				//
+				//Based on a lot of thinking, and looking carefully at the graphs, I think the answer might be:
+				//* De-negativize
+				//* Remove duplicates (for now)
+				//* Sort the weights in ascending order.
+				//* Set the lowest one to what is the highest number.
+				//* Working back from the highest to lowest number, the slope from the lowest to highest should match
+				//... so if len = 4, to compute the value of 1, it would be the value of 0 + diff from 4 to 3.
+				//... In this step you obviously put back in repeated versions with the same value
+				//* Now you normalize THAT.
+				//... WAIT, I think this might only work if the numbers are smoothly distributed across the range.
+					// To reason about that, consider {2,3,8}
 				[]float64{
 					0.51612903225806,
 					0.25806451612903,
