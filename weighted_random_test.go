@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-const _NUM_RUNS_TEST_WEIGHTED_DISTRIBUTION = 1000
+const _NUM_RUNS_TEST_WEIGHTED_DISTRIBUTION = 10000
 const _ALLOWABLE_DIFF_WEIGHTED_DISTRIBUTION = 0.01
 
 func TestRandomWeightedIndex(t *testing.T) {
@@ -100,6 +100,44 @@ func TestRandomWeightedIndex(t *testing.T) {
 			t.Error("Random index with weights that ended in zero picked wrong index with seed ", i)
 		}
 	}
+}
+
+func TestWeightedRandomDistribution(t *testing.T) {
+
+	//We're just going to bother testing randomIndexWithInvertedWeights since that's the one we actually use
+	//in HumanSolve.
+
+	type distributionTestCase struct {
+		input       []float64
+		expected    []float64
+		description string
+	}
+
+	cases := []distributionTestCase{
+		{
+			[]float64{
+				0.0,
+				1.0,
+				2.0,
+			},
+			[]float64{
+				0.66666666666,
+				0.33333333333,
+				0.0,
+			},
+			"0 1 2",
+		},
+	}
+
+	for _, testCase := range cases {
+		randomIndexDistributionHelper(
+			t,
+			randomIndexWithInvertedWeights,
+			testCase.input,
+			testCase.expected,
+			testCase.description)
+	}
+
 }
 
 func randomIndexDistributionHelper(t *testing.T, theFunc func([]float64) int, input []float64, expectedDistribution []float64, testCase string) {
