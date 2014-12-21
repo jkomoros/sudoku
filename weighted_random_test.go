@@ -232,6 +232,7 @@ func TestWeightedRandomDistribution(t *testing.T) {
 				//... so if len = 4, to compute the value of 1, it would be the value of 0 + diff from 4 to 3.
 				//... In this step you obviously put back in repeated versions with the same value
 				//* Now you normalize THAT.
+				//According to Jeff, the right way to normalize (after de-negativizing) might be e^(1/x)
 				//... WAIT, I think this might only work if the numbers are smoothly distributed across the range.
 					// To reason about that, consider {2,3,8}
 				[]float64{
