@@ -20,6 +20,21 @@ func normalizedWeights(weights []float64) []float64 {
 		return weights
 	}
 	var sum float64
+
+	fixedWeights := denegativizeWeights(weights)
+
+	for _, weight := range fixedWeights {
+		sum += weight
+	}
+
+	result := make([]float64, len(weights))
+	for i, weight := range fixedWeights {
+		result[i] = weight / sum
+	}
+	return result
+}
+
+func denegativizeWeights(weights []float64) []float64 {
 	var lowestNegative float64
 
 	//Check for a negative.
@@ -43,15 +58,7 @@ func normalizedWeights(weights []float64) []float64 {
 
 	}
 
-	for _, weight := range fixedWeights {
-		sum += weight
-	}
-
-	result := make([]float64, len(weights))
-	for i, weight := range fixedWeights {
-		result[i] = weight / sum
-	}
-	return result
+	return fixedWeights
 }
 
 func randomIndexWithInvertedWeights(invertedWeights []float64) int {
