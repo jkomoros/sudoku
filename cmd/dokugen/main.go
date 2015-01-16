@@ -30,7 +30,7 @@ type appOptions struct {
 	SYMMETRY_PROPORTION float64
 	MIN_DIFFICULTY      float64
 	MAX_DIFFICULTY      float64
-	CACHE               bool
+	NO_CACHE            bool
 }
 
 func init() {
@@ -54,7 +54,7 @@ func main() {
 	flag.Float64Var(&options.SYMMETRY_PROPORTION, "r", 0.7, "What proportion of cells should be filled according to symmetry")
 	flag.Float64Var(&options.MIN_DIFFICULTY, "min", 0.0, "Minimum difficulty for generated puzzle")
 	flag.Float64Var(&options.MAX_DIFFICULTY, "max", 1.0, "Maximum difficulty for generated puzzle")
-	flag.BoolVar(&options.CACHE, "cache", true, "Whether or not we should vend generated puzzles from the cache of previously generated puzzles.")
+	flag.BoolVar(&options.NO_CACHE, "no-cache", false, "If provided, will not vend generated puzzles from the cache of previously generated puzzles.")
 
 	flag.Parse()
 
@@ -84,7 +84,7 @@ func main() {
 	for i := 0; i < options.NUM; i++ {
 		//TODO: allow the type of symmetry to be configured.
 		if options.GENERATE {
-			grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.CACHE)
+			grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.NO_CACHE)
 			fmt.Fprintln(output, grid.DataString())
 		} else if options.PUZZLE_TO_SOLVE != "" {
 			//TODO: detect if the load failed.
@@ -223,10 +223,10 @@ func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symm
 	return nil
 }
 
-func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, useCache bool) *sudoku.Grid {
+func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, skipCache bool) *sudoku.Grid {
 	var result *sudoku.Grid
 
-	if useCache {
+	if !skipCache {
 		result = vendPuzzle(min, max, symmetryType, symmetryPercentage)
 
 		if result != nil {
