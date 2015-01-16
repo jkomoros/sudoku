@@ -108,6 +108,10 @@ TODO:
 
 * In a perfect world, NonFill steps that don't end up being necessary to actually place a cell in the future would not be included.
 	* This may be a side effect of other techinques taking a "key" cell (the cells affected last move) to focus more intensely on. This mirrors human behavior more closely.
+	* The way to do this, I think, is to mirror the guess branch logic in HumanSolve. Whenever we pick a nonfill stepp, we have to fill forward until we find the first fill step. Then we need to verify that the cell picked had its possibilities reduced by the interveining non fill steps.
+		* This could get expensive.
+		* This will be easier to do if we split the techniques up into the tranches and only dip into nonfill when no fills are available.
+		* Presumably at each step after a nonfill we try ALL possible fill steps and see if any of them are one of the cells whose possibilties have been reduced since the "branch"
 
 * GenerateGrid should take a maxDifficulty parameter, and as it's generating puzzles we stop removing cells as soon as it crosses that barrier.
 	* This is hard since our difficulty weights are heavingly trained on realistic puzzles (with 50 filled cells or more)
