@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"math"
 	"math/rand"
 )
 
@@ -65,9 +66,20 @@ func randomIndexWithInvertedWeights(invertedWeights []float64) int {
 	//TODO: this function means that the worst weighted item will have a weight of 0.0. Isn't that wrong? Maybe it should be +1 to everythign?
 	weights := make([]float64, len(invertedWeights))
 
+	invertedWeights = denegativizeWeights(invertedWeights)
+
+	//This inversion isn't really an inversion, and it's tied closely to the shape of the weightings we expect to be given in the sudoku problem domain.
+
+	//In sudoku, the weights for different techniques go up exponentially. So when we invert, we want to see a similar exponential shape of the
+	//flipped values.
+
+	//We flip with 1/x, and the bottom is an exponent, but softened some.
+
+	//I don't know if this math makes any sense, but in the test distributions the outputs FEEL right.
+
 	//Invert
 	for i, weight := range invertedWeights {
-		weights[i] = weight * -1
+		weights[i] = 1 / math.Exp(weight/20)
 	}
 
 	//But now you need to renormalize since they won't sum to 1.
