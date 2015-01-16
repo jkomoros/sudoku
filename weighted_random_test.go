@@ -222,6 +222,25 @@ func TestWeightedRandomDistribution(t *testing.T) {
 			},
 			"Straight power of two increase 31",
 		},
+		{
+			[]float64{
+				1.0,
+				2.0,
+				3.0,
+				4.0,
+				10.0,
+				1000.0,
+			},
+			[]float64{
+				0.2291,
+				0.219,
+				0.2075,
+				0.1979,
+				0.1465,
+				0.0,
+			},
+			"Small numbers and very big one",
+		},
 	}
 
 	for _, testCase := range cases {
