@@ -11,7 +11,7 @@ type blockBlockInteractionTechnique struct {
 
 func (self *blockBlockInteractionTechnique) HumanLikelihood() float64 {
 	//TODO: think more about how difficult this technique is.
-	return self.difficultyHelper(6.0)
+	return self.difficultyHelper(60.0)
 }
 
 func (self *blockBlockInteractionTechnique) Find(grid *Grid) []*SolveStep {

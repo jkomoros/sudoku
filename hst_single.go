@@ -81,7 +81,7 @@ func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter 
 }
 
 func (self *nakedSingleTechnique) HumanLikelihood() float64 {
-	return self.difficultyHelper(2.0)
+	return self.difficultyHelper(20.0)
 }
 
 func (self *nakedSingleTechnique) Description(step *SolveStep) string {
@@ -112,7 +112,7 @@ func (self *nakedSingleTechnique) Find(grid *Grid) []*SolveStep {
 }
 
 func (self *hiddenSingleTechnique) HumanLikelihood() float64 {
-	return self.difficultyHelper(1.8)
+	return self.difficultyHelper(18.0)
 }
 
 func (self *hiddenSingleTechnique) Description(step *SolveStep) string {

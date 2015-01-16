@@ -10,7 +10,7 @@ type guessTechnique struct {
 }
 
 func (self *guessTechnique) HumanLikelihood() float64 {
-	return self.difficultyHelper(1000.0)
+	return self.difficultyHelper(100000.0)
 }
 
 func (self *guessTechnique) Description(step *SolveStep) string {

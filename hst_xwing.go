@@ -10,7 +10,7 @@ type xwingTechnique struct {
 }
 
 func (self *xwingTechnique) HumanLikelihood() float64 {
-	return self.difficultyHelper(5.0)
+	return self.difficultyHelper(50.0)
 }
 
 func (self *xwingTechnique) Description(step *SolveStep) string {

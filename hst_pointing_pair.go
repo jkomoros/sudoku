@@ -10,7 +10,7 @@ type pointingPairTechnique struct {
 }
 
 func (self *pointingPairTechnique) HumanLikelihood() float64 {
-	return self.difficultyHelper(5.0)
+	return self.difficultyHelper(50.0)
 }
 
 func (self *pointingPairTechnique) Description(step *SolveStep) string {
