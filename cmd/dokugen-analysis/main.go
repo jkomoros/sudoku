@@ -510,15 +510,6 @@ func calculateRelativeDifficulty() []*puzzle {
 		}
 	}
 
-	//Now, create the Markov Transition Matrix, according to algorithm MC4 of http://www.wisdom.weizmann.ac.il/~naor/PAPERS/rank_www10.html
-	//The relevant part of the algorithm, from that source:
-	/*
-
-		If the current state is page P, then the next state is chosen as follows: first pick a page Q uniformly from the union of all pages ranked by the search engines. If t(Q) < t(P) for a majority of the lists t that ranked both P and Q, then go to Q, else stay in P.
-
-	*/
-	//We start by creating a stacked array of float64's that we'll pass to the matrix library.
-
 	//This will be the dimensions of the matrix.
 	numPuzzles := len(collectionByPuzzle)
 
@@ -529,18 +520,49 @@ func calculateRelativeDifficulty() []*puzzle {
 		os.Exit(1)
 	}
 
-	//Create the stacked array we'll stuff values into.
-	matrixData := make([][]float64, numPuzzles)
-	for i := range matrixData {
-		matrixData[i] = make([]float64, numPuzzles)
-	}
+	//Now we'll merge in information about the puzzles
 
-	//Now we will associate each observed puzzleID with an index that it will be associated with in the matrix.
+	//Collect the results of the second query we kicked off at the beginning,
+	//with meta-information about each puzzle.
+	difficultyRatings := <-difficutlyRatingsChan
+
+	//This will be our final output.
+	puzzles := make([]*puzzle, numPuzzles)
+
+	//Now we will associate each observed puzzleID with an index that it will be associated with in the matrix,
+	//since the puzzleID in the database isn't the index it will be in the matrix.
 	puzzleIndex := make([]int, numPuzzles)
 	counter := 0
 	for key, _ := range collectionByPuzzle {
 		puzzleIndex[counter] = key
 		counter++
+	}
+
+	for i := 0; i < numPuzzles; i++ {
+		thePuzzle := new(puzzle)
+		thePuzzle.id = puzzleIndex[i]
+		info, ok := difficultyRatings[thePuzzle.id]
+		if ok {
+			thePuzzle.difficultyRating = info.difficultyRating
+			thePuzzle.name = info.name
+			thePuzzle.puzzle = info.puzzle
+		}
+		puzzles[i] = thePuzzle
+	}
+
+	//Now, create the Markov Transition Matrix, according to algorithm MC4 of http://www.wisdom.weizmann.ac.il/~naor/PAPERS/rank_www10.html
+	//The relevant part of the algorithm, from that source:
+	/*
+
+		If the current state is page P, then the next state is chosen as follows: first pick a page Q uniformly from the union of all pages ranked by the search engines. If t(Q) < t(P) for a majority of the lists t that ranked both P and Q, then go to Q, else stay in P.
+
+	*/
+	//We start by creating a stacked array of float64's that we'll pass to the matrix library.
+
+	//Create the stacked array we'll stuff values into.
+	matrixData := make([][]float64, numPuzzles)
+	for i := range matrixData {
+		matrixData[i] = make([]float64, numPuzzles)
 	}
 
 	//Now we start to build up the matrix according to the MC4 algorithm.
@@ -652,27 +674,11 @@ func calculateRelativeDifficulty() []*puzzle {
 		}
 	}
 
-	//Now we'll merge in information about the puzzles
-
-	//Collect the results of the second query we kicked off at the beginning,
-	//with meta-information about each puzzle.
-	difficultyRatings := <-difficutlyRatingsChan
-
-	//This will be our final output.
-	puzzles := make([]*puzzle, numPuzzles)
-
+	//Store the result of the calculation back on the puzzles.
 	for i := 0; i < numPuzzles; i++ {
-		thePuzzle := new(puzzle)
-		thePuzzle.id = puzzleIndex[i]
+		thePuzzle := puzzles[i]
 		//TODO: rename this field, it no longer reflects what it really is.
 		thePuzzle.userRelativeDifficulty = markovChain.Get(0, i)
-		info, ok := difficultyRatings[thePuzzle.id]
-		if ok {
-			thePuzzle.difficultyRating = info.difficultyRating
-			thePuzzle.name = info.name
-			thePuzzle.puzzle = info.puzzle
-		}
-		puzzles[i] = thePuzzle
 	}
 
 	//Lineralize the data, where min == 0.1 and max == 0.9
