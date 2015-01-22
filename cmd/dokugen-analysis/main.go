@@ -459,7 +459,12 @@ func calculateRelativeDifficulty() []*puzzle {
 	//This is a map of puzzles to a set of which collections include it.
 	collectionByPuzzle := make(map[int]map[*userSolvesCollection]bool)
 
+	//We want to report on the average number of solves per user.
+	userSolvesLengthAccum := 0
+
 	for _, collection := range solvesByUser {
+
+		userSolvesLengthAccum += len(collection.solves)
 
 		//Now that we have all of the solves for this user, we can sort them.
 		//For the analysis we'll do later, a harder solve is ranked higher, and a higher rank is actually a LOW rank.
@@ -484,6 +489,8 @@ func calculateRelativeDifficulty() []*puzzle {
 		}
 
 	}
+
+	log.Println(len(solvesByUser), "users, with an average of", float64(userSolvesLengthAccum)/float64(len(solvesByUser)), "solves per user.")
 
 	//Cull puzzles where we don't have enough user-solves to have confidence in the rankings.
 	if minPuzzleCollections != 1 {
