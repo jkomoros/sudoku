@@ -93,8 +93,9 @@ type solve struct {
 }
 
 type userSolvesCollection struct {
-	solves     []solve
-	idPosition map[int]int
+	solves       []solve
+	idPosition   map[int]int
+	difficulties map[int]int
 }
 
 type puzzle struct {
@@ -531,16 +532,20 @@ func calculateRelativeDifficulty() []*puzzle {
 
 	//Now we will associate each observed puzzleID with an index that it will be associated with in the matrix,
 	//since the puzzleID in the database isn't the index it will be in the matrix.
-	puzzleIndex := make([]int, numPuzzles)
+	puzzleIDFromIndex := make([]int, numPuzzles)
+	//And keep a map of the other direction, too.
+	puzzleIndexFromID := make(map[int]int)
+
 	counter := 0
 	for key, _ := range collectionByPuzzle {
-		puzzleIndex[counter] = key
+		puzzleIDFromIndex[counter] = key
+		puzzleIndexFromID[key] = counter
 		counter++
 	}
 
 	for i := 0; i < numPuzzles; i++ {
 		thePuzzle := new(puzzle)
-		thePuzzle.id = puzzleIndex[i]
+		thePuzzle.id = puzzleIDFromIndex[i]
 		info, ok := difficultyRatings[thePuzzle.id]
 		if ok {
 			thePuzzle.difficultyRating = info.difficultyRating
@@ -549,6 +554,26 @@ func calculateRelativeDifficulty() []*puzzle {
 		}
 		puzzles[i] = thePuzzle
 	}
+
+	//Just for our own information, we'll calculate how many different difficulties each user has solved puzzles for.
+	for _, collection := range solvesByUser {
+		collection.difficulties = make(map[int]int)
+		for _, solve := range collection.solves {
+			puzzleIndex := puzzleIndexFromID[solve.puzzleID]
+			if puzzleIndex == 0 {
+				//Must have been one of the puzzles we discarded.
+				continue
+			}
+			puzzleInfo := puzzles[puzzleIndex]
+			if puzzleInfo == nil {
+				log.Println("Couldn't find a puzzle:", solve.puzzleID)
+				os.Exit(1)
+			}
+			collection.difficulties[puzzleInfo.difficultyRating]++
+		}
+	}
+
+	//TODO: report these stats.
 
 	//Now, create the Markov Transition Matrix, according to algorithm MC4 of http://www.wisdom.weizmann.ac.il/~naor/PAPERS/rank_www10.html
 	//The relevant part of the algorithm, from that source:
@@ -580,8 +605,8 @@ func calculateRelativeDifficulty() []*puzzle {
 			}
 
 			//Convert the zero-index into the puzzle ID we're actually interested in.
-			p := puzzleIndex[i]
-			q := puzzleIndex[j]
+			p := puzzleIDFromIndex[i]
+			q := puzzleIDFromIndex[j]
 
 			//Find the intersection of userSolveCollections that contain both p and q.
 
