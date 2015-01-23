@@ -543,17 +543,12 @@ func calculateRelativeDifficulty() []*puzzle {
 		counter++
 	}
 
-	maxDifficultyRating := 0
-
 	for i := 0; i < numPuzzles; i++ {
 		thePuzzle := new(puzzle)
 		thePuzzle.id = puzzleIDFromIndex[i]
 		info, ok := difficultyRatings[thePuzzle.id]
 		if ok {
 			thePuzzle.difficultyRating = info.difficultyRating
-			if info.difficultyRating > maxDifficultyRating {
-				maxDifficultyRating = info.difficultyRating
-			}
 			thePuzzle.name = info.name
 			thePuzzle.puzzle = info.puzzle
 		}
