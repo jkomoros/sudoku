@@ -543,17 +543,23 @@ func calculateRelativeDifficulty() []*puzzle {
 		counter++
 	}
 
+	//Keep track of how many different difficulties we've observed.
+	seenDifficulties := make(map[int]bool)
+
 	for i := 0; i < numPuzzles; i++ {
 		thePuzzle := new(puzzle)
 		thePuzzle.id = puzzleIDFromIndex[i]
 		info, ok := difficultyRatings[thePuzzle.id]
 		if ok {
 			thePuzzle.difficultyRating = info.difficultyRating
+			seenDifficulties[info.difficultyRating] = true
 			thePuzzle.name = info.name
 			thePuzzle.puzzle = info.puzzle
 		}
 		puzzles[i] = thePuzzle
 	}
+
+	numUsersWithNumDifficulties := make([]int, len(seenDifficulties)+1)
 
 	//Just for our own information, we'll calculate how many different difficulties each user has solved puzzles for.
 	for _, collection := range solvesByUser {
@@ -571,9 +577,12 @@ func calculateRelativeDifficulty() []*puzzle {
 			}
 			collection.difficulties[puzzleInfo.difficultyRating]++
 		}
+		numUsersWithNumDifficulties[len(collection.difficulties)]++
 	}
 
-	//TODO: report these stats.
+	for i := 0; i <= len(seenDifficulties); i++ {
+		log.Println(numUsersWithNumDifficulties[i], "users played puzzles of", i, "different difficulties.")
+	}
 
 	//Now, create the Markov Transition Matrix, according to algorithm MC4 of http://www.wisdom.weizmann.ac.il/~naor/PAPERS/rank_www10.html
 	//The relevant part of the algorithm, from that source:
