@@ -561,6 +561,15 @@ func calculateRelativeDifficulty() []*puzzle {
 		puzzles[i] = thePuzzle
 	}
 
+	//Sort the order of the seen difficulties, so we can print out stats in a stable order.
+	seenDifficultiesInOrder := make([]int, len(seenDifficulties))
+	counter = 0
+	for key, _ := range seenDifficulties {
+		seenDifficultiesInOrder[counter] = key
+		counter++
+	}
+	sort.Ints(seenDifficultiesInOrder)
+
 	numUsersWithNumDifficulties := make([]int, len(seenDifficulties)+1)
 
 	totalSeenSolves := 0
@@ -587,7 +596,8 @@ func calculateRelativeDifficulty() []*puzzle {
 	}
 
 	//Print out how many different solves for each difficulty were seen.
-	for difficulty, count := range seenDifficultiesCount {
+	for _, difficulty := range seenDifficultiesInOrder {
+		count := seenDifficultiesCount[difficulty]
 		log.Println(count, "solves seen for difficulty", difficulty, "(", float64(count)/float64(totalSeenSolves)*100, "%)")
 	}
 
