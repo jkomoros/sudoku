@@ -565,8 +565,8 @@ func calculateRelativeDifficulty() []*puzzle {
 	for _, collection := range solvesByUser {
 		collection.difficulties = make(map[int]int)
 		for _, solve := range collection.solves {
-			puzzleIndex := puzzleIndexFromID[solve.puzzleID]
-			if puzzleIndex == 0 {
+			puzzleIndex, ok := puzzleIndexFromID[solve.puzzleID]
+			if !ok {
 				//Must have been one of the puzzles we discarded.
 				continue
 			}
