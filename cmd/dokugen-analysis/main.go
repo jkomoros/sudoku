@@ -580,6 +580,7 @@ func calculateRelativeDifficulty() []*puzzle {
 		numUsersWithNumDifficulties[len(collection.difficulties)]++
 	}
 
+	//Note: some users will have had all of their solves culled because they cheated in all of them. They will show as having seen 0 difficulties.
 	for i := 0; i <= len(seenDifficulties); i++ {
 		log.Println(numUsersWithNumDifficulties[i], "users played puzzles of", i, "different difficulties.")
 	}
