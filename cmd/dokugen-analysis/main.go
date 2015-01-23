@@ -545,6 +545,8 @@ func calculateRelativeDifficulty() []*puzzle {
 
 	//Keep track of how many different difficulties we've observed.
 	seenDifficulties := make(map[int]bool)
+	//And this will keep track of how many times each is observed in the data.
+	seenDifficultiesCount := make(map[int]int)
 
 	for i := 0; i < numPuzzles; i++ {
 		thePuzzle := new(puzzle)
@@ -561,6 +563,8 @@ func calculateRelativeDifficulty() []*puzzle {
 
 	numUsersWithNumDifficulties := make([]int, len(seenDifficulties)+1)
 
+	totalSeenSolves := 0
+
 	//Just for our own information, we'll calculate how many different difficulties each user has solved puzzles for.
 	for _, collection := range solvesByUser {
 		collection.difficulties = make(map[int]int)
@@ -576,10 +580,20 @@ func calculateRelativeDifficulty() []*puzzle {
 				os.Exit(1)
 			}
 			collection.difficulties[puzzleInfo.difficultyRating]++
+			seenDifficultiesCount[puzzleInfo.difficultyRating]++
+			totalSeenSolves++
 		}
 		numUsersWithNumDifficulties[len(collection.difficulties)]++
 	}
 
+	//Print out how many different solves for each difficulty were seen.
+	for difficulty, count := range seenDifficultiesCount {
+		log.Println(count, "solves seen for difficulty", difficulty, "(", float64(count)/float64(totalSeenSolves)*100, "%)")
+	}
+
+	//Print out how many users had how many different difficulty puzzles in their collections.
+	//You want a good number to have their data spread out across multiple difficulties, otherwise the overall rank aggregation
+	//might be weird.
 	//Note: some users will have had all of their solves culled because they cheated in all of them. They will show as having seen 0 difficulties.
 	for i := 0; i <= len(seenDifficulties); i++ {
 		log.Println(numUsersWithNumDifficulties[i], "users played puzzles of", i, "different difficulties.")
