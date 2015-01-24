@@ -44,6 +44,7 @@ TODO:
 
 * Human solve: Implement more solve tehcniques described at http://www.sadmansoftware.com/sudoku/solvingtechniques.htm. Technqiues I've skipped so far:
 	* Implement enough techniques to be able to solve #122, #33, and #138.
+	* The technique where all of the 6's in a block are in the same column, therefore the 6 can't be elsewhere in that column (this might already be covered)
 
 * Visualize the ranges of the different userSolveCollections in analysis, to verify that we're getting good coverage and overlap from them.
 
