@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestKomoConverter(t *testing.T) {
+func TestKomoConverterLoad(t *testing.T) {
 	tests := [][2]string{
 		{"converter_one_komo.sdk", "converter_one.sdk"},
 		{"converter_two_komo.sdk", "converter_two.sdk"},
@@ -15,7 +15,18 @@ func TestKomoConverter(t *testing.T) {
 	}
 }
 
+func TestKomoConverterDataString(t *testing.T) {
+	tests := [][2]string{
+		{"converter_one_komo.sdk", "converter_one.sdk"},
+		{"converter_two_komo.sdk", "converter_two.sdk"},
+	}
+	for _, test := range tests {
+		converterTesterHelper(t, false, "komo", test[0], test[1])
+	}
+}
+
 func converterTesterHelper(t *testing.T, testLoad bool, format string, otherFile string, sdkFile string) {
+
 	converter := Converters[format]
 
 	if converter == nil {
@@ -54,6 +65,12 @@ func converterTesterHelper(t *testing.T, testLoad bool, format string, otherFile
 			t.Error("Expected", sdk, "got", grid.DataString(), "for input", other)
 		}
 	} else {
-		t.Fatal("TesterHelper doesn't support testing loading right now.")
+		grid.Load(sdk)
+
+		data := converter.DataString(grid)
+
+		if data != other {
+			t.Error("Expected", other, "got", data, "for input", sdk)
+		}
 	}
 }
