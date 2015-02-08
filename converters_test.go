@@ -6,9 +6,9 @@ import (
 )
 
 func TestKomoConverter(t *testing.T) {
-	//TODO: test a puzzle where everything is filled.
 	tests := [][2]string{
 		{"converter_one_komo.sdk", "converter_one.sdk"},
+		{"converter_two_komo.sdk", "converter_two.sdk"},
 	}
 	for _, test := range tests {
 		converterDataStringTesterHelper(t, "komo", test[0], test[1])
