@@ -155,8 +155,6 @@ TODO:
 
 * Incorporate a notion of closeness into ChainDissimilarity. Right now it treats a column miss, for example, as a total failure.
 
-* Verify that userSolveRanges have a reasonable overlap
-
 * Make it so if any technique takes too long and we already have some answers, we move ahead anyway.
 
 * Move all of the puzzle constants in tests into SDK files
