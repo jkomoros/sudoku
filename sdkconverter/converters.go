@@ -55,6 +55,8 @@ func (c *komoConverter) DataString(grid *sudoku.Grid) string {
 	//So we need to solve the puzzle.
 	solvedGrid := grid.Copy()
 
+	//TODO: when running the tests, this fails every so often, even though the puzzle is solveable. This implies
+	//a BIG problem somewhere in solver.
 	if !solvedGrid.Solve() {
 		//Hmm, puzzle wasn't valid. We can't represent it in this format.
 		return ""

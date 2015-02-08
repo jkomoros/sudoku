@@ -131,6 +131,8 @@ TODO:
 
 * Start rolling out some of the generated puzzles into production to start accumulating solves on them
 
+* Investigate and fix the flaky test in sdkconverters/converter.go DataString for Komo.
+
 * Split SolveTechniques into tranches (we already ahve two: normal and expensive). Only run the tranche at a time, and only go up to the next tranche if there's nothing returned. 
 	* Is it better to just do the weightings correctly in the step selection?
 	* One problem is that in real life there are invariably some CheapNonFill steps that are picked before existing FillTechniques.
