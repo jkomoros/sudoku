@@ -124,6 +124,7 @@ TODO:
 	sure we're training for a broad range of puzzles. We should inject these in (optionally) after phase 1.
 
 * Write a sdk --> komorosk_sudoku converter
+	* sdkconverter should have an sdk converter that's just a pass through.
 
 * Fix races with go test -race.
 
