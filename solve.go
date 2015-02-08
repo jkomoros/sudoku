@@ -10,6 +10,13 @@ import (
 //solution and return true. If there are no solutions the grid will remain
 //untouched and it will return false.
 func (self *Grid) Solve() bool {
+
+	//Special case; check if it's already solved.
+	//TODO: removing this causes Solve, when called on an already solved grid, to sometimes fail. Why is that?
+	if self.Solved() {
+		return true
+	}
+
 	//TODO: Optimization: we only need one, so we can bail as soon as we find a single one.
 	solutions := self.Solutions()
 	if len(solutions) == 0 {

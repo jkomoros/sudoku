@@ -475,6 +475,10 @@ func TestAdvancedSolve(t *testing.T) {
 		t.Fail()
 	}
 
+	if !grid.Solve() {
+		t.Error("Solve called on already solved grid did not return true")
+	}
+
 	//TODO: test that nOrFewerSolutions does stop at max (unless cached)
 	//TODO: test HasMultipleSolutions
 
@@ -651,6 +655,9 @@ func nCopies(in string, copies int) (result []string) {
 }
 
 func puzzlePath(name string) string {
+
+	//NOTE: This is currently duplicated exactly in sdkconverter/converters_test.go
+
 	//Will look for the puzzle in all of the default directories and return its location if it exists. If it doesn't find it, will return ""
 	name = strings.ToLower(name)
 
