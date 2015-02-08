@@ -1,14 +1,15 @@
-package sudoku
+package sdkconverter
 
 import (
+	"dokugen"
 	"io/ioutil"
 	"testing"
 )
 
 func TestKomoConverterLoad(t *testing.T) {
 	tests := [][2]string{
-		{"converter_one_komo.sdk", "converter_one.sdk"},
-		{"converter_two_komo.sdk", "converter_two.sdk"},
+		{"puzzles/converter_one_komo.sdk", "puzzles/converter_one.sdk"},
+		{"puzzles/converter_two_komo.sdk", "puzzles/converter_two.sdk"},
 	}
 	for _, test := range tests {
 		converterTesterHelper(t, true, "komo", test[0], test[1])
@@ -17,8 +18,8 @@ func TestKomoConverterLoad(t *testing.T) {
 
 func TestKomoConverterDataString(t *testing.T) {
 	tests := [][2]string{
-		{"converter_one_komo.sdk", "converter_one.sdk"},
-		{"converter_two_komo.sdk", "converter_two.sdk"},
+		{"puzzles/converter_one_komo.sdk", "puzzles/converter_one.sdk"},
+		{"puzzles/converter_two_komo.sdk", "puzzles/converter_two.sdk"},
 	}
 	for _, test := range tests {
 		converterTesterHelper(t, false, "komo", test[0], test[1])
@@ -33,17 +34,6 @@ func converterTesterHelper(t *testing.T, testLoad bool, format string, otherFile
 		t.Fatal("Couldn't find converter of format", format)
 	}
 
-	otherFile = puzzlePath(otherFile)
-	sdkFile = puzzlePath(sdkFile)
-
-	if otherFile == "" {
-		t.Fatal("Couldn't find puzzle at", otherFile)
-	}
-
-	if sdkFile == "" {
-		t.Fatal("Couldn't find puzzle at", sdkFile)
-	}
-
 	var other string
 	var sdk string
 
@@ -55,7 +45,7 @@ func converterTesterHelper(t *testing.T, testLoad bool, format string, otherFile
 		sdk = string(data)
 	}
 
-	grid := NewGrid()
+	grid := sudoku.NewGrid()
 
 	if testLoad {
 

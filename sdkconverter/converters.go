@@ -1,6 +1,7 @@
-package sudoku
+package sdkconverter
 
 import (
+	"dokugen"
 	"strconv"
 	"strings"
 )
@@ -10,8 +11,8 @@ import (
  */
 
 type SudokuPuzzleConverter interface {
-	Load(grid *Grid, puzzle string)
-	DataString(grid *Grid) string
+	Load(grid *sudoku.Grid, puzzle string)
+	DataString(grid *sudoku.Grid) string
 }
 
 var Converters map[string]SudokuPuzzleConverter
@@ -24,7 +25,7 @@ func init() {
 type komoConverter struct {
 }
 
-func (c *komoConverter) Load(grid *Grid, puzzle string) {
+func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) {
 	//TODO: also handle odd things like user-provided marks and other things.
 
 	var result string
@@ -48,7 +49,7 @@ func (c *komoConverter) Load(grid *Grid, puzzle string) {
 	grid.Load(result)
 }
 
-func (c *komoConverter) DataString(grid *Grid) string {
+func (c *komoConverter) DataString(grid *sudoku.Grid) string {
 	//The komo puzzle format fills all cells and marks which ones are 'locked',
 	//whereas the default sdk format simply leaves non-'locked' cells as blank.
 	//So we need to solve the puzzle.
@@ -59,18 +60,18 @@ func (c *komoConverter) DataString(grid *Grid) string {
 		return ""
 	}
 	result := ""
-	for r := 0; r < DIM; r++ {
-		for c := 0; c < DIM; c++ {
+	for r := 0; r < sudoku.DIM; r++ {
+		for c := 0; c < sudoku.DIM; c++ {
 			cell := solvedGrid.Cell(r, c)
 			result += strconv.Itoa(cell.Number())
 			if grid.Cell(r, c).Number() != 0 {
 				result += "!"
 			}
-			if c != DIM-1 {
+			if c != sudoku.DIM-1 {
 				result += ","
 			}
 		}
-		if r != DIM-1 {
+		if r != sudoku.DIM-1 {
 			result += ";"
 		}
 	}
