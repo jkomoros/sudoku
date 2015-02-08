@@ -123,8 +123,6 @@ TODO:
 	* We should include a lot of trivially easy puzzles in the difficulty training set (and really really hard ones, requiring tons of guesses) to make 
 	sure we're training for a broad range of puzzles. We should inject these in (optionally) after phase 1.
 
-* Write a sdk --> komorosk_sudoku converte
-
 * Fix races with go test -race.
 
 * Test the main app (partially there... just need to minimize randomness now)
