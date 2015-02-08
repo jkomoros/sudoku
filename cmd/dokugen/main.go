@@ -89,7 +89,9 @@ func main() {
 		} else if options.PUZZLE_TO_SOLVE != "" {
 			//TODO: detect if the load failed.
 			grid = sudoku.NewGrid()
-			grid.LoadFromFile(options.PUZZLE_TO_SOLVE)
+			if !grid.LoadFromFile(options.PUZZLE_TO_SOLVE) {
+				grid = nil
+			}
 		}
 
 		if grid == nil {
