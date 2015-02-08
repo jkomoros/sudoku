@@ -34,11 +34,16 @@ func converterTesterHelper(t *testing.T, testLoad bool, format string, otherFile
 		t.Fatal("Couldn't find converter of format", format)
 	}
 
-	var other string
-	var sdk string
+	other := loadTestPuzzle(otherFile)
+	sdk := loadTestPuzzle(sdkFile)
 
-	other = loadTestPuzzle(otherFile)
-	sdk = loadTestPuzzle(sdkFile)
+	if other == "" {
+		t.Fatal("Couldn't load", otherFile)
+	}
+
+	if sdk == "" {
+		t.Fatal("Couldn't load", sdkFile)
+	}
 
 	grid := sudoku.NewGrid()
 
