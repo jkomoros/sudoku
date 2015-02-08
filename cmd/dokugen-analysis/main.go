@@ -2,6 +2,7 @@ package main
 
 import (
 	"dokugen"
+	"dokugen/sdkconverter"
 	"encoding/csv"
 	"encoding/json"
 	"flag"
@@ -16,7 +17,6 @@ import (
 	"runtime"
 	"sort"
 	"strconv"
-	"strings"
 )
 
 const _DB_CONFIG_FILENAME = "db_config.SECRET.json"
@@ -823,7 +823,12 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 		}
 
 		grid := sudoku.NewGrid()
-		grid.Load(convertPuzzleString(thePuzzle.puzzle))
+		converter := sdkconverter.Converters["komo"]
+		if converter == nil {
+			log.Fatal("Couldn't find komo converter")
+		}
+
+		converter.Load(grid, thePuzzle.puzzle)
 
 		solveDirections := make([]sudoku.SolveDirections, numSolvesToAverage)
 
@@ -966,32 +971,6 @@ func calculateWeights(stats [][]float64) *regression.Regression {
 	r.RunLinearRegression()
 
 	return &r
-}
-
-func convertPuzzleString(input string) string {
-	//Puzzles stored in the database have a weird format. This function converts them into one that the sudoku library understands.
-
-	//TODO: use the converter package in the main library
-
-	//TODO: also handle odd things like user-provided marks and other things.
-
-	var result string
-
-	rows := strings.Split(input, ";")
-	for _, row := range rows {
-		cols := strings.Split(row, ",")
-		for _, col := range cols {
-			if strings.Contains(col, "!") {
-				result += strings.TrimSuffix(col, "!")
-			} else {
-				result += "."
-			}
-		}
-		result += "\n"
-	}
-
-	//We added an extra \n in the last runthrough, remove it.
-	return strings.TrimSuffix(result, "\n")
 }
 
 var cachedAllSignalNames []string
