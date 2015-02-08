@@ -2,6 +2,7 @@ package main
 
 import (
 	"dokugen"
+	"dokugen/sdkconverter"
 	"flag"
 	"fmt"
 	"io"
@@ -31,6 +32,8 @@ type appOptions struct {
 	MIN_DIFFICULTY      float64
 	MAX_DIFFICULTY      float64
 	NO_CACHE            bool
+	PUZZLE_FORMAT       string
+	CONVERTER           sdkconverter.SudokuPuzzleConverter
 }
 
 func init() {
@@ -55,7 +58,8 @@ func main() {
 	flag.Float64Var(&options.MIN_DIFFICULTY, "min", 0.0, "Minimum difficulty for generated puzzle")
 	flag.Float64Var(&options.MAX_DIFFICULTY, "max", 1.0, "Maximum difficulty for generated puzzle")
 	flag.BoolVar(&options.NO_CACHE, "no-cache", false, "If provided, will not vend generated puzzles from the cache of previously generated puzzles.")
-
+	//TODO: the format should also be how we interpret loads, too.
+	flag.StringVar(&options.PUZZLE_FORMAT, "format", "sdk", "Which format to export puzzles from. Defaults to 'sdk'")
 	flag.Parse()
 
 	options.RAW_SYMMETRY = strings.ToLower(options.RAW_SYMMETRY)
@@ -72,6 +76,12 @@ func main() {
 		log.Fatal("Unknown symmetry flag: ", options.RAW_SYMMETRY)
 	}
 
+	options.CONVERTER = sdkconverter.Converters[options.PUZZLE_FORMAT]
+
+	if options.CONVERTER == nil {
+		log.Fatal("Invalid format option:", options.PUZZLE_FORMAT)
+	}
+
 	output := os.Stdout
 
 	if options.HELP {
@@ -85,7 +95,7 @@ func main() {
 		//TODO: allow the type of symmetry to be configured.
 		if options.GENERATE {
 			grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.NO_CACHE)
-			fmt.Fprintln(output, grid.DataString())
+			fmt.Fprintln(output, options.CONVERTER.DataString(grid))
 		} else if options.PUZZLE_TO_SOLVE != "" {
 			//TODO: detect if the load failed.
 			grid = sudoku.NewGrid()
@@ -124,7 +134,7 @@ func main() {
 		}
 		if options.PUZZLE_TO_SOLVE != "" {
 			grid.Solve()
-			fmt.Fprintln(output, grid.DataString())
+			fmt.Fprintln(output, options.CONVERTER.DataString(grid))
 			//If we're asked to solve, n could only be 1 anyway.
 			return
 		}
