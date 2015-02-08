@@ -133,6 +133,8 @@ TODO:
 
 * Investigate and fix the flaky test in sdkconverters/converter.go DataString for Komo.
 
+* Name containing directory sudoku, not dokugen so imports make sense (currenltly sub-packages import dokugen but use sudoku...)
+
 * Split SolveTechniques into tranches (we already ahve two: normal and expensive). Only run the tranche at a time, and only go up to the next tranche if there's nothing returned. 
 	* Is it better to just do the weightings correctly in the step selection?
 	* One problem is that in real life there are invariably some CheapNonFill steps that are picked before existing FillTechniques.
