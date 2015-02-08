@@ -22,6 +22,33 @@ func init() {
 	Converters["komo"] = &komoConverter{}
 }
 
+func ToSDK(format string, other string) (sdk string) {
+	grid := sudoku.NewGrid()
+	converter := Converters[format]
+
+	if converter == nil {
+		return ""
+	}
+
+	converter.Load(grid, other)
+
+	return grid.DataString()
+
+}
+
+func ToOther(format string, sdk string) (other string) {
+	grid := sudoku.NewGrid()
+	converter := Converters[format]
+
+	if converter == nil {
+		return ""
+	}
+
+	grid.Load(sdk)
+
+	return converter.DataString(grid)
+}
+
 type komoConverter struct {
 }
 

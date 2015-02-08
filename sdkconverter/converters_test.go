@@ -26,6 +26,23 @@ func TestKomoConverterDataString(t *testing.T) {
 	}
 }
 
+func TestConvenienceFuncs(t *testing.T) {
+	sdk := loadTestPuzzle("converter_one.sdk")
+	other := loadTestPuzzle("converter_one_komo.sdk")
+
+	result := ToSDK("komo", other)
+
+	if result != sdk {
+		t.Error("Testing ToSDK, expected", sdk, "got", result)
+	}
+
+	result = ToOther("komo", sdk)
+
+	if result != other {
+		t.Error("Testing ToOther, expected", other, "got", result)
+	}
+}
+
 func converterTesterHelper(t *testing.T, testLoad bool, format string, otherFile string, sdkFile string) {
 
 	converter := Converters[format]
