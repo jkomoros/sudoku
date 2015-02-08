@@ -82,11 +82,12 @@ func (c *komoConverter) DataString(grid *sudoku.Grid) string {
 	//So we need to solve the puzzle.
 	solvedGrid := grid.Copy()
 
-	//TODO: when running the tests, this fails every so often, even though the puzzle is solveable. This implies
-	//a BIG problem somewhere in solver.
-	if !solvedGrid.Solve() {
-		//Hmm, puzzle wasn't valid. We can't represent it in this format.
-		return ""
+	//Solve the grid. Note that calling solve on a solved Grid returns false (why?), so check for that first.
+	if !solvedGrid.Solved() {
+		if !solvedGrid.Solve() {
+			//Hmm, puzzle wasn't valid. We can't represent it in this format.
+			return ""
+		}
 	}
 	result := ""
 	for r := 0; r < sudoku.DIM; r++ {

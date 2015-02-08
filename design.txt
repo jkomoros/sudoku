@@ -131,9 +131,6 @@ TODO:
 
 * Start rolling out some of the generated puzzles into production to start accumulating solves on them
 
-* Investigate and fix the flaky test in sdkconverters/converter.go DataString for Komo.
-	* When solving the exact same file from the commandline in dokugen, I'm not ever able to get it to not solve...
-
 * Name containing directory sudoku, not dokugen so imports make sense (currenltly sub-packages import dokugen but use sudoku...)
 
 * Split SolveTechniques into tranches (we already ahve two: normal and expensive). Only run the tranche at a time, and only go up to the next tranche if there's nothing returned. 
