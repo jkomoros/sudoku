@@ -26,6 +26,26 @@ func TestKomoConverterDataString(t *testing.T) {
 	}
 }
 
+func TestSDKConverterLoad(t *testing.T) {
+	tests := [][2]string{
+		{"converter_one.sdk", "converter_one.sdk"},
+		{"converter_two.sdk", "converter_two.sdk"},
+	}
+	for _, test := range tests {
+		converterTesterHelper(t, true, "sdk", test[0], test[1])
+	}
+}
+
+func TestSDKConverterDataString(t *testing.T) {
+	tests := [][2]string{
+		{"converter_one.sdk", "converter_one.sdk"},
+		{"converter_two.sdk", "converter_two.sdk"},
+	}
+	for _, test := range tests {
+		converterTesterHelper(t, false, "sdk", test[0], test[1])
+	}
+}
+
 func TestConvenienceFuncs(t *testing.T) {
 	sdk := loadTestPuzzle("converter_one.sdk")
 	other := loadTestPuzzle("converter_one_komo.sdk")

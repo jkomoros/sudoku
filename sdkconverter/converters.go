@@ -15,11 +15,19 @@ type SudokuPuzzleConverter interface {
 	DataString(grid *sudoku.Grid) string
 }
 
+type komoConverter struct {
+}
+
+//This one is a total pass through, just for convenience.
+type sdkConverter struct {
+}
+
 var Converters map[string]SudokuPuzzleConverter
 
 func init() {
 	Converters = make(map[string]SudokuPuzzleConverter)
 	Converters["komo"] = &komoConverter{}
+	Converters["sdk"] = &sdkConverter{}
 }
 
 func ToSDK(format string, other string) (sdk string) {
@@ -47,9 +55,6 @@ func ToOther(format string, sdk string) (other string) {
 	grid.Load(sdk)
 
 	return converter.DataString(grid)
-}
-
-type komoConverter struct {
 }
 
 func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) {
@@ -104,4 +109,12 @@ func (c *komoConverter) DataString(grid *sudoku.Grid) string {
 		}
 	}
 	return result
+}
+
+func (c *sdkConverter) Load(grid *sudoku.Grid, puzzle string) {
+	grid.Load(puzzle)
+}
+
+func (c *sdkConverter) DataString(grid *sudoku.Grid) string {
+	return grid.DataString()
 }
