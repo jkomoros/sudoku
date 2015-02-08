@@ -971,6 +971,8 @@ func calculateWeights(stats [][]float64) *regression.Regression {
 func convertPuzzleString(input string) string {
 	//Puzzles stored in the database have a weird format. This function converts them into one that the sudoku library understands.
 
+	//TODO: use the converter package in the main library
+
 	//TODO: also handle odd things like user-provided marks and other things.
 
 	var result string
