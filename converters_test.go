@@ -11,44 +11,49 @@ func TestKomoConverter(t *testing.T) {
 		{"converter_two_komo.sdk", "converter_two.sdk"},
 	}
 	for _, test := range tests {
-		converterDataStringTesterHelper(t, "komo", test[0], test[1])
+		converterTesterHelper(t, true, "komo", test[0], test[1])
 	}
 }
 
-func converterDataStringTesterHelper(t *testing.T, format string, inputFile string, expectedSDKFile string) {
+func converterTesterHelper(t *testing.T, testLoad bool, format string, otherFile string, sdkFile string) {
 	converter := Converters[format]
 
 	if converter == nil {
 		t.Fatal("Couldn't find converter of format", format)
 	}
 
-	inputFile = puzzlePath(inputFile)
-	expectedSDKFile = puzzlePath(expectedSDKFile)
+	otherFile = puzzlePath(otherFile)
+	sdkFile = puzzlePath(sdkFile)
 
-	if inputFile == "" {
-		t.Fatal("Couldn't find puzzle at", inputFile)
+	if otherFile == "" {
+		t.Fatal("Couldn't find puzzle at", otherFile)
 	}
 
-	if expectedSDKFile == "" {
-		t.Fatal("Couldn't find puzzle at", expectedSDKFile)
+	if sdkFile == "" {
+		t.Fatal("Couldn't find puzzle at", sdkFile)
 	}
 
-	var input string
-	var expectedSDK string
+	var other string
+	var sdk string
 
-	if data, err := ioutil.ReadFile(inputFile); err == nil {
-		input = string(data)
+	if data, err := ioutil.ReadFile(otherFile); err == nil {
+		other = string(data)
 	}
 
-	if data, err := ioutil.ReadFile(expectedSDKFile); err == nil {
-		expectedSDK = string(data)
+	if data, err := ioutil.ReadFile(sdkFile); err == nil {
+		sdk = string(data)
 	}
 
 	grid := NewGrid()
 
-	converter.Load(grid, input)
+	if testLoad {
 
-	if grid.DataString() != expectedSDK {
-		t.Error("Expected", expectedSDK, "got", grid.DataString(), "for input", input)
+		converter.Load(grid, other)
+
+		if grid.DataString() != sdk {
+			t.Error("Expected", sdk, "got", grid.DataString(), "for input", other)
+		}
+	} else {
+		t.Fatal("TesterHelper doesn't support testing loading right now.")
 	}
 }
