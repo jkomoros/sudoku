@@ -8,8 +8,8 @@ import (
 
 func TestKomoConverterLoad(t *testing.T) {
 	tests := [][2]string{
-		{"puzzles/converter_one_komo.sdk", "puzzles/converter_one.sdk"},
-		{"puzzles/converter_two_komo.sdk", "puzzles/converter_two.sdk"},
+		{"converter_one_komo.sdk", "converter_one.sdk"},
+		{"converter_two_komo.sdk", "converter_two.sdk"},
 	}
 	for _, test := range tests {
 		converterTesterHelper(t, true, "komo", test[0], test[1])
@@ -18,8 +18,8 @@ func TestKomoConverterLoad(t *testing.T) {
 
 func TestKomoConverterDataString(t *testing.T) {
 	tests := [][2]string{
-		{"puzzles/converter_one_komo.sdk", "puzzles/converter_one.sdk"},
-		{"puzzles/converter_two_komo.sdk", "puzzles/converter_two.sdk"},
+		{"converter_one_komo.sdk", "converter_one.sdk"},
+		{"converter_two_komo.sdk", "converter_two.sdk"},
 	}
 	for _, test := range tests {
 		converterTesterHelper(t, false, "komo", test[0], test[1])
@@ -37,13 +37,8 @@ func converterTesterHelper(t *testing.T, testLoad bool, format string, otherFile
 	var other string
 	var sdk string
 
-	if data, err := ioutil.ReadFile(otherFile); err == nil {
-		other = string(data)
-	}
-
-	if data, err := ioutil.ReadFile(sdkFile); err == nil {
-		sdk = string(data)
-	}
+	other = loadTestPuzzle(otherFile)
+	sdk = loadTestPuzzle(sdkFile)
 
 	grid := sudoku.NewGrid()
 
@@ -63,4 +58,14 @@ func converterTesterHelper(t *testing.T, testLoad bool, format string, otherFile
 			t.Error("Expected", other, "got", data, "for input", sdk)
 		}
 	}
+}
+
+func loadTestPuzzle(puzzleName string) string {
+	data, err := ioutil.ReadFile("puzzles/" + puzzleName)
+
+	if err != nil {
+		return ""
+	}
+
+	return string(data)
 }
