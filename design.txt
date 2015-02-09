@@ -147,6 +147,7 @@ TODO:
 		* CheapNonFill
 		* ExpensiveNonFill
 		* Guess
+	* Started doing this on the MBP; solves go MUCH faster (obviously) but the score for training difficulties is .11 (versus .4)
 
 * Figure out why tweakChains in human solve doesn't appear to have much of a difference in the average dissimilarity of steps returned.
 	* Even multiplying the tweaks by a large constant doesn't change the number much ... which should be obvious?
