@@ -128,6 +128,7 @@ TODO:
 * Test the main app (partially there... just need to minimize randomness now)
 
 * Start rolling out some of the generated puzzles into production to start accumulating solves on them
+	* Add a way for generate to push out multiple puzzles in CSV format
 
 * Name containing directory sudoku, not dokugen so imports make sense (currenltly sub-packages import dokugen but use sudoku...)
 
