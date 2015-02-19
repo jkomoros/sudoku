@@ -99,9 +99,15 @@ func main() {
 		} else if options.PUZZLE_TO_SOLVE != "" {
 			//TODO: detect if the load failed.
 			grid = sudoku.NewGrid()
-			if !grid.LoadFromFile(options.PUZZLE_TO_SOLVE) {
-				grid = nil
+
+			data, err := ioutil.ReadFile(options.PUZZLE_TO_SOLVE)
+
+			if err != nil {
+				log.Fatalln("Read error for specified file:", err)
 			}
+
+			//TODO: shouldn't a load method have a way to say the string provided is invalid?
+			options.CONVERTER.Load(grid, string(data))
 		}
 
 		if grid == nil {
