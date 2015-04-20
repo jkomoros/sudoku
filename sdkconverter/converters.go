@@ -1,7 +1,7 @@
 package sdkconverter
 
 import (
-	"dokugen"
+	"github.com/jkomoros/sudoku"
 	"strconv"
 	"strings"
 )

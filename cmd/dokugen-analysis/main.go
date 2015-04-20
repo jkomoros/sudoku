@@ -1,12 +1,12 @@
 package main
 
 import (
-	"dokugen"
-	"dokugen/sdkconverter"
 	"encoding/csv"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/jkomoros/sudoku"
+	"github.com/jkomoros/sudoku/sdkconverter"
 	"github.com/sajari/regression"
 	"github.com/skelterjohn/go.matrix"
 	"github.com/ziutek/mymysql/mysql"

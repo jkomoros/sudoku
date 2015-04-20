@@ -1,10 +1,10 @@
 package main
 
 import (
-	"dokugen"
-	"dokugen/sdkconverter"
 	"flag"
 	"fmt"
+	"github.com/jkomoros/sudoku"
+	"github.com/jkomoros/sudoku/sdkconverter"
 	"io"
 	"io/ioutil"
 	"log"

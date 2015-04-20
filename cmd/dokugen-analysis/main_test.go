@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dokugen"
+	"github.com/jkomoros/sudoku"
 	"reflect"
 	"testing"
 )
