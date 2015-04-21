@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"flag"
 	"fmt"
 	"github.com/jkomoros/sudoku"
@@ -33,6 +34,7 @@ type appOptions struct {
 	MAX_DIFFICULTY      float64
 	NO_CACHE            bool
 	PUZZLE_FORMAT       string
+	OUTPUT_CSV          bool
 	CONVERTER           sdkconverter.SudokuPuzzleConverter
 }
 
@@ -60,6 +62,7 @@ func main() {
 	flag.BoolVar(&options.NO_CACHE, "no-cache", false, "If provided, will not vend generated puzzles from the cache of previously generated puzzles.")
 	//TODO: the format should also be how we interpret loads, too.
 	flag.StringVar(&options.PUZZLE_FORMAT, "format", "sdk", "Which format to export puzzles from. Defaults to 'sdk'")
+	flag.BoolVar(&options.OUTPUT_CSV, "csv", false, "Output the results in CSV.")
 	flag.Parse()
 
 	options.RAW_SYMMETRY = strings.ToLower(options.RAW_SYMMETRY)
@@ -91,11 +94,28 @@ func main() {
 
 	var grid *sudoku.Grid
 
+	var csvWriter *csv.Writer
+	var csvRec []string
+
+	if options.OUTPUT_CSV {
+		csvWriter = csv.NewWriter(output)
+	}
+
 	for i := 0; i < options.NUM; i++ {
+
+		if options.OUTPUT_CSV {
+			csvRec = nil
+		}
+
 		//TODO: allow the type of symmetry to be configured.
 		if options.GENERATE {
 			grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.NO_CACHE)
-			fmt.Fprintln(output, options.CONVERTER.DataString(grid))
+			//TODO: factor out all of this double-printing.
+			if options.OUTPUT_CSV {
+				csvRec = append(csvRec, options.CONVERTER.DataString(grid))
+			} else {
+				fmt.Fprintln(output, options.CONVERTER.DataString(grid))
+			}
 		} else if options.PUZZLE_TO_SOLVE != "" {
 			//TODO: detect if the load failed.
 			grid = sudoku.NewGrid()
@@ -131,20 +151,45 @@ func main() {
 		}
 
 		if options.WALKTHROUGH {
-			fmt.Fprintln(output, directions.Walkthrough(grid))
+			if options.OUTPUT_CSV {
+				csvRec = append(csvRec, directions.Walkthrough(grid))
+			} else {
+				fmt.Fprintln(output, directions.Walkthrough(grid))
+			}
 		}
 		if options.PRINT_STATS {
-			fmt.Fprintln(output, grid.Difficulty())
-			//TODO: consider actually printing out the Signals stats (with a Stats method on signals)
-			fmt.Fprintln(output, strings.Join(directions.Stats(), "\n"))
+			if options.OUTPUT_CSV {
+				csvRec = append(csvRec, strconv.FormatFloat(grid.Difficulty(), 'f', -1, 64))
+				//We won't print out the directions.Stats() like we do for just printing to stdout,
+				//because that's mostly noise in this format.
+			} else {
+				fmt.Fprintln(output, grid.Difficulty())
+				//TODO: consider actually printing out the Signals stats (with a Stats method on signals)
+				fmt.Fprintln(output, strings.Join(directions.Stats(), "\n"))
+			}
 		}
 		if options.PUZZLE_TO_SOLVE != "" {
 			grid.Solve()
-			fmt.Fprintln(output, options.CONVERTER.DataString(grid))
+			if options.OUTPUT_CSV {
+				csvRec = append(csvRec, options.CONVERTER.DataString(grid))
+			} else {
+				fmt.Fprintln(output, options.CONVERTER.DataString(grid))
+
+			}
+		}
+
+		if options.OUTPUT_CSV {
+			csvWriter.Write(csvRec)
+		}
+
+		if options.PUZZLE_TO_SOLVE != "" {
 			//If we're asked to solve, n could only be 1 anyway.
 			return
 		}
 		grid.Done()
+	}
+	if options.OUTPUT_CSV {
+		csvWriter.Flush()
 	}
 
 }
