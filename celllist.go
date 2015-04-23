@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+//CellList is a list of cells with many convenience methods for doing common operations on them.
 type CellList []*Cell
 
 type IntSlice []int
@@ -36,18 +37,23 @@ func getBlock(cell *Cell) int {
 	return cell.Block
 }
 
+//SameRow returns true if all cells are in the same row.
 func (self CellList) SameRow() bool {
 	return self.CollectNums(getRow).Same()
 }
 
+//SameCol returns true if all cells are in the same column.
 func (self CellList) SameCol() bool {
 	return self.CollectNums(getCol).Same()
 }
 
+//SameBlock returns true if all cells are in the same block.
 func (self CellList) SameBlock() bool {
 	return self.CollectNums(getBlock).Same()
 }
 
+//Row returns the row that at least one of the cells is in. If SameRow() is false, the Row
+//may be any of the rows in the set.
 func (self CellList) Row() int {
 	//Will return the row of a random item.
 	if len(self) == 0 {
@@ -56,6 +62,8 @@ func (self CellList) Row() int {
 	return self[0].Row
 }
 
+//Col returns the column that at least one of the cells is in. If SameCol() is false, the column
+//may be any of the columns in the set.
 func (self CellList) Col() int {
 	if len(self) == 0 {
 		return 0
@@ -63,6 +71,8 @@ func (self CellList) Col() int {
 	return self[0].Col
 }
 
+//Block returns the row that at least one of the cells is in. If SameBlock() is false, the Block
+//may be any of the blocks in the set.
 func (self CellList) Block() int {
 	if len(self) == 0 {
 		return 0
@@ -70,6 +80,7 @@ func (self CellList) Block() int {
 	return self[0].Block
 }
 
+//AddExclude sets the given number to excluded on all cells in the set.
 func (self CellList) AddExclude(exclude int) {
 	mapper := func(cell *Cell) {
 		cell.setExcluded(exclude, true)
@@ -77,6 +88,8 @@ func (self CellList) AddExclude(exclude int) {
 	self.Map(mapper)
 }
 
+//FilterByPossible returns a new CellList with only the cells in the list that have the given number
+//as an active possibility.
 func (self CellList) FilterByPossible(possible int) CellList {
 	//TODO: test this
 	filter := func(cell *Cell) bool {
@@ -85,6 +98,8 @@ func (self CellList) FilterByPossible(possible int) CellList {
 	return self.Filter(filter)
 }
 
+//FilterByNumPossibles returns a new CellList with only cells that have precisely the provided
+//number of possible numbers.
 func (self CellList) FilterByNumPossibilities(target int) CellList {
 	//TODO: test this
 	filter := func(cell *Cell) bool {
@@ -93,6 +108,7 @@ func (self CellList) FilterByNumPossibilities(target int) CellList {
 	return self.Filter(filter)
 }
 
+//FilterByHasPossibilities returns a new CellList with only cells that have 0 or more open possibilities.
 func (self CellList) FilterByHasPossibilities() CellList {
 	//Returns a list of cells that have possibilities.
 	//TODO: test this.
@@ -102,6 +118,7 @@ func (self CellList) FilterByHasPossibilities() CellList {
 	return self.Filter(filter)
 }
 
+//RemoveCells returns a new CellList that does not contain any of the cells included in the provided CellList.
 func (self CellList) RemoveCells(targets CellList) CellList {
 	//TODO: test this.
 	targetCells := make(map[*Cell]bool)
@@ -114,6 +131,7 @@ func (self CellList) RemoveCells(targets CellList) CellList {
 	return self.Filter(filterFunc)
 }
 
+//PossibilitiesUnion returns an IntSlice that is the union of all active possibilities in cells in the set.
 func (self CellList) PossibilitiesUnion() IntSlice {
 	//Returns an IntSlice of the union of all possibilities.
 	set := make(map[int]bool)
@@ -135,6 +153,8 @@ func (self CellList) PossibilitiesUnion() IntSlice {
 	return result
 }
 
+//Subset returns a new CellList that is the subset of the list including the items at the indexes provided
+//in the IntSlice. See also InverseSubset.
 func (self CellList) Subset(indexes IntSlice) CellList {
 	//IntSlice.Subset is basically a carbon copy.
 	//TODO: what's this behavior if indexes has dupes? What SHOULD it be?
@@ -150,6 +170,8 @@ func (self CellList) Subset(indexes IntSlice) CellList {
 	return result
 }
 
+//InverseSubset returns a new CellList that contains all of the elements from the list that are *not*
+//at the indexes provided in the IntSlice. See also Subset.
 func (self CellList) InverseSubset(indexes IntSlice) CellList {
 	//TODO: figure out what this should do when presented with dupes.
 
@@ -175,11 +197,15 @@ func (self CellList) InverseSubset(indexes IntSlice) CellList {
 	return result
 }
 
+//Sort mutates the provided CellList so that the cells are in order from left to right, top to bottom
+//based on their position in the grid.
 func (self CellList) Sort() {
 	sorter := cellListSorter{self}
 	sort.Sort(sorter)
 }
 
+//FilledNums returns an IntSlice representing all of the numbers that have been actively set on cells
+//in the list. Cells that are empty (are set to '0') are not included.
 func (self CellList) FilledNums() IntSlice {
 	set := make(intSet)
 	for _, cell := range self {
@@ -191,6 +217,7 @@ func (self CellList) FilledNums() IntSlice {
 	return set.toSlice()
 }
 
+//CollectNums collects the result of running fetcher across all items in the list.
 func (self CellList) CollectNums(fetcher func(*Cell) int) IntSlice {
 	var result IntSlice
 	for _, cell := range self {
@@ -215,6 +242,7 @@ func (self cellListSorter) Swap(i, j int) {
 	self.CellList[i], self.CellList[j] = self.CellList[j], self.CellList[i]
 }
 
+//Filter returns a new CellList that includes all cells where filter returned true.
 func (self CellList) Filter(filter func(*Cell) bool) CellList {
 	var result CellList
 	for _, cell := range self {
@@ -225,6 +253,7 @@ func (self CellList) Filter(filter func(*Cell) bool) CellList {
 	return result
 }
 
+//Map executes the mapper function on each cell in the list.
 func (self CellList) Map(mapper func(*Cell)) {
 	for _, cell := range self {
 		mapper(cell)
@@ -327,6 +356,7 @@ func (self CellList) chainDissimilarity(other CellList) float64 {
 
 }
 
+//Description returns a human-readable description of the cells in the list, like "(0,1), (0,2), and (0,3)"
 func (self CellList) Description() string {
 	strings := make(stringSlice, len(self))
 
