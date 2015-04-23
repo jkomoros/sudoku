@@ -19,12 +19,12 @@ func (self *xwingTechnique) Description(step *SolveStep) string {
 	var majorGroups IntSlice
 	var minorGroups IntSlice
 	switch self.groupType {
-	case GROUP_ROW:
+	case _GROUP_ROW:
 		majorAxis = "rows"
 		minorAxis = "columns"
 		majorGroups = step.PointerCells.CollectNums(getRow).Unique()
 		minorGroups = step.PointerCells.CollectNums(getCol).Unique()
-	case GROUP_COL:
+	case _GROUP_COL:
 		majorAxis = "columns"
 		minorAxis = "rows"
 		majorGroups = step.PointerCells.CollectNums(getCol).Unique()
@@ -86,7 +86,7 @@ func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
 
 			//Are the possibilities in each row in the same column as the one above?
 			//We need to do this differently depending on if we're row or col.
-			if self.groupType == GROUP_ROW {
+			if self.groupType == _GROUP_ROW {
 				//TODO: figure out a way to factor group row and col better so we don't duplicate code like this.
 				if currentGroups[0][0].Col != currentGroups[1][0].Col || currentGroups[0][1].Col != currentGroups[1][1].Col {
 					//Nope, the cells didn't line up.
@@ -95,7 +95,7 @@ func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
 				//All of the cells in those two columns
 				targetCells = append(grid.Col(currentGroups[0][0].Col), grid.Col(currentGroups[0][1].Col)...)
 
-			} else if self.groupType == GROUP_COL {
+			} else if self.groupType == _GROUP_COL {
 				if currentGroups[0][0].Row != currentGroups[1][0].Row || currentGroups[0][1].Row != currentGroups[1][1].Row {
 					//Nope, the cells didn't line up.
 					continue

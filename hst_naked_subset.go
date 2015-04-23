@@ -22,13 +22,13 @@ func (self *nakedSubsetTechnique) Description(step *SolveStep) string {
 	var groupName string
 	var groupNum int
 	switch self.groupType {
-	case GROUP_BLOCK:
+	case _GROUP_BLOCK:
 		groupName = "block"
 		groupNum = step.TargetCells.Block()
-	case GROUP_ROW:
+	case _GROUP_ROW:
 		groupName = "row"
 		groupNum = step.TargetCells.Row()
-	case GROUP_COL:
+	case _GROUP_COL:
 		groupName = "column"
 		groupNum = step.TargetCells.Col()
 	default:

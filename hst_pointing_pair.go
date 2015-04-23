@@ -20,10 +20,10 @@ func (self *pointingPairTechnique) Description(step *SolveStep) string {
 
 	groupName := "<NONE>"
 	groupNum := -1
-	if self.groupType == GROUP_ROW {
+	if self.groupType == _GROUP_ROW {
 		groupName = "row"
 		groupNum = step.TargetCells.Row()
-	} else if self.groupType == GROUP_COL {
+	} else if self.groupType == _GROUP_COL {
 		groupName = "column"
 		groupNum = step.TargetCells.Col()
 	}
@@ -48,10 +48,10 @@ func (self *pointingPairTechnique) Find(grid *Grid) []*SolveStep {
 				continue
 			}
 			//Okay, it's possible it's a match. Are all relevant groups (rows or cols, depending on groupType) the same?
-			if (self.groupType == GROUP_ROW && cells.SameRow()) || (self.groupType == GROUP_COL && cells.SameCol()) {
+			if (self.groupType == _GROUP_ROW && cells.SameRow()) || (self.groupType == _GROUP_COL && cells.SameCol()) {
 				//Yup!
 				var result *SolveStep
-				if self.groupType == GROUP_ROW {
+				if self.groupType == _GROUP_ROW {
 					result = &SolveStep{grid.Row(cells.Row()).RemoveCells(block), cells, []int{num + 1}, nil, self}
 				} else {
 					result = &SolveStep{grid.Col(cells.Col()).RemoveCells(block), cells, []int{num + 1}, nil, self}

@@ -7,7 +7,7 @@ import (
 func TestObviousInCollectionRow(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
 		targetCells: []cellRef{{2, 3}},
-		targetSame:  GROUP_ROW,
+		targetSame:  _GROUP_ROW,
 		targetGroup: 2,
 		targetNums:  IntSlice([]int{7}),
 		description: "(2,3) is the only cell in row 2 that is unfilled, and it must be 7",
@@ -20,7 +20,7 @@ func TestObviousInCollectionCol(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
 		transpose:   true,
 		targetCells: []cellRef{{3, 2}},
-		targetSame:  GROUP_COL,
+		targetSame:  _GROUP_COL,
 		targetGroup: 2,
 		targetNums:  IntSlice([]int{7}),
 		description: "(3,2) is the only cell in column 2 that is unfilled, and it must be 7",
@@ -32,7 +32,7 @@ func TestObviousInCollectionCol(t *testing.T) {
 func TestObviousInCollectionBlock(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
 		targetCells: []cellRef{{4, 1}},
-		targetSame:  GROUP_BLOCK,
+		targetSame:  _GROUP_BLOCK,
 		targetGroup: 3,
 		targetNums:  IntSlice([]int{9}),
 		description: "(4,1) is the only cell in block 3 that is unfilled, and it must be 9",

@@ -38,10 +38,10 @@ type SolveTechnique interface {
 type cellGroupType int
 
 const (
-	GROUP_NONE = iota
-	GROUP_ROW
-	GROUP_COL
-	GROUP_BLOCK
+	_GROUP_NONE cellGroupType = iota
+	_GROUP_ROW
+	_GROUP_COL
+	_GROUP_BLOCK
 )
 
 type basicSolveTechnique struct {
@@ -63,7 +63,7 @@ func init() {
 				//TODO: shouldn't this be "Hidden Single Row" (and likewise for others)
 				"Necessary In Row",
 				true,
-				GROUP_ROW,
+				_GROUP_ROW,
 				1,
 			},
 		},
@@ -71,7 +71,7 @@ func init() {
 			&basicSolveTechnique{
 				"Necessary In Col",
 				true,
-				GROUP_COL,
+				_GROUP_COL,
 				1,
 			},
 		},
@@ -79,7 +79,7 @@ func init() {
 			&basicSolveTechnique{
 				"Necessary In Block",
 				true,
-				GROUP_BLOCK,
+				_GROUP_BLOCK,
 				1,
 			},
 		},
@@ -88,7 +88,7 @@ func init() {
 				//TODO: shouldn't this name be Naked Single for consistency?
 				"Only Legal Number",
 				true,
-				GROUP_NONE,
+				_GROUP_NONE,
 				1,
 			},
 		},
@@ -96,7 +96,7 @@ func init() {
 			&basicSolveTechnique{
 				"Obvious In Row",
 				true,
-				GROUP_ROW,
+				_GROUP_ROW,
 				1,
 			},
 		},
@@ -104,7 +104,7 @@ func init() {
 			&basicSolveTechnique{
 				"Obvious In Col",
 				true,
-				GROUP_COL,
+				_GROUP_COL,
 				1,
 			},
 		},
@@ -112,7 +112,7 @@ func init() {
 			&basicSolveTechnique{
 				"Obvious In Block",
 				true,
-				GROUP_BLOCK,
+				_GROUP_BLOCK,
 				1,
 			},
 		},
@@ -120,7 +120,7 @@ func init() {
 			&basicSolveTechnique{
 				"Pointing Pair Row",
 				false,
-				GROUP_ROW,
+				_GROUP_ROW,
 				2,
 			},
 		},
@@ -128,7 +128,7 @@ func init() {
 			&basicSolveTechnique{
 				"Pointing Pair Col",
 				false,
-				GROUP_COL,
+				_GROUP_COL,
 				2,
 			},
 		},
@@ -136,7 +136,7 @@ func init() {
 			&basicSolveTechnique{
 				"Block Block Interactions",
 				false,
-				GROUP_BLOCK,
+				_GROUP_BLOCK,
 				2,
 			},
 		},
@@ -144,7 +144,7 @@ func init() {
 			&basicSolveTechnique{
 				"Naked Pair Col",
 				false,
-				GROUP_COL,
+				_GROUP_COL,
 				2,
 			},
 		},
@@ -152,7 +152,7 @@ func init() {
 			&basicSolveTechnique{
 				"Naked Pair Row",
 				false,
-				GROUP_ROW,
+				_GROUP_ROW,
 				2,
 			},
 		},
@@ -160,7 +160,7 @@ func init() {
 			&basicSolveTechnique{
 				"Naked Pair Block",
 				false,
-				GROUP_BLOCK,
+				_GROUP_BLOCK,
 				2,
 			},
 		},
@@ -168,7 +168,7 @@ func init() {
 			&basicSolveTechnique{
 				"Naked Triple Col",
 				false,
-				GROUP_COL,
+				_GROUP_COL,
 				3,
 			},
 		},
@@ -176,7 +176,7 @@ func init() {
 			&basicSolveTechnique{
 				"Naked Triple Row",
 				false,
-				GROUP_ROW,
+				_GROUP_ROW,
 				3,
 			},
 		},
@@ -184,7 +184,7 @@ func init() {
 			&basicSolveTechnique{
 				"Naked Triple Block",
 				false,
-				GROUP_BLOCK,
+				_GROUP_BLOCK,
 				3,
 			},
 		},
@@ -192,7 +192,7 @@ func init() {
 			&basicSolveTechnique{
 				"Naked Quad Col",
 				false,
-				GROUP_COL,
+				_GROUP_COL,
 				4,
 			},
 		},
@@ -200,7 +200,7 @@ func init() {
 			&basicSolveTechnique{
 				"Naked Quad Row",
 				false,
-				GROUP_ROW,
+				_GROUP_ROW,
 				4,
 			},
 		},
@@ -208,7 +208,7 @@ func init() {
 			&basicSolveTechnique{
 				"Naked Quad Block",
 				false,
-				GROUP_BLOCK,
+				_GROUP_BLOCK,
 				4,
 			},
 		},
@@ -216,7 +216,7 @@ func init() {
 			&basicSolveTechnique{
 				"Hidden Pair Row",
 				false,
-				GROUP_ROW,
+				_GROUP_ROW,
 				2,
 			},
 		},
@@ -224,7 +224,7 @@ func init() {
 			&basicSolveTechnique{
 				"Hidden Pair Col",
 				false,
-				GROUP_COL,
+				_GROUP_COL,
 				2,
 			},
 		},
@@ -232,7 +232,7 @@ func init() {
 			&basicSolveTechnique{
 				"Hidden Pair Block",
 				false,
-				GROUP_BLOCK,
+				_GROUP_BLOCK,
 				2,
 			},
 		},
@@ -240,7 +240,7 @@ func init() {
 			&basicSolveTechnique{
 				"XWing Row",
 				false,
-				GROUP_ROW,
+				_GROUP_ROW,
 				2,
 			},
 		},
@@ -248,7 +248,7 @@ func init() {
 			&basicSolveTechnique{
 				"XWing Col",
 				false,
-				GROUP_COL,
+				_GROUP_COL,
 				2,
 			},
 		},
@@ -259,7 +259,7 @@ func init() {
 			&basicSolveTechnique{
 				"Hidden Triple Row",
 				false,
-				GROUP_ROW,
+				_GROUP_ROW,
 				3,
 			},
 		},
@@ -267,7 +267,7 @@ func init() {
 			&basicSolveTechnique{
 				"Hidden Triple Col",
 				false,
-				GROUP_COL,
+				_GROUP_COL,
 				3,
 			},
 		},
@@ -275,7 +275,7 @@ func init() {
 			&basicSolveTechnique{
 				"Hidden Triple Block",
 				false,
-				GROUP_BLOCK,
+				_GROUP_BLOCK,
 				3,
 			},
 		},
@@ -283,7 +283,7 @@ func init() {
 			&basicSolveTechnique{
 				"Hidden Quad Row",
 				false,
-				GROUP_ROW,
+				_GROUP_ROW,
 				4,
 			},
 		},
@@ -291,7 +291,7 @@ func init() {
 			&basicSolveTechnique{
 				"Hidden Quad Col",
 				false,
-				GROUP_COL,
+				_GROUP_COL,
 				4,
 			},
 		},
@@ -299,7 +299,7 @@ func init() {
 			&basicSolveTechnique{
 				"Hidden Quad Block",
 				false,
-				GROUP_BLOCK,
+				_GROUP_BLOCK,
 				4,
 			},
 		},
@@ -309,7 +309,7 @@ func init() {
 		&basicSolveTechnique{
 			"Guess",
 			true,
-			GROUP_NONE,
+			_GROUP_NONE,
 			1,
 		},
 	}
@@ -344,13 +344,13 @@ func (self *basicSolveTechnique) difficultyHelper(baseDifficulty float64) float6
 	groupMultiplier := 1.0
 
 	switch self.groupType {
-	case GROUP_BLOCK:
+	case _GROUP_BLOCK:
 		//Blocks are the easiest to notice; although they require zig-zag scanning, the eye doesn't have to move far.
 		groupMultiplier = 1.0
-	case GROUP_ROW:
+	case _GROUP_ROW:
 		//Rows are easier to scan than columns because most humans are used to reading LTR
 		groupMultiplier = 1.25
-	case GROUP_COL:
+	case _GROUP_COL:
 		//Cols are easy to scan because the eye can move in one line, but they have to move a long way in an unnatural direction
 		groupMultiplier = 1.3
 	}
@@ -367,15 +367,15 @@ func (self *basicSolveTechnique) difficultyHelper(baseDifficulty float64) float6
 
 func (self *basicSolveTechnique) getter(grid *Grid) func(int) CellList {
 	switch self.groupType {
-	case GROUP_ROW:
+	case _GROUP_ROW:
 		return func(i int) CellList {
 			return grid.Row(i)
 		}
-	case GROUP_COL:
+	case _GROUP_COL:
 		return func(i int) CellList {
 			return grid.Col(i)
 		}
-	case GROUP_BLOCK:
+	case _GROUP_BLOCK:
 		return func(i int) CellList {
 			return grid.Block(i)
 		}

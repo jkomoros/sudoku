@@ -37,13 +37,13 @@ func (self *obviousInCollectionTechnique) Description(step *SolveStep) string {
 	groupName := "<NONE>"
 	groupNumber := 0
 	switch self.groupType {
-	case GROUP_BLOCK:
+	case _GROUP_BLOCK:
 		groupName = "block"
 		groupNumber = step.TargetCells.Block()
-	case GROUP_COL:
+	case _GROUP_COL:
 		groupName = "column"
 		groupNumber = step.TargetCells.Col()
-	case GROUP_ROW:
+	case _GROUP_ROW:
 		groupName = "row"
 		groupNumber = step.TargetCells.Row()
 	}
@@ -128,17 +128,17 @@ func (self *hiddenSingleTechnique) Description(step *SolveStep) string {
 	var groupNum int
 	var otherGroupNum string
 	switch self.groupType {
-	case GROUP_BLOCK:
+	case _GROUP_BLOCK:
 		groupName = "block"
 		otherGroupName = "cell"
 		groupNum = step.TargetCells.Block()
 		otherGroupNum = step.TargetCells.Description()
-	case GROUP_ROW:
+	case _GROUP_ROW:
 		groupName = "row"
 		otherGroupName = "column"
 		groupNum = step.TargetCells.Row()
 		otherGroupNum = strconv.Itoa(cell.Col)
-	case GROUP_COL:
+	case _GROUP_COL:
 		groupName = "column"
 		otherGroupName = "row"
 		groupNum = step.TargetCells.Col()

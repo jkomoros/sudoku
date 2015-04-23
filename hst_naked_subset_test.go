@@ -32,7 +32,7 @@ func TestNakedPairCol(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
 		targetCells:  []cellRef{{0, 8}, {1, 8}, {2, 8}, {3, 8}, {4, 8}, {5, 8}, {8, 8}},
 		pointerCells: []cellRef{{6, 8}, {7, 8}},
-		targetSame:   GROUP_COL,
+		targetSame:   _GROUP_COL,
 		targetGroup:  8,
 		targetNums:   IntSlice([]int{2, 3}),
 		description:  "2 and 3 are only possible in (6,8) and (7,8), which means that they can't be in any other cell in column 8",
@@ -47,7 +47,7 @@ func TestNakedPairRow(t *testing.T) {
 		transpose:    true,
 		targetCells:  []cellRef{{8, 0}, {8, 1}, {8, 2}, {8, 3}, {8, 4}, {8, 5}, {8, 8}},
 		pointerCells: []cellRef{{8, 6}, {8, 7}},
-		targetSame:   GROUP_ROW,
+		targetSame:   _GROUP_ROW,
 		targetGroup:  8,
 		targetNums:   IntSlice([]int{2, 3}),
 		description:  "2 and 3 are only possible in (8,6) and (8,7), which means that they can't be in any other cell in row 8",
@@ -61,7 +61,7 @@ func TestNakedPairBlock(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
 		targetCells:  []cellRef{{0, 2}, {1, 0}, {1, 1}, {1, 2}, {2, 0}, {2, 1}, {2, 2}},
 		pointerCells: []cellRef{{0, 0}, {0, 1}},
-		targetSame:   GROUP_BLOCK,
+		targetSame:   _GROUP_BLOCK,
 		targetGroup:  0,
 		targetNums:   IntSlice([]int{1, 2}),
 		description:  "1 and 2 are only possible in (0,0) and (0,1), which means that they can't be in any other cell in block 0",
@@ -76,7 +76,7 @@ func TestNakedTriple(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
 		targetCells:  []cellRef{{4, 0}, {4, 1}, {4, 2}, {4, 6}, {4, 7}, {4, 8}},
 		pointerCells: []cellRef{{4, 3}, {4, 4}, {4, 5}},
-		targetSame:   GROUP_ROW,
+		targetSame:   _GROUP_ROW,
 		targetGroup:  4,
 		targetNums:   IntSlice([]int{3, 5, 8}),
 		description:  "3, 5, and 8 are only possible in (4,3), (4,4), and (4,5), which means that they can't be in any other cell in row 4",

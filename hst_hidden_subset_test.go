@@ -35,7 +35,7 @@ func TestHiddenPairRow(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
 		targetCells:  []cellRef{{4, 7}, {4, 8}},
 		pointerCells: []cellRef{{4, 7}, {4, 8}},
-		targetSame:   GROUP_ROW,
+		targetSame:   _GROUP_ROW,
 		targetGroup:  4,
 		targetNums:   IntSlice([]int{7, 8, 2}),
 		pointerNums:  IntSlice([]int{3, 5}),
@@ -51,7 +51,7 @@ func TestHiddenPairCol(t *testing.T) {
 		transpose:    true,
 		targetCells:  []cellRef{{7, 4}, {8, 4}},
 		pointerCells: []cellRef{{7, 4}, {8, 4}},
-		targetSame:   GROUP_COL,
+		targetSame:   _GROUP_COL,
 		targetGroup:  4,
 		targetNums:   IntSlice([]int{7, 8, 2}),
 		pointerNums:  IntSlice([]int{3, 5}),
@@ -66,7 +66,7 @@ func TestHiddenPairBlock(t *testing.T) {
 		targetCells:  []cellRef{{4, 7}, {4, 8}},
 		pointerCells: []cellRef{{4, 7}, {4, 8}},
 		//Yes, in this case we want them to be the same row.
-		targetSame:  GROUP_ROW,
+		targetSame:  _GROUP_ROW,
 		targetGroup: 4,
 		targetNums:  IntSlice([]int{7, 8, 2}),
 		pointerNums: IntSlice([]int{3, 5}),

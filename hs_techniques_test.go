@@ -116,19 +116,19 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		}
 
 		switch options.targetSame {
-		case GROUP_ROW:
+		case _GROUP_ROW:
 			if !step.TargetCells.SameRow() || step.TargetCells.Row() != options.targetGroup {
 				t.Error("The target cells in the ", techniqueName, " were wrong row :", step.TargetCells.Row())
 			}
-		case GROUP_BLOCK:
+		case _GROUP_BLOCK:
 			if !step.TargetCells.SameBlock() || step.TargetCells.Block() != options.targetGroup {
 				t.Error("The target cells in the ", techniqueName, " were wrong block :", step.TargetCells.Block())
 			}
-		case GROUP_COL:
+		case _GROUP_COL:
 			if !step.TargetCells.SameCol() || step.TargetCells.Col() != options.targetGroup {
 				t.Error("The target cells in the ", techniqueName, " were wrong col :", step.TargetCells.Col())
 			}
-		case GROUP_NONE:
+		case _GROUP_NONE:
 			//Do nothing
 		default:
 			t.Error("human solve technique helper error: unsupported group type: ", options.targetSame)
@@ -167,7 +167,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 			t.Error("Pointer cells in match mode any not yet supported.")
 		}
 
-		if options.targetSame != GROUP_NONE {
+		if options.targetSame != _GROUP_NONE {
 			t.Error("Target Same in match mode any not yet supported.")
 		}
 
