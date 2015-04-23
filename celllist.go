@@ -233,7 +233,7 @@ func (self CellList) Map(mapper func(*Cell)) {
 
 //TODO: should this be in this file? It's awfully specific to HumanSolve needs, and extremely complex.
 //TODO: is this how you spell this?
-func (self CellList) ChainDissimilarity(other CellList) float64 {
+func (self CellList) chainDissimilarity(other CellList) float64 {
 	//Returns a value between 0.0 and 1.0 depending on how 'similar' the cellLists are.
 
 	if other == nil || len(self) == 0 || len(other) == 0 {

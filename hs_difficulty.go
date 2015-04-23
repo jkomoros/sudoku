@@ -94,7 +94,7 @@ func (self SolveDirections) Stats() []string {
 	dissimilarityAccum := 0.0
 	for _, step := range self {
 		if lastStep != nil {
-			dissimilarityAccum += step.TargetCells.ChainDissimilarity(lastStep.TargetCells)
+			dissimilarityAccum += step.TargetCells.chainDissimilarity(lastStep.TargetCells)
 		}
 		techniqueCount[step.Technique.Name()] += 1
 		lastStep = step

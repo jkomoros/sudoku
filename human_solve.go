@@ -402,7 +402,7 @@ func tweakChainedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, w
 		//It turns out that we probably want to STRENGTHEN the effect.
 		//Logically we should be attenuating Dissimilarity here, but for some reason the math.Pow(dissimilairty, 10) doesn't actually
 		//appear to work here, which is maddening.
-		weights[i] *= possibility.TargetCells.ChainDissimilarity(lastStep.TargetCells)
+		weights[i] *= possibility.TargetCells.chainDissimilarity(lastStep.TargetCells)
 	}
 }
 

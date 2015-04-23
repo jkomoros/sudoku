@@ -215,7 +215,7 @@ func TestChainDissimilarity(t *testing.T) {
 		for _, ref := range test.two {
 			listTwo = append(listTwo, ref.Cell(grid))
 		}
-		dissimilarity := listOne.ChainDissimilarity(listTwo)
+		dissimilarity := listOne.chainDissimilarity(listTwo)
 		if dissimilarity < 0.0 {
 			t.Fatal(test.name, "failed with a dissimilarity less than 0.0: ", dissimilarity)
 		}
