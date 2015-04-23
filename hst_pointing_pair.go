@@ -52,9 +52,9 @@ func (self *pointingPairTechnique) Find(grid *Grid) []*SolveStep {
 				//Yup!
 				var result *SolveStep
 				if self.groupType == _GROUP_ROW {
-					result = &SolveStep{grid.Row(cells.Row()).RemoveCells(block), cells, []int{num + 1}, nil, self}
+					result = &SolveStep{self, grid.Row(cells.Row()).RemoveCells(block), []int{num + 1}, cells, nil}
 				} else {
-					result = &SolveStep{grid.Col(cells.Col()).RemoveCells(block), cells, []int{num + 1}, nil, self}
+					result = &SolveStep{self, grid.Col(cells.Col()).RemoveCells(block), []int{num + 1}, cells, nil}
 				}
 				if result.IsUseful(grid) {
 					results = append(results, result)

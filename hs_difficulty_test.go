@@ -11,32 +11,32 @@ var sampleSolveDirections SolveDirections
 func init() {
 	sampleSolveDirections = SolveDirections{
 		&SolveStep{
-			nil,
-			nil,
-			nil,
-			nil,
 			techniquesByName["Necessary In Row"],
+			nil,
+			nil,
+			nil,
+			nil,
 		},
 		&SolveStep{
-			nil,
-			nil,
-			nil,
-			nil,
 			techniquesByName["Guess"],
+			nil,
+			nil,
+			nil,
+			nil,
 		},
 		&SolveStep{
-			nil,
-			nil,
-			nil,
-			nil,
 			techniquesByName["Naked Pair Block"],
+			nil,
+			nil,
+			nil,
+			nil,
 		},
 		&SolveStep{
-			nil,
-			nil,
-			nil,
-			nil,
 			techniquesByName["Guess"],
+			nil,
+			nil,
+			nil,
+			nil,
 		},
 	}
 }

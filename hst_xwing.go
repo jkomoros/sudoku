@@ -113,7 +113,7 @@ func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
 			targetCells = targetCells.FilterByPossible(i)
 
 			//Okay, we found a pair that works. Create a step for it (if it's useful)
-			step := &SolveStep{targetCells, append(currentGroups[0], currentGroups[1]...), IntSlice{i}, nil, self}
+			step := &SolveStep{self, targetCells, IntSlice{i}, append(currentGroups[0], currentGroups[1]...), nil}
 			if step.IsUseful(grid) {
 				results = append(results, step)
 			}

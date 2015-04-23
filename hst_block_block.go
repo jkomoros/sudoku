@@ -90,11 +90,11 @@ func (self *blockBlockInteractionTechnique) Find(grid *Grid) []*SolveStep {
 
 			//Okay, we have a possible set. Now we need to create a step.
 			step := &SolveStep{
-				targetCells,
-				append(firstBlockCells, secondBlockCells...),
-				[]int{i},
-				nil,
 				self,
+				targetCells,
+				[]int{i},
+				append(firstBlockCells, secondBlockCells...),
+				nil,
 			}
 
 			if step.IsUseful(grid) {

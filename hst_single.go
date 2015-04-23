@@ -22,7 +22,7 @@ type obviousInCollectionTechnique struct {
 func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
 	cellArr := []*Cell{cell}
 	numArr := []int{num}
-	return &SolveStep{cellArr, nil, numArr, nil, technique}
+	return &SolveStep{technique, cellArr, numArr, nil, nil}
 }
 
 func (self *obviousInCollectionTechnique) HumanLikelihood() float64 {

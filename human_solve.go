@@ -34,21 +34,26 @@ const _MAX_DIFFICULTY_ITERATIONS = 50
 //How close we have to get to the average to feel comfortable our difficulty is converging.
 const _DIFFICULTY_CONVERGENCE = 0.005
 
+//SolveDirections is a list of SolveSteps that, when applied in order to a given Grid, would
+//cause it to be solved.
 type SolveDirections []*SolveStep
 
+//SolveStep is a step to fill in a number in a cell or narrow down the possibilities in a cell to
+//get it closer to being solved. SolveSteps model techniques that humans would use to solve a
+//puzzle.
 type SolveStep struct {
-	//The cells that will be affected by the techinque
+	//The technique that was used to identify that this step is logically valid at this point in the solution.
+	Technique SolveTechnique
+	//The cells that will be affected by the techinque (either the number to fill in or possibilities to exclude).
 	TargetCells CellList
-	//The cells that together lead the techinque to being valid
-	PointerCells CellList
-	//The numbers we will remove (or, in the case of Fill, add)
-	//TODO: shouldn't this be renamed TargetNums?
+	//The numbers we will remove (or, in the case of Fill, add) to the TargetCells.
 	TargetNums IntSlice
-	//The numbers in pointerCells that lead us to remove TargetNums from TargetCells.
+	//The cells that together lead the techinque to logically apply in this case; the cells behind the reasoning
+	//why the TargetCells will be mutated in the way specified by this SolveStep.
+	PointerCells CellList
+	//The specific numbers in PointerCells that lead us to remove TargetNums from TargetCells.
 	//This is only very rarely needed (at this time only for hiddenSubset techniques)
 	PointerNums IntSlice
-	//The general technique that underlies this step.
-	Technique SolveTechnique
 }
 
 func (self *SolveStep) IsUseful(grid *Grid) bool {

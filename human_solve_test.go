@@ -88,35 +88,35 @@ func TestStepsDescription(t *testing.T) {
 	//It's really brittle that we load techniques in this way... it changes every time we add a new early technique!
 	steps := SolveDirections{
 		&SolveStep{
+			Techniques[3],
 			CellList{
 				grid.Cell(0, 0),
 			},
-			nil,
 			IntSlice{1},
 			nil,
-			Techniques[3],
+			nil,
 		},
 		&SolveStep{
+			Techniques[8],
 			CellList{
 				grid.Cell(1, 0),
 				grid.Cell(1, 1),
 			},
+			IntSlice{1, 2},
 			CellList{
 				grid.Cell(1, 3),
 				grid.Cell(1, 4),
 			},
-			IntSlice{1, 2},
 			nil,
-			Techniques[8],
 		},
 		&SolveStep{
+			Techniques[3],
 			CellList{
 				grid.Cell(2, 0),
 			},
-			nil,
 			IntSlice{2},
 			nil,
-			Techniques[3],
+			nil,
 		},
 	}
 
@@ -150,38 +150,38 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 	//TODO: test other, harder cases as well.
 	grid := NewGrid()
 	lastStep := &SolveStep{
+		nil,
 		cellRefsToCells([]cellRef{
 			{0, 0},
 		}, grid),
 		nil,
 		nil,
 		nil,
-		nil,
 	}
 	possibilities := []*SolveStep{
 		&SolveStep{
+			nil,
 			cellRefsToCells([]cellRef{
 				{1, 0},
 			}, grid),
 			nil,
 			nil,
 			nil,
-			nil,
 		},
 		&SolveStep{
+			nil,
 			cellRefsToCells([]cellRef{
 				{2, 2},
 			}, grid),
 			nil,
 			nil,
 			nil,
-			nil,
 		},
 		&SolveStep{
+			nil,
 			cellRefsToCells([]cellRef{
 				{7, 7},
 			}, grid),
-			nil,
 			nil,
 			nil,
 			nil,
