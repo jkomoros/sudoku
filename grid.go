@@ -10,9 +10,23 @@ import (
 //TODO: Support non-squared DIMS (logic in Block() would need updating)
 const BLOCK_DIM = 3
 const DIM = BLOCK_DIM * BLOCK_DIM
-const ROW_SEP = "\n"
-const COL_SEP = "|"
-const ALT_COL_SEP = "||"
+
+//Constants for important aspects of the accepted format
+const (
+	ALT_0       = "."
+	ROW_SEP     = "\n"
+	COL_SEP     = "|"
+	ALT_COL_SEP = "||"
+)
+
+//Constants for how important parts of the diagram are printed out
+const (
+	DIAGRAM_IMPOSSIBLE = " "
+	DIAGRAM_RIGHT      = "|"
+	DIAGRAM_BOTTOM     = "-"
+	DIAGRAM_CORNER     = "+"
+	DIAGRAM_NUMBER     = "•"
+)
 
 type Grid struct {
 	initalized       bool
