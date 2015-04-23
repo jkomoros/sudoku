@@ -23,11 +23,11 @@ var GuessTechnique SolveTechnique
 var AllTechniques []SolveTechnique
 
 //Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
-const MAX_DIFFICULTY_ITERATIONS = 50
+const _MAX_DIFFICULTY_ITERATIONS = 50
 
 //TODO: consider relaxing this even more.
 //How close we have to get to the average to feel comfortable our difficulty is converging.
-const DIFFICULTY_CONVERGENCE = 0.005
+const _DIFFICULTY_CONVERGENCE = 0.005
 
 type SolveDirections []*SolveStep
 
@@ -454,7 +454,7 @@ func (self *Grid) calcluateDifficulty(accurate bool) float64 {
 	lastAverage := 0.0
 
 	//Since this is so expensive, in testing situations we want to run it in less accurate mode (so it goes fast!)
-	maxIterations := MAX_DIFFICULTY_ITERATIONS
+	maxIterations := _MAX_DIFFICULTY_ITERATIONS
 	if !accurate {
 		maxIterations = 1
 	}
@@ -465,7 +465,7 @@ func (self *Grid) calcluateDifficulty(accurate bool) float64 {
 		accum += difficulty
 		average = accum / (float64(i) + 1.0)
 
-		if math.Abs(average-lastAverage) < DIFFICULTY_CONVERGENCE {
+		if math.Abs(average-lastAverage) < _DIFFICULTY_CONVERGENCE {
 			//Okay, we've already converged. Just return early!
 			return average
 		}

@@ -17,7 +17,7 @@ type DifficultySignals map[string]float64
 //next calls will have as keys.
 type DifficultySignalGenerator func(directions SolveDirections) DifficultySignals
 
-const DIFFICULTY_WEIGHT_FILENAME = "difficulties.csv"
+const _DIFFICULTY_WEIGHT_FILENAME = "difficulties.csv"
 
 var DifficultySignalGenerators []DifficultySignalGenerator
 var DifficultySignalWeights map[string]float64
@@ -34,7 +34,7 @@ func init() {
 
 	//TODO: set reasonable DifficultySignalWeights here after we have training data we feel confident in.
 	worked := false
-	difficultyFile := DIFFICULTY_WEIGHT_FILENAME
+	difficultyFile := _DIFFICULTY_WEIGHT_FILENAME
 
 	//For now, just search upwards until we find a difficulty CSV.
 	for !worked {
@@ -46,7 +46,7 @@ func init() {
 		//We're just making an ever-longer ../../../ ... FILENAME, but if we absolutized it now, we couldn't easily continue
 		//prepending ../ . So just test the absFile, but still operate on difficultyFile.
 		absFile, _ := filepath.Abs(difficultyFile)
-		if absFile == "/"+DIFFICULTY_WEIGHT_FILENAME {
+		if absFile == "/"+_DIFFICULTY_WEIGHT_FILENAME {
 			//We're already at the top.
 			log.Println("Couldn't find a difficulty weights file.")
 			break
