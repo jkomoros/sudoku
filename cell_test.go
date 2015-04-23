@@ -24,7 +24,7 @@ func TestCellCreation(t *testing.T) {
 
 	number := 1
 	data := strconv.Itoa(number)
-	cell := NewCell(nil, 0, 0)
+	cell := newCell(nil, 0, 0)
 
 	if cell.Rank() != DIM {
 		t.Log("Cell's rank was not DIM when initalized")

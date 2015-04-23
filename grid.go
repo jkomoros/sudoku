@@ -79,7 +79,7 @@ func NewGrid() *Grid {
 	i := 0
 	for r := 0; r < DIM; r++ {
 		for c := 0; c < DIM; c++ {
-			result.cells[i] = NewCell(result, r, c)
+			result.cells[i] = newCell(result, r, c)
 			//The cell can't insert itself because it doesn't know where it will actually live in memory yet.
 			i++
 		}

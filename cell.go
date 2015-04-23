@@ -37,7 +37,7 @@ type Cell struct {
 	excluded    [DIM]bool
 }
 
-func NewCell(grid *Grid, row int, col int) Cell {
+func newCell(grid *Grid, row int, col int) Cell {
 	//TODO: we should not set the number until neighbors are initialized.
 	return Cell{grid: grid, Row: row, Col: col, Block: grid.blockForCell(row, col)}
 }
