@@ -18,7 +18,7 @@ const NUM_NEIGHBORS = (DIM-1)*3 - (BLOCK_DIM-1)*2
 type SymmetryType int
 
 const (
-	SYMMETRY_NONE = iota
+	SYMMETRY_NONE SymmetryType = iota
 	SYMMETRY_ANY
 	SYMMETRY_HORIZONTAL
 	SYMMETRY_VERTICAL
