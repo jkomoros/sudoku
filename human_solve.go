@@ -10,17 +10,22 @@ import (
 //Note: this should be set to the num-solves parameter used to train the currently configured weights.
 const _NUM_SOLVES_FOR_DIFFICULTY = 10
 
+//The list of techniques that HumanSolve will use to try to solve the puzzle, split up into
+//different tranches based on their complexity and oddity.
+var (
+	//Techniques that are 'cheap' to compute, and should be tried before trying ExpensiveTechniques
+	CheapTechniques []SolveTechnique
+	//Techniques that are 'expensive' to compute, and should only be tried after trying CheapTechniques.
+	ExpensiveTechniques []SolveTechnique
+	//All of the 'normal' Techniques that will be used to solve the puzzle; Cheap+Expensive techniques
+	Techniques []SolveTechnique
+	//The special GuessTechnique that is used only if no other techniques find options.
+	GuessTechnique SolveTechnique
+	//Every technique that HumanSolve could ever use, including the oddball Guess technique.
+	AllTechniques []SolveTechnique
+)
+
 //The actual techniques are intialized in hs_techniques.go, and actually defined in hst_*.go files.
-//Techniques is ALL technies. CheapTechniques is techniques that are reasonably cheap to compute.
-//ExpensiveTechniques is techniques that should only be used if all else has failed.
-var Techniques []SolveTechnique
-var CheapTechniques []SolveTechnique
-var ExpensiveTechniques []SolveTechnique
-
-var GuessTechnique SolveTechnique
-
-//EVERY technique, even the weird one like Guess
-var AllTechniques []SolveTechnique
 
 //Worst case scenario, how many times we'd call HumanSolve to get a difficulty.
 const _MAX_DIFFICULTY_ITERATIONS = 50
