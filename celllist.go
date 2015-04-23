@@ -10,6 +10,7 @@ import (
 //CellList is a list of cells with many convenience methods for doing common operations on them.
 type CellList []*Cell
 
+//IntSlice is a list of ints, with many convenience methods specific to sudoku.
 type IntSlice []int
 
 type stringSlice []string
@@ -420,6 +421,7 @@ func (self stringSlice) description() string {
 	return result + ", and " + self[len(self)-1]
 }
 
+//Description returns a human readable description of the ints in the set, like "7, 4, and 3"
 func (self IntSlice) Description() string {
 
 	strings := make(stringSlice, len(self))
@@ -432,12 +434,13 @@ func (self IntSlice) Description() string {
 
 }
 
-//returns an IntSlice like self, but with any dupes removed.
+//Unique returns a new IntSlice like the receiver, but with any duplicates removed. Order is not preserved.
 func (self IntSlice) Unique() IntSlice {
 	//TODO: test this.
 	return self.toIntSet().toSlice()
 }
 
+//Same returns true if all ints in the slice are the same.
 func (self IntSlice) Same() bool {
 	if len(self) == 0 {
 		return true
@@ -451,6 +454,8 @@ func (self IntSlice) Same() bool {
 	return true
 }
 
+//SameContetnAs returns true if the receiver and otherSlice have the same list of ints
+//(although not necessarily the same ordering of them)
 func (self IntSlice) SameContentAs(otherSlice IntSlice) bool {
 	//Same as SameAs, but doesn't care about order.
 
@@ -467,6 +472,8 @@ func (self IntSlice) SameContentAs(otherSlice IntSlice) bool {
 	return selfToUse.SameAs(otherToUse)
 }
 
+//SameAs returns true if the receiver and otherSlice have the same ints in the same order. See also
+//SameContentAs.
 func (self IntSlice) SameAs(other IntSlice) bool {
 	//TODO: test this.
 	if len(self) != len(other) {
@@ -480,6 +487,7 @@ func (self IntSlice) SameAs(other IntSlice) bool {
 	return true
 }
 
+//Subset returns a new IntSlice like the receiver, but with only the ints at the provided indexes kept.
 func (self IntSlice) Subset(indexes IntSlice) IntSlice {
 	//TODO: test this.
 	//Basically a carbon copy of CellList.Subset
@@ -496,6 +504,7 @@ func (self IntSlice) Subset(indexes IntSlice) IntSlice {
 	return result
 }
 
+//Sort sorts the IntSlice in place from small to large.
 func (self IntSlice) Sort() {
 	sort.Ints(self)
 }
@@ -555,12 +564,16 @@ func (self intSet) union(other intSet) intSet {
 	return result
 }
 
+//Intersection returns a new IntSlice that represents the intersection of the two IntSlices,
+//that is, the ints that appear in both slices.
 func (self IntSlice) Intersection(other IntSlice) IntSlice {
 	//Returns an IntSlice of the union of both intSlices
 
 	return self.toIntSet().intersection(other.toIntSet()).toSlice()
 }
 
+//Difference returns a new IntSlice that contains all of the ints in the receiver that are not
+//also in other.
 func (self IntSlice) Difference(other IntSlice) IntSlice {
 	return self.toIntSet().difference(other.toIntSet()).toSlice()
 }
