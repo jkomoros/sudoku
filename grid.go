@@ -46,12 +46,13 @@ type Grid struct {
 
 var gridCache chan *Grid
 
-const MAX_GRIDS = 100
+const _MAX_GRIDS = 100
 
-const NUM_SOLVER_THREADS = 4
+//TODO:Allow num solver threads to be set at runtime
+const _NUM_SOLVER_THREADS = 4
 
 func init() {
-	gridCache = make(chan *Grid, MAX_GRIDS)
+	gridCache = make(chan *Grid, _MAX_GRIDS)
 }
 
 func getGrid() *Grid {

@@ -62,7 +62,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		//and block, which prevented them from looping back up and getting the signal to shut down.
 		//Since there's only a known number of threads, we'll make sure they all ahve a place to leave their work
 		//without blocking so they can get the signal to shut down.
-		incomingSolutions := make(chan *Grid, NUM_SOLVER_THREADS)
+		incomingSolutions := make(chan *Grid, _NUM_SOLVER_THREADS)
 
 		//Using a pattern for closing fan in style receivers from http://blog.golang.org/pipelines
 		var wg sync.WaitGroup
@@ -71,7 +71,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 
 		//TODO: figure out a way to kill all of these threads when necessary.
 
-		for i := 0; i < NUM_SOLVER_THREADS; i++ {
+		for i := 0; i < _NUM_SOLVER_THREADS; i++ {
 			go func() {
 				//Sovler thread.
 				firstRun := true
@@ -92,7 +92,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 			}()
 		}
 
-		wg.Add(NUM_SOLVER_THREADS)
+		wg.Add(_NUM_SOLVER_THREADS)
 
 		go func() {
 			wg.Wait()

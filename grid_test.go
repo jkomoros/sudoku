@@ -143,7 +143,7 @@ const SOLVED_ADVANCED_TEST_GRID = `3|5|8|2|1|6|7|4|9
 8|1|6|7|4|9|2|3|5`
 
 func init() {
-	runtime.GOMAXPROCS(NUM_SOLVER_THREADS)
+	runtime.GOMAXPROCS(_NUM_SOLVER_THREADS)
 }
 
 func TestGridCreation(t *testing.T) {
