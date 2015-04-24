@@ -339,7 +339,7 @@ func (self *Cell) Neighbors() CellList {
 
 }
 
-func (self *Cell) DataString() string {
+func (self *Cell) dataString() string {
 	result := strconv.Itoa(self.Number())
 	return strings.Replace(result, "0", ALT_0, -1)
 }

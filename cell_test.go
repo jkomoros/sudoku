@@ -142,7 +142,7 @@ func TestCellCreation(t *testing.T) {
 		t.Log("Cell came back wrong")
 		t.Fail()
 	}
-	if cell.DataString() != data {
+	if cell.dataString() != data {
 		t.Log("Cell round-tripped out with different string than data in")
 		t.Fail()
 	}
