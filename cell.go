@@ -344,6 +344,7 @@ func (self *Cell) dataString() string {
 	return strings.Replace(result, "0", ALT_0, -1)
 }
 
+//String returns a debug-friendly summary of the Cell.
 func (self *Cell) String() string {
 	return "Cell[" + strconv.Itoa(self.Row) + "][" + strconv.Itoa(self.Col) + "]:" + strconv.Itoa(self.Number()) + "\n"
 }
