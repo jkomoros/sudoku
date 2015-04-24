@@ -83,12 +83,12 @@ func TestCellCreation(t *testing.T) {
 			t.Log("Cell reported ", i, " was impossible even after matched calls to setPossible/setImpossible")
 			t.Fail()
 		}
-		cell.setExcluded(i, true)
+		cell.SetExcluded(i, true)
 		if cell.Possible(i) {
 			t.Log("A cell reported it was possible even though its number had been manually excluded")
 			t.Fail()
 		}
-		cell.resetExcludes()
+		cell.ResetExcludes()
 		if !cell.Possible(i) {
 			t.Log("A cell thought it was not possible even after excludes were cleared")
 			t.Fail()

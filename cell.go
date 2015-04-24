@@ -139,7 +139,7 @@ func (self *Cell) setImpossible(number int) {
 	}
 }
 
-func (self *Cell) setExcluded(number int, excluded bool) {
+func (self *Cell) SetExcluded(number int, excluded bool) {
 	number--
 	if number < 0 || number >= DIM {
 		return
@@ -153,7 +153,7 @@ func (self *Cell) setExcluded(number int, excluded bool) {
 	}
 }
 
-func (self *Cell) resetExcludes() {
+func (self *Cell) ResetExcludes() {
 	for i := 0; i < DIM; i++ {
 		self.excluded[i] = false
 	}

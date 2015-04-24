@@ -176,7 +176,7 @@ func (self *Grid) transpose() *Grid {
 
 func (self *Grid) ResetOverrides() {
 	for _, cell := range self.cells {
-		cell.resetExcludes()
+		cell.ResetExcludes()
 	}
 }
 

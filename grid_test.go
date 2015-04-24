@@ -309,7 +309,7 @@ func TestGridLoad(t *testing.T) {
 	}
 
 	//Twiddle an exclude to make sure it copies over correctly.
-	grid.Cell(2, 0).setExcluded(4, true)
+	grid.Cell(2, 0).SetExcluded(4, true)
 
 	if grid.Diagram() != TEST_GRID_EXCLUDED_DIAGRAM {
 		t.Error("Diagram did not reflect the manually excluded item: \n", grid.Diagram())

@@ -100,7 +100,7 @@ func (self *SolveStep) Apply(grid *Grid) {
 		for _, cell := range self.TargetCells {
 			gridCell := cell.InGrid(grid)
 			for _, exclude := range self.TargetNums {
-				gridCell.setExcluded(exclude, true)
+				gridCell.SetExcluded(exclude, true)
 			}
 		}
 	}

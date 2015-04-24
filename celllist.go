@@ -84,7 +84,7 @@ func (self CellList) Block() int {
 //AddExclude sets the given number to excluded on all cells in the set.
 func (self CellList) AddExclude(exclude int) {
 	mapper := func(cell *Cell) {
-		cell.setExcluded(exclude, true)
+		cell.SetExcluded(exclude, true)
 	}
 	self.Map(mapper)
 }
