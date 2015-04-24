@@ -195,8 +195,7 @@ func (self *Cell) Possible(number int) bool {
 
 //Possibilities returns a list of all current possibilities for this cell: all numbers for which cell.Possible
 //returns true.
-func (self *Cell) Possibilities() (result []int) {
-	//tODO: shouldn't this return an intslice?
+func (self *Cell) Possibilities() (result IntSlice) {
 	if self.number != 0 {
 		return nil
 	}
