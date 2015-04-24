@@ -127,7 +127,7 @@ func (self *Grid) Load(data string) {
 	for r, row := range strings.Split(data, ROW_SEP) {
 		for c, data := range strings.Split(row, "") {
 			cell := self.Cell(r, c)
-			cell.Load(data)
+			cell.load(data)
 		}
 	}
 }

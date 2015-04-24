@@ -50,7 +50,7 @@ func (self *Cell) InGrid(grid *Grid) *Cell {
 	return grid.Cell(self.Row, self.Col)
 }
 
-func (self *Cell) Load(data string) {
+func (self *Cell) load(data string) {
 	//Format, for now, is just the number itself, or 0 if no number.
 	data = strings.Replace(data, ALT_0, "0", -1)
 	num, _ := strconv.Atoi(data)

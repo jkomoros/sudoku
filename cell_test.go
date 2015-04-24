@@ -129,7 +129,7 @@ func TestCellCreation(t *testing.T) {
 		t.Fail()
 	}
 
-	cell.Load(data)
+	cell.load(data)
 	if cell.Number() != number {
 		t.Log("Number came back wrong")
 		t.Fail()
