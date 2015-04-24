@@ -221,6 +221,7 @@ func (self *Cell) checkInvalid() {
 func (self *Cell) Invalid() bool {
 	//Returns true if no numbers are possible.
 	//TODO: figure out a way to send this back up to the solver when it happens.
+	//TODO: shouldn't this always return true if there is a number set?
 	for i, counter := range self.impossibles {
 		if counter == 0 && !self.excluded[i] {
 			return false
