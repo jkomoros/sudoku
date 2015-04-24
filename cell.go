@@ -181,6 +181,9 @@ func (self *Cell) ResetExcludes() {
 	}
 }
 
+//Possible returns whether or not a given number is legal to fill via SetNumber, given the state of the grid (specifically,
+//the cell's neighbors) and the numbers the cell was told to explicitly exclude via SetExclude.
+//If the cell is already filled with a number, it will return false for all numbers.
 func (self *Cell) Possible(number int) bool {
 	//Number is 1 indexed, but we store it as 0-indexed
 	number--
@@ -190,8 +193,10 @@ func (self *Cell) Possible(number int) bool {
 	return self.impossibles[number] == 0 && !self.excluded[number]
 }
 
-//A slice of ints representing the possibilties for this cell.
+//Possibilities returns a list of all current possibilities for this cell: all numbers for which cell.Possible
+//returns true.
 func (self *Cell) Possibilities() (result []int) {
+	//tODO: shouldn't this return an intslice?
 	if self.number != 0 {
 		return nil
 	}
