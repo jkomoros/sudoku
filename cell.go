@@ -57,11 +57,15 @@ func (self *Cell) load(data string) {
 	self.SetNumber(num)
 }
 
+//Number returns the number the cell is currently set to.
 func (self *Cell) Number() int {
 	//A layer of indirection since number needs to be used from the Setter.
 	return self.number
 }
 
+//SetNumber explicitly sets the number of the cell. This operation could cause the grid to become
+//invalid if it conflicts with its neighbors' numbers. This operation will affect the Possiblities()
+//of its neighbor cells.
 func (self *Cell) SetNumber(number int) {
 	//Sets the explicit number. This will affect its neighbors possibles list.
 	if self.number == number {
@@ -145,6 +149,10 @@ func (self *Cell) setImpossible(number int) {
 	}
 }
 
+//SetExcluded defines whether a possibility is considered not feasible, even if not directly precluded
+//by the Number()s of the cell's neighbors. This is used by advanced HumanSolve techniques that
+//cull possibilities that are logically excluded by the state of the grid, in a non-direct way.
+//The state of Excluded bits will affect the results of this cell's Possibilities() list.
 func (self *Cell) SetExcluded(number int, excluded bool) {
 	number--
 	if number < 0 || number >= DIM {
@@ -159,6 +167,8 @@ func (self *Cell) SetExcluded(number int, excluded bool) {
 	}
 }
 
+//ResetExcludes sets all excluded bits to false, so that Possibilities() will be based purely
+//on direct implications of the Number()s of neighbors. See also SetExcluded.
 func (self *Cell) ResetExcludes() {
 	for i := 0; i < DIM; i++ {
 		self.excluded[i] = false
