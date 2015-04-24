@@ -19,6 +19,10 @@ const (
 	SYMMETRY_BOTH
 )
 
+//Cell represents a single cell within a grid. It maintains information about the number that is filled, the numbers that are
+//currently legal given the filled status of its neighbors, and whether any possibilities have been
+//explicitly excluded by solve techniques. Cells should not be constructed on their own; create a Grid
+//and grab references to the cells from there.
 type Cell struct {
 	grid *Grid
 	//The number if it's explicitly set. Number() will return it if it's explicitly or implicitly set.
@@ -36,6 +40,8 @@ func newCell(grid *Grid, row int, col int) Cell {
 	return Cell{grid: grid, Row: row, Col: col, Block: grid.blockForCell(row, col)}
 }
 
+//InGrid returns a reference to a cell in the provided grid that has the same row/column as this cell.
+//Effectively, this cell's analogue in the other grid.
 func (self *Cell) InGrid(grid *Grid) *Cell {
 	//Returns our analogue in the given grid.
 	if grid == nil {
