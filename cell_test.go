@@ -26,7 +26,7 @@ func TestCellCreation(t *testing.T) {
 	data := strconv.Itoa(number)
 	cell := newCell(nil, 0, 0)
 
-	if cell.Rank() != DIM {
+	if cell.rank() != DIM {
 		t.Log("Cell's rank was not DIM when initalized")
 		t.Fail()
 	}
@@ -67,8 +67,8 @@ func TestCellCreation(t *testing.T) {
 			t.Fail()
 		}
 
-		if cell.Rank() != DIM-1 {
-			t.Log("Cell reported an incorrect rank: ", cell.Rank())
+		if cell.rank() != DIM-1 {
+			t.Log("Cell reported an incorrect rank: ", cell.rank())
 			t.Fail()
 		}
 
@@ -168,7 +168,7 @@ func TestCellCreation(t *testing.T) {
 		t.Fail()
 	}
 
-	if cell.Rank() != 0 {
+	if cell.rank() != 0 {
 		t.Log("Cell with an explicit number came back with a non-0 Rank")
 		t.Fail()
 	}

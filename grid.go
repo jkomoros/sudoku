@@ -37,7 +37,7 @@ type Grid struct {
 	cacheRowMutex    sync.RWMutex
 	cacheColMutex    sync.RWMutex
 	cacheBlockMutext sync.RWMutex
-	theQueue         *FiniteQueue
+	theQueue         *finiteQueue
 	numFilledCells   int
 	invalidCells     map[*Cell]bool
 	cachedSolutions  []*Grid
@@ -103,9 +103,9 @@ func NewGrid() *Grid {
 	return result
 }
 
-func (self *Grid) queue() *FiniteQueue {
+func (self *Grid) queue() *finiteQueue {
 	if self.theQueue == nil {
-		self.theQueue = NewFiniteQueue(1, DIM)
+		self.theQueue = newFiniteQueue(1, DIM)
 		for i := range self.cells {
 			//If we did i, cell, cell would just be the temp variable. So we'll grab it via the index.
 			self.theQueue.Insert(&self.cells[i])
@@ -380,7 +380,7 @@ func (self *Grid) cellRankChanged(cell *Cell) {
 	}
 }
 
-func (self *Grid) Rank() int {
+func (self *Grid) rank() int {
 	return len(self.cells) - self.numFilledCells
 }
 

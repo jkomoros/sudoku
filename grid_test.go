@@ -410,7 +410,7 @@ func TestAdvancedSolve(t *testing.T) {
 	}
 
 	if grid.numFilledCells != 27 {
-		t.Log("The advanced grid's rank was wrong at load: ", grid.Rank())
+		t.Log("The advanced grid's rank was wrong at load: ", grid.rank())
 		t.Fail()
 	}
 

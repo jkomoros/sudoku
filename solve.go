@@ -54,7 +54,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 
 		queueDone := make(chan bool, 1)
 
-		queue := NewSyncedFiniteQueue(0, DIM*DIM, queueDone)
+		queue := newSyncedFiniteQueue(0, DIM*DIM, queueDone)
 
 		queue.In <- self.Copy()
 
@@ -129,7 +129,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 
 }
 
-func (self *Grid) searchSolutions(queue *SyncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) *Grid {
+func (self *Grid) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) *Grid {
 	//This will only be called by Solutions.
 	//We will return ourselves if we are a solution, and if not we will return nil.
 	//If there are any sub children, we will send them to counter before we're done.

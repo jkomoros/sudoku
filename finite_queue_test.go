@@ -6,16 +6,16 @@ import (
 )
 
 type SimpleRankedObject struct {
-	rank int
-	id   string
+	_rank int
+	id    string
 }
 
-func (self *SimpleRankedObject) Rank() int {
-	return self.rank
+func (self *SimpleRankedObject) rank() int {
+	return self._rank
 }
 
 func TestFiniteQueue(t *testing.T) {
-	queue := NewFiniteQueue(1, DIM)
+	queue := newFiniteQueue(1, DIM)
 	if queue == nil {
 		t.Log("We didn't get a queue back from the constructor")
 		t.Fail()
@@ -32,8 +32,8 @@ func TestFiniteQueue(t *testing.T) {
 			t.Fail()
 			continue
 		}
-		if retrievedObj.Rank() != obj.Rank() {
-			t.Log("We got back an object with the wrong rank: ", retrievedObj.Rank(), " is not ", obj.Rank())
+		if retrievedObj.rank() != obj.rank() {
+			t.Log("We got back an object with the wrong rank: ", retrievedObj.rank(), " is not ", obj.rank())
 			t.Fail()
 		}
 	}
@@ -47,7 +47,7 @@ func TestFiniteQueue(t *testing.T) {
 		queue.Insert(obj)
 	}
 
-	objects[1].rank = 6
+	objects[1]._rank = 6
 	queue.Insert(objects[1])
 	//We'll sneak in a test for double-inserting here.
 	queue.Insert(objects[1])
@@ -64,8 +64,8 @@ func TestFiniteQueue(t *testing.T) {
 			t.Fail()
 			continue
 		}
-		if retrievedObj.Rank() != obj.Rank() {
-			t.Log("We got back an object with the wrong rank: ", retrievedObj.Rank(), " is not ", obj.Rank())
+		if retrievedObj.rank() != obj.rank() {
+			t.Log("We got back an object with the wrong rank: ", retrievedObj.rank(), " is not ", obj.rank())
 			t.Fail()
 		}
 		convertedObj, _ := retrievedObj.(*SimpleRankedObject)
@@ -121,7 +121,7 @@ func TestFiniteQueue(t *testing.T) {
 }
 
 func TestFiniteQueueGetter(t *testing.T) {
-	queue := NewFiniteQueue(1, DIM)
+	queue := newFiniteQueue(1, DIM)
 	//Note that the first item does not fit in the first bucket on purpose.
 	objects := [...]*SimpleRankedObject{{3, "a"}, {4, "b"}, {4, "c"}, {5, "d"}}
 	for _, object := range objects {
@@ -143,8 +143,8 @@ func TestFiniteQueueGetter(t *testing.T) {
 			t.Fail()
 			continue
 		}
-		if retrievedObj.Rank() != obj.Rank() {
-			t.Log("We got back an object with the wrong rank: ", retrievedObj.Rank(), " is not ", obj.Rank())
+		if retrievedObj.rank() != obj.rank() {
+			t.Log("We got back an object with the wrong rank: ", retrievedObj.rank(), " is not ", obj.rank())
 			t.Fail()
 		}
 	}
@@ -166,7 +166,7 @@ func TestFiniteQueueGetter(t *testing.T) {
 		queue.Insert(object)
 	}
 	getter = queue.NewGetter()
-	seenObjects := make(map[RankedObject]bool)
+	seenObjects := make(map[rankedObject]bool)
 	item := getter.Get()
 	seenObjects[item] = true
 	newObject := &SimpleRankedObject{3, "e"}
@@ -218,7 +218,7 @@ func TestFiniteQueueGetter(t *testing.T) {
 	_ = getter.Get()
 	//Now change its rank and make sure we get again.
 	rawObject := objects[0]
-	rawObject.rank = 1
+	rawObject._rank = 1
 	queue.Insert(rawObject)
 	item = getter.Get()
 	if item != rawObject {
@@ -232,7 +232,7 @@ func TestSyncedFiniteQueue(t *testing.T) {
 
 	done := make(chan bool, 1)
 
-	queue := NewSyncedFiniteQueue(1, DIM, done)
+	queue := newSyncedFiniteQueue(1, DIM, done)
 
 	select {
 	case <-queue.Out:
@@ -250,7 +250,7 @@ func TestSyncedFiniteQueue(t *testing.T) {
 		t.Fail()
 	}
 
-	secondQueue := NewSyncedFiniteQueue(1, DIM, done)
+	secondQueue := newSyncedFiniteQueue(1, DIM, done)
 	//Note that the first item does not fit in the first bucket on purpose.
 	objects := [...]*SimpleRankedObject{{3, "a"}, {4, "b"}, {4, "c"}, {5, "d"}}
 	for _, object := range objects {
@@ -263,8 +263,8 @@ func TestSyncedFiniteQueue(t *testing.T) {
 			t.Fail()
 			continue
 		}
-		if retrievedObj.Rank() != obj.Rank() {
-			t.Log("We got back an object with the wrong rank: ", retrievedObj.Rank(), " is not ", obj.Rank())
+		if retrievedObj.rank() != obj.rank() {
+			t.Log("We got back an object with the wrong rank: ", retrievedObj.rank(), " is not ", obj.rank())
 			t.Fail()
 		}
 	}

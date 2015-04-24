@@ -209,7 +209,7 @@ func (self *Cell) Invalid() bool {
 	return true
 }
 
-func (self *Cell) Rank() int {
+func (self *Cell) rank() int {
 	if self.number != 0 {
 		return 0
 	}

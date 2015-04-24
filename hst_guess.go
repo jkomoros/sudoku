@@ -30,7 +30,7 @@ func (self *guessTechnique) Find(grid *Grid) []*SolveStep {
 		}
 
 		//This WILL happen, since guess will return a bunch of possible guesses you could make.
-		if obj.Rank() > 3 {
+		if obj.rank() > 3 {
 			//Given that this WILL happen, it's important to return results so far, whatever they are.
 			break
 		}
