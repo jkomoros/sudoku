@@ -406,6 +406,6 @@ func (self *Cell) diagramRows() (rows []string) {
 	return rows
 }
 
-func (self *Cell) Diagram() string {
+func (self *Cell) diagram() string {
 	return strings.Join(self.diagramRows(), "\n")
 }

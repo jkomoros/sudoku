@@ -201,22 +201,22 @@ func TestCellCreation(t *testing.T) {
 		}
 	}
 
-	if cell.Diagram() != TOP_LEFT_CELL {
-		t.Log("Diagram for the top left cell printed out incorrectly: \n", cell.Diagram())
+	if cell.diagram() != TOP_LEFT_CELL {
+		t.Log("Diagram for the top left cell printed out incorrectly: \n", cell.diagram())
 		t.Fail()
 	}
 
 	cell.setImpossible(BLOCK_DIM)
 
-	if cell.Diagram() != TOP_LEFT_CELL_NO_BLOCK_DIM {
-		t.Log("Diagram for the top left cell printed out incorrectly: \n", cell.Diagram())
+	if cell.diagram() != TOP_LEFT_CELL_NO_BLOCK_DIM {
+		t.Log("Diagram for the top left cell printed out incorrectly: \n", cell.diagram())
 		t.Fail()
 	}
 
 	cell.SetNumber(1)
 
-	if cell.Diagram() != TOP_LEFT_CELL_FILLED {
-		t.Log("Diagram for the top left cell filled printed out incorrectly: \n", cell.Diagram())
+	if cell.diagram() != TOP_LEFT_CELL_FILLED {
+		t.Log("Diagram for the top left cell filled printed out incorrectly: \n", cell.diagram())
 		t.Fail()
 	}
 }
