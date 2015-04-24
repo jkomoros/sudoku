@@ -87,6 +87,9 @@ func loadDifficultyWeights(fileName string) bool {
 	return true
 }
 
+//Stats returns a printout of interesting statistics about the SolveDirections, including number of steps,
+//difficulty (based on this solve description alone), how unrelated the cells in subsequent steps are,
+//and the values of all of the signals used to generate the difficulty.
 func (self SolveDirections) Stats() []string {
 	//TODO: test this.
 	techniqueCount := make(map[string]int)
@@ -126,6 +129,9 @@ func (self SolveDirections) Stats() []string {
 	return result
 }
 
+//Description returns a comprehensive prose description of the SolveDirections, including reasoning for each step, that
+//if followed would lead to the grid being solved. Unlike Walkthrough, Description() does not include diagrams
+//for each step.
 func (self SolveDirections) Description() []string {
 
 	if len(self) == 0 {
@@ -151,6 +157,8 @@ func (self SolveDirections) Description() []string {
 	return descriptions
 }
 
+//Walkthrough prints an exhaustive set of human-readable directions that includes diagrams at each
+//step to make it easier to follow.
 func (self SolveDirections) Walkthrough(grid *Grid) string {
 
 	//TODO: test this.
