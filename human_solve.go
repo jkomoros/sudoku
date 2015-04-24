@@ -491,15 +491,15 @@ func (self *Grid) calcluateDifficulty(accurate bool) float64 {
 //give the difficulty for THAT. This is more accurate becuase the weights were trained on such averaged signals.
 func gridDifficultyHelper(grid *Grid) float64 {
 
-	collector := make(chan DifficultySignals, _NUM_SOLVES_FOR_DIFFICULTY)
+	collector := make(chan difficultySignals, _NUM_SOLVES_FOR_DIFFICULTY)
 	//Might as well run all of the human solutions in parallel
 	for i := 0; i < _NUM_SOLVES_FOR_DIFFICULTY; i++ {
 		go func(gridToUse *Grid) {
-			collector <- gridToUse.HumanSolution().Signals()
+			collector <- gridToUse.HumanSolution().signals()
 		}(grid)
 	}
 
-	combinedSignals := DifficultySignals{}
+	combinedSignals := difficultySignals{}
 
 	for i := 0; i < _NUM_SOLVES_FOR_DIFFICULTY; i++ {
 		signals := <-collector

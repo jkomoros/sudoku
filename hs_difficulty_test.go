@@ -44,10 +44,10 @@ func init() {
 //TODO: the other solvedirections tests should be in this file.
 
 func TestDifficultySignals(t *testing.T) {
-	signals := DifficultySignals{"a": 1.0, "b": 5.0}
-	other := DifficultySignals{"a": 3.2, "c": 6.0}
+	signals := difficultySignals{"a": 1.0, "b": 5.0}
+	other := difficultySignals{"a": 3.2, "c": 6.0}
 
-	golden := DifficultySignals{"a": 3.2, "b": 5.0, "c": 6.0}
+	golden := difficultySignals{"a": 3.2, "b": 5.0, "c": 6.0}
 	signals.Add(other)
 
 	if !reflect.DeepEqual(signals, golden) {
@@ -56,16 +56,16 @@ func TestDifficultySignals(t *testing.T) {
 }
 
 func TestSumDifficultySignals(t *testing.T) {
-	signals := DifficultySignals{
+	signals := difficultySignals{
 		"a": 0.5,
 		"b": 1.0,
 		"c": 0.6,
 	}
-	other := DifficultySignals{
+	other := difficultySignals{
 		"b": 2.0,
 		"d": 1.0,
 	}
-	golden := DifficultySignals{
+	golden := difficultySignals{
 		"a": 0.5,
 		"b": 3.0,
 		"c": 0.6,
@@ -78,8 +78,8 @@ func TestSumDifficultySignals(t *testing.T) {
 }
 
 func TestSolveDirectionsSignals(t *testing.T) {
-	result := sampleSolveDirections.Signals()
-	golden := DifficultySignals{}
+	result := sampleSolveDirections.signals()
+	golden := difficultySignals{}
 
 	for _, technique := range AllTechniques {
 		golden[technique.Name()+" Count"] = 0.0
@@ -101,12 +101,12 @@ func TestSolveDirectionsSignals(t *testing.T) {
 	}
 
 	//We're going to swap out the real difficulty signal weights for the test.
-	realWeights := DifficultySignalWeights
+	realWeights := difficultySignalWeights
 	defer func() {
-		DifficultySignalWeights = realWeights
+		difficultySignalWeights = realWeights
 	}()
 
-	DifficultySignalWeights = map[string]float64{
+	difficultySignalWeights = map[string]float64{
 		"Constant":               0.5,
 		"Guess Count":            -0.09,
 		"Necessary In Row Count": -0.07,
@@ -127,7 +127,7 @@ func TestTechniqueSignal(t *testing.T) {
 
 	result := signalTechnique(sampleSolveDirections)
 
-	golden := DifficultySignals{}
+	golden := difficultySignals{}
 
 	for _, technique := range AllTechniques {
 		golden[technique.Name()+" Count"] = 0.0
@@ -146,7 +146,7 @@ func TestTechniqueSignalPercentage(t *testing.T) {
 
 	result := signalTechniquePercentage(sampleSolveDirections)
 
-	golden := DifficultySignals{}
+	golden := difficultySignals{}
 
 	for _, technique := range AllTechniques {
 		golden[technique.Name()+" Percentage"] = 0.0
@@ -163,7 +163,7 @@ func TestTechniqueSignalPercentage(t *testing.T) {
 
 func TestSignalNumberOfSteps(t *testing.T) {
 	result := signalNumberOfSteps(sampleSolveDirections)
-	golden := DifficultySignals{
+	golden := difficultySignals{
 		"Number of Steps": 4.0,
 	}
 	if !reflect.DeepEqual(result, golden) {
@@ -173,7 +173,7 @@ func TestSignalNumberOfSteps(t *testing.T) {
 
 func TestSignalPercentageFillSteps(t *testing.T) {
 	result := signalPercentageFilledSteps(sampleSolveDirections)
-	golden := DifficultySignals{
+	golden := difficultySignals{
 		"Percentage Fill Steps": 0.75,
 	}
 	if !reflect.DeepEqual(result, golden) {
@@ -183,7 +183,7 @@ func TestSignalPercentageFillSteps(t *testing.T) {
 
 func TestSignalNumberUnfilled(t *testing.T) {
 	result := signalNumberUnfilled(sampleSolveDirections)
-	golden := DifficultySignals{
+	golden := difficultySignals{
 		"Number Unfilled Cells": 3.0,
 	}
 	if !reflect.DeepEqual(result, golden) {
@@ -194,7 +194,7 @@ func TestSignalNumberUnfilled(t *testing.T) {
 
 func TestSignalStepsUntilNonFill(t *testing.T) {
 	result := signalStepsUntilNonFill(sampleSolveDirections)
-	golden := DifficultySignals{
+	golden := difficultySignals{
 		"Steps Until Nonfill": 2.0,
 	}
 	if !reflect.DeepEqual(result, golden) {

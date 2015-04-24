@@ -10,20 +10,20 @@ import (
 	"strings"
 )
 
-type DifficultySignals map[string]float64
+type difficultySignals map[string]float64
 
 //A difficulty signal generator can return more than one difficutly signal, so it doesn't just return float64
 //Each signal generator should always return a map with the SAME keys--so if you've called it once you know what the
 //next calls will have as keys.
-type DifficultySignalGenerator func(directions SolveDirections) DifficultySignals
+type difficultySignalGenerator func(directions SolveDirections) difficultySignals
 
 const _DIFFICULTY_WEIGHT_FILENAME = "difficulties.csv"
 
-var DifficultySignalGenerators []DifficultySignalGenerator
-var DifficultySignalWeights map[string]float64
+var difficultySignalGenerators []difficultySignalGenerator
+var difficultySignalWeights map[string]float64
 
 func init() {
-	DifficultySignalGenerators = []DifficultySignalGenerator{
+	difficultySignalGenerators = []difficultySignalGenerator{
 		signalTechnique,
 		signalNumberOfSteps,
 		signalTechniquePercentage,
@@ -72,7 +72,7 @@ func loadDifficultyWeights(fileName string) bool {
 	}
 
 	//Load up the weights into a map.
-	DifficultySignalWeights = make(map[string]float64)
+	difficultySignalWeights = make(map[string]float64)
 	for i, record := range records {
 		if len(record) != 2 {
 			log.Fatalln("Record in weights csv wasn't right size: ", i, record)
@@ -81,7 +81,7 @@ func loadDifficultyWeights(fileName string) bool {
 		if err != nil {
 			log.Fatalln("Record in weights had an invalid float: ", i, record, err)
 		}
-		DifficultySignalWeights[record[0]] = theFloat
+		difficultySignalWeights[record[0]] = theFloat
 	}
 
 	return true
@@ -108,7 +108,7 @@ func (self SolveDirections) Stats() []string {
 
 	result = append(result, divider)
 	//TODO: we shouldn't even include this... it's not meaningful to report the difficulty of a single solve.
-	result = append(result, fmt.Sprintf("Difficulty : %f", self.Signals().Difficulty()))
+	result = append(result, fmt.Sprintf("Difficulty : %f", self.signals().Difficulty()))
 	result = append(result, divider)
 	result = append(result, fmt.Sprintf("Step count: %d", len(self)))
 	result = append(result, divider)
@@ -195,9 +195,9 @@ func (self SolveDirections) Walkthrough(grid *Grid) string {
 
 //Because of the contract of a DifficultySignalGenerator (that it always returns the same keys), as long as DifficultySignalGenerators stays constant
 //it's reasonable for callers to assume that one call to Signals() will return all of the string keys you'll see any time you call Signals()
-func (self SolveDirections) Signals() DifficultySignals {
-	result := DifficultySignals{}
-	for _, generator := range DifficultySignalGenerators {
+func (self SolveDirections) signals() difficultySignals {
+	result := difficultySignals{}
+	for _, generator := range difficultySignalGenerators {
 		result.Add(generator(self))
 	}
 	return result
@@ -205,7 +205,7 @@ func (self SolveDirections) Signals() DifficultySignals {
 
 //This will overwrite colliding values
 //TODO: this is confusingly named
-func (self DifficultySignals) Add(other DifficultySignals) {
+func (self difficultySignals) Add(other difficultySignals) {
 	for key, val := range other {
 		self[key] = val
 	}
@@ -214,16 +214,16 @@ func (self DifficultySignals) Add(other DifficultySignals) {
 //For keys in both, will sum them together.
 //TODO: this is confusingly named (compared to Add)
 // Do we really need both Sum and Add?
-func (self DifficultySignals) Sum(other DifficultySignals) {
+func (self difficultySignals) Sum(other difficultySignals) {
 	for key, val := range other {
 		self[key] += val
 	}
 }
 
-func (self DifficultySignals) Difficulty() float64 {
+func (self difficultySignals) Difficulty() float64 {
 	accum := 0.0
 
-	if constant, ok := DifficultySignalWeights["Constant"]; ok {
+	if constant, ok := difficultySignalWeights["Constant"]; ok {
 		accum = constant
 	} else {
 		log.Println("Didn't have the constant term loaded.")
@@ -231,7 +231,7 @@ func (self DifficultySignals) Difficulty() float64 {
 
 	for signal, val := range self {
 		//We can discard the OK because 0 is a reasonable thing to do with weights we aren't aware of.
-		weight, _ := DifficultySignalWeights[signal]
+		weight, _ := difficultySignalWeights[signal]
 
 		accum += val * weight
 	}
@@ -254,9 +254,9 @@ func (self DifficultySignals) Difficulty() float64 {
 //This technique returns a count of how many each type of technique is seen.
 //Different techniques are different "difficulties" so seeing more of a hard technique will
 //Lead to a higher overall difficulty.
-func signalTechnique(directions SolveDirections) DifficultySignals {
+func signalTechnique(directions SolveDirections) difficultySignals {
 	//Our contract is to always return every signal name, even if it's 0.0.
-	result := DifficultySignals{}
+	result := difficultySignals{}
 	for _, technique := range AllTechniques {
 		result[technique.Name()+" Count"] = 0.0
 	}
@@ -267,16 +267,16 @@ func signalTechnique(directions SolveDirections) DifficultySignals {
 }
 
 //This signal is just number of steps. More steps is PROBABLY a harder puzzle.
-func signalNumberOfSteps(directions SolveDirections) DifficultySignals {
-	return DifficultySignals{
+func signalNumberOfSteps(directions SolveDirections) difficultySignals {
+	return difficultySignals{
 		"Number of Steps": float64(len(directions)),
 	}
 }
 
 //This signal is like signalTechnique, except it returns the count divided by the TOTAL number of steps.
-func signalTechniquePercentage(directions SolveDirections) DifficultySignals {
+func signalTechniquePercentage(directions SolveDirections) difficultySignals {
 	//Our contract is to always return every signal name, even if it's 0.0.
-	result := DifficultySignals{}
+	result := difficultySignals{}
 	for _, technique := range AllTechniques {
 		result[technique.Name()+" Percentage"] = 0.0
 	}
@@ -300,7 +300,7 @@ func signalTechniquePercentage(directions SolveDirections) DifficultySignals {
 }
 
 //This signal is how many steps are filled out of all steps. Presumably harder puzzles will have more non-fill steps.
-func signalPercentageFilledSteps(directions SolveDirections) DifficultySignals {
+func signalPercentageFilledSteps(directions SolveDirections) difficultySignals {
 	numerator := 0.0
 	denominator := float64(len(directions))
 
@@ -310,13 +310,13 @@ func signalPercentageFilledSteps(directions SolveDirections) DifficultySignals {
 		}
 	}
 
-	return DifficultySignals{
+	return difficultySignals{
 		"Percentage Fill Steps": numerator / denominator,
 	}
 }
 
 //This signal is how many cells are unfilled at the beginning. Presumably harder puzzles will have fewer cells filled (although obviously this isn't necessarily true)
-func signalNumberUnfilled(directions SolveDirections) DifficultySignals {
+func signalNumberUnfilled(directions SolveDirections) difficultySignals {
 
 	//We don't have access to the underlying grid, so we'll just count how many fill steps (since each can only add one number, and no numbers are ever unfilled)
 
@@ -327,14 +327,14 @@ func signalNumberUnfilled(directions SolveDirections) DifficultySignals {
 		}
 	}
 
-	return DifficultySignals{
+	return difficultySignals{
 		"Number Unfilled Cells": count,
 	}
 }
 
 //This signal is how many steps into the solve directions before you encounter your first non-fill step. Non-fill steps are harder, so this signal
 //captures how easy the start of the puzzle is.
-func signalStepsUntilNonFill(directions SolveDirections) DifficultySignals {
+func signalStepsUntilNonFill(directions SolveDirections) difficultySignals {
 	count := 0.0
 	for _, step := range directions {
 		if !step.Technique.IsFill() {
@@ -343,7 +343,7 @@ func signalStepsUntilNonFill(directions SolveDirections) DifficultySignals {
 		count++
 	}
 
-	return DifficultySignals{
+	return difficultySignals{
 		"Steps Until Nonfill": count,
 	}
 
