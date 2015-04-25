@@ -56,6 +56,9 @@ type SolveStep struct {
 	PointerNums IntSlice
 }
 
+//IsUseful returns true if this SolveStep, when applied to the given grid, would do useful work--that is, it would
+//either fill a previously unfilled number, or cull previously un-culled possibilities. This is useful to ensure
+//HumanSolve doesn't get in a loop of applying the same useless steps.
 func (self *SolveStep) IsUseful(grid *Grid) bool {
 	//Returns true IFF calling Apply with this step and the given grid would result in some useful work. Does not modify the gri.d
 
@@ -88,6 +91,8 @@ func (self *SolveStep) IsUseful(grid *Grid) bool {
 	}
 }
 
+//Apply does the solve operation to the Grid that is defined by the configuration of the SolveStep, mutating the
+//grid and bringing it one step closer to being solved.
 func (self *SolveStep) Apply(grid *Grid) {
 	//All of this logic is substantially recreated in IsUseful.
 	if self.Technique.IsFill() {
@@ -106,6 +111,8 @@ func (self *SolveStep) Apply(grid *Grid) {
 	}
 }
 
+//Description returns a human-readable sentence describing what the SolveStep instructs the user to do, and what reasoning
+//it used to decide that this step was logically valid to apply.
 func (self *SolveStep) Description() string {
 	result := ""
 	if self.Technique.IsFill() {
