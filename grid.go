@@ -79,7 +79,7 @@ func dropGrids() {
 }
 
 func returnGrid(grid *Grid) {
-	grid.ResetOverrides()
+	grid.ResetExcludes()
 	select {
 	case gridCache <- grid:
 		//Returned it to the queue.
@@ -185,7 +185,8 @@ func (self *Grid) transpose() *Grid {
 	return result
 }
 
-func (self *Grid) ResetOverrides() {
+//ResetExcludes calls ResetExcludes on all cells in the grid. See Cell.SetExcluded for more about excludes.
+func (self *Grid) ResetExcludes() {
 	for _, cell := range self.cells {
 		cell.ResetExcludes()
 	}
