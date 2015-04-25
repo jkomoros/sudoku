@@ -10,12 +10,12 @@ import (
 	"strings"
 )
 
-type difficultySignals map[string]float64
+type DifficultySignals map[string]float64
 
 //A difficulty signal generator can return more than one difficutly signal, so it doesn't just return float64
 //Each signal generator should always return a map with the SAME keys--so if you've called it once you know what the
 //next calls will have as keys.
-type difficultySignalGenerator func(directions SolveDirections) difficultySignals
+type difficultySignalGenerator func(directions SolveDirections) DifficultySignals
 
 const _DIFFICULTY_WEIGHT_FILENAME = "difficulties.csv"
 
@@ -111,7 +111,7 @@ func (self SolveDirections) Stats() []string {
 
 	result = append(result, divider)
 	//TODO: we shouldn't even include this... it's not meaningful to report the difficulty of a single solve.
-	result = append(result, fmt.Sprintf("Difficulty : %f", self.signals().Difficulty()))
+	result = append(result, fmt.Sprintf("Difficulty : %f", self.Signals().difficulty()))
 	result = append(result, divider)
 	result = append(result, fmt.Sprintf("Step count: %d", len(self)))
 	result = append(result, divider)
@@ -203,17 +203,17 @@ func (self SolveDirections) Walkthrough(grid *Grid) string {
 
 //Because of the contract of a DifficultySignalGenerator (that it always returns the same keys), as long as DifficultySignalGenerators stays constant
 //it's reasonable for callers to assume that one call to Signals() will return all of the string keys you'll see any time you call Signals()
-func (self SolveDirections) signals() difficultySignals {
-	result := difficultySignals{}
+func (self SolveDirections) Signals() DifficultySignals {
+	result := DifficultySignals{}
 	for _, generator := range difficultySignalGenerators {
-		result.Add(generator(self))
+		result.add(generator(self))
 	}
 	return result
 }
 
 //This will overwrite colliding values
 //TODO: this is confusingly named
-func (self difficultySignals) Add(other difficultySignals) {
+func (self DifficultySignals) add(other DifficultySignals) {
 	for key, val := range other {
 		self[key] = val
 	}
@@ -222,13 +222,13 @@ func (self difficultySignals) Add(other difficultySignals) {
 //For keys in both, will sum them together.
 //TODO: this is confusingly named (compared to Add)
 // Do we really need both Sum and Add?
-func (self difficultySignals) Sum(other difficultySignals) {
+func (self DifficultySignals) sum(other DifficultySignals) {
 	for key, val := range other {
 		self[key] += val
 	}
 }
 
-func (self difficultySignals) Difficulty() float64 {
+func (self DifficultySignals) difficulty() float64 {
 	accum := 0.0
 
 	if constant, ok := difficultySignalWeights["Constant"]; ok {
@@ -262,9 +262,9 @@ func (self difficultySignals) Difficulty() float64 {
 //This technique returns a count of how many each type of technique is seen.
 //Different techniques are different "difficulties" so seeing more of a hard technique will
 //Lead to a higher overall difficulty.
-func signalTechnique(directions SolveDirections) difficultySignals {
+func signalTechnique(directions SolveDirections) DifficultySignals {
 	//Our contract is to always return every signal name, even if it's 0.0.
-	result := difficultySignals{}
+	result := DifficultySignals{}
 	for _, technique := range AllTechniques {
 		result[technique.Name()+" Count"] = 0.0
 	}
@@ -275,16 +275,16 @@ func signalTechnique(directions SolveDirections) difficultySignals {
 }
 
 //This signal is just number of steps. More steps is PROBABLY a harder puzzle.
-func signalNumberOfSteps(directions SolveDirections) difficultySignals {
-	return difficultySignals{
+func signalNumberOfSteps(directions SolveDirections) DifficultySignals {
+	return DifficultySignals{
 		"Number of Steps": float64(len(directions)),
 	}
 }
 
 //This signal is like signalTechnique, except it returns the count divided by the TOTAL number of steps.
-func signalTechniquePercentage(directions SolveDirections) difficultySignals {
+func signalTechniquePercentage(directions SolveDirections) DifficultySignals {
 	//Our contract is to always return every signal name, even if it's 0.0.
-	result := difficultySignals{}
+	result := DifficultySignals{}
 	for _, technique := range AllTechniques {
 		result[technique.Name()+" Percentage"] = 0.0
 	}
@@ -308,7 +308,7 @@ func signalTechniquePercentage(directions SolveDirections) difficultySignals {
 }
 
 //This signal is how many steps are filled out of all steps. Presumably harder puzzles will have more non-fill steps.
-func signalPercentageFilledSteps(directions SolveDirections) difficultySignals {
+func signalPercentageFilledSteps(directions SolveDirections) DifficultySignals {
 	numerator := 0.0
 	denominator := float64(len(directions))
 
@@ -318,13 +318,13 @@ func signalPercentageFilledSteps(directions SolveDirections) difficultySignals {
 		}
 	}
 
-	return difficultySignals{
+	return DifficultySignals{
 		"Percentage Fill Steps": numerator / denominator,
 	}
 }
 
 //This signal is how many cells are unfilled at the beginning. Presumably harder puzzles will have fewer cells filled (although obviously this isn't necessarily true)
-func signalNumberUnfilled(directions SolveDirections) difficultySignals {
+func signalNumberUnfilled(directions SolveDirections) DifficultySignals {
 
 	//We don't have access to the underlying grid, so we'll just count how many fill steps (since each can only add one number, and no numbers are ever unfilled)
 
@@ -335,14 +335,14 @@ func signalNumberUnfilled(directions SolveDirections) difficultySignals {
 		}
 	}
 
-	return difficultySignals{
+	return DifficultySignals{
 		"Number Unfilled Cells": count,
 	}
 }
 
 //This signal is how many steps into the solve directions before you encounter your first non-fill step. Non-fill steps are harder, so this signal
 //captures how easy the start of the puzzle is.
-func signalStepsUntilNonFill(directions SolveDirections) difficultySignals {
+func signalStepsUntilNonFill(directions SolveDirections) DifficultySignals {
 	count := 0.0
 	for _, step := range directions {
 		if !step.Technique.IsFill() {
@@ -351,7 +351,7 @@ func signalStepsUntilNonFill(directions SolveDirections) difficultySignals {
 		count++
 	}
 
-	return difficultySignals{
+	return DifficultySignals{
 		"Steps Until Nonfill": count,
 	}
 

@@ -458,7 +458,7 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 }
 
 //Difficulty returns a value between 0.0 and 1.0, representing how hard the puzzle would be
-//for a human to solve. This is an EXTREMELY expensive method (although repeated calls without
+//for a human to solve. :This is an EXTREMELY expensive method (although repeated calls without
 //mutating the grid return a cached value quickly). It human solves the puzzle, extracts signals
 //out of the solveDirections, and then passes those signals into a machine-learned model that
 //was trained on hundreds of thousands of solves by real users in order to generate a candidate difficulty.
@@ -519,19 +519,19 @@ func (self *Grid) calcluateDifficulty(accurate bool) float64 {
 //give the difficulty for THAT. This is more accurate becuase the weights were trained on such averaged signals.
 func gridDifficultyHelper(grid *Grid) float64 {
 
-	collector := make(chan difficultySignals, _NUM_SOLVES_FOR_DIFFICULTY)
+	collector := make(chan DifficultySignals, _NUM_SOLVES_FOR_DIFFICULTY)
 	//Might as well run all of the human solutions in parallel
 	for i := 0; i < _NUM_SOLVES_FOR_DIFFICULTY; i++ {
 		go func(gridToUse *Grid) {
-			collector <- gridToUse.HumanSolution().signals()
+			collector <- gridToUse.HumanSolution().Signals()
 		}(grid)
 	}
 
-	combinedSignals := difficultySignals{}
+	combinedSignals := DifficultySignals{}
 
 	for i := 0; i < _NUM_SOLVES_FOR_DIFFICULTY; i++ {
 		signals := <-collector
-		combinedSignals.Sum(signals)
+		combinedSignals.sum(signals)
 	}
 
 	//Now average all of the signal values
@@ -539,6 +539,6 @@ func gridDifficultyHelper(grid *Grid) float64 {
 		combinedSignals[key] /= _NUM_SOLVES_FOR_DIFFICULTY
 	}
 
-	return combinedSignals.Difficulty()
+	return combinedSignals.difficulty()
 
 }
