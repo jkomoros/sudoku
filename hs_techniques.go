@@ -20,18 +20,25 @@ import (
 //TODO: it feels like a pattern smell that there's only a singleton for each technique that you can't cons up on demand.
 var techniquesByName map[string]SolveTechnique
 
+//SolveTechnique is a logical technique that, when applied to a grid, returns potential SolveSteps
+//that will move the grid closer to being solved, and are based on sound logical reasoning. A stable
+//of SolveTechniques (stored in Techniques) are repeatedly applied to the Grid in HumanSolve.
 type SolveTechnique interface {
+	//Name returns the human-readable shortname of the technique.
 	Name() string
+	//Description returns a human-readable phrase that describes the logical reasoning applied in the particular step; why
+	//it is valid.
 	Description(*SolveStep) string
 	//IMPORTANT: a step should return a step IFF that step is valid AND the step would cause useful work to be done if applied.
 
-	//Find returns as many steps as it can find in the grid for that technique. This helps ensure that when we pick a step,
-	//it's more likely to be an "easy" step because there will be more of them at any time.
+	//Find returns as many steps as it can find in the grid for that technique, in a random order.
+	//HumanSolve repeatedly applies technique.Find() to identify candidates for the next step in the solution.
 	Find(*Grid) []*SolveStep
+	//IsFill returns true if the techinque's action when applied to a grid is to fill a number (as opposed to culling possbilitie).
 	IsFill() bool
-	//How likely a user would be to pick this technique. Generally inversely related to difficulty (but not perfectly).
-	//This value will be used to pick which technique to apply.
-	//The value is inversely related to how often it will be picked.
+	//HumanLikelihood is how likely a user would be to pick this technique when compared with other possible steps.
+	//Generally inversely related to difficulty (but not perfectly).
+	//This value will be used to pick which technique to apply when compared with other candidates.
 	HumanLikelihood() float64
 }
 
