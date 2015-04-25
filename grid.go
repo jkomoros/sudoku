@@ -28,6 +28,8 @@ const (
 	DIAGRAM_NUMBER     = "•"
 )
 
+//Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
+//be acted on in various ways.
 type Grid struct {
 	initalized       bool
 	cells            [DIM * DIM]Cell
@@ -86,6 +88,7 @@ func returnGrid(grid *Grid) {
 	}
 }
 
+//NewGrid creates a new, blank grid with all of its cells unfilled.
 func NewGrid() *Grid {
 	result := &Grid{}
 
@@ -114,11 +117,17 @@ func (self *Grid) queue() *finiteQueue {
 	return self.theQueue
 }
 
+//Done marks the grid as ready to be used by another consumer of it. This potentially allows
+//grids to be reused (but not currently).
 func (self *Grid) Done() {
 	//We're done using this grid; it's okay use to use it again.
 	returnGrid(self)
 }
 
+//Load takes the string data and parses it into the puzzle. The format is the 'sdk' format:
+//a `.` marks an empty cell, a number denotes a filled cell, and a newline marks a new row.
+//Load also accepts other variations on the sdk format, including one with a `|` between each cell.
+//For other sudoku formats see the sdkconverter subpackage.
 func (self *Grid) Load(data string) {
 	//All col separators are basically just to make it easier to read. Remove them.
 	data = strings.Replace(data, ALT_COL_SEP, COL_SEP, -1)
@@ -132,6 +141,8 @@ func (self *Grid) Load(data string) {
 	}
 }
 
+//LoadFromFile is a simple convenience wrapper around Load that loads a grid based on the contents
+//of the file at the given path.
 func (self *Grid) LoadFromFile(path string) bool {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -141,7 +152,7 @@ func (self *Grid) LoadFromFile(path string) bool {
 	return true
 }
 
-//Returns a new grid that has exactly the same numbers placed as the original, and same excludes.
+//Copy returns a new grid that has all of the same numbers and excludes filled in it.
 func (self *Grid) Copy() *Grid {
 	//TODO: ideally we'd have some kind of smart SparseGrid or something that we can return.
 	result := NewGrid()
