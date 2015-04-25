@@ -126,11 +126,14 @@ func (self *SolveStep) normalize() {
 	self.PointerNums.Sort()
 }
 
+//HumanWalkthrough returns a human-readable, verbose walkthrough of how a human would solve the provided puzzle, without mutating the grid. A covenience
+//wrapper around grid.HumanSolution and SolveDirections.Walkthrough.
 func (self *Grid) HumanWalkthrough() string {
 	steps := self.HumanSolution()
 	return steps.Walkthrough(self)
 }
 
+//HumanSolution returns the SolveDirections that represent how a human would solve this puzzle. It does not mutate the grid.
 func (self *Grid) HumanSolution() SolveDirections {
 	clone := self.Copy()
 	defer clone.Done()
@@ -162,7 +165,8 @@ func (self *Grid) HumanSolution() SolveDirections {
  * the expensive set of techniques. But both cheap and expensive techniques are similar in that they move us
  * towards the end state.
  *
- * For simplicity, we'll just show paths like this as a single line, even though realistically they could diverge arbitrarily.
+ * For simplicity, we'll just show paths like this as a single line, even though realistically they could diverge arbitrarily,
+ * before converging on the end state.
  *
  * This all changes when you introduce branching, because at a branch point you could have chosen the wrong path
  * and at some point down that path you will discover an invalidity, which tells you you chose wrong, and
@@ -170,10 +174,10 @@ func (self *Grid) HumanSolution() SolveDirections {
  *
  * Let's explore a puzzle that needs one branch point.
  *
- * We explore with normal techniques until we run into a point where none of hte normal techinques work.
+ * We explore with normal techniques until we run into a point where none of the normal techinques work.
  * This is a DIRE point, and in some cases we might just give up. But we have one last thing to try:
  * branching.
- * We then run the guess technique, which proposes multiple guess steps (big O's) that we could take.
+ * We then run the guess technique, which proposes multiple guess steps (big O's, in this diagram) that we could take.
  *
  * The technique will choose cells with only a small number of possibilities, to reduce the branching factor.
  *
@@ -182,7 +186,7 @@ func (self *Grid) HumanSolution() SolveDirections {
  *                  V
  *                  O O O O O ...
  *
- * We will randomly pick one, and then explore all of its possibilities.
+ * We will randomly pick one cell, and then explore all of its possibilities.
  * CRUCIALLY, at a branch point, we never have to pick another cell to explore its possibilities; for each cell,
  * if you plug in each of the possibilites and solve forward, it must result in either an invalidity (at which
  * point you try another possibility, or if they're all gone you unwind if there's a branch point above), or
@@ -257,8 +261,16 @@ func (self *Grid) HumanSolution() SolveDirections {
  * until finding one that works. This keeps humanSolveHelper pretty straighforward and keeps most of the complex guess logic out.
  */
 
-//TODO: there are lots of options to HumanSolve, like how hard to search, whether to weight based on chaining, etc. Should there be a way to configure those options?
+//HumanSolve is the workhorse of the package. It solves the puzzle much like a human would, applying complex
+//logic techniques iteratively to find a sequence of steps that a reasonable human might apply to solve the puzzle.
+//HumanSolve is an expensive operation because at each step it identifies all of the valid logic rules it could
+//apply and then selects between them based on various weightings. HumanSolve endeavors to find the most realistic
+//human solution it can by using a large number of possible techniques with realistic weights, as well as by doing things
+//like being more likely to pick a cell that is in the same row/cell/block as the last filled cell.
+//Returns nil if the puzzle does not have a single valid solution.
 func (self *Grid) HumanSolve() SolveDirections {
+
+	//TODO: there are lots of options to HumanSolve, like how hard to search, whether to weight based on chaining, etc. Should there be a way to configure those options?
 
 	//Short circuit solving if it has multiple solutions.
 	if self.HasMultipleSolutions() {
@@ -282,7 +294,7 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 	for !grid.Solved() {
 
 		if grid.Invalid() {
-			//We much have been in a branch and found an invalidity.
+			//We must have been in a branch and found an invalidity.
 			//Bail immediately.
 			return nil
 		}
