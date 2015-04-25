@@ -7,8 +7,10 @@ import (
 	"sync"
 )
 
-//TODO: Support non-squared DIMS (logic in Block() would need updating)
+//BLOCK_DIM is the height and width of each block within the grid.
 const BLOCK_DIM = 3
+
+//DIM is the dimension of the grid (the height and width)
 const DIM = BLOCK_DIM * BLOCK_DIM
 
 //Constants for important aspects of the accepted format
