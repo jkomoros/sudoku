@@ -1,3 +1,8 @@
+/*
+dokugen is a simple command line utility that exposes many of the basic functions of the
+sudoku package. It's able to generate puzzles (with difficutly) and solve provided puzzles.
+Run with -h to see help on how to use it.
+*/
 package main
 
 import (
