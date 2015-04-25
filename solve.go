@@ -5,10 +5,10 @@ import (
 	"sync"
 )
 
-//Searches for a solution to the puzzle as it currently exists without
+//Solve searches for a solution to the puzzle as it currently exists without
 //unfilling any cells. If one exists, it will fill in all cells to fit that
 //solution and return true. If there are no solutions the grid will remain
-//untouched and it will return false.
+//untouched and it will return false. If multiple solutions exist, Solve will pick one at random.
 func (self *Grid) Solve() bool {
 
 	//Special case; check if it's already solved.
@@ -26,23 +26,25 @@ func (self *Grid) Solve() bool {
 	return true
 }
 
-//Returns the total number of solutions found in the grid. Does not mutate the grid.
+//NumSolutions returns the total number of solutions found in the grid when it is solved forward
+//from this point. A valid Sudoku puzzle has only one solution. Does not mutate the grid.
 func (self *Grid) NumSolutions() int {
 	return len(self.Solutions())
 }
 
-//Returns true if the grid has at least one solution. Does not mutate the grid.
+//HasSolution returns true if the grid has at least one solution. Does not mutate the grid.
 func (self *Grid) HasSolution() bool {
 	//TODO: optimize this to bail as soon as we find a single solution.
 	return len(self.nOrFewerSolutions(1)) > 0
 }
 
+//HasMultipleSolutions returns true if the grid has more than one solution. Does not mutate the grid.
 func (self *Grid) HasMultipleSolutions() bool {
 	return len(self.nOrFewerSolutions(2)) >= 2
 }
 
-//Returns a slice of grids that represent possible solutions if you were to solve forward this grid. The current grid is not modified.
-//If there are no solutions forward from this location it will return a slice with len() 0.
+//Solutions returns a slice of grids that represent possible solutions if you were to solve forward this grid. The current grid is not modified.
+//If there are no solutions forward from this location it will return a slice with len() 0. Does not mutate the grid.
 func (self *Grid) Solutions() (solutions []*Grid) {
 	return self.nOrFewerSolutions(0)
 }
