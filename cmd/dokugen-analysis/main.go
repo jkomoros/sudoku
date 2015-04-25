@@ -1,3 +1,10 @@
+/*
+dokugen-analysis is a command that does complex analysis on solve data from users in the wild
+in order to understand how accurately the difficulties have been set in that data, and help
+train difficulties for the main sudoku package based on that real world solve data. It's not
+particularly useful if you don't have your own database to plug into with hundreds of thousands
+of solve records.
+*/
 package main
 
 import (
