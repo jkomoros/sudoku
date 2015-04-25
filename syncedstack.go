@@ -7,10 +7,10 @@ import (
 type instructionType int
 
 const (
-	INSERT = iota
-	GET
-	DECREMENT_ACTIVE
-	DISPOSE
+	_INSERT instructionType = iota
+	_GET
+	_DECREMENT_ACTIVE
+	_DISPOSE
 )
 
 type instruction struct {
@@ -69,7 +69,7 @@ func (self *syncedStack) Dispose() {
 	if self.closed {
 		return
 	}
-	self.instructions <- instruction{nil, DISPOSE, nil, 0.0}
+	self.instructions <- instruction{nil, _DISPOSE, nil, 0.0}
 	//Purposefully don't block.
 }
 
@@ -124,7 +124,7 @@ func (self *chanSyncedStack) workLoop() {
 }
 
 func (self *chanSyncedStack) processInstruction(instruction instruction) {
-	if instruction.instructionType == DISPOSE {
+	if instruction.instructionType == _DISPOSE {
 		self.doDispose()
 	} else {
 		self.syncedStack.processInstruction(instruction)
@@ -133,16 +133,16 @@ func (self *chanSyncedStack) processInstruction(instruction instruction) {
 
 func (self *syncedStack) processInstruction(instruction instruction) {
 	switch instruction.instructionType {
-	case INSERT:
+	case _INSERT:
 		self.doInsert(instruction.item)
 		instruction.result <- nil
-	case GET:
+	case _GET:
 		wrappedItem, previous := self.doSelect(instruction.probability)
 		instruction.result <- self.doExtract(wrappedItem, previous)
-	case DECREMENT_ACTIVE:
+	case _DECREMENT_ACTIVE:
 		self.doDecrementActive()
 		instruction.result <- nil
-	case DISPOSE:
+	case _DISPOSE:
 		//disposes don't have a channel result.
 		self.doDispose()
 	}
@@ -161,7 +161,7 @@ func (self *syncedStack) ItemDone() {
 		return
 	}
 	result := make(chan interface{})
-	self.instructions <- instruction{result, DECREMENT_ACTIVE, nil, 0.0}
+	self.instructions <- instruction{result, _DECREMENT_ACTIVE, nil, 0.0}
 	<-result
 	return
 }
@@ -171,7 +171,7 @@ func (self *syncedStack) Insert(item interface{}) {
 		return
 	}
 	result := make(chan interface{})
-	self.instructions <- instruction{result, INSERT, item, 0.0}
+	self.instructions <- instruction{result, _INSERT, item, 0.0}
 	<-result
 	return
 }
@@ -197,7 +197,7 @@ func (self *syncedStack) Get(probability float32) interface{} {
 	}
 	//Working from the back, will take each item with probability probability, else move to the next item in the stack.
 	result := make(chan interface{})
-	self.instructions <- instruction{result, GET, nil, probability}
+	self.instructions <- instruction{result, _GET, nil, probability}
 	return <-result
 }
 
