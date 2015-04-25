@@ -10,6 +10,9 @@ import (
 	"strings"
 )
 
+//DifficultySignals is a collection of names to float64 values, representing the various signals
+//extracted from a SolveDirections, and used for the Difficulty calculation.
+//Generally not useful to package users.
 type DifficultySignals map[string]float64
 
 //A difficulty signal generator can return more than one difficutly signal, so it doesn't just return float64
@@ -201,9 +204,10 @@ func (self SolveDirections) Walkthrough(grid *Grid) string {
 	return intro + strings.Join(results, DIVIDER) + DIVIDER + "Now the puzzle is solved."
 }
 
-//Because of the contract of a DifficultySignalGenerator (that it always returns the same keys), as long as DifficultySignalGenerators stays constant
-//it's reasonable for callers to assume that one call to Signals() will return all of the string keys you'll see any time you call Signals()
+//Signals returns the DifficultySignals for this set of SolveDirections.
 func (self SolveDirections) Signals() DifficultySignals {
+	//Because of the contract of a DifficultySignalGenerator (that it always returns the same keys), as long as DifficultySignalGenerators stays constant
+	//it's reasonable for callers to assume that one call to Signals() will return all of the string keys you'll see any time you call Signals()
 	result := DifficultySignals{}
 	for _, generator := range difficultySignalGenerators {
 		result.add(generator(self))
