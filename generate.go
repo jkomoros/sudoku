@@ -4,9 +4,9 @@ import (
 	"math/rand"
 )
 
-//Fill will find a random filling of the puzzle that is valid. If it cannot find one,
-// it will return False and leave the grid as it found it. Generally you would only want to call this on
-//grids that have more than one solution (e.g. a fully blank grid)
+//Fill will find a random filling of the puzzle such that every cell is filled and no cells conflict with their neighbors. If it cannot find one,
+// it will return false and leave the grid as it found it. Generally you would only want to call this on
+//grids that have more than one solution (e.g. a fully blank grid). Fill provides a good starting point for generated puzzles.
 func (self *Grid) Fill() bool {
 
 	solutions := self.nOrFewerSolutions(1)
@@ -19,6 +19,16 @@ func (self *Grid) Fill() bool {
 	return false
 }
 
+//GenerateGrid returns a new sudoku puzzle with a single unique solution and many of its cells unfilled--a
+//puzzle that is appropriate (and hopefully fun) for humans to solve. GenerateGrid first finds a random
+//full filling of the grid, then iteratively removes cells until just before the grid begins having
+//multiple solutions. The result is a grid that has a single valid solution but many of its cells
+//unfilled. symmetrty and symmetryType control the aesthetics of the generated grid. symmetryPercentage
+//controls roughly what percentage of cells with have a filled partner across the provided plane of
+//symmetry. SYMMETRY_VERTICAl, 0.7 give reasonable results that feel balanced but not perfectly symmetrical.
+//GenerateGrid doesn't currently give any way to define the desired difficulty; the best option is to
+//repeatedly generate puzzles until you find one that matches your desired difficulty. cmd/dokugen
+//applies this technique.
 func GenerateGrid(symmetry SymmetryType, symmetryPercentage float64) *Grid {
 	grid := NewGrid()
 	//Do a random fill of the grid
