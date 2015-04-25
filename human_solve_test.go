@@ -159,7 +159,7 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 		nil,
 	}
 	possibilities := []*SolveStep{
-		&SolveStep{
+		{
 			nil,
 			cellRefsToCells([]cellRef{
 				{1, 0},
@@ -168,7 +168,7 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 			nil,
 			nil,
 		},
-		&SolveStep{
+		{
 			nil,
 			cellRefsToCells([]cellRef{
 				{2, 2},
@@ -177,7 +177,7 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 			nil,
 			nil,
 		},
-		&SolveStep{
+		{
 			nil,
 			cellRefsToCells([]cellRef{
 				{7, 7},

@@ -447,7 +447,7 @@ func (self *Grid) Diagram() string {
 		tempRows = self.Cell(r, 0).diagramRows()
 		for c := 1; c < DIM; c++ {
 			cellRows := self.Cell(r, c).diagramRows()
-			for i, _ := range tempRows {
+			for i := range tempRows {
 				tempRows[i] += cellRows[i]
 				//Are we at a block boundary?
 				if c%BLOCK_DIM == BLOCK_DIM-1 && c != DIM-1 {

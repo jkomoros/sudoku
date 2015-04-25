@@ -544,7 +544,7 @@ func calculateRelativeDifficulty() []*puzzle {
 	puzzleIndexFromID := make(map[int]int)
 
 	counter := 0
-	for key, _ := range collectionByPuzzle {
+	for key := range collectionByPuzzle {
 		puzzleIDFromIndex[counter] = key
 		puzzleIndexFromID[key] = counter
 		counter++
@@ -571,7 +571,7 @@ func calculateRelativeDifficulty() []*puzzle {
 	//Sort the order of the seen difficulties, so we can print out stats in a stable order.
 	seenDifficultiesInOrder := make([]int, len(seenDifficulties))
 	counter = 0
-	for key, _ := range seenDifficulties {
+	for key := range seenDifficulties {
 		seenDifficultiesInOrder[counter] = key
 		counter++
 	}
@@ -657,7 +657,7 @@ func calculateRelativeDifficulty() []*puzzle {
 
 			//Build the intersection.
 			var intersection []*userSolvesCollection
-			for collection, _ := range pMap {
+			for collection := range pMap {
 				if _, ok := qMap[collection]; ok {
 					intersection = append(intersection, collection)
 				}
@@ -870,7 +870,7 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 		}
 
 		//Convert each technique to an average by dividing by the number of different solves
-		for i, _ := range solveStats {
+		for i := range solveStats {
 			solveStats[i] /= float64(numSolvesToAverage)
 		}
 
@@ -911,7 +911,7 @@ func removeZeroedColumns(stats [][]float64, safeIndexes []int) (newStats [][]flo
 	}
 	indexesToKeep := make([]int, len(nonZeroColumns))
 	i := 0
-	for key, _ := range nonZeroColumns {
+	for key := range nonZeroColumns {
 		indexesToKeep[i] = key
 		i++
 	}
@@ -989,7 +989,7 @@ func allSignalNames() []string {
 		signals := sudoku.SolveDirections{}.Signals()
 		var signalNames []string
 
-		for name, _ := range signals {
+		for name := range signals {
 			signalNames = append(signalNames, name)
 		}
 		sort.Strings(signalNames)

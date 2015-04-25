@@ -535,7 +535,7 @@ func gridDifficultyHelper(grid *Grid) float64 {
 	}
 
 	//Now average all of the signal values
-	for key, _ := range combinedSignals {
+	for key := range combinedSignals {
 		combinedSignals[key] /= _NUM_SOLVES_FOR_DIFFICULTY
 	}
 

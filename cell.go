@@ -330,7 +330,7 @@ func (self *Cell) Neighbors() CellSlice {
 		}
 		self.neighbors = make([]*Cell, len(neighborsMap))
 		i := 0
-		for cell, _ := range neighborsMap {
+		for cell := range neighborsMap {
 			self.neighbors[i] = cell
 			i++
 		}

@@ -146,7 +146,7 @@ func (self CellSlice) PossibilitiesUnion() IntSlice {
 	result := make(IntSlice, len(set))
 
 	i := 0
-	for possibility, _ := range set {
+	for possibility := range set {
 		result[i] = possibility
 		i++
 	}
@@ -383,7 +383,7 @@ func (self CellSlice) sameAsRefs(refs []cellRef) bool {
 		return false
 	}
 
-	for item, _ := range cellSet {
+	for item := range cellSet {
 		if _, ok := refSet[item]; !ok {
 			return false
 		}

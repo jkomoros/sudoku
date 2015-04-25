@@ -304,7 +304,7 @@ func signalTechniquePercentage(directions SolveDirections) DifficultySignals {
 	}
 
 	//Now normalize all of them
-	for name, _ := range result {
+	for name := range result {
 		result[name] /= float64(count)
 	}
 

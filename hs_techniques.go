@@ -407,7 +407,7 @@ func subsetIndexes(len int, size int) [][]int {
 	//returns an array of slices of size size that give you all of the subsets of a list of length len
 	result := make([][]int, 0)
 	counters := make([]int, size)
-	for i, _ := range counters {
+	for i := range counters {
 		counters[i] = i
 	}
 	for {
