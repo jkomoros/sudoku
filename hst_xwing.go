@@ -61,7 +61,7 @@ func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
 		//i is zero indexed right now
 		i++
 
-		var majorGroups []CellList
+		var majorGroups []CellSlice
 
 		for groupIndex := 0; groupIndex < DIM; groupIndex++ {
 			group := getter(groupIndex)
@@ -80,9 +80,9 @@ func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
 
 		//Now look at each pair of rows and see if their numbers line up.
 		for _, subsets := range subsetIndexes(len(majorGroups), 2) {
-			var targetCells CellList
+			var targetCells CellSlice
 
-			currentGroups := []CellList{majorGroups[subsets[0]], majorGroups[subsets[1]]}
+			currentGroups := []CellSlice{majorGroups[subsets[0]], majorGroups[subsets[1]]}
 
 			//Are the possibilities in each row in the same column as the one above?
 			//We need to do this differently depending on if we're row or col.

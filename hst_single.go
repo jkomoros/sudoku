@@ -55,7 +55,7 @@ func (self *obviousInCollectionTechnique) Find(grid *Grid) []*SolveStep {
 	return obviousInCollection(grid, self, self.getter(grid))
 }
 
-func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellList) []*SolveStep {
+func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice) []*SolveStep {
 	indexes := rand.Perm(DIM)
 	var results []*SolveStep
 	for _, index := range indexes {
@@ -158,7 +158,7 @@ func (self *hiddenSingleTechnique) Find(grid *Grid) []*SolveStep {
 	return necessaryInCollection(grid, self, self.getter(grid))
 }
 
-func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellList) []*SolveStep {
+func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice) []*SolveStep {
 	//This will be a random item
 	indexes := rand.Perm(DIM)
 

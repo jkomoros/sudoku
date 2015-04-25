@@ -30,7 +30,7 @@ type Cell struct {
 	Row         int
 	Col         int
 	Block       int
-	neighbors   CellList
+	neighbors   CellSlice
 	impossibles [DIM]int
 	excluded    [DIM]bool
 }
@@ -301,9 +301,9 @@ func (self *Cell) SymmetricalPartner(symmetry SymmetryType) *Cell {
 	return nil
 }
 
-//Neighbors returns a CellList of all of the cell's neighbors--the other cells in its row, column, and block.
+//Neighbors returns a CellSlice of all of the cell's neighbors--the other cells in its row, column, and block.
 //The set of neighbors is the set of cells that this cell's number must not conflict with.
-func (self *Cell) Neighbors() CellList {
+func (self *Cell) Neighbors() CellSlice {
 	if self.grid == nil || !self.grid.initalized {
 		return nil
 	}

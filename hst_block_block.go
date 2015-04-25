@@ -21,7 +21,7 @@ func (self *blockBlockInteractionTechnique) Find(grid *Grid) []*SolveStep {
 	pairs := pairwiseBlocks(grid)
 
 	//We're going to be looking at a lot of blocks again and again, so might as well cache this.
-	unfilledCellsForBlock := make([]CellList, DIM)
+	unfilledCellsForBlock := make([]CellSlice, DIM)
 	filledNumsForBlock := make([]IntSlice, DIM)
 	for i := 0; i < DIM; i++ {
 		unfilledCellsForBlock[i] = grid.Block(i).FilterByHasPossibilities()
@@ -76,7 +76,7 @@ func (self *blockBlockInteractionTechnique) Find(grid *Grid) []*SolveStep {
 				continue
 			}
 
-			var targetCells CellList
+			var targetCells CellSlice
 
 			if majorAxisIsRow {
 				targetCells = grid.Row(blockOneIndexes[0])

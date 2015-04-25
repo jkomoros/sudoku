@@ -44,7 +44,7 @@ func (self *nakedSubsetTechnique) Find(grid *Grid) []*SolveStep {
 	return nakedSubset(grid, self, self.k, self.getter(grid))
 }
 
-func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) []*SolveStep {
+func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellSlice) []*SolveStep {
 	//NOTE: very similar implemenation in hiddenSubset.
 	//TODO: randomize order we visit things.
 	var results []*SolveStep
@@ -70,7 +70,7 @@ func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter f
 	return results
 }
 
-func subsetCellsWithNPossibilities(k int, inputCells CellList) []CellList {
+func subsetCellsWithNPossibilities(k int, inputCells CellSlice) []CellSlice {
 	//Given a list of cells (often a row, col, or block) and a target group size K,
 	//returns a list of groups of cells of size K where the union of each group's possibility list
 	//is size K.
@@ -80,7 +80,7 @@ func subsetCellsWithNPossibilities(k int, inputCells CellList) []CellList {
 	//First, cull any cells with no possibilities to help minimize n
 	cells := inputCells.FilterByHasPossibilities()
 
-	var results []CellList
+	var results []CellSlice
 
 	for _, indexes := range subsetIndexes(len(cells), k) {
 		//Build up set of all possibilties in this subset.

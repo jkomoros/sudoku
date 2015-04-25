@@ -44,7 +44,7 @@ func (self *hiddenSubsetTechnique) Find(grid *Grid) []*SolveStep {
 	return hiddenSubset(grid, self, self.k, self.getter(grid))
 }
 
-func hiddenSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellList) []*SolveStep {
+func hiddenSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellSlice) []*SolveStep {
 	//NOTE: very similar implemenation in nakedSubset.
 	var results []*SolveStep
 	for _, i := range rand.Perm(DIM) {
@@ -72,7 +72,7 @@ func hiddenSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter 
 }
 
 //TODO: come up with a better name for this HiddenSubset technique helper method
-func subsetCellsWithNUniquePossibilities(k int, inputCells CellList) ([]CellList, []IntSlice) {
+func subsetCellsWithNUniquePossibilities(k int, inputCells CellSlice) ([]CellSlice, []IntSlice) {
 	//Given a list of cells (often a row, col, or block) and a target group size K,
 	//returns a list of groups of cells of size K where all of the cells have K
 	//candidates that don't appear anywhere else in the group.
@@ -82,7 +82,7 @@ func subsetCellsWithNUniquePossibilities(k int, inputCells CellList) ([]CellList
 	//First, cull any cells with no possibilities to help minimize n
 	cells := inputCells.FilterByHasPossibilities()
 
-	var cellResults []CellList
+	var cellResults []CellSlice
 	var intResults []IntSlice
 
 	for _, indexes := range subsetIndexes(len(cells), k) {

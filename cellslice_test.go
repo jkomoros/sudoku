@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-func TestBasicCellList(t *testing.T) {
+func TestBasicCellSlice(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
 	grid.Load(SOLVED_TEST_GRID)
-	row := CellList(grid.Row(2))
+	row := CellSlice(grid.Row(2))
 	if !row.SameRow() {
 		t.Log("The items of a row were not all of the same row.")
 		t.Fail()
@@ -30,7 +30,7 @@ func TestBasicCellList(t *testing.T) {
 		t.Error("sameAsRefs didn't match values for row 2")
 	}
 
-	col := CellList(grid.Col(2))
+	col := CellSlice(grid.Col(2))
 	if !col.SameCol() {
 		t.Log("The items in the col were not int he same col.")
 		t.Fail()
@@ -41,7 +41,7 @@ func TestBasicCellList(t *testing.T) {
 		t.Fail()
 	}
 
-	block := CellList(grid.Block(2))
+	block := CellSlice(grid.Block(2))
 	if !block.SameBlock() {
 		t.Log("The items in the block were not int he same block.")
 		t.Fail()
@@ -89,7 +89,7 @@ func TestBasicCellList(t *testing.T) {
 		t.Fail()
 	}
 
-	unsortedList := CellList{grid.Cell(0, 1), grid.Cell(1, 2), grid.Cell(0, 0)}
+	unsortedList := CellSlice{grid.Cell(0, 1), grid.Cell(1, 2), grid.Cell(0, 0)}
 	unsortedList.Sort()
 	if unsortedList[0].Row != 0 || unsortedList[0].Col != 0 ||
 		unsortedList[1].Row != 0 || unsortedList[1].Col != 1 ||
@@ -207,8 +207,8 @@ func TestChainDissimilarity(t *testing.T) {
 		if !test.equivalentToPrevious {
 			equivalenceGroup++
 		}
-		var listOne CellList
-		var listTwo CellList
+		var listOne CellSlice
+		var listTwo CellSlice
 		for _, ref := range test.one {
 			listOne = append(listOne, ref.Cell(grid))
 		}

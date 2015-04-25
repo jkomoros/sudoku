@@ -89,7 +89,7 @@ func TestStepsDescription(t *testing.T) {
 	steps := SolveDirections{
 		&SolveStep{
 			Techniques[3],
-			CellList{
+			CellSlice{
 				grid.Cell(0, 0),
 			},
 			IntSlice{1},
@@ -98,12 +98,12 @@ func TestStepsDescription(t *testing.T) {
 		},
 		&SolveStep{
 			Techniques[8],
-			CellList{
+			CellSlice{
 				grid.Cell(1, 0),
 				grid.Cell(1, 1),
 			},
 			IntSlice{1, 2},
-			CellList{
+			CellSlice{
 				grid.Cell(1, 3),
 				grid.Cell(1, 4),
 			},
@@ -111,7 +111,7 @@ func TestStepsDescription(t *testing.T) {
 		},
 		&SolveStep{
 			Techniques[3],
-			CellList{
+			CellSlice{
 				grid.Cell(2, 0),
 			},
 			IntSlice{2},
@@ -137,8 +137,8 @@ func TestStepsDescription(t *testing.T) {
 }
 
 //TODO: this is useful. Should we use this in other tests?
-func cellRefsToCells(refs []cellRef, grid *Grid) CellList {
-	var result CellList
+func cellRefsToCells(refs []cellRef, grid *Grid) CellSlice {
+	var result CellSlice
 	for _, ref := range refs {
 		result = append(result, ref.Cell(grid))
 	}

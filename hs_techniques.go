@@ -372,25 +372,25 @@ func (self *basicSolveTechnique) difficultyHelper(baseDifficulty float64) float6
 	return groupMultiplier * fillMultiplier * math.Pow(baseDifficulty, float64(self.k))
 }
 
-func (self *basicSolveTechnique) getter(grid *Grid) func(int) CellList {
+func (self *basicSolveTechnique) getter(grid *Grid) func(int) CellSlice {
 	switch self.groupType {
 	case _GROUP_ROW:
-		return func(i int) CellList {
+		return func(i int) CellSlice {
 			return grid.Row(i)
 		}
 	case _GROUP_COL:
-		return func(i int) CellList {
+		return func(i int) CellSlice {
 			return grid.Col(i)
 		}
 	case _GROUP_BLOCK:
-		return func(i int) CellList {
+		return func(i int) CellSlice {
 			return grid.Block(i)
 		}
 	default:
 		//This should never happen in normal execution--the rare techniques where it doesn't work should never call getter.
 		log.Println("Asked for a getter for a function with GROUP_NONE")
 		//Return a shell of  a function just to not trip up things downstream.
-		return func(i int) CellList {
+		return func(i int) CellSlice {
 			return nil
 		}
 	}
