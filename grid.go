@@ -192,6 +192,7 @@ func (self *Grid) ResetExcludes() {
 	}
 }
 
+//Row returns a CellList containing all of the cells in the given row (0 indexed), in order from left to right.
 func (self *Grid) Row(index int) CellList {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Row: ", index)
@@ -209,6 +210,7 @@ func (self *Grid) Row(index int) CellList {
 	return result
 }
 
+//Col returns a CellList containing all of the cells in the given column (0 indexed), in order from top to bottom.
 func (self *Grid) Col(index int) CellList {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Col: ", index)
@@ -227,6 +229,7 @@ func (self *Grid) Col(index int) CellList {
 	return result
 }
 
+//Block returns a CellList containing all of the cells in the given block (0 indexed), in order from left to right, top to bottom.
 func (self *Grid) Block(index int) CellList {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Block: ", index)
@@ -275,6 +278,7 @@ func (self *Grid) blockHasNeighbors(index int) (top bool, right bool, bottom boo
 	return
 }
 
+//Cell returns a reference to a specific cell (zero-indexed) in the grid.
 func (self *Grid) Cell(row int, col int) *Cell {
 	index := row*DIM + col
 	if index >= DIM*DIM || index < 0 {
@@ -305,6 +309,7 @@ func (self *Grid) cellList(rowOne int, colOne int, rowTwo int, colTwo int) CellL
 	return CellList(result)
 }
 
+//Solved returns true if all cells are filled without violating any constraints; that is, the puzzle is solved.
 func (self *Grid) Solved() bool {
 	//TODO: use numFilledCells here.
 	if self.numFilledCells != len(self.cells) {
@@ -321,9 +326,12 @@ func (self *Grid) cellsInvalid() bool {
 	return false
 }
 
-//Grid will never be invalid based on moves made by the solver; it will detect times that
-//someone called SetNumber with an impossible number after the fact, though.
+//Invalid returns true if any numbers are set in the grid that conflict with numbers set in neighborhing cells;
+//when a valid solution cannot be arrived at by continuing to fill additional cells.
 func (self *Grid) Invalid() bool {
+	//Grid will never be invalid based on moves made by the solver; it will detect times that
+	//someone called SetNumber with an impossible number after the fact, though.
+
 	if self.cellsInvalid() {
 		return true
 	}
@@ -396,6 +404,8 @@ func (self *Grid) rank() int {
 	return len(self.cells) - self.numFilledCells
 }
 
+//DataString represents the serialized format of the grid in canonical sdk format; the output
+//is valid to pass to Grid.Load(). If you want other formats, see the sdkconverter subpackage.
 func (self *Grid) DataString() string {
 	var rows []string
 	for r := 0; r < DIM; r++ {
