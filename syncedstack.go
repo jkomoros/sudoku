@@ -25,14 +25,14 @@ type stackItem struct {
 	next *stackItem
 }
 
-type ChanSyncedStack struct {
-	*SyncedStack
+type chanSyncedStack struct {
+	*syncedStack
 	DefaultProbability float32
 	Output             chan interface{}
 	doneChan           chan bool
 }
 
-type SyncedStack struct {
+type syncedStack struct {
 	closed         bool
 	instructions   chan instruction
 	numItems       int
@@ -40,32 +40,32 @@ type SyncedStack struct {
 	firstItem      *stackItem
 }
 
-func NewChanSyncedStack(doneChan chan bool) *ChanSyncedStack {
+func newChanSyncedStack(doneChan chan bool) *chanSyncedStack {
 	//WARNING: doneChan should be a buffered channel or else you cloud get deadlock!
-	result := &ChanSyncedStack{&SyncedStack{false, make(chan instruction), 0, 0, nil}, 1.0, make(chan interface{}, 1), doneChan}
+	result := &chanSyncedStack{&syncedStack{false, make(chan instruction), 0, 0, nil}, 1.0, make(chan interface{}, 1), doneChan}
 	go result.workLoop()
 	return result
 }
 
-func NewSyncedStack() *SyncedStack {
-	stack := &SyncedStack{false, make(chan instruction), 0, 0, nil}
+func newSyncedStack() *syncedStack {
+	stack := &syncedStack{false, make(chan instruction), 0, 0, nil}
 	go stack.workLoop()
 	return stack
 }
 
-func (self *SyncedStack) Length() int {
+func (self *syncedStack) Length() int {
 	return self.numItems
 }
 
-func (self *SyncedStack) NumActiveItems() int {
+func (self *syncedStack) NumActiveItems() int {
 	return self.numActiveItems
 }
 
-func (self *SyncedStack) IsDone() bool {
+func (self *syncedStack) IsDone() bool {
 	return self.numItems == 0 && self.numActiveItems == 0
 }
 
-func (self *SyncedStack) Dispose() {
+func (self *syncedStack) Dispose() {
 	if self.closed {
 		return
 	}
@@ -73,7 +73,7 @@ func (self *SyncedStack) Dispose() {
 	//Purposefully don't block.
 }
 
-func (self *SyncedStack) workLoop() {
+func (self *syncedStack) workLoop() {
 	for {
 		instruction, ok := <-self.instructions
 		if !ok {
@@ -83,7 +83,7 @@ func (self *SyncedStack) workLoop() {
 	}
 }
 
-func (self *ChanSyncedStack) workLoop() {
+func (self *chanSyncedStack) workLoop() {
 
 	//This workloop is complicated.
 	//If we ahve an item and there's room in the Output channel, we ALWAYS want to do that.
@@ -123,15 +123,15 @@ func (self *ChanSyncedStack) workLoop() {
 	}
 }
 
-func (self *ChanSyncedStack) processInstruction(instruction instruction) {
+func (self *chanSyncedStack) processInstruction(instruction instruction) {
 	if instruction.instructionType == DISPOSE {
 		self.doDispose()
 	} else {
-		self.SyncedStack.processInstruction(instruction)
+		self.syncedStack.processInstruction(instruction)
 	}
 }
 
-func (self *SyncedStack) processInstruction(instruction instruction) {
+func (self *syncedStack) processInstruction(instruction instruction) {
 	switch instruction.instructionType {
 	case INSERT:
 		self.doInsert(instruction.item)
@@ -149,14 +149,14 @@ func (self *SyncedStack) processInstruction(instruction instruction) {
 	//Drop other instructions on the floor for now.
 }
 
-func (self *ChanSyncedStack) ItemDone() {
-	self.SyncedStack.ItemDone()
+func (self *chanSyncedStack) ItemDone() {
+	self.syncedStack.ItemDone()
 	if self.IsDone() {
 		self.Dispose()
 	}
 }
 
-func (self *SyncedStack) ItemDone() {
+func (self *syncedStack) ItemDone() {
 	if self.closed {
 		return
 	}
@@ -166,7 +166,7 @@ func (self *SyncedStack) ItemDone() {
 	return
 }
 
-func (self *SyncedStack) Insert(item interface{}) {
+func (self *syncedStack) Insert(item interface{}) {
 	if self.closed {
 		return
 	}
@@ -176,22 +176,22 @@ func (self *SyncedStack) Insert(item interface{}) {
 	return
 }
 
-func (self *ChanSyncedStack) Pop() interface{} {
+func (self *chanSyncedStack) Pop() interface{} {
 	//You must use output for a ChanSyncedStack
 	return nil
 }
 
-func (self *SyncedStack) Pop() interface{} {
+func (self *syncedStack) Pop() interface{} {
 	//Gets the last item on the stack.
 	return self.Get(1.0)
 }
 
-func (self *ChanSyncedStack) Get(probability float32) interface{} {
+func (self *chanSyncedStack) Get(probability float32) interface{} {
 	//You must use output for a ChanSyncedStack
 	return nil
 }
 
-func (self *SyncedStack) Get(probability float32) interface{} {
+func (self *syncedStack) Get(probability float32) interface{} {
 	if self.closed {
 		return nil
 	}
@@ -201,13 +201,13 @@ func (self *SyncedStack) Get(probability float32) interface{} {
 	return <-result
 }
 
-func (self *ChanSyncedStack) doDispose() {
-	self.SyncedStack.doDispose()
+func (self *chanSyncedStack) doDispose() {
+	self.syncedStack.doDispose()
 	close(self.Output)
 	self.doneChan <- true
 }
 
-func (self *SyncedStack) doDispose() {
+func (self *syncedStack) doDispose() {
 	//TODO: do we need to close out anything else here?
 	//TODO: the work loops, when they notice the channel is closed, should probably exit.
 	self.closed = true
@@ -215,21 +215,21 @@ func (self *SyncedStack) doDispose() {
 	//close(self.instructions)
 }
 
-func (self *SyncedStack) doDecrementActive() {
+func (self *syncedStack) doDecrementActive() {
 	//May only be called from workLoop.
 	if self.numActiveItems > 0 {
 		self.numActiveItems--
 	}
 }
 
-func (self *SyncedStack) doInsert(item interface{}) {
+func (self *syncedStack) doInsert(item interface{}) {
 	//May only be called from workLoop
 	wrappedItem := &stackItem{item, self.firstItem}
 	self.firstItem = wrappedItem
 	self.numItems++
 }
 
-func (self *SyncedStack) doSelect(probability float32) (item *stackItem, previous *stackItem) {
+func (self *syncedStack) doSelect(probability float32) (item *stackItem, previous *stackItem) {
 
 	var lastItem *stackItem
 	var lastLastItem *stackItem
@@ -248,7 +248,7 @@ func (self *SyncedStack) doSelect(probability float32) (item *stackItem, previou
 	return lastItem, lastLastItem
 }
 
-func (self *SyncedStack) doExtract(item *stackItem, previous *stackItem) interface{} {
+func (self *syncedStack) doExtract(item *stackItem, previous *stackItem) interface{} {
 	//may only be called from within workLoop
 	//Called when we've decided we ware going to take the item.
 	if item == nil {

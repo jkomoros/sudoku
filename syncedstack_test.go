@@ -6,7 +6,7 @@ import (
 )
 
 func TestBasicSyncedStack(t *testing.T) {
-	stack := NewSyncedStack()
+	stack := newSyncedStack()
 	if stack == nil {
 		t.Log("Didn't get a stack back.")
 		t.Fail()
@@ -107,7 +107,7 @@ func TestBasicSyncedStack(t *testing.T) {
 
 func TestChanSyncedStack(t *testing.T) {
 	doneChan := make(chan bool, 1)
-	stack := NewChanSyncedStack(doneChan)
+	stack := newChanSyncedStack(doneChan)
 	item := 1
 	secondItem := 2
 	var result interface{}
