@@ -1,3 +1,4 @@
+//Package sdkconverter provides a set of converters to and from sudoku's default sdk format.
 package sdkconverter
 
 import (
@@ -11,7 +12,10 @@ import (
  */
 
 type SudokuPuzzleConverter interface {
+	//Load loads the puzzle defined by `puzzle`, in the format tied to this partcular converter,
+	//into the provided grid.
 	Load(grid *sudoku.Grid, puzzle string)
+	//DataString returns the serialization of the provided grid in the format provided by this converter.
 	DataString(grid *sudoku.Grid) string
 }
 
@@ -22,6 +26,7 @@ type komoConverter struct {
 type sdkConverter struct {
 }
 
+//Converters is a list of the provided converters. Currently only "komo" and "sdk" (a pass-through) are provided.
 var Converters map[string]SudokuPuzzleConverter
 
 func init() {
@@ -30,6 +35,8 @@ func init() {
 	Converters["sdk"] = &sdkConverter{}
 }
 
+//ToSDK is a convenience wrapper that takes the name of a format and the puzzle data
+//and returns an sdk string.
 func ToSDK(format string, other string) (sdk string) {
 	grid := sudoku.NewGrid()
 	converter := Converters[format]
@@ -44,6 +51,8 @@ func ToSDK(format string, other string) (sdk string) {
 
 }
 
+//ToOther is a conenience wrapper that takes the name of a format and the sdk datastring
+//and returns the DataString in the other format.
 func ToOther(format string, sdk string) (other string) {
 	grid := sudoku.NewGrid()
 	converter := Converters[format]
