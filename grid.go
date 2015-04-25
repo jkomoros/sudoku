@@ -404,7 +404,7 @@ func (self *Grid) rank() int {
 	return len(self.cells) - self.numFilledCells
 }
 
-//DataString represents the serialized format of the grid in canonical sdk format; the output
+//DataString represents the serialized format of the grid (not including excludes) in canonical sdk format; the output
 //is valid to pass to Grid.Load(). If you want other formats, see the sdkconverter subpackage.
 func (self *Grid) DataString() string {
 	var rows []string
