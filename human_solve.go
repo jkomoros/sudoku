@@ -457,9 +457,18 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 	return possibilities
 }
 
-//TODO: test that the memoization works (that is, the cached value is thrown out if the grid is modified)
-//It's hard to test because self.calculateDifficulty(true) is so expensive to run.
+//Difficulty returns a value between 0.0 and 1.0, representing how hard the puzzle would be
+//for a human to solve. This is an EXTREMELY expensive method (although repeated calls without
+//mutating the grid return a cached value quickly). It human solves the puzzle, extracts signals
+//out of the solveDirections, and then passes those signals into a machine-learned model that
+//was trained on hundreds of thousands of solves by real users in order to generate a candidate difficulty.
+//It then repeats the process multiple times until the difficultly number begins to converge to
+//an average.
 func (self *Grid) Difficulty() float64 {
+
+	//TODO: test that the memoization works (that is, the cached value is thrown out if the grid is modified)
+	//It's hard to test because self.calculateDifficulty(true) is so expensive to run.
+
 	//This is so expensive and during testing we don't care if converges.
 	//So we split out the meat of the method separately.
 
