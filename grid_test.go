@@ -254,7 +254,7 @@ func TestGridCreation(t *testing.T) {
 
 	neighbors := cell.Neighbors()
 
-	if len(neighbors) != NUM_NEIGHBORS {
+	if len(neighbors) != _NUM_NEIGHBORS {
 		t.Log("We got a different number of neighbors than what we were expecting: ", len(neighbors))
 		t.Fail()
 	}

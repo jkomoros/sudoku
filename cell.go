@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const NUM_NEIGHBORS = (DIM-1)*3 - (BLOCK_DIM-1)*2
+const _NUM_NEIGHBORS = (DIM-1)*3 - (BLOCK_DIM-1)*2
 
 type SymmetryType int
 

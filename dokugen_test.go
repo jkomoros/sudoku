@@ -46,7 +46,7 @@ func TestDokugen(t *testing.T) {
 
 	target.SetNumber(num)
 
-	consumeCells(grid.queue(), NUM_NEIGHBORS, "After setting one number", t)
+	consumeCells(grid.queue(), _NUM_NEIGHBORS, "After setting one number", t)
 
 	if grid.fillSimpleCells() != 0 {
 		t.Log("We filled more than 0 cells even though there aren't any cells to obviously fill!")
