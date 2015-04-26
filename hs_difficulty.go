@@ -1,12 +1,8 @@
 package sudoku
 
 import (
-	"encoding/csv"
 	"fmt"
 	"log"
-	"os"
-	"path/filepath"
-	"strconv"
 	"strings"
 )
 
@@ -23,6 +19,11 @@ type difficultySignalGenerator func(directions SolveDirections) DifficultySignal
 const _DIFFICULTY_WEIGHT_FILENAME = "difficulties.csv"
 
 var difficultySignalGenerators []difficultySignalGenerator
+
+//These are the weights that will be used to turn a list of signals into a difficulty.
+//starting weights are set in hs_difficulty_weights.go, which is auto-generated.
+//Generate those now:
+//go:generate python util/difficulty-convert.py
 var difficultySignalWeights map[string]float64
 
 func init() {
@@ -34,60 +35,6 @@ func init() {
 		signalNumberUnfilled,
 		signalStepsUntilNonFill,
 	}
-
-	//TODO: set reasonable DifficultySignalWeights here after we have training data we feel confident in.
-	worked := false
-	difficultyFile := _DIFFICULTY_WEIGHT_FILENAME
-
-	//For now, just search upwards until we find a difficulty CSV.
-	for !worked {
-		worked = loadDifficultyWeights(difficultyFile)
-		if worked {
-			break
-		}
-		difficultyFile = "../" + difficultyFile
-		//We're just making an ever-longer ../../../ ... FILENAME, but if we absolutized it now, we couldn't easily continue
-		//prepending ../ . So just test the absFile, but still operate on difficultyFile.
-		absFile, _ := filepath.Abs(difficultyFile)
-		if absFile == "/"+_DIFFICULTY_WEIGHT_FILENAME {
-			//We're already at the top.
-			log.Println("Couldn't find a difficulty weights file.")
-			break
-		}
-	}
-}
-
-func loadDifficultyWeights(fileName string) bool {
-
-	//TODO: test that this loading works.
-
-	inputFile, err := os.Open(fileName)
-	if err != nil {
-		//This error will be common because we'll be calling into this repeatedly in init with filenames that we don't know are valid.
-		return false
-	}
-	defer inputFile.Close()
-	csvIn := csv.NewReader(inputFile)
-	records, csvErr := csvIn.ReadAll()
-	if csvErr != nil {
-		log.Println("The provided CSV could not be parsed.")
-		return false
-	}
-
-	//Load up the weights into a map.
-	difficultySignalWeights = make(map[string]float64)
-	for i, record := range records {
-		if len(record) != 2 {
-			log.Fatalln("Record in weights csv wasn't right size: ", i, record)
-		}
-		theFloat, err := strconv.ParseFloat(record[1], 64)
-		if err != nil {
-			log.Fatalln("Record in weights had an invalid float: ", i, record, err)
-		}
-		difficultySignalWeights[record[0]] = theFloat
-	}
-
-	return true
 }
 
 //Stats returns a printout of interesting statistics about the SolveDirections, including number of steps,
