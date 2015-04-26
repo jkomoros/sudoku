@@ -3,6 +3,8 @@ sudoku is a package written in go for generating and solving sudoku puzzles. Not
 
 This is my first non-trivial project written in Go. It is very much a **work in progress**, and may be rough/broken/over-engineered/non-idiomatic/slow in places. Pull requests welcome!
 
+You can find documentation at http://godoc.org/github.com/jkomoros/sudoku
+
 ##Included commands
 
 ###dokugen
