@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"log"
 	"strings"
-	"sync"
 )
 
 //BLOCK_DIM is the height and width of each block within the grid.
@@ -38,9 +37,6 @@ type Grid struct {
 	rows             [DIM]CellSlice
 	cols             [DIM]CellSlice
 	blocks           [DIM]CellSlice
-	cacheRowMutex    sync.RWMutex
-	cacheColMutex    sync.RWMutex
-	cacheBlockMutext sync.RWMutex
 	theQueue         *finiteQueue
 	numFilledCells   int
 	invalidCells     map[*Cell]bool
@@ -104,6 +100,13 @@ func NewGrid() *Grid {
 			i++
 		}
 	}
+
+	for index := 0; index < DIM; index++ {
+		result.rows[index] = result.cellSlice(index, 0, index, DIM-1)
+		result.cols[index] = result.cellSlice(0, index, DIM-1, index)
+		result.blocks[index] = result.cellSlice(result.blockExtents(index))
+	}
+
 	result.initalized = true
 	return result
 }
@@ -200,16 +203,7 @@ func (self *Grid) Row(index int) CellSlice {
 		log.Println("Invalid index passed to Row: ", index)
 		return nil
 	}
-	self.cacheRowMutex.RLock()
-	result := self.rows[index]
-	self.cacheRowMutex.RUnlock()
-	if result == nil {
-		self.cacheRowMutex.Lock()
-		self.rows[index] = self.cellSlice(index, 0, index, DIM-1)
-		result = self.rows[index]
-		self.cacheRowMutex.Unlock()
-	}
-	return result
+	return self.rows[index]
 }
 
 //Col returns a CellSlice containing all of the cells in the given column (0 indexed), in order from top to bottom.
@@ -218,17 +212,7 @@ func (self *Grid) Col(index int) CellSlice {
 		log.Println("Invalid index passed to Col: ", index)
 		return nil
 	}
-	self.cacheColMutex.RLock()
-	result := self.cols[index]
-	self.cacheColMutex.RUnlock()
-
-	if result == nil {
-		self.cacheColMutex.Lock()
-		self.cols[index] = self.cellSlice(0, index, DIM-1, index)
-		result = self.cols[index]
-		self.cacheColMutex.Unlock()
-	}
-	return result
+	return self.cols[index]
 }
 
 //Block returns a CellSlice containing all of the cells in the given block (0 indexed), in order from left to right, top to bottom.
@@ -237,19 +221,7 @@ func (self *Grid) Block(index int) CellSlice {
 		log.Println("Invalid index passed to Block: ", index)
 		return nil
 	}
-
-	self.cacheBlockMutext.RLock()
-	result := self.blocks[index]
-	self.cacheBlockMutext.RUnlock()
-
-	if result == nil {
-		topRow, topCol, bottomRow, bottomCol := self.blockExtents(index)
-		self.cacheBlockMutext.Lock()
-		self.blocks[index] = self.cellSlice(topRow, topCol, bottomRow, bottomCol)
-		result = self.blocks[index]
-		self.cacheBlockMutext.Unlock()
-	}
-	return result
+	return self.blocks[index]
 }
 
 func (self *Grid) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
