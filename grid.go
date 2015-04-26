@@ -192,8 +192,8 @@ func (self *Grid) transpose() *Grid {
 
 //ResetExcludes calls ResetExcludes on all cells in the grid. See Cell.SetExcluded for more about excludes.
 func (self *Grid) ResetExcludes() {
-	for _, cell := range self.cells {
-		cell.ResetExcludes()
+	for i := range self.cells {
+		self.cells[i].ResetExcludes()
 	}
 }
 
