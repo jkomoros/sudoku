@@ -19,6 +19,11 @@ type difficultySignalGenerator func(directions SolveDirections) DifficultySignal
 const _DIFFICULTY_WEIGHT_FILENAME = "difficulties.csv"
 
 var difficultySignalGenerators []difficultySignalGenerator
+
+//These are the weights that will be used to turn a list of signals into a difficulty.
+//starting weights are set in hs_difficulty_weights.go, which is auto-generated.
+//Generate those now:
+//go:generate python util/difficulty-convert.py
 var difficultySignalWeights map[string]float64
 
 func init() {
@@ -30,8 +35,6 @@ func init() {
 		signalNumberUnfilled,
 		signalStepsUntilNonFill,
 	}
-
-	//starting weights are set in hs_difficulty_weights.go
 }
 
 //Stats returns a printout of interesting statistics about the SolveDirections, including number of steps,
