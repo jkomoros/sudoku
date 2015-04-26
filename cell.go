@@ -1,3 +1,11 @@
+/*
+
+sudoku is a package for generating, solving, and rating the difficulty of sudoku puzzles.
+Notably, it is able to solve a puzzle like a human would, and aspires to provide
+high-quality difficulty ratings for puzzles based on a model trained on hundreds
+of thousands of solves by real users.
+
+*/
 package sudoku
 
 import (
