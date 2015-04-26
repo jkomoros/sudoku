@@ -3,16 +3,20 @@ import string
 import sys
 import os
 
-INPUT_FILE_NAME = "weka-output.txt"
+INPUT_FILE_NAME = "input.txt"
+DEFAULT_INPUT_FILE_NAME = "input.SAMPLE.txt"
 OUTPUT_FILE_NAME = "../hs_difficulty_weights.go"
 
 def convertDifficulties():
 
-	f = open(os.path.join(sys.path[0], INPUT_FILE_NAME))
-
-	if not f:
-		logging.error("Couldn't find file " + INPUT_FILE_NAME)
-		return
+	try:
+		f = open(os.path.join(sys.path[0], INPUT_FILE_NAME))
+	except IOError:
+		try:
+			f = open(os.path.join(sys.path[0], DEFAULT_INPUT_FILE_NAME))
+		except IOError:
+			logging.error("Couldn't find file at either " + INPUT_FILE_NAME + " or " + DEFAULT_INPUT_FILE_NAME)
+			return
 
 	result = {}
 
