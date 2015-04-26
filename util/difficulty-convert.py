@@ -1,22 +1,13 @@
 import logging
 import string
+import fileinput
 
-input_file_name = "input.txt"
-
-
-#input.txt should be a copy/pasted output from the Weka training.
-#yes, copy/pasted; Weka makes it really hard to export the weights in any other way.
 
 def convertDifficulties():
-	f = open(input_file_name)
 
 	result = {}
 
-	if not f:
-		logging.error("Couldn't find input.txt")
-		return
-
-	for line in f:
+	for line in fileinput.input():
 		line = string.lstrip(line)
 		if len(line) == 0:
 			continue
