@@ -7,8 +7,12 @@ cd to cmd/dokugen-analysis
 go run main.go mock_data.go -a -v -p > relativedifficulties.csv
 go run main.go mock_data.go -a -v -w -t -h relativedifficulties.csv > solves.csv
 
-Load up Weka (the JVM version), load solves.csv, switch to Classify tab, select LeastMedSq (leave defaults -S 4), make sure (num) Difficulty is showing in the drop down.
+Load up Weka (the JVM version), load solves.csv, switch to Classify tab, select SMOReg (set filterType to No normalization/standardization). Make sure Difficulty is showing in the drop down. (LeastMedSq used to work slightly better)
 
-Recently SMOReg with the filterType set to No normalization/standardization has been giving higher correlations.
+Copy/paste the output into util/input.txt . It doesn't matter exactly how much you copy paste as long as all of the numbers are there.
+
+Don't commit input.txt or any of the intermediate csvs.
+
+In root of project, run `go generate`. Test the change and then commit.
 
 
