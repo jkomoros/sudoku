@@ -43,7 +43,7 @@ def convertDifficulties():
 	print("package sudoku")
 	print("func init() {")
 
-	print("\tdifficultySignalWeights = {")
+	print("\tdifficultySignalWeights = map[string]float64{")
 
 	for key,val in result.items():
 		print("\t\t\"" + key + "\" : " + str(val) + ",")
