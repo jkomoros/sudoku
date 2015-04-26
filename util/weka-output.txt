@@ -1,4 +1,5 @@
 #input.txt should be the copy/pasted output from the Weka training log.
+#Exactly where the copy/paste starts isn't that important, as long as the key lines are included.
 #This is a sample.
 
 SMOreg
