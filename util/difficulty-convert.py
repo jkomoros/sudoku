@@ -1,13 +1,21 @@
 import logging
 import string
-import fileinput
+import sys
+import os
 
+INPUT_FILE_NAME = "weka-output.txt"
 
 def convertDifficulties():
 
+	f = open(os.path.join(sys.path[0], INPUT_FILE_NAME))
+
+	if not f:
+		logging.error("Couldn't find file " + INPUT_FILE_NAME)
+		return
+
 	result = {}
 
-	for line in fileinput.input():
+	for line in f:
 		line = string.lstrip(line)
 		if len(line) == 0:
 			continue
