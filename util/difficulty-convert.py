@@ -23,7 +23,23 @@ def convertDifficulties():
 		if line[0] != "+" and line[0] != "-":
 			#All lines we're looking for start with either + or -
 			continue
-		print line
+		negative = line[0] == "-"
+		line = string.lstrip(line[1:])
+		parts = line.split(" * ")
+		if len(parts) > 2:
+			logging.error("Skipped line " + line + " because it was not shaped the way we expected.")
+		
+		if len(parts) == 1:
+			name = "Constant"
+		else:
+			name = string.strip(parts[1])
+
+		if negative:
+			parts[0] = "-" + parts[0]
+
+		result[name] = float(parts[0])
+
+	print result
 
 
 
