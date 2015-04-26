@@ -35,9 +35,9 @@ type Cell struct {
 	grid *Grid
 	//The number if it's explicitly set. Number() will return it if it's explicitly or implicitly set.
 	number      int
-	Row         int
-	Col         int
-	Block       int
+	row         int
+	col         int
+	block       int
 	neighbors   CellSlice
 	impossibles [DIM]int
 	excluded    [DIM]bool
@@ -45,7 +45,22 @@ type Cell struct {
 
 func newCell(grid *Grid, row int, col int) Cell {
 	//TODO: we should not set the number until neighbors are initialized.
-	return Cell{grid: grid, Row: row, Col: col, Block: grid.blockForCell(row, col)}
+	return Cell{grid: grid, row: row, col: col, block: grid.blockForCell(row, col)}
+}
+
+//Row returns the cell's row in its parent grid.
+func (self *Cell) Row() int {
+	return self.row
+}
+
+//Col returns the cell's column in its parent grid.
+func (self *Cell) Col() int {
+	return self.col
+}
+
+//Block returns the cell's block in its parent grid.
+func (self *Cell) Block() int {
+	return self.block
 }
 
 //InGrid returns a reference to a cell in the provided grid that has the same row/column as this cell.
@@ -55,7 +70,7 @@ func (self *Cell) InGrid(grid *Grid) *Cell {
 	if grid == nil {
 		return nil
 	}
-	return grid.Cell(self.Row, self.Col)
+	return grid.Cell(self.Row(), self.Col())
 }
 
 func (self *Cell) load(data string) {
@@ -255,7 +270,7 @@ func (self *Cell) rank() int {
 }
 
 func (self *Cell) ref() cellRef {
-	return cellRef{self.Row, self.Col}
+	return cellRef{self.Row(), self.Col()}
 }
 
 //Sets ourselves to a random one of our possibilities.
@@ -292,15 +307,15 @@ func (self *Cell) SymmetricalPartner(symmetry SymmetryType) *Cell {
 
 	switch symmetry {
 	case SYMMETRY_BOTH:
-		if cell := self.grid.Cell(DIM-self.Row-1, DIM-self.Col-1); cell != self {
+		if cell := self.grid.Cell(DIM-self.Row()-1, DIM-self.Col()-1); cell != self {
 			return cell
 		}
 	case SYMMETRY_HORIZONTAL:
-		if cell := self.grid.Cell(DIM-self.Row-1, self.Col); cell != self {
+		if cell := self.grid.Cell(DIM-self.Row()-1, self.Col()); cell != self {
 			return cell
 		}
 	case SYMMETRY_VERTICAL:
-		if cell := self.grid.Cell(self.Row, DIM-self.Col-1); cell != self {
+		if cell := self.grid.Cell(self.Row(), DIM-self.Col()-1); cell != self {
 			return cell
 		}
 	}
@@ -318,19 +333,19 @@ func (self *Cell) Neighbors() CellSlice {
 	if self.neighbors == nil {
 		//We don't want duplicates, so we will collect in a map (used as a set) and then reduce.
 		neighborsMap := make(map[*Cell]bool)
-		for _, cell := range self.grid.Row(self.Row) {
+		for _, cell := range self.grid.Row(self.Row()) {
 			if cell == self {
 				continue
 			}
 			neighborsMap[cell] = true
 		}
-		for _, cell := range self.grid.Col(self.Col) {
+		for _, cell := range self.grid.Col(self.Col()) {
 			if cell == self {
 				continue
 			}
 			neighborsMap[cell] = true
 		}
-		for _, cell := range self.grid.Block(self.Block) {
+		for _, cell := range self.grid.Block(self.Block()) {
 			if cell == self {
 				continue
 			}
@@ -354,18 +369,18 @@ func (self *Cell) dataString() string {
 
 //String returns a debug-friendly summary of the Cell.
 func (self *Cell) String() string {
-	return "Cell[" + strconv.Itoa(self.Row) + "][" + strconv.Itoa(self.Col) + "]:" + strconv.Itoa(self.Number()) + "\n"
+	return "Cell[" + strconv.Itoa(self.Row()) + "][" + strconv.Itoa(self.Col()) + "]:" + strconv.Itoa(self.Number()) + "\n"
 }
 
 func (self *Cell) positionInBlock() (top, right, bottom, left bool) {
 	if self.grid == nil {
 		return
 	}
-	topRow, topCol, bottomRow, bottomCol := self.grid.blockExtents(self.Block)
-	top = self.Row == topRow
-	right = self.Col == bottomCol
-	bottom = self.Row == bottomRow
-	left = self.Col == topCol
+	topRow, topCol, bottomRow, bottomCol := self.grid.blockExtents(self.Block())
+	top = self.Row() == topRow
+	right = self.Col() == bottomCol
+	bottom = self.Row() == bottomRow
+	left = self.Col() == topCol
 	return
 }
 

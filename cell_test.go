@@ -134,11 +134,11 @@ func TestCellCreation(t *testing.T) {
 		t.Log("Number came back wrong")
 		t.Fail()
 	}
-	if cell.Row != 0 {
+	if cell.Row() != 0 {
 		t.Log("Row came back wrong")
 		t.Fail()
 	}
-	if cell.Col != 0 {
+	if cell.Col() != 0 {
 		t.Log("Cell came back wrong")
 		t.Fail()
 	}
@@ -229,19 +229,19 @@ func TestSymmetry(t *testing.T) {
 
 	partner := cell.SymmetricalPartner(SYMMETRY_BOTH)
 
-	if partner.Row != 5 || partner.Col != 5 {
+	if partner.Row() != 5 || partner.Col() != 5 {
 		t.Error("Got wrong symmetrical partner (both) for 3,3: ", partner)
 	}
 
 	partner = cell.SymmetricalPartner(SYMMETRY_HORIZONTAL)
 
-	if partner.Row != 5 || partner.Col != 3 {
+	if partner.Row() != 5 || partner.Col() != 3 {
 		t.Error("Got wrong symmetrical partner (horizontal) for 3,3: ", partner)
 	}
 
 	partner = cell.SymmetricalPartner(SYMMETRY_VERTICAL)
 
-	if partner.Row != 3 || partner.Col != 5 {
+	if partner.Row() != 3 || partner.Col() != 5 {
 		t.Error("Got wrong symmetrical partner (vertical) for 3,3: ", partner)
 	}
 

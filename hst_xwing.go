@@ -88,20 +88,20 @@ func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
 			//We need to do this differently depending on if we're row or col.
 			if self.groupType == _GROUP_ROW {
 				//TODO: figure out a way to factor group row and col better so we don't duplicate code like this.
-				if currentGroups[0][0].Col != currentGroups[1][0].Col || currentGroups[0][1].Col != currentGroups[1][1].Col {
+				if currentGroups[0][0].Col() != currentGroups[1][0].Col() || currentGroups[0][1].Col() != currentGroups[1][1].Col() {
 					//Nope, the cells didn't line up.
 					continue
 				}
 				//All of the cells in those two columns
-				targetCells = append(grid.Col(currentGroups[0][0].Col), grid.Col(currentGroups[0][1].Col)...)
+				targetCells = append(grid.Col(currentGroups[0][0].Col()), grid.Col(currentGroups[0][1].Col())...)
 
 			} else if self.groupType == _GROUP_COL {
-				if currentGroups[0][0].Row != currentGroups[1][0].Row || currentGroups[0][1].Row != currentGroups[1][1].Row {
+				if currentGroups[0][0].Row() != currentGroups[1][0].Row() || currentGroups[0][1].Row() != currentGroups[1][1].Row() {
 					//Nope, the cells didn't line up.
 					continue
 				}
 				//All of the cells in those two columns
-				targetCells = append(grid.Row(currentGroups[0][0].Row), grid.Row(currentGroups[0][1].Row)...)
+				targetCells = append(grid.Row(currentGroups[0][0].Row()), grid.Row(currentGroups[0][1].Row())...)
 
 			}
 

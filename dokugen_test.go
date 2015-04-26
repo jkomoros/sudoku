@@ -29,7 +29,7 @@ func TestDokugen(t *testing.T) {
 			t.Fail()
 		}
 	}
-	for _, cell := range grid.Block(target.Block) {
+	for _, cell := range grid.Block(target.Block()) {
 		if cell == target {
 			continue
 		}

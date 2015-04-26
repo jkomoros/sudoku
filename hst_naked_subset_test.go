@@ -21,7 +21,7 @@ func TestSubsetCellsWithNPossibilities(t *testing.T) {
 		t.Log("Number of subset cells did not match k: ", len(result))
 		t.Fail()
 	}
-	if result[0].Row != 6 || result[0].Col != 8 || result[1].Row != 7 || result[1].Col != 8 {
+	if result[0].Row() != 6 || result[0].Col() != 8 || result[1].Row() != 7 || result[1].Col() != 8 {
 		t.Log("Subset cells came back with wrong cells: ", result)
 		t.Fail()
 	}

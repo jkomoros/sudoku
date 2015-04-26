@@ -75,7 +75,7 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 
 	cellFromStep := step.TargetCells[0]
 
-	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
+	if cellFromStep.Col() != 3 || cellFromStep.Row() != 3 {
 		t.Log("The only legal number technique identified the wrong cell.")
 		t.Fail()
 	}
@@ -144,7 +144,7 @@ func TestNecessaryInRow(t *testing.T) {
 
 	cellFromStep := step.TargetCells[0]
 
-	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
+	if cellFromStep.Col() != 3 || cellFromStep.Row() != 3 {
 		t.Log("The necessary in row technique identified the wrong cell.")
 		t.Fail()
 	}
@@ -214,7 +214,7 @@ func TestNecessaryInCol(t *testing.T) {
 
 	cellFromStep := step.TargetCells[0]
 
-	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
+	if cellFromStep.Col() != 3 || cellFromStep.Row() != 3 {
 		t.Log("The necessary in col technique identified the wrong cell.")
 		t.Fail()
 	}
@@ -284,7 +284,7 @@ func TestNecessaryInBlock(t *testing.T) {
 
 	cellFromStep := step.TargetCells[0]
 
-	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
+	if cellFromStep.Col() != 3 || cellFromStep.Row() != 3 {
 		t.Log("The necessary in block technique identified the wrong cell.")
 		t.Fail()
 	}

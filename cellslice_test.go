@@ -58,7 +58,7 @@ func TestBasicCellSlice(t *testing.T) {
 	}
 
 	nums := row.CollectNums(func(cell *Cell) int {
-		return cell.Row
+		return cell.Row()
 	})
 
 	if !nums.Same() {
@@ -67,7 +67,7 @@ func TestBasicCellSlice(t *testing.T) {
 	}
 
 	isZeroRow := func(cell *Cell) bool {
-		return cell.Row == 0
+		return cell.Row() == 0
 	}
 
 	cells := grid.Block(0).Filter(isZeroRow)
@@ -91,9 +91,9 @@ func TestBasicCellSlice(t *testing.T) {
 
 	unsortedList := CellSlice{grid.Cell(0, 1), grid.Cell(1, 2), grid.Cell(0, 0)}
 	unsortedList.Sort()
-	if unsortedList[0].Row != 0 || unsortedList[0].Col != 0 ||
-		unsortedList[1].Row != 0 || unsortedList[1].Col != 1 ||
-		unsortedList[2].Row != 1 || unsortedList[2].Col != 2 {
+	if unsortedList[0].Row() != 0 || unsortedList[0].Col() != 0 ||
+		unsortedList[1].Row() != 0 || unsortedList[1].Col() != 1 ||
+		unsortedList[2].Row() != 1 || unsortedList[2].Col() != 2 {
 		t.Error("Cell List didn't get sorted: ", unsortedList)
 	}
 
@@ -310,7 +310,7 @@ func TestInverseSubset(t *testing.T) {
 	}
 
 	for _, cell := range subset {
-		if cell.Col == 2 || cell.Col == 4 || cell.Col == 6 {
+		if cell.Col() == 2 || cell.Col() == 4 || cell.Col() == 6 {
 			t.Error("Inverse subset included cells it shouldn't have.")
 		}
 	}

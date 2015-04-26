@@ -173,7 +173,7 @@ func (self *Grid) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, num
 
 	for i, num := range possibilities {
 		copy := self.Copy()
-		copy.Cell(cell.Row, cell.Col).SetNumber(num)
+		copy.Cell(cell.Row(), cell.Col()).SetNumber(num)
 		//As an optimization for cases where there are many solutions, we'll just continue a DFS until we barf then unroll back up.
 		//It doesn't appear to slow things down in the general case
 		if i == 0 && !isFirstRun {

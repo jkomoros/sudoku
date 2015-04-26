@@ -27,15 +27,15 @@ type CellSliceSorter struct {
 }
 
 func getRow(cell *Cell) int {
-	return cell.Row
+	return cell.Row()
 }
 
 func getCol(cell *Cell) int {
-	return cell.Col
+	return cell.Col()
 }
 
 func getBlock(cell *Cell) int {
-	return cell.Block
+	return cell.Block()
 }
 
 //SameRow returns true if all cells are in the same row.
@@ -60,7 +60,7 @@ func (self CellSlice) Row() int {
 	if len(self) == 0 {
 		return 0
 	}
-	return self[0].Row
+	return self[0].Row()
 }
 
 //Col returns the column that at least one of the cells is in. If SameCol() is false, the column
@@ -69,7 +69,7 @@ func (self CellSlice) Col() int {
 	if len(self) == 0 {
 		return 0
 	}
-	return self[0].Col
+	return self[0].Col()
 }
 
 //Block returns the row that at least one of the cells is in. If SameBlock() is false, the Block
@@ -78,7 +78,7 @@ func (self CellSlice) Block() int {
 	if len(self) == 0 {
 		return 0
 	}
-	return self[0].Block
+	return self[0].Block()
 }
 
 //AddExclude sets the given number to excluded on all cells in the set.
@@ -236,7 +236,7 @@ func (self CellSliceSorter) Less(i, j int) bool {
 	one := self.CellSlice[i]
 	two := self.CellSlice[j]
 
-	return (one.Row*DIM + one.Col) < (two.Row*DIM + two.Col)
+	return (one.Row()*DIM + one.Col()) < (two.Row()*DIM + two.Col())
 }
 
 func (self CellSliceSorter) Swap(i, j int) {
@@ -303,15 +303,15 @@ func (self CellSlice) chainDissimilarity(other CellSlice) float64 {
 	otherProportion := float64(1) / float64(len(other))
 
 	for _, cell := range self {
-		selfRow[cell.Row] += selfProportion
-		selfCol[cell.Col] += selfProportion
-		selfBlock[cell.Block] += selfProportion
+		selfRow[cell.Row()] += selfProportion
+		selfCol[cell.Col()] += selfProportion
+		selfBlock[cell.Block()] += selfProportion
 	}
 
 	for _, cell := range other {
-		otherRow[cell.Row] += otherProportion
-		otherCol[cell.Col] += otherProportion
-		otherBlock[cell.Block] += otherProportion
+		otherRow[cell.Row()] += otherProportion
+		otherCol[cell.Col()] += otherProportion
+		otherBlock[cell.Block()] += otherProportion
 	}
 
 	rowDiff := 0.0

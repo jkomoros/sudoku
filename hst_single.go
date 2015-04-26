@@ -137,12 +137,12 @@ func (self *hiddenSingleTechnique) Description(step *SolveStep) string {
 		groupName = "row"
 		otherGroupName = "column"
 		groupNum = step.TargetCells.Row()
-		otherGroupNum = strconv.Itoa(cell.Col)
+		otherGroupNum = strconv.Itoa(cell.Col())
 	case _GROUP_COL:
 		groupName = "column"
 		otherGroupName = "row"
 		groupNum = step.TargetCells.Col()
-		otherGroupNum = strconv.Itoa(cell.Row)
+		otherGroupNum = strconv.Itoa(cell.Row())
 	default:
 		groupName = "<NONE>"
 		otherGroupName = "<NONE>"

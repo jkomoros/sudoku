@@ -22,7 +22,7 @@ func TestSubsetCellsWithNUniquePossibilities(t *testing.T) {
 		t.Log("Number of subset cells did not match k: ", len(cellList))
 		t.Fail()
 	}
-	if cellList[0].Row != 4 || cellList[0].Col != 7 || cellList[1].Row != 4 || cellList[1].Col != 8 {
+	if cellList[0].Row() != 4 || cellList[0].Col() != 7 || cellList[1].Row() != 4 || cellList[1].Col() != 8 {
 		t.Log("Subset cells unique came back with wrong cells: ", cellList)
 		t.Fail()
 	}
