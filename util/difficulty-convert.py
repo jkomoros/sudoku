@@ -53,8 +53,8 @@ def convertDifficulties():
 
 	o.write("\tdifficultySignalWeights = map[string]float64{\n")
 
-	for key,val in result.items():
-		o.write("\t\t\"" + key + "\" : " + str(val) + ",\n")
+	for key in sorted(result):
+		o.write("\t\t\"" + key + "\" : " + str(result[key]) + ",\n")
 
 	o.write("\t}\n")
 	o.write("}\n")
