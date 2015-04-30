@@ -35,6 +35,7 @@ type appOptions struct {
 	RAW_SYMMETRY        string
 	SYMMETRY            sudoku.SymmetryType
 	SYMMETRY_PROPORTION float64
+	MIN_FILLED_CELLS    int
 	MIN_DIFFICULTY      float64
 	MAX_DIFFICULTY      float64
 	NO_CACHE            bool
@@ -62,6 +63,7 @@ func main() {
 	flag.BoolVar(&options.WALKTHROUGH, "w", false, "If provided, will print out a walkthrough to solve the provided puzzle.")
 	flag.StringVar(&options.RAW_SYMMETRY, "y", "vertical", "Valid values: 'none', 'both', 'horizontal', 'vertical")
 	flag.Float64Var(&options.SYMMETRY_PROPORTION, "r", 0.7, "What proportion of cells should be filled according to symmetry")
+	flag.IntVar(&options.MIN_FILLED_CELLS, "min-filled-cells", 0, "The minimum number of cells that should be filled in the generated puzzles.")
 	flag.Float64Var(&options.MIN_DIFFICULTY, "min", 0.0, "Minimum difficulty for generated puzzle")
 	flag.Float64Var(&options.MAX_DIFFICULTY, "max", 1.0, "Maximum difficulty for generated puzzle")
 	flag.BoolVar(&options.NO_CACHE, "no-cache", false, "If provided, will not vend generated puzzles from the cache of previously generated puzzles.")
@@ -114,7 +116,7 @@ func main() {
 
 		//TODO: allow the type of symmetry to be configured.
 		if options.GENERATE {
-			grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.NO_CACHE)
+			grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.MIN_FILLED_CELLS, options.NO_CACHE)
 			//TODO: factor out all of this double-printing.
 			if options.OUTPUT_CSV {
 				csvRec = append(csvRec, options.CONVERTER.DataString(grid))
@@ -199,17 +201,18 @@ func main() {
 
 }
 
-func puzzleDirectoryParts(symmetryType sudoku.SymmetryType, symmetryPercentage float64) []string {
+func puzzleDirectoryParts(symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) []string {
 	return []string{
 		STORED_PUZZLES_DIRECTORY,
 		"SYM_TYPE_" + strconv.Itoa(int(symmetryType)),
 		"SYM_PERCENTAGE_" + strconv.FormatFloat(symmetryPercentage, 'f', -1, 64),
+		"MIN_FILED_CELLS_" + strconv.Itoa(minFilledCells),
 	}
 }
 
-func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) bool {
+func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) bool {
 	//TODO: we should include a hashed version of our difficulty weights file so we don't cache ones with old weights.
-	directoryParts := puzzleDirectoryParts(symmetryType, symmetryPercentage)
+	directoryParts := puzzleDirectoryParts(symmetryType, symmetryPercentage, minFilledCells)
 
 	fileNamePart := strconv.FormatFloat(difficulty, 'f', -1, 64) + ".sdk"
 
@@ -254,9 +257,9 @@ func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.Symm
 	return true
 }
 
-func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64) *sudoku.Grid {
+func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) *sudoku.Grid {
 
-	directory := filepath.Join(puzzleDirectoryParts(symmetryType, symmetryPercentage)...)
+	directory := filepath.Join(puzzleDirectoryParts(symmetryType, symmetryPercentage, minFilledCells)...)
 
 	if files, err := ioutil.ReadDir(directory); os.IsNotExist(err) {
 		//The directory doesn't exist.
@@ -291,11 +294,11 @@ func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symm
 	return nil
 }
 
-func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, skipCache bool) *sudoku.Grid {
+func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, skipCache bool) *sudoku.Grid {
 	var result *sudoku.Grid
 
 	if !skipCache {
-		result = vendPuzzle(min, max, symmetryType, symmetryPercentage)
+		result = vendPuzzle(min, max, symmetryType, symmetryPercentage, minFilledCells)
 
 		if result != nil {
 			log.Println("Vending a puzzle from the cache.")
@@ -306,6 +309,7 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 	options := sudoku.GenerationOptions{
 		Symmetry:           symmetryType,
 		SymmetryPercentage: symmetryPercentage,
+		MinFilledCells:     minFilledCells,
 	}
 
 	//We'll have to generate one ourselves.
@@ -325,7 +329,7 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 		}
 
 		log.Println("Rejecting grid of difficulty", difficulty)
-		if storePuzzle(result, difficulty, symmetryType, symmetryPercentage) {
+		if storePuzzle(result, difficulty, symmetryType, symmetryPercentage, minFilledCells) {
 			log.Println("Stored the puzzle for future use.")
 		}
 
