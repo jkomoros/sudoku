@@ -11,6 +11,10 @@ type GenerationOptions struct {
 	//symmetry.
 	Symmetry           SymmetryType
 	SymmetryPercentage float64
+	//The minimum number of cells to leave filled in the puzzle. The generated puzzle might have
+	//more filled cells. A value of DIM * DIM - 1, for example, would return an extremely trivial
+	//puzzle.
+	MinFilledCells int
 }
 
 var defaultGenerationOptions GenerationOptions
@@ -19,6 +23,7 @@ func init() {
 	defaultGenerationOptions = GenerationOptions{
 		Symmetry:           SYMMETRY_VERTICAL,
 		SymmetryPercentage: 0.7,
+		MinFilledCells:     0,
 	}
 }
 
@@ -73,6 +78,7 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 	}
 
 	for _, cell := range cells {
+
 		num := cell.Number()
 		if num == 0 {
 			continue
@@ -89,6 +95,16 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 			if otherCell != nil {
 				otherNum = otherCell.Number()
 			}
+		}
+
+		numCellsToFillThisStep := 1
+		if otherCell != nil {
+			numCellsToFillThisStep = 2
+		}
+
+		if grid.numFilledCells-numCellsToFillThisStep < options.MinFilledCells {
+			//Doing this step would leave us with too few cells filled. Finish.
+			continue
 		}
 
 		//Unfill it.

@@ -583,6 +583,28 @@ func TestGenerate(t *testing.T) {
 	}
 }
 
+func TestGenerateMinFilledCells(t *testing.T) {
+	options := GenerationOptions{
+		Symmetry:           SYMMETRY_NONE,
+		SymmetryPercentage: 1.0,
+		MinFilledCells:     DIM*DIM - 1,
+	}
+
+	grid := GenerateGrid(&options)
+
+	if grid.numFilledCells < options.MinFilledCells {
+		t.Error("Grid came back with too few cells filled: ", grid.numFilledCells, "expected", options.MinFilledCells)
+	}
+
+	options.Symmetry = SYMMETRY_VERTICAL
+
+	grid = GenerateGrid(&options)
+
+	if grid.numFilledCells < options.MinFilledCells {
+		t.Error("Grid came back with too few cells filled: ", grid.numFilledCells, "expected", options.MinFilledCells)
+	}
+}
+
 func TestSymmetricalGenerate(t *testing.T) {
 	options := GenerationOptions{
 		Symmetry:           SYMMETRY_VERTICAL,
