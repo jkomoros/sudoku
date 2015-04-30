@@ -4,6 +4,24 @@ import (
 	"math/rand"
 )
 
+//GenerationOptions provides configuration options for generating a sudoku puzzle.
+type GenerationOptions struct {
+	//symmetrty and symmetryType control the aesthetics of the generated grid. symmetryPercentage
+	//controls roughly what percentage of cells with have a filled partner across the provided plane of
+	//symmetry.
+	Symmetry           SymmetryType
+	SymmetryPercentage float64
+}
+
+var defaultGenerationOptions GenerationOptions
+
+func init() {
+	defaultGenerationOptions = GenerationOptions{
+		Symmetry:           SYMMETRY_VERTICAL,
+		SymmetryPercentage: 0.7,
+	}
+}
+
 //Fill will find a random filling of the puzzle such that every cell is filled and no cells conflict with their neighbors. If it cannot find one,
 // it will return false and leave the grid as it found it. Generally you would only want to call this on
 //grids that have more than one solution (e.g. a fully blank grid). Fill provides a good starting point for generated puzzles.
@@ -23,16 +41,22 @@ func (self *Grid) Fill() bool {
 //puzzle that is appropriate (and hopefully fun) for humans to solve. GenerateGrid first finds a random
 //full filling of the grid, then iteratively removes cells until just before the grid begins having
 //multiple solutions. The result is a grid that has a single valid solution but many of its cells
-//unfilled. symmetrty and symmetryType control the aesthetics of the generated grid. symmetryPercentage
-//controls roughly what percentage of cells with have a filled partner across the provided plane of
-//symmetry. SYMMETRY_VERTICAl, 0.7 give reasonable results that feel balanced but not perfectly symmetrical.
+//unfilled. Pass nil for options to use reasonable defaults.
 //GenerateGrid doesn't currently give any way to define the desired difficulty; the best option is to
 //repeatedly generate puzzles until you find one that matches your desired difficulty. cmd/dokugen
 //applies this technique.
-func GenerateGrid(symmetry SymmetryType, symmetryPercentage float64) *Grid {
+func GenerateGrid(options *GenerationOptions) *Grid {
+
+	if options == nil {
+		options = &defaultGenerationOptions
+	}
+
 	grid := NewGrid()
 	//Do a random fill of the grid
 	grid.Fill()
+
+	//Make a copy so we don't mutate the passed in dict
+	symmetryPercentage := options.SymmetryPercentage
 
 	//Make sure symmetry percentage is within the legal range.
 	if symmetryPercentage < 0.0 {
@@ -60,7 +84,7 @@ func GenerateGrid(symmetry SymmetryType, symmetryPercentage float64) *Grid {
 		if rand.Float64() < symmetryPercentage {
 
 			//Pick a symmetrical partner for symmetryPercentage number of cells.
-			otherCell = cell.SymmetricalPartner(symmetry)
+			otherCell = cell.SymmetricalPartner(options.Symmetry)
 
 			if otherCell != nil {
 				otherNum = otherCell.Number()

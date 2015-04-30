@@ -303,6 +303,11 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 		}
 	}
 
+	options := sudoku.GenerationOptions{
+		Symmetry:           symmetryType,
+		SymmetryPercentage: symmetryPercentage,
+	}
+
 	//We'll have to generate one ourselves.
 	count := 0
 	for {
@@ -311,7 +316,7 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 			log.Println("Attempt", count, "at generating puzzle.")
 		}
 
-		result = sudoku.GenerateGrid(symmetryType, symmetryPercentage)
+		result = sudoku.GenerateGrid(&options)
 
 		difficulty := result.Difficulty()
 

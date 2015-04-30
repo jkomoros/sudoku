@@ -563,7 +563,7 @@ func TestGridCache(t *testing.T) {
 }
 
 func TestGenerate(t *testing.T) {
-	grid := GenerateGrid(SYMMETRY_NONE, 0.0)
+	grid := GenerateGrid(nil)
 
 	defer grid.Done()
 
@@ -584,7 +584,16 @@ func TestGenerate(t *testing.T) {
 }
 
 func TestSymmetricalGenerate(t *testing.T) {
-	grid := GenerateGrid(SYMMETRY_VERTICAL, 1.0)
+	options := GenerationOptions{
+		Symmetry:           SYMMETRY_VERTICAL,
+		SymmetryPercentage: 1.5,
+	}
+
+	if options.SymmetryPercentage != 1.5 {
+		t.Error("GenerateGrid mutated the provided options.")
+	}
+
+	grid := GenerateGrid(&options)
 
 	defer grid.Done()
 
@@ -611,7 +620,8 @@ func TestSymmetricalGenerate(t *testing.T) {
 
 	//Now test a non 1.0 symmetry
 	percentage := 0.5
-	grid = GenerateGrid(SYMMETRY_VERTICAL, percentage)
+	options.SymmetryPercentage = percentage
+	grid = GenerateGrid(&options)
 
 	if grid == nil {
 		t.Fatal("Did not get a generated grid back with 0.5 symmetry")
