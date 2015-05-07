@@ -17,13 +17,18 @@ func (self *guessTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("we have no other moves to make, so we randomly pick a cell with the smallest number of possibilities, %s, and pick one of its possibilities", step.TargetCells.Description())
 }
 
-func (self *guessTechnique) Find(grid *Grid) []*SolveStep {
+func (self *guessTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 
 	getter := grid.queue().NewGetter()
 
-	var results []*SolveStep
-
 	for {
+
+		select {
+		case <-done:
+			return
+		default:
+		}
+
 		obj := getter.Get()
 		if obj == nil {
 			break
@@ -50,9 +55,11 @@ func (self *guessTechnique) Find(grid *Grid) []*SolveStep {
 		//We're going to abuse pointerNums and use it to point out the other numbers we COULD have used.
 		step.PointerNums = IntSlice(possibilities).Difference(IntSlice{num})
 		if step.IsUseful(grid) {
-			results = append(results, step)
+			select {
+			case results <- step:
+			case <-done:
+				return
+			}
 		}
 	}
-
-	return results
 }
