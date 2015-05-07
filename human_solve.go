@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"sync"
 )
 
 //The number of solves we should average the signals together for before asking them for their difficulty
@@ -437,24 +438,40 @@ func tweakChainedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, w
 
 func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 	numTechniques := len(techniques)
-	possibilitiesChan := make(chan []*SolveStep)
 
-	var possibilities []*SolveStep
+	resultsChan := make(chan *SolveStep)
+	done := make(chan bool)
+
+	var results []*SolveStep
+
+	var wg sync.WaitGroup
+
+	wg.Add(numTechniques)
 
 	for _, technique := range techniques {
 		go func(theTechnique SolveTechnique) {
-			possibilitiesChan <- theTechnique.Find(grid)
+			theTechnique.Find(grid, resultsChan, done)
+			wg.Done()
 		}(technique)
 	}
 
-	//Collect all of the results
-	for i := 0; i < numTechniques; i++ {
-		for _, possibility := range <-possibilitiesChan {
-			possibilities = append(possibilities, possibility)
+	//TODO: close done as soon as we get enough items or our timeout has passed
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+OuterLoop:
+	for {
+		select {
+		case result := <-resultsChan:
+			results = append(results, result)
+		case <-done:
+			break OuterLoop
 		}
 	}
 
-	return possibilities
+	return results
 }
 
 //Difficulty returns a value between 0.0 and 1.0, representing how hard the puzzle would be
