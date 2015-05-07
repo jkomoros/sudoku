@@ -88,13 +88,23 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		t.Fatal("Couldn't find technique object: ", techniqueName)
 	}
 
-	steps := solver.Find(grid)
+	results := make(chan *SolveStep)
+	done := make(chan bool)
 
-	if len(steps) == 0 {
+	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
+	solver.Find(grid, results, done)
+
+	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
+	close(done)
+
+	var step *SolveStep
+
+	//TODO: test cases where we expectmultipel results...
+	select {
+	case step = <-results:
+	default:
 		t.Fatal(techniqueName, " didn't find a cell it should have.")
 	}
-
-	step := steps[0]
 
 	if options.debugPrint {
 		log.Println(step)
