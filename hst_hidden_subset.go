@@ -39,15 +39,20 @@ func (self hiddenSubsetTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%s are only possible in %s within %s %d, which means that only those numbers could be in those cells", step.PointerNums.Description(), step.PointerCells.Description(), groupName, groupNum)
 }
 
-func (self *hiddenSubsetTechnique) Find(grid *Grid) []*SolveStep {
+func (self *hiddenSubsetTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 	//TODO: test that this will find multiple if they exist.
-	return hiddenSubset(grid, self, self.k, self.getter(grid))
+	return hiddenSubset(grid, self, self.k, self.getter(grid), results, done)
 }
 
-func hiddenSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellSlice) []*SolveStep {
+func hiddenSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellSlice, results chan *SolveStep, done chan bool) {
 	//NOTE: very similar implemenation in nakedSubset.
-	var results []*SolveStep
 	for _, i := range rand.Perm(DIM) {
+
+		select {
+		case <-done:
+			return
+		default:
+		}
 
 		groups, nums := subsetCellsWithNUniquePossibilities(k, collectionGetter(i))
 
@@ -61,14 +66,17 @@ func hiddenSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter 
 
 				numsToRemove := group.PossibilitiesUnion().Difference(numList)
 
-				result := &SolveStep{technique, group, numsToRemove, group, numList}
-				if result.IsUseful(grid) {
-					results = append(results, result)
+				step := &SolveStep{technique, group, numsToRemove, group, numList}
+				if step.IsUseful(grid) {
+					select {
+					case results <- step:
+					case <-done:
+						return
+					}
 				}
 			}
 		}
 	}
-	return results
 }
 
 //TODO: come up with a better name for this HiddenSubset technique helper method
