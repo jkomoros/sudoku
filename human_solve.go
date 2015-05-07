@@ -445,7 +445,10 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 
 	numTechniques := len(techniques)
 
-	resultsChan := make(chan *SolveStep)
+	//Leave some room in resultsChan so all of the techniques don't have to block as often
+	//waiting for the mainthread to clear resultsChan. Leads to a 20% reduction in time compared
+	//to unbuffered.
+	resultsChan := make(chan *SolveStep, len(Techniques))
 	done := make(chan bool)
 
 	var results []*SolveStep
