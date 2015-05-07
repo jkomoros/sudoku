@@ -448,6 +448,10 @@ func tweakChainedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, w
 }
 
 func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
+
+	//TODO: make this configurable, and figure out what the optimal value is
+	numRequestedSteps := 20
+
 	numTechniques := len(techniques)
 
 	resultsChan := make(chan *SolveStep)
@@ -466,10 +470,13 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 		}(technique)
 	}
 
-	//TODO: close done as soon as we get enough items or our timeout has passed
+	//Whether all the tehcniques have returned--that is, no more results will be coming.
+	allTechniquesDone := make(chan bool)
+
+	//TODO Consider having a timeout so not number of techniques, but amount of time that passes before moving on.
 	go func() {
 		wg.Wait()
-		close(done)
+		allTechniquesDone <- true
 	}()
 
 OuterLoop:
@@ -477,7 +484,14 @@ OuterLoop:
 		select {
 		case result := <-resultsChan:
 			results = append(results, result)
-		case <-done:
+			//Do we have enough steps accumulate?
+			if len(results) > numRequestedSteps {
+				//Communicate to all still-running routines that they can stop
+				close(done)
+				break OuterLoop
+			}
+		case <-allTechniquesDone:
+			//No more techniques will be coming in; this is as good as it gets.
 			break OuterLoop
 		}
 	}
