@@ -11,14 +11,9 @@ import (
 //Note: this should be set to the num-solves parameter used to train the currently configured weights.
 const _NUM_SOLVES_FOR_DIFFICULTY = 10
 
-//The list of techniques that HumanSolve will use to try to solve the puzzle, split up into
-//different tranches based on their complexity and oddity.
+//The list of techniques that HumanSolve will use to try to solve the puzzle, with the oddball Guess split out.
 var (
-	//Techniques that are 'cheap' to compute, and should be tried before trying ExpensiveTechniques
-	CheapTechniques []SolveTechnique
-	//Techniques that are 'expensive' to compute, and should only be tried after trying CheapTechniques.
-	ExpensiveTechniques []SolveTechnique
-	//All of the 'normal' Techniques that will be used to solve the puzzle; Cheap+Expensive techniques
+	//All of the 'normal' Techniques that will be used to solve the puzzle
 	Techniques []SolveTechnique
 	//The special GuessTechnique that is used only if no other techniques find options.
 	GuessTechnique SolveTechnique
@@ -307,16 +302,12 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 			return nil
 		}
 
-		possibilities := runTechniques(CheapTechniques, grid)
+		possibilities := runTechniques(Techniques, grid)
 
 		//Now pick one to apply.
 		if len(possibilities) == 0 {
-			//Okay, let's try the ExpensiveTechniques, as a hail mary.
-			possibilities = runTechniques(ExpensiveTechniques, grid)
-			if len(possibilities) == 0 {
-				//Hmm, didn't find any possivbilities. We failed. :-(
-				break
-			}
+			//Hmm, didn't find any possivbilities. We failed. :-(
+			break
 		}
 
 		//TODO: consider if we should stop picking techniques based on their weight here.

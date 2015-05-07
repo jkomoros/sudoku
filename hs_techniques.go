@@ -70,7 +70,7 @@ func init() {
 
 	//TODO: calculate more realistic weights.
 
-	CheapTechniques = []SolveTechnique{
+	Techniques = []SolveTechnique{
 		&hiddenSingleTechnique{
 			&basicSolveTechnique{
 				//TODO: shouldn't this be "Hidden Single Row" (and likewise for others)
@@ -265,9 +265,6 @@ func init() {
 				2,
 			},
 		},
-	}
-
-	ExpensiveTechniques = []SolveTechnique{
 		&hiddenSubsetTechnique{
 			&basicSolveTechnique{
 				"Hidden Triple Row",
@@ -326,8 +323,6 @@ func init() {
 			1,
 		},
 	}
-
-	Techniques = append(CheapTechniques, ExpensiveTechniques...)
 
 	AllTechniques = append(Techniques, GuessTechnique)
 
