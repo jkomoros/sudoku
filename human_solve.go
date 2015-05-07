@@ -352,7 +352,8 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 //Called when we have run out of options at a given state and need to guess.
 func humanSolveGuess(grid *Grid) []*SolveStep {
 
-	results := make(chan *SolveStep)
+	//Yes, using DIM*DIM is a gross hack... I really should be calling Find inside a goroutine...
+	results := make(chan *SolveStep, DIM*DIM)
 	done := make(chan bool)
 
 	//TODO: consider doing a normal solve forward from here to figure out what the right branch is and just do that.
