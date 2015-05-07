@@ -41,7 +41,7 @@ func (self *nakedSubsetTechnique) Description(step *SolveStep) string {
 
 func (self *nakedSubsetTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 	//TODO: test that this will find multiple if they exist.
-	return nakedSubset(grid, self, self.k, self.getter(grid), results, done)
+	nakedSubset(grid, self, self.k, self.getter(grid), results, done)
 }
 
 func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellSlice, results chan *SolveStep, done chan bool) {

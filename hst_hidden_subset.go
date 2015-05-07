@@ -41,7 +41,7 @@ func (self hiddenSubsetTechnique) Description(step *SolveStep) string {
 
 func (self *hiddenSubsetTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 	//TODO: test that this will find multiple if they exist.
-	return hiddenSubset(grid, self, self.k, self.getter(grid), results, done)
+	hiddenSubset(grid, self, self.k, self.getter(grid), results, done)
 }
 
 func hiddenSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellSlice, results chan *SolveStep, done chan bool) {

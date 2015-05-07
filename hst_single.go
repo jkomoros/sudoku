@@ -52,7 +52,7 @@ func (self *obviousInCollectionTechnique) Description(step *SolveStep) string {
 }
 
 func (self *obviousInCollectionTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
-	return obviousInCollection(grid, self, self.getter(grid), results, done)
+	obviousInCollection(grid, self, self.getter(grid), results, done)
 }
 
 func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice, results chan *SolveStep, done chan bool) {
@@ -173,7 +173,7 @@ func (self *hiddenSingleTechnique) Description(step *SolveStep) string {
 
 func (self *hiddenSingleTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 	//TODO: test that if there are multiple we find them both.
-	return necessaryInCollection(grid, self, self.getter(grid), results, done)
+	necessaryInCollection(grid, self, self.getter(grid), results, done)
 }
 
 func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice, results chan *SolveStep, done chan bool) {
