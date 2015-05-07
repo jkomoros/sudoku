@@ -352,16 +352,26 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 //Called when we have run out of options at a given state and need to guess.
 func humanSolveGuess(grid *Grid) []*SolveStep {
 
-	//TODO: consider doing a normal solve forward from here to figure out what the right branch is and just do that.
-	guesses := GuessTechnique.Find(grid)
+	results := make(chan *SolveStep)
+	done := make(chan bool)
 
-	if len(guesses) == 0 {
+	//TODO: consider doing a normal solve forward from here to figure out what the right branch is and just do that.
+
+	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
+	GuessTechnique.Find(grid, results, done)
+	close(done)
+
+	var guess *SolveStep
+
+	//TODO: test cases where we expectmultipel results...
+	select {
+	case guess = <-results:
+	default:
 		//Coludn't find a guess step, oddly enough.
 		return nil
 	}
 
-	//Take just the first guess step and forget about the other ones.
-	guess := guesses[0]
+	//We'll just take the first guess step and forget about the other ones.
 
 	//The guess technique passes back the other nums as PointerNums, which is a hack.
 	//Unpack them and then nil it out to prevent confusing other people in the future with them.
