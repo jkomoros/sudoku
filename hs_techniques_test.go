@@ -88,7 +88,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		t.Fatal("Couldn't find technique object: ", techniqueName)
 	}
 
-	results := make(chan *SolveStep)
+	results := make(chan *SolveStep, DIM*DIM)
 	done := make(chan bool)
 
 	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
