@@ -39,16 +39,21 @@ func (self *nakedSubsetTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%s are only possible in %s, which means that they can't be in any other cell in %s %d", step.TargetNums.Description(), step.PointerCells.Description(), groupName, groupNum)
 }
 
-func (self *nakedSubsetTechnique) Find(grid *Grid) []*SolveStep {
+func (self *nakedSubsetTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 	//TODO: test that this will find multiple if they exist.
-	return nakedSubset(grid, self, self.k, self.getter(grid))
+	nakedSubset(grid, self, self.k, self.getter(grid), results, done)
 }
 
-func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellSlice) []*SolveStep {
+func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellSlice, results chan *SolveStep, done chan bool) {
 	//NOTE: very similar implemenation in hiddenSubset.
 	//TODO: randomize order we visit things.
-	var results []*SolveStep
 	for _, i := range rand.Perm(DIM) {
+
+		select {
+		case <-done:
+			return
+		default:
+		}
 
 		groups := subsetCellsWithNPossibilities(k, collectionGetter(i))
 
@@ -58,16 +63,19 @@ func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter f
 
 				group := groups[groupIndex]
 
-				result := &SolveStep{technique, collectionGetter(i).RemoveCells(group), group.PossibilitiesUnion(), group, nil}
-				if result.IsUseful(grid) {
-					results = append(results, result)
+				step := &SolveStep{technique, collectionGetter(i).RemoveCells(group), group.PossibilitiesUnion(), group, nil}
+				if step.IsUseful(grid) {
+					select {
+					case results <- step:
+					case <-done:
+						return
+					}
 				}
 				//Keep going
 			}
 		}
 
 	}
-	return results
 }
 
 func subsetCellsWithNPossibilities(k int, inputCells CellSlice) []CellSlice {

@@ -88,7 +88,7 @@ func TestStepsDescription(t *testing.T) {
 	//It's really brittle that we load techniques in this way... it changes every time we add a new early technique!
 	steps := SolveDirections{
 		&SolveStep{
-			Techniques[3],
+			techniquesByName["Only Legal Number"],
 			CellSlice{
 				grid.Cell(0, 0),
 			},
@@ -97,7 +97,7 @@ func TestStepsDescription(t *testing.T) {
 			nil,
 		},
 		&SolveStep{
-			Techniques[8],
+			techniquesByName["Pointing Pair Col"],
 			CellSlice{
 				grid.Cell(1, 0),
 				grid.Cell(1, 1),
@@ -110,7 +110,7 @@ func TestStepsDescription(t *testing.T) {
 			nil,
 		},
 		&SolveStep{
-			Techniques[3],
+			techniquesByName["Only Legal Number"],
 			CellSlice{
 				grid.Cell(2, 0),
 			},

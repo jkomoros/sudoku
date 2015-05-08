@@ -47,9 +47,7 @@ func (self *xwingTechnique) Description(step *SolveStep) string {
 	)
 }
 
-func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
-
-	var results []*SolveStep
+func (self *xwingTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 
 	getter := self.getter(grid)
 
@@ -57,6 +55,12 @@ func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
 	for _, i := range rand.Perm(DIM) {
 		//In comments we'll say "Row" for the major group type, and "col" for minor group type, just for easier comprehension.
 		//Look for each row that has that number possible in only two cells.
+
+		select {
+		case <-done:
+			return
+		default:
+		}
 
 		//i is zero indexed right now
 		i++
@@ -80,6 +84,13 @@ func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
 
 		//Now look at each pair of rows and see if their numbers line up.
 		for _, subsets := range subsetIndexes(len(majorGroups), 2) {
+
+			select {
+			case <-done:
+				return
+			default:
+			}
+
 			var targetCells CellSlice
 
 			currentGroups := []CellSlice{majorGroups[subsets[0]], majorGroups[subsets[1]]}
@@ -115,10 +126,13 @@ func (self *xwingTechnique) Find(grid *Grid) []*SolveStep {
 			//Okay, we found a pair that works. Create a step for it (if it's useful)
 			step := &SolveStep{self, targetCells, IntSlice{i}, append(currentGroups[0], currentGroups[1]...), nil}
 			if step.IsUseful(grid) {
-				results = append(results, step)
+				select {
+				case results <- step:
+				case <-done:
+					return
+				}
 			}
 		}
 
 	}
-	return results
 }

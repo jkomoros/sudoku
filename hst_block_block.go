@@ -14,9 +14,7 @@ func (self *blockBlockInteractionTechnique) HumanLikelihood() float64 {
 	return self.difficultyHelper(60.0)
 }
 
-func (self *blockBlockInteractionTechnique) Find(grid *Grid) []*SolveStep {
-
-	var results []*SolveStep
+func (self *blockBlockInteractionTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 
 	pairs := pairwiseBlocks(grid)
 
@@ -30,9 +28,18 @@ func (self *blockBlockInteractionTechnique) Find(grid *Grid) []*SolveStep {
 
 	//For each pair of blocks (in random order)
 	for _, pairIndex := range rand.Perm(len(pairs)) {
+
 		pair := pairs[pairIndex]
 		excludeNums := filledNumsForBlock[pair[0]].toIntSet().union(filledNumsForBlock[pair[1]].toIntSet())
 		for _, i := range rand.Perm(DIM) {
+
+			//See if we should stop doing work
+			select {
+			case <-done:
+				return
+			default:
+			}
+
 			//Skip numbers entirely where either of the blocks has a cell with it set, since there obviously
 			//won't be any cells in both blocks that have that possibility.
 			if _, ok := excludeNums[i]; ok {
@@ -98,12 +105,15 @@ func (self *blockBlockInteractionTechnique) Find(grid *Grid) []*SolveStep {
 			}
 
 			if step.IsUseful(grid) {
-				results = append(results, step)
+				select {
+				case results <- step:
+				case <-done:
+					return
+				}
 			}
 		}
 
 	}
-	return results
 }
 
 func (self *blockBlockInteractionTechnique) Description(step *SolveStep) string {

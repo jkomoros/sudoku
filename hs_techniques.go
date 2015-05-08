@@ -3,6 +3,7 @@ package sudoku
 import (
 	"log"
 	"math"
+	"sort"
 )
 
 /*
@@ -33,7 +34,13 @@ type SolveTechnique interface {
 
 	//Find returns as many steps as it can find in the grid for that technique, in a random order.
 	//HumanSolve repeatedly applies technique.Find() to identify candidates for the next step in the solution.
-	Find(*Grid) []*SolveStep
+	//A technique's Find method will send results as it finds them to results, and will periodically see if it
+	//can receive any value from done--if it can, it will stop searching. Find will block and not return if it can't send
+	//to results or receive from done; either use sufficiently buffered channels or run Find in a goroutine.
+	Find(grid *Grid, results chan *SolveStep, done chan bool)
+	//TODO: if we keep this signature, we should consider having each find method actually wrap its internals in a goRoutine
+	//to make it safer to use--although that would probably require a new signature.
+
 	//IsFill returns true if the techinque's action when applied to a grid is to fill a number (as opposed to culling possbilitie).
 	IsFill() bool
 	//HumanLikelihood is how likely a user would be to pick this technique when compared with other possible steps.
@@ -60,11 +67,27 @@ type basicSolveTechnique struct {
 	k int
 }
 
+//Boilerplate to allow us to sort Techniques in weights
+
+type techniqueByLikelihood []SolveTechnique
+
+func (t techniqueByLikelihood) Len() int {
+	return len(t)
+}
+
+func (t techniqueByLikelihood) Swap(i, j int) {
+	t[i], t[j] = t[j], t[i]
+}
+
+func (t techniqueByLikelihood) Less(i, j int) bool {
+	return t[i].HumanLikelihood() < t[j].HumanLikelihood()
+}
+
 func init() {
 
 	//TODO: calculate more realistic weights.
 
-	CheapTechniques = []SolveTechnique{
+	Techniques = []SolveTechnique{
 		&hiddenSingleTechnique{
 			&basicSolveTechnique{
 				//TODO: shouldn't this be "Hidden Single Row" (and likewise for others)
@@ -259,9 +282,6 @@ func init() {
 				2,
 			},
 		},
-	}
-
-	ExpensiveTechniques = []SolveTechnique{
 		&hiddenSubsetTechnique{
 			&basicSolveTechnique{
 				"Hidden Triple Row",
@@ -321,8 +341,10 @@ func init() {
 		},
 	}
 
-	Techniques = append(CheapTechniques, ExpensiveTechniques...)
+	//Sort Techniques in order of humanLikelihood
+	sort.Sort(techniqueByLikelihood(Techniques))
 
+	//Guess is always the highest, so AllTechniques should already be sorted.
 	AllTechniques = append(Techniques, GuessTechnique)
 
 	techniquesByName = make(map[string]SolveTechnique)

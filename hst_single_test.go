@@ -59,14 +59,23 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 		t.Fatal("Couldn't find technique object: ", techniqueName)
 	}
 
-	steps := solver.Find(grid)
+	results := make(chan *SolveStep, DIM*DIM)
+	done := make(chan bool)
 
-	if len(steps) == 0 {
-		t.Log("The only legal number technique did not solve a puzzle it should have.")
-		t.FailNow()
+	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
+	solver.Find(grid, results, done)
+
+	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
+	close(done)
+
+	var step *SolveStep
+
+	//TODO: test cases where we expectmultipel results...
+	select {
+	case step = <-results:
+	default:
+		t.Fatal(techniqueName, " didn't find a cell it should have.")
 	}
-
-	step := steps[0]
 
 	description := solver.Description(step)
 	if description != "3 is the only remaining valid number for that cell" {
@@ -128,14 +137,23 @@ func TestNecessaryInRow(t *testing.T) {
 		t.Fatal("Couldn't find technique object: ", techniqueName)
 	}
 
-	steps := solver.Find(grid)
+	results := make(chan *SolveStep, DIM*DIM)
+	done := make(chan bool)
 
-	if len(steps) == 0 {
-		t.Log("The necessary in row technique did not solve a puzzle it should have.")
-		t.FailNow()
+	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
+	solver.Find(grid, results, done)
+
+	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
+	close(done)
+
+	var step *SolveStep
+
+	//TODO: test cases where we expectmultipel results...
+	select {
+	case step = <-results:
+	default:
+		t.Fatal(techniqueName, " didn't find a cell it should have.")
 	}
-
-	step := steps[0]
 
 	description := solver.Description(step)
 	if description != "9 is required in the 3 row, and 3 is the only column it fits" {
@@ -198,14 +216,23 @@ func TestNecessaryInCol(t *testing.T) {
 		t.Fatal("Couldn't find technique object: ", techniqueName)
 	}
 
-	steps := solver.Find(grid)
+	results := make(chan *SolveStep, DIM*DIM)
+	done := make(chan bool)
 
-	if len(steps) == 0 {
-		t.Log("The necessary in col technique did not solve a puzzle it should have.")
-		t.FailNow()
+	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
+	solver.Find(grid, results, done)
+
+	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
+	close(done)
+
+	var step *SolveStep
+
+	//TODO: test cases where we expectmultipel results...
+	select {
+	case step = <-results:
+	default:
+		t.Fatal(techniqueName, " didn't find a cell it should have.")
 	}
-
-	step := steps[0]
 
 	description := solver.Description(step)
 	if description != "9 is required in the 3 column, and 3 is the only row it fits" {
@@ -268,14 +295,23 @@ func TestNecessaryInBlock(t *testing.T) {
 		t.Fatal("Couldn't find technique object: ", techniqueName)
 	}
 
-	steps := solver.Find(grid)
+	results := make(chan *SolveStep, DIM*DIM)
+	done := make(chan bool)
 
-	if len(steps) == 0 {
-		t.Log("The necessary in block technique did not solve a puzzle it should have.")
-		t.FailNow()
+	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
+	solver.Find(grid, results, done)
+
+	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
+	close(done)
+
+	var step *SolveStep
+
+	//TODO: test cases where we expectmultipel results...
+	select {
+	case step = <-results:
+	default:
+		t.Fatal(techniqueName, " didn't find a cell it should have.")
 	}
-
-	step := steps[0]
 
 	description := solver.Description(step)
 	if description != "9 is required in the 4 block, and (3,3) is the only cell it fits" {

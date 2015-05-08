@@ -5,6 +5,16 @@ import (
 	"testing"
 )
 
+func TestTechniquesSorted(t *testing.T) {
+	lastLikelihood := 0.0
+	for i, technique := range AllTechniques {
+		if technique.HumanLikelihood() < lastLikelihood {
+			t.Fatal("Technique named", technique.Name(), "with index", i, "has a likelihood lower than one of the earlier ones: ", technique.HumanLikelihood(), lastLikelihood)
+		}
+		lastLikelihood = technique.HumanLikelihood()
+	}
+}
+
 func TestSubsetIndexes(t *testing.T) {
 	result := subsetIndexes(3, 1)
 	expectedResult := [][]int{{0}, {1}, {2}}
@@ -88,13 +98,23 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		t.Fatal("Couldn't find technique object: ", techniqueName)
 	}
 
-	steps := solver.Find(grid)
+	results := make(chan *SolveStep, DIM*DIM)
+	done := make(chan bool)
 
-	if len(steps) == 0 {
+	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
+	solver.Find(grid, results, done)
+
+	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
+	close(done)
+
+	var step *SolveStep
+
+	//TODO: test cases where we expectmultipel results...
+	select {
+	case step = <-results:
+	default:
 		t.Fatal(techniqueName, " didn't find a cell it should have.")
 	}
-
-	step := steps[0]
 
 	if options.debugPrint {
 		log.Println(step)
