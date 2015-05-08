@@ -65,6 +65,9 @@ func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter 
 		default:
 		}
 
+		//For temporary debugging of issue #94, to get as much useful info as possible since it's not repeatable.
+		savedGridDiagramState := grid.Diagram()
+
 		collection := collectionGetter(index)
 		openCells := collection.FilterByHasPossibilities()
 		if len(openCells) == 1 {
@@ -72,7 +75,12 @@ func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter 
 			cell := openCells[0]
 			possibilities := cell.Possibilities()
 			if len(possibilities) != 1 {
-				log.Fatalln("Expected the cell to only have one possibility", grid.Diagram(), cell, cell.Possibilities(), cell.excluded, cell.impossibles)
+				wasAboutToExit := false
+				select {
+				case <-done:
+					wasAboutToExit = true
+				}
+				log.Fatalln("Expected the cell to only have one possibility", grid.Diagram(), cell, cell.Possibilities(), cell.excluded, cell.impossibles, wasAboutToExit, savedGridDiagramState)
 			} else {
 				possibility := possibilities[0]
 				step := newFillSolveStep(cell, possibility, technique)
