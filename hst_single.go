@@ -80,7 +80,7 @@ func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter 
 				case <-done:
 					wasAboutToExit = true
 				}
-				log.Fatalln("Expected the cell to only have one possibility", grid.Diagram(), cell, cell.Possibilities(), cell.excluded, cell.impossibles, wasAboutToExit, savedGridDiagramState)
+				log.Fatalln("Expected the cell to only have one possibility", grid.Diagram(), openCells, collection, cell, cell.Possibilities(), possibilities, cell.excluded, cell.impossibles, wasAboutToExit, savedGridDiagramState)
 			} else {
 				possibility := possibilities[0]
 				step := newFillSolveStep(cell, possibility, technique)
