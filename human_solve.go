@@ -448,6 +448,7 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 	//Leave some room in resultsChan so all of the techniques don't have to block as often
 	//waiting for the mainthread to clear resultsChan. Leads to a 20% reduction in time compared
 	//to unbuffered.
+	//We'll close this channel to signal the collector that no more results are coming.
 	resultsChan := make(chan *SolveStep, len(Techniques))
 	done := make(chan bool)
 
@@ -468,32 +469,27 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 		go startTechnique(technique)
 	}
 
-	//Whether all the tehcniques have returned--that is, no more results will be coming.
-	allTechniquesDone := make(chan bool)
-
 	//Listen for when all items are done and signal the collector to stop collecting
 	go func() {
 		wg.Wait()
-		//TODO: couldn't we just close(resultsChan) instead of having a separate channel to signal this happened?
-		//All of the techniques must be done here; no one can send on resultsChan at that point.
-		//I guess the potential problem is what happens to items buffered in the chan if it's closed--are they dropped?
-		//... But we sitll have that problem right now as implemented, so not a big deal.
-		allTechniquesDone <- true
+		//All of the techniques must be done here; no one can send on resultsChan at this point.
+		//Signal to the collector that it should break out.
+		close(resultsChan)
 	}()
 
+	//Collect the results as long as more are coming
 OuterLoop:
 	for {
-		select {
-		case result := <-resultsChan:
-			results = append(results, result)
-			//Do we have enough steps accumulate?
-			if len(results) > numRequestedSteps {
-				//Communicate to all still-running routines that they can stop
-				close(done)
-				break OuterLoop
-			}
-		case <-allTechniquesDone:
-			//No more techniques will be coming in; this is as good as it gets.
+		result, ok := <-resultsChan
+		if !ok {
+			//resultsChan was closed, which is our signal that no more results are coming and we should break
+			break OuterLoop
+		}
+		results = append(results, result)
+		//Do we have enough steps accumulate?
+		if len(results) > numRequestedSteps {
+			//Communicate to all still-running routines that they can stop
+			close(done)
 			break OuterLoop
 		}
 	}
