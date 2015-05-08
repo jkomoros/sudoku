@@ -451,25 +451,33 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 	resultsChan := make(chan *SolveStep, len(Techniques))
 	done := make(chan bool)
 
-	var results []*SolveStep
-
 	var wg sync.WaitGroup
+
+	//We'll be kicking off this routine from multiple places so just define it once
+	startTechnique := func(theTechnique SolveTechnique) {
+		theTechnique.Find(grid, resultsChan, done)
+		//Potentially kick off another technique here, before wg.Done, so we avoid ending too early
+		wg.Done()
+	}
+
+	var results []*SolveStep
 
 	wg.Add(numTechniques)
 
 	for _, technique := range techniques {
-		go func(theTechnique SolveTechnique) {
-			theTechnique.Find(grid, resultsChan, done)
-			wg.Done()
-		}(technique)
+		go startTechnique(technique)
 	}
 
 	//Whether all the tehcniques have returned--that is, no more results will be coming.
 	allTechniquesDone := make(chan bool)
 
-	//TODO Consider having a timeout so not number of techniques, but amount of time that passes before moving on.
+	//Listen for when all items are done and signal the collector to stop collecting
 	go func() {
 		wg.Wait()
+		//TODO: couldn't we just close(resultsChan) instead of having a separate channel to signal this happened?
+		//All of the techniques must be done here; no one can send on resultsChan at that point.
+		//I guess the potential problem is what happens to items buffered in the chan if it's closed--are they dropped?
+		//... But we sitll have that problem right now as implemented, so not a big deal.
 		allTechniquesDone <- true
 	}()
 
