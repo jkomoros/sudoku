@@ -72,7 +72,7 @@ func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter 
 			cell := openCells[0]
 			possibilities := cell.Possibilities()
 			if len(possibilities) != 1 {
-				log.Fatalln("Expected the cell to only have one possibility", grid.Diagram(), cell.Possibilities(), cell.excluded, cell.impossibles)
+				log.Fatalln("Expected the cell to only have one possibility", grid.Diagram(), cell, cell.Possibilities(), cell.excluded, cell.impossibles)
 			} else {
 				possibility := possibilities[0]
 				step := newFillSolveStep(cell, possibility, technique)
