@@ -5,6 +5,16 @@ import (
 	"testing"
 )
 
+func TestTechniquesSorted(t *testing.T) {
+	lastLikelihood := 0.0
+	for i, technique := range AllTechniques {
+		if technique.HumanLikelihood() < lastLikelihood {
+			t.Fatal("Technique named", technique.Name(), "with index", i, "has a likelihood lower than one of the earlier ones: ", technique.HumanLikelihood(), lastLikelihood)
+		}
+		lastLikelihood = technique.HumanLikelihood()
+	}
+}
+
 func TestSubsetIndexes(t *testing.T) {
 	result := subsetIndexes(3, 1)
 	expectedResult := [][]int{{0}, {1}, {2}}

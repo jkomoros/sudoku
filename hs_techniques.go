@@ -3,6 +3,7 @@ package sudoku
 import (
 	"log"
 	"math"
+	"sort"
 )
 
 /*
@@ -64,6 +65,22 @@ type basicSolveTechnique struct {
 	//Size of set in technique, e.g. single = 1, pair = 2, triple = 3
 	//Used for generating descriptions in some sub-structs.
 	k int
+}
+
+//Boilerplate to allow us to sort Techniques in weights
+
+type techniqueByLikelihood []SolveTechnique
+
+func (t techniqueByLikelihood) Len() int {
+	return len(t)
+}
+
+func (t techniqueByLikelihood) Swap(i, j int) {
+	t[i], t[j] = t[j], t[i]
+}
+
+func (t techniqueByLikelihood) Less(i, j int) bool {
+	return t[i].HumanLikelihood() < t[j].HumanLikelihood()
 }
 
 func init() {
@@ -324,6 +341,10 @@ func init() {
 		},
 	}
 
+	//Sort Techniques in order of humanLikelihood
+	sort.Sort(techniqueByLikelihood(Techniques))
+
+	//Guess is always the highest, so AllTechniques should already be sorted.
 	AllTechniques = append(Techniques, GuessTechnique)
 
 	techniquesByName = make(map[string]SolveTechnique)
