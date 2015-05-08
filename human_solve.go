@@ -440,33 +440,48 @@ func tweakChainedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, w
 
 func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 
-	//TODO: make this configurable, and figure out what the optimal value is
+	//TODO: make these configurable, and figure out what the optimal values are
 	numRequestedSteps := 20
-
-	numTechniques := len(techniques)
+	numTechniquesToStartByDefault := 10
 
 	//Leave some room in resultsChan so all of the techniques don't have to block as often
 	//waiting for the mainthread to clear resultsChan. Leads to a 20% reduction in time compared
 	//to unbuffered.
 	//We'll close this channel to signal the collector that no more results are coming.
-	resultsChan := make(chan *SolveStep, len(Techniques))
+	resultsChan := make(chan *SolveStep, len(techniques))
 	done := make(chan bool)
 
+	//Deliberately unbuffered; we want it to run sync inside of startTechnique
+	//the thread that's waiting on it will pass its own chan that it should send to when it's done
+	techniqueFinished := make(chan chan bool)
+
 	var wg sync.WaitGroup
+
+	//The next technique to spin up
+	nextTechniqueIndex := 0
 
 	//We'll be kicking off this routine from multiple places so just define it once
 	startTechnique := func(theTechnique SolveTechnique) {
 		theTechnique.Find(grid, resultsChan, done)
-		//Potentially kick off another technique here, before wg.Done, so we avoid ending too early
+		//This is where a new technique should be kicked off, if one's going to be, before we tell the waitgroup that we're done.
+		//We need to communicate synchronously with that thread
+		comms := make(chan bool)
+		techniqueFinished <- comms
+		//Wait to hear back that a new technique is started, if one is going to be.
+		<-comms
+
+		//Okay, now the other thread has either started a new technique going, or hasn't.
 		wg.Done()
 	}
 
 	var results []*SolveStep
 
-	wg.Add(numTechniques)
+	//Get the first batch of techniques going
+	wg.Add(numTechniquesToStartByDefault)
 
-	for _, technique := range techniques {
-		go startTechnique(technique)
+	//Since Techniques is in sorted order, we're starting off with the easiest techniques.
+	for nextTechniqueIndex = 0; nextTechniqueIndex < numTechniquesToStartByDefault; nextTechniqueIndex++ {
+		go startTechnique(techniques[nextTechniqueIndex])
 	}
 
 	//Listen for when all items are done and signal the collector to stop collecting
@@ -475,6 +490,36 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 		//All of the techniques must be done here; no one can send on resultsChan at this point.
 		//Signal to the collector that it should break out.
 		close(resultsChan)
+		close(techniqueFinished)
+	}()
+
+	//The thread that will kick off new techinques
+	go func() {
+		for {
+			returnChan, ok := <-techniqueFinished
+			if !ok {
+				//If channel is closed, that's our cue to die.
+				return
+			}
+			//Start a technique here, if we're going to.
+			//First, check if the collector has signaled that we're all done
+			select {
+			case <-done:
+				//Don't start a new one
+			default:
+				//Potentially start a new technique going as things aren't shutting down yet.
+				//Is there another technique?
+				if nextTechniqueIndex < len(techniques) {
+					wg.Add(1)
+					go startTechnique(techniques[nextTechniqueIndex])
+					//Next time we're considering starting a new technique, start the next one
+					nextTechniqueIndex++
+				}
+			}
+
+			//Tell our caller that we're done
+			returnChan <- true
+		}
 	}()
 
 	//Collect the results as long as more are coming
