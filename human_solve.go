@@ -462,6 +462,11 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 
 	*/
 
+	//We make a copy of the grid to search on to avoid race conditions where
+	// main thread has already returned up to humanSolveHelper, but not all of the techinques have gotten
+	//the message and freak out a bit because the grid starts changing under them.
+	gridCopy := grid.Copy()
+
 	//TODO: make these configurable, and figure out what the optimal values are
 	numRequestedSteps := 20
 	numTechniquesToStartByDefault := 10
@@ -484,7 +489,7 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 
 	//We'll be kicking off this routine from multiple places so just define it once
 	startTechnique := func(theTechnique SolveTechnique) {
-		theTechnique.Find(grid, resultsChan, done)
+		theTechnique.Find(gridCopy, resultsChan, done)
 		//This is where a new technique should be kicked off, if one's going to be, before we tell the waitgroup that we're done.
 		//We need to communicate synchronously with that thread
 		comms := make(chan bool)
