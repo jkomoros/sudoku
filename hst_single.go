@@ -2,7 +2,6 @@ package sudoku
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"strconv"
 )
@@ -65,23 +64,14 @@ func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter 
 		default:
 		}
 
-		//For temporary debugging of issue #94, to get as much useful info as possible since it's not repeatable.
-		savedGridDiagramState := grid.Diagram()
-
 		collection := collectionGetter(index)
 		openCells := collection.FilterByHasPossibilities()
 		if len(openCells) == 1 {
 			//Okay, only one cell in this collection has an opening, which must mean it has one possibilty.
 			cell := openCells[0]
 			possibilities := cell.Possibilities()
-			if len(possibilities) != 1 {
-				wasAboutToExit := false
-				select {
-				case <-done:
-					wasAboutToExit = true
-				}
-				log.Fatalln("Expected the cell to only have one possibility", grid.Diagram(), openCells, collection, cell, cell.Possibilities(), possibilities, cell.excluded, cell.impossibles, wasAboutToExit, savedGridDiagramState)
-			} else {
+			//len(possibiltiies) SHOULD be 1, but check just in case.
+			if len(possibilities) == 1 {
 				possibility := possibilities[0]
 				step := newFillSolveStep(cell, possibility, technique)
 				if step.IsUseful(grid) {
