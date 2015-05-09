@@ -33,7 +33,7 @@ const _PENALTY_PERCENTAGE_CUTOFF = 0.01
 const _MATRIX_DIFFERENCE_CUTOFF = 0.00001
 const _MAX_MATRIX_POWER = 50
 
-const _NORMALIZED_LOWER_BOUND = 0.1
+const _NORMALIZED_LOWER_BOUND = 0.0
 const _NORMALIZED_UPPER_BOUND = 0.9
 
 //How many solves a user must have to have their relative scale included.
