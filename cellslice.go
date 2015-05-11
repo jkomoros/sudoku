@@ -17,6 +17,8 @@ type stringSlice []string
 
 type intSet map[int]bool
 
+type cellSet map[*Cell]bool
+
 type cellRef struct {
 	row int
 	col int
@@ -517,8 +519,26 @@ func (self IntSlice) toIntSet() intSet {
 	return result
 }
 
+func (self CellSlice) toCellSet() cellSet {
+	result := make(cellSet)
+	for _, item := range self {
+		result[item] = true
+	}
+	return result
+}
+
 func (self intSet) toSlice() IntSlice {
 	var result IntSlice
+	for item, val := range self {
+		if val {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+func (self cellSet) toSlice() CellSlice {
+	var result CellSlice
 	for item, val := range self {
 		if val {
 			result = append(result, item)
@@ -530,6 +550,18 @@ func (self intSet) toSlice() IntSlice {
 //TODO: test this directly (tested implicitly via intSlice.Intersection)
 func (self intSet) intersection(other intSet) intSet {
 	result := make(intSet)
+	for item, value := range self {
+		if value {
+			if val, ok := other[item]; ok && val {
+				result[item] = true
+			}
+		}
+	}
+	return result
+}
+
+func (self cellSet) intersection(other cellSet) cellSet {
+	result := make(cellSet)
 	for item, value := range self {
 		if value {
 			if val, ok := other[item]; ok && val {
@@ -552,9 +584,32 @@ func (self intSet) difference(other intSet) intSet {
 	return result
 }
 
+func (self cellSet) difference(other cellSet) cellSet {
+	result := make(cellSet)
+	for item, value := range self {
+		if value {
+			if val, ok := other[item]; !ok && !val {
+				result[item] = true
+			}
+		}
+	}
+	return result
+}
+
 //TODO: test this.
 func (self intSet) union(other intSet) intSet {
 	result := make(intSet)
+	for item, value := range self {
+		result[item] = value
+	}
+	for item, value := range other {
+		result[item] = value
+	}
+	return result
+}
+
+func (self cellSet) union(other cellSet) cellSet {
+	result := make(cellSet)
 	for item, value := range self {
 		result[item] = value
 	}
