@@ -52,122 +52,118 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 		//Check that the neighbor isn't just already having a single possibility, because then this technique is overkill.
 
-		firstAffectedCellSet := cellSet{}
-		secondAffectedCellSet := cellSet{}
+		firstAffectedCellSets, firstAffectedCellNums := chainSearcher(_MAX_IMPLICATION_STEPS,
+			candidateCell.InGrid(firstGrid),
+			firstPossibilityNum,
+			[]cellSet{cellSet{}},
+			[]map[*Cell]int{make(map[*Cell]int)})
 
-		//What numbers were put into the cells on the two branches
-		//(We can't use the cellSet because that only store bools)
-		firstAffectedCellMapping := make(map[*Cell]int)
-		secondAffectedCellMapping := make(map[*Cell]int)
+		secondAffectedCellSets, secondAffectedCellNums := chainSearcher(_MAX_IMPLICATION_STEPS,
+			candidateCell.InGrid(secondGrid),
+			secondPossibilityNum,
+			[]cellSet{cellSet{}},
+			[]map[*Cell]int{make(map[*Cell]int)})
 
-		firstCurrentCell := candidateCell.InGrid(firstGrid)
-		secondCurrentCell := candidateCell.InGrid(secondGrid)
+		//Check if the sets overlap.
 
-		for i := 0; i < _MAX_IMPLICATION_STEPS; i++ {
+		//Check pairwise through each of the result sets for each side and see if any overlap in an interestin way
 
-			//Don't do work if this branch is done
-			if firstCurrentCell != nil {
+		for i, theSet := range firstAffectedCellSets {
+			theCellMapping := firstAffectedCellNums[i]
+			for j, theSecondSet := range secondAffectedCellSets {
+				theSecondCellMapping := secondAffectedCellNums[j]
 
-				//Before we make the change, make sure the change will force
-				//another cell. (We don't just set it and see if there are any
-				//singleLegals in neigbhors because this technique is only
-				//concerned with CHAINS of cells that we bring into existence.
+				intersection := theSet.intersection(theSecondSet)
+				if len(intersection) > 0 {
+					//Okay, a cell overlapped... did they both set the same number?
+					//TODO: should we look at all items that overlap if it's greater than 1?
 
-				//Find the nextCells that will have their numbers forced by the cell we're thinking of fillint.
-				nextCells := firstCurrentCell.Neighbors().FilterByPossible(firstPossibilityNum).FilterByNumPossibilities(2)
+					cell := intersection.toSlice()[0]
 
-				if len(nextCells) == 1 {
+					if theCellMapping[cell] == theSecondCellMapping[cell] {
+						//Booyah, found a step.
 
-					cell := nextCells[0]
-					//TODO: really if more than one cell is affected that's fine, we should recursively handle all of those cells.
-					//(Although of course if no cells are affected then we should abandon this chain)
+						step := &SolveStep{self,
+							CellSlice{cell},
+							IntSlice{theCellMapping[cell]},
+							CellSlice{candidateCell},
+							candidateCell.Possibilities(),
+						}
 
-					//Okay, looks like we found a cell we're going to affect.
-					//Note that we're going to affect it.
-
-					firstAffectedCellSet = firstAffectedCellSet.union(cellSet{cell: true})
-
-					forcedNum := cell.Possibilities().Difference(IntSlice{firstPossibilityNum})[0]
-					firstAffectedCellMapping[cell] = forcedNum
-
-					//Make the change to the original set
-					firstCurrentCell.SetNumber(firstPossibilityNum)
-
-					//And update the one we're going to do next step
-					firstPossibilityNum = forcedNum
-					firstCurrentCell = cell
-
-				} else {
-					//Stop searching forward on this chain
-					firstCurrentCell = nil
-				}
-			}
-			if secondCurrentCell != nil {
-
-				//Before we make the change, make sure the change will force
-				//another cell. (We don't just set it and see if there are any
-				//singleLegals in neigbhors because this technique is only
-				//concerned with CHAINS of cells that we bring into existence.
-
-				//Find the nextCells that will have their numbers forced by the cell we're thinking of fillint.
-				nextCells := secondCurrentCell.Neighbors().FilterByPossible(secondPossibilityNum).FilterByNumPossibilities(2)
-
-				if len(nextCells) == 1 {
-
-					cell := nextCells[0]
-					//TODO: really if more than one cell is affected that's fine, we should recursively handle all of those cells.
-					//(Although of course if no cells are affected then we should abandon this chain)
-
-					//Okay, looks like we found a cell we're going to affect.
-					//Note that we're going to affect it.
-
-					secondAffectedCellSet = secondAffectedCellSet.union(cellSet{cell: true})
-
-					forcedNum := cell.Possibilities().Difference(IntSlice{secondPossibilityNum})[0]
-					secondAffectedCellMapping[cell] = forcedNum
-
-					//Make the change to the original set
-					secondCurrentCell.SetNumber(secondPossibilityNum)
-
-					//And update the one we're going to do next step
-					secondPossibilityNum = forcedNum
-					secondCurrentCell = cell
-
-				} else {
-					//Stop searching forward on this chain
-					secondCurrentCell = nil
-				}
-			}
-
-			//Check if the sets overlap.
-
-			intersection := firstAffectedCellSet.intersection(secondAffectedCellSet)
-			if len(intersection) > 0 {
-				//Okay, a cell overlapped... did they both set the same number?
-				//TODO: should we look at all items that overlap if it's greater than 1?
-
-				cell := intersection.toSlice()[0]
-
-				if firstAffectedCellMapping[cell] == secondAffectedCellMapping[cell] {
-					//Booyah, found a step.
-
-					step := &SolveStep{self,
-						CellSlice{cell},
-						IntSlice{firstAffectedCellMapping[cell]},
-						CellSlice{candidateCell},
-						candidateCell.Possibilities(),
-					}
-
-					if step.IsUseful(grid) {
-						select {
-						case results <- step:
-						case <-done:
-							return
+						if step.IsUseful(grid) {
+							select {
+							case results <- step:
+							case <-done:
+								return
+							}
 						}
 					}
 				}
+
 			}
 		}
 
 	}
+}
+
+func chainSearcher(i int, cell *Cell, numToApply int, affectedCellSetsSoFar []cellSet, affectedCellNumsSoFar []map[*Cell]int) (affectedCellSets []cellSet, affectedCellNums []map[*Cell]int) {
+	if i <= 0 || cell == nil {
+		//Base case
+		return affectedCellSetsSoFar, affectedCellNumsSoFar
+	}
+
+	if len(affectedCellSetsSoFar) != len(affectedCellNumsSoFar) {
+		panic("Mismatched sizes of arrays to chainSearcher")
+	}
+
+	var resultAffectedCellSets []cellSet
+	var resultAffectedCellNums []map[*Cell]int
+
+	for k, affectedCellSet := range affectedCellSetsSoFar {
+
+		//Before we make the change, make sure the change will force
+		//another cell. (We don't just set it and see if there are any
+		//singleLegals in neigbhors because this technique is only
+		//concerned with CHAINS of cells that we bring into existence.
+
+		affectedCellNums := affectedCellNumsSoFar[k]
+
+		//Find the nextCells that will have their numbers forced by the cell we're thinking of fillint.
+		for j, nextCell := range cell.Neighbors().FilterByPossible(numToApply).FilterByNumPossibilities(2) {
+			forcedNum := nextCell.Possibilities().Difference(IntSlice{numToApply})[0]
+
+			var newAffectedNums map[*Cell]int
+
+			//If it's not the first one, we're effectively branching.
+			if j == 0 {
+				newAffectedNums = affectedCellNums
+
+			} else {
+				newGrid := nextCell.grid.Copy()
+				nextCell = nextCell.InGrid(newGrid)
+
+				newAffectedNums = make(map[*Cell]int)
+
+				for key, val := range affectedCellNums {
+					newAffectedNums[key] = val
+				}
+
+			}
+
+			newAffectedNums[nextCell] = forcedNum
+
+			nextCell.SetNumber(forcedNum)
+
+			theAffectedCellSets, theAffectedCellNums := chainSearcher(i-1,
+				nextCell,
+				forcedNum,
+				[]cellSet{affectedCellSet.union(cellSet{nextCell: true})},
+				[]map[*Cell]int{newAffectedNums})
+
+			resultAffectedCellSets = append(resultAffectedCellSets, theAffectedCellSets...)
+			resultAffectedCellNums = append(resultAffectedCellNums, theAffectedCellNums...)
+		}
+	}
+	return resultAffectedCellSets, resultAffectedCellNums
+
 }
