@@ -282,6 +282,14 @@ func init() {
 				2,
 			},
 		},
+		&forcingChainsTechnique{
+			&basicSolveTechnique{
+				"Forcing Chain",
+				true,
+				_GROUP_NONE,
+				2,
+			},
+		},
 		&hiddenSubsetTechnique{
 			&basicSolveTechnique{
 				"Hidden Triple Row",
