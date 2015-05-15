@@ -87,31 +87,41 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		firstAccumulator.accumulateGenerations()
 		secondAccumulator.accumulateGenerations()
 
-		//Check for any overlap at the last generation
-		firstAffectedCells := firstAccumulator[0].filledNumbers
-		secondAffectedCells := secondAccumulator[0].filledNumbers
+		foundOne := false
 
-		for key, val := range firstAffectedCells {
-			if num, ok := secondAffectedCells[key]; ok {
-				//Found cell overlap! ... is the forced number the same?
-				if val == num {
-					//Yup, seems like we've found a cell that is forced to the same value on either branch.
-					step := &SolveStep{self,
-						CellSlice{key.Cell(grid)},
-						IntSlice{val},
-						CellSlice{candidateCell},
-						candidateCell.Possibilities(),
-					}
+		for generation := _MAX_IMPLICATION_STEPS - 1; generation >= 0 && !foundOne; generation-- {
 
-					if doPrint {
-						log.Println(step)
-					}
+			if doPrint {
+				log.Println(generation)
+			}
 
-					if step.IsUseful(grid) {
-						select {
-						case results <- step:
-						case <-done:
-							return
+			//Check for any overlap at the last generation
+			firstAffectedCells := firstAccumulator[generation].filledNumbers
+			secondAffectedCells := secondAccumulator[generation].filledNumbers
+
+			for key, val := range firstAffectedCells {
+				if num, ok := secondAffectedCells[key]; ok {
+					//Found cell overlap! ... is the forced number the same?
+					if val == num {
+						//Yup, seems like we've found a cell that is forced to the same value on either branch.
+						step := &SolveStep{self,
+							CellSlice{key.Cell(grid)},
+							IntSlice{val},
+							CellSlice{candidateCell},
+							candidateCell.Possibilities(),
+						}
+
+						if doPrint {
+							log.Println(step)
+						}
+
+						if step.IsUseful(grid) {
+							foundOne = true
+							select {
+							case results <- step:
+							case <-done:
+								return
+							}
 						}
 					}
 				}
