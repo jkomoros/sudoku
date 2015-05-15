@@ -169,27 +169,6 @@ func (c chainSearcherAccumulator) String() string {
 	return result
 }
 
-//accumulateGenerations goes through each generation (youngest to newest)
-//and squaches older generation maps into each generation, so each
-//generation's map represents the totality of all cells seen at that point.
-func (c chainSearcherAccumulator) accumulateGenerations() {
-	for i := len(c) - 2; i >= 0; i-- {
-		lastGeneration := c[i+1]
-		currentGeneration := c[i]
-		for key, val := range lastGeneration {
-			if currentVal, ok := currentGeneration[key]; ok {
-				if currentVal != val {
-					//No, this should be expected to happen when we get to an invalid grid state,
-					//which we should expect to happen down one of the two branches (at least as explore
-					//far enough.)
-					log.Println("We were about to overwrite a value from an earlier generation... this shouldn't happen.")
-				}
-			}
-			currentGeneration[key] = val
-		}
-	}
-}
-
 func makeChainSeacherAccumulator(size int) chainSearcherAccumulator {
 	result := make(chainSearcherAccumulator, size)
 	for i := 0; i < size; i++ {
