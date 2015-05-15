@@ -190,13 +190,8 @@ func (c chainSearcherAccumulator) addGeneration() chainSearcherAccumulator {
 
 func chainSearcher(maxGeneration int, cell *Cell, numToApply int) chainSearcherAccumulator {
 
-	//TODO: rename the i paramater to max generations
-	//TODO: generations should count UP, not down.
-
 	//Chainsearcher implements a BFS over implications forward given the starting point.
 	//It collects its results in the provided chainSearcherAccumulator.
-
-	//TODO: why doesn't this just return its own chainSearcherAccumulator.
 
 	//the first time we cross over into a new generation, we should do a one-time copy of the old generation
 	//into the new.
