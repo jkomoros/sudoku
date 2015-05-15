@@ -100,6 +100,12 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 			secondAffectedCells := secondAccumulator[generation].filledNumbers
 
 			for key, val := range firstAffectedCells {
+
+				//Skip the candidateCell, because that's not a meaningful overlap--we set that one as a way of branching!
+				if key == candidateCell.ref() {
+					continue
+				}
+
 				if num, ok := secondAffectedCells[key]; ok {
 					//Found cell overlap! ... is the forced number the same?
 					if val == num {
