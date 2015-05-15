@@ -90,9 +90,7 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 		//See if either branch, at some generation, has the same cell forced to the same number in either generation.
 
-		foundOne := false
-
-		for generation := 0; generation < len(firstAccumulator) && !foundOne; generation++ {
+		for generation := 0; generation < len(firstAccumulator); generation++ {
 
 			//Check for any overlap at the last generation
 			firstAffectedCells := firstAccumulator[generation]
@@ -122,7 +120,6 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 						}
 
 						if step.IsUseful(grid) {
-							foundOne = true
 							if doPrint {
 								log.Println("Found solution on generation: ", generation)
 							}
