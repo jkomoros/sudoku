@@ -128,6 +128,9 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 			}
 		}
 
+		//TODO: we should prefer solutions where the total implications on both branches are minimized.
+		//For example, if only one implication is requried on left, but 4 are on right, that's preferable to one where
+		//three implications are required on both sides.
 		//TODO: do we really need the cellSet? (if we remove it, add a note to remove it from cellslice.go)
 		//TODO: figure out a way to only compute a generation if required on each branch (don't compute all the way to _MAX_IMPLICATIONS to start)
 
