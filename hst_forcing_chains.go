@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"container/list"
 	"fmt"
 	"log"
 	"strconv"
@@ -203,49 +204,83 @@ func makeChainSeacherAccumulator(size int) chainSearcherAccumulator {
 
 func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherAccumulator) {
 
-	//TODO: we should change this implementation so that it's not DFS but BFS.
+	//Chainsearcher implements a BFS over implications forward given the starting point.
+	//It collects its results in the provided chainSearcherAccumulator.
+
+	//TODO: why doesn't this just return its own chainSearcherAccumulator.
+
 	//the first time we cross over into a new generation, we should do a one-time copy of the old generation
 	//into the new.
 	//At any write, if we notice that we'd be overwriting to a different value, we can bail out (how would
 	//we mark that we bailed early), since we've run into an inconsistency down this branch and following
 	//it further is not useful.
 
-	if i <= 0 || cell == nil {
-		//Base case
-		return
+	type modificationToMake struct {
+		generation int
+		cell       *Cell
+		numToApply int
 	}
 
-	if i-1 >= len(accumulator) {
-		panic("The accumulator provided was not big enough for the i provided.")
-	}
+	workSteps := list.New()
 
-	generationDetails := accumulator[i-1]
+	//Add the first workstep.
+	workSteps.PushBack(modificationToMake{
+		i,
+		cell,
+		numToApply,
+	})
 
-	//Find the nextCells that WILL have their numbers forced by the cell we're thinking of fillint.
-	cellsToVisit := cell.Neighbors().FilterByPossible(numToApply).FilterByNumPossibilities(2)
+	var step modificationToMake
 
-	//Now that we know which cells will be affected and what their next number will be,
-	//set the number in the given cell and then recurse downward down each branch.
-	cell.SetNumber(numToApply)
+	e := workSteps.Front()
 
-	generationDetails[cell.ref()] = numToApply
+	for e != nil {
 
-	for _, cellToVisit := range cellsToVisit {
+		workSteps.Remove(e)
 
-		possibilities := cellToVisit.Possibilities()
-
-		if len(possibilities) != 1 {
-			panic("Expected the cell to have one possibility")
+		switch t := e.Value.(type) {
+		case modificationToMake:
+			step = t
+		default:
+			panic("Found unexpected type in workSteps list")
 		}
 
-		forcedNum := possibilities[0]
+		if step.generation <= 0 {
+			break
+		}
 
-		//Each branch modifies the grid, so create a new copy
-		newGrid := cellToVisit.grid.Copy()
-		cellToVisit = cellToVisit.InGrid(newGrid)
+		generationDetails := accumulator[step.generation-1]
 
-		//Recurse downward
-		chainSearcher(i-1, cellToVisit, forcedNum, accumulator)
+		//TODO: Check here if we crossed a generation boundary. If so, accumulate last generation.
+		cellsToVisit := step.cell.Neighbors().FilterByPossible(step.numToApply).FilterByNumPossibilities(2)
+
+		step.cell.SetNumber(step.numToApply)
+
+		//TODO: check here if we're overwriting a value; if so, don't process anymore work steps.
+		generationDetails[step.cell.ref()] = step.numToApply
+
+		for _, cellToVisit := range cellsToVisit {
+			possibilities := cellToVisit.Possibilities()
+
+			if len(possibilities) != 1 {
+				panic("Expected the cell to have one possibility")
+			}
+
+			forcedNum := possibilities[0]
+
+			//Each branch modifies the grid, so create a new copy
+			newGrid := cellToVisit.grid.Copy()
+			cellToVisit = cellToVisit.InGrid(newGrid)
+
+			workSteps.PushBack(modificationToMake{
+				step.generation - 1,
+				cellToVisit,
+				forcedNum,
+			})
+
+		}
+
+		e = workSteps.Front()
 
 	}
 
