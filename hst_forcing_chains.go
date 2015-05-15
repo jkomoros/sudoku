@@ -1,5 +1,9 @@
 package sudoku
 
+import (
+	"log"
+)
+
 type forcingChainsTechnique struct {
 	*basicSolveTechnique
 }
@@ -52,118 +56,123 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 		//Check that the neighbor isn't just already having a single possibility, because then this technique is overkill.
 
-		firstAffectedCellSets, firstAffectedCellNums := chainSearcher(_MAX_IMPLICATION_STEPS,
+		firstAccumulator := makeChainSeacherAccumulator(_MAX_IMPLICATION_STEPS)
+		secondAccumulator := makeChainSeacherAccumulator(_MAX_IMPLICATION_STEPS)
+
+		chainSearcher(_MAX_IMPLICATION_STEPS,
 			candidateCell.InGrid(firstGrid),
 			firstPossibilityNum,
-			[]cellSet{cellSet{}},
-			[]map[*Cell]int{make(map[*Cell]int)})
+			firstAccumulator)
 
-		secondAffectedCellSets, secondAffectedCellNums := chainSearcher(_MAX_IMPLICATION_STEPS,
+		chainSearcher(_MAX_IMPLICATION_STEPS,
 			candidateCell.InGrid(secondGrid),
 			secondPossibilityNum,
-			[]cellSet{cellSet{}},
-			[]map[*Cell]int{make(map[*Cell]int)})
+			secondAccumulator)
 
-		//Check if the sets overlap.
+		//TODO:Check if the sets overlap.
 
-		//Check pairwise through each of the result sets for each side and see if any overlap in an interestin way
+		log.Println(firstAccumulator)
+		log.Println(secondAccumulator)
 
-		for i, theSet := range firstAffectedCellSets {
-			theCellMapping := firstAffectedCellNums[i]
-			for j, theSecondSet := range secondAffectedCellSets {
-				theSecondCellMapping := secondAffectedCellNums[j]
+		/*
+			//Check pairwise through each of the result sets for each side and see if any overlap in an interestin way
 
-				intersection := theSet.intersection(theSecondSet)
-				if len(intersection) > 0 {
-					//Okay, a cell overlapped... did they both set the same number?
-					//TODO: should we look at all items that overlap if it's greater than 1?
+			for i, theSet := range firstAffectedCellSets {
+				theCellMapping := firstAffectedCellNums[i]
+				for j, theSecondSet := range secondAffectedCellSets {
+					theSecondCellMapping := secondAffectedCellNums[j]
 
-					cell := intersection.toSlice()[0]
+					intersection := theSet.intersection(theSecondSet)
+					if len(intersection) > 0 {
+						//Okay, a cell overlapped... did they both set the same number?
+						//TODO: should we look at all items that overlap if it's greater than 1?
 
-					if theCellMapping[cell] == theSecondCellMapping[cell] {
-						//Booyah, found a step.
+						cell := intersection.toSlice()[0]
 
-						step := &SolveStep{self,
-							CellSlice{cell},
-							IntSlice{theCellMapping[cell]},
-							CellSlice{candidateCell},
-							candidateCell.Possibilities(),
-						}
+						if theCellMapping[cell] == theSecondCellMapping[cell] {
+							//Booyah, found a step.
 
-						if step.IsUseful(grid) {
-							select {
-							case results <- step:
-							case <-done:
-								return
+							step := &SolveStep{self,
+								CellSlice{cell},
+								IntSlice{theCellMapping[cell]},
+								CellSlice{candidateCell},
+								candidateCell.Possibilities(),
+							}
+
+							if step.IsUseful(grid) {
+								select {
+								case results <- step:
+								case <-done:
+									return
+								}
 							}
 						}
 					}
-				}
 
+				}
 			}
-		}
+		*/
 
 	}
 }
 
-func chainSearcher(i int, cell *Cell, numToApply int, affectedCellSetsSoFar []cellSet, affectedCellNumsSoFar []map[*Cell]int) (affectedCellSets []cellSet, affectedCellNums []map[*Cell]int) {
-	if i <= 0 || cell == nil {
-		//Base case
-		return affectedCellSetsSoFar, affectedCellNumsSoFar
-	}
+type chainSearcherGenerationDetails struct {
+	affectedCells cellSet
+	filledNumbers map[*Cell]int
+}
 
-	if len(affectedCellSetsSoFar) != len(affectedCellNumsSoFar) {
-		panic("Mismatched sizes of arrays to chainSearcher")
-	}
+type chainSearcherAccumulator []*chainSearcherGenerationDetails
 
-	var resultAffectedCellSets []cellSet
-	var resultAffectedCellNums []map[*Cell]int
-
-	for k, affectedCellSet := range affectedCellSetsSoFar {
-
-		//Before we make the change, make sure the change will force
-		//another cell. (We don't just set it and see if there are any
-		//singleLegals in neigbhors because this technique is only
-		//concerned with CHAINS of cells that we bring into existence.
-
-		affectedCellNums := affectedCellNumsSoFar[k]
-
-		//Find the nextCells that will have their numbers forced by the cell we're thinking of fillint.
-		for j, nextCell := range cell.Neighbors().FilterByPossible(numToApply).FilterByNumPossibilities(2) {
-			forcedNum := nextCell.Possibilities().Difference(IntSlice{numToApply})[0]
-
-			var newAffectedNums map[*Cell]int
-
-			//If it's not the first one, we're effectively branching.
-			if j == 0 {
-				newAffectedNums = affectedCellNums
-
-			} else {
-				newGrid := nextCell.grid.Copy()
-				nextCell = nextCell.InGrid(newGrid)
-
-				newAffectedNums = make(map[*Cell]int)
-
-				for key, val := range affectedCellNums {
-					newAffectedNums[key] = val
-				}
-
-			}
-
-			newAffectedNums[nextCell] = forcedNum
-
-			nextCell.SetNumber(forcedNum)
-
-			theAffectedCellSets, theAffectedCellNums := chainSearcher(i-1,
-				nextCell,
-				forcedNum,
-				[]cellSet{affectedCellSet.union(cellSet{nextCell: true})},
-				[]map[*Cell]int{newAffectedNums})
-
-			resultAffectedCellSets = append(resultAffectedCellSets, theAffectedCellSets...)
-			resultAffectedCellNums = append(resultAffectedCellNums, theAffectedCellNums...)
+func makeChainSeacherAccumulator(size int) chainSearcherAccumulator {
+	result := make(chainSearcherAccumulator, size)
+	for i := 0; i < size; i++ {
+		result[i] = &chainSearcherGenerationDetails{
+			affectedCells: make(cellSet),
+			filledNumbers: make(map[*Cell]int),
 		}
 	}
-	return resultAffectedCellSets, resultAffectedCellNums
+	return result
+}
+
+func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherAccumulator) {
+	if i <= 0 || cell == nil {
+		//Base case
+		return
+	}
+
+	if i-1 >= len(accumulator) {
+		panic("The accumulator provided was not big enough for the i provided.")
+	}
+
+	generationDetails := accumulator[i-1]
+
+	//Find the nextCells that WILL have their numbers forced by the cell we're thinking of fillint.
+	cellsToVisit := cell.Neighbors().FilterByPossible(numToApply).FilterByNumPossibilities(2)
+
+	//Now that we know which cells will be affected and what their next number will be,
+	//set the number in the given cell and then recurse downward down each branch.
+	cell.SetNumber(numToApply)
+
+	generationDetails.affectedCells[cell] = true
+	generationDetails.filledNumbers[cell] = numToApply
+
+	for _, cellToVisit := range cellsToVisit {
+
+		possibilities := cellToVisit.Possibilities()
+
+		if len(possibilities) != 1 {
+			panic("Expected the cell to have one possibility")
+		}
+
+		forcedNum := possibilities[0]
+
+		//Each branch modifies the grid, so create a new copy
+		newGrid := cellToVisit.grid.Copy()
+		cellToVisit = cellToVisit.InGrid(newGrid)
+
+		//Recurse downward
+		chainSearcher(i-1, cellToVisit, forcedNum, accumulator)
+
+	}
 
 }
