@@ -144,6 +144,8 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		//TODO: figure out why the printed output does not return the same steps (different order is fine).
 		//Does this mean there's some unexpected non-deterministic behavior in chainSearcher? Perhaps in the precise moment we
 		//notice an inconsistency and stop searching more?
+		//The problem seems to be down the eventually-inconsistent branch. Depending on order we visit, we get either 8 or 9
+		//cells seen. Probably the right answer is to throw out the entire last generation if any inconsitency found.
 
 	}
 }
