@@ -79,6 +79,10 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 			log.Println(secondAccumulator)
 		}
 
+		//See if either branch, at some generation, has the same cell forced to the same number in either generation.
+
+		//TODO: do we really need the cellSet? (if we remove it, add a note to remove it from cellslice.go)
+
 		/*
 			//Check pairwise through each of the result sets for each side and see if any overlap in an interestin way
 
@@ -146,6 +150,19 @@ func (c chainSearcherAccumulator) String() string {
 	}
 	result += "]\n"
 	return result
+}
+
+//accumulateGenerations goes through each generation (youngest to newest)
+//and squaches older generation maps into each generation, so each
+//generation's map represents the totality of all cells seen at that point.
+func (c chainSearcherAccumulator) accumulateGenerations() {
+	for i := len(c) - 2; i >= 0; i-- {
+		lastGeneration := c[i+1]
+		currentGeneration := c[i]
+		for key, val := range lastGeneration {
+			currentGeneration[key] = val
+		}
+	}
 }
 
 func makeChainSeacherAccumulator(size int) chainSearcherAccumulator {
