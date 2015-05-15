@@ -389,9 +389,9 @@ func TestCellSetBasicOperations(t *testing.T) {
 	two := twoSlice.toCellSet()
 	three := threeSlice.toCellSet()
 
-	oneGolden := cellSet{cellOne: true, cellTwo: true}
-	twoGolden := cellSet{cellThree: true}
-	threeGolden := cellSet{cellTwo: true, cellThree: true}
+	oneGolden := cellSet{cellOne.ref(): true, cellTwo.ref(): true}
+	twoGolden := cellSet{cellThree.ref(): true}
+	threeGolden := cellSet{cellTwo.ref(): true, cellThree.ref(): true}
 
 	if !reflect.DeepEqual(one, oneGolden) {
 		t.Fatal("Creating cellSet failed. Got", one, "wanted", oneGolden)
@@ -413,19 +413,19 @@ func TestCellSetBasicOperations(t *testing.T) {
 
 	oneThreeIntersection := one.intersection(three)
 
-	if !reflect.DeepEqual(oneThreeIntersection, cellSet{cellTwo: true}) {
+	if !reflect.DeepEqual(oneThreeIntersection, cellSet{cellTwo.ref(): true}) {
 		t.Error("One three intersection failed. Got: ", oneThreeIntersection)
 	}
 
 	oneTwoUnion := one.union(two)
 
-	if !reflect.DeepEqual(oneTwoUnion, cellSet{cellOne: true, cellTwo: true, cellThree: true}) {
+	if !reflect.DeepEqual(oneTwoUnion, cellSet{cellOne.ref(): true, cellTwo.ref(): true, cellThree.ref(): true}) {
 		t.Error("One two union failed. Got: ", oneTwoUnion)
 	}
 
 	oneThreeUnion := one.union(three)
 
-	if !reflect.DeepEqual(oneThreeUnion, cellSet{cellOne: true, cellTwo: true, cellThree: true}) {
+	if !reflect.DeepEqual(oneThreeUnion, cellSet{cellOne.ref(): true, cellTwo.ref(): true, cellThree.ref(): true}) {
 		t.Error("One three union failed. Got: ", oneThreeUnion)
 	}
 
@@ -437,7 +437,7 @@ func TestCellSetBasicOperations(t *testing.T) {
 
 	oneThreeDifference := one.difference(three)
 
-	if !reflect.DeepEqual(oneThreeDifference, cellSet{cellOne: true}) {
+	if !reflect.DeepEqual(oneThreeDifference, cellSet{cellOne.ref(): true}) {
 		t.Error("One three difference failed. Got: ", oneThreeDifference)
 	}
 

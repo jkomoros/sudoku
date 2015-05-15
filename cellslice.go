@@ -17,7 +17,7 @@ type stringSlice []string
 
 type intSet map[int]bool
 
-type cellSet map[*Cell]bool
+type cellSet map[cellRef]bool
 
 type cellRef struct {
 	row int
@@ -522,7 +522,7 @@ func (self IntSlice) toIntSet() intSet {
 func (self CellSlice) toCellSet() cellSet {
 	result := make(cellSet)
 	for _, item := range self {
-		result[item] = true
+		result[item.ref()] = true
 	}
 	return result
 }
@@ -537,11 +537,11 @@ func (self intSet) toSlice() IntSlice {
 	return result
 }
 
-func (self cellSet) toSlice() CellSlice {
+func (self cellSet) toSlice(grid *Grid) CellSlice {
 	var result CellSlice
 	for item, val := range self {
 		if val {
-			result = append(result, item)
+			result = append(result, item.Cell(grid))
 		}
 	}
 	return result

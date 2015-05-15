@@ -123,7 +123,7 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 type chainSearcherGenerationDetails struct {
 	affectedCells cellSet
-	filledNumbers map[*Cell]int
+	filledNumbers map[cellRef]int
 }
 
 func (c chainSearcherGenerationDetails) String() string {
@@ -151,7 +151,7 @@ func makeChainSeacherAccumulator(size int) chainSearcherAccumulator {
 	for i := 0; i < size; i++ {
 		result[i] = &chainSearcherGenerationDetails{
 			affectedCells: make(cellSet),
-			filledNumbers: make(map[*Cell]int),
+			filledNumbers: make(map[cellRef]int),
 		}
 	}
 	return result
@@ -176,8 +176,8 @@ func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherA
 	//set the number in the given cell and then recurse downward down each branch.
 	cell.SetNumber(numToApply)
 
-	generationDetails.affectedCells[cell] = true
-	generationDetails.filledNumbers[cell] = numToApply
+	generationDetails.affectedCells[cell.ref()] = true
+	generationDetails.filledNumbers[cell.ref()] = numToApply
 
 	for _, cellToVisit := range cellsToVisit {
 
