@@ -73,8 +73,10 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 		//TODO:Check if the sets overlap.
 
+		doPrint := candidateCell.Row() == 1 && candidateCell.Col() == 0
+
 		//For these debugging purposes, only print out the candidateCell we know to be interesting in the test case.
-		if candidateCell.Row() == 1 && candidateCell.Col() == 0 {
+		if doPrint {
 			log.Println(firstAccumulator)
 			log.Println(secondAccumulator)
 		}
@@ -99,6 +101,10 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 						IntSlice{val},
 						CellSlice{candidateCell},
 						candidateCell.Possibilities(),
+					}
+
+					if doPrint {
+						log.Println(step)
 					}
 
 					if step.IsUseful(grid) {
