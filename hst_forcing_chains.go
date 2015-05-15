@@ -1,7 +1,9 @@
 package sudoku
 
 import (
+	"fmt"
 	"log"
+	"strconv"
 )
 
 type forcingChainsTechnique struct {
@@ -121,7 +123,25 @@ type chainSearcherGenerationDetails struct {
 	filledNumbers map[*Cell]int
 }
 
+func (c chainSearcherGenerationDetails) String() string {
+	result := "Begin map\n"
+	for cell, num := range c.filledNumbers {
+		result += "\t" + cell.String() + " : " + strconv.Itoa(num) + "\n"
+	}
+	result += "End map\n"
+	return result
+}
+
 type chainSearcherAccumulator []*chainSearcherGenerationDetails
+
+func (c chainSearcherAccumulator) String() string {
+	result := "Accumulator[\n"
+	for _, rec := range c {
+		result += fmt.Sprintf("%s\n", rec)
+	}
+	result += "]\n"
+	return result
+}
 
 func makeChainSeacherAccumulator(size int) chainSearcherAccumulator {
 	result := make(chainSearcherAccumulator, size)
