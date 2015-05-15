@@ -87,6 +87,12 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		firstAccumulator.accumulateGenerations()
 		secondAccumulator.accumulateGenerations()
 
+		if doPrint {
+			log.Println("Accumulators after accumulating generations:")
+			log.Println(firstAccumulator)
+			log.Println(secondAccumulator)
+		}
+
 		foundOne := false
 
 		for generation := _MAX_IMPLICATION_STEPS - 1; generation >= 0 && !foundOne; generation-- {
