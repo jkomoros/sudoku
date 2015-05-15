@@ -182,6 +182,9 @@ func (c chainSearcherAccumulator) accumulateGenerations() {
 		for key, val := range lastGeneration {
 			if currentVal, ok := currentGeneration[key]; ok {
 				if currentVal != val {
+					//No, this should be expected to happen when we get to an invalid grid state,
+					//which we should expect to happen down one of the two branches (at least as explore
+					//far enough.)
 					log.Println("We were about to overwrite a value from an earlier generation... this shouldn't happen.")
 				}
 			}
