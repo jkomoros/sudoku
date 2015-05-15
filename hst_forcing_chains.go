@@ -243,7 +243,13 @@ func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherA
 
 		step.cell.SetNumber(step.numToApply)
 
-		//TODO: check here if we're overwriting a value; if so, don't process anymore work steps.
+		if currentVal, ok := generationDetails[step.cell.ref()]; ok {
+			if currentVal != step.numToApply {
+				//Found a contradiction! We can bail from processing any more because this branch leads inexorably
+				//to a contradiction.
+				return
+			}
+		}
 		generationDetails[step.cell.ref()] = step.numToApply
 
 		for _, cellToVisit := range cellsToVisit {
