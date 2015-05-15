@@ -59,18 +59,13 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 		//Check that the neighbor isn't just already having a single possibility, because then this technique is overkill.
 
-		firstAccumulator := makeChainSeacherAccumulator(_MAX_IMPLICATION_STEPS)
-		secondAccumulator := makeChainSeacherAccumulator(_MAX_IMPLICATION_STEPS)
-
-		chainSearcher(_MAX_IMPLICATION_STEPS,
+		firstAccumulator := chainSearcher(_MAX_IMPLICATION_STEPS,
 			candidateCell.InGrid(firstGrid),
-			firstPossibilityNum,
-			firstAccumulator)
+			firstPossibilityNum)
 
-		chainSearcher(_MAX_IMPLICATION_STEPS,
+		secondAccumulator := chainSearcher(_MAX_IMPLICATION_STEPS,
 			candidateCell.InGrid(secondGrid),
-			secondPossibilityNum,
-			secondAccumulator)
+			secondPossibilityNum)
 
 		//TODO:Check if the sets overlap.
 
@@ -92,7 +87,7 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 		foundOne := false
 
-		for generation := _MAX_IMPLICATION_STEPS - 1; generation >= 0 && !foundOne; generation-- {
+		for generation := 0; generation < _MAX_IMPLICATION_STEPS && !foundOne; generation++ {
 
 			//Check for any overlap at the last generation
 			firstAffectedCells := firstAccumulator[generation]
@@ -169,15 +164,20 @@ func (c chainSearcherAccumulator) String() string {
 	return result
 }
 
-func makeChainSeacherAccumulator(size int) chainSearcherAccumulator {
-	result := make(chainSearcherAccumulator, size)
-	for i := 0; i < size; i++ {
-		result[i] = make(map[cellRef]int)
+func (c chainSearcherAccumulator) addGeneration() chainSearcherAccumulator {
+	newGeneration := make(chainSearcherGenerationDetails)
+	result := append(c, newGeneration)
+	if len(result) > 1 {
+		oldGeneration := result[len(result)-2]
+		//Accumulate forward old generation
+		for key, val := range oldGeneration {
+			newGeneration[key] = val
+		}
 	}
 	return result
 }
 
-func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherAccumulator) {
+func chainSearcher(maxGeneration int, cell *Cell, numToApply int) chainSearcherAccumulator {
 
 	//TODO: rename the i paramater to max generations
 	//TODO: generations should count UP, not down.
@@ -199,11 +199,13 @@ func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherA
 		numToApply int
 	}
 
+	var result chainSearcherAccumulator
+
 	workSteps := list.New()
 
 	//Add the first workstep.
 	workSteps.PushBack(modificationToMake{
-		i,
+		0,
 		cell,
 		numToApply,
 	})
@@ -211,8 +213,6 @@ func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherA
 	var step modificationToMake
 
 	e := workSteps.Front()
-
-	lastSeenGeneration := i
 
 	for e != nil {
 
@@ -225,19 +225,15 @@ func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherA
 			panic("Found unexpected type in workSteps list")
 		}
 
-		if step.generation <= 0 {
+		if step.generation > maxGeneration {
 			break
 		}
 
-		generationDetails := accumulator[step.generation-1]
-
-		if step.generation != lastSeenGeneration {
-			//We just crossed the generation boundary. Copy the generation above's data into ours before we start populating it.
-			lastGenerationDetails := accumulator[step.generation]
-			for key, val := range lastGenerationDetails {
-				generationDetails[key] = val
-			}
+		for len(result) < step.generation+1 {
+			result = result.addGeneration()
 		}
+
+		generationDetails := result[step.generation]
 
 		cellsToVisit := step.cell.Neighbors().FilterByPossible(step.numToApply).FilterByNumPossibilities(2)
 
@@ -247,7 +243,7 @@ func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherA
 			if currentVal != step.numToApply {
 				//Found a contradiction! We can bail from processing any more because this branch leads inexorably
 				//to a contradiction.
-				return
+				return result
 			}
 		}
 		generationDetails[step.cell.ref()] = step.numToApply
@@ -266,7 +262,7 @@ func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherA
 			cellToVisit = cellToVisit.InGrid(newGrid)
 
 			workSteps.PushBack(modificationToMake{
-				step.generation - 1,
+				step.generation + 1,
 				cellToVisit,
 				forcedNum,
 			})
@@ -276,5 +272,7 @@ func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherA
 		e = workSteps.Front()
 
 	}
+
+	return result
 
 }
