@@ -91,10 +91,6 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 		for generation := _MAX_IMPLICATION_STEPS - 1; generation >= 0 && !foundOne; generation-- {
 
-			if doPrint {
-				log.Println(generation)
-			}
-
 			//Check for any overlap at the last generation
 			firstAffectedCells := firstAccumulator[generation].filledNumbers
 			secondAffectedCells := secondAccumulator[generation].filledNumbers
@@ -119,10 +115,14 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 						if doPrint {
 							log.Println(step)
+							log.Println("Candidate Cell", candidateCell.ref())
 						}
 
 						if step.IsUseful(grid) {
 							foundOne = true
+							if doPrint {
+								log.Println("Found solution on generation: ", generation)
+							}
 							select {
 							case results <- step:
 							case <-done:
