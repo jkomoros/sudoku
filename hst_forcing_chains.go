@@ -82,6 +82,8 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		/*
 			//Check pairwise through each of the result sets for each side and see if any overlap in an interestin way
 
+			//TODO: figure out a way to only compute a generation if required on each branch (don't compute all the way to _MAX_IMPLICATIONS to start)
+
 			for i, theSet := range firstAffectedCellSets {
 				theCellMapping := firstAffectedCellNums[i]
 				for j, theSecondSet := range secondAffectedCellSets {
