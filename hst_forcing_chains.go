@@ -84,10 +84,6 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 		//See if either branch, at some generation, has the same cell forced to the same number in either generation.
 
-		//accumulate forward, so the last generation has ALL cells affected in any generation on that branch
-		firstAccumulator.accumulateGenerations()
-		secondAccumulator.accumulateGenerations()
-
 		if doPrint {
 			log.Println("Accumulators after accumulating generations:")
 			log.Println(firstAccumulator)
@@ -204,6 +200,9 @@ func makeChainSeacherAccumulator(size int) chainSearcherAccumulator {
 
 func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherAccumulator) {
 
+	//TODO: rename the i paramater to max generations
+	//TODO: generations should count UP, not down.
+
 	//Chainsearcher implements a BFS over implications forward given the starting point.
 	//It collects its results in the provided chainSearcherAccumulator.
 
@@ -234,6 +233,8 @@ func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherA
 
 	e := workSteps.Front()
 
+	lastSeenGeneration := i
+
 	for e != nil {
 
 		workSteps.Remove(e)
@@ -251,7 +252,14 @@ func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherA
 
 		generationDetails := accumulator[step.generation-1]
 
-		//TODO: Check here if we crossed a generation boundary. If so, accumulate last generation.
+		if step.generation != lastSeenGeneration {
+			//We just crossed the generation boundary. Copy the generation above's data into ours before we start populating it.
+			lastGenerationDetails := accumulator[step.generation]
+			for key, val := range lastGenerationDetails {
+				generationDetails[key] = val
+			}
+		}
+
 		cellsToVisit := step.cell.Neighbors().FilterByPossible(step.numToApply).FilterByNumPossibilities(2)
 
 		step.cell.SetNumber(step.numToApply)
