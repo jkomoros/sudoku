@@ -17,6 +17,8 @@ type stringSlice []string
 
 type intSet map[int]bool
 
+//TODO: consider removing cellSet, since it's not actually used anywhere
+//(it was built for forcing_chains, but we ended up not using it there)
 type cellSet map[cellRef]bool
 
 type cellRef struct {

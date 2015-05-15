@@ -92,8 +92,8 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		for generation := _MAX_IMPLICATION_STEPS - 1; generation >= 0 && !foundOne; generation-- {
 
 			//Check for any overlap at the last generation
-			firstAffectedCells := firstAccumulator[generation].filledNumbers
-			secondAffectedCells := secondAccumulator[generation].filledNumbers
+			firstAffectedCells := firstAccumulator[generation]
+			secondAffectedCells := secondAccumulator[generation]
 
 			for key, val := range firstAffectedCells {
 
@@ -137,27 +137,23 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		//TODO: we should prefer solutions where the total implications on both branches are minimized.
 		//For example, if only one implication is requried on left, but 4 are on right, that's preferable to one where
 		//three implications are required on both sides.
-		//TODO: do we really need the cellSet? (if we remove it, add a note to remove it from cellslice.go)
 		//TODO: figure out a way to only compute a generation if required on each branch (don't compute all the way to _MAX_IMPLICATIONS to start)
 
 	}
 }
 
-type chainSearcherGenerationDetails struct {
-	affectedCells cellSet
-	filledNumbers map[cellRef]int
-}
+type chainSearcherGenerationDetails map[cellRef]int
 
 func (c chainSearcherGenerationDetails) String() string {
 	result := "Begin map\n"
-	for cell, num := range c.filledNumbers {
+	for cell, num := range c {
 		result += "\t" + cell.String() + " : " + strconv.Itoa(num) + "\n"
 	}
 	result += "End map\n"
 	return result
 }
 
-type chainSearcherAccumulator []*chainSearcherGenerationDetails
+type chainSearcherAccumulator []chainSearcherGenerationDetails
 
 func (c chainSearcherAccumulator) String() string {
 	result := "Accumulator[\n"
@@ -173,8 +169,8 @@ func (c chainSearcherAccumulator) String() string {
 //generation's map represents the totality of all cells seen at that point.
 func (c chainSearcherAccumulator) accumulateGenerations() {
 	for i := len(c) - 2; i >= 0; i-- {
-		lastGeneration := c[i+1].filledNumbers
-		currentGeneration := c[i].filledNumbers
+		lastGeneration := c[i+1]
+		currentGeneration := c[i]
 		for key, val := range lastGeneration {
 			currentGeneration[key] = val
 		}
@@ -184,10 +180,7 @@ func (c chainSearcherAccumulator) accumulateGenerations() {
 func makeChainSeacherAccumulator(size int) chainSearcherAccumulator {
 	result := make(chainSearcherAccumulator, size)
 	for i := 0; i < size; i++ {
-		result[i] = &chainSearcherGenerationDetails{
-			affectedCells: make(cellSet),
-			filledNumbers: make(map[cellRef]int),
-		}
+		result[i] = make(map[cellRef]int)
 	}
 	return result
 }
@@ -211,8 +204,7 @@ func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherA
 	//set the number in the given cell and then recurse downward down each branch.
 	cell.SetNumber(numToApply)
 
-	generationDetails.affectedCells[cell.ref()] = true
-	generationDetails.filledNumbers[cell.ref()] = numToApply
+	generationDetails[cell.ref()] = numToApply
 
 	for _, cellToVisit := range cellsToVisit {
 
