@@ -90,12 +90,6 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 		//See if either branch, at some generation, has the same cell forced to the same number in either generation.
 
-		if doPrint {
-			log.Println("Accumulators after accumulating generations:")
-			log.Println(firstAccumulator)
-			log.Println(secondAccumulator)
-		}
-
 		foundOne := false
 
 		for generation := 0; generation < len(firstAccumulator) && !foundOne; generation++ {
