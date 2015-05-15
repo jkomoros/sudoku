@@ -81,48 +81,39 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 		//See if either branch, at some generation, has the same cell forced to the same number in either generation.
 
-		//TODO: do we really need the cellSet? (if we remove it, add a note to remove it from cellslice.go)
+		//accumulate forward, so the last generation has ALL cells affected in any generation on that branch
+		firstAccumulator.accumulateGenerations()
+		secondAccumulator.accumulateGenerations()
 
-		/*
-			//Check pairwise through each of the result sets for each side and see if any overlap in an interestin way
+		//Check for any overlap at the last generation
+		firstAffectedCells := firstAccumulator[0].filledNumbers
+		secondAffectedCells := secondAccumulator[0].filledNumbers
 
-			//TODO: figure out a way to only compute a generation if required on each branch (don't compute all the way to _MAX_IMPLICATIONS to start)
-
-			for i, theSet := range firstAffectedCellSets {
-				theCellMapping := firstAffectedCellNums[i]
-				for j, theSecondSet := range secondAffectedCellSets {
-					theSecondCellMapping := secondAffectedCellNums[j]
-
-					intersection := theSet.intersection(theSecondSet)
-					if len(intersection) > 0 {
-						//Okay, a cell overlapped... did they both set the same number?
-						//TODO: should we look at all items that overlap if it's greater than 1?
-
-						cell := intersection.toSlice()[0]
-
-						if theCellMapping[cell] == theSecondCellMapping[cell] {
-							//Booyah, found a step.
-
-							step := &SolveStep{self,
-								CellSlice{cell},
-								IntSlice{theCellMapping[cell]},
-								CellSlice{candidateCell},
-								candidateCell.Possibilities(),
-							}
-
-							if step.IsUseful(grid) {
-								select {
-								case results <- step:
-								case <-done:
-									return
-								}
-							}
-						}
+		for key, val := range firstAffectedCells {
+			if num, ok := secondAffectedCells[key]; ok {
+				//Found cell overlap! ... is the forced number the same?
+				if val == num {
+					//Yup, seems like we've found a cell that is forced to the same value on either branch.
+					step := &SolveStep{self,
+						CellSlice{key.Cell(grid)},
+						IntSlice{val},
+						CellSlice{candidateCell},
+						candidateCell.Possibilities(),
 					}
 
+					if step.IsUseful(grid) {
+						select {
+						case results <- step:
+						case <-done:
+							return
+						}
+					}
 				}
 			}
-		*/
+		}
+
+		//TODO: do we really need the cellSet? (if we remove it, add a note to remove it from cellslice.go)
+		//TODO: figure out a way to only compute a generation if required on each branch (don't compute all the way to _MAX_IMPLICATIONS to start)
 
 	}
 }
@@ -157,8 +148,8 @@ func (c chainSearcherAccumulator) String() string {
 //generation's map represents the totality of all cells seen at that point.
 func (c chainSearcherAccumulator) accumulateGenerations() {
 	for i := len(c) - 2; i >= 0; i-- {
-		lastGeneration := c[i+1]
-		currentGeneration := c[i]
+		lastGeneration := c[i+1].filledNumbers
+		currentGeneration := c[i].filledNumbers
 		for key, val := range lastGeneration {
 			currentGeneration[key] = val
 		}
