@@ -141,12 +141,6 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		//three implications are required on both sides.
 		//TODO: figure out a way to only compute a generation if required on each branch (don't compute all the way to _MAX_IMPLICATIONS to start)
 
-		//TODO: figure out why the printed output does not return the same steps (different order is fine).
-		//Does this mean there's some unexpected non-deterministic behavior in chainSearcher? Perhaps in the precise moment we
-		//notice an inconsistency and stop searching more?
-		//The problem seems to be down the eventually-inconsistent branch. Depending on order we visit, we get either 8 or 9
-		//cells seen. Probably the right answer is to throw out the entire last generation if any inconsitency found.
-
 	}
 }
 
@@ -246,7 +240,10 @@ func chainSearcher(maxGeneration int, cell *Cell, numToApply int) chainSearcherA
 			if currentVal != step.numToApply {
 				//Found a contradiction! We can bail from processing any more because this branch leads inexorably
 				//to a contradiction.
-				return result
+
+				//However, this last generation--the one we found the inconsistency in--needs to be thrown out.
+
+				return result[:len(result)-1]
 			}
 		}
 		generationDetails[step.cell.ref()] = step.numToApply
