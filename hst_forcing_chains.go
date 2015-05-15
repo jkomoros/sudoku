@@ -202,6 +202,14 @@ func makeChainSeacherAccumulator(size int) chainSearcherAccumulator {
 }
 
 func chainSearcher(i int, cell *Cell, numToApply int, accumulator chainSearcherAccumulator) {
+
+	//TODO: we should change this implementation so that it's not DFS but BFS.
+	//the first time we cross over into a new generation, we should do a one-time copy of the old generation
+	//into the new.
+	//At any write, if we notice that we'd be overwriting to a different value, we can bail out (how would
+	//we mark that we bailed early), since we've run into an inconsistency down this branch and following
+	//it further is not useful.
+
 	if i <= 0 || cell == nil {
 		//Base case
 		return
