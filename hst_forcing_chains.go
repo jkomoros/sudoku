@@ -141,6 +141,10 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		//three implications are required on both sides.
 		//TODO: figure out a way to only compute a generation if required on each branch (don't compute all the way to _MAX_IMPLICATIONS to start)
 
+		//TODO: figure out why the printed output does not return the same steps (different order is fine).
+		//Does this mean there's some unexpected non-deterministic behavior in chainSearcher? Perhaps in the precise moment we
+		//notice an inconsistency and stop searching more?
+
 	}
 }
 
