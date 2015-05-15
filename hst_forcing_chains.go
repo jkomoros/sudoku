@@ -150,7 +150,7 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 type chainSearcherGenerationDetails map[cellRef]int
 
 func (c chainSearcherGenerationDetails) String() string {
-	result := "Begin map\n"
+	result := "Begin map (length " + strconv.Itoa(len(c)) + ")\n"
 	for cell, num := range c {
 		result += "\t" + cell.String() + " : " + strconv.Itoa(num) + "\n"
 	}
