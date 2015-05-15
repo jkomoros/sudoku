@@ -67,6 +67,17 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 			candidateCell.InGrid(secondGrid),
 			secondPossibilityNum)
 
+		//Quick hack to make sure that firstAccumulator and secondAccumulator have same number of generations
+		//( even if they don't really)
+
+		for len(firstAccumulator) < len(secondAccumulator) {
+			firstAccumulator = firstAccumulator.addGeneration()
+		}
+
+		for len(secondAccumulator) < len(firstAccumulator) {
+			secondAccumulator = secondAccumulator.addGeneration()
+		}
+
 		//TODO:Check if the sets overlap.
 
 		doPrint := candidateCell.Row() == 1 && candidateCell.Col() == 0
@@ -87,7 +98,7 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 		foundOne := false
 
-		for generation := 0; generation < _MAX_IMPLICATION_STEPS && !foundOne; generation++ {
+		for generation := 0; generation < len(firstAccumulator) && !foundOne; generation++ {
 
 			//Check for any overlap at the last generation
 			firstAffectedCells := firstAccumulator[generation]
