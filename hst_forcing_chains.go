@@ -134,6 +134,8 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 			}
 		}
 
+		//TODO: figure out why the tests are coming back with different answers, even when only looking at the key cell
+		//that should work from the example.
 		//TODO: we should prefer solutions where the total implications on both branches are minimized.
 		//For example, if only one implication is requried on left, but 4 are on right, that's preferable to one where
 		//three implications are required on both sides.
