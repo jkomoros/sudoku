@@ -180,6 +180,11 @@ func (c chainSearcherAccumulator) accumulateGenerations() {
 		lastGeneration := c[i+1]
 		currentGeneration := c[i]
 		for key, val := range lastGeneration {
+			if currentVal, ok := currentGeneration[key]; ok {
+				if currentVal != val {
+					log.Println("We were about to overwrite a value from an earlier generation... this shouldn't happen.")
+				}
+			}
 			currentGeneration[key] = val
 		}
 	}
