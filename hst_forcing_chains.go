@@ -141,6 +141,10 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		//three implications are required on both sides.
 		//TODO: figure out a way to only compute a generation if required on each branch (don't compute all the way to _MAX_IMPLICATIONS to start)
 
+		//TODO: currently we pass back duplicates, so if we find a cell in generation 5, we will also
+		//return the same step in generation 6. Either keep track of cells and don't repeat, or do a
+		//better job comparing generations.
+
 	}
 }
 
