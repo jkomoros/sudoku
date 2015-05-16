@@ -67,19 +67,6 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 			candidateCell.InGrid(secondGrid),
 			secondPossibilityNum)
 
-		//Quick hack to make sure that firstAccumulator and secondAccumulator have same number of generations
-		//( even if they don't really)
-
-		for len(firstAccumulator) < len(secondAccumulator) {
-			firstAccumulator = firstAccumulator.addGeneration()
-		}
-
-		for len(secondAccumulator) < len(firstAccumulator) {
-			secondAccumulator = secondAccumulator.addGeneration()
-		}
-
-		//TODO:Check if the sets overlap.
-
 		doPrint := candidateCell.Row() == 1 && candidateCell.Col() == 0
 
 		//For these debugging purposes, only print out the candidateCell we know to be interesting in the test case.
@@ -90,43 +77,48 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 		//See if either branch, at some generation, has the same cell forced to the same number in either generation.
 
-		for generation := 0; generation < len(firstAccumulator); generation++ {
+		for firstGeneration := 0; firstGeneration < len(firstAccumulator); firstGeneration++ {
+			for secondGeneration := 0; secondGeneration < len(secondAccumulator); secondGeneration++ {
+				firstAffectedCells := firstAccumulator[firstGeneration]
+				secondAffectedCells := secondAccumulator[secondGeneration]
 
-			//Check for any overlap at the last generation
-			firstAffectedCells := firstAccumulator[generation]
-			secondAffectedCells := secondAccumulator[generation]
+				for key, val := range firstAffectedCells {
+					//Skip the candidateCell, because that's not a meaningful overlap--we set that one as a way of branching!
+					if key == candidateCell.ref() {
+						continue
+					}
 
-			for key, val := range firstAffectedCells {
-
-				//Skip the candidateCell, because that's not a meaningful overlap--we set that one as a way of branching!
-				if key == candidateCell.ref() {
-					continue
-				}
-
-				if num, ok := secondAffectedCells[key]; ok {
-					//Found cell overlap! ... is the forced number the same?
-					if val == num {
-						//Yup, seems like we've found a cell that is forced to the same value on either branch.
-						step := &SolveStep{self,
-							CellSlice{key.Cell(grid)},
-							IntSlice{val},
-							CellSlice{candidateCell},
-							candidateCell.Possibilities(),
-						}
-
-						if doPrint {
-							log.Println(step)
-							log.Println("Candidate Cell", candidateCell.ref())
-						}
-
-						if step.IsUseful(grid) {
-							if doPrint {
-								log.Println("Found solution on generation: ", generation)
+					if num, ok := secondAffectedCells[key]; ok {
+						//Found cell overlap! ... is the forced number the same?
+						if val == num {
+							//Yup, seems like we've found a cell that is forced to the same value on either branch.
+							step := &SolveStep{self,
+								CellSlice{key.Cell(grid)},
+								IntSlice{val},
+								CellSlice{candidateCell},
+								candidateCell.Possibilities(),
 							}
-							select {
-							case results <- step:
-							case <-done:
-								return
+
+							if doPrint {
+								log.Println(step)
+							}
+
+							if step.IsUseful(grid) {
+								if doPrint {
+									log.Println("Found solution on generation: ",
+										firstGeneration,
+										"+",
+										secondGeneration,
+										"=",
+										firstGeneration+secondGeneration,
+										"\n",
+									)
+								}
+								select {
+								case results <- step:
+								case <-done:
+									return
+								}
 							}
 						}
 					}
