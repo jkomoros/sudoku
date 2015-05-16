@@ -67,14 +67,6 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 			candidateCell.InGrid(secondGrid),
 			secondPossibilityNum)
 
-		doPrint := candidateCell.Row() == 1 && candidateCell.Col() == 0
-
-		//For these debugging purposes, only print out the candidateCell we know to be interesting in the test case.
-		if doPrint {
-			log.Println(firstAccumulator)
-			log.Println(secondAccumulator)
-		}
-
 		//Cells that we've already vended and shouldn't vend again if we find another
 		//TODO: figure out a better way to not vend duplicates. this method feels dirty.
 		vendedCells := make(map[cellRef]bool)
@@ -110,21 +102,8 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 								candidateCell.Possibilities(),
 							}
 
-							if doPrint {
-								log.Println(step)
-							}
-
 							if step.IsUseful(grid) {
-								if doPrint {
-									log.Println("Found solution on generation: ",
-										firstGeneration,
-										"+",
-										secondGeneration,
-										"=",
-										firstGeneration+secondGeneration,
-										"\n",
-									)
-								}
+								log.Println(step)
 								vendedCells[key] = true
 								select {
 								case results <- step:
