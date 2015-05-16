@@ -75,8 +75,17 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 			log.Println(secondAccumulator)
 		}
 
+		//Cells that we've already vended and shouldn't vend again if we find another
+		//TODO: figure out a better way to not vend duplicates. this method feels dirty.
+		vendedCells := make(map[cellRef]bool)
+		//don't vend the candidateCell; obviously both of the two branches will overlap on that one
+		//in generation0.
+		vendedCells[candidateCell.ref()] = true
+
 		//See if either branch, at some generation, has the same cell forced to the same number in either generation.
 
+		//TODO: visit the pairs of generations in such a way that the sum of the two generation counts
+		//goes up linearly. This might already happen... think harder about it.
 		for firstGeneration := 0; firstGeneration < len(firstAccumulator); firstGeneration++ {
 			for secondGeneration := 0; secondGeneration < len(secondAccumulator); secondGeneration++ {
 				firstAffectedCells := firstAccumulator[firstGeneration]
@@ -84,7 +93,9 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 				for key, val := range firstAffectedCells {
 					//Skip the candidateCell, because that's not a meaningful overlap--we set that one as a way of branching!
-					if key == candidateCell.ref() {
+
+					if _, ok := vendedCells[key]; ok {
+						//This is a cell we've already vended
 						continue
 					}
 
@@ -114,6 +125,7 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 										"\n",
 									)
 								}
+								vendedCells[key] = true
 								select {
 								case results <- step:
 								case <-done:
@@ -132,10 +144,6 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		//For example, if only one implication is requried on left, but 4 are on right, that's preferable to one where
 		//three implications are required on both sides.
 		//TODO: figure out a way to only compute a generation if required on each branch (don't compute all the way to _MAX_IMPLICATIONS to start)
-
-		//TODO: currently we pass back duplicates, so if we find a cell in generation 5, we will also
-		//return the same step in generation 6. Either keep track of cells and don't repeat, or do a
-		//better job comparing generations.
 
 		//TODO: ideally steps with a higher generation + generation score
 		//would be scored as higher diffiuclty maybe include a
