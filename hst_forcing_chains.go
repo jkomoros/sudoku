@@ -145,6 +145,14 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		//return the same step in generation 6. Either keep track of cells and don't repeat, or do a
 		//better job comparing generations.
 
+		//TODO: ideally steps with a higher generation + generation score
+		//would be scored as higher diffiuclty maybe include a
+		//difficultyMultiplier in SolveStep that we can fill in? Hmmm, but
+		//ideally it would factor  in at humanLikelihood level. Having a
+		//million different ForcingChainLength techniques would be a
+		//nightmare, peformance wise... unless there was a way to pass the
+		//work done in one technique to another.
+
 	}
 }
 
