@@ -17,11 +17,13 @@ func TestForcingChains(t *testing.T) {
 	//* In the forcing chain helper, calculate the steps once, then
 	//pass them in each time in a list of ~10 calls to solveTechniqueTEstHelper that we know are valid here.
 
-	//TODO: test description
-	options := solveTechniqueTestHelperOptions{
-		targetCells: []cellRef{{0, 1}},
-		targetNums:  IntSlice([]int{7}),
-		debugPrint:  true,
-	}
-	humanSolveTechniqueTestHelper(t, "forcingchain_test1.sdk", "Forcing Chain", options)
+	/*
+		//TODO: test description
+		options := solveTechniqueTestHelperOptions{
+			targetCells: []cellRef{{0, 1}},
+			targetNums:  IntSlice([]int{7}),
+			debugPrint:  true,
+		}
+		humanSolveTechniqueTestHelper(t, "forcingchain_test1.sdk", "Forcing Chain", options)
+	*/
 }
