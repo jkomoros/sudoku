@@ -7,8 +7,6 @@ import (
 func TestForcingChains(t *testing.T) {
 
 	//Steps to test this:
-	//* Configure humanSolveTechniqueHelper to have a checkAllSteps option, that if
-	//true will pull all steps from getSteps and check them.
 	//* create a stepsToCheck list of steps we can pass in to humanSolveTEchniqueHelper,
 	//so we can calculate it once and pass that in to the helper.
 	//* In the forcing chain helper, calculate the steps once, then

@@ -71,6 +71,8 @@ type solveTechniqueTestHelperOptions struct {
 	pointerNums  IntSlice
 	targetSame   cellGroupType
 	targetGroup  int
+	//If true, will loop over all steps from the technique and see if ANY of them match.
+	checkAllSteps bool
 	//If description provided, the description MUST match.
 	description string
 	//If descriptions provided, ONE of the descriptions must match.
@@ -129,7 +131,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		t.Fatal("Couldn't find technique object: ", techniqueName)
 	}
 
-	steps := getStepsForTechnique(solver, grid, false)
+	steps := getStepsForTechnique(solver, grid, options.checkAllSteps)
 
 	//Check if solveStep is nil here
 	if len(steps) == 0 {
