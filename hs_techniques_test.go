@@ -79,6 +79,37 @@ type solveTechniqueTestHelperOptions struct {
 	debugPrint   bool
 }
 
+func getStepsForTechnique(technique SolveTechnique, grid *Grid, fetchAll bool) []*SolveStep {
+
+	var steps []*SolveStep
+
+	results := make(chan *SolveStep, DIM*DIM)
+	done := make(chan bool)
+
+	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
+	go func() {
+		technique.Find(grid, results, done)
+		//Since we're the only technique running, as soon as this one returns, we can
+		//signal up that no more results are coming.
+		close(results)
+	}()
+
+	for step := range results {
+		steps = append(steps, step)
+		if !fetchAll {
+			//Signal to done if we can.
+			select {
+			case done <- true:
+			default:
+			}
+			break
+		}
+	}
+
+	return steps
+
+}
+
 func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueName string, options solveTechniqueTestHelperOptions) {
 	//TODO: test for col and block as well
 	grid := NewGrid()
@@ -98,148 +129,140 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		t.Fatal("Couldn't find technique object: ", techniqueName)
 	}
 
-	results := make(chan *SolveStep, DIM*DIM)
-	done := make(chan bool)
+	steps := getStepsForTechnique(solver, grid, false)
 
-	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
-	solver.Find(grid, results, done)
-
-	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
-	close(done)
-
-	var step *SolveStep
-
-	//TODO: test cases where we expectmultipel results...
-	select {
-	case step = <-results:
-	default:
+	//Check if solveStep is nil here
+	if len(steps) == 0 {
 		t.Fatal(techniqueName, " didn't find a cell it should have.")
 	}
 
-	if options.debugPrint {
-		log.Println(step)
-	}
+	for _, step := range steps {
 
-	if options.matchMode == solveTechniqueMatchModeAll {
-
-		//All must match
-
-		if options.targetCells != nil {
-			if !step.TargetCells.sameAsRefs(options.targetCells) {
-				t.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
-			}
-		}
-		if options.pointerCells != nil {
-			if !step.PointerCells.sameAsRefs(options.pointerCells) {
-				t.Error(techniqueName, " had the wrong pointer cells: ", step.PointerCells)
-			}
+		if options.debugPrint {
+			log.Println(step)
 		}
 
-		switch options.targetSame {
-		case _GROUP_ROW:
-			if !step.TargetCells.SameRow() || step.TargetCells.Row() != options.targetGroup {
-				t.Error("The target cells in the ", techniqueName, " were wrong row :", step.TargetCells.Row())
-			}
-		case _GROUP_BLOCK:
-			if !step.TargetCells.SameBlock() || step.TargetCells.Block() != options.targetGroup {
-				t.Error("The target cells in the ", techniqueName, " were wrong block :", step.TargetCells.Block())
-			}
-		case _GROUP_COL:
-			if !step.TargetCells.SameCol() || step.TargetCells.Col() != options.targetGroup {
-				t.Error("The target cells in the ", techniqueName, " were wrong col :", step.TargetCells.Col())
-			}
-		case _GROUP_NONE:
-			//Do nothing
-		default:
-			t.Error("human solve technique helper error: unsupported group type: ", options.targetSame)
-		}
+		if options.matchMode == solveTechniqueMatchModeAll {
 
-		if options.targetNums != nil {
-			if !step.TargetNums.SameContentAs(options.targetNums) {
-				t.Error(techniqueName, " found the wrong numbers: ", step.TargetNums)
+			//All must match
+
+			if options.targetCells != nil {
+				if !step.TargetCells.sameAsRefs(options.targetCells) {
+					t.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
+				}
 			}
-		}
-
-		if options.pointerNums != nil {
-			if !step.PointerNums.SameContentAs(options.pointerNums) {
-				t.Error(techniqueName, "found the wrong numbers:", step.PointerNums)
+			if options.pointerCells != nil {
+				if !step.PointerCells.sameAsRefs(options.pointerCells) {
+					t.Error(techniqueName, " had the wrong pointer cells: ", step.PointerCells)
+				}
 			}
-		}
-	} else if options.matchMode == solveTechniqueMatchModeAny {
 
-		foundMatch := false
+			switch options.targetSame {
+			case _GROUP_ROW:
+				if !step.TargetCells.SameRow() || step.TargetCells.Row() != options.targetGroup {
+					t.Error("The target cells in the ", techniqueName, " were wrong row :", step.TargetCells.Row())
+				}
+			case _GROUP_BLOCK:
+				if !step.TargetCells.SameBlock() || step.TargetCells.Block() != options.targetGroup {
+					t.Error("The target cells in the ", techniqueName, " were wrong block :", step.TargetCells.Block())
+				}
+			case _GROUP_COL:
+				if !step.TargetCells.SameCol() || step.TargetCells.Col() != options.targetGroup {
+					t.Error("The target cells in the ", techniqueName, " were wrong col :", step.TargetCells.Col())
+				}
+			case _GROUP_NONE:
+				//Do nothing
+			default:
+				t.Error("human solve technique helper error: unsupported group type: ", options.targetSame)
+			}
 
-		if options.targetCells != nil {
-			foundMatch = false
-			for _, ref := range options.targetCells {
-				for _, cell := range step.TargetCells {
-					if ref.Cell(grid) == cell {
-						//TODO: break out early
-						foundMatch = true
+			if options.targetNums != nil {
+				if !step.TargetNums.SameContentAs(options.targetNums) {
+					t.Error(techniqueName, " found the wrong numbers: ", step.TargetNums)
+				}
+			}
+
+			if options.pointerNums != nil {
+				if !step.PointerNums.SameContentAs(options.pointerNums) {
+					t.Error(techniqueName, "found the wrong numbers:", step.PointerNums)
+				}
+			}
+		} else if options.matchMode == solveTechniqueMatchModeAny {
+
+			foundMatch := false
+
+			if options.targetCells != nil {
+				foundMatch = false
+				for _, ref := range options.targetCells {
+					for _, cell := range step.TargetCells {
+						if ref.Cell(grid) == cell {
+							//TODO: break out early
+							foundMatch = true
+						}
 					}
+				}
+				if !foundMatch {
+					t.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
+				}
+			}
+			if options.pointerCells != nil {
+				t.Error("Pointer cells in match mode any not yet supported.")
+			}
+
+			if options.targetSame != _GROUP_NONE {
+				t.Error("Target Same in match mode any not yet supported.")
+			}
+
+			if options.targetNums != nil {
+				foundMatch = false
+				for _, targetNum := range options.targetNums {
+					for _, num := range step.TargetNums {
+						if targetNum == num {
+							foundMatch = true
+							//TODO: break early here.
+						}
+					}
+				}
+				if !foundMatch {
+					t.Error(techniqueName, " had the wrong target nums: ", step.TargetNums)
+				}
+			}
+
+			if options.pointerNums != nil {
+				foundMatch = false
+				for _, pointerNum := range options.pointerNums {
+					for _, num := range step.PointerNums {
+						if pointerNum == num {
+							foundMatch = true
+							//TODO: break early here
+						}
+					}
+				}
+				if !foundMatch {
+					t.Error(techniqueName, " had the wrong pointer nums: ", step.PointerNums)
+				}
+			}
+		}
+
+		if options.description != "" {
+			//Normalize the step so that the description will be stable for the test.
+			step.normalize()
+			description := solver.Description(step)
+			if description != options.description {
+				t.Error("Wrong description for ", techniqueName, ". Got:*", description, "* expected: *", options.description, "*")
+			}
+		} else if options.descriptions != nil {
+			foundMatch := false
+			step.normalize()
+			description := solver.Description(step)
+			for _, targetDescription := range options.descriptions {
+				if description == targetDescription {
+					foundMatch = true
 				}
 			}
 			if !foundMatch {
-				t.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
+				t.Error("No descriptions matched for ", techniqueName, ". Got:*", description)
 			}
-		}
-		if options.pointerCells != nil {
-			t.Error("Pointer cells in match mode any not yet supported.")
-		}
-
-		if options.targetSame != _GROUP_NONE {
-			t.Error("Target Same in match mode any not yet supported.")
-		}
-
-		if options.targetNums != nil {
-			foundMatch = false
-			for _, targetNum := range options.targetNums {
-				for _, num := range step.TargetNums {
-					if targetNum == num {
-						foundMatch = true
-						//TODO: break early here.
-					}
-				}
-			}
-			if !foundMatch {
-				t.Error(techniqueName, " had the wrong target nums: ", step.TargetNums)
-			}
-		}
-
-		if options.pointerNums != nil {
-			foundMatch = false
-			for _, pointerNum := range options.pointerNums {
-				for _, num := range step.PointerNums {
-					if pointerNum == num {
-						foundMatch = true
-						//TODO: break early here
-					}
-				}
-			}
-			if !foundMatch {
-				t.Error(techniqueName, " had the wrong pointer nums: ", step.PointerNums)
-			}
-		}
-	}
-
-	if options.description != "" {
-		//Normalize the step so that the description will be stable for the test.
-		step.normalize()
-		description := solver.Description(step)
-		if description != options.description {
-			t.Error("Wrong description for ", techniqueName, ". Got:*", description, "* expected: *", options.description, "*")
-		}
-	} else if options.descriptions != nil {
-		foundMatch := false
-		step.normalize()
-		description := solver.Description(step)
-		for _, targetDescription := range options.descriptions {
-			if description == targetDescription {
-				foundMatch = true
-			}
-		}
-		if !foundMatch {
-			t.Error("No descriptions matched for ", techniqueName, ". Got:*", description)
 		}
 	}
 

@@ -7,8 +7,6 @@ import (
 func TestForcingChains(t *testing.T) {
 
 	//Steps to test this:
-	//* Make a getSteps (all/one) util method for a grid and technique. it runs
-	//and returns either a one-len array or a full array of all options it found.
 	//* Use getSteps in humanSolveTechniqueHelper
 	//* Configure humanSolveTechniqueHelper to have a checkAllSteps option, that if
 	//true will pull all steps from getSteps and check them.
