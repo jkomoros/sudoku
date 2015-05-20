@@ -73,9 +73,14 @@ type solveTechniqueTestHelperOptions struct {
 	targetGroup  int
 	//If true, will loop over all steps from the technique and see if ANY of them match.
 	checkAllSteps bool
-	//A list of steps that you can provide to the helper if you don't want it to compute the steps
-	//to check, but you want to. This is useful in cases where you
-	stepsToCheck []*SolveStep
+	//A way to skip the step generator by provding your own list of steps.
+	//Useful if you're going to be do repeated calls to the test helper with the
+	//same list of steps.
+	stepsToCheck struct {
+		grid   *Grid
+		solver SolveTechnique
+		steps  []*SolveStep
+	}
 	//If description provided, the description MUST match.
 	description string
 	//If descriptions provided, ONE of the descriptions must match.
@@ -141,7 +146,17 @@ func humanSolveTechniqueTestHelperStepGenerator(t *testing.T, puzzleName string,
 func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueName string, options solveTechniqueTestHelperOptions) {
 	//TODO: test for col and block as well
 
-	grid, solver, steps := humanSolveTechniqueTestHelperStepGenerator(t, puzzleName, techniqueName, options)
+	var grid *Grid
+	var solver SolveTechnique
+	var steps []*SolveStep
+
+	if options.stepsToCheck.grid != nil {
+		grid = options.stepsToCheck.grid
+		solver = options.stepsToCheck.solver
+		steps = options.stepsToCheck.steps
+	} else {
+		grid, solver, steps = humanSolveTechniqueTestHelperStepGenerator(t, puzzleName, techniqueName, options)
+	}
 
 	//Check if solveStep is nil here
 	if len(steps) == 0 {
