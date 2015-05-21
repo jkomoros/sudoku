@@ -26,14 +26,18 @@ func TestForcingChains(t *testing.T) {
 	//up in the solve steps.
 
 	type loopOptions struct {
-		targetCells []cellRef
-		targetNums  IntSlice
+		targetCells  []cellRef
+		targetNums   IntSlice
+		pointerCells []cellRef
+		pointerNums  IntSlice
 	}
 
 	tests := []loopOptions{
 		{
-			targetCells: []cellRef{{0, 1}},
-			targetNums:  IntSlice([]int{7}),
+			targetCells:  []cellRef{{0, 1}},
+			targetNums:   IntSlice([]int{7}),
+			pointerCells: []cellRef{{1, 0}},
+			pointerNums:  IntSlice([]int{1, 2}),
 		},
 	}
 
@@ -42,6 +46,8 @@ func TestForcingChains(t *testing.T) {
 
 		options.targetCells = test.targetCells
 		options.targetNums = test.targetNums
+		options.pointerCells = test.pointerCells
+		options.pointerNums = test.pointerNums
 
 		humanSolveTechniqueTestHelper(t, "forcingchain_test1.sdk", "Forcing Chain", options)
 	}
