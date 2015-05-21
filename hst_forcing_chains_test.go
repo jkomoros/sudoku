@@ -13,7 +13,6 @@ func TestForcingChains(t *testing.T) {
 
 	options := solveTechniqueTestHelperOptions{
 		checkAllSteps: true,
-		debugPrint:    false,
 	}
 
 	grid, solver, steps := humanSolveTechniqueTestHelperStepGenerator(t,

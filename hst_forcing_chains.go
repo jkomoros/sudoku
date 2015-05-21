@@ -3,7 +3,6 @@ package sudoku
 import (
 	"container/list"
 	"fmt"
-	"log"
 	"strconv"
 )
 
@@ -103,7 +102,6 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 							}
 
 							if step.IsUseful(grid) {
-								log.Println(step)
 								vendedCells[key] = true
 								select {
 								case results <- step:
