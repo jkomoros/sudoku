@@ -25,12 +25,26 @@ func TestForcingChains(t *testing.T) {
 	//OK, now we'll walk through all of the options in a loop and make sure they all show
 	//up in the solve steps.
 
-	options.targetCells = []cellRef{{0, 1}}
-	options.targetNums = IntSlice([]int{7})
+	type loopOptions struct {
+		targetCells []cellRef
+		targetNums  IntSlice
+	}
 
-	//TODO: test description
+	tests := []loopOptions{
+		{
+			targetCells: []cellRef{{0, 1}},
+			targetNums:  IntSlice([]int{7}),
+		},
+	}
 
-	humanSolveTechniqueTestHelper(t, "forcingchain_test1.sdk", "Forcing Chain", options)
+	for _, test := range tests {
+		//TODO: test description
+
+		options.targetCells = test.targetCells
+		options.targetNums = test.targetNums
+
+		humanSolveTechniqueTestHelper(t, "forcingchain_test1.sdk", "Forcing Chain", options)
+	}
 
 	//TODO: test all other valid steps that could be found at this grid state for this technique.
 
