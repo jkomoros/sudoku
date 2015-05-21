@@ -50,8 +50,9 @@ func TestForcingChains(t *testing.T) {
 		},
 	}
 
-	//TODO: Test here if len(tests) == len(steps), t.Error if not. That makes sure we aren't getting
-	//EXTRA tests.
+	if len(tests) != len(steps) {
+		t.Error("We didn't have enough tests for all of the steps that forcing chains returned. Got", len(tests), "expected", len(steps))
+	}
 
 	for _, test := range tests {
 
