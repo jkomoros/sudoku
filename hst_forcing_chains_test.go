@@ -16,6 +16,7 @@ func TestForcingChains(t *testing.T) {
 		options := solveTechniqueTestHelperOptions{
 			targetCells: []cellRef{{0, 1}},
 			targetNums:  IntSlice([]int{7}),
+			checkAllSteps: true,
 			debugPrint:  true,
 		}
 		humanSolveTechniqueTestHelper(t, "forcingchain_test1.sdk", "Forcing Chain", options)
