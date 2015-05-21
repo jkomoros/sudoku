@@ -63,6 +63,7 @@ func TestForcingChains(t *testing.T) {
 			pointerCells: []cellRef{{7, 8}},
 			pointerNums:  IntSlice([]int{2, 7}),
 		},
+		//TODO: update this comment
 		//Skipping 0,1 / 7 / 5,7 / 1,3 because I think implications force it wrong.
 		//The reason is because there is an inconsistency down that branch... just one implication
 		//step beyond when it finds a match. Hmmmm... interesting test case.
@@ -111,6 +112,8 @@ func TestForcingChains(t *testing.T) {
 
 		//All of these are missing... what?
 		//Oh, we fail as soon as we notice they don't all match.
+		//We haven't seen this set again... flakey?
+		//Next step: do the manual check for a 'normal' run to see which is missing
 		// 0,6 /3 / 1,0 / 1,2
 		// 0,1 / 7 / 5,1 / 1,2
 		// 0,6 / 3 / 5,1 / 1,2
