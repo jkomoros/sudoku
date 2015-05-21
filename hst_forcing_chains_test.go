@@ -64,6 +64,12 @@ func TestForcingChains(t *testing.T) {
 			pointerNums:  IntSlice([]int{2, 7}),
 		},
 		//Skipping 0,1 / 7 / 5,7 / 1,3 because I think implications force it wrong.
+		{
+			targetCells:  []cellRef{{8, 3}},
+			targetNums:   IntSlice([]int{7}),
+			pointerCells: []cellRef{{5, 7}},
+			pointerNums:  IntSlice([]int{1, 3}),
+		},
 	}
 
 	if len(tests) != len(steps) {
