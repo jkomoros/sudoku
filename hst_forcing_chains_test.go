@@ -41,6 +41,12 @@ func TestForcingChains(t *testing.T) {
 			pointerNums:  IntSlice([]int{1, 2}),
 			description:  "cell (1,0) only has two options, 1 and 2, and if you put either one in and see the chain of implications it leads to, both ones end up with 7 in cell (0,1), so we can just fill that number in",
 		},
+		{
+			targetCells:  []cellRef{{1, 0}},
+			targetNums:   IntSlice([]int{1}),
+			pointerCells: []cellRef{{0, 6}},
+			pointerNums:  IntSlice([]int{3, 7}),
+		},
 	}
 
 	for _, test := range tests {
