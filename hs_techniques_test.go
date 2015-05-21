@@ -66,15 +66,15 @@ type loopTest struct {
 	lastMessage string
 }
 
-func (l loopTest) Reset() {
+func (l *loopTest) Reset() {
 	l.lastMessage = ""
 }
 
-func (l loopTest) Passed() bool {
+func (l *loopTest) Passed() bool {
 	return l.lastMessage == ""
 }
 
-func (l loopTest) Error(args ...interface{}) {
+func (l *loopTest) Error(args ...interface{}) {
 	if l.looping == false {
 		l.t.Error(args...)
 	} else {
@@ -197,7 +197,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 
 	//Instead of calling error on t, we'll call it on l. If we're not in checkAllSteps mode,
 	//l.Error() will be  pass through; otherwise we can interrogate it at any point in the loop.
-	l := loopTest{t: t, looping: options.checkAllSteps}
+	l := &loopTest{t: t, looping: options.checkAllSteps}
 
 	for _, step := range steps {
 
