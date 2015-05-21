@@ -153,13 +153,7 @@ func TestForcingChains(t *testing.T) {
 		t.Error("We didn't have enough tests for all of the steps that forcing chains returned. Got", len(tests), "expected", len(steps))
 	}
 
-	for i, test := range tests {
-
-		if i == 0 {
-			options.debugPrint = true
-		} else {
-			options.debugPrint = false
-		}
+	for _, test := range tests {
 
 		options.targetCells = test.targetCells
 		options.targetNums = test.targetNums
