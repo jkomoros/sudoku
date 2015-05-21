@@ -195,7 +195,13 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		t.Fatal(techniqueName, " didn't find a cell it should have.")
 	}
 
+	//Instead of calling error on t, we'll call it on l. If we're not in checkAllSteps mode,
+	//l.Error() will be  pass through; otherwise we can interrogate it at any point in the loop.
+	l := loopTest{t: t, looping: options.checkAllSteps}
+
 	for _, step := range steps {
+
+		l.Reset()
 
 		if options.debugPrint {
 			log.Println(step)
@@ -207,43 +213,43 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 
 			if options.targetCells != nil {
 				if !step.TargetCells.sameAsRefs(options.targetCells) {
-					t.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
+					l.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
 				}
 			}
 			if options.pointerCells != nil {
 				if !step.PointerCells.sameAsRefs(options.pointerCells) {
-					t.Error(techniqueName, " had the wrong pointer cells: ", step.PointerCells)
+					l.Error(techniqueName, " had the wrong pointer cells: ", step.PointerCells)
 				}
 			}
 
 			switch options.targetSame {
 			case _GROUP_ROW:
 				if !step.TargetCells.SameRow() || step.TargetCells.Row() != options.targetGroup {
-					t.Error("The target cells in the ", techniqueName, " were wrong row :", step.TargetCells.Row())
+					l.Error("The target cells in the ", techniqueName, " were wrong row :", step.TargetCells.Row())
 				}
 			case _GROUP_BLOCK:
 				if !step.TargetCells.SameBlock() || step.TargetCells.Block() != options.targetGroup {
-					t.Error("The target cells in the ", techniqueName, " were wrong block :", step.TargetCells.Block())
+					l.Error("The target cells in the ", techniqueName, " were wrong block :", step.TargetCells.Block())
 				}
 			case _GROUP_COL:
 				if !step.TargetCells.SameCol() || step.TargetCells.Col() != options.targetGroup {
-					t.Error("The target cells in the ", techniqueName, " were wrong col :", step.TargetCells.Col())
+					l.Error("The target cells in the ", techniqueName, " were wrong col :", step.TargetCells.Col())
 				}
 			case _GROUP_NONE:
 				//Do nothing
 			default:
-				t.Error("human solve technique helper error: unsupported group type: ", options.targetSame)
+				l.Error("human solve technique helper error: unsupported group type: ", options.targetSame)
 			}
 
 			if options.targetNums != nil {
 				if !step.TargetNums.SameContentAs(options.targetNums) {
-					t.Error(techniqueName, " found the wrong numbers: ", step.TargetNums)
+					l.Error(techniqueName, " found the wrong numbers: ", step.TargetNums)
 				}
 			}
 
 			if options.pointerNums != nil {
 				if !step.PointerNums.SameContentAs(options.pointerNums) {
-					t.Error(techniqueName, "found the wrong numbers:", step.PointerNums)
+					l.Error(techniqueName, "found the wrong numbers:", step.PointerNums)
 				}
 			}
 		} else if options.matchMode == solveTechniqueMatchModeAny {
@@ -261,15 +267,15 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 					}
 				}
 				if !foundMatch {
-					t.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
+					l.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
 				}
 			}
 			if options.pointerCells != nil {
-				t.Error("Pointer cells in match mode any not yet supported.")
+				l.Error("Pointer cells in match mode any not yet supported.")
 			}
 
 			if options.targetSame != _GROUP_NONE {
-				t.Error("Target Same in match mode any not yet supported.")
+				l.Error("Target Same in match mode any not yet supported.")
 			}
 
 			if options.targetNums != nil {
@@ -283,7 +289,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 					}
 				}
 				if !foundMatch {
-					t.Error(techniqueName, " had the wrong target nums: ", step.TargetNums)
+					l.Error(techniqueName, " had the wrong target nums: ", step.TargetNums)
 				}
 			}
 
@@ -298,7 +304,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 					}
 				}
 				if !foundMatch {
-					t.Error(techniqueName, " had the wrong pointer nums: ", step.PointerNums)
+					l.Error(techniqueName, " had the wrong pointer nums: ", step.PointerNums)
 				}
 			}
 		}
@@ -308,7 +314,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 			step.normalize()
 			description := solver.Description(step)
 			if description != options.description {
-				t.Error("Wrong description for ", techniqueName, ". Got:*", description, "* expected: *", options.description, "*")
+				l.Error("Wrong description for ", techniqueName, ". Got:*", description, "* expected: *", options.description, "*")
 			}
 		} else if options.descriptions != nil {
 			foundMatch := false
@@ -320,9 +326,17 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 				}
 			}
 			if !foundMatch {
-				t.Error("No descriptions matched for ", techniqueName, ". Got:*", description)
+				l.Error("No descriptions matched for ", techniqueName, ". Got:*", description)
 			}
 		}
+
+		if options.checkAllSteps && l.Passed() {
+			break
+		}
+	}
+
+	if !l.Passed() {
+		t.Error("No cells matched any of the options.")
 	}
 
 	//TODO: we should do exhaustive testing of SolveStep application. We used to test it here, but as long as targetCells and targetNums are correct it should be fine.
