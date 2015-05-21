@@ -70,6 +70,12 @@ func TestForcingChains(t *testing.T) {
 		//... I think they would, right? By definition one of hte branches leads to invalidity. This
 		//technique is about finding a universal before you find that invalidity.
 		{
+			targetCells:  []cellRef{{0, 1}},
+			targetNums:   IntSlice([]int{7}),
+			pointerCells: []cellRef{{5, 7}},
+			pointerNums:  IntSlice([]int{1, 3}),
+		},
+		{
 			targetCells:  []cellRef{{8, 3}},
 			targetNums:   IntSlice([]int{7}),
 			pointerCells: []cellRef{{5, 7}},
