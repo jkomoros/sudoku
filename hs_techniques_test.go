@@ -89,6 +89,8 @@ type solveTechniqueTestHelperOptions struct {
 	debugPrint   bool
 }
 
+//TODO: 97473c18633203a6eaa075d968ba77d85ba28390 introduced an error here where we don't return all techniques,
+//at least for forcing chains technique.
 func getStepsForTechnique(technique SolveTechnique, grid *Grid, fetchAll bool) []*SolveStep {
 
 	var steps []*SolveStep
