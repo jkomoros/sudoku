@@ -59,8 +59,10 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 //where at least one run through the loop must not Error for the whole test
 //to pass. Call t.Reset(), and at any time call Passed() to see if t.Error()
 //has been called since last reset.
+//Or, if looping is false, it's just a passthrough to t.Error.
 type loopTest struct {
 	t           *testing.T
+	looping     bool
 	lastMessage string
 }
 
@@ -73,7 +75,11 @@ func (l loopTest) Passed() bool {
 }
 
 func (l loopTest) Error(args ...interface{}) {
-	l.lastMessage = fmt.Sprint(args...)
+	if l.looping == false {
+		l.t.Error(args...)
+	} else {
+		l.lastMessage = fmt.Sprint(args...)
+	}
 }
 
 type solveTechniqueMatchMode int
