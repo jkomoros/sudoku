@@ -46,6 +46,7 @@ func TestForcingChains(t *testing.T) {
 			targetNums:   IntSlice([]int{1}),
 			pointerCells: []cellRef{{0, 6}},
 			pointerNums:  IntSlice([]int{3, 7}),
+			//Explicitly don't test description after the first one.
 		},
 	}
 
