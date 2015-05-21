@@ -13,7 +13,6 @@ func TestForcingChains(t *testing.T) {
 
 	options := solveTechniqueTestHelperOptions{
 		checkAllSteps: true,
-		debugPrint:    true,
 	}
 
 	grid, solver, steps := humanSolveTechniqueTestHelperStepGenerator(t,
@@ -142,7 +141,13 @@ func TestForcingChains(t *testing.T) {
 		t.Error("We didn't have enough tests for all of the steps that forcing chains returned. Got", len(tests), "expected", len(steps))
 	}
 
-	for _, test := range tests {
+	for i, test := range tests {
+
+		if i == 0 {
+			options.debugPrint = true
+		} else {
+			options.debugPrint = false
+		}
 
 		options.targetCells = test.targetCells
 		options.targetNums = test.targetNums
