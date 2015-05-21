@@ -30,6 +30,7 @@ func TestForcingChains(t *testing.T) {
 		targetNums   IntSlice
 		pointerCells []cellRef
 		pointerNums  IntSlice
+		description  string
 	}
 
 	tests := []loopOptions{
@@ -38,16 +39,17 @@ func TestForcingChains(t *testing.T) {
 			targetNums:   IntSlice([]int{7}),
 			pointerCells: []cellRef{{1, 0}},
 			pointerNums:  IntSlice([]int{1, 2}),
+			description:  "cell (1,0) only has two options, 1 and 2, and if you put either one in and see the chain of implications it leads to, both ones end up with 7 in cell (0,1), so we can just fill that number in",
 		},
 	}
 
 	for _, test := range tests {
-		//TODO: test description
 
 		options.targetCells = test.targetCells
 		options.targetNums = test.targetNums
 		options.pointerCells = test.pointerCells
 		options.pointerNums = test.pointerNums
+		options.description = test.description
 
 		humanSolveTechniqueTestHelper(t, "forcingchain_test1.sdk", "Forcing Chain", options)
 	}

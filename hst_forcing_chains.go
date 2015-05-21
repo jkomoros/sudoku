@@ -16,8 +16,7 @@ func (self *forcingChainsTechnique) HumanLikelihood() float64 {
 }
 
 func (self *forcingChainsTechnique) Description(step *SolveStep) string {
-	//TODO: implement this
-	return "ERROR: NOT IMPLEMENTED"
+	return fmt.Sprintf("cell %s only has two options, %s, and if you put either one in and see the chain of implications it leads to, both ones end up with %s in cell %s, so we can just fill that number in", step.PointerCells.Description(), step.PointerNums.Description(), step.TargetNums.Description(), step.TargetCells.Description())
 }
 
 func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
