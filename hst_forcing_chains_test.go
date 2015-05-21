@@ -109,6 +109,13 @@ func TestForcingChains(t *testing.T) {
 			pointerCells: []cellRef{{0, 6}},
 			pointerNums:  IntSlice([]int{3, 7}),
 		},
+		//Another particularly long one
+		{
+			targetCells:  []cellRef{{1, 0}},
+			targetNums:   IntSlice([]int{1}),
+			pointerCells: []cellRef{{0, 6}},
+			pointerNums:  IntSlice([]int{3, 7}),
+		},
 	}
 
 	if len(tests) != len(steps) {
