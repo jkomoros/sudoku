@@ -11,14 +11,28 @@ func TestForcingChains(t *testing.T) {
 	//pass them in each time in a list of ~10 calls to solveTechniqueTEstHelper that we know are valid here.
 	//* VERIFY MANUALLY that each step that is returned is actually a valid application of forcingchains.
 
-	/*
-		//TODO: test description
-		options := solveTechniqueTestHelperOptions{
-			targetCells: []cellRef{{0, 1}},
-			targetNums:  IntSlice([]int{7}),
-			checkAllSteps: true,
-			debugPrint:  true,
-		}
-		humanSolveTechniqueTestHelper(t, "forcingchain_test1.sdk", "Forcing Chain", options)
-	*/
+	options := solveTechniqueTestHelperOptions{
+		checkAllSteps: true,
+		debugPrint:    false,
+	}
+
+	grid, solver, steps := humanSolveTechniqueTestHelperStepGenerator(t,
+		"forcingchain_test1.sdk", "Forcing Chain", options)
+
+	options.stepsToCheck.grid = grid
+	options.stepsToCheck.solver = solver
+	options.stepsToCheck.steps = steps
+
+	//OK, now we'll walk through all of the options in a loop and make sure they all show
+	//up in the solve steps.
+
+	options.targetCells = []cellRef{{0, 1}}
+	options.targetNums = IntSlice([]int{7})
+
+	//TODO: test description
+
+	humanSolveTechniqueTestHelper(t, "forcingchain_test1.sdk", "Forcing Chain", options)
+
+	//TODO: test all other valid steps that could be found at this grid state for this technique.
+
 }
