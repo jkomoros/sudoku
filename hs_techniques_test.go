@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"fmt"
 	"log"
 	"testing"
 )
@@ -52,6 +53,27 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 			}
 		}
 	}
+}
+
+//multiTestWrapper wraps a testing.T and makes it possible to run loops
+//where at least one run through the loop must not Error for the whole test
+//to pass. Call t.Reset(), and at any time call Passed() to see if t.Error()
+//has been called since last reset.
+type loopTest struct {
+	t           *testing.T
+	lastMessage string
+}
+
+func (l loopTest) Reset() {
+	l.lastMessage = ""
+}
+
+func (l loopTest) Passed() bool {
+	return l.lastMessage == ""
+}
+
+func (l loopTest) Error(args ...interface{}) {
+	l.lastMessage = fmt.Sprint(args...)
 }
 
 type solveTechniqueMatchMode int
