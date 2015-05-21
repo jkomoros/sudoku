@@ -214,11 +214,13 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 			if options.targetCells != nil {
 				if !step.TargetCells.sameAsRefs(options.targetCells) {
 					l.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
+					continue
 				}
 			}
 			if options.pointerCells != nil {
 				if !step.PointerCells.sameAsRefs(options.pointerCells) {
 					l.Error(techniqueName, " had the wrong pointer cells: ", step.PointerCells)
+					continue
 				}
 			}
 
@@ -226,30 +228,36 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 			case _GROUP_ROW:
 				if !step.TargetCells.SameRow() || step.TargetCells.Row() != options.targetGroup {
 					l.Error("The target cells in the ", techniqueName, " were wrong row :", step.TargetCells.Row())
+					continue
 				}
 			case _GROUP_BLOCK:
 				if !step.TargetCells.SameBlock() || step.TargetCells.Block() != options.targetGroup {
 					l.Error("The target cells in the ", techniqueName, " were wrong block :", step.TargetCells.Block())
+					continue
 				}
 			case _GROUP_COL:
 				if !step.TargetCells.SameCol() || step.TargetCells.Col() != options.targetGroup {
 					l.Error("The target cells in the ", techniqueName, " were wrong col :", step.TargetCells.Col())
+					continue
 				}
 			case _GROUP_NONE:
 				//Do nothing
 			default:
 				l.Error("human solve technique helper error: unsupported group type: ", options.targetSame)
+				continue
 			}
 
 			if options.targetNums != nil {
 				if !step.TargetNums.SameContentAs(options.targetNums) {
 					l.Error(techniqueName, " found the wrong numbers: ", step.TargetNums)
+					continue
 				}
 			}
 
 			if options.pointerNums != nil {
 				if !step.PointerNums.SameContentAs(options.pointerNums) {
 					l.Error(techniqueName, "found the wrong numbers:", step.PointerNums)
+					continue
 				}
 			}
 		} else if options.matchMode == solveTechniqueMatchModeAny {
@@ -268,14 +276,17 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 				}
 				if !foundMatch {
 					l.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
+					continue
 				}
 			}
 			if options.pointerCells != nil {
 				l.Error("Pointer cells in match mode any not yet supported.")
+				continue
 			}
 
 			if options.targetSame != _GROUP_NONE {
 				l.Error("Target Same in match mode any not yet supported.")
+				continue
 			}
 
 			if options.targetNums != nil {
@@ -290,6 +301,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 				}
 				if !foundMatch {
 					l.Error(techniqueName, " had the wrong target nums: ", step.TargetNums)
+					continue
 				}
 			}
 
@@ -305,6 +317,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 				}
 				if !foundMatch {
 					l.Error(techniqueName, " had the wrong pointer nums: ", step.PointerNums)
+					continue
 				}
 			}
 		}
@@ -315,6 +328,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 			description := solver.Description(step)
 			if description != options.description {
 				l.Error("Wrong description for ", techniqueName, ". Got:*", description, "* expected: *", options.description, "*")
+				continue
 			}
 		} else if options.descriptions != nil {
 			foundMatch := false
@@ -327,6 +341,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 			}
 			if !foundMatch {
 				l.Error("No descriptions matched for ", techniqueName, ". Got:*", description)
+				continue
 			}
 		}
 
