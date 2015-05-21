@@ -99,7 +99,7 @@ func TestForcingChains(t *testing.T) {
 			targetCells:  []cellRef{{1, 0}},
 			targetNums:   IntSlice([]int{1}),
 			pointerCells: []cellRef{{0, 1}},
-			pointerNums:  IntSlice([]int{1, 2}),
+			pointerNums:  IntSlice([]int{2, 7}),
 		},
 		{
 			targetCells:  []cellRef{{5, 1}},
