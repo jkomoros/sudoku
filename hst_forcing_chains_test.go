@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"log"
 	"testing"
 )
 
@@ -107,6 +108,16 @@ func TestForcingChains(t *testing.T) {
 			pointerCells: []cellRef{{0, 1}},
 			pointerNums:  IntSlice([]int{2, 7}),
 		},
+
+		//All of these are missing... what?
+		//Oh, we fail as soon as we notice they don't all match.
+		// 0,6 /3 / 1,0 / 1,2
+		// 0,1 / 7 / 5,1 / 1,2
+		// 0,6 / 3 / 5,1 / 1,2
+		//8,3 / 7 / 8,7 / 1,2
+		// 0,1 /7 / 5,4 / 2,3
+		// 8,3 / 7 / 5,4 / 2,3
+
 		{
 			targetCells:  []cellRef{{0, 1}},
 			targetNums:   IntSlice([]int{7}),
@@ -149,8 +160,8 @@ func TestForcingChains(t *testing.T) {
 		},
 	}
 
-	if len(tests) != len(steps) {
-		t.Error("We didn't have enough tests for all of the steps that forcing chains returned. Got", len(tests), "expected", len(steps))
+	for _, step := range steps {
+		log.Println(step)
 	}
 
 	for _, test := range tests {
@@ -162,6 +173,10 @@ func TestForcingChains(t *testing.T) {
 		options.description = test.description
 
 		humanSolveTechniqueTestHelper(t, "forcingchain_test1.sdk", "Forcing Chain", options)
+	}
+
+	if len(tests) != len(steps) {
+		t.Error("We didn't have enough tests for all of the steps that forcing chains returned. Got", len(tests), "expected", len(steps))
 	}
 
 	//TODO: test all other valid steps that could be found at this grid state for this technique.
