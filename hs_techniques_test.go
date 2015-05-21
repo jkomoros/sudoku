@@ -144,6 +144,8 @@ func humanSolveTechniqueTestHelperStepGenerator(t *testing.T, puzzleName string,
 }
 
 func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueName string, options solveTechniqueTestHelperOptions) {
+	//TODO: it's weird that you have to pass in puzzleName a second time if you're also passing in options.
+
 	//TODO: test for col and block as well
 
 	var grid *Grid
