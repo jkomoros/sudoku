@@ -50,6 +50,9 @@ func TestForcingChains(t *testing.T) {
 		},
 	}
 
+	//TODO: Test here if len(tests) == len(steps), t.Error if not. That makes sure we aren't getting
+	//EXTRA tests.
+
 	for _, test := range tests {
 
 		options.targetCells = test.targetCells
