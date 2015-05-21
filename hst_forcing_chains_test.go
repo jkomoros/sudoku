@@ -13,6 +13,7 @@ func TestForcingChains(t *testing.T) {
 
 	options := solveTechniqueTestHelperOptions{
 		checkAllSteps: true,
+		debugPrint:    true,
 	}
 
 	grid, solver, steps := humanSolveTechniqueTestHelperStepGenerator(t,
@@ -47,6 +48,12 @@ func TestForcingChains(t *testing.T) {
 			pointerCells: []cellRef{{0, 6}},
 			pointerNums:  IntSlice([]int{3, 7}),
 			//Explicitly don't test description after the first one.
+		},
+		{
+			targetCells:  []cellRef{{5, 1}},
+			targetNums:   IntSlice([]int{1}),
+			pointerCells: []cellRef{{0, 6}},
+			pointerNums:  IntSlice([]int{3, 7}),
 		},
 	}
 
