@@ -63,6 +63,12 @@ func TestForcingChains(t *testing.T) {
 			pointerNums:  IntSlice([]int{2, 7}),
 		},
 		//Skipping 0,1 / 7 / 5,7 / 1,3 because I think implications force it wrong.
+		//The reason is because there is an inconsistency down that branch... just one implication
+		//step beyond when it finds a match. Hmmmm... interesting test case.
+		//Of course, the number being filled _IS_ right... is that a coincidence? I wondder
+		//if other ones in this set that I'm considering valid would ahve the same problem...
+		//... I think they would, right? By definition one of hte branches leads to invalidity. This
+		//technique is about finding a universal before you find that invalidity.
 		{
 			targetCells:  []cellRef{{8, 3}},
 			targetNums:   IntSlice([]int{7}),
