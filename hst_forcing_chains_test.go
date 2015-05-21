@@ -34,6 +34,8 @@ func TestForcingChains(t *testing.T) {
 		description  string
 	}
 
+	//Tester puzzle: http://www.komoroske.com/sudoku/index.php?puzzle=Q6Ur5iYGINSUFcyocqaY6G91DpttiqYz
+
 	tests := []loopOptions{
 		{
 			targetCells:  []cellRef{{0, 1}},
