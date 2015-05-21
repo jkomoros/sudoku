@@ -34,7 +34,7 @@ func TestForcingChains(t *testing.T) {
 		description  string
 	}
 
-	//Tester puzzle: http://www.komoroske.com/sudoku/index.php?puzzle=Q6Ur5iYGINSUFcyocqaY6G91DpttiqYz
+	//Tester puzzle: http://www.komoroske.com/sudoku/index.php?puzzle=Q6Ur5iYGINSUFcyocqaY6G91DpttiqYzs
 
 	tests := []loopOptions{
 		{
@@ -56,6 +56,12 @@ func TestForcingChains(t *testing.T) {
 			targetNums:   IntSlice([]int{1}),
 			pointerCells: []cellRef{{0, 6}},
 			pointerNums:  IntSlice([]int{3, 7}),
+		},
+		{
+			targetCells:  []cellRef{{8, 3}},
+			targetNums:   IntSlice([]int{7}),
+			pointerCells: []cellRef{{7, 8}},
+			pointerNums:  IntSlice([]int{2, 7}),
 		},
 	}
 
