@@ -96,6 +96,12 @@ func TestForcingChains(t *testing.T) {
 			pointerCells: []cellRef{{0, 1}},
 			pointerNums:  IntSlice([]int{2, 7}),
 		},
+		{
+			targetCells:  []cellRef{{0, 1}},
+			targetNums:   IntSlice([]int{7}),
+			pointerCells: []cellRef{{1, 0}},
+			pointerNums:  IntSlice([]int{1, 2}),
+		},
 	}
 
 	if len(tests) != len(steps) {
