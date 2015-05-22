@@ -21,7 +21,30 @@ func (self *forcingChainsTechnique) Description(step *SolveStep) string {
 
 func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 	//TODO: test that this will find multiple if they exist.
-	//TODO: Implement this.
+
+	/*
+	 * Conceptually this techinque chooses a cell with two possibilities
+	 * and explores forward along two branches, seeing what would happen
+	 * if it followed the simple implication chains forward to see if any
+	 * cells end up set to the same number on both branches, meaning
+	 * that no matter what, the cell will end up that value so you can set it
+	 * that way now. In some ways it's like a very easy form of guessing.
+	 *
+	 * This techinque will do a BFS forward from the chosen cell, and won't
+	 * explore more than _MAX_IMPLICATION_STEPS steps out from that. It will
+	 * stop exploring if it finds one of two types of contradictions:
+	 * 1) It notes that down this branch a single cell has had two different numbers
+	 * implicated into it, which implies that somewhere earlier we ran into some inconsistency
+	 * or
+	 * 2) As soon as we note an inconsistency (a cell with no legal values).
+	 *
+	 * It is important to note that for every sudoku with one solution (that is, all
+	 * legal puzzles), one of the two branches MUST lead to an inconsistency somewhere
+	 * it's just a matter of how forward you have to go before you find it. That means
+	 * that this technique is sensitive to the order in which you explore the frontiers
+	 * of implications and when you choose to bail.
+	 *
+	 */
 
 	getter := grid.queue().DefaultGetter()
 
