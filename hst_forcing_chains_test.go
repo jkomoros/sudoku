@@ -6,11 +6,6 @@ import (
 
 func TestForcingChains(t *testing.T) {
 
-	//Steps to test this:
-	//* In the forcing chain helper, calculate the steps once, then
-	//pass them in each time in a list of ~10 calls to solveTechniqueTEstHelper that we know are valid here.
-	//* VERIFY MANUALLY that each step that is returned is actually a valid application of forcingchains.
-
 	options := solveTechniqueTestHelperOptions{
 		checkAllSteps: true,
 	}
