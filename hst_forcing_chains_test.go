@@ -114,12 +114,18 @@ func TestForcingChains(t *testing.T) {
 		//Oh, we fail as soon as we notice they don't all match.
 		//We haven't seen this set again... flakey?
 		//Next step: do the manual check for a 'normal' run to see which is missing
-		// 0,6 /3 / 1,0 / 1,2
-		// 0,1 / 7 / 5,1 / 1,2
-		// 0,6 / 3 / 5,1 / 1,2
-		//8,3 / 7 / 8,7 / 1,2
-		// 0,1 /7 / 5,4 / 2,3
-		// 8,3 / 7 / 5,4 / 2,3
+		// 0,6 /3 / 1,0 / 1,2 *
+		// 0,1 / 7 / 5,1 / 1,2 *
+		// 0,6 / 3 / 5,1 / 1,2 *
+		//8,3 / 7 / 8,7 / 1,2 *
+		// 0,1 /7 / 5,4 / 2,3 *
+		// 8,3 / 7 / 5,4 / 2,3 *
+
+		//8,3 / 7 / 5,7 / 1,3
+
+		//Next step: look at the one's that AREN't in tests that are matching, see if they're valid.
+		//Also, it's very suspicious that there are always 17 steps returned, and some random subset
+		//of what I presume are all valid options.
 
 		{
 			targetCells:  []cellRef{{0, 1}},
