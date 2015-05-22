@@ -224,6 +224,16 @@ func chainSearcher(maxGeneration int, cell *Cell, numToApply int) chainSearcherA
 
 		step.cell.SetNumber(step.numToApply)
 
+		if cell.grid.Invalid() {
+			//Filling that cell make the grid invalid! We found a contradiction, no need to process
+			//this branch more.
+
+			//However, this last generation--the one we found the inconsistency in--needs to be
+			//thrown out.
+
+			return result[:len(result)-1]
+		}
+
 		if currentVal, ok := generationDetails[step.cell.ref()]; ok {
 			if currentVal != step.numToApply {
 				//Found a contradiction! We can bail from processing any more because this branch leads inexorably
@@ -234,6 +244,7 @@ func chainSearcher(maxGeneration int, cell *Cell, numToApply int) chainSearcherA
 				return result[:len(result)-1]
 			}
 		}
+
 		generationDetails[step.cell.ref()] = step.numToApply
 
 		for _, cellToVisit := range cellsToVisit {
