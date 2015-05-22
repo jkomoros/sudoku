@@ -98,11 +98,19 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		//See if either branch, at some generation, has the same cell forced to the same number in either generation.
 
 		//TODO: visit the pairs of generations in such a way that the sum of the two generation counts
-		//goes up linearly. This might already happen... think harder about it.
+		//goes up linearly, since we're going to skip any that together are too long.. ... but it's
+		//probably not a big deal since we'll skip early in the loop anyway.
 		for firstGeneration := 0; firstGeneration < len(firstAccumulator); firstGeneration++ {
 			for secondGeneration := 0; secondGeneration < len(secondAccumulator); secondGeneration++ {
 				firstAffectedCells := firstAccumulator[firstGeneration]
 				secondAffectedCells := secondAccumulator[secondGeneration]
+
+				//We calculated up to _MAX_IMPLICATION_STEPS down each branch,
+				//but we shouldn't return steps that require more than _MAX_IMPLICATION_STEPS
+				//down either branch, total.
+				if firstGeneration+secondGeneration > _MAX_IMPLICATION_STEPS+1 {
+					continue
+				}
 
 				for key, val := range firstAffectedCells {
 					//Skip the candidateCell, because that's not a meaningful overlap--we set that one as a way of branching!
@@ -139,9 +147,6 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 		//TODO: figure out why the tests are coming back with different answers, even when only looking at the key cell
 		//that should work from the example.
-		//TODO: we should prefer solutions where the total implications on both branches are minimized.
-		//For example, if only one implication is requried on left, but 4 are on right, that's preferable to one where
-		//three implications are required on both sides.
 		//TODO: figure out a way to only compute a generation if required on each branch (don't compute all the way to _MAX_IMPLICATIONS to start)
 
 		//TODO: ideally steps with a higher generation + generation score

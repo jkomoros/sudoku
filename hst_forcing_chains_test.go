@@ -64,12 +64,7 @@ func TestForcingChains(t *testing.T) {
 			pointerCells: []cellRef{{5, 7}},
 			pointerNums:  IntSlice([]int{1, 3}),
 		},
-		{
-			targetCells:  []cellRef{{0, 6}},
-			targetNums:   IntSlice([]int{3}),
-			pointerCells: []cellRef{{1, 0}},
-			pointerNums:  IntSlice([]int{1, 2}),
-		},
+
 		{
 			targetCells:  []cellRef{{0, 6}},
 			targetNums:   IntSlice([]int{3}),
@@ -125,19 +120,27 @@ func TestForcingChains(t *testing.T) {
 			pointerCells: []cellRef{{5, 7}},
 			pointerNums:  IntSlice([]int{1, 3}),
 		},
-		//Another particularly long one
-		{
-			targetCells:  []cellRef{{8, 3}},
-			targetNums:   IntSlice([]int{7}),
-			pointerCells: []cellRef{{7, 8}},
-			pointerNums:  IntSlice([]int{2, 7}),
-		},
 		{
 			targetCells:  []cellRef{{8, 3}},
 			targetNums:   IntSlice([]int{7}),
 			pointerCells: []cellRef{{8, 7}},
 			pointerNums:  IntSlice([]int{1, 2}),
 		},
+
+		/* Steps that are too long now
+		{
+			targetCells:  []cellRef{{0, 6}},
+			targetNums:   IntSlice([]int{3}),
+			pointerCells: []cellRef{{1, 0}},
+			pointerNums:  IntSlice([]int{1, 2}),
+		},
+		{
+			targetCells:  []cellRef{{8, 3}},
+			targetNums:   IntSlice([]int{7}),
+			pointerCells: []cellRef{{7, 8}},
+			pointerNums:  IntSlice([]int{2, 7}),
+		},
+		*/
 
 		/*
 			Steps that are valid, but that we don't expect the technique to find
