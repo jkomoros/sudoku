@@ -11,8 +11,12 @@ type forcingChainsTechnique struct {
 }
 
 func (self *forcingChainsTechnique) HumanLikelihood() float64 {
-	//TODO: figure out what the baseDifficulty should be
-	return self.difficultyHelper(200.0)
+	//TODO: figure out what the baseDifficulty should be, this might be higher than
+	//it's actually in practice
+
+	//Note that this number has to be pretty high because it's competing against
+	//HiddenSIZEGROUP, which has the k exponential in its favor.
+	return self.difficultyHelper(20000.0)
 }
 
 func (self *forcingChainsTechnique) Description(step *SolveStep) string {
