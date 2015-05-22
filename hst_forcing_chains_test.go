@@ -114,7 +114,6 @@ func TestForcingChains(t *testing.T) {
 		//Oh, we fail as soon as we notice they don't all match.
 		//We haven't seen this set again... flakey?
 		//Next step: do the manual check for a 'normal' run to see which is missing
-		// 0,6 /3 / 1,0 / 1,2 *
 		// 0,1 / 7 / 5,1 / 1,2 *
 		// 0,6 / 3 / 5,1 / 1,2 *
 		//8,3 / 7 / 8,7 / 1,2 *
@@ -164,6 +163,12 @@ func TestForcingChains(t *testing.T) {
 		{
 			targetCells:  []cellRef{{1, 8}},
 			targetNums:   IntSlice([]int{4}),
+			pointerCells: []cellRef{{1, 0}},
+			pointerNums:  IntSlice([]int{1, 2}),
+		},
+		{
+			targetCells:  []cellRef{{0, 6}},
+			targetNums:   IntSlice([]int{3}),
 			pointerCells: []cellRef{{1, 0}},
 			pointerNums:  IntSlice([]int{1, 2}),
 		},
