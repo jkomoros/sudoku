@@ -1,7 +1,8 @@
 package sudoku
 
 import (
-	"log"
+	"fmt"
+	"sort"
 	"testing"
 )
 
@@ -203,8 +204,16 @@ func TestForcingChains(t *testing.T) {
 		},
 	}
 
+	var stepDescriptions []string
+
 	for _, step := range steps {
-		log.Println(step)
+		stepDescriptions = append(stepDescriptions, fmt.Sprint(step.TargetCells.Description(), step.TargetNums.Description(), step.PointerCells.Description(), step.PointerNums.Description()))
+	}
+
+	sort.Strings(stepDescriptions)
+
+	for _, str := range stepDescriptions {
+		fmt.Println(str)
 	}
 
 	for _, test := range tests {
