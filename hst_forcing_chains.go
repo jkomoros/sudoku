@@ -48,7 +48,8 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 	getter := grid.queue().DefaultGetter()
 
-	_MAX_IMPLICATION_STEPS := 6
+	//TODO: investigate bumping this back up when #100 lands.
+	_MAX_IMPLICATION_STEPS := 5
 
 	for {
 

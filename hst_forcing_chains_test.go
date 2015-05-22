@@ -52,12 +52,7 @@ func TestForcingChains(t *testing.T) {
 			pointerCells: []cellRef{{5, 1}},
 			pointerNums:  IntSlice([]int{1, 2}),
 		},
-		{
-			targetCells:  []cellRef{{0, 1}},
-			targetNums:   IntSlice([]int{7}),
-			pointerCells: []cellRef{{5, 4}},
-			pointerNums:  IntSlice([]int{2, 3}),
-		},
+
 		{
 			targetCells:  []cellRef{{0, 1}},
 			targetNums:   IntSlice([]int{7}),
@@ -111,6 +106,20 @@ func TestForcingChains(t *testing.T) {
 		{
 			targetCells:  []cellRef{{8, 3}},
 			targetNums:   IntSlice([]int{7}),
+			pointerCells: []cellRef{{8, 7}},
+			pointerNums:  IntSlice([]int{1, 2}),
+		},
+
+		/* Steps that are too long now
+		{
+			targetCells:  []cellRef{{0, 1}},
+			targetNums:   IntSlice([]int{7}),
+			pointerCells: []cellRef{{5, 4}},
+			pointerNums:  IntSlice([]int{2, 3}),
+		},
+				{
+			targetCells:  []cellRef{{8, 3}},
+			targetNums:   IntSlice([]int{7}),
 			pointerCells: []cellRef{{5, 4}},
 			pointerNums:  IntSlice([]int{2, 3}),
 		},
@@ -120,14 +129,7 @@ func TestForcingChains(t *testing.T) {
 			pointerCells: []cellRef{{5, 7}},
 			pointerNums:  IntSlice([]int{1, 3}),
 		},
-		{
-			targetCells:  []cellRef{{8, 3}},
-			targetNums:   IntSlice([]int{7}),
-			pointerCells: []cellRef{{8, 7}},
-			pointerNums:  IntSlice([]int{1, 2}),
-		},
 
-		/* Steps that are too long now
 		{
 			targetCells:  []cellRef{{0, 6}},
 			targetNums:   IntSlice([]int{3}),
