@@ -290,6 +290,9 @@ func chainSearcher(maxGeneration int, cell *Cell, numToApply int) chainSearcherA
 			//so they're all bunched up together.
 			//... but even that's too much. Because we keep track of all the cells to visit before
 			//visiting any cells from the next generation... right?
+			//Having separate branches keeps the chain of implications pure, where each one advances
+			//in a given direction, and none of them run into each other. If you glom them all together,
+			//you're going to notice inconsistencies WAY faster and the technique will be less useful.
 			newGrid := cellToVisit.grid.Copy()
 			cellToVisit = cellToVisit.InGrid(newGrid)
 
