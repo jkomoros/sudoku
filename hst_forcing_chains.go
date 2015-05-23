@@ -107,8 +107,8 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		//probably not a big deal since we'll skip early in the loop anyway.
 		for firstGeneration := 0; firstGeneration < len(firstAccumulator); firstGeneration++ {
 			for secondGeneration := 0; secondGeneration < len(secondAccumulator); secondGeneration++ {
-				firstAffectedCells := firstAccumulator[firstGeneration]
-				secondAffectedCells := secondAccumulator[secondGeneration]
+				firstAffectedCells := firstAccumulator[firstGeneration].numbers
+				secondAffectedCells := secondAccumulator[secondGeneration].numbers
 
 				//We calculated up to _MAX_IMPLICATION_STEPS down each branch,
 				//but we shouldn't return steps that require more than _MAX_IMPLICATION_STEPS
@@ -165,11 +165,13 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 	}
 }
 
-type chainSearcherGenerationDetails map[cellRef]int
+type chainSearcherGenerationDetails struct {
+	numbers map[cellRef]int
+}
 
 func (c chainSearcherGenerationDetails) String() string {
-	result := "Begin map (length " + strconv.Itoa(len(c)) + ")\n"
-	for cell, num := range c {
+	result := "Begin map (length " + strconv.Itoa(len(c.numbers)) + ")\n"
+	for cell, num := range c.numbers {
 		result += "\t" + cell.String() + " : " + strconv.Itoa(num) + "\n"
 	}
 	result += "End map\n"
@@ -188,13 +190,13 @@ func (c chainSearcherAccumulator) String() string {
 }
 
 func (c chainSearcherAccumulator) addGeneration() chainSearcherAccumulator {
-	newGeneration := make(chainSearcherGenerationDetails)
+	newGeneration := chainSearcherGenerationDetails{make(map[cellRef]int)}
 	result := append(c, newGeneration)
 	if len(result) > 1 {
 		oldGeneration := result[len(result)-2]
 		//Accumulate forward old generation
-		for key, val := range oldGeneration {
-			newGeneration[key] = val
+		for key, val := range oldGeneration.numbers {
+			newGeneration.numbers[key] = val
 		}
 	}
 	return result
@@ -267,7 +269,7 @@ func chainSearcher(maxGeneration int, cell *Cell, numToApply int) chainSearcherA
 			return result[:len(result)-1]
 		}
 
-		if currentVal, ok := generationDetails[step.cell.ref()]; ok {
+		if currentVal, ok := generationDetails.numbers[step.cell.ref()]; ok {
 			if currentVal != step.numToApply {
 				//Found a contradiction! We can bail from processing any more because this branch leads inexorably
 				//to a contradiction.
@@ -278,7 +280,7 @@ func chainSearcher(maxGeneration int, cell *Cell, numToApply int) chainSearcherA
 			}
 		}
 
-		generationDetails[step.cell.ref()] = step.numToApply
+		generationDetails.numbers[step.cell.ref()] = step.numToApply
 
 		for _, cellToVisit := range cellsToVisit {
 			possibilities := cellToVisit.Possibilities()
