@@ -52,19 +52,11 @@ func TestForcingChains(t *testing.T) {
 			pointerCells: []cellRef{{5, 1}},
 			pointerNums:  IntSlice([]int{1, 2}),
 		},
-
 		{
 			targetCells:  []cellRef{{0, 1}},
 			targetNums:   IntSlice([]int{7}),
 			pointerCells: []cellRef{{5, 7}},
 			pointerNums:  IntSlice([]int{1, 3}),
-		},
-
-		{
-			targetCells:  []cellRef{{0, 6}},
-			targetNums:   IntSlice([]int{3}),
-			pointerCells: []cellRef{{5, 1}},
-			pointerNums:  IntSlice([]int{1, 2}),
 		},
 		//Another particularly long one
 		{
@@ -98,17 +90,27 @@ func TestForcingChains(t *testing.T) {
 			pointerNums:  IntSlice([]int{2, 7}),
 		},
 		{
-			targetCells:  []cellRef{{5, 1}},
-			targetNums:   IntSlice([]int{1}),
-			pointerCells: []cellRef{{0, 6}},
-			pointerNums:  IntSlice([]int{3, 7}),
-		},
-		{
 			targetCells:  []cellRef{{8, 3}},
 			targetNums:   IntSlice([]int{7}),
 			pointerCells: []cellRef{{8, 7}},
 			pointerNums:  IntSlice([]int{1, 2}),
 		},
+
+		/* Steps that dropped out when we switched to backwards intersect
+		{
+			targetCells:  []cellRef{{0, 6}},
+			targetNums:   IntSlice([]int{3}),
+			pointerCells: []cellRef{{5, 1}},
+			pointerNums:  IntSlice([]int{1, 2}),
+		},
+		{
+			targetCells:  []cellRef{{5, 1}},
+			targetNums:   IntSlice([]int{1}),
+			pointerCells: []cellRef{{0, 6}},
+			pointerNums:  IntSlice([]int{3, 7}),
+		},
+
+		*/
 
 		/* Steps that are too long now
 		{

@@ -93,60 +93,51 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 			candidateCell.InGrid(secondGrid),
 			secondPossibilityNum)
 
-		//Cells that we've already vended and shouldn't vend again if we find another
-		//TODO: figure out a better way to not vend duplicates. this method feels dirty.
-		vendedCells := make(map[cellRef]bool)
-		//don't vend the candidateCell; obviously both of the two branches will overlap on that one
-		//in generation0.
-		vendedCells[candidateCell.ref()] = true
-
 		//See if either branch, at some generation, has the same cell forced to the same number in either generation.
 
-		//TODO: visit the pairs of generations in such a way that the sum of the two generation counts
-		//goes up linearly, since we're going to skip any that together are too long.. ... but it's
-		//probably not a big deal since we'll skip early in the loop anyway.
-		for firstGeneration := 0; firstGeneration < len(firstAccumulator); firstGeneration++ {
-			for secondGeneration := 0; secondGeneration < len(secondAccumulator); secondGeneration++ {
-				firstAffectedCells := firstAccumulator[firstGeneration]
-				secondAffectedCells := secondAccumulator[secondGeneration]
+		//We're just going to look at the last generation for each and compare
+		//when each cell was setœ instead of doing (expensive!) pairwise
+		//comparison across all of them
 
-				//We calculated up to _MAX_IMPLICATION_STEPS down each branch,
-				//but we shouldn't return steps that require more than _MAX_IMPLICATION_STEPS
-				//down either branch, total.
-				if firstGeneration+secondGeneration > _MAX_IMPLICATION_STEPS+1 {
+		if len(firstAccumulator) == 0 || len(secondAccumulator) == 0 {
+			//Rare, but can happen if we're down a flawed guess branch and the cell we're considering
+			//is the vulnerability.
+			continue
+		}
+
+		firstFinalGeneration := firstAccumulator[len(firstAccumulator)-1]
+		secondFinalGeneration := secondAccumulator[len(secondAccumulator)-1]
+
+		for cell, num := range firstFinalGeneration.numbers {
+			if secondNum, ok := secondFinalGeneration.numbers[cell]; ok {
+
+				//Found two cells that overlap. Were they forced to the same number?=
+				if num != secondNum {
 					continue
 				}
 
-				for key, val := range firstAffectedCells {
-					//Skip the candidateCell, because that's not a meaningful overlap--we set that one as a way of branching!
+				//Is their combined generation count lower than _MAX_IMPLICATION_STEPS?
+				if firstFinalGeneration.firstGeneration[cell]+secondFinalGeneration.firstGeneration[cell] > _MAX_IMPLICATION_STEPS+1 {
+					//Too many implication steps. :-(
+					continue
+				}
 
-					if _, ok := vendedCells[key]; ok {
-						//This is a cell we've already vended
-						continue
-					}
+				//Okay, we have a candidate step. Is it useful?
+				step := &SolveStep{self,
+					CellSlice{cell.Cell(grid)},
+					IntSlice{num},
+					CellSlice{candidateCell},
+					candidateCell.Possibilities(),
+				}
 
-					if num, ok := secondAffectedCells[key]; ok {
-						//Found cell overlap! ... is the forced number the same?
-						if val == num {
-							//Yup, seems like we've found a cell that is forced to the same value on either branch.
-							step := &SolveStep{self,
-								CellSlice{key.Cell(grid)},
-								IntSlice{val},
-								CellSlice{candidateCell},
-								candidateCell.Possibilities(),
-							}
-
-							if step.IsUseful(grid) {
-								vendedCells[key] = true
-								select {
-								case results <- step:
-								case <-done:
-									return
-								}
-							}
-						}
+				if step.IsUseful(grid) {
+					select {
+					case results <- step:
+					case <-done:
+						return
 					}
 				}
+
 			}
 		}
 
@@ -165,12 +156,15 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 	}
 }
 
-type chainSearcherGenerationDetails map[cellRef]int
+type chainSearcherGenerationDetails struct {
+	numbers         map[cellRef]int
+	firstGeneration map[cellRef]int
+}
 
 func (c chainSearcherGenerationDetails) String() string {
-	result := "Begin map (length " + strconv.Itoa(len(c)) + ")\n"
-	for cell, num := range c {
-		result += "\t" + cell.String() + " : " + strconv.Itoa(num) + "\n"
+	result := "Begin map (length " + strconv.Itoa(len(c.numbers)) + ")\n"
+	for cell, num := range c.numbers {
+		result += "\t" + cell.String() + " : " + strconv.Itoa(num) + " : " + strconv.Itoa(c.firstGeneration[cell]) + "\n"
 	}
 	result += "End map\n"
 	return result
@@ -188,13 +182,14 @@ func (c chainSearcherAccumulator) String() string {
 }
 
 func (c chainSearcherAccumulator) addGeneration() chainSearcherAccumulator {
-	newGeneration := make(chainSearcherGenerationDetails)
+	newGeneration := chainSearcherGenerationDetails{make(map[cellRef]int), make(map[cellRef]int)}
 	result := append(c, newGeneration)
 	if len(result) > 1 {
 		oldGeneration := result[len(result)-2]
 		//Accumulate forward old generation
-		for key, val := range oldGeneration {
-			newGeneration[key] = val
+		for key, val := range oldGeneration.numbers {
+			newGeneration.numbers[key] = val
+			newGeneration.firstGeneration[key] = oldGeneration.firstGeneration[key]
 		}
 	}
 	return result
@@ -267,7 +262,7 @@ func chainSearcher(maxGeneration int, cell *Cell, numToApply int) chainSearcherA
 			return result[:len(result)-1]
 		}
 
-		if currentVal, ok := generationDetails[step.cell.ref()]; ok {
+		if currentVal, ok := generationDetails.numbers[step.cell.ref()]; ok {
 			if currentVal != step.numToApply {
 				//Found a contradiction! We can bail from processing any more because this branch leads inexorably
 				//to a contradiction.
@@ -278,7 +273,8 @@ func chainSearcher(maxGeneration int, cell *Cell, numToApply int) chainSearcherA
 			}
 		}
 
-		generationDetails[step.cell.ref()] = step.numToApply
+		generationDetails.numbers[step.cell.ref()] = step.numToApply
+		generationDetails.firstGeneration[step.cell.ref()] = step.generation
 
 		for _, cellToVisit := range cellsToVisit {
 			possibilities := cellToVisit.Possibilities()
