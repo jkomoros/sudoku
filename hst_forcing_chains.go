@@ -99,6 +99,12 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		//when each cell was setœ instead of doing (expensive!) pairwise
 		//comparison across all of them
 
+		if len(firstAccumulator) == 0 || len(secondAccumulator) == 0 {
+			//Rare, but can happen if we're down a flawed guess branch and the cell we're considering
+			//is the vulnerability.
+			continue
+		}
+
 		firstFinalGeneration := firstAccumulator[len(firstAccumulator)-1]
 		secondFinalGeneration := secondAccumulator[len(secondAccumulator)-1]
 
