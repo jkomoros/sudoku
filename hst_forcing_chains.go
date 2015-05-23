@@ -166,13 +166,14 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 }
 
 type chainSearcherGenerationDetails struct {
-	numbers map[cellRef]int
+	numbers         map[cellRef]int
+	firstGeneration map[cellRef]int
 }
 
 func (c chainSearcherGenerationDetails) String() string {
 	result := "Begin map (length " + strconv.Itoa(len(c.numbers)) + ")\n"
 	for cell, num := range c.numbers {
-		result += "\t" + cell.String() + " : " + strconv.Itoa(num) + "\n"
+		result += "\t" + cell.String() + " : " + strconv.Itoa(num) + " : " + strconv.Itoa(c.firstGeneration[cell]) + "\n"
 	}
 	result += "End map\n"
 	return result
@@ -190,13 +191,14 @@ func (c chainSearcherAccumulator) String() string {
 }
 
 func (c chainSearcherAccumulator) addGeneration() chainSearcherAccumulator {
-	newGeneration := chainSearcherGenerationDetails{make(map[cellRef]int)}
+	newGeneration := chainSearcherGenerationDetails{make(map[cellRef]int), make(map[cellRef]int)}
 	result := append(c, newGeneration)
 	if len(result) > 1 {
 		oldGeneration := result[len(result)-2]
 		//Accumulate forward old generation
 		for key, val := range oldGeneration.numbers {
 			newGeneration.numbers[key] = val
+			newGeneration.firstGeneration[key] = oldGeneration.firstGeneration[key]
 		}
 	}
 	return result
@@ -281,6 +283,7 @@ func chainSearcher(maxGeneration int, cell *Cell, numToApply int) chainSearcherA
 		}
 
 		generationDetails.numbers[step.cell.ref()] = step.numToApply
+		generationDetails.firstGeneration[step.cell.ref()] = step.generation
 
 		for _, cellToVisit := range cellsToVisit {
 			possibilities := cellToVisit.Possibilities()
