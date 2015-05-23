@@ -286,6 +286,10 @@ func chainSearcher(maxGeneration int, cell *Cell, numToApply int) chainSearcherA
 			forcedNum := possibilities[0]
 
 			//Each branch modifies the grid, so create a new copy
+			//TODO: this isn't actually necessary, right? At max we need one grid per generation
+			//so they're all bunched up together.
+			//... but even that's too much. Because we keep track of all the cells to visit before
+			//visiting any cells from the next generation... right?
 			newGrid := cellToVisit.grid.Copy()
 			cellToVisit = cellToVisit.InGrid(newGrid)
 
