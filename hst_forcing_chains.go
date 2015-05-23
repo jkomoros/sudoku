@@ -269,6 +269,8 @@ func chainSearcher(maxGeneration int, cell *Cell, numToApply int) chainSearcherA
 
 				//However, this last generation--the one we found the inconsistency in--needs to be thrown out.
 
+				//TODO: consider completing the generation when an inconstency is found, not bailing early.
+
 				return result[:len(result)-1]
 			}
 		}
