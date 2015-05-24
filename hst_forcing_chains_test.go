@@ -38,25 +38,12 @@ func TestForcingChains(t *testing.T) {
 			pointerNums:  IntSlice([]int{1, 2}),
 			description:  "cell (1,0) only has two options, 1 and 2, and if you put either one in and see the chain of implications it leads to, both ones end up with 7 in cell (0,1), so we can just fill that number in",
 		},
-		//This next one's particularly long implication chain
-		{
-			targetCells:  []cellRef{{0, 1}},
-			targetNums:   IntSlice([]int{7}),
-			pointerCells: []cellRef{{4, 0}},
-			pointerNums:  IntSlice([]int{1, 2}),
-			//Explicitly don't test description after the first one.
-		},
 		{
 			targetCells:  []cellRef{{0, 1}},
 			targetNums:   IntSlice([]int{7}),
 			pointerCells: []cellRef{{5, 1}},
 			pointerNums:  IntSlice([]int{1, 2}),
-		},
-		{
-			targetCells:  []cellRef{{0, 1}},
-			targetNums:   IntSlice([]int{7}),
-			pointerCells: []cellRef{{5, 7}},
-			pointerNums:  IntSlice([]int{1, 3}),
+			//Explicitly don't test description after the first one.
 		},
 		//Another particularly long one
 		{
@@ -95,6 +82,23 @@ func TestForcingChains(t *testing.T) {
 			pointerCells: []cellRef{{8, 7}},
 			pointerNums:  IntSlice([]int{1, 2}),
 		},
+
+		/* Steps that got dropped out when we switched to DFS
+		//This next one's particularly long implication chain
+		{
+			targetCells:  []cellRef{{0, 1}},
+			targetNums:   IntSlice([]int{7}),
+			pointerCells: []cellRef{{4, 0}},
+			pointerNums:  IntSlice([]int{1, 2}),
+		},
+		{
+			targetCells:  []cellRef{{0, 1}},
+			targetNums:   IntSlice([]int{7}),
+			pointerCells: []cellRef{{5, 7}},
+			pointerNums:  IntSlice([]int{1, 3}),
+		},
+
+		*/
 
 		/* Steps that dropped out when we switched to backwards intersect
 		{
