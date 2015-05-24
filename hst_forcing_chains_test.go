@@ -35,6 +35,12 @@ func TestForcingChains(t *testing.T) {
 
 	//Tester puzzle: http://www.komoroske.com/sudoku/index.php?puzzle=Q6Ur5iYGINSUFcyocqaY6G91DpttiqYzs
 
+	//TODO: verify these four and add to set.
+	//4, 0 / 2 / 0,6 / 3,7
+	//4, 0 / 2 / 0,1 / 2,7
+	//1, 8 / 4 / 5,1 / 1,2
+	//4, 5 / 7 / 5,4 / 2,3
+
 	tests := []loopOptions{
 		{
 			targetCells:  []cellRef{{0, 1}},
