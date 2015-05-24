@@ -196,6 +196,9 @@ func chainSearcher(generation int, maxGeneration int, cell *Cell, numToApply int
 
 	//Accumulate information about this cell being set.
 	if len(accum.numbers[cell.ref()].Intersection(IntSlice{numToApply})) == 0 {
+		//TODO: instead of having IntSlices here, we should compare generation and only set our number if our generation is lower.
+		//... but if we set to the same number for the same generation, we should... write a -1?
+		//... what does generation even mean i this context? does 4 geneartion mean something meaninful, that one wins?
 		accum.numbers[cell.ref()] = append(accum.numbers[cell.ref()], numToApply)
 		accum.firstGeneration[cell.ref()] = append(accum.firstGeneration[cell.ref()], generation)
 	}
