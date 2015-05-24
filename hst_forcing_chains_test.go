@@ -41,6 +41,8 @@ func TestForcingChains(t *testing.T) {
 	//1, 8 / 4 / 5,1 / 1,2
 	//4, 5 / 7 / 5,4 / 2,3
 
+	//TODO: figure out why we're getting different numbers of steps, seemingly randomly. :-(
+
 	tests := []loopOptions{
 		{
 			targetCells:  []cellRef{{0, 1}},
