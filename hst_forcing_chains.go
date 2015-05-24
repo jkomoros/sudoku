@@ -201,6 +201,19 @@ func (c *chainSearcherAccumulator) addGeneration() {
 }
 
 func chainSearcher(generation int, maxGeneration int, cell *Cell, numToApply int, accum *chainSearcherAccumulator) {
+
+	/*
+	 * chainSearcher implements a DFS to search forward through implication chains to
+	 * fill out accum with details about cells it sees and sets.
+	 * The reason a DFS and not a BFS is called for is because with forcing chains, we
+	 * KNOW that either the left or right branch will lead to an inconsistency at some point
+	 * (as long as the sudoku has only one valid solution). We want to IGNORE that
+	 * inconsistency for as long as possible to follow the implication chains as deep as we can go.
+	 * By definition, the end of the DFS will be the farthest a given implication chain can go
+	 * towards setting that specific cell to the forced value. This means that we have the maximum
+	 * density of implication chain results to sift through to find cells forced to the same value.
+	 */
+
 	if generation > maxGeneration {
 		//base case
 		return
