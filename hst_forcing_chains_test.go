@@ -28,6 +28,11 @@ func TestForcingChains(t *testing.T) {
 		description  string
 	}
 
+	//TODO: the fact that every time we make a relatively small change to the forcing chain algo
+	//we have to manually swizzle the test cases around reveals that the exact behavior of forcing
+	//chains is fundamentally arbitrary. That makes me nervous. We should probably add a bunch more
+	//tests.
+
 	//Tester puzzle: http://www.komoroske.com/sudoku/index.php?puzzle=Q6Ur5iYGINSUFcyocqaY6G91DpttiqYzs
 
 	tests := []loopOptions{
