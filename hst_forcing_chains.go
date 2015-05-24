@@ -1,7 +1,6 @@
 package sudoku
 
 import (
-	"container/list"
 	"fmt"
 	"strconv"
 )
@@ -85,13 +84,16 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 
 		//Check that the neighbor isn't just already having a single possibility, because then this technique is overkill.
 
-		firstAccumulator := chainSearcher(_MAX_IMPLICATION_STEPS,
-			candidateCell.InGrid(firstGrid),
-			firstPossibilityNum)
+		firstAccumulator := &chainSearcherAccumulator{nil}
+		secondAccumulator := &chainSearcherAccumulator{nil}
 
-		secondAccumulator := chainSearcher(_MAX_IMPLICATION_STEPS,
+		chainSearcher(0, _MAX_IMPLICATION_STEPS,
+			candidateCell.InGrid(firstGrid),
+			firstPossibilityNum, firstAccumulator)
+
+		chainSearcher(0, _MAX_IMPLICATION_STEPS,
 			candidateCell.InGrid(secondGrid),
-			secondPossibilityNum)
+			secondPossibilityNum, secondAccumulator)
 
 		//See if either branch, at some generation, has the same cell forced to the same number in either generation.
 
@@ -99,25 +101,27 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 		//when each cell was setœ instead of doing (expensive!) pairwise
 		//comparison across all of them
 
-		if len(firstAccumulator) == 0 || len(secondAccumulator) == 0 {
+		if len(firstAccumulator.details) == 0 || len(secondAccumulator.details) == 0 {
 			//Rare, but can happen if we're down a flawed guess branch and the cell we're considering
 			//is the vulnerability.
 			continue
 		}
 
-		firstFinalGeneration := firstAccumulator[len(firstAccumulator)-1]
-		secondFinalGeneration := secondAccumulator[len(secondAccumulator)-1]
+		firstFinalGeneration := firstAccumulator.details[len(firstAccumulator.details)-1]
+		secondFinalGeneration := secondAccumulator.details[len(secondAccumulator.details)-1]
 
-		for cell, num := range firstFinalGeneration.numbers {
-			if secondNum, ok := secondFinalGeneration.numbers[cell]; ok {
+		for cell, numSlice := range firstFinalGeneration.numbers {
+			if secondNumSlice, ok := secondFinalGeneration.numbers[cell]; ok {
 
-				//Found two cells that overlap. Were they forced to the same number?=
-				if num != secondNum {
+				//Found two cells that overlap in terms of both being affected.
+				//We're only interested in them if they are both set to exactly one item, which is the
+				//same number.
+				if len(numSlice) != 1 || len(secondNumSlice) != 1 || !numSlice.SameContentAs(secondNumSlice) {
 					continue
 				}
 
 				//Is their combined generation count lower than _MAX_IMPLICATION_STEPS?
-				if firstFinalGeneration.firstGeneration[cell]+secondFinalGeneration.firstGeneration[cell] > _MAX_IMPLICATION_STEPS+1 {
+				if firstFinalGeneration.firstGeneration[cell][0]+secondFinalGeneration.firstGeneration[cell][0] > _MAX_IMPLICATION_STEPS+1 {
 					//Too many implication steps. :-(
 					continue
 				}
@@ -125,7 +129,7 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 				//Okay, we have a candidate step. Is it useful?
 				step := &SolveStep{self,
 					CellSlice{cell.Cell(grid)},
-					IntSlice{num},
+					IntSlice{numSlice[0]},
 					CellSlice{candidateCell},
 					candidateCell.Possibilities(),
 				}
@@ -157,159 +161,87 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 }
 
 type chainSearcherGenerationDetails struct {
-	numbers         map[cellRef]int
-	firstGeneration map[cellRef]int
+	numbers         map[cellRef]IntSlice
+	firstGeneration map[cellRef]IntSlice
 }
 
-func (c chainSearcherGenerationDetails) String() string {
+func (c *chainSearcherGenerationDetails) String() string {
 	result := "Begin map (length " + strconv.Itoa(len(c.numbers)) + ")\n"
-	for cell, num := range c.numbers {
-		result += "\t" + cell.String() + " : " + strconv.Itoa(num) + " : " + strconv.Itoa(c.firstGeneration[cell]) + "\n"
+	for cell, numSlice := range c.numbers {
+		result += "\t" + cell.String() + " : " + numSlice.Description() + " : " + c.firstGeneration[cell].Description() + "\n"
 	}
 	result += "End map\n"
 	return result
 }
 
-type chainSearcherAccumulator []chainSearcherGenerationDetails
+type chainSearcherAccumulator struct {
+	details []*chainSearcherGenerationDetails
+}
 
-func (c chainSearcherAccumulator) String() string {
+func (c *chainSearcherAccumulator) String() string {
 	result := "Accumulator[\n"
-	for _, rec := range c {
+	for _, rec := range c.details {
 		result += fmt.Sprintf("%s\n", rec)
 	}
 	result += "]\n"
 	return result
 }
 
-func (c chainSearcherAccumulator) addGeneration() chainSearcherAccumulator {
-	newGeneration := chainSearcherGenerationDetails{make(map[cellRef]int), make(map[cellRef]int)}
-	result := append(c, newGeneration)
-	if len(result) > 1 {
-		oldGeneration := result[len(result)-2]
+func (c *chainSearcherAccumulator) addGeneration() {
+	newGeneration := chainSearcherGenerationDetails{make(map[cellRef]IntSlice), make(map[cellRef]IntSlice)}
+	c.details = append(c.details, &newGeneration)
+	if len(c.details) > 1 {
+		oldGeneration := c.details[len(c.details)-2]
 		//Accumulate forward old generation
 		for key, val := range oldGeneration.numbers {
 			newGeneration.numbers[key] = val
 			newGeneration.firstGeneration[key] = oldGeneration.firstGeneration[key]
 		}
 	}
-	return result
 }
 
-func chainSearcher(maxGeneration int, cell *Cell, numToApply int) chainSearcherAccumulator {
-
-	//Chainsearcher implements a BFS over implications forward given the starting point.
-	//It collects its results in the provided chainSearcherAccumulator.
-
-	//the first time we cross over into a new generation, we should do a one-time copy of the old generation
-	//into the new.
-	//At any write, if we notice that we'd be overwriting to a different value, we can bail out (how would
-	//we mark that we bailed early), since we've run into an inconsistency down this branch and following
-	//it further is not useful.
-
-	type modificationToMake struct {
-		generation int
-		cell       *Cell
-		numToApply int
+func chainSearcher(generation int, maxGeneration int, cell *Cell, numToApply int, accum *chainSearcherAccumulator) {
+	if generation > maxGeneration {
+		//base case
+		return
 	}
 
-	var result chainSearcherAccumulator
-
-	workSteps := list.New()
-
-	//Add the first workstep.
-	workSteps.PushBack(modificationToMake{
-		0,
-		cell,
-		numToApply,
-	})
-
-	var step modificationToMake
-
-	e := workSteps.Front()
-
-	for e != nil {
-
-		workSteps.Remove(e)
-
-		switch t := e.Value.(type) {
-		case modificationToMake:
-			step = t
-		default:
-			panic("Found unexpected type in workSteps list")
-		}
-
-		if step.generation > maxGeneration {
-			break
-		}
-
-		for len(result) < step.generation+1 {
-			result = result.addGeneration()
-		}
-
-		generationDetails := result[step.generation]
-
-		cellsToVisit := step.cell.Neighbors().FilterByPossible(step.numToApply).FilterByNumPossibilities(2)
-
-		step.cell.SetNumber(step.numToApply)
-
-		if cell.grid.Invalid() {
-			//Filling that cell make the grid invalid! We found a contradiction, no need to process
-			//this branch more.
-
-			//However, this last generation--the one we found the inconsistency in--needs to be
-			//thrown out.
-
-			return result[:len(result)-1]
-		}
-
-		if currentVal, ok := generationDetails.numbers[step.cell.ref()]; ok {
-			if currentVal != step.numToApply {
-				//Found a contradiction! We can bail from processing any more because this branch leads inexorably
-				//to a contradiction.
-
-				//However, this last generation--the one we found the inconsistency in--needs to be thrown out.
-
-				//TODO: consider completing the generation when an inconstency is found, not bailing early.
-
-				return result[:len(result)-1]
-			}
-		}
-
-		generationDetails.numbers[step.cell.ref()] = step.numToApply
-		generationDetails.firstGeneration[step.cell.ref()] = step.generation
-
-		for _, cellToVisit := range cellsToVisit {
-			possibilities := cellToVisit.Possibilities()
-
-			if len(possibilities) != 1 {
-				panic("Expected the cell to have one possibility")
-			}
-
-			forcedNum := possibilities[0]
-
-			//Each branch modifies the grid, so create a new copy
-			//TODO: this isn't actually necessary, right? At max we need one grid per generation
-			//so they're all bunched up together.
-			//... but even that's too much. Because we keep track of all the cells to visit before
-			//visiting any cells from the next generation... right?
-			//Having separate branches keeps the chain of implications pure, where each one advances
-			//in a given direction, and none of them run into each other. If you glom them all together,
-			//you're going to notice inconsistencies WAY faster and the technique will be less useful.
-			newGrid := cellToVisit.grid.Copy()
-			cellToVisit = cellToVisit.InGrid(newGrid)
-
-			workSteps.PushBack(modificationToMake{
-				step.generation + 1,
-				cellToVisit,
-				forcedNum,
-			})
-
-		}
-
-		e = workSteps.Front()
-
+	//Becuase this is a DFS, if we see an invalidity in this grid, it's a meaningful invalidity
+	//and we should avoid it.
+	if cell.grid.Invalid() {
+		return
 	}
 
-	return result
+	//Make sure accum is big enough
+	for len(accum.details) <= generation {
+		accum.addGeneration()
+	}
 
+	generationDetails := accum.details[generation]
+
+	cellsToVisit := cell.Neighbors().FilterByPossible(numToApply).FilterByNumPossibilities(2)
+
+	cell.SetNumber(numToApply)
+
+	//Accumulate information about this cell being set.
+	if len(generationDetails.numbers[cell.ref()].Intersection(IntSlice{numToApply})) == 0 {
+		generationDetails.numbers[cell.ref()] = append(generationDetails.numbers[cell.ref()], numToApply)
+		generationDetails.firstGeneration[cell.ref()] = append(generationDetails.firstGeneration[cell.ref()], generation)
+	}
+
+	for _, cellToVisit := range cellsToVisit {
+		possibilities := cellToVisit.Possibilities()
+
+		if len(possibilities) != 1 {
+			panic("Expected the cell to have one possibility")
+		}
+
+		forcedNum := possibilities[0]
+
+		//recurse
+		chainSearcher(generation+1, maxGeneration, cellToVisit, forcedNum, accum)
+	}
+
+	//Undo this number and return
+	cell.SetNumber(0)
 }
