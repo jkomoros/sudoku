@@ -194,6 +194,13 @@ func chainSearcher(generation int, maxGeneration int, cell *Cell, numToApply int
 
 	cell.SetNumber(numToApply)
 
+	//TODO: fix the odd flake in the next line. If a cell. candidateCell 5,1, sub-cell 1,8 shows it
+	//every so often.
+	//Basically, cell 1,8 is driven to 4 in either generation 3 or generation 4 depending on which
+	//way it visits first. But we only take note of the generation once, because the second time
+	//we see that we've already noted it and move on. But what we should do in that case is make
+	//sure the set generation is the min of the current and proposed generation.
+
 	//Accumulate information about this cell being set.
 	if len(accum.numbers[cell.ref()].Intersection(IntSlice{numToApply})) == 0 {
 		//TODO: instead of having IntSlices here, we should compare generation and only set our number if our generation is lower.
