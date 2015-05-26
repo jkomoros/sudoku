@@ -121,6 +121,16 @@ func (self *SolveStep) Description() string {
 	return result
 }
 
+//HumanLikelihood is how likely a user would be to pick this step when compared with other possible steps.
+//Generally inversely related to difficulty (but not perfectly).
+//This value will be used to pick which technique to apply when compared with other candidates.
+//Based on the technique's HumanLikelihood, possibly attenuated by this particular step's variant
+//or specifics.
+func (self *SolveStep) HumanLikelihood() float64 {
+	//TODO: attenuate by variant
+	return self.Technique.HumanLikelihood()
+}
+
 func (self *SolveStep) normalize() {
 	//Puts the solve step in its normal status. In practice this means that the various slices are sorted, so that the Description of them is stable.
 	self.PointerCells.Sort()
@@ -315,7 +325,7 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 
 		possibilitiesWeights := make([]float64, len(possibilities))
 		for i, possibility := range possibilities {
-			possibilitiesWeights[i] = possibility.Technique.HumanLikelihood()
+			possibilitiesWeights[i] = possibility.HumanLikelihood()
 		}
 
 		tweakChainedStepsWeights(lastStep, possibilities, possibilitiesWeights)
