@@ -95,6 +95,9 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 			candidateCell.InGrid(secondGrid),
 			secondPossibilityNum, secondAccumulator)
 
+		firstAccumulator.reduce()
+		secondAccumulator.reduce()
+
 		//See if either branch, at some generation, has the same cell forced to the same number in either generation.
 
 		//We're just going to look at the last generation for each and compare
@@ -165,6 +168,32 @@ func (c *chainSearcherAccumulator) String() string {
 	return result
 }
 
+//Goes through each item in the map and removes duplicates, keeping the smallest generation.
+func (c *chainSearcherAccumulator) reduce() {
+	for cell, numList := range c.numbers {
+		output := make(map[int]int)
+		generationList, ok := c.firstGeneration[cell]
+		if !ok {
+			panic("numbers and firstGeneration were out of sync")
+		}
+		for i, num := range numList {
+			generation := generationList[i]
+			currentGeneration := output[num]
+			if currentGeneration == 0 || generation < currentGeneration {
+				output[num] = generation
+			}
+		}
+		var resultNumbers IntSlice
+		var resultGenerations IntSlice
+		for num, generation := range output {
+			resultNumbers = append(resultNumbers, num)
+			resultGenerations = append(resultGenerations, generation)
+		}
+		c.numbers[cell] = resultNumbers
+		c.firstGeneration[cell] = resultGenerations
+	}
+}
+
 func chainSearcher(generation int, maxGeneration int, cell *Cell, numToApply int, accum *chainSearcherAccumulator) {
 
 	/*
@@ -201,14 +230,9 @@ func chainSearcher(generation int, maxGeneration int, cell *Cell, numToApply int
 	//we see that we've already noted it and move on. But what we should do in that case is make
 	//sure the set generation is the min of the current and proposed generation.
 
-	//Accumulate information about this cell being set.
-	if len(accum.numbers[cell.ref()].Intersection(IntSlice{numToApply})) == 0 {
-		//TODO: instead of having IntSlices here, we should compare generation and only set our number if our generation is lower.
-		//... but if we set to the same number for the same generation, we should... write a -1?
-		//... what does generation even mean i this context? does 4 geneartion mean something meaninful, that one wins?
-		accum.numbers[cell.ref()] = append(accum.numbers[cell.ref()], numToApply)
-		accum.firstGeneration[cell.ref()] = append(accum.firstGeneration[cell.ref()], generation)
-	}
+	//Accumulate information about this cell being set. We'll reduce out duplicates later.
+	accum.numbers[cell.ref()] = append(accum.numbers[cell.ref()], numToApply)
+	accum.firstGeneration[cell.ref()] = append(accum.firstGeneration[cell.ref()], generation)
 
 	for _, cellToVisit := range cellsToVisit {
 		possibilities := cellToVisit.Possibilities()
