@@ -168,7 +168,7 @@ func (c *chainSearcherAccumulator) String() string {
 	return result
 }
 
-//Goes through each item in the map and removes duplicates, keeping the smallest generation.
+//Goes through each item in the map and removes duplicates, keeping the smallest generation seen for each unique number.
 func (c *chainSearcherAccumulator) reduce() {
 	for cell, numList := range c.numbers {
 		output := make(map[int]int)
@@ -222,13 +222,6 @@ func chainSearcher(generation int, maxGeneration int, cell *Cell, numToApply int
 	cellsToVisit := cell.Neighbors().FilterByPossible(numToApply).FilterByNumPossibilities(2)
 
 	cell.SetNumber(numToApply)
-
-	//TODO: fix the odd flake in the next line. If a cell. candidateCell 5,1, sub-cell 1,8 shows it
-	//every so often.
-	//Basically, cell 1,8 is driven to 4 in either generation 3 or generation 4 depending on which
-	//way it visits first. But we only take note of the generation once, because the second time
-	//we see that we've already noted it and move on. But what we should do in that case is make
-	//sure the set generation is the min of the current and proposed generation.
 
 	//Accumulate information about this cell being set. We'll reduce out duplicates later.
 	accum.numbers[cell.ref()] = append(accum.numbers[cell.ref()], numToApply)
