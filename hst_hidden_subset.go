@@ -10,7 +10,7 @@ type hiddenSubsetTechnique struct {
 	*basicSolveTechnique
 }
 
-func (self *hiddenSubsetTechnique) HumanLikelihood() float64 {
+func (self *hiddenSubsetTechnique) humanLikelihood() float64 {
 	return self.difficultyHelper(120.0)
 }
 

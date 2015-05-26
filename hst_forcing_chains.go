@@ -9,7 +9,7 @@ type forcingChainsTechnique struct {
 	*basicSolveTechnique
 }
 
-func (self *forcingChainsTechnique) HumanLikelihood() float64 {
+func (self *forcingChainsTechnique) humanLikelihood() float64 {
 	//TODO: figure out what the baseDifficulty should be, this might be higher than
 	//it's actually in practice
 

@@ -46,7 +46,8 @@ type SolveTechnique interface {
 	//HumanLikelihood is how likely a user would be to pick this technique when compared with other possible steps.
 	//Generally inversely related to difficulty (but not perfectly).
 	//This value will be used to pick which technique to apply when compared with other candidates.
-	HumanLikelihood() float64
+	//This is primarily used to calculate SolveStep.HumanLikelihood.
+	humanLikelihood() float64
 }
 
 type cellGroupType int
@@ -80,7 +81,7 @@ func (t techniqueByLikelihood) Swap(i, j int) {
 }
 
 func (t techniqueByLikelihood) Less(i, j int) bool {
-	return t[i].HumanLikelihood() < t[j].HumanLikelihood()
+	return t[i].humanLikelihood() < t[j].humanLikelihood()
 }
 
 func init() {

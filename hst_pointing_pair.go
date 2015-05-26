@@ -9,7 +9,7 @@ type pointingPairTechnique struct {
 	*basicSolveTechnique
 }
 
-func (self *pointingPairTechnique) HumanLikelihood() float64 {
+func (self *pointingPairTechnique) humanLikelihood() float64 {
 	return self.difficultyHelper(50.0)
 }
 

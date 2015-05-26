@@ -128,7 +128,7 @@ func (self *SolveStep) Description() string {
 //or specifics.
 func (self *SolveStep) HumanLikelihood() float64 {
 	//TODO: attenuate by variant
-	return self.Technique.HumanLikelihood()
+	return self.Technique.humanLikelihood()
 }
 
 func (self *SolveStep) normalize() {

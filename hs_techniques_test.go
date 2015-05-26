@@ -9,10 +9,10 @@ import (
 func TestTechniquesSorted(t *testing.T) {
 	lastLikelihood := 0.0
 	for i, technique := range AllTechniques {
-		if technique.HumanLikelihood() < lastLikelihood {
-			t.Fatal("Technique named", technique.Name(), "with index", i, "has a likelihood lower than one of the earlier ones: ", technique.HumanLikelihood(), lastLikelihood)
+		if technique.humanLikelihood() < lastLikelihood {
+			t.Fatal("Technique named", technique.Name(), "with index", i, "has a likelihood lower than one of the earlier ones: ", technique.humanLikelihood(), lastLikelihood)
 		}
-		lastLikelihood = technique.HumanLikelihood()
+		lastLikelihood = technique.humanLikelihood()
 	}
 }
 
