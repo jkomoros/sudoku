@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"reflect"
 	"sort"
 	"testing"
 )
@@ -370,6 +371,74 @@ func TestSameContentAs(t *testing.T) {
 	if !onePair.SameContentAs(twoPair) {
 		t.Log("Didn't think two equivalent pairs were the same.")
 		t.Fail()
+	}
+
+}
+
+func TestCellSetBasicOperations(t *testing.T) {
+	grid := NewGrid()
+	cellOne := grid.Cell(0, 1)
+	cellTwo := grid.Cell(0, 2)
+	cellThree := grid.Cell(0, 3)
+
+	oneSlice := CellSlice{cellOne, cellTwo}
+	twoSlice := CellSlice{cellThree}
+	threeSlice := CellSlice{cellTwo, cellThree}
+
+	one := oneSlice.toCellSet()
+	two := twoSlice.toCellSet()
+	three := threeSlice.toCellSet()
+
+	oneGolden := cellSet{cellOne.ref(): true, cellTwo.ref(): true}
+	twoGolden := cellSet{cellThree.ref(): true}
+	threeGolden := cellSet{cellTwo.ref(): true, cellThree.ref(): true}
+
+	if !reflect.DeepEqual(one, oneGolden) {
+		t.Fatal("Creating cellSet failed. Got", one, "wanted", oneGolden)
+	}
+
+	if !reflect.DeepEqual(two, twoGolden) {
+		t.Fatal("Creating cellset two failed. Got: ", two, "wanted", twoGolden)
+	}
+
+	if !reflect.DeepEqual(three, threeGolden) {
+		t.Fatal("Creating cellset three failed. Got: ", three, "wanted", threeGolden)
+	}
+
+	oneTwoIntersection := one.intersection(two)
+
+	if !reflect.DeepEqual(oneTwoIntersection, cellSet{}) {
+		t.Error("One two intersection failed. Got:", oneTwoIntersection)
+	}
+
+	oneThreeIntersection := one.intersection(three)
+
+	if !reflect.DeepEqual(oneThreeIntersection, cellSet{cellTwo.ref(): true}) {
+		t.Error("One three intersection failed. Got: ", oneThreeIntersection)
+	}
+
+	oneTwoUnion := one.union(two)
+
+	if !reflect.DeepEqual(oneTwoUnion, cellSet{cellOne.ref(): true, cellTwo.ref(): true, cellThree.ref(): true}) {
+		t.Error("One two union failed. Got: ", oneTwoUnion)
+	}
+
+	oneThreeUnion := one.union(three)
+
+	if !reflect.DeepEqual(oneThreeUnion, cellSet{cellOne.ref(): true, cellTwo.ref(): true, cellThree.ref(): true}) {
+		t.Error("One three union failed. Got: ", oneThreeUnion)
+	}
+
+	oneTwoDifference := one.difference(two)
+
+	if !reflect.DeepEqual(oneTwoDifference, one) {
+		t.Error("One two difference failed. Got: ", oneTwoDifference)
+	}
+
+	oneThreeDifference := one.difference(three)
+
+	if !reflect.DeepEqual(oneThreeDifference, cellSet{cellOne.ref(): true}) {
+		t.Error("One three difference failed. Got: ", oneThreeDifference)
 	}
 
 }
