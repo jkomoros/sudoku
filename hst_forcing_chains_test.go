@@ -35,16 +35,6 @@ func TestForcingChains(t *testing.T) {
 
 	//Tester puzzle: http://www.komoroske.com/sudoku/index.php?puzzle=Q6Ur5iYGINSUFcyocqaY6G91DpttiqYzs
 
-	//TODO: verify these four and add to set.
-	//4, 0 / 2 / 0,6 / 3,7
-	//4, 0 / 2 / 0,1 / 2,7
-	//1, 8 / 4 / 5,1 / 1,2
-	//4, 5 / 7 / 5,4 / 2,3
-
-	//1, 8 / 4 / 5,7 / 1,3
-
-	//TODO: figure out why we're getting different numbers of steps, seemingly randomly. :-(
-
 	tests := []loopOptions{
 		{
 			targetCells:  []cellRef{{0, 1}},
@@ -84,6 +74,36 @@ func TestForcingChains(t *testing.T) {
 			targetNums:   IntSlice([]int{4}),
 			pointerCells: []cellRef{{4, 0}},
 			pointerNums:  IntSlice([]int{1, 2}),
+		},
+		{
+			targetCells:  []cellRef{{1, 8}},
+			targetNums:   IntSlice([]int{4}),
+			pointerCells: []cellRef{{5, 1}},
+			pointerNums:  IntSlice([]int{1, 2}),
+		},
+		{
+			targetCells:  []cellRef{{1, 8}},
+			targetNums:   IntSlice([]int{4}),
+			pointerCells: []cellRef{{5, 7}},
+			pointerNums:  IntSlice([]int{1, 3}),
+		},
+		{
+			targetCells:  []cellRef{{4, 0}},
+			targetNums:   IntSlice([]int{2}),
+			pointerCells: []cellRef{{0, 1}},
+			pointerNums:  IntSlice([]int{2, 7}),
+		},
+		{
+			targetCells:  []cellRef{{4, 0}},
+			targetNums:   IntSlice([]int{2}),
+			pointerCells: []cellRef{{0, 6}},
+			pointerNums:  IntSlice([]int{3, 7}),
+		},
+		{
+			targetCells:  []cellRef{{4, 5}},
+			targetNums:   IntSlice([]int{7}),
+			pointerCells: []cellRef{{5, 4}},
+			pointerNums:  IntSlice([]int{2, 3}),
 		},
 		{
 			targetCells:  []cellRef{{5, 1}},
