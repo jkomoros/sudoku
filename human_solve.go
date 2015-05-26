@@ -131,6 +131,18 @@ func (self *SolveStep) HumanLikelihood() float64 {
 	return self.Technique.humanLikelihood()
 }
 
+//TechniqueVariant returns the name of the precise variant of the Technique
+//that this step represents. This information is useful for figuring out
+//which weight to apply when calculating overall difficulty. A Technique would have
+//variants (as opposed to simply other Techniques) when the work to calculate all
+//variants is the same, but the difficulty of produced steps may vary due to some
+//property of the technique. Forcing Chains is the canonical example.
+func (self *SolveStep) TechniqueVariant() string {
+	//Defer to the Technique.variant implementation entirely.
+	//This allows us to most easily share code for the simple case.
+	return self.Technique.variant(self)
+}
+
 func (self *SolveStep) normalize() {
 	//Puts the solve step in its normal status. In practice this means that the various slices are sorted, so that the Description of them is stable.
 	self.PointerCells.Sort()

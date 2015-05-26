@@ -99,6 +99,7 @@ type solveTechniqueTestHelperOptions struct {
 	pointerNums  IntSlice
 	targetSame   cellGroupType
 	targetGroup  int
+	variantName  string
 	//If true, will loop over all steps from the technique and see if ANY of them match.
 	checkAllSteps bool
 	//A way to skip the step generator by provding your own list of steps.
@@ -207,9 +208,20 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 			log.Println(step)
 		}
 
+		variantName := options.variantName
+
+		if options.variantName == "" {
+			variantName = techniqueName
+		}
+
 		if options.matchMode == solveTechniqueMatchModeAll {
 
 			//All must match
+
+			if step.TechniqueVariant() != variantName {
+				l.Error("TechniqueVariant name was not what was expected. Got", step.TechniqueVariant(), "expected", variantName)
+				continue
+			}
 
 			if options.targetCells != nil {
 				if !step.TargetCells.sameAsRefs(options.targetCells) {
@@ -263,6 +275,11 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		} else if options.matchMode == solveTechniqueMatchModeAny {
 
 			foundMatch := false
+
+			if step.TechniqueVariant() != variantName {
+				l.Error("TechniqueVariant name was not what was expected. Got", step.TechniqueVariant(), "expected", variantName)
+				continue
+			}
 
 			if options.targetCells != nil {
 				foundMatch = false

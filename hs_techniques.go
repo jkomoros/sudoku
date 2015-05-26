@@ -48,6 +48,11 @@ type SolveTechnique interface {
 	//This value will be used to pick which technique to apply when compared with other candidates.
 	//This is primarily used to calculate SolveStep.HumanLikelihood.
 	humanLikelihood() float64
+
+	//variant is a helper method that has the technique figure out which TechniqueVariant
+	//was used given the speicif step produced. This allows us to share implementation for the
+	//base case.
+	variant(step *SolveStep) string
 }
 
 type cellGroupType int
@@ -370,6 +375,12 @@ func (self *basicSolveTechnique) Name() string {
 
 func (self *basicSolveTechnique) IsFill() bool {
 	return self.isFill
+}
+
+func (self *basicSolveTechnique) variant(step *SolveStep) string {
+	//In the simplest case, our 'variant' is just the actual name, because we have no variants.
+	//Other techniques should override this if they have variants.
+	return self.Name()
 }
 
 //TOOD: this is now named incorrectly. (It should be likelihoodHelper)
