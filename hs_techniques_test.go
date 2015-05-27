@@ -51,6 +51,7 @@ func TestAllVariantNames(t *testing.T) {
 		"Forcing Chain (3 steps)",
 		"Forcing Chain (4 steps)",
 		"Forcing Chain (5 steps)",
+		"Forcing Chain (6 steps)",
 		"Hidden Quad Block",
 		"Hidden Quad Row",
 		"Hidden Quad Col",
@@ -284,19 +285,32 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 			variantName = techniqueName
 		}
 
+		if step.TechniqueVariant() != variantName {
+			l.Error("TechniqueVariant name was not what was expected. Got", step.TechniqueVariant(), "expected", variantName)
+			continue
+		}
+
+		foundVariantNameMatch := false
+		for _, variant := range AllTechniqueVariants {
+			if variant == step.TechniqueVariant() {
+				foundVariantNameMatch = true
+				break
+			}
+		}
+
+		if !foundVariantNameMatch {
+			//This is a t.error, because every step should be valid in this way.
+			t.Error("Found a variant name that's not in the set: ", step.TechniqueVariant())
+		}
+
+		if !reflect.DeepEqual(step.extra, options.extra) {
+			l.Error("Extra did not match. Got", step.extra, "expected", options.extra)
+			continue
+		}
+
 		if options.matchMode == solveTechniqueMatchModeAll {
 
 			//All must match
-
-			if step.TechniqueVariant() != variantName {
-				l.Error("TechniqueVariant name was not what was expected. Got", step.TechniqueVariant(), "expected", variantName)
-				continue
-			}
-
-			if !reflect.DeepEqual(step.extra, options.extra) {
-				l.Error("Extra did not match. Got", step.extra, "expected", options.extra)
-				continue
-			}
 
 			if options.targetCells != nil {
 				if !step.TargetCells.sameAsRefs(options.targetCells) {
@@ -350,11 +364,6 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		} else if options.matchMode == solveTechniqueMatchModeAny {
 
 			foundMatch := false
-
-			if step.TechniqueVariant() != variantName {
-				l.Error("TechniqueVariant name was not what was expected. Got", step.TechniqueVariant(), "expected", variantName)
-				continue
-			}
 
 			if !reflect.DeepEqual(step.extra, options.extra) {
 				l.Error("Extra did not match. Got", step.extra, "expected", options.extra)

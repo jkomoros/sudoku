@@ -13,6 +13,7 @@ func TestForcingChains(t *testing.T) {
 		"Forcing Chain (3 steps)",
 		"Forcing Chain (4 steps)",
 		"Forcing Chain (5 steps)",
+		"Forcing Chain (6 steps)",
 	)
 
 	options := solveTechniqueTestHelperOptions{

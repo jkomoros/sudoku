@@ -14,7 +14,7 @@ type forcingChainsTechnique struct {
 
 func (self *forcingChainsTechnique) Variants() []string {
 	var result []string
-	for i := 1; i <= _MAX_IMPLICATION_STEPS; i++ {
+	for i := 1; i <= _MAX_IMPLICATION_STEPS+1; i++ {
 		result = append(result, self.Name()+" ("+strconv.Itoa(i)+" steps)")
 	}
 	return result
