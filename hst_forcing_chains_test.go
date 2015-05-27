@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"strconv"
 	"testing"
 )
 
@@ -265,6 +266,7 @@ func TestForcingChains(t *testing.T) {
 		options.pointerNums = test.pointerNums
 		options.description = test.description
 		options.extra = test.numImplicationSteps
+		options.variantName = "Forcing Chain (" + strconv.Itoa(test.numImplicationSteps) + " steps)"
 
 		humanSolveTechniqueTestHelper(t, "forcingchain_test1.sdk", "Forcing Chain", options)
 	}

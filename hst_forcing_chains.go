@@ -9,6 +9,18 @@ type forcingChainsTechnique struct {
 	*basicSolveTechnique
 }
 
+func (self *forcingChainsTechnique) variant(step *SolveStep) string {
+
+	//Verify that the information we're unpacking is what we expect
+	numImplicationSteps, ok := step.extra.(int)
+
+	if !ok {
+		numImplicationSteps = 0
+	}
+
+	return self.basicSolveTechnique.variant(step) + " (" + strconv.Itoa(numImplicationSteps) + " steps)"
+}
+
 func (self *forcingChainsTechnique) humanLikelihood() float64 {
 	//TODO: figure out what the baseDifficulty should be, this might be higher than
 	//it's actually in practice
