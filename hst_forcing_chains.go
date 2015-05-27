@@ -15,14 +15,14 @@ type forcingChainsTechnique struct {
 func (self *forcingChainsTechnique) numImplicationSteps(step *SolveStep) int {
 
 	if step == nil {
-		return 0
+		return 1
 	}
 
 	//Verify that the information we're unpacking is what we expect
 	numImplicationSteps, ok := step.extra.(int)
 
 	if !ok {
-		numImplicationSteps = 0
+		numImplicationSteps = 1
 	}
 	return numImplicationSteps
 }
@@ -45,7 +45,7 @@ func (self *forcingChainsTechnique) humanLikelihood(step *SolveStep) float64 {
 
 	//Note that this number has to be pretty high because it's competing against
 	//HiddenSIZEGROUP, which has the k exponential in its favor.
-	return self.difficultyHelper(20000.0)
+	return float64(self.numImplicationSteps(step)) * self.difficultyHelper(20000.0)
 }
 
 func (self *forcingChainsTechnique) Description(step *SolveStep) string {
