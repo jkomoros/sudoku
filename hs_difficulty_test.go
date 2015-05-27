@@ -16,9 +16,11 @@ func init() {
 			nil,
 			nil,
 			nil,
+			nil,
 		},
 		&SolveStep{
 			techniquesByName["Guess"],
+			nil,
 			nil,
 			nil,
 			nil,
@@ -30,9 +32,11 @@ func init() {
 			nil,
 			nil,
 			nil,
+			nil,
 		},
 		&SolveStep{
 			techniquesByName["Guess"],
+			nil,
 			nil,
 			nil,
 			nil,

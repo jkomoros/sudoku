@@ -126,6 +126,7 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 					IntSlice{numSlice[0]},
 					CellSlice{candidateCell},
 					candidateCell.Possibilities(),
+					nil,
 				}
 
 				if step.IsUseful(grid) {

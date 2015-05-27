@@ -50,6 +50,9 @@ type SolveStep struct {
 	//The specific numbers in PointerCells that lead us to remove TargetNums from TargetCells.
 	//This is only very rarely needed (at this time only for hiddenSubset techniques)
 	PointerNums IntSlice
+	//extra is a private place that information relevant to only specific techniques
+	//can be stashed.
+	extra interface{}
 }
 
 //IsUseful returns true if this SolveStep, when applied to the given grid, would do useful work--that is, it would

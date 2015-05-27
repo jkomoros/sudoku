@@ -3,6 +3,7 @@ package sudoku
 import (
 	"fmt"
 	"log"
+	"reflect"
 	"testing"
 )
 
@@ -124,6 +125,7 @@ type solveTechniqueTestHelperOptions struct {
 	targetSame   cellGroupType
 	targetGroup  int
 	variantName  string
+	extra        interface{}
 	//If true, will loop over all steps from the technique and see if ANY of them match.
 	checkAllSteps bool
 	//A way to skip the step generator by provding your own list of steps.
@@ -247,6 +249,11 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 				continue
 			}
 
+			if !reflect.DeepEqual(step.extra, options.extra) {
+				l.Error("Extra did not match. Got", step.extra, "expected", options.extra)
+				continue
+			}
+
 			if options.targetCells != nil {
 				if !step.TargetCells.sameAsRefs(options.targetCells) {
 					l.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
@@ -302,6 +309,11 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 
 			if step.TechniqueVariant() != variantName {
 				l.Error("TechniqueVariant name was not what was expected. Got", step.TechniqueVariant(), "expected", variantName)
+				continue
+			}
+
+			if !reflect.DeepEqual(step.extra, options.extra) {
+				l.Error("Extra did not match. Got", step.extra, "expected", options.extra)
 				continue
 			}
 
