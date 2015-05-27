@@ -114,8 +114,10 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 					continue
 				}
 
+				numImplicationSteps := firstAccumulator.firstGeneration[cell][0] + secondAccumulator.firstGeneration[cell][0]
+
 				//Is their combined generation count lower than _MAX_IMPLICATION_STEPS?
-				if firstAccumulator.firstGeneration[cell][0]+secondAccumulator.firstGeneration[cell][0] > _MAX_IMPLICATION_STEPS+1 {
+				if numImplicationSteps > _MAX_IMPLICATION_STEPS+1 {
 					//Too many implication steps. :-(
 					continue
 				}
@@ -126,7 +128,7 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 					IntSlice{numSlice[0]},
 					CellSlice{candidateCell},
 					candidateCell.Possibilities(),
-					nil,
+					numImplicationSteps,
 				}
 
 				if step.IsUseful(grid) {
