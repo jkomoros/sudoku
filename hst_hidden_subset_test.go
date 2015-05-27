@@ -42,6 +42,7 @@ func TestHiddenPairRow(t *testing.T) {
 		description:  "3 and 5 are only possible in (4,7) and (4,8) within row 4, which means that only those numbers could be in those cells",
 	}
 	humanSolveTechniqueTestHelper(t, "hiddenpair1_filled.sdk", "Hidden Pair Row", options)
+	techniqueVariantsTestHelper(t, "Hidden Pair Row")
 
 }
 
@@ -58,6 +59,7 @@ func TestHiddenPairCol(t *testing.T) {
 		description:  "3 and 5 are only possible in (7,4) and (8,4) within column 4, which means that only those numbers could be in those cells",
 	}
 	humanSolveTechniqueTestHelper(t, "hiddenpair1_filled.sdk", "Hidden Pair Col", options)
+	techniqueVariantsTestHelper(t, "Hidden Pair Col")
 
 }
 
@@ -73,6 +75,7 @@ func TestHiddenPairBlock(t *testing.T) {
 		description: "3 and 5 are only possible in (4,7) and (4,8) within block 5, which means that only those numbers could be in those cells",
 	}
 	humanSolveTechniqueTestHelper(t, "hiddenpair1_filled.sdk", "Hidden Pair Block", options)
+	techniqueVariantsTestHelper(t, "Hidden Pair Block")
 
 }
 

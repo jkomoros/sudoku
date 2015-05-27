@@ -9,7 +9,7 @@ type blockBlockInteractionTechnique struct {
 	*basicSolveTechnique
 }
 
-func (self *blockBlockInteractionTechnique) HumanLikelihood() float64 {
+func (self *blockBlockInteractionTechnique) humanLikelihood() float64 {
 	//TODO: think more about how difficult this technique is.
 	return self.difficultyHelper(60.0)
 }
@@ -101,6 +101,7 @@ func (self *blockBlockInteractionTechnique) Find(grid *Grid, results chan *Solve
 				targetCells,
 				[]int{i},
 				append(firstBlockCells, secondBlockCells...),
+				nil,
 				nil,
 			}
 

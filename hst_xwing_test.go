@@ -14,6 +14,7 @@ func TestXWingRow(t *testing.T) {
 		description:  "in rows 0 and 7, 9 is only possible in columns 4 and 7, and 9 must be in one of those cells per rows, so it can't be in any other cells in those columns",
 	}
 	humanSolveTechniqueTestHelper(t, "xwingtest.sdk", "XWing Row", options)
+	techniqueVariantsTestHelper(t, "XWing Row")
 
 }
 
@@ -26,5 +27,6 @@ func TestXWingCol(t *testing.T) {
 		description:  "in columns 0 and 7, 9 is only possible in rows 4 and 7, and 9 must be in one of those cells per columns, so it can't be in any other cells in those rows",
 	}
 	humanSolveTechniqueTestHelper(t, "xwingtest.sdk", "XWing Col", options)
+	techniqueVariantsTestHelper(t, "XWing Col")
 
 }

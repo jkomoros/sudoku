@@ -9,7 +9,7 @@ type xwingTechnique struct {
 	*basicSolveTechnique
 }
 
-func (self *xwingTechnique) HumanLikelihood() float64 {
+func (self *xwingTechnique) humanLikelihood() float64 {
 	return self.difficultyHelper(50.0)
 }
 
@@ -124,7 +124,7 @@ func (self *xwingTechnique) Find(grid *Grid, results chan *SolveStep, done chan 
 			targetCells = targetCells.FilterByPossible(i)
 
 			//Okay, we found a pair that works. Create a step for it (if it's useful)
-			step := &SolveStep{self, targetCells, IntSlice{i}, append(currentGroups[0], currentGroups[1]...), nil}
+			step := &SolveStep{self, targetCells, IntSlice{i}, append(currentGroups[0], currentGroups[1]...), nil, nil}
 			if step.IsUseful(grid) {
 				select {
 				case results <- step:

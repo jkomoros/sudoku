@@ -19,6 +19,8 @@ var (
 	GuessTechnique SolveTechnique
 	//Every technique that HumanSolve could ever use, including the oddball Guess technique.
 	AllTechniques []SolveTechnique
+	//Every variant name for every TechniqueVariant that HumanSolve could ever use.
+	AllTechniqueVariants []string
 )
 
 //The actual techniques are intialized in hs_techniques.go, and actually defined in hst_*.go files.
@@ -50,6 +52,9 @@ type SolveStep struct {
 	//The specific numbers in PointerCells that lead us to remove TargetNums from TargetCells.
 	//This is only very rarely needed (at this time only for hiddenSubset techniques)
 	PointerNums IntSlice
+	//extra is a private place that information relevant to only specific techniques
+	//can be stashed.
+	extra interface{}
 }
 
 //IsUseful returns true if this SolveStep, when applied to the given grid, would do useful work--that is, it would
@@ -119,6 +124,28 @@ func (self *SolveStep) Description() string {
 	}
 	result += "because " + self.Technique.Description(self) + "."
 	return result
+}
+
+//HumanLikelihood is how likely a user would be to pick this step when compared with other possible steps.
+//Generally inversely related to difficulty (but not perfectly).
+//This value will be used to pick which technique to apply when compared with other candidates.
+//Based on the technique's HumanLikelihood, possibly attenuated by this particular step's variant
+//or specifics.
+func (self *SolveStep) HumanLikelihood() float64 {
+	//TODO: attenuate by variant
+	return self.Technique.humanLikelihood()
+}
+
+//TechniqueVariant returns the name of the precise variant of the Technique
+//that this step represents. This information is useful for figuring out
+//which weight to apply when calculating overall difficulty. A Technique would have
+//variants (as opposed to simply other Techniques) when the work to calculate all
+//variants is the same, but the difficulty of produced steps may vary due to some
+//property of the technique. Forcing Chains is the canonical example.
+func (self *SolveStep) TechniqueVariant() string {
+	//Defer to the Technique.variant implementation entirely.
+	//This allows us to most easily share code for the simple case.
+	return self.Technique.variant(self)
 }
 
 func (self *SolveStep) normalize() {
@@ -315,7 +342,7 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 
 		possibilitiesWeights := make([]float64, len(possibilities))
 		for i, possibility := range possibilities {
-			possibilitiesWeights[i] = possibility.Technique.HumanLikelihood()
+			possibilitiesWeights[i] = possibility.HumanLikelihood()
 		}
 
 		tweakChainedStepsWeights(lastStep, possibilities, possibilitiesWeights)

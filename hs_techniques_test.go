@@ -3,16 +3,62 @@ package sudoku
 import (
 	"fmt"
 	"log"
+	"reflect"
 	"testing"
 )
 
 func TestTechniquesSorted(t *testing.T) {
 	lastLikelihood := 0.0
 	for i, technique := range AllTechniques {
-		if technique.HumanLikelihood() < lastLikelihood {
-			t.Fatal("Technique named", technique.Name(), "with index", i, "has a likelihood lower than one of the earlier ones: ", technique.HumanLikelihood(), lastLikelihood)
+		if technique.humanLikelihood() < lastLikelihood {
+			t.Fatal("Technique named", technique.Name(), "with index", i, "has a likelihood lower than one of the earlier ones: ", technique.humanLikelihood(), lastLikelihood)
 		}
-		lastLikelihood = technique.HumanLikelihood()
+		lastLikelihood = technique.humanLikelihood()
+	}
+}
+
+func TestAllVariantNames(t *testing.T) {
+	expected := []string{
+		"Obvious In Block",
+		"Obvious In Row",
+		"Obvious In Col",
+		"Necessary In Block",
+		"Only Legal Number",
+		"Necessary In Row",
+		"Necessary In Col",
+		"Naked Pair Block",
+		"Naked Pair Row",
+		"Naked Pair Col",
+		"Naked Triple Block",
+		"Naked Triple Row",
+		"Naked Triple Col",
+		"Naked Quad Block",
+		"Naked Quad Row",
+		"Naked Quad Col",
+		"XWing Row",
+		"Pointing Pair Row",
+		"Pointing Pair Col",
+		"XWing Col",
+		"Block Block Interactions",
+		"Hidden Pair Block",
+		"Hidden Pair Row",
+		"Hidden Pair Col",
+		"Hidden Triple Block",
+		"Hidden Triple Row",
+		"Hidden Triple Col",
+		"Forcing Chain (1 steps)",
+		"Forcing Chain (2 steps)",
+		"Forcing Chain (3 steps)",
+		"Forcing Chain (4 steps)",
+		"Forcing Chain (5 steps)",
+		"Forcing Chain (6 steps)",
+		"Hidden Quad Block",
+		"Hidden Quad Row",
+		"Hidden Quad Col",
+		"Guess",
+	}
+	if !reflect.DeepEqual(expected, AllTechniqueVariants) {
+		t.Error("Got wrong technique variants. Expected", expected, "got", AllTechniqueVariants)
 	}
 }
 
@@ -51,6 +97,30 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 				t.Log("Subset indexes had wrong number at ", i, ",", j, " : ", result, " : ", expectedResult)
 				t.Fail()
 			}
+		}
+	}
+}
+
+func techniqueVariantsTestHelper(t *testing.T, techniqueName string, variantNames ...string) {
+
+	technique, ok := techniquesByName[techniqueName]
+
+	if !ok {
+		t.Fatal("Couldn't find technqiue named", techniqueName)
+	}
+
+	if len(variantNames) == 0 {
+		variantNames = []string{technique.Name()}
+	}
+
+	names := technique.Variants()
+	if len(names) != len(variantNames) {
+		t.Fatal("Didn't receive the right number of variants for", technique.Name(), "Got", len(names), "expected", len(variantNames))
+	}
+	for i, name := range names {
+		goldenName := variantNames[i]
+		if name != goldenName {
+			t.Error(i, "th variant name for", technique.Name(), "wrong. Got", name, "expected", goldenName)
 		}
 	}
 }
@@ -99,6 +169,8 @@ type solveTechniqueTestHelperOptions struct {
 	pointerNums  IntSlice
 	targetSame   cellGroupType
 	targetGroup  int
+	variantName  string
+	extra        interface{}
 	//If true, will loop over all steps from the technique and see if ANY of them match.
 	checkAllSteps bool
 	//A way to skip the step generator by provding your own list of steps.
@@ -207,6 +279,35 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 			log.Println(step)
 		}
 
+		variantName := options.variantName
+
+		if options.variantName == "" {
+			variantName = techniqueName
+		}
+
+		if step.TechniqueVariant() != variantName {
+			l.Error("TechniqueVariant name was not what was expected. Got", step.TechniqueVariant(), "expected", variantName)
+			continue
+		}
+
+		foundVariantNameMatch := false
+		for _, variant := range AllTechniqueVariants {
+			if variant == step.TechniqueVariant() {
+				foundVariantNameMatch = true
+				break
+			}
+		}
+
+		if !foundVariantNameMatch {
+			//This is a t.error, because every step should be valid in this way.
+			t.Error("Found a variant name that's not in the set: ", step.TechniqueVariant())
+		}
+
+		if !reflect.DeepEqual(step.extra, options.extra) {
+			l.Error("Extra did not match. Got", step.extra, "expected", options.extra)
+			continue
+		}
+
 		if options.matchMode == solveTechniqueMatchModeAll {
 
 			//All must match
@@ -263,6 +364,11 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		} else if options.matchMode == solveTechniqueMatchModeAny {
 
 			foundMatch := false
+
+			if !reflect.DeepEqual(step.extra, options.extra) {
+				l.Error("Extra did not match. Got", step.extra, "expected", options.extra)
+				continue
+			}
 
 			if options.targetCells != nil {
 				foundMatch = false

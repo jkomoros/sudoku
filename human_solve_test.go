@@ -95,6 +95,7 @@ func TestStepsDescription(t *testing.T) {
 			IntSlice{1},
 			nil,
 			nil,
+			nil,
 		},
 		&SolveStep{
 			techniquesByName["Pointing Pair Col"],
@@ -108,6 +109,7 @@ func TestStepsDescription(t *testing.T) {
 				grid.Cell(1, 4),
 			},
 			nil,
+			nil,
 		},
 		&SolveStep{
 			techniquesByName["Only Legal Number"],
@@ -115,6 +117,7 @@ func TestStepsDescription(t *testing.T) {
 				grid.Cell(2, 0),
 			},
 			IntSlice{2},
+			nil,
 			nil,
 			nil,
 		},
@@ -157,6 +160,7 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		nil,
 	}
 	possibilities := []*SolveStep{
 		{
@@ -164,6 +168,7 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 			cellRefsToCells([]cellRef{
 				{1, 0},
 			}, grid),
+			nil,
 			nil,
 			nil,
 			nil,
@@ -176,12 +181,14 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 			nil,
 			nil,
 			nil,
+			nil,
 		},
 		{
 			nil,
 			cellRefsToCells([]cellRef{
 				{7, 7},
 			}, grid),
+			nil,
 			nil,
 			nil,
 			nil,

@@ -21,10 +21,10 @@ type obviousInCollectionTechnique struct {
 func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
 	cellArr := []*Cell{cell}
 	numArr := []int{num}
-	return &SolveStep{technique, cellArr, numArr, nil, nil}
+	return &SolveStep{technique, cellArr, numArr, nil, nil, nil}
 }
 
-func (self *obviousInCollectionTechnique) HumanLikelihood() float64 {
+func (self *obviousInCollectionTechnique) humanLikelihood() float64 {
 	return self.difficultyHelper(1.0)
 }
 
@@ -87,7 +87,7 @@ func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter 
 	}
 }
 
-func (self *nakedSingleTechnique) HumanLikelihood() float64 {
+func (self *nakedSingleTechnique) humanLikelihood() float64 {
 	return self.difficultyHelper(20.0)
 }
 
@@ -127,7 +127,7 @@ func (self *nakedSingleTechnique) Find(grid *Grid, results chan *SolveStep, done
 	}
 }
 
-func (self *hiddenSingleTechnique) HumanLikelihood() float64 {
+func (self *hiddenSingleTechnique) humanLikelihood() float64 {
 	return self.difficultyHelper(18.0)
 }
 

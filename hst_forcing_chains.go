@@ -5,11 +5,34 @@ import (
 	"strconv"
 )
 
+//TODO: investigate bumping this back up when #100 lands
+const _MAX_IMPLICATION_STEPS = 5
+
 type forcingChainsTechnique struct {
 	*basicSolveTechnique
 }
 
-func (self *forcingChainsTechnique) HumanLikelihood() float64 {
+func (self *forcingChainsTechnique) Variants() []string {
+	var result []string
+	for i := 1; i <= _MAX_IMPLICATION_STEPS+1; i++ {
+		result = append(result, self.Name()+" ("+strconv.Itoa(i)+" steps)")
+	}
+	return result
+}
+
+func (self *forcingChainsTechnique) variant(step *SolveStep) string {
+
+	//Verify that the information we're unpacking is what we expect
+	numImplicationSteps, ok := step.extra.(int)
+
+	if !ok {
+		numImplicationSteps = 0
+	}
+
+	return self.basicSolveTechnique.variant(step) + " (" + strconv.Itoa(numImplicationSteps) + " steps)"
+}
+
+func (self *forcingChainsTechnique) humanLikelihood() float64 {
 	//TODO: figure out what the baseDifficulty should be, this might be higher than
 	//it's actually in practice
 
@@ -50,9 +73,6 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 	 */
 
 	getter := grid.queue().DefaultGetter()
-
-	//TODO: investigate bumping this back up when #100 lands.
-	_MAX_IMPLICATION_STEPS := 5
 
 	for {
 
@@ -114,8 +134,10 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 					continue
 				}
 
+				numImplicationSteps := firstAccumulator.firstGeneration[cell][0] + secondAccumulator.firstGeneration[cell][0]
+
 				//Is their combined generation count lower than _MAX_IMPLICATION_STEPS?
-				if firstAccumulator.firstGeneration[cell][0]+secondAccumulator.firstGeneration[cell][0] > _MAX_IMPLICATION_STEPS+1 {
+				if numImplicationSteps > _MAX_IMPLICATION_STEPS+1 {
 					//Too many implication steps. :-(
 					continue
 				}
@@ -126,6 +148,7 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 					IntSlice{numSlice[0]},
 					CellSlice{candidateCell},
 					candidateCell.Possibilities(),
+					numImplicationSteps,
 				}
 
 				if step.IsUseful(grid) {

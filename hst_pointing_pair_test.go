@@ -14,6 +14,7 @@ func TestPointingPairCol(t *testing.T) {
 		description:  "7 is only possible in column 1 of block 0, which means it can't be in any other cell in that column not in that block",
 	}
 	humanSolveTechniqueTestHelper(t, "pointingpaircol1.sdk", "Pointing Pair Col", options)
+	techniqueVariantsTestHelper(t, "Pointing Pair Col")
 
 }
 
@@ -27,5 +28,6 @@ func TestPointingPairRow(t *testing.T) {
 		description:  "7 is only possible in row 1 of block 0, which means it can't be in any other cell in that row not in that block",
 	}
 	humanSolveTechniqueTestHelper(t, "pointingpairrow1.sdk", "Pointing Pair Row", options)
+	techniqueVariantsTestHelper(t, "Pointing Pair Row")
 
 }

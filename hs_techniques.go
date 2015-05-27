@@ -43,10 +43,22 @@ type SolveTechnique interface {
 
 	//IsFill returns true if the techinque's action when applied to a grid is to fill a number (as opposed to culling possbilitie).
 	IsFill() bool
+
+	//Variants returns a slice of strings representing all of the various variantnames
+	//that steps produced from this technique could ever have. This is useful as part of
+	//enumerating all possible TechniqueVariant names that any steps could ever emit.
+	Variants() []string
+
 	//HumanLikelihood is how likely a user would be to pick this technique when compared with other possible steps.
 	//Generally inversely related to difficulty (but not perfectly).
 	//This value will be used to pick which technique to apply when compared with other candidates.
-	HumanLikelihood() float64
+	//This is primarily used to calculate SolveStep.HumanLikelihood.
+	humanLikelihood() float64
+
+	//variant is a helper method that has the technique figure out which TechniqueVariant
+	//was used given the speicif step produced. This allows us to share implementation for the
+	//base case.
+	variant(step *SolveStep) string
 }
 
 type cellGroupType int
@@ -80,7 +92,7 @@ func (t techniqueByLikelihood) Swap(i, j int) {
 }
 
 func (t techniqueByLikelihood) Less(i, j int) bool {
-	return t[i].HumanLikelihood() < t[j].HumanLikelihood()
+	return t[i].humanLikelihood() < t[j].humanLikelihood()
 }
 
 func init() {
@@ -359,6 +371,9 @@ func init() {
 
 	for _, technique := range AllTechniques {
 		techniquesByName[technique.Name()] = technique
+		for _, variant := range technique.Variants() {
+			AllTechniqueVariants = append(AllTechniqueVariants, variant)
+		}
 	}
 
 }
@@ -369,6 +384,16 @@ func (self *basicSolveTechnique) Name() string {
 
 func (self *basicSolveTechnique) IsFill() bool {
 	return self.isFill
+}
+
+func (self *basicSolveTechnique) Variants() []string {
+	return []string{self.Name()}
+}
+
+func (self *basicSolveTechnique) variant(step *SolveStep) string {
+	//In the simplest case, our 'variant' is just the actual name, because we have no variants.
+	//Other techniques should override this if they have variants.
+	return self.Name()
 }
 
 //TOOD: this is now named incorrectly. (It should be likelihoodHelper)

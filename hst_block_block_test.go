@@ -36,6 +36,7 @@ func TestBlockBlockInteraction(t *testing.T) {
 		description:  "3 can only be in two different columns in blocks 1 and 4, which means that 3 can't be in any other cells in those columns that aren't in blocks 1 and 4",
 	}
 	humanSolveTechniqueTestHelper(t, "blockblocktest.sdk", "Block Block Interactions", options)
+	techniqueVariantsTestHelper(t, "Block Block Interactions")
 
 }
 

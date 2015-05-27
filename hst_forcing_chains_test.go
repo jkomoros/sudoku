@@ -1,10 +1,20 @@
 package sudoku
 
 import (
+	"strconv"
 	"testing"
 )
 
 func TestForcingChains(t *testing.T) {
+
+	techniqueVariantsTestHelper(t, "Forcing Chain",
+		"Forcing Chain (1 steps)",
+		"Forcing Chain (2 steps)",
+		"Forcing Chain (3 steps)",
+		"Forcing Chain (4 steps)",
+		"Forcing Chain (5 steps)",
+		"Forcing Chain (6 steps)",
+	)
 
 	options := solveTechniqueTestHelperOptions{
 		checkAllSteps: true,
@@ -21,11 +31,12 @@ func TestForcingChains(t *testing.T) {
 	//up in the solve steps.
 
 	type loopOptions struct {
-		targetCells  []cellRef
-		targetNums   IntSlice
-		pointerCells []cellRef
-		pointerNums  IntSlice
-		description  string
+		targetCells         []cellRef
+		targetNums          IntSlice
+		pointerCells        []cellRef
+		pointerNums         IntSlice
+		description         string
+		numImplicationSteps int
 	}
 
 	//TODO: the fact that every time we make a relatively small change to the forcing chain algo
@@ -37,11 +48,12 @@ func TestForcingChains(t *testing.T) {
 
 	tests := []loopOptions{
 		{
-			targetCells:  []cellRef{{0, 1}},
-			targetNums:   IntSlice([]int{7}),
-			pointerCells: []cellRef{{1, 0}},
-			pointerNums:  IntSlice([]int{1, 2}),
-			description:  "cell (1,0) only has two options, 1 and 2, and if you put either one in and see the chain of implications it leads to, both ones end up with 7 in cell (0,1), so we can just fill that number in",
+			targetCells:         []cellRef{{0, 1}},
+			targetNums:          IntSlice([]int{7}),
+			pointerCells:        []cellRef{{1, 0}},
+			pointerNums:         IntSlice([]int{1, 2}),
+			description:         "cell (1,0) only has two options, 1 and 2, and if you put either one in and see the chain of implications it leads to, both ones end up with 7 in cell (0,1), so we can just fill that number in",
+			numImplicationSteps: 6,
 		},
 		{
 			targetCells:  []cellRef{{0, 1}},
@@ -49,73 +61,85 @@ func TestForcingChains(t *testing.T) {
 			pointerCells: []cellRef{{5, 1}},
 			pointerNums:  IntSlice([]int{1, 2}),
 			//Explicitly don't test description after the first one.
+			numImplicationSteps: 4,
 		},
 		//Another particularly long one
 		{
-			targetCells:  []cellRef{{1, 0}},
-			targetNums:   IntSlice([]int{1}),
-			pointerCells: []cellRef{{0, 1}},
-			pointerNums:  IntSlice([]int{2, 7}),
+			targetCells:         []cellRef{{1, 0}},
+			targetNums:          IntSlice([]int{1}),
+			pointerCells:        []cellRef{{0, 1}},
+			pointerNums:         IntSlice([]int{2, 7}),
+			numImplicationSteps: 5,
 		},
 		{
-			targetCells:  []cellRef{{1, 0}},
-			targetNums:   IntSlice([]int{1}),
-			pointerCells: []cellRef{{0, 6}},
-			pointerNums:  IntSlice([]int{3, 7}),
+			targetCells:         []cellRef{{1, 0}},
+			targetNums:          IntSlice([]int{1}),
+			pointerCells:        []cellRef{{0, 6}},
+			pointerNums:         IntSlice([]int{3, 7}),
+			numImplicationSteps: 5,
 		},
 		{
-			targetCells:  []cellRef{{1, 8}},
-			targetNums:   IntSlice([]int{4}),
-			pointerCells: []cellRef{{1, 0}},
-			pointerNums:  IntSlice([]int{1, 2}),
+			targetCells:         []cellRef{{1, 8}},
+			targetNums:          IntSlice([]int{4}),
+			pointerCells:        []cellRef{{1, 0}},
+			pointerNums:         IntSlice([]int{1, 2}),
+			numImplicationSteps: 6,
 		},
 		{
-			targetCells:  []cellRef{{1, 8}},
-			targetNums:   IntSlice([]int{4}),
-			pointerCells: []cellRef{{4, 0}},
-			pointerNums:  IntSlice([]int{1, 2}),
+			targetCells:         []cellRef{{1, 8}},
+			targetNums:          IntSlice([]int{4}),
+			pointerCells:        []cellRef{{4, 0}},
+			pointerNums:         IntSlice([]int{1, 2}),
+			numImplicationSteps: 6,
 		},
 		{
-			targetCells:  []cellRef{{1, 8}},
-			targetNums:   IntSlice([]int{4}),
-			pointerCells: []cellRef{{5, 1}},
-			pointerNums:  IntSlice([]int{1, 2}),
+			targetCells:         []cellRef{{1, 8}},
+			targetNums:          IntSlice([]int{4}),
+			pointerCells:        []cellRef{{5, 1}},
+			pointerNums:         IntSlice([]int{1, 2}),
+			numImplicationSteps: 6,
 		},
 		{
-			targetCells:  []cellRef{{1, 8}},
-			targetNums:   IntSlice([]int{4}),
-			pointerCells: []cellRef{{5, 7}},
-			pointerNums:  IntSlice([]int{1, 3}),
+			targetCells:         []cellRef{{1, 8}},
+			targetNums:          IntSlice([]int{4}),
+			pointerCells:        []cellRef{{5, 7}},
+			pointerNums:         IntSlice([]int{1, 3}),
+			numImplicationSteps: 6,
 		},
 		{
-			targetCells:  []cellRef{{4, 0}},
-			targetNums:   IntSlice([]int{2}),
-			pointerCells: []cellRef{{0, 1}},
-			pointerNums:  IntSlice([]int{2, 7}),
+			targetCells:         []cellRef{{4, 0}},
+			targetNums:          IntSlice([]int{2}),
+			pointerCells:        []cellRef{{0, 1}},
+			pointerNums:         IntSlice([]int{2, 7}),
+			numImplicationSteps: 5,
 		},
 		{
-			targetCells:  []cellRef{{4, 0}},
-			targetNums:   IntSlice([]int{2}),
-			pointerCells: []cellRef{{0, 6}},
-			pointerNums:  IntSlice([]int{3, 7}),
+			targetCells:         []cellRef{{4, 0}},
+			targetNums:          IntSlice([]int{2}),
+			pointerCells:        []cellRef{{0, 6}},
+			pointerNums:         IntSlice([]int{3, 7}),
+			numImplicationSteps: 5,
 		},
 		{
-			targetCells:  []cellRef{{4, 5}},
-			targetNums:   IntSlice([]int{7}),
-			pointerCells: []cellRef{{5, 4}},
-			pointerNums:  IntSlice([]int{2, 3}),
+			targetCells:         []cellRef{{4, 5}},
+			targetNums:          IntSlice([]int{7}),
+			pointerCells:        []cellRef{{5, 4}},
+			pointerNums:         IntSlice([]int{2, 3}),
+			numImplicationSteps: 6,
 		},
 		{
-			targetCells:  []cellRef{{5, 1}},
-			targetNums:   IntSlice([]int{1}),
-			pointerCells: []cellRef{{0, 1}},
-			pointerNums:  IntSlice([]int{2, 7}),
+			targetCells:         []cellRef{{5, 1}},
+			targetNums:          IntSlice([]int{1}),
+			pointerCells:        []cellRef{{0, 1}},
+			pointerNums:         IntSlice([]int{2, 7}),
+			numImplicationSteps: 5,
 		},
 		{
-			targetCells:  []cellRef{{8, 3}},
-			targetNums:   IntSlice([]int{7}),
-			pointerCells: []cellRef{{8, 7}},
-			pointerNums:  IntSlice([]int{1, 2}),
+			targetCells:         []cellRef{{8, 3}},
+			targetNums:          IntSlice([]int{7}),
+			pointerCells:        []cellRef{{8, 7}},
+			pointerNums:         IntSlice([]int{1, 2}),
+			numImplicationSteps: 6,
 		},
 
 		/* Steps that got dropped out when we switched to DFS
@@ -248,6 +272,8 @@ func TestForcingChains(t *testing.T) {
 		options.pointerCells = test.pointerCells
 		options.pointerNums = test.pointerNums
 		options.description = test.description
+		options.extra = test.numImplicationSteps
+		options.variantName = "Forcing Chain (" + strconv.Itoa(test.numImplicationSteps) + " steps)"
 
 		humanSolveTechniqueTestHelper(t, "forcingchain_test1.sdk", "Forcing Chain", options)
 	}

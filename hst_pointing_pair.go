@@ -9,7 +9,7 @@ type pointingPairTechnique struct {
 	*basicSolveTechnique
 }
 
-func (self *pointingPairTechnique) HumanLikelihood() float64 {
+func (self *pointingPairTechnique) humanLikelihood() float64 {
 	return self.difficultyHelper(50.0)
 }
 
@@ -57,9 +57,9 @@ func (self *pointingPairTechnique) Find(grid *Grid, results chan *SolveStep, don
 				//Yup!
 				var step *SolveStep
 				if self.groupType == _GROUP_ROW {
-					step = &SolveStep{self, grid.Row(cells.Row()).RemoveCells(block), []int{num + 1}, cells, nil}
+					step = &SolveStep{self, grid.Row(cells.Row()).RemoveCells(block), []int{num + 1}, cells, nil, nil}
 				} else {
-					step = &SolveStep{self, grid.Col(cells.Col()).RemoveCells(block), []int{num + 1}, cells, nil}
+					step = &SolveStep{self, grid.Col(cells.Col()).RemoveCells(block), []int{num + 1}, cells, nil, nil}
 				}
 				if step.IsUseful(grid) {
 					select {

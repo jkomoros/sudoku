@@ -10,7 +10,7 @@ type nakedSubsetTechnique struct {
 	*basicSolveTechnique
 }
 
-func (self *nakedSubsetTechnique) HumanLikelihood() float64 {
+func (self *nakedSubsetTechnique) humanLikelihood() float64 {
 	return self.difficultyHelper(6.0)
 }
 
@@ -63,7 +63,7 @@ func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter f
 
 				group := groups[groupIndex]
 
-				step := &SolveStep{technique, collectionGetter(i).RemoveCells(group), group.PossibilitiesUnion(), group, nil}
+				step := &SolveStep{technique, collectionGetter(i).RemoveCells(group), group.PossibilitiesUnion(), group, nil, nil}
 				if step.IsUseful(grid) {
 					select {
 					case results <- step:

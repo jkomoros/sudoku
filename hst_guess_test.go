@@ -6,6 +6,8 @@ import (
 
 func TestGuessTechnique(t *testing.T) {
 
+	techniqueVariantsTestHelper(t, "Guess")
+
 	//TODO: this test doesn't exercise whether pointerNums is the right value. The test case to do so would be too hard.
 	options := solveTechniqueTestHelperOptions{
 		matchMode:   solveTechniqueMatchModeAny,
