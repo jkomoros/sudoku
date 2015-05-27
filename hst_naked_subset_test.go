@@ -38,6 +38,7 @@ func TestNakedPairCol(t *testing.T) {
 		description:  "2 and 3 are only possible in (6,8) and (7,8), which means that they can't be in any other cell in column 8",
 	}
 	humanSolveTechniqueTestHelper(t, "nakedpair3.sdk", "Naked Pair Col", options)
+	techniqueVariantsTestHelper(t, "Naked Pair Col")
 
 }
 
@@ -53,6 +54,7 @@ func TestNakedPairRow(t *testing.T) {
 		description:  "2 and 3 are only possible in (8,6) and (8,7), which means that they can't be in any other cell in row 8",
 	}
 	humanSolveTechniqueTestHelper(t, "nakedpair3.sdk", "Naked Pair Row", options)
+	techniqueVariantsTestHelper(t, "Naked Pair Row")
 
 }
 
@@ -67,6 +69,7 @@ func TestNakedPairBlock(t *testing.T) {
 		description:  "1 and 2 are only possible in (0,0) and (0,1), which means that they can't be in any other cell in block 0",
 	}
 	humanSolveTechniqueTestHelper(t, "nakedpairblock1.sdk", "Naked Pair Block", options)
+	techniqueVariantsTestHelper(t, "Naked Pair Block")
 
 }
 
@@ -82,6 +85,7 @@ func TestNakedTriple(t *testing.T) {
 		description:  "3, 5, and 8 are only possible in (4,3), (4,4), and (4,5), which means that they can't be in any other cell in row 4",
 	}
 	humanSolveTechniqueTestHelper(t, "nakedtriplet2.sdk", "Naked Triple Row", options)
+	techniqueVariantsTestHelper(t, "Naked Triple Row")
 }
 
 //TODO: test naked quad techniques. (We don't have an easy one that requires it off hand.)

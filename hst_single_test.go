@@ -13,6 +13,7 @@ func TestObviousInCollectionRow(t *testing.T) {
 		description: "(2,3) is the only cell in row 2 that is unfilled, and it must be 7",
 	}
 	humanSolveTechniqueTestHelper(t, "obviousrow.sdk", "Obvious In Row", options)
+	techniqueVariantsTestHelper(t, "Obvious In Row")
 
 }
 
@@ -26,6 +27,7 @@ func TestObviousInCollectionCol(t *testing.T) {
 		description: "(3,2) is the only cell in column 2 that is unfilled, and it must be 7",
 	}
 	humanSolveTechniqueTestHelper(t, "obviousrow.sdk", "Obvious In Col", options)
+	techniqueVariantsTestHelper(t, "Obvious In Col")
 
 }
 
@@ -38,10 +40,14 @@ func TestObviousInCollectionBlock(t *testing.T) {
 		description: "(4,1) is the only cell in block 3 that is unfilled, and it must be 9",
 	}
 	humanSolveTechniqueTestHelper(t, "obviousblock.sdk", "Obvious In Block", options)
+	techniqueVariantsTestHelper(t, "Obvious In Block")
 
 }
 
 func TestSolveOnlyLegalNumber(t *testing.T) {
+
+	techniqueVariantsTestHelper(t, "Only Legal Number")
+
 	grid := NewGrid()
 	defer grid.Done()
 	//Load up a solved grid
@@ -133,6 +139,8 @@ func TestNecessaryInRow(t *testing.T) {
 	techniqueName := "Necessary In Row"
 	solver := techniquesByName[techniqueName]
 
+	techniqueVariantsTestHelper(t, "Necessary In Row")
+
 	if solver == nil {
 		t.Fatal("Couldn't find technique object: ", techniqueName)
 	}
@@ -212,6 +220,8 @@ func TestNecessaryInCol(t *testing.T) {
 	techniqueName := "Necessary In Col"
 	solver := techniquesByName[techniqueName]
 
+	techniqueVariantsTestHelper(t, "Necessary In Col")
+
 	if solver == nil {
 		t.Fatal("Couldn't find technique object: ", techniqueName)
 	}
@@ -290,6 +300,8 @@ func TestNecessaryInBlock(t *testing.T) {
 
 	techniqueName := "Necessary In Block"
 	solver := techniquesByName[techniqueName]
+
+	techniqueVariantsTestHelper(t, "Necessary In Block")
 
 	if solver == nil {
 		t.Fatal("Couldn't find technique object: ", techniqueName)

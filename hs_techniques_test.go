@@ -55,6 +55,30 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 	}
 }
 
+func techniqueVariantsTestHelper(t *testing.T, techniqueName string, variantNames ...string) {
+
+	technique, ok := techniquesByName[techniqueName]
+
+	if !ok {
+		t.Fatal("Couldn't find technqiue named", techniqueName)
+	}
+
+	if len(variantNames) == 0 {
+		variantNames = []string{technique.Name()}
+	}
+
+	names := technique.Variants()
+	if len(names) != len(variantNames) {
+		t.Fatal("Didn't receive the right number of variants for", technique.Name(), "Got", len(names), "expected", len(variantNames))
+	}
+	for i, name := range names {
+		goldenName := variantNames[i]
+		if name != goldenName {
+			t.Error(i, "th variant name for", technique.Name(), "wrong. Got", name, "expected", goldenName)
+		}
+	}
+}
+
 //multiTestWrapper wraps a testing.T and makes it possible to run loops
 //where at least one run through the loop must not Error for the whole test
 //to pass. Call t.Reset(), and at any time call Passed() to see if t.Error()

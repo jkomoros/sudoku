@@ -43,6 +43,12 @@ type SolveTechnique interface {
 
 	//IsFill returns true if the techinque's action when applied to a grid is to fill a number (as opposed to culling possbilitie).
 	IsFill() bool
+
+	//Variants returns a slice of strings representing all of the various variantnames
+	//that steps produced from this technique could ever have. This is useful as part of
+	//enumerating all possible TechniqueVariant names that any steps could ever emit.
+	Variants() []string
+
 	//HumanLikelihood is how likely a user would be to pick this technique when compared with other possible steps.
 	//Generally inversely related to difficulty (but not perfectly).
 	//This value will be used to pick which technique to apply when compared with other candidates.
@@ -375,6 +381,10 @@ func (self *basicSolveTechnique) Name() string {
 
 func (self *basicSolveTechnique) IsFill() bool {
 	return self.isFill
+}
+
+func (self *basicSolveTechnique) Variants() []string {
+	return []string{self.Name()}
 }
 
 func (self *basicSolveTechnique) variant(step *SolveStep) string {
