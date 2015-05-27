@@ -9,7 +9,7 @@ type xwingTechnique struct {
 	*basicSolveTechnique
 }
 
-func (self *xwingTechnique) humanLikelihood() float64 {
+func (self *xwingTechnique) humanLikelihood(step *SolveStep) float64 {
 	return self.difficultyHelper(50.0)
 }
 

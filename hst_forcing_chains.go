@@ -32,7 +32,7 @@ func (self *forcingChainsTechnique) variant(step *SolveStep) string {
 	return self.basicSolveTechnique.variant(step) + " (" + strconv.Itoa(numImplicationSteps) + " steps)"
 }
 
-func (self *forcingChainsTechnique) humanLikelihood() float64 {
+func (self *forcingChainsTechnique) humanLikelihood(step *SolveStep) float64 {
 	//TODO: figure out what the baseDifficulty should be, this might be higher than
 	//it's actually in practice
 

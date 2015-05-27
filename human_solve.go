@@ -133,7 +133,7 @@ func (self *SolveStep) Description() string {
 //or specifics.
 func (self *SolveStep) HumanLikelihood() float64 {
 	//TODO: attenuate by variant
-	return self.Technique.humanLikelihood()
+	return self.Technique.humanLikelihood(self)
 }
 
 //TechniqueVariant returns the name of the precise variant of the Technique

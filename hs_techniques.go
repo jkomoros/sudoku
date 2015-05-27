@@ -53,7 +53,9 @@ type SolveTechnique interface {
 	//Generally inversely related to difficulty (but not perfectly).
 	//This value will be used to pick which technique to apply when compared with other candidates.
 	//This is primarily used to calculate SolveStep.HumanLikelihood.
-	humanLikelihood() float64
+	//step is optional; if provided nil, the result will be for the "normal" value of that
+	//technique.
+	humanLikelihood(step *SolveStep) float64
 
 	//variant is a helper method that has the technique figure out which TechniqueVariant
 	//was used given the speicif step produced. This allows us to share implementation for the
@@ -92,7 +94,7 @@ func (t techniqueByLikelihood) Swap(i, j int) {
 }
 
 func (t techniqueByLikelihood) Less(i, j int) bool {
-	return t[i].humanLikelihood() < t[j].humanLikelihood()
+	return t[i].humanLikelihood(nil) < t[j].humanLikelihood(nil)
 }
 
 func init() {
