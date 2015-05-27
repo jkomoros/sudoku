@@ -5,8 +5,19 @@ import (
 	"strconv"
 )
 
+//TODO: investigate bumping this back up when #100 lands
+const _MAX_IMPLICATION_STEPS = 5
+
 type forcingChainsTechnique struct {
 	*basicSolveTechnique
+}
+
+func (self *forcingChainsTechnique) Variants() []string {
+	var result []string
+	for i := 1; i <= _MAX_IMPLICATION_STEPS; i++ {
+		result = append(result, self.Name()+" ("+strconv.Itoa(i)+" steps)")
+	}
+	return result
 }
 
 func (self *forcingChainsTechnique) variant(step *SolveStep) string {
@@ -62,9 +73,6 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 	 */
 
 	getter := grid.queue().DefaultGetter()
-
-	//TODO: investigate bumping this back up when #100 lands.
-	_MAX_IMPLICATION_STEPS := 5
 
 	for {
 

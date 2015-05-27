@@ -7,7 +7,13 @@ import (
 
 func TestForcingChains(t *testing.T) {
 
-	techniqueVariantsTestHelper(t, "Forcing Chain")
+	techniqueVariantsTestHelper(t, "Forcing Chain",
+		"Forcing Chain (1 steps)",
+		"Forcing Chain (2 steps)",
+		"Forcing Chain (3 steps)",
+		"Forcing Chain (4 steps)",
+		"Forcing Chain (5 steps)",
+	)
 
 	options := solveTechniqueTestHelperOptions{
 		checkAllSteps: true,
