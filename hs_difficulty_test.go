@@ -85,9 +85,9 @@ func TestSolveDirectionsSignals(t *testing.T) {
 	result := sampleSolveDirections.Signals()
 	golden := DifficultySignals{}
 
-	for _, technique := range AllTechniques {
-		golden[technique.Name()+" Count"] = 0.0
-		golden[technique.Name()+" Percentage"] = 0.0
+	for _, techniqueName := range AllTechniqueVariants {
+		golden[techniqueName+" Count"] = 0.0
+		golden[techniqueName+" Percentage"] = 0.0
 	}
 	golden["Guess Count"] = 2.0
 	golden["Necessary In Row Count"] = 1.0
@@ -133,8 +133,8 @@ func TestTechniqueSignal(t *testing.T) {
 
 	golden := DifficultySignals{}
 
-	for _, technique := range AllTechniques {
-		golden[technique.Name()+" Count"] = 0.0
+	for _, techniqueName := range AllTechniqueVariants {
+		golden[techniqueName+" Count"] = 0.0
 	}
 
 	golden["Guess Count"] = 2.0
@@ -152,8 +152,8 @@ func TestTechniqueSignalPercentage(t *testing.T) {
 
 	golden := DifficultySignals{}
 
-	for _, technique := range AllTechniques {
-		golden[technique.Name()+" Percentage"] = 0.0
+	for _, techniqueName := range AllTechniqueVariants {
+		golden[techniqueName+" Percentage"] = 0.0
 	}
 
 	golden["Guess Percentage"] = 0.5

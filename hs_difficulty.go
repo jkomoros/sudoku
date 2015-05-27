@@ -216,11 +216,11 @@ func (self DifficultySignals) difficulty() float64 {
 func signalTechnique(directions SolveDirections) DifficultySignals {
 	//Our contract is to always return every signal name, even if it's 0.0.
 	result := DifficultySignals{}
-	for _, technique := range AllTechniques {
-		result[technique.Name()+" Count"] = 0.0
+	for _, techniqueName := range AllTechniqueVariants {
+		result[techniqueName+" Count"] = 0.0
 	}
 	for _, step := range directions {
-		result[step.Technique.Name()+" Count"]++
+		result[step.TechniqueVariant()+" Count"]++
 	}
 	return result
 }
@@ -236,8 +236,8 @@ func signalNumberOfSteps(directions SolveDirections) DifficultySignals {
 func signalTechniquePercentage(directions SolveDirections) DifficultySignals {
 	//Our contract is to always return every signal name, even if it's 0.0.
 	result := DifficultySignals{}
-	for _, technique := range AllTechniques {
-		result[technique.Name()+" Percentage"] = 0.0
+	for _, techniqueName := range AllTechniqueVariants {
+		result[techniqueName+" Percentage"] = 0.0
 	}
 
 	count := len(directions)
@@ -247,7 +247,7 @@ func signalTechniquePercentage(directions SolveDirections) DifficultySignals {
 	}
 
 	for _, step := range directions {
-		result[step.Technique.Name()+" Percentage"]++
+		result[step.TechniqueVariant()+" Percentage"]++
 	}
 
 	//Now normalize all of them
