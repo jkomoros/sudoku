@@ -13,6 +13,11 @@ type forcingChainsTechnique struct {
 }
 
 func (self *forcingChainsTechnique) numImplicationSteps(step *SolveStep) int {
+
+	if step == nil {
+		return 0
+	}
+
 	//Verify that the information we're unpacking is what we expect
 	numImplicationSteps, ok := step.extra.(int)
 
