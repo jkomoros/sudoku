@@ -12,6 +12,16 @@ type forcingChainsTechnique struct {
 	*basicSolveTechnique
 }
 
+func (self *forcingChainsTechnique) numImplicationSteps(step *SolveStep) int {
+	//Verify that the information we're unpacking is what we expect
+	numImplicationSteps, ok := step.extra.(int)
+
+	if !ok {
+		numImplicationSteps = 0
+	}
+	return numImplicationSteps
+}
+
 func (self *forcingChainsTechnique) Variants() []string {
 	var result []string
 	for i := 1; i <= _MAX_IMPLICATION_STEPS+1; i++ {
@@ -21,15 +31,7 @@ func (self *forcingChainsTechnique) Variants() []string {
 }
 
 func (self *forcingChainsTechnique) variant(step *SolveStep) string {
-
-	//Verify that the information we're unpacking is what we expect
-	numImplicationSteps, ok := step.extra.(int)
-
-	if !ok {
-		numImplicationSteps = 0
-	}
-
-	return self.basicSolveTechnique.variant(step) + " (" + strconv.Itoa(numImplicationSteps) + " steps)"
+	return self.basicSolveTechnique.variant(step) + " (" + strconv.Itoa(self.numImplicationSteps(step)) + " steps)"
 }
 
 func (self *forcingChainsTechnique) humanLikelihood(step *SolveStep) float64 {
