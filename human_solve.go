@@ -19,6 +19,8 @@ var (
 	GuessTechnique SolveTechnique
 	//Every technique that HumanSolve could ever use, including the oddball Guess technique.
 	AllTechniques []SolveTechnique
+	//Every variant name for every TechniqueVariant that HumanSolve could ever use.
+	AllTechniqueVariants []string
 )
 
 //The actual techniques are intialized in hs_techniques.go, and actually defined in hst_*.go files.

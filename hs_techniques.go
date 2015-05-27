@@ -371,6 +371,9 @@ func init() {
 
 	for _, technique := range AllTechniques {
 		techniquesByName[technique.Name()] = technique
+		for _, variant := range technique.Variants() {
+			AllTechniqueVariants = append(AllTechniqueVariants, variant)
+		}
 	}
 
 }

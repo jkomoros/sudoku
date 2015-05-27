@@ -17,6 +17,50 @@ func TestTechniquesSorted(t *testing.T) {
 	}
 }
 
+func TestAllVariantNames(t *testing.T) {
+	expected := []string{
+		"Obvious In Block",
+		"Obvious In Row",
+		"Obvious In Col",
+		"Necessary In Block",
+		"Only Legal Number",
+		"Necessary In Row",
+		"Necessary In Col",
+		"Naked Pair Block",
+		"Naked Pair Row",
+		"Naked Pair Col",
+		"Naked Triple Block",
+		"Naked Triple Row",
+		"Naked Triple Col",
+		"Naked Quad Block",
+		"Naked Quad Row",
+		"Naked Quad Col",
+		"XWing Row",
+		"Pointing Pair Row",
+		"Pointing Pair Col",
+		"XWing Col",
+		"Block Block Interactions",
+		"Hidden Pair Block",
+		"Hidden Pair Row",
+		"Hidden Pair Col",
+		"Hidden Triple Block",
+		"Hidden Triple Row",
+		"Hidden Triple Col",
+		"Forcing Chain (1 steps)",
+		"Forcing Chain (2 steps)",
+		"Forcing Chain (3 steps)",
+		"Forcing Chain (4 steps)",
+		"Forcing Chain (5 steps)",
+		"Hidden Quad Block",
+		"Hidden Quad Row",
+		"Hidden Quad Col",
+		"Guess",
+	}
+	if !reflect.DeepEqual(expected, AllTechniqueVariants) {
+		t.Error("Got wrong technique variants. Expected", expected, "got", AllTechniqueVariants)
+	}
+}
+
 func TestSubsetIndexes(t *testing.T) {
 	result := subsetIndexes(3, 1)
 	expectedResult := [][]int{{0}, {1}, {2}}
