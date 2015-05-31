@@ -39,6 +39,7 @@ regr = linear_model.Ridge(alpha=1.0)
 regr.fit(data, targets)
 
 print("Coefficients")
+print("Constant = " + str(regr.intercept_))
 for i in xrange(0, len(regr.coef_)):
 	print(labels[i+1] + " = " + str(regr.coef_[i]))
 
