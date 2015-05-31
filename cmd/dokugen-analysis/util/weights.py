@@ -52,3 +52,5 @@ print("Residual sum of squares: %.2f"
       % np.mean((regr.predict(data_test) - targets_test) ** 2))
 # Explained variance score: 1 is perfect prediction
 print('Variance score: %.2f' % regr.score(data_test, targets_test))
+
+#TODO: export the model in a way that Go can run it
