@@ -40,7 +40,7 @@ targets_test = targets[-20:]
 
 
 # Create linear regression object
-regr = linear_model.LinearRegression()
+regr = linear_model.Ridge(alpha=1.0)
 
 # Train the model using the training sets
 regr.fit(data_train, targets_train)
