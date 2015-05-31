@@ -9,8 +9,28 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import datasets, linear_model
 
-# Load the diabetes dataset
-diabetes = datasets.load_diabetes()
+import csv
+
+#Load the data
+
+#TODO: allow loading from an arbitrary input
+f = open('../solves.csv', 'rb')
+reader = csv.reader(f)
+firstRow = True
+
+targets_basic = []
+data_basic = []
+
+for row in reader:
+	if firstRow:
+		firstRow = False
+		continue
+	targets_basic.append(row[:1][0])
+	data_basic.append(row[1:])
+
+print(targets_basic)
+print(data_basic)
+
 
 
 # Use only one feature
