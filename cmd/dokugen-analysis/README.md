@@ -16,3 +16,7 @@ Don't commit input.txt or any of the intermediate csvs.
 In root of project, run `go generate`. Test the change and then commit.
 
 
+## Scikit version
+
+Install pip: `sudo easy_install pip`
+Install scikit: `sudo pip install -U numpy scipy scikit-learn`
