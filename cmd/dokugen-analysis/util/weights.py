@@ -21,8 +21,9 @@ for row in reader:
 	if firstRow:
 		firstRow = False
 		continue
-	targets_basic.append(row[:1][0])
-	data_basic.append(row[1:])
+	convertedRow = [float(a) for a in row]
+	targets_basic.append(convertedRow[:1][0])
+	data_basic.append(convertedRow[1:])
 
 #TODO: figure out if I can just create a numpy array from the beginning
 targets = np.array(targets_basic)
