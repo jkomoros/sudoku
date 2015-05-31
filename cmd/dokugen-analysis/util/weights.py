@@ -1,7 +1,6 @@
 #originally inspired by http://scikit-learn.org/stable/auto_examples/linear_model/plot_ols.html ,
 #but substantially modified from that
 
-import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import datasets, linear_model
 
@@ -53,13 +52,3 @@ print("Residual sum of squares: %.2f"
       % np.mean((regr.predict(data_test) - targets_test) ** 2))
 # Explained variance score: 1 is perfect prediction
 print('Variance score: %.2f' % regr.score(data_test, targets_test))
-
-# Plot outputs
-plt.scatter(data_test, targets_test,  color='black')
-plt.plot(data_test, regr.predict(targets_test), color='blue',
-         linewidth=3)
-
-plt.xticks(())
-plt.yticks(())
-
-plt.show()
