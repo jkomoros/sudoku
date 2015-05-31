@@ -17,9 +17,12 @@ firstRow = True
 targets_basic = []
 data_basic = []
 
+labels = []
+
 for row in reader:
 	if firstRow:
 		firstRow = False
+		labels = row
 		continue
 	convertedRow = [float(a) for a in row]
 	targets_basic.append(convertedRow[:1][0])
@@ -35,8 +38,10 @@ regr = linear_model.Ridge(alpha=1.0)
 # Train the model using the training sets
 regr.fit(data, targets)
 
-# The coefficients
-print('Coefficients: \n', regr.coef_)
+print("Coefficients")
+for i in xrange(0, len(regr.coef_)):
+	print(labels[i+1] + " = " + str(regr.coef_[i]))
+
 # # The mean square error
 # print("Residual sum of squares: %.2f"
 #       % np.mean((regr.predict(data_test) - targets_test) ** 2))
