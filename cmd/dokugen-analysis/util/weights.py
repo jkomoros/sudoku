@@ -1,9 +1,5 @@
-#Copied from http://scikit-learn.org/stable/auto_examples/linear_model/plot_ols.html
-
-print(__doc__)
-
-# Code source: Jaques Grobler
-# License: BSD 3 clause
+#originally inspired by http://scikit-learn.org/stable/auto_examples/linear_model/plot_ols.html ,
+#but substantially modified from that
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,40 +24,38 @@ for row in reader:
 	targets_basic.append(row[:1][0])
 	data_basic.append(row[1:])
 
-print(targets_basic)
-print(data_basic)
+#TODO: figure out if I can just create a numpy array from the beginning
+targets = np.array(targets_basic)
+data = np.array(data_basic)
 
-
-
-# Use only one feature
-diabetes_X = diabetes.data[:, np.newaxis]
-diabetes_X_temp = diabetes_X[:, :, 2]
+#TODO: do folds of test/training sets.
 
 # Split the data into training/testing sets
-diabetes_X_train = diabetes_X_temp[:-20]
-diabetes_X_test = diabetes_X_temp[-20:]
+data_train = data[:-20]
+data_test = data[-20:]
 
-# Split the targets into training/testing sets
-diabetes_y_train = diabetes.target[:-20]
-diabetes_y_test = diabetes.target[-20:]
+#Split the targets into training/testing sets
+targets_train = targets[:-20]
+targets_test = targets[-20:]
+
 
 # Create linear regression object
 regr = linear_model.LinearRegression()
 
 # Train the model using the training sets
-regr.fit(diabetes_X_train, diabetes_y_train)
+regr.fit(data_train, targets_train)
 
 # The coefficients
 print('Coefficients: \n', regr.coef_)
 # The mean square error
 print("Residual sum of squares: %.2f"
-      % np.mean((regr.predict(diabetes_X_test) - diabetes_y_test) ** 2))
+      % np.mean((regr.predict(data_test) - targets_test) ** 2))
 # Explained variance score: 1 is perfect prediction
-print('Variance score: %.2f' % regr.score(diabetes_X_test, diabetes_y_test))
+print('Variance score: %.2f' % regr.score(data_test, targets_test))
 
 # Plot outputs
-plt.scatter(diabetes_X_test, diabetes_y_test,  color='black')
-plt.plot(diabetes_X_test, regr.predict(diabetes_X_test), color='blue',
+plt.scatter(data_test, targets_test,  color='black')
+plt.plot(data_test, regr.predict(targets_test), color='blue',
          linewidth=3)
 
 plt.xticks(())
