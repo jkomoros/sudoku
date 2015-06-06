@@ -84,6 +84,11 @@ func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan
 					//it might never be able to be in the list anyway.
 					intersection = intersection.RemoveCells(CellSlice{pivotCell})
 
+					//TODO: consider chunking up this list of affectedCells by
+					//the block the cell is in; this fits more closely with
+					//how humans actually apply the technique in practice.
+					//(Hmm, possibly there should be chunk and unchunked
+					//variants?)
 					affectedCells := intersection.FilterByPossible(z)
 
 					//Okay, we have a candidate step. Is it useful?
