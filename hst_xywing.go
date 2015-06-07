@@ -82,9 +82,9 @@ func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan
 					//find cells that are in both neighbor lists
 					intersection := xCell.Neighbors().toCellSet().intersection(yCell.Neighbors().toCellSet()).toSlice(grid)
 
-					//TODO: consider if we actually need to remove pivotCell;
+					//TODO: consider if we actually need to remove all of these cells;
 					//it might never be able to be in the list anyway.
-					intersection = intersection.RemoveCells(CellSlice{pivotCell})
+					intersection = intersection.RemoveCells(CellSlice{pivotCell, xCell, yCell})
 
 					//TODO: consider chunking up this list of affectedCells by
 					//the block the cell is in; this fits more closely with

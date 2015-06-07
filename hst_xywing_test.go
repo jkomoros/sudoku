@@ -12,6 +12,7 @@ func TestXYWing(t *testing.T) {
 		//TODO: figure out how to test that {3,6} (the pivot cell) comes first
 		pointerCells: []cellRef{{3, 6}, {3, 3}, {5, 7}},
 		targetNums:   IntSlice([]int{7}),
+		//TODO: test for pointernums
 		//TODO: test description
 	}
 	humanSolveTechniqueTestHelper(t, "xywing_example.sdk", "XYWing", options)
