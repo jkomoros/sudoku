@@ -89,6 +89,9 @@ func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan
 
 					//TODO: consider if we actually need to remove all of these cells;
 					//it might never be able to be in the list anyway.
+					//TODO: xCell, yCell can't be in there, because xCell is not in its
+					//neighbors and yCell isn't in its neighbors. But it's semantically
+					//clearer to do it here, maybe, to make clear the intention?
 					intersection = intersection.RemoveCells(CellSlice{pivotCell, xCell, yCell})
 
 					//TODO: consider chunking up this list of affectedCells by
