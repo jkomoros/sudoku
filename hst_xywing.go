@@ -1,5 +1,9 @@
 package sudoku
 
+import (
+	"fmt"
+)
+
 //TODO: register this with techniques.go
 type xywingTechnique struct {
 	*basicSolveTechnique
@@ -11,7 +15,12 @@ func (self *xywingTechnique) humanLikelihood(step *SolveStep) float64 {
 }
 
 func (self *xywingTechnique) Description(step *SolveStep) string {
-	return "TODO: IMPLEMENT THIS"
+	//TODO: make this description more clear
+	return fmt.Sprintf("%s can only be two values, and cells %s have those two possibilities, plus one other, so if you put either of the main cell's two possibiltiies in, it forces the intersection of the other two cells to not have %s",
+		step.PointerCells[0:1].Description(),
+		step.PointerCells[1:3].Description(),
+		step.TargetNums.Description(),
+	)
 }
 
 func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
