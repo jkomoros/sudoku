@@ -16,7 +16,7 @@ func (self *xywingTechnique) Description(step *SolveStep) string {
 
 func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 
-	getter := grid.queue().DefaultGetter()
+	getter := grid.queue().NewGetter()
 
 	for {
 
