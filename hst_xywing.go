@@ -4,7 +4,6 @@ import (
 	"fmt"
 )
 
-//TODO: register this with techniques.go
 type xywingTechnique struct {
 	*basicSolveTechnique
 }
