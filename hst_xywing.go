@@ -56,7 +56,7 @@ func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan
 		yList := pivotCell.Neighbors().FilterByPossible(y).FilterByNumPossibilities(2)
 
 		//Now, we'll check for each possible value of Z
-		for z := 0; z < DIM; z++ {
+		for z := 1; z <= DIM; z++ {
 			//z can't be either x or y, so don't do that work
 			if z == x || z == y {
 				continue
@@ -81,6 +81,11 @@ func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan
 
 					//find cells that are in both neighbor lists
 					intersection := xCell.Neighbors().toCellSet().intersection(yCell.Neighbors().toCellSet()).toSlice(grid)
+
+					//TODO: technically the filterByPossible(z) below will
+					//also filter out cells that are already set, but this is
+					//more semanitcally clear.
+					intersection = intersection.FilterByHasPossibilities()
 
 					//TODO: consider if we actually need to remove all of these cells;
 					//it might never be able to be in the list anyway.
