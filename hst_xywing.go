@@ -4,14 +4,17 @@ import (
 	"fmt"
 )
 
-//TODO: register this with techniques.go
 type xywingTechnique struct {
 	*basicSolveTechnique
 }
 
 func (self *xywingTechnique) humanLikelihood(step *SolveStep) float64 {
 	//TODO: reason about what the proper value should be for this.
-	return self.difficultyHelper(60.0)
+	multiplier := 1.0
+	if step != nil && step.TargetCells != nil && !step.TargetCells.SameBlock() {
+		multiplier = 1.5
+	}
+	return self.difficultyHelper(60.0) * multiplier
 }
 
 func (self *xywingTechnique) Description(step *SolveStep) string {
@@ -29,6 +32,17 @@ func (self *xywingTechnique) normalizeStep(step *SolveStep) {
 	step.TargetCells.Sort()
 	step.TargetNums.Sort()
 	step.PointerNums.Sort()
+}
+
+func (self *xywingTechnique) Variants() []string {
+	return []string{self.Name(), self.Name() + " (Same Block)"}
+}
+
+func (self *xywingTechnique) variant(step *SolveStep) string {
+	if step.TargetCells.SameBlock() {
+		return self.Name() + " (Same Block)"
+	}
+	return self.Name()
 }
 
 func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
@@ -111,18 +125,42 @@ func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan
 					//clearer to do it here, maybe, to make clear the intention?
 					intersection = intersection.RemoveCells(CellSlice{pivotCell, xCell, yCell})
 
-					//TODO: consider chunking up this list of affectedCells by
-					//the block the cell is in; this fits more closely with
-					//how humans actually apply the technique in practice.
-					//(Hmm, possibly there should be chunk and unchunked
-					//variants?)
 					affectedCells := intersection.FilterByPossible(z)
 
 					if len(affectedCells) == 0 {
 						continue
 					}
 
-					//Okay, we have a candidate step. Is it useful?
+					if !affectedCells.SameBlock() {
+						//The affected cells are not all in the same block,
+						//so create chunked step variants.
+
+						for _, block := range affectedCells.AllBlocks() {
+							filter := func(cell *Cell) bool {
+								return cell.Block() == block
+							}
+							chunkedAffectedCells := affectedCells.Filter(filter)
+
+							step := &SolveStep{self,
+								chunkedAffectedCells,
+								IntSlice{z},
+								CellSlice{pivotCell, xCell, yCell},
+								IntSlice{x, y, z},
+								nil,
+							}
+
+							if step.IsUseful(grid) {
+								select {
+								case results <- step:
+								case <-done:
+									return
+								}
+							}
+						}
+
+					}
+
+					//Okay, we have a candidate step (unchunked). Is it useful?
 					step := &SolveStep{self,
 						affectedCells,
 						IntSlice{z},

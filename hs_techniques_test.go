@@ -41,6 +41,7 @@ func TestAllVariantNames(t *testing.T) {
 		"XWing Col",
 		"Block Block Interactions",
 		"XYWing",
+		"XYWing (Same Block)",
 		"Hidden Pair Block",
 		"Hidden Pair Row",
 		"Hidden Pair Col",

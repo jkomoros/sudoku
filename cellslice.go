@@ -85,6 +85,24 @@ func (self CellSlice) Block() int {
 	return self[0].Block()
 }
 
+//AllRows returns all of the rows for cells in this slice.
+func (self CellSlice) AllRows() IntSlice {
+	//TODO: test this.
+	return self.CollectNums(getRow).Unique()
+}
+
+//AllBCols returns all of the columns for cells in this slice.
+func (self CellSlice) AllCols() IntSlice {
+	//TODO: test this.
+	return self.CollectNums(getCol).Unique()
+}
+
+//AllBlocks returns all of the blocks for cells in this slice.
+func (self CellSlice) AllBlocks() IntSlice {
+	//TODO: test this.
+	return self.CollectNums(getBlock).Unique()
+}
+
 //AddExclude sets the given number to excluded on all cells in the set.
 func (self CellSlice) AddExclude(exclude int) {
 	mapper := func(cell *Cell) {
