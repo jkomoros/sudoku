@@ -61,6 +61,11 @@ type SolveTechnique interface {
 	//was used given the speicif step produced. This allows us to share implementation for the
 	//base case.
 	variant(step *SolveStep) string
+
+	//normalizeStep makes sure that the step is in a known order, mainly for testing. Most
+	//techniques just sort all of the slices, but some techniques encode meaningful information
+	//in the order of the slices so don't want to do it.
+	normalizeStep(step *SolveStep)
 }
 
 type cellGroupType int
@@ -404,6 +409,14 @@ func (self *basicSolveTechnique) variant(step *SolveStep) string {
 	//In the simplest case, our 'variant' is just the actual name, because we have no variants.
 	//Other techniques should override this if they have variants.
 	return self.Name()
+}
+
+func (self *basicSolveTechnique) normalizeStep(step *SolveStep) {
+	//Puts the solve step in its normal status. In practice this means that the various slices are sorted, so that the Description of them is stable.
+	step.PointerCells.Sort()
+	step.TargetCells.Sort()
+	step.TargetNums.Sort()
+	step.PointerNums.Sort()
 }
 
 //TOOD: this is now named incorrectly. (It should be likelihoodHelper)

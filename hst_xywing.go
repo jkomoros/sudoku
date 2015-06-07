@@ -23,6 +23,14 @@ func (self *xywingTechnique) Description(step *SolveStep) string {
 	)
 }
 
+func (self *xywingTechnique) normalizeStep(step *SolveStep) {
+	//Do what the normal base technique does, but don't sort pointerCells, since their precise
+	//order encodes which is the pivotCell.
+	step.TargetCells.Sort()
+	step.TargetNums.Sort()
+	step.PointerNums.Sort()
+}
+
 func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 
 	getter := grid.queue().NewGetter()

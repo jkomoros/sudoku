@@ -42,7 +42,7 @@ func TestXYWing(t *testing.T) {
 			pointerCells: []cellRef{{3, 6}, {3, 3}, {5, 7}},
 			targetNums:   IntSlice([]int{7}),
 			pointerNums:  IntSlice{2, 5, 7},
-			//TODO: test description
+			description:  "(3,6) can only be two values, and cells (5,7) and (3,3) have those two possibilities, plus one other, so if you put either of the main cell's two possibiltiies in, it forces the intersection of the other two cells to not have 7",
 		},
 		{
 			targetCells:  []cellRef{{3, 3}},
