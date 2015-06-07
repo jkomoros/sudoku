@@ -102,6 +102,50 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 	}
 }
 
+type multipleValidStepLoopOptions struct {
+	targetCells  []cellRef
+	targetNums   IntSlice
+	pointerCells []cellRef
+	pointerNums  IntSlice
+	description  string
+	extra        interface{}
+	variantName  string
+}
+
+//TODO: rename this to fit in with the other test helpers
+func multipleValidStepsTestHelper(t *testing.T, puzzleName string, techniqueName string, tests []multipleValidStepLoopOptions) {
+	options := solveTechniqueTestHelperOptions{
+		checkAllSteps: true,
+	}
+
+	grid, solver, steps := humanSolveTechniqueTestHelperStepGenerator(t,
+		puzzleName, techniqueName, options)
+
+	options.stepsToCheck.grid = grid
+	options.stepsToCheck.solver = solver
+	options.stepsToCheck.steps = steps
+
+	//OK, now we'll walk through all of the options in a loop and make sure they all show
+	//up in the solve steps.
+
+	for _, test := range tests {
+
+		options.targetCells = test.targetCells
+		options.targetNums = test.targetNums
+		options.pointerCells = test.pointerCells
+		options.pointerNums = test.pointerNums
+		options.description = test.description
+		options.extra = test.extra
+		options.variantName = test.variantName
+
+		humanSolveTechniqueTestHelper(t, puzzleName, techniqueName, options)
+	}
+
+	if len(tests) != len(steps) {
+		t.Error("We didn't have enough tests for all of the steps that ", techniqueName, " returned. Got", len(tests), "expected", len(steps))
+	}
+}
+
 func techniqueVariantsTestHelper(t *testing.T, techniqueName string, variantNames ...string) {
 
 	technique, ok := techniquesByName[techniqueName]
