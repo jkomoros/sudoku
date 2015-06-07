@@ -296,6 +296,14 @@ func init() {
 				2,
 			},
 		},
+		&xywingTechnique{
+			&basicSolveTechnique{
+				"XYWing",
+				false,
+				_GROUP_NONE,
+				2,
+			},
+		},
 		&forcingChainsTechnique{
 			&basicSolveTechnique{
 				"Forcing Chain",
