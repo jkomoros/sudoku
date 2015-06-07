@@ -35,7 +35,9 @@ func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan
 
 		pivotCell := pivot.(*Cell)
 
-		if len(pivotCell.Possibilities()) != 2 {
+		possibilities := pivotCell.Possibilities()
+
+		if len(possibilities) != 2 {
 			//We found one with 1 possibility, which isn't interesting for us--nakedSingle should do that one.
 			continue
 		}
@@ -43,8 +45,8 @@ func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan
 		//OK, this is our pivot cell. Let's consider its two possibilities to
 		//be X and Y.
 
-		x := pivotCell.Possibilities()[0]
-		y := pivotCell.Possibilities()[1]
+		x := possibilities[0]
+		y := possibilities[1]
 
 		//We want to find two neighbors of the pivot cell that have two
 		//possibilities that are XZ and YZ. So we're looking for neighbors
