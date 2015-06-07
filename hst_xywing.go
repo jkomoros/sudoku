@@ -11,7 +11,11 @@ type xywingTechnique struct {
 
 func (self *xywingTechnique) humanLikelihood(step *SolveStep) float64 {
 	//TODO: reason about what the proper value should be for this.
-	return self.difficultyHelper(60.0)
+	multiplier := 1.0
+	if step != nil && step.TargetCells != nil && !step.TargetCells.SameBlock() {
+		multiplier = 1.5
+	}
+	return self.difficultyHelper(60.0) * multiplier
 }
 
 func (self *xywingTechnique) Description(step *SolveStep) string {
@@ -29,6 +33,17 @@ func (self *xywingTechnique) normalizeStep(step *SolveStep) {
 	step.TargetCells.Sort()
 	step.TargetNums.Sort()
 	step.PointerNums.Sort()
+}
+
+func (self *xywingTechnique) Variants() []string {
+	return []string{self.Name(), self.Name() + " (Same Block)"}
+}
+
+func (self *xywingTechnique) variant(step *SolveStep) string {
+	if step.TargetCells.SameBlock() {
+		return self.Name() + " (Same Block)"
+	}
+	return self.Name()
 }
 
 func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {

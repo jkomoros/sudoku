@@ -8,7 +8,7 @@ import (
 
 func TestXYWing(t *testing.T) {
 
-	techniqueVariantsTestHelper(t, "XYWing")
+	techniqueVariantsTestHelper(t, "XYWing", "XYWing", "XYWing (Same Block)")
 
 	tests := []multipleValidStepLoopOptions{
 		{
@@ -25,6 +25,7 @@ func TestXYWing(t *testing.T) {
 			pointerCells: []cellRef{{5, 7}, {3, 6}, {5, 3}},
 			pointerNums:  IntSlice{2, 7, 5},
 			//Explicitly don't test description after the first one.
+			variantName: "XYWing (Same Block)",
 		},
 	}
 
