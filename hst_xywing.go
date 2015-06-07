@@ -125,18 +125,42 @@ func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan
 					//clearer to do it here, maybe, to make clear the intention?
 					intersection = intersection.RemoveCells(CellSlice{pivotCell, xCell, yCell})
 
-					//TODO: consider chunking up this list of affectedCells by
-					//the block the cell is in; this fits more closely with
-					//how humans actually apply the technique in practice.
-					//(Hmm, possibly there should be chunk and unchunked
-					//variants?)
 					affectedCells := intersection.FilterByPossible(z)
 
 					if len(affectedCells) == 0 {
 						continue
 					}
 
-					//Okay, we have a candidate step. Is it useful?
+					if !affectedCells.SameBlock() {
+						//The affected cells are not all in the same block,
+						//so create chunked step variants.
+
+						for _, block := range affectedCells.AllBlocks() {
+							filter := func(cell *Cell) bool {
+								return cell.Block() == block
+							}
+							chunkedAffectedCells := affectedCells.Filter(filter)
+
+							step := &SolveStep{self,
+								chunkedAffectedCells,
+								IntSlice{z},
+								CellSlice{pivotCell, xCell, yCell},
+								IntSlice{x, y, z},
+								nil,
+							}
+
+							if step.IsUseful(grid) {
+								select {
+								case results <- step:
+								case <-done:
+									return
+								}
+							}
+						}
+
+					}
+
+					//Okay, we have a candidate step (unchunked). Is it useful?
 					step := &SolveStep{self,
 						affectedCells,
 						IntSlice{z},
