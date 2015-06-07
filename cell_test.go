@@ -111,7 +111,7 @@ func TestCellCreation(t *testing.T) {
 		}
 		possibilities := cell.Possibilities()
 		if len(possibilities) != 1 {
-			t.Log("We got the wrong number of possibilities back")
+			t.Log("We got the wrong number of possibilities back: ", possibilities)
 			t.Fail()
 		} else if possibilities[0] != i {
 			t.Log("We got the wrong possibility back")

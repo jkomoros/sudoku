@@ -34,13 +34,14 @@ const (
 type Cell struct {
 	grid *Grid
 	//The number if it's explicitly set. Number() will return it if it's explicitly or implicitly set.
-	number      int
-	row         int
-	col         int
-	block       int
-	neighbors   CellSlice
-	impossibles [DIM]int
-	excluded    [DIM]bool
+	number              int
+	row                 int
+	col                 int
+	block               int
+	neighbors           CellSlice
+	impossibles         [DIM]int
+	excluded            [DIM]bool
+	cachedPossibilities *IntSlice
 }
 
 func newCell(grid *Grid, row int, col int) Cell {
@@ -119,8 +120,7 @@ func (self *Cell) SetNumber(number int) {
 		self.grid.cellModified(self)
 		if (oldNumber > 0 && number == 0) || (oldNumber == 0 && number > 0) {
 			//Our rank will have changed.
-			//TODO: figure out how to test this.
-			self.grid.cellRankChanged(self)
+			self.rankChanged()
 		}
 	}
 }
@@ -146,12 +146,9 @@ func (self *Cell) setPossible(number int) {
 		return
 	}
 	self.impossibles[number]--
-	if self.impossibles[number] == 0 && self.grid != nil {
+	if self.impossibles[number] == 0 {
 		//TODO: should we check exclusion to save work?
-		//Our rank will have changed.
-		self.grid.cellRankChanged(self)
-		//We may have just become valid.
-		self.checkInvalid()
+		self.rankChanged()
 	}
 
 }
@@ -163,12 +160,9 @@ func (self *Cell) setImpossible(number int) {
 		return
 	}
 	self.impossibles[number]++
-	if self.impossibles[number] == 1 && self.grid != nil {
+	if self.impossibles[number] == 1 {
 		//TODO: should we check exclusion to save work?
-		//Our rank will have changed.
-		self.grid.cellRankChanged(self)
-		//We may have just become invalid.
-		self.checkInvalid()
+		self.rankChanged()
 	}
 }
 
@@ -184,10 +178,7 @@ func (self *Cell) SetExcluded(number int, excluded bool) {
 	self.excluded[number] = excluded
 	//Our rank may have changed.
 	//TODO: should we check if we're invalid already?
-	if self.grid != nil {
-		self.grid.cellRankChanged(self)
-		self.checkInvalid()
-	}
+	self.rankChanged()
 }
 
 //ResetExcludes sets all excluded bits to false, so that Possibilities() will be based purely
@@ -198,10 +189,7 @@ func (self *Cell) ResetExcludes() {
 	}
 	//Our rank may have changed.
 	//TODO: should we check if we're invalid already?
-	if self.grid != nil {
-		self.grid.cellRankChanged(self)
-		self.checkInvalid()
-	}
+	self.rankChanged()
 }
 
 //Possible returns whether or not a given number is legal to fill via SetNumber, given the state of the grid (specifically,
@@ -218,16 +206,30 @@ func (self *Cell) Possible(number int) bool {
 
 //Possibilities returns a list of all current possibilities for this cell: all numbers for which cell.Possible
 //returns true.
-func (self *Cell) Possibilities() (result IntSlice) {
-	if self.number != 0 {
-		return nil
-	}
-	for i := 1; i <= DIM; i++ {
-		if self.Possible(i) {
-			result = append(result, i)
+func (self *Cell) Possibilities() IntSlice {
+	if self.cachedPossibilities == nil {
+		var result IntSlice
+		if self.number == 0 {
+			for i := 1; i <= DIM; i++ {
+				if self.Possible(i) {
+					result = append(result, i)
+				}
+			}
 		}
+		//if self.number is non-zero, result is nil
+		self.cachedPossibilities = &result
 	}
-	return result
+	return *self.cachedPossibilities
+}
+
+func (self *Cell) rankChanged() {
+	//Our possibilities list likely changed
+	self.cachedPossibilities = nil
+	if self.grid != nil {
+		self.grid.cellRankChanged(self)
+	}
+	//We may have just become valid.
+	self.checkInvalid()
 }
 
 func (self *Cell) checkInvalid() {
