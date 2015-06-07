@@ -93,6 +93,10 @@ func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan
 					//variants?)
 					affectedCells := intersection.FilterByPossible(z)
 
+					if len(affectedCells) == 0 {
+						continue
+					}
+
 					//Okay, we have a candidate step. Is it useful?
 					step := &SolveStep{self,
 						affectedCells,
