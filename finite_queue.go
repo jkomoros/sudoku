@@ -257,6 +257,9 @@ func (self *finiteQueue) getBucket(rank int) (*finiteQueueBucket, bool) {
 	return self.objects[rank-self.min], true
 }
 
+//DefaultGetter returns the default getter for the queue. ONLY USE THIS IF YOU
+//KNOW YOU ARE THE ONLY ONE ACCESSING IT; it is not thread safe. If you don't
+//know that, then use NewGetter.
 func (self *finiteQueue) DefaultGetter() *finiteQueueGetter {
 	if self.defaultGetter == nil {
 		self.defaultGetter = self.NewGetter()

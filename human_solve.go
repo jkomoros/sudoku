@@ -148,12 +148,10 @@ func (self *SolveStep) TechniqueVariant() string {
 	return self.Technique.variant(self)
 }
 
+//normalize puts the step in a known, deterministic state, which eases testing.
 func (self *SolveStep) normalize() {
-	//Puts the solve step in its normal status. In practice this means that the various slices are sorted, so that the Description of them is stable.
-	self.PointerCells.Sort()
-	self.TargetCells.Sort()
-	self.TargetNums.Sort()
-	self.PointerNums.Sort()
+	//Different techniques will want to normalize steps in different ways.
+	self.Technique.normalizeStep(self)
 }
 
 //HumanWalkthrough returns a human-readable, verbose walkthrough of how a human would solve the provided puzzle, without mutating the grid. A covenience
