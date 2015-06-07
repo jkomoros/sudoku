@@ -91,7 +91,7 @@ func (self CellSlice) AllRows() IntSlice {
 	return self.CollectNums(getRow).Unique()
 }
 
-//AllBCols returns all of the columns for cells in this slice.
+//AllCols returns all of the columns for cells in this slice.
 func (self CellSlice) AllCols() IntSlice {
 	//TODO: test this.
 	return self.CollectNums(getCol).Unique()
