@@ -90,13 +90,16 @@ func (self *swordfishTechnique) Find(grid *Grid, results chan *SolveStep, done c
 			//Get rid of cells that are already filled
 			affectedCells = affectedCells.FilterByHasPossibilities()
 
+			//Gather the list of all cells that are "pointing" to this
+
 			var pointerCells CellSlice
 
-			//Get rid of all cells in the defining set
 			for _, group := range majorAxisGroups {
 				pointerCells = append(pointerCells, group...)
 			}
 
+			//Get rid of all pointer cells from the rows of cells that will be
+			//affected.
 			affectedCells = affectedCells.RemoveCells(pointerCells)
 
 			//Okay, now the set is solid.
