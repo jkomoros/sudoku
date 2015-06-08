@@ -269,9 +269,16 @@ func getStepsForTechnique(technique SolveTechnique, grid *Grid, fetchAll bool) [
 }
 
 func humanSolveTechniqueTestHelperStepGenerator(t *testing.T, puzzleName string, techniqueName string, options solveTechniqueTestHelperOptions) (*Grid, SolveTechnique, []*SolveStep) {
-	grid := NewGrid()
-	if !grid.LoadFromFile(puzzlePath(puzzleName)) {
-		t.Fatal("Couldn't load puzzle ", puzzleName)
+
+	var grid *Grid
+
+	if options.stepsToCheck.grid != nil {
+		grid = options.stepsToCheck.grid
+	} else {
+		grid = NewGrid()
+		if !grid.LoadFromFile(puzzlePath(puzzleName)) {
+			t.Fatal("Couldn't load puzzle ", puzzleName)
+		}
 	}
 
 	if options.transpose {
