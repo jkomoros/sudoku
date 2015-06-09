@@ -8,7 +8,7 @@ import (
 
 func TestSwordfishCol(t *testing.T) {
 
-	techniqueVariantsTestHelper(t, "Swordfish")
+	techniqueVariantsTestHelper(t, "Swordfish Col")
 
 	grid := NewGrid()
 
@@ -54,13 +54,13 @@ func TestSwordfishCol(t *testing.T) {
 
 	//TODO: it's not possible to just pass in an override grid to humanSolveTechniqueTestHelper as
 	//is, because we're overloading passing it to stepsToCheck. That's a smell.
-	grid, solver, steps := humanSolveTechniqueTestHelperStepGenerator(t, "NOOP", "Swordfish", options)
+	grid, solver, steps := humanSolveTechniqueTestHelperStepGenerator(t, "NOOP", "Swordfish Col", options)
 
 	options.stepsToCheck.grid = grid
 	options.stepsToCheck.solver = solver
 	options.stepsToCheck.steps = steps
 
-	humanSolveTechniqueTestHelper(t, "NOOP", "Swordfish", options)
+	humanSolveTechniqueTestHelper(t, "NOOP", "Swordfish Col", options)
 
 }
 

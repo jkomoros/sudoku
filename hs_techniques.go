@@ -311,7 +311,7 @@ func init() {
 		},
 		&swordfishTechnique{
 			&basicSolveTechnique{
-				"Swordfish",
+				"Swordfish Col",
 				false,
 				_GROUP_COL,
 				3,
