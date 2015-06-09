@@ -24,6 +24,7 @@ func (self *swordfishTechnique) Find(grid *Grid, results chan *SolveStep, done c
 	//TODO: Implement the "relaxed" version of this technique, too.
 
 	//TODO: walk through this in random order
+	//... and do this in xywing, too.
 	for i := 1; i < DIM+1; i++ {
 		//The candidate we're considering
 
