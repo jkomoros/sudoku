@@ -48,7 +48,11 @@ func (self *swordfishTechnique) Find(grid *Grid, results chan *SolveStep, done c
 
 	//TODO: Implement the "relaxed" version of this technique, too.
 
-	for _, i := range rand.Perm(DIM) {
+	for _, i := range rand.Perm(DIM + 1) {
+
+		if i == 0 {
+			continue
+		}
 		//The candidate we're considering
 
 		//Consider each of the major-axis groups to see if more than three have
