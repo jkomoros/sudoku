@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"fmt"
+	"math/rand"
 )
 
 type swordfishTechnique struct {
@@ -47,9 +48,7 @@ func (self *swordfishTechnique) Find(grid *Grid, results chan *SolveStep, done c
 
 	//TODO: Implement the "relaxed" version of this technique, too.
 
-	//TODO: walk through this in random order
-	//... and do this in xywing, too.
-	for i := 1; i < DIM+1; i++ {
+	for _, i := range rand.Perm(DIM) {
 		//The candidate we're considering
 
 		//Consider each of the major-axis groups to see if more than three have
