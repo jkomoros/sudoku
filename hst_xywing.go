@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"fmt"
+	"math/rand"
 )
 
 type xywingTechnique struct {
@@ -87,7 +88,13 @@ func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan
 		yList := pivotCell.Neighbors().FilterByPossible(y).FilterByNumPossibilities(2)
 
 		//Now, we'll check for each possible value of Z
-		for z := 1; z <= DIM; z++ {
+		for _, z := range rand.Perm(DIM + 1) {
+
+			//z is 1-indexed, but perm returns a 0-indexed list
+			if z == 0 {
+				continue
+			}
+
 			//z can't be either x or y, so don't do that work
 			if z == x || z == y {
 				continue
