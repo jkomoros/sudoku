@@ -87,8 +87,9 @@ func (self *swordfishTechnique) Find(grid *Grid, results chan *SolveStep, done c
 				}
 			}
 
-			//Get rid of cells that are already filled
-			affectedCells = affectedCells.FilterByHasPossibilities()
+			//Get rid of cells that are already filled, or where removing 'i'
+			//would be a no-op anyway since it's not already a possible there.
+			affectedCells = affectedCells.FilterByPossible(i)
 
 			//Gather the list of all cells that are "pointing" to this
 
