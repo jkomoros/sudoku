@@ -54,7 +54,7 @@ func TestSwordfishCol(t *testing.T) {
 		targetCells:  []cellRef{{1, 1}, {5, 4}},
 		pointerCells: []cellRef{{1, 0}, {1, 5}, {5, 3}, {5, 5}, {8, 0}, {8, 3}},
 		targetNums:   IntSlice{1},
-		//TODO: test description
+		description:  "1 is only possible in two cells each in three different columns, all of which align onto three rows, which means that 1 can't be in any of the other cells in those rows ((1,1) and (5,4))",
 	}
 	options.stepsToCheck.grid = grid
 
@@ -81,7 +81,7 @@ func TestSwordfishRow(t *testing.T) {
 		targetCells:  []cellRef{{1, 1}, {4, 5}},
 		pointerCells: []cellRef{{0, 1}, {5, 1}, {3, 5}, {5, 5}, {0, 8}, {3, 8}},
 		targetNums:   IntSlice{1},
-		//TODO: test description
+		description:  "1 is only possible in two cells each in three different rows, all of which align onto three columns, which means that 1 can't be in any of the other cells in those columns ((1,1) and (4,5))",
 	}
 	options.stepsToCheck.grid = grid
 
