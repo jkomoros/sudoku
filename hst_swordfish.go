@@ -24,7 +24,7 @@ func (self *swordfishTechnique) Find(grid *Grid, results chan *SolveStep, done c
 	//TODO: Implement the "relaxed" version of this technique, too.
 
 	//TODO: walk through this in random order
-	for i := 0; i < DIM; i++ {
+	for i := 1; i < DIM+1; i++ {
 		//The candidate we're considering
 
 		//Consider each of the major-axis groups to see if more than three have
