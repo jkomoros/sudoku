@@ -485,6 +485,10 @@ func TestAdvancedSolve(t *testing.T) {
 }
 
 func TestTranspose(t *testing.T) {
+
+	//TODO: this test doesn't verify that a grid with specific excludes set is transposed as well
+	//(although that does work)
+
 	grid := NewGrid()
 	defer grid.Done()
 	grid.Load(TEST_GRID)

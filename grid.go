@@ -185,6 +185,8 @@ func (self *Grid) transpose() *Grid {
 			original := self.Cell(r, c)
 			copy := result.Cell(c, r)
 			copy.SetNumber(original.Number())
+			//This should be a copy since it's an array, right?
+			copy.excluded = original.excluded
 		}
 	}
 	return result
