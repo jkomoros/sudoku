@@ -309,6 +309,14 @@ func init() {
 				2,
 			},
 		},
+		&swordfishTechnique{
+			&basicSolveTechnique{
+				"Swordfish",
+				false,
+				_GROUP_COL,
+				3,
+			},
+		},
 		&forcingChainsTechnique{
 			&basicSolveTechnique{
 				"Forcing Chain",
