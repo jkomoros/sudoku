@@ -8,6 +8,8 @@ import (
 
 func TestSwordfishCol(t *testing.T) {
 
+	techniqueVariantsTestHelper(t, "Swordfish")
+
 	grid := NewGrid()
 
 	puzzleName := "swordfish_example.sdk"
