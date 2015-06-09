@@ -44,10 +44,16 @@ func TestSwordfishCol(t *testing.T) {
 		}
 	}
 
-	options := solveTechniqueTestHelperOptions{}
+	options := solveTechniqueTestHelperOptions{
+		targetCells:  []cellRef{{1, 1}, {5, 4}},
+		pointerCells: []cellRef{{1, 0}, {1, 5}, {5, 3}, {5, 5}, {8, 0}, {8, 3}},
+		targetNums:   IntSlice{1},
+		//TODO: test description
+	}
 	options.stepsToCheck.grid = grid
 
-	_, _, _ = humanSolveTechniqueTestHelperStepGenerator(t, "NOOP", "Swordfish", options)
+	humanSolveTechniqueTestHelper(t, "NOOP", "Swordfish", options)
+
 }
 
 //TODO: TestSwordfishRow (and implement Row!)
