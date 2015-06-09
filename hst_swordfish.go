@@ -1,5 +1,9 @@
 package sudoku
 
+import (
+	"fmt"
+)
+
 type swordfishTechnique struct {
 	*basicSolveTechnique
 }
@@ -10,8 +14,28 @@ func (self *swordfishTechnique) humanLikelihood(step *SolveStep) float64 {
 }
 
 func (self *swordfishTechnique) Description(step *SolveStep) string {
-	//TODO: Implement this
-	return "TODO: IMPLEMENT ME"
+
+	if len(step.TargetNums) != 1 {
+		return ""
+	}
+
+	groupName := "columns"
+	otherGroupName := "rows"
+
+	if self.groupType == _GROUP_ROW {
+		groupName = "rows"
+		otherGroupName = "columns"
+	}
+
+	return fmt.Sprintf("%d is only possible in two cells each in three different %s, all of which align onto three %s, which means that %d can't be in any of the other cells in those %s (%s)",
+		step.TargetNums[0],
+		groupName,
+		otherGroupName,
+		step.TargetNums[0],
+		otherGroupName,
+		step.TargetCells.Description(),
+	)
+
 }
 
 func (self *swordfishTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
