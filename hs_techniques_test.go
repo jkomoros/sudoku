@@ -45,6 +45,7 @@ func TestAllVariantNames(t *testing.T) {
 		"Hidden Pair Block",
 		"Hidden Pair Row",
 		"Hidden Pair Col",
+		"Swordfish Row",
 		"Swordfish Col",
 		"Hidden Triple Block",
 		"Hidden Triple Row",
