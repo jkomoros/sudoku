@@ -70,4 +70,29 @@ func TestSwordfishCol(t *testing.T) {
 
 }
 
-//TODO: TestSwordfishRow (and implement Row!)
+func TestSwordfishRow(t *testing.T) {
+
+	techniqueVariantsTestHelper(t, "Swordfish Row")
+
+	grid := swordfishExampleGrid(t)
+	grid = grid.transpose()
+
+	options := solveTechniqueTestHelperOptions{
+		targetCells:  []cellRef{{1, 1}, {4, 5}},
+		pointerCells: []cellRef{{0, 1}, {5, 1}, {3, 5}, {5, 5}, {0, 8}, {3, 8}},
+		targetNums:   IntSlice{1},
+		//TODO: test description
+	}
+	options.stepsToCheck.grid = grid
+
+	//TODO: it's not possible to just pass in an override grid to humanSolveTechniqueTestHelper as
+	//is, because we're overloading passing it to stepsToCheck. That's a smell.
+	grid, solver, steps := humanSolveTechniqueTestHelperStepGenerator(t, "NOOP", "Swordfish Row", options)
+
+	options.stepsToCheck.grid = grid
+	options.stepsToCheck.solver = solver
+	options.stepsToCheck.steps = steps
+
+	humanSolveTechniqueTestHelper(t, "NOOP", "Swordfish Row", options)
+
+}
