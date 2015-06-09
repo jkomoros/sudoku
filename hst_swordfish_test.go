@@ -6,10 +6,7 @@ import (
 
 //TODO: test a few more puzzles to make sure I'm exercising it correctly.
 
-func TestSwordfishCol(t *testing.T) {
-
-	techniqueVariantsTestHelper(t, "Swordfish Col")
-
+func swordfishExampleGrid(t *testing.T) *Grid {
 	grid := NewGrid()
 
 	puzzleName := "swordfish_example.sdk"
@@ -43,6 +40,15 @@ func TestSwordfishCol(t *testing.T) {
 			cell.SetExcluded(exclude, true)
 		}
 	}
+
+	return grid
+}
+
+func TestSwordfishCol(t *testing.T) {
+
+	techniqueVariantsTestHelper(t, "Swordfish Col")
+
+	grid := swordfishExampleGrid(t)
 
 	options := solveTechniqueTestHelperOptions{
 		targetCells:  []cellRef{{1, 1}, {5, 4}},
