@@ -47,3 +47,5 @@ func TestSwordfishCol(t *testing.T) {
 
 	_, _, _ = humanSolveTechniqueTestHelperStepGenerator(t, "NOOP", "Swordfish", options)
 }
+
+//TODO: TestSwordfishRow (and implement Row!)
