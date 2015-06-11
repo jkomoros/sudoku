@@ -493,7 +493,7 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 	gridCopy := grid.Copy()
 
 	//TODO: make these configurable, and figure out what the optimal values are
-	numRequestedSteps := 20
+	numRequestedSteps := 15
 	numTechniquesToStartByDefault := 10
 
 	//Leave some room in resultsChan so all of the techniques don't have to block as often
