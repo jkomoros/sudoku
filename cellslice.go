@@ -26,7 +26,7 @@ type cellRef struct {
 	col int
 }
 
-type CellSliceSorter struct {
+type cellSliceSorter struct {
 	CellSlice
 }
 
@@ -223,7 +223,7 @@ func (self CellSlice) InverseSubset(indexes IntSlice) CellSlice {
 //Sort mutates the provided CellSlice so that the cells are in order from left to right, top to bottom
 //based on their position in the grid.
 func (self CellSlice) Sort() {
-	sorter := CellSliceSorter{self}
+	sorter := cellSliceSorter{self}
 	sort.Sort(sorter)
 }
 
@@ -249,11 +249,11 @@ func (self CellSlice) CollectNums(fetcher func(*Cell) int) IntSlice {
 	return result
 }
 
-func (self CellSliceSorter) Len() int {
+func (self cellSliceSorter) Len() int {
 	return len(self.CellSlice)
 }
 
-func (self CellSliceSorter) Less(i, j int) bool {
+func (self cellSliceSorter) Less(i, j int) bool {
 	//Sort based on the index of the cell.
 	one := self.CellSlice[i]
 	two := self.CellSlice[j]
@@ -261,7 +261,7 @@ func (self CellSliceSorter) Less(i, j int) bool {
 	return (one.Row()*DIM + one.Col()) < (two.Row()*DIM + two.Col())
 }
 
-func (self CellSliceSorter) Swap(i, j int) {
+func (self cellSliceSorter) Swap(i, j int) {
 	self.CellSlice[i], self.CellSlice[j] = self.CellSlice[j], self.CellSlice[i]
 }
 
