@@ -33,6 +33,7 @@ type appOptions struct {
 	PRINT_STATS         bool
 	WALKTHROUGH         bool
 	RAW_SYMMETRY        string
+	RAW_DIFFICULTY      string
 	SYMMETRY            sudoku.SymmetryType
 	SYMMETRY_PROPORTION float64
 	MIN_FILLED_CELLS    int
@@ -44,9 +45,20 @@ type appOptions struct {
 	CONVERTER           sdkconverter.SudokuPuzzleConverter
 }
 
+var difficultyRanges map[string]struct {
+	low, high float64
+}
+
 func init() {
 	//grid.Difficulty can make use of a number of processes simultaneously.
 	runtime.GOMAXPROCS(6)
+
+	difficultyRanges = map[string]struct{ low, high float64 }{
+		"gentle": {0.0, 0.3},
+		"easy":   {0.3, 0.6},
+		"medium": {0.6, 0.7},
+		"tough":  {0.7, 1.0},
+	}
 }
 
 func main() {
@@ -70,6 +82,7 @@ func main() {
 	//TODO: the format should also be how we interpret loads, too.
 	flag.StringVar(&options.PUZZLE_FORMAT, "format", "sdk", "Which format to export puzzles from. Defaults to 'sdk'")
 	flag.BoolVar(&options.OUTPUT_CSV, "csv", false, "Output the results in CSV.")
+	flag.StringVar(&options.RAW_DIFFICULTY, "d", "", "difficulty, one of {gentle, easy, medium, tough}")
 	flag.Parse()
 
 	options.RAW_SYMMETRY = strings.ToLower(options.RAW_SYMMETRY)
@@ -84,6 +97,17 @@ func main() {
 		options.SYMMETRY = sudoku.SYMMETRY_VERTICAL
 	default:
 		log.Fatal("Unknown symmetry flag: ", options.RAW_SYMMETRY)
+	}
+
+	options.RAW_DIFFICULTY = strings.ToLower(options.RAW_DIFFICULTY)
+	if options.RAW_DIFFICULTY != "" {
+		vals, ok := difficultyRanges[options.RAW_DIFFICULTY]
+		if !ok {
+			log.Fatal("Invalid difficulty option:", options.RAW_DIFFICULTY)
+		}
+		options.MIN_DIFFICULTY = vals.low
+		options.MAX_DIFFICULTY = vals.high
+		log.Println("Using difficulty max:", strconv.FormatFloat(vals.high, 'f', -1, 64), "min:", strconv.FormatFloat(vals.low, 'f', -1, 64))
 	}
 
 	options.CONVERTER = sdkconverter.Converters[options.PUZZLE_FORMAT]
