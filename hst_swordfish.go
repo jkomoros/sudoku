@@ -55,6 +55,13 @@ func (self *swordfishTechnique) Find(grid *Grid, results chan *SolveStep, done c
 		}
 		//The candidate we're considering
 
+		//Check if it's time to stop.
+		select {
+		case <-done:
+			return
+		default:
+		}
+
 		//Consider each of the major-axis groups to see if more than three have
 		//only two candidates for
 
