@@ -305,12 +305,12 @@ func (self *Grid) HumanSolve() SolveDirections {
 		return nil
 	}
 
-	return humanSolveHelper(self)
+	return humanSolveHelper(self, true)
 }
 
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
 //The core worker of human solve, it does all of the solving between branch points.
-func humanSolveHelper(grid *Grid) []*SolveStep {
+func humanSolveHelper(grid *Grid, endConditionSolved bool) []*SolveStep {
 
 	var results []*SolveStep
 
@@ -319,7 +319,7 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 
 	var lastStep *SolveStep
 
-	for !grid.Solved() {
+	for (endConditionSolved && !grid.Solved()) || (!endConditionSolved && lastStep != nil && !lastStep.Technique.IsFill()) {
 
 		if grid.Invalid() {
 			//We must have been in a branch and found an invalidity.
@@ -352,10 +352,10 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 		step.Apply(grid)
 
 	}
-	if !grid.Solved() {
+	if (endConditionSolved && !grid.Solved()) || (!endConditionSolved && lastStep != nil && !lastStep.Technique.IsFill()) {
 		//We couldn't solve the puzzle.
 		//But let's do one last ditch effort and try guessing.
-		guessSteps := humanSolveGuess(grid)
+		guessSteps := humanSolveGuess(grid, endConditionSolved)
 		if len(guessSteps) == 0 {
 			//Okay, we just totally failed.
 			return nil
@@ -366,7 +366,7 @@ func humanSolveHelper(grid *Grid) []*SolveStep {
 }
 
 //Called when we have run out of options at a given state and need to guess.
-func humanSolveGuess(grid *Grid) []*SolveStep {
+func humanSolveGuess(grid *Grid, endConditionSolved bool) []*SolveStep {
 
 	//Yes, using DIM*DIM is a gross hack... I really should be calling Find inside a goroutine...
 	results := make(chan *SolveStep, DIM*DIM)
@@ -402,7 +402,7 @@ func humanSolveGuess(grid *Grid) []*SolveStep {
 
 		guess.Apply(gridCopy)
 
-		solveSteps := humanSolveHelper(gridCopy)
+		solveSteps := humanSolveHelper(gridCopy, endConditionSolved)
 
 		if len(solveSteps) != 0 {
 			//Success!
