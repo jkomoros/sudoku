@@ -308,6 +308,9 @@ func (self *Grid) HumanSolve() SolveDirections {
 	return humanSolveHelper(self, true)
 }
 
+//TODO: implement (self *Grid) Hint() SolveDirections
+//TODO: test that Hint() works when returning a Guess.
+
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
 //The core worker of human solve, it does all of the solving between branch points.
 func humanSolveHelper(grid *Grid, endConditionSolved bool) []*SolveStep {
