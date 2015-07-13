@@ -319,6 +319,9 @@ func humanSolveHelper(grid *Grid, endConditionSolved bool) []*SolveStep {
 
 	var lastStep *SolveStep
 
+	//TODO: this logic for the !endConditionSolved is wrong because if a guess happens and
+	//we reenter into humanSolveHelper, we will basically keep going until we get _another_ fill step
+	//but the guess was a fill step.
 	for (endConditionSolved && !grid.Solved()) || (!endConditionSolved && lastStep != nil && !lastStep.Technique.IsFill()) {
 
 		if grid.Invalid() {
