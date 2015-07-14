@@ -308,8 +308,25 @@ func (self *Grid) HumanSolve() SolveDirections {
 	return humanSolveHelper(self, true)
 }
 
-//TODO: implement (self *Grid) Hint() SolveDirections
-//TODO: test that Hint() works when returning a Guess.
+//SolveDirections returns a chain of SolveDirections, containing exactly one
+//IsFill step at the end, that is a reasonable next step to move the puzzle
+//towards being completed. It is effectively a hint to the user about what
+//Fill step to do next, and why it's logically implied; the truncated return
+//value of HumanSolve. Returns nil if the puzzle has multiple solutions or is
+//otherwise invalid.
+func (self *Grid) Hint() SolveDirections {
+
+	//TODO: test this
+	//TODO: test that this works correctly when returning a Guess as the IsFill step.
+
+	//Short circuit solving of it if it has multiple solutions.
+	if self.HasMultipleSolutions() {
+		return nil
+	}
+
+	return humanSolveHelper(self, false)
+
+}
 
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
 //The core worker of human solve, it does all of the solving between branch points.
