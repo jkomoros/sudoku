@@ -322,9 +322,6 @@ func humanSolveHelper(grid *Grid, endConditionSolved bool) []*SolveStep {
 
 	var lastStep *SolveStep
 
-	//TODO: this logic for the !endConditionSolved is wrong because if a guess happens and
-	//we reenter into humanSolveHelper, we will basically keep going until we get _another_ fill step
-	//but the guess was a fill step.
 	for (endConditionSolved && !grid.Solved()) || (!endConditionSolved && lastStep != nil && !lastStep.Technique.IsFill()) {
 
 		if grid.Invalid() {
@@ -374,10 +371,6 @@ func humanSolveHelper(grid *Grid, endConditionSolved bool) []*SolveStep {
 //Called when we have run out of options at a given state and need to guess.
 func humanSolveGuess(grid *Grid, endConditionSolved bool) []*SolveStep {
 
-	//TODO: if endConditionSolved is false, then we should only return back a guess (it's a fill step, after all)
-	//and all we need to do now is verify that it's the right guess to make--so solveSteps can be thrown
-	//out and calling back into humanSolveHelper ... shouldn't (?) have true set?
-
 	//Yes, using DIM*DIM is a gross hack... I really should be calling Find inside a goroutine...
 	results := make(chan *SolveStep, DIM*DIM)
 	done := make(chan bool)
@@ -412,14 +405,25 @@ func humanSolveGuess(grid *Grid, endConditionSolved bool) []*SolveStep {
 
 		guess.Apply(gridCopy)
 
-		solveSteps := humanSolveHelper(gridCopy, endConditionSolved)
+		//Even if endConditionSolved is true, this guess we will return will be an IsFill,
+		//thus terminating the search. From here on out all we're doing is verifying that
+		//we picked the right branch at the guess if endConditionSolved is not true.
+		solveSteps := humanSolveHelper(gridCopy, true)
 
 		if len(solveSteps) != 0 {
 			//Success!
 			//Make ourselves look like that grid (to pass back the state of what the solution was) and return.
 			grid.replace(gridCopy)
 			gridCopy.Done()
-			return append([]*SolveStep{guess}, solveSteps...)
+			if endConditionSolved {
+				return append([]*SolveStep{guess}, solveSteps...)
+			} else {
+				//Since we're trying to find a hint that terminates in an IsFill step,
+				//and this guess IS the IsFill step, and we've verified that this
+				//guess we chose is correct, just return the guess step back up.
+				return []*SolveStep{guess}
+			}
+
 		}
 		//We need to try the next solution.
 
