@@ -316,8 +316,10 @@ func (self *Grid) HumanSolve() SolveDirections {
 //otherwise invalid.
 func (self *Grid) Hint() SolveDirections {
 
-	//TODO: test this
-	//TODO: test that this works correctly when returning a Guess as the IsFill step.
+	//TODO: return HintDirections instead of SolveDirections
+
+	//TODO: test that non-fill steps before the last one are necessary to unlock
+	//the fill step at the end (cull them if not), and test that.
 
 	//Short circuit solving of it if it has multiple solutions.
 	if self.HasMultipleSolutions() {

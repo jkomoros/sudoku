@@ -44,6 +44,36 @@ func TestHumanSolve(t *testing.T) {
 
 }
 
+func TestHint(t *testing.T) {
+	//TODO: explicitly test hints that end in a guess, too.
+
+	grid := NewGrid()
+	defer grid.Done()
+
+	grid.Load(TEST_GRID)
+
+	steps := grid.Hint()
+
+	if steps == nil || len(steps) == 0 {
+		t.Error("No steps returned from Hint")
+	}
+
+	for count, step := range steps {
+		if count == len(steps)-1 {
+			//Last one
+			if step.Technique.IsFill() {
+				t.Error("Non-fill step as last step in Hint: ", step.Technique.Name())
+			}
+		} else {
+			//Not last one
+			if !step.Technique.IsFill() {
+				t.Error("Fill step as non-last step in Hint: ", count, step.Technique.Name())
+			}
+		}
+	}
+
+}
+
 func TestHumanSolveWithGuess(t *testing.T) {
 
 	grid := NewGrid()
