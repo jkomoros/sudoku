@@ -57,6 +57,18 @@ type SolveStep struct {
 	extra interface{}
 }
 
+//HumanSolveOptions configures how precisely the human solver should
+//operate. Passing nil where a HumanSolveOptions is expected will
+//use reasonable defaults.
+type HumanSolveOptions struct {
+	//At each step in solving the puzzle, how many candidate SolveSteps should
+	//we generate before stopping the search for more? Higher values will give
+	//more 'realistic' solves, but at the cost of *much* higher performance
+	//costs. Also note that the results may be wrong if the difficulty model
+	//in use was trained on a different NumOptionsToCalculate.
+	NumOptionsToCalculate int
+}
+
 //IsUseful returns true if this SolveStep, when applied to the given grid, would do useful work--that is, it would
 //either fill a previously unfilled number, or cull previously un-culled possibilities. This is useful to ensure
 //HumanSolve doesn't get in a loop of applying the same useless steps.
