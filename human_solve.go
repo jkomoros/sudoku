@@ -71,7 +71,12 @@ type HumanSolveOptions struct {
 	//costs. Also note that the results may be wrong if the difficulty model
 	//in use was trained on a different NumOptionsToCalculate.
 	NumOptionsToCalculate int
+	//TODO: figure out how to test that we do indeed use different values of
+	//numOptionsToCalculate.
 	//TODO: add a TwiddleChainDissimilarity bool.
+
+	//A cheap way of testing that non-default options are accepted.
+	justReturnInvalidGuess bool
 }
 
 //IsUseful returns true if this SolveStep, when applied to the given grid, would do useful work--that is, it would
@@ -194,7 +199,8 @@ func defaultHumanSolveOptions() *HumanSolveOptions {
 	//The methods may mutate the options object, so create a new one each
 	//time.
 	return &HumanSolveOptions{
-		NumOptionsToCalculate: 15,
+		NumOptionsToCalculate:  15,
+		justReturnInvalidGuess: false,
 	}
 }
 
@@ -375,6 +381,15 @@ func (self *Grid) Hint(options *HumanSolveOptions) SolveDirections {
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
 //The core worker of human solve, it does all of the solving between branch points.
 func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) []*SolveStep {
+
+	//this is a dumb thing just for testing that non-default options are at least somewhat honored.
+	if options.justReturnInvalidGuess {
+		return []*SolveStep{
+			&SolveStep{
+				Technique: GuessTechnique,
+			},
+		}
+	}
 
 	var results []*SolveStep
 

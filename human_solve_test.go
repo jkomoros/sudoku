@@ -42,6 +42,24 @@ func TestHumanSolve(t *testing.T) {
 		t.Fail()
 	}
 
+	//TODO: figure out a better way to test that non-default options to HumanSolution
+	//are actually honored. This is hacky and cheap. :-/
+	weirdOptions := HumanSolveOptions{
+		justReturnInvalidGuess: true,
+	}
+
+	steps = grid.HumanSolve(&weirdOptions)
+
+	if steps == nil {
+		t.Fatal("Weird human solve options returned nothing")
+	}
+	if len(steps) != 1 {
+		t.Fatal("Wrong number of weird steps returned")
+	}
+	if steps[0].Technique != GuessTechnique {
+		t.Fatal("Weird solve options didn't return Guess.")
+	}
+
 }
 
 func TestHint(t *testing.T) {
