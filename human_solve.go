@@ -396,7 +396,7 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 			return nil
 		}
 
-		possibilities := runTechniques(Techniques, grid)
+		possibilities := runTechniques(Techniques, grid, options.NumOptionsToCalculate)
 
 		//Now pick one to apply.
 		if len(possibilities) == 0 {
@@ -543,7 +543,7 @@ func tweakChainedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, w
 	}
 }
 
-func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
+func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps int) []*SolveStep {
 
 	/*
 		This function went from being a mere convenience function to being a complex piece of multi-threaded code.
@@ -572,8 +572,7 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 	//the message and freak out a bit because the grid starts changing under them.
 	gridCopy := grid.Copy()
 
-	//TODO: make these configurable, and figure out what the optimal values are
-	numRequestedSteps := 15
+	//TODO: make this configurable, and figure out what the optimal values are
 	numTechniquesToStartByDefault := 10
 
 	//Leave some room in resultsChan so all of the techniques don't have to block as often
