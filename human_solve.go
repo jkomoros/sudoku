@@ -341,7 +341,12 @@ func humanSolveHelper(grid *Grid, endConditionSolved bool) []*SolveStep {
 
 	var lastStep *SolveStep
 
-	for (endConditionSolved && !grid.Solved()) || (!endConditionSolved && lastStep != nil && !lastStep.Technique.IsFill()) {
+	//Is this the first time through the loop?
+	firstRun := true
+
+	for firstRun || (endConditionSolved && !grid.Solved()) || (!endConditionSolved && lastStep != nil && !lastStep.Technique.IsFill()) {
+
+		firstRun = false
 
 		if grid.Invalid() {
 			//We must have been in a branch and found an invalidity.
