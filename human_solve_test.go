@@ -61,12 +61,12 @@ func TestHint(t *testing.T) {
 	for count, step := range steps {
 		if count == len(steps)-1 {
 			//Last one
-			if step.Technique.IsFill() {
+			if !step.Technique.IsFill() {
 				t.Error("Non-fill step as last step in Hint: ", step.Technique.Name())
 			}
 		} else {
 			//Not last one
-			if !step.Technique.IsFill() {
+			if step.Technique.IsFill() {
 				t.Error("Fill step as non-last step in Hint: ", count, step.Technique.Name())
 			}
 		}
