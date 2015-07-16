@@ -10,7 +10,7 @@ func BenchmarkHumanSolve(b *testing.B) {
 		grid := NewGrid()
 		defer grid.Done()
 		grid.Load(TEST_GRID)
-		grid.HumanSolve()
+		grid.HumanSolve(nil)
 	}
 }
 
@@ -19,7 +19,7 @@ func TestHumanSolve(t *testing.T) {
 	defer grid.Done()
 	grid.Load(TEST_GRID)
 
-	steps := grid.HumanSolution()
+	steps := grid.HumanSolution(nil)
 
 	if steps == nil {
 		t.Log("Human solution returned 0 techniques.")
@@ -31,7 +31,7 @@ func TestHumanSolve(t *testing.T) {
 		t.Fail()
 	}
 
-	steps = grid.HumanSolve()
+	steps = grid.HumanSolve(nil)
 	//TODO: test to make sure that we use a wealth of different techniques. This will require a cooked random for testing.
 	if steps == nil {
 		t.Log("Human solve returned 0 techniques")
@@ -58,7 +58,7 @@ func hintTestHelper(t *testing.T) {
 
 	grid.Load(TEST_GRID)
 
-	steps := grid.Hint()
+	steps := grid.Hint(nil)
 
 	if steps == nil || len(steps) == 0 {
 		t.Error("No steps returned from Hint")
@@ -88,7 +88,7 @@ func TestHumanSolveWithGuess(t *testing.T) {
 		t.Fatal("harddifficulty.sdk wasn't loaded")
 	}
 
-	steps := grid.HumanSolution()
+	steps := grid.HumanSolution(nil)
 
 	if steps == nil {
 		t.Fatal("Didn't find a solution to a grid that should have needed a guess")
