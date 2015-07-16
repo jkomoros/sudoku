@@ -45,7 +45,10 @@ func TestHumanSolve(t *testing.T) {
 }
 
 func TestHint(t *testing.T) {
-	//TODO: explicitly test hints that end in a guess, too.
+	//TODO: explicitly test hints that end in a guess, too. I think the best way to do that
+	//is once HumanSolve and its variants take a HumanSolveOptions struct, and have a
+	//packagePrivate onlyGuessFirstRecursion field to use just for testing.
+
 	hintTestHelper(t)
 }
 
