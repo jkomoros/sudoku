@@ -180,7 +180,7 @@ func (self *SolveStep) normalize() {
 //human would solve the provided puzzle, without mutating the grid. A
 //covenience wrapper around grid.HumanSolution and
 //SolveDirections.Walkthrough. If options is nil, will use reasonable
-//defaults.z
+//defaults.
 func (self *Grid) HumanWalkthrough(options *HumanSolveOptions) string {
 	steps := self.HumanSolution(options)
 	return steps.Walkthrough(self)
