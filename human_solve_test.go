@@ -67,6 +67,9 @@ func TestHint(t *testing.T) {
 	//justReturnGuess (that gets flipped back to false when re-entering into
 	//humanSolveHelper again)
 
+	//TODO: we should test that hints are valid, like, 10 times and make sure
+	//that all of them pass this test. Of course, this test will still be flaky...
+
 	hintTestHelper(t)
 }
 
