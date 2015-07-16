@@ -171,7 +171,7 @@ func main() {
 		var directions sudoku.SolveDirections
 
 		if options.WALKTHROUGH || options.PRINT_STATS {
-			directions = grid.HumanSolution()
+			directions = grid.HumanSolution(nil)
 			if len(directions) == 0 {
 				//We couldn't solve it. Let's check and see if the puzzle is well formed.
 				if grid.HasMultipleSolutions() {

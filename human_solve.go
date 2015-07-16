@@ -57,6 +57,28 @@ type SolveStep struct {
 	extra interface{}
 }
 
+//TODO: consider passing a non-pointer humanSolveOptions so that mutations
+//deeper  in the solve stack don' tmatter.
+
+//HumanSolveOptions configures how precisely the human solver should operate.
+//Passing nil where a HumanSolveOptions is expected will use reasonable
+//defaults. Note that the various human solve methods may mutate your options
+//object.
+type HumanSolveOptions struct {
+	//At each step in solving the puzzle, how many candidate SolveSteps should
+	//we generate before stopping the search for more? Higher values will give
+	//more 'realistic' solves, but at the cost of *much* higher performance
+	//costs. Also note that the results may be wrong if the difficulty model
+	//in use was trained on a different NumOptionsToCalculate.
+	NumOptionsToCalculate int
+	//TODO: figure out how to test that we do indeed use different values of
+	//numOptionsToCalculate.
+	//TODO: add a TwiddleChainDissimilarity bool.
+
+	//A cheap way of testing that non-default options are accepted.
+	justReturnInvalidGuess bool
+}
+
 //IsUseful returns true if this SolveStep, when applied to the given grid, would do useful work--that is, it would
 //either fill a previously unfilled number, or cull previously un-culled possibilities. This is useful to ensure
 //HumanSolve doesn't get in a loop of applying the same useless steps.
@@ -154,18 +176,32 @@ func (self *SolveStep) normalize() {
 	self.Technique.normalizeStep(self)
 }
 
-//HumanWalkthrough returns a human-readable, verbose walkthrough of how a human would solve the provided puzzle, without mutating the grid. A covenience
-//wrapper around grid.HumanSolution and SolveDirections.Walkthrough.
-func (self *Grid) HumanWalkthrough() string {
-	steps := self.HumanSolution()
+//HumanWalkthrough returns a human-readable, verbose walkthrough of how a
+//human would solve the provided puzzle, without mutating the grid. A
+//covenience wrapper around grid.HumanSolution and
+//SolveDirections.Walkthrough. If options is nil, will use reasonable
+//defaults.z
+func (self *Grid) HumanWalkthrough(options *HumanSolveOptions) string {
+	steps := self.HumanSolution(options)
 	return steps.Walkthrough(self)
 }
 
-//HumanSolution returns the SolveDirections that represent how a human would solve this puzzle. It does not mutate the grid.
-func (self *Grid) HumanSolution() SolveDirections {
+//HumanSolution returns the SolveDirections that represent how a human would
+//solve this puzzle. It does not mutate the grid. If options is nil, will use
+//reasonable defaults.
+func (self *Grid) HumanSolution(options *HumanSolveOptions) SolveDirections {
 	clone := self.Copy()
 	defer clone.Done()
-	return clone.HumanSolve()
+	return clone.HumanSolve(options)
+}
+
+func defaultHumanSolveOptions() *HumanSolveOptions {
+	//The methods may mutate the options object, so create a new one each
+	//time.
+	return &HumanSolveOptions{
+		NumOptionsToCalculate:  15,
+		justReturnInvalidGuess: false,
+	}
 }
 
 /*
@@ -289,14 +325,18 @@ func (self *Grid) HumanSolution() SolveDirections {
  * until finding one that works. This keeps humanSolveHelper pretty straighforward and keeps most of the complex guess logic out.
  */
 
-//HumanSolve is the workhorse of the package. It solves the puzzle much like a human would, applying complex
-//logic techniques iteratively to find a sequence of steps that a reasonable human might apply to solve the puzzle.
-//HumanSolve is an expensive operation because at each step it identifies all of the valid logic rules it could
-//apply and then selects between them based on various weightings. HumanSolve endeavors to find the most realistic
-//human solution it can by using a large number of possible techniques with realistic weights, as well as by doing things
-//like being more likely to pick a cell that is in the same row/cell/block as the last filled cell.
-//Returns nil if the puzzle does not have a single valid solution.
-func (self *Grid) HumanSolve() SolveDirections {
+//HumanSolve is the workhorse of the package. It solves the puzzle much like a
+//human would, applying complex logic techniques iteratively to find a
+//sequence of steps that a reasonable human might apply to solve the puzzle.
+//HumanSolve is an expensive operation because at each step it identifies all
+//of the valid logic rules it could apply and then selects between them based
+//on various weightings. HumanSolve endeavors to find the most realistic human
+//solution it can by using a large number of possible techniques with
+//realistic weights, as well as by doing things like being more likely to pick
+//a cell that is in the same row/cell/block as the last filled cell. Returns
+//nil if the puzzle does not have a single valid solution. If options is nil,
+//will use reasonable defaults.
+func (self *Grid) HumanSolve(options *HumanSolveOptions) SolveDirections {
 
 	//TODO: there are lots of options to HumanSolve, like how hard to search, whether to weight based on chaining, etc. Should there be a way to configure those options?
 
@@ -305,7 +345,11 @@ func (self *Grid) HumanSolve() SolveDirections {
 		return nil
 	}
 
-	return humanSolveHelper(self, true)
+	if options == nil {
+		options = defaultHumanSolveOptions()
+	}
+
+	return humanSolveHelper(self, options, true)
 }
 
 //SolveDirections returns a chain of SolveDirections, containing exactly one
@@ -313,8 +357,8 @@ func (self *Grid) HumanSolve() SolveDirections {
 //towards being completed. It is effectively a hint to the user about what
 //Fill step to do next, and why it's logically implied; the truncated return
 //value of HumanSolve. Returns nil if the puzzle has multiple solutions or is
-//otherwise invalid.
-func (self *Grid) Hint() SolveDirections {
+//otherwise invalid. If options is nil, will use reasonable defaults.
+func (self *Grid) Hint(options *HumanSolveOptions) SolveDirections {
 
 	//TODO: return HintDirections instead of SolveDirections
 
@@ -326,13 +370,26 @@ func (self *Grid) Hint() SolveDirections {
 		return nil
 	}
 
-	return humanSolveHelper(self, false)
+	if options == nil {
+		options = defaultHumanSolveOptions()
+	}
+
+	return humanSolveHelper(self, options, false)
 
 }
 
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
 //The core worker of human solve, it does all of the solving between branch points.
-func humanSolveHelper(grid *Grid, endConditionSolved bool) []*SolveStep {
+func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) []*SolveStep {
+
+	//this is a dumb thing just for testing that non-default options are at least somewhat honored.
+	if options.justReturnInvalidGuess {
+		return []*SolveStep{
+			&SolveStep{
+				Technique: GuessTechnique,
+			},
+		}
+	}
 
 	var results []*SolveStep
 
@@ -354,7 +411,7 @@ func humanSolveHelper(grid *Grid, endConditionSolved bool) []*SolveStep {
 			return nil
 		}
 
-		possibilities := runTechniques(Techniques, grid)
+		possibilities := runTechniques(Techniques, grid, options.NumOptionsToCalculate)
 
 		//Now pick one to apply.
 		if len(possibilities) == 0 {
@@ -382,7 +439,7 @@ func humanSolveHelper(grid *Grid, endConditionSolved bool) []*SolveStep {
 	if (endConditionSolved && !grid.Solved()) || (!endConditionSolved && lastStep != nil && !lastStep.Technique.IsFill()) {
 		//We couldn't solve the puzzle.
 		//But let's do one last ditch effort and try guessing.
-		guessSteps := humanSolveGuess(grid, endConditionSolved)
+		guessSteps := humanSolveGuess(grid, options, endConditionSolved)
 		if len(guessSteps) == 0 {
 			//Okay, we just totally failed.
 			return nil
@@ -393,7 +450,7 @@ func humanSolveHelper(grid *Grid, endConditionSolved bool) []*SolveStep {
 }
 
 //Called when we have run out of options at a given state and need to guess.
-func humanSolveGuess(grid *Grid, endConditionSolved bool) []*SolveStep {
+func humanSolveGuess(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) []*SolveStep {
 
 	//Yes, using DIM*DIM is a gross hack... I really should be calling Find inside a goroutine...
 	results := make(chan *SolveStep, DIM*DIM)
@@ -432,7 +489,7 @@ func humanSolveGuess(grid *Grid, endConditionSolved bool) []*SolveStep {
 		//Even if endConditionSolved is true, this guess we will return will be an IsFill,
 		//thus terminating the search. From here on out all we're doing is verifying that
 		//we picked the right branch at the guess if endConditionSolved is not true.
-		solveSteps := humanSolveHelper(gridCopy, true)
+		solveSteps := humanSolveHelper(gridCopy, options, true)
 
 		if len(solveSteps) != 0 {
 			//Success!
@@ -501,7 +558,7 @@ func tweakChainedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, w
 	}
 }
 
-func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
+func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps int) []*SolveStep {
 
 	/*
 		This function went from being a mere convenience function to being a complex piece of multi-threaded code.
@@ -530,8 +587,7 @@ func runTechniques(techniques []SolveTechnique, grid *Grid) []*SolveStep {
 	//the message and freak out a bit because the grid starts changing under them.
 	gridCopy := grid.Copy()
 
-	//TODO: make these configurable, and figure out what the optimal values are
-	numRequestedSteps := 15
+	//TODO: make this configurable, and figure out what the optimal values are
 	numTechniquesToStartByDefault := 10
 
 	//Leave some room in resultsChan so all of the techniques don't have to block as often
@@ -698,7 +754,7 @@ func gridDifficultyHelper(grid *Grid) float64 {
 	//Might as well run all of the human solutions in parallel
 	for i := 0; i < _NUM_SOLVES_FOR_DIFFICULTY; i++ {
 		go func(gridToUse *Grid) {
-			collector <- gridToUse.HumanSolution().Signals()
+			collector <- gridToUse.HumanSolution(nil).Signals()
 		}(grid)
 	}
 
