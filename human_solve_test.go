@@ -46,7 +46,10 @@ func TestHumanSolve(t *testing.T) {
 
 func TestHint(t *testing.T) {
 	//TODO: explicitly test hints that end in a guess, too.
+	hintTestHelper(t)
+}
 
+func hintTestHelper(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
 
@@ -71,7 +74,6 @@ func TestHint(t *testing.T) {
 			}
 		}
 	}
-
 }
 
 func TestHumanSolveWithGuess(t *testing.T) {
