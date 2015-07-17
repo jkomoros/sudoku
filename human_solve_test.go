@@ -63,38 +63,40 @@ func TestHumanSolve(t *testing.T) {
 }
 
 func TestHint(t *testing.T) {
-	//TODO: explicitly test hints that end in a guess, too, by having a
-	//justReturnGuess (that gets flipped back to false when re-entering into
-	//humanSolveHelper again)
 
 	//TODO: we should test that hints are valid, like, 10 times and make sure
 	//that all of them pass this test. Of course, this test will still be flaky...
 
-	hintTestHelper(t)
+	hintTestHelper(t, nil, "base case")
+
+	options := defaultHumanSolveOptions()
+	options.justReturnValidGuess = true
+
+	hintTestHelper(t, options, "guess")
 }
 
-func hintTestHelper(t *testing.T) {
+func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string) {
 	grid := NewGrid()
 	defer grid.Done()
 
 	grid.Load(TEST_GRID)
 
-	steps := grid.Hint(nil)
+	steps := grid.Hint(options)
 
 	if steps == nil || len(steps) == 0 {
-		t.Error("No steps returned from Hint")
+		t.Error("No steps returned from Hint", description)
 	}
 
 	for count, step := range steps {
 		if count == len(steps)-1 {
 			//Last one
 			if !step.Technique.IsFill() {
-				t.Error("Non-fill step as last step in Hint: ", step.Technique.Name())
+				t.Error("Non-fill step as last step in Hint: ", step.Technique.Name(), description)
 			}
 		} else {
 			//Not last one
 			if step.Technique.IsFill() {
-				t.Error("Fill step as non-last step in Hint: ", count, step.Technique.Name())
+				t.Error("Fill step as non-last step in Hint: ", count, step.Technique.Name(), description)
 			}
 		}
 	}

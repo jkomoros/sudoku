@@ -75,8 +75,12 @@ type HumanSolveOptions struct {
 	//numOptionsToCalculate.
 	//TODO: add a TwiddleChainDissimilarity bool.
 
+	//The following are flags only used for testing.
+
 	//A cheap way of testing that non-default options are accepted.
 	justReturnInvalidGuess bool
+	//A way to force Hint to return a guess so it can test that case.
+	justReturnValidGuess bool
 }
 
 //IsUseful returns true if this SolveStep, when applied to the given grid, would do useful work--that is, it would
@@ -418,7 +422,7 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 		possibilities := runTechniques(Techniques, grid, options.NumOptionsToCalculate)
 
 		//Now pick one to apply.
-		if len(possibilities) == 0 {
+		if len(possibilities) == 0 || options.justReturnValidGuess {
 			//Hmm, didn't find any possivbilities. We failed. :-(
 			break
 		}
@@ -455,6 +459,10 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 
 //Called when we have run out of options at a given state and need to guess.
 func humanSolveGuess(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) []*SolveStep {
+
+	//If we go back to humanSolveHelper, we want to flip justReturnGuess to false
+	//even if it was true.
+	options.justReturnValidGuess = false
 
 	//Yes, using DIM*DIM is a gross hack... I really should be calling Find inside a goroutine...
 	results := make(chan *SolveStep, DIM*DIM)
