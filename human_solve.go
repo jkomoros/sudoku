@@ -586,6 +586,10 @@ func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps in
 
 	*/
 
+	if numRequestedSteps < 1 {
+		numRequestedSteps = 1
+	}
+
 	//We make a copy of the grid to search on to avoid race conditions where
 	// main thread has already returned up to humanSolveHelper, but not all of the techinques have gotten
 	//the message and freak out a bit because the grid starts changing under them.
