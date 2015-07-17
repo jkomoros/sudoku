@@ -195,6 +195,10 @@ func (self *Grid) HumanSolution(options *HumanSolveOptions) SolveDirections {
 	return clone.HumanSolve(options)
 }
 
+//TODO: there should be a way for someone to get a "default options" + this one tweak.
+//So either that's making this a public method, or a makeValidHumanOptions method
+//that takes a HumanOptions and makes sure that everything's valid (like numOptionsToCalcuate
+// is at least 1)
 func defaultHumanSolveOptions() *HumanSolveOptions {
 	//The methods may mutate the options object, so create a new one each
 	//time.
