@@ -75,6 +75,11 @@ type HumanSolveOptions struct {
 	//numOptionsToCalculate.
 	//TODO: add a TwiddleChainDissimilarity bool.
 
+	//TODO: replace the following with:
+	//TechniquesToUse (defaults to Techniques)
+	//Guess bool
+	//resetTechniquesOnReentry
+
 	//The following are flags only used for testing.
 
 	//A cheap way of testing that non-default options are accepted.
