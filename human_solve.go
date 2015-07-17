@@ -444,7 +444,7 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 		step.Apply(grid)
 
 	}
-	if (endConditionSolved && !grid.Solved()) || (!endConditionSolved && lastStep != nil && !lastStep.Technique.IsFill()) {
+	if (endConditionSolved && !grid.Solved()) || (!endConditionSolved && (lastStep == nil || !lastStep.Technique.IsFill())) {
 		//We couldn't solve the puzzle.
 		//But let's do one last ditch effort and try guessing.
 		guessSteps := humanSolveGuess(grid, options, endConditionSolved)
