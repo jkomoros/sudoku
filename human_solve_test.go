@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"strconv"
 	"testing"
 	"time"
 )
@@ -64,10 +65,10 @@ func TestHumanSolve(t *testing.T) {
 
 func TestHint(t *testing.T) {
 
-	//TODO: we should test that hints are valid, like, 10 times and make sure
-	//that all of them pass this test. Of course, this test will still be flaky...
-
-	hintTestHelper(t, nil, "base case")
+	//This is still flaky, but at least it's a little more likely to catch problems. :-/
+	for i := 0; i < 10; i++ {
+		hintTestHelper(t, nil, "base case"+strconv.Itoa(i))
+	}
 
 	options := defaultHumanSolveOptions()
 	options.justReturnValidGuess = true
