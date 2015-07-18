@@ -61,6 +61,15 @@ func TestHumanSolve(t *testing.T) {
 		t.Fatal("Weird solve options didn't return Guess.")
 	}
 
+	shortTechniqueOptions := defaultHumanSolveOptions()
+	shortTechniqueOptions.TechniquesToUse = Techniques[0:5]
+
+	steps = grid.HumanSolve(shortTechniqueOptions)
+
+	if steps == nil {
+		t.Fatal("Short technique Options returned nothing")
+	}
+
 }
 
 func TestHint(t *testing.T) {

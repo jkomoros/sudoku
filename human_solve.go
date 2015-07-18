@@ -624,8 +624,16 @@ func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps in
 	//the message and freak out a bit because the grid starts changing under them.
 	gridCopy := grid.Copy()
 
+	//TODO: filter out GuessTechnique, if it exists, from Techniques here.
+	//(before calculating numTechqniuesToStartByDefault)
+
 	//TODO: make this configurable, and figure out what the optimal values are
 	numTechniquesToStartByDefault := 10
+
+	//Handle the case where we were given a short list of techniques.
+	if len(techniques) < numTechniquesToStartByDefault {
+		numTechniquesToStartByDefault = len(techniques)
+	}
 
 	//Leave some room in resultsChan so all of the techniques don't have to block as often
 	//waiting for the mainthread to clear resultsChan. Leads to a 20% reduction in time compared
@@ -639,8 +647,6 @@ func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps in
 	techniqueFinished := make(chan chan bool)
 
 	var wg sync.WaitGroup
-
-	//TODO: filter out GuessTechnique, if it exists, from Techniques here.
 
 	//The next technique to spin up
 	nextTechniqueIndex := 0
