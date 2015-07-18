@@ -667,9 +667,6 @@ func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps in
 
 	var results []*SolveStep
 
-	//TODO: reason about what to do if len(techniquesToUse) is less than
-	//numTechniquesToStartByDefault
-
 	//Get the first batch of techniques going
 	wg.Add(numTechniquesToStartByDefault)
 
