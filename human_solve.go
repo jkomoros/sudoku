@@ -366,8 +366,6 @@ func (self *Grid) HumanSolution(options *HumanSolveOptions) SolveDirections {
 //will use reasonable defaults.
 func (self *Grid) HumanSolve(options *HumanSolveOptions) SolveDirections {
 
-	//TODO: there are lots of options to HumanSolve, like how hard to search, whether to weight based on chaining, etc. Should there be a way to configure those options?
-
 	//Short circuit solving if it has multiple solutions.
 	if self.HasMultipleSolutions() {
 		return nil
