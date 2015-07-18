@@ -71,12 +71,23 @@ type HumanSolveOptions struct {
 	//costs. Also note that the results may be wrong if the difficulty model
 	//in use was trained on a different NumOptionsToCalculate.
 	NumOptionsToCalculate int
+	//Which techniques to try at each step of the puzzle, sorted in the order
+	//to try them out (generally from cheapest to most expensive). A value of
+	//nil will use Techniques (the default). Do not include GuessTechnique in
+	//your list of techniques.
+	TechniquesToUse []SolveTechnique
+
+	//TODO: humanSolveHelper should just skip a GuessTechnique if it sees one.
+
+	//TODO: test passing Nil and zero-length values for TechniquesToUse works as intended.
+
+	//TODO: get rid of justReturnValidGuess and have it use TechniquesToUse + resetTechniquesOnReentry
+
 	//TODO: figure out how to test that we do indeed use different values of
 	//numOptionsToCalculate.
 	//TODO: add a TwiddleChainDissimilarity bool.
 
 	//TODO: replace the following with:
-	//TechniquesToUse (defaults to Techniques)
 	//Guess bool
 	//resetTechniquesOnReentry
 
@@ -213,6 +224,7 @@ func defaultHumanSolveOptions() *HumanSolveOptions {
 	//time.
 	return &HumanSolveOptions{
 		NumOptionsToCalculate:  15,
+		TechniquesToUse:        Techniques,
 		justReturnInvalidGuess: false,
 	}
 }
@@ -404,6 +416,10 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 		}
 	}
 
+	if options.TechniquesToUse == nil {
+		options.TechniquesToUse = Techniques
+	}
+
 	var results []*SolveStep
 
 	//Note: trying these all in parallel is much slower (~15x) than doing them in sequence.
@@ -424,7 +440,7 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 			return nil
 		}
 
-		possibilities := runTechniques(Techniques, grid, options.NumOptionsToCalculate)
+		possibilities := runTechniques(options.TechniquesToUse, grid, options.NumOptionsToCalculate)
 
 		//Now pick one to apply.
 		if len(possibilities) == 0 || options.justReturnValidGuess {
