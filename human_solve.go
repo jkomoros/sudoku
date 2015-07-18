@@ -99,6 +99,14 @@ type HumanSolveOptions struct {
 	justReturnValidGuess bool
 }
 
+//Sets the given HumanSolveOptions to have reasonable defaults. Returns itself
+//for convenience.
+func (self *HumanSolveOptions) Default() *HumanSolveOptions {
+	self.NumOptionsToCalculate = 15
+	self.TechniquesToUse = Techniques
+	return self
+}
+
 //IsUseful returns true if this SolveStep, when applied to the given grid, would do useful work--that is, it would
 //either fill a previously unfilled number, or cull previously un-culled possibilities. This is useful to ensure
 //HumanSolve doesn't get in a loop of applying the same useless steps.
@@ -213,20 +221,6 @@ func (self *Grid) HumanSolution(options *HumanSolveOptions) SolveDirections {
 	clone := self.Copy()
 	defer clone.Done()
 	return clone.HumanSolve(options)
-}
-
-//TODO: there should be a way for someone to get a "default options" + this one tweak.
-//So either that's making this a public method, or a makeValidHumanOptions method
-//that takes a HumanOptions and makes sure that everything's valid (like numOptionsToCalcuate
-// is at least 1)
-func defaultHumanSolveOptions() *HumanSolveOptions {
-	//The methods may mutate the options object, so create a new one each
-	//time.
-	return &HumanSolveOptions{
-		NumOptionsToCalculate:  15,
-		TechniquesToUse:        Techniques,
-		justReturnInvalidGuess: false,
-	}
 }
 
 /*
@@ -371,7 +365,7 @@ func (self *Grid) HumanSolve(options *HumanSolveOptions) SolveDirections {
 	}
 
 	if options == nil {
-		options = defaultHumanSolveOptions()
+		options = (&HumanSolveOptions{}).Default()
 	}
 
 	return humanSolveHelper(self, options, true)
@@ -396,7 +390,7 @@ func (self *Grid) Hint(options *HumanSolveOptions) SolveDirections {
 	}
 
 	if options == nil {
-		options = defaultHumanSolveOptions()
+		options = (&HumanSolveOptions{}).Default()
 	}
 
 	return humanSolveHelper(self, options, false)

@@ -68,7 +68,7 @@ func TestShortTechniquesToUseHumanSolveOptions(t *testing.T) {
 	defer grid.Done()
 	grid.Load(TEST_GRID)
 
-	shortTechniqueOptions := defaultHumanSolveOptions()
+	shortTechniqueOptions := (&HumanSolveOptions{}).Default()
 	shortTechniqueOptions.TechniquesToUse = Techniques[0:5]
 
 	steps := grid.HumanSolution(shortTechniqueOptions)
@@ -85,7 +85,7 @@ func TestHint(t *testing.T) {
 		hintTestHelper(t, nil, "base case"+strconv.Itoa(i))
 	}
 
-	options := defaultHumanSolveOptions()
+	options := (&HumanSolveOptions{}).Default()
 	options.justReturnValidGuess = true
 
 	hintTestHelper(t, options, "guess")
