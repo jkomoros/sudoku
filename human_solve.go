@@ -640,6 +640,8 @@ func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps in
 
 	var wg sync.WaitGroup
 
+	//TODO: filter out GuessTechnique, if it exists, from Techniques here.
+
 	//The next technique to spin up
 	nextTechniqueIndex := 0
 
@@ -659,11 +661,17 @@ func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps in
 
 	var results []*SolveStep
 
+	//TODO: reason about what to do if len(techniquesToUse) is less than
+	//numTechniquesToStartByDefault
+
 	//Get the first batch of techniques going
 	wg.Add(numTechniquesToStartByDefault)
 
 	//Since Techniques is in sorted order, we're starting off with the easiest techniques.
 	for nextTechniqueIndex = 0; nextTechniqueIndex < numTechniquesToStartByDefault; nextTechniqueIndex++ {
+		if techniques[nextTechniqueIndex] == GuessTechnique {
+			continue
+		}
 		go startTechnique(techniques[nextTechniqueIndex])
 	}
 
