@@ -102,8 +102,17 @@ type HumanSolveOptions struct {
 //Sets the given HumanSolveOptions to have reasonable defaults. Returns itself
 //for convenience.
 func (self *HumanSolveOptions) Default() *HumanSolveOptions {
+
+	//TODO: the (&HumanSolveOptions{}).Default() pattern is a bit weird.
+	//consider just doing a package global DefaultHumanSolveOptions.
+
 	self.NumOptionsToCalculate = 15
 	self.TechniquesToUse = Techniques
+
+	//Have to set even zero valued properties, because the Options isn't
+	//necessarily default initalized.
+	self.justReturnInvalidGuess = false
+	self.justReturnValidGuess = false
 	return self
 }
 
