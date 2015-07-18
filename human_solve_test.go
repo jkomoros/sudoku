@@ -101,7 +101,27 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 		t.Error("defaultOptions came back incorrectly: ", options)
 	}
 
-	//TODO: test humansolveoptions.Validate()
+	weirdOptions := &HumanSolveOptions{
+		-3,
+		nil,
+		false,
+		false,
+	}
+
+	validatedOptions := &HumanSolveOptions{
+		1,
+		Techniques,
+		false,
+		false,
+	}
+
+	weirdOptions.validate()
+
+	if !reflect.DeepEqual(weirdOptions, validatedOptions) {
+		t.Error("Weird options didn't validate:", weirdOptions, "wanted", validatedOptions)
+	}
+
+	//TODO: check that validate() removes GuessTechnique, once it does.
 
 }
 
