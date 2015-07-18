@@ -669,9 +669,6 @@ func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps in
 
 	//Since Techniques is in sorted order, we're starting off with the easiest techniques.
 	for nextTechniqueIndex = 0; nextTechniqueIndex < numTechniquesToStartByDefault; nextTechniqueIndex++ {
-		if techniques[nextTechniqueIndex] == GuessTechnique {
-			continue
-		}
 		go startTechnique(techniques[nextTechniqueIndex])
 	}
 
