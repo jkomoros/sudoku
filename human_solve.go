@@ -116,6 +116,24 @@ func (self *HumanSolveOptions) Default() *HumanSolveOptions {
 	return self
 }
 
+//Modifies the options object to make sure all of the options are set
+//in a legal way. Returns itself for convenience.
+func (self *HumanSolveOptions) validate() *HumanSolveOptions {
+
+	if self.TechniquesToUse == nil {
+		self.TechniquesToUse = Techniques
+	}
+
+	if self.NumOptionsToCalculate < 1 {
+		self.NumOptionsToCalculate = 1
+	}
+
+	//TODO: cull out GuessTechnique if it exists in self.TechniquesToUse
+
+	return self
+
+}
+
 //IsUseful returns true if this SolveStep, when applied to the given grid, would do useful work--that is, it would
 //either fill a previously unfilled number, or cull previously un-culled possibilities. This is useful to ensure
 //HumanSolve doesn't get in a loop of applying the same useless steps.
@@ -375,6 +393,8 @@ func (self *Grid) HumanSolve(options *HumanSolveOptions) SolveDirections {
 		options = (&HumanSolveOptions{}).Default()
 	}
 
+	//TODO: validate options here.
+
 	return humanSolveHelper(self, options, true)
 }
 
@@ -399,6 +419,8 @@ func (self *Grid) Hint(options *HumanSolveOptions) SolveDirections {
 	if options == nil {
 		options = (&HumanSolveOptions{}).Default()
 	}
+
+	//TODO: Validate options here.
 
 	return humanSolveHelper(self, options, false)
 

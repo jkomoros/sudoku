@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"reflect"
 	"strconv"
 	"testing"
 	"time"
@@ -76,6 +77,32 @@ func TestShortTechniquesToUseHumanSolveOptions(t *testing.T) {
 	if steps == nil {
 		t.Fatal("Short technique Options returned nothing")
 	}
+}
+
+func TestHumanSolveOptionsMethods(t *testing.T) {
+
+	defaultOptions := &HumanSolveOptions{
+		15,
+		Techniques,
+		false,
+		false,
+	}
+
+	options := &HumanSolveOptions{
+		-3,
+		nil,
+		true,
+		true,
+	}
+
+	options.Default()
+
+	if !reflect.DeepEqual(options, defaultOptions) {
+		t.Error("defaultOptions came back incorrectly: ", options)
+	}
+
+	//TODO: test humansolveoptions.Validate()
+
 }
 
 func TestHint(t *testing.T) {
