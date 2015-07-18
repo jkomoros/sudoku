@@ -60,16 +60,22 @@ func TestHumanSolve(t *testing.T) {
 	if steps[0].Technique != GuessTechnique {
 		t.Fatal("Weird solve options didn't return Guess.")
 	}
+}
+
+func TestShortTechniquesToUseHumanSolveOptions(t *testing.T) {
+
+	grid := NewGrid()
+	defer grid.Done()
+	grid.Load(TEST_GRID)
 
 	shortTechniqueOptions := defaultHumanSolveOptions()
 	shortTechniqueOptions.TechniquesToUse = Techniques[0:5]
 
-	steps = grid.HumanSolve(shortTechniqueOptions)
+	steps := grid.HumanSolution(shortTechniqueOptions)
 
 	if steps == nil {
 		t.Fatal("Short technique Options returned nothing")
 	}
-
 }
 
 func TestHint(t *testing.T) {
