@@ -624,8 +624,12 @@ func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps in
 	//the message and freak out a bit because the grid starts changing under them.
 	gridCopy := grid.Copy()
 
-	//TODO: filter out GuessTechnique, if it exists, from Techniques here.
-	//(before calculating numTechqniuesToStartByDefault)
+	//TODO: NO, we should filter out Guess right before we call humanSolveHelper. Maybe have a "validate config"
+	//method that we call before calling humanSolveOptions.
+	//Should also have a HumanSolveOptions.Defatul() and HumanSolveOptions.validate(). (Repalce defaultHumanSolveOptions)
+	//Should also do it for GenerationOptions.
+
+	//TODO: filter out Guess here.
 
 	//TODO: make this configurable, and figure out what the optimal values are
 	numTechniquesToStartByDefault := 10
