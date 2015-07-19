@@ -450,10 +450,6 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 		}
 	}
 
-	if options.TechniquesToUse == nil {
-		options.TechniquesToUse = Techniques
-	}
-
 	var results []*SolveStep
 
 	//Note: trying these all in parallel is much slower (~15x) than doing them in sequence.
