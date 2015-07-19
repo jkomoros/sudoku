@@ -659,8 +659,6 @@ func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps in
 	//Should also have a HumanSolveOptions.Defatul() and HumanSolveOptions.validate(). (Repalce defaultHumanSolveOptions)
 	//Should also do it for GenerationOptions.
 
-	//TODO: filter out Guess here.
-
 	//TODO: make this configurable, and figure out what the optimal values are
 	numTechniquesToStartByDefault := 10
 
