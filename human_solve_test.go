@@ -153,7 +153,8 @@ func TestHint(t *testing.T) {
 	}
 
 	options := (&HumanSolveOptions{}).Default()
-	options.justReturnValidGuess = true
+	options.TechniquesToUse = []SolveTechnique{}
+	options.resetTechniquesAfterGuess = true
 
 	hintTestHelper(t, options, "guess")
 }

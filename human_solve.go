@@ -80,16 +80,17 @@ type HumanSolveOptions struct {
 	//should not fall back on guessing, and instead just return failure.
 	NoGuess bool
 
-	//TODO: get rid of justReturnValidGuess and have it use TechniquesToUse + resetTechniquesOnReentry
-
 	//TODO: figure out how to test that we do indeed use different values of
 	//numOptionsToCalculate.
 	//TODO: add a TwiddleChainDissimilarity bool.
 
 	//The following are flags only used for testing.
 
-	//A way to force Hint to return a guess so it can test that case.
-	justReturnValidGuess bool
+	//When we reenter back into humanSolveHelper after making a guess, should
+	//we keep the provided TechniquesToUse, or revert back to the default
+	//Techniques? Mainly useful for the case where we want to test that Hint
+	//works well when it returns a guess.
+	resetTechniquesAfterGuess bool
 }
 
 //Sets the given HumanSolveOptions to have reasonable defaults. Returns itself
@@ -105,7 +106,7 @@ func (self *HumanSolveOptions) Default() *HumanSolveOptions {
 
 	//Have to set even zero valued properties, because the Options isn't
 	//necessarily default initalized.
-	self.justReturnValidGuess = false
+	self.resetTechniquesAfterGuess = false
 	return self
 }
 
@@ -457,7 +458,7 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 		possibilities := runTechniques(options.TechniquesToUse, grid, options.NumOptionsToCalculate)
 
 		//Now pick one to apply.
-		if len(possibilities) == 0 || options.justReturnValidGuess {
+		if len(possibilities) == 0 {
 			//Hmm, didn't find any possivbilities. We failed. :-(
 			break
 		}
@@ -500,13 +501,13 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 //Called when we have run out of options at a given state and need to guess.
 func humanSolveGuess(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) []*SolveStep {
 
-	//If we go back to humanSolveHelper, we want to flip justReturnGuess to false
-	//even if it was true.
-	options.justReturnValidGuess = false
-
 	//Yes, using DIM*DIM is a gross hack... I really should be calling Find inside a goroutine...
 	results := make(chan *SolveStep, DIM*DIM)
 	done := make(chan bool)
+
+	if options.resetTechniquesAfterGuess {
+		options.TechniquesToUse = Techniques
+	}
 
 	//TODO: consider doing a normal solve forward from here to figure out what the right branch is and just do that.
 
