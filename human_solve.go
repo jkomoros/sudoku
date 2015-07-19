@@ -73,8 +73,8 @@ type HumanSolveOptions struct {
 	NumOptionsToCalculate int
 	//Which techniques to try at each step of the puzzle, sorted in the order
 	//to try them out (generally from cheapest to most expensive). A value of
-	//nil will use Techniques (the default). Do not include GuessTechnique in
-	//your list of techniques.
+	//nil will use Techniques (the default). Any GuessTechniques will be
+	//ignored.
 	TechniquesToUse []SolveTechnique
 
 	//TODO: humanSolveHelper should just skip a GuessTechnique if it sees one.
@@ -128,7 +128,18 @@ func (self *HumanSolveOptions) validate() *HumanSolveOptions {
 		self.NumOptionsToCalculate = 1
 	}
 
-	//TODO: cull out GuessTechnique if it exists in self.TechniquesToUse
+	//Remove any GuessTechniques that might be in there because
+	//the are invalid.
+	var techniques []SolveTechnique
+
+	for _, technique := range self.TechniquesToUse {
+		if technique == GuessTechnique {
+			continue
+		}
+		techniques = append(techniques, technique)
+	}
+
+	self.TechniquesToUse = techniques
 
 	return self
 

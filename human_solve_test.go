@@ -121,7 +121,17 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 		t.Error("Weird options didn't validate:", weirdOptions, "wanted", validatedOptions)
 	}
 
-	//TODO: check that validate() removes GuessTechnique, once it does.
+	guessOptions := (&HumanSolveOptions{}).Default()
+	guessOptions.TechniquesToUse = AllTechniques
+	guessOptions.validate()
+
+	for i, technique := range guessOptions.TechniquesToUse {
+		if technique == GuessTechnique {
+			t.Error("Validate didn't remove a guesstechnique (position", i, ")")
+		}
+	}
+
+	//TODO: verify edge case of single GuessTechnique is fine.
 
 }
 
