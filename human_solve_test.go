@@ -63,6 +63,22 @@ func TestHumanSolve(t *testing.T) {
 	}
 }
 
+func TestHumanSolveOptionsNoGuess(t *testing.T) {
+	grid := NewGrid()
+	defer grid.Done()
+	grid.Load(TEST_GRID)
+
+	options := (&HumanSolveOptions{}).Default()
+	options.TechniquesToUse = Techniques[0:3]
+	options.NoGuess = true
+
+	steps := grid.HumanSolution(options)
+
+	if len(steps) != 0 {
+		t.Error("A human solve with very limited techniques and no allowed guesses was still solved: ", steps)
+	}
+}
+
 func TestShortTechniquesToUseHumanSolveOptions(t *testing.T) {
 
 	grid := NewGrid()
@@ -86,11 +102,13 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 		Techniques,
 		false,
 		false,
+		false,
 	}
 
 	options := &HumanSolveOptions{
 		-3,
 		nil,
+		true,
 		true,
 		true,
 	}
@@ -118,11 +136,13 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 		nil,
 		false,
 		false,
+		false,
 	}
 
 	validatedOptions := &HumanSolveOptions{
 		1,
 		Techniques,
+		false,
 		false,
 		false,
 	}

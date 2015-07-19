@@ -76,16 +76,15 @@ type HumanSolveOptions struct {
 	//nil will use Techniques (the default). Any GuessTechniques will be
 	//ignored.
 	TechniquesToUse []SolveTechnique
+	//NoGuess specifies that even if no other techniques work, the HumanSolve
+	//should not fall back on guessing, and instead just return failure.
+	NoGuess bool
 
 	//TODO: get rid of justReturnValidGuess and have it use TechniquesToUse + resetTechniquesOnReentry
 
 	//TODO: figure out how to test that we do indeed use different values of
 	//numOptionsToCalculate.
 	//TODO: add a TwiddleChainDissimilarity bool.
-
-	//TODO: replace the following with:
-	//Guess bool
-	//resetTechniquesOnReentry
 
 	//The following are flags only used for testing.
 
@@ -104,6 +103,7 @@ func (self *HumanSolveOptions) Default() *HumanSolveOptions {
 
 	self.NumOptionsToCalculate = 15
 	self.TechniquesToUse = Techniques
+	self.NoGuess = false
 
 	//Have to set even zero valued properties, because the Options isn't
 	//necessarily default initalized.
@@ -494,6 +494,11 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	if (endConditionSolved && !grid.Solved()) || (!endConditionSolved && (lastStep == nil || !lastStep.Technique.IsFill())) {
 		//We couldn't solve the puzzle.
 		//But let's do one last ditch effort and try guessing.
+		//But first... are we allowed to guess?
+		if options.NoGuess {
+			//guess not... :-)
+			return nil
+		}
 		guessSteps := humanSolveGuess(grid, options, endConditionSolved)
 		if len(guessSteps) == 0 {
 			//Okay, we just totally failed.
