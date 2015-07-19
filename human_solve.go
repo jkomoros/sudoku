@@ -68,8 +68,8 @@ type HumanSolveOptions struct {
 	//At each step in solving the puzzle, how many candidate SolveSteps should
 	//we generate before stopping the search for more? Higher values will give
 	//more 'realistic' solves, but at the cost of *much* higher performance
-	//costs. Also note that the results may be wrong if the difficulty model
-	//in use was trained on a different NumOptionsToCalculate.
+	//costs. Also note that the difficulty may be wrong if the difficulty
+	//model in use was trained on a different NumOptionsToCalculate.
 	NumOptionsToCalculate int
 	//Which techniques to try at each step of the puzzle, sorted in the order
 	//to try them out (generally from cheapest to most expensive). A value of
@@ -95,7 +95,7 @@ type HumanSolveOptions struct {
 }
 
 //Sets the given HumanSolveOptions to have reasonable defaults. Returns itself
-//for convenience.
+//for convenience, allowing `options := (&HumanSolveOptions{}).Default()`
 func (self *HumanSolveOptions) Default() *HumanSolveOptions {
 
 	//TODO: the (&HumanSolveOptions{}).Default() pattern is a bit weird.
