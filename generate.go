@@ -17,6 +17,7 @@ type GenerationOptions struct {
 	MinFilledCells int
 }
 
+//TODO: consider providing a GenerationOptions.Default(), just like HumanSolveOptions does.
 var defaultGenerationOptions GenerationOptions
 
 func init() {
