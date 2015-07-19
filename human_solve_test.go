@@ -101,6 +101,18 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 		t.Error("defaultOptions came back incorrectly: ", options)
 	}
 
+	//Test the case where the user is deliberately trying to specify that no
+	//normal techniques should use (and that they should implicitly guess
+	//constantly)
+	zeroLenTechniquesOptions := (&HumanSolveOptions{}).Default()
+	zeroLenTechniquesOptions.TechniquesToUse = []SolveTechnique{}
+
+	zeroLenTechniquesOptions.validate()
+
+	if len(zeroLenTechniquesOptions.TechniquesToUse) != 0 {
+		t.Error("Validate treated a deliberate zero-len techniques to use as a nil to be replaced")
+	}
+
 	weirdOptions := &HumanSolveOptions{
 		-3,
 		nil,

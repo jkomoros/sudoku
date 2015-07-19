@@ -77,8 +77,6 @@ type HumanSolveOptions struct {
 	//ignored.
 	TechniquesToUse []SolveTechnique
 
-	//TODO: test passing Nil and zero-length values for TechniquesToUse works as intended.
-
 	//TODO: get rid of justReturnValidGuess and have it use TechniquesToUse + resetTechniquesOnReentry
 
 	//TODO: figure out how to test that we do indeed use different values of
