@@ -88,8 +88,6 @@ type HumanSolveOptions struct {
 
 	//The following are flags only used for testing.
 
-	//A cheap way of testing that non-default options are accepted.
-	justReturnInvalidGuess bool
 	//A way to force Hint to return a guess so it can test that case.
 	justReturnValidGuess bool
 }
@@ -107,7 +105,6 @@ func (self *HumanSolveOptions) Default() *HumanSolveOptions {
 
 	//Have to set even zero valued properties, because the Options isn't
 	//necessarily default initalized.
-	self.justReturnInvalidGuess = false
 	self.justReturnValidGuess = false
 	return self
 }
@@ -436,15 +433,6 @@ func (self *Grid) Hint(options *HumanSolveOptions) SolveDirections {
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
 //The core worker of human solve, it does all of the solving between branch points.
 func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) []*SolveStep {
-
-	//this is a dumb thing just for testing that non-default options are at least somewhat honored.
-	if options.justReturnInvalidGuess {
-		return []*SolveStep{
-			&SolveStep{
-				Technique: GuessTechnique,
-			},
-		}
-	}
 
 	var results []*SolveStep
 
