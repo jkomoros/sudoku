@@ -77,8 +77,6 @@ type HumanSolveOptions struct {
 	//ignored.
 	TechniquesToUse []SolveTechnique
 
-	//TODO: humanSolveHelper should just skip a GuessTechnique if it sees one.
-
 	//TODO: test passing Nil and zero-length values for TechniquesToUse works as intended.
 
 	//TODO: get rid of justReturnValidGuess and have it use TechniquesToUse + resetTechniquesOnReentry
