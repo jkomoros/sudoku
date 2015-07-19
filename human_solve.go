@@ -404,7 +404,7 @@ func (self *Grid) HumanSolve(options *HumanSolveOptions) SolveDirections {
 		options = (&HumanSolveOptions{}).Default()
 	}
 
-	//TODO: validate options here.
+	options.validate()
 
 	return humanSolveHelper(self, options, true)
 }
@@ -431,7 +431,7 @@ func (self *Grid) Hint(options *HumanSolveOptions) SolveDirections {
 		options = (&HumanSolveOptions{}).Default()
 	}
 
-	//TODO: Validate options here.
+	options.validate()
 
 	return humanSolveHelper(self, options, false)
 
