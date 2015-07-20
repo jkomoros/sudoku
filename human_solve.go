@@ -614,24 +614,34 @@ func tweakChainedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, w
 func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps int) []*SolveStep {
 
 	/*
-		This function went from being a mere convenience function to being a complex piece of multi-threaded code.
+		This function went from being a mere convenience function to
+		being a complex piece of multi-threaded code.
 
-		The basic idea is to parellelize all of the technique's.Find work.
+		The basic idea is to parellelize all of the technique's.Find
+		work.
 
-		Each technique is designed so it will bail early if we tell it (via closing the done channel) we've already
-		got enough steps found.
+		Each technique is designed so it will bail early if we tell it
+		(via closing the done channel) we've already got enough steps
+		found.
 
-		We only want to spin up numTechniquesToStartByDefault # of techniques at a time, because likely we'll find
-		enough steps before getting to the harder (and generally more expensive to calculate) techniques if earlier
-		ones fail.
+		We only want to spin up numTechniquesToStartByDefault # of
+		techniques at a time, because likely we'll find enough steps
+		before getting to the harder (and generally more expensive to
+		calculate) techniques if earlier ones fail.
 
-		There is one thread for each currently running technique's Find. The main thread collects results and
-		figures out when it has enough that all of the other threads can stop searching (or, when it hears that no
-		more results will be coming in and it should just stop). There are two other threads. One waits until the
-		waitgroup is all done and then signals that back to the main thread by closing resultsChan. The other thread
-		is notified every time a technique thread is done, and decides whether or not it should start a new technique
-		thread now. The interplay of those last two threads is very timing sensitive; if wg.Done were called before
-		we'd started up the new technique, we could return from the whole endeavor before getting enough steps collected.
+		There is one thread for each currently running technique's
+		Find. The main thread collects results and figures out when it
+		has enough that all of the other threads can stop searching
+		(or, when it hears that no more results will be coming in and
+		it should just stop). There are two other threads. One waits
+		until the waitgroup is all done and then signals that back to
+		the main thread by closing resultsChan. The other thread is
+		notified every time a technique thread is done, and decides
+		whether or not it should start a new technique thread now. The
+		interplay of those last two threads is very timing sensitive;
+		if wg.Done were called before we'd started up the new
+		technique, we could return from the whole endeavor before
+		getting enough steps collected.
 
 	*/
 
