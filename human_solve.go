@@ -87,12 +87,10 @@ type HumanSolveOptions struct {
 	//The following are flags only used for testing.
 
 	//When we reenter back into humanSolveHelper after making a guess, should
-	//we keep the provided TechniquesToUse, or revert back to the default
-	//Techniques? Mainly useful for the case where we want to test that Hint
-	//works well when it returns a guess.
-	resetTechniquesAfterGuess bool
-	//TODO: ^This should actually be techniquesToSetAfterGuess. If it's not nil,
-	//after guess, set TechniquesToUse to that. That's more general.
+	//we keep the provided TechniquesToUse, or revert back to this set of
+	//techniques? (If nil, don't change them) Mainly useful for the case where
+	//we want to test that Hint works well when it returns a guess.
+	techniquesToUseAfterGuess []SolveTechnique
 }
 
 //Sets the given HumanSolveOptions to have reasonable defaults. Returns itself
@@ -108,7 +106,7 @@ func (self *HumanSolveOptions) Default() *HumanSolveOptions {
 
 	//Have to set even zero valued properties, because the Options isn't
 	//necessarily default initalized.
-	self.resetTechniquesAfterGuess = false
+	self.techniquesToUseAfterGuess = nil
 	return self
 }
 
@@ -507,8 +505,8 @@ func humanSolveGuess(grid *Grid, options *HumanSolveOptions, endConditionSolved 
 	results := make(chan *SolveStep, DIM*DIM)
 	done := make(chan bool)
 
-	if options.resetTechniquesAfterGuess {
-		options.TechniquesToUse = Techniques
+	if options.techniquesToUseAfterGuess != nil {
+		options.TechniquesToUse = options.techniquesToUseAfterGuess
 	}
 
 	//TODO: consider doing a normal solve forward from here to figure out what the right branch is and just do that.
