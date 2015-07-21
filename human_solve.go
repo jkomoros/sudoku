@@ -91,6 +91,8 @@ type HumanSolveOptions struct {
 	//Techniques? Mainly useful for the case where we want to test that Hint
 	//works well when it returns a guess.
 	resetTechniquesAfterGuess bool
+	//TODO: ^This should actually be techniquesToSetAfterGuess. If it's not nil,
+	//after guess, set TechniquesToUse to that. That's more general.
 }
 
 //Sets the given HumanSolveOptions to have reasonable defaults. Returns itself
