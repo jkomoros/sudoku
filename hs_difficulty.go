@@ -45,14 +45,14 @@ func (self SolveDirections) Stats() []string {
 	techniqueCount := make(map[string]int)
 	var lastStep *SolveStep
 	dissimilarityAccum := 0.0
-	for _, step := range self {
+	for _, step := range self.Steps {
 		if lastStep != nil {
 			dissimilarityAccum += step.TargetCells.chainDissimilarity(lastStep.TargetCells)
 		}
 		techniqueCount[step.Technique.Name()] += 1
 		lastStep = step
 	}
-	dissimilarityAccum /= float64(len(self))
+	dissimilarityAccum /= float64(len(self.Steps))
 
 	var result []string
 
@@ -63,7 +63,7 @@ func (self SolveDirections) Stats() []string {
 	//TODO: we shouldn't even include this... it's not meaningful to report the difficulty of a single solve.
 	result = append(result, fmt.Sprintf("Difficulty : %f", self.Signals().difficulty()))
 	result = append(result, divider)
-	result = append(result, fmt.Sprintf("Step count: %d", len(self)))
+	result = append(result, fmt.Sprintf("Step count: %d", len(self.Steps)))
 	result = append(result, divider)
 	result = append(result, fmt.Sprintf("Avg Dissimilarity: %f", dissimilarityAccum))
 	result = append(result, divider)
@@ -84,18 +84,18 @@ func (self SolveDirections) Stats() []string {
 //for each step.
 func (self SolveDirections) Description() []string {
 
-	if len(self) == 0 {
+	if len(self.Steps) == 0 {
 		return []string{""}
 	}
 
-	descriptions := make([]string, len(self))
+	descriptions := make([]string, len(self.Steps))
 
-	for i, step := range self {
+	for i, step := range self.Steps {
 		intro := ""
 		switch i {
 		case 0:
 			intro = "First, "
-		case len(self) - 1:
+		case len(self.Steps) - 1:
 			intro = "Finally, "
 		default:
 			//TODO: switch between "then" and "next" randomly.
@@ -109,20 +109,20 @@ func (self SolveDirections) Description() []string {
 
 //Walkthrough prints an exhaustive set of human-readable directions that includes diagrams at each
 //step to make it easier to follow.
-func (self SolveDirections) Walkthrough(grid *Grid) string {
+func (self SolveDirections) Walkthrough() string {
 
 	//TODO: test this.
 
-	if len(self) == 0 {
+	if len(self.Steps) == 0 {
 		return "The puzzle could not be solved with any of the techniques we're aware of."
 	}
 
-	clone := grid.Copy()
+	clone := self.Grid()
 	defer clone.Done()
 
 	DIVIDER := "\n\n--------------------------------------------\n\n"
 
-	intro := fmt.Sprintf("This will take %d steps to solve.", len(self))
+	intro := fmt.Sprintf("This will take %d steps to solve.", len(self.Steps))
 
 	intro += "\nWhen you start, your grid looks like this:\n"
 
@@ -134,14 +134,14 @@ func (self SolveDirections) Walkthrough(grid *Grid) string {
 
 	descriptions := self.Description()
 
-	results := make([]string, len(self))
+	results := make([]string, len(self.Steps))
 
 	for i, description := range descriptions {
 
 		result := description + "\n"
 		result += "After doing that, your grid will look like: \n\n"
 
-		self[i].Apply(clone)
+		self.Steps[i].Apply(clone)
 
 		result += clone.Diagram()
 
@@ -210,6 +210,9 @@ func (self DifficultySignals) difficulty() float64 {
 
 //Rest of file is different Signals
 
+//TODO: now that SolveDirections includes gridSnapshot, think if there are any
+//additional Signals we can generate.
+
 //This technique returns a count of how many each type of technique is seen.
 //Different techniques are different "difficulties" so seeing more of a hard technique will
 //Lead to a higher overall difficulty.
@@ -219,7 +222,7 @@ func signalTechnique(directions SolveDirections) DifficultySignals {
 	for _, techniqueName := range AllTechniqueVariants {
 		result[techniqueName+" Count"] = 0.0
 	}
-	for _, step := range directions {
+	for _, step := range directions.Steps {
 		result[step.TechniqueVariant()+" Count"]++
 	}
 	return result
@@ -228,7 +231,7 @@ func signalTechnique(directions SolveDirections) DifficultySignals {
 //This signal is just number of steps. More steps is PROBABLY a harder puzzle.
 func signalNumberOfSteps(directions SolveDirections) DifficultySignals {
 	return DifficultySignals{
-		"Number of Steps": float64(len(directions)),
+		"Number of Steps": float64(len(directions.Steps)),
 	}
 }
 
@@ -240,13 +243,13 @@ func signalTechniquePercentage(directions SolveDirections) DifficultySignals {
 		result[techniqueName+" Percentage"] = 0.0
 	}
 
-	count := len(directions)
+	count := len(directions.Steps)
 
 	if count == 0 {
 		return result
 	}
 
-	for _, step := range directions {
+	for _, step := range directions.Steps {
 		result[step.TechniqueVariant()+" Percentage"]++
 	}
 
@@ -261,9 +264,9 @@ func signalTechniquePercentage(directions SolveDirections) DifficultySignals {
 //This signal is how many steps are filled out of all steps. Presumably harder puzzles will have more non-fill steps.
 func signalPercentageFilledSteps(directions SolveDirections) DifficultySignals {
 	numerator := 0.0
-	denominator := float64(len(directions))
+	denominator := float64(len(directions.Steps))
 
-	for _, step := range directions {
+	for _, step := range directions.Steps {
 		if step.Technique.IsFill() {
 			numerator += 1.0
 		}
@@ -280,7 +283,7 @@ func signalNumberUnfilled(directions SolveDirections) DifficultySignals {
 	//We don't have access to the underlying grid, so we'll just count how many fill steps (since each can only add one number, and no numbers are ever unfilled)
 
 	count := 0.0
-	for _, step := range directions {
+	for _, step := range directions.Steps {
 		if step.Technique.IsFill() {
 			count++
 		}
@@ -295,7 +298,7 @@ func signalNumberUnfilled(directions SolveDirections) DifficultySignals {
 //captures how easy the start of the puzzle is.
 func signalStepsUntilNonFill(directions SolveDirections) DifficultySignals {
 	count := 0.0
-	for _, step := range directions {
+	for _, step := range directions.Steps {
 		if !step.Technique.IsFill() {
 			break
 		}

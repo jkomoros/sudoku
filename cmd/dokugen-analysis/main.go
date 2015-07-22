@@ -837,7 +837,7 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 
 		converter.Load(grid, thePuzzle.puzzle)
 
-		solveDirections := make([]sudoku.SolveDirections, numSolvesToAverage)
+		solveDirections := make([]*sudoku.SolveDirections, numSolvesToAverage)
 
 		sawNil := 0
 

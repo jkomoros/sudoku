@@ -32,9 +32,16 @@ const _MAX_DIFFICULTY_ITERATIONS = 50
 //How close we have to get to the average to feel comfortable our difficulty is converging.
 const _DIFFICULTY_CONVERGENCE = 0.005
 
-//SolveDirections is a list of SolveSteps that, when applied in order to a given Grid, would
-//cause it to be solved.
-type SolveDirections []*SolveStep
+//SolveDirections is a list of SolveSteps that, when applied in order to its
+//Grid, would cause it to be solved.
+type SolveDirections struct {
+	//A copy of the Grid when the SolveDirections was generated. Grab a
+	//reference from SolveDirections.Grid().
+	gridSnapshot *Grid
+	//The list of steps that, when applied in order, would cause the
+	//SolveDirection's Grid() to be solved.
+	Steps []*SolveStep
+}
 
 //SolveStep is a step to fill in a number in a cell or narrow down the possibilities in a cell to
 //get it closer to being solved. SolveSteps model techniques that humans would use to solve a
@@ -91,6 +98,13 @@ type HumanSolveOptions struct {
 	//techniques? (If nil, don't change them) Mainly useful for the case where
 	//we want to test that Hint works well when it returns a guess.
 	techniquesToUseAfterGuess []SolveTechnique
+}
+
+//Grid returns a snapshot of the grid at the time this SolveDirections was
+//generated. Returns a fresh copy every time.
+func (self *SolveDirections) Grid() *Grid {
+	//TODO: this is the only pointer receiver method on SolveDirections.
+	return self.gridSnapshot.Copy()
 }
 
 //Sets the given HumanSolveOptions to have reasonable defaults. Returns itself
@@ -242,14 +256,15 @@ func (self *SolveStep) normalize() {
 //SolveDirections.Walkthrough. If options is nil, will use reasonable
 //defaults.
 func (self *Grid) HumanWalkthrough(options *HumanSolveOptions) string {
-	steps := self.HumanSolution(options)
-	return steps.Walkthrough(self)
+	//TODO: now that gridSnapshot is kep in SolveDirections, do we need this method?
+	solution := self.HumanSolution(options)
+	return solution.Walkthrough()
 }
 
 //HumanSolution returns the SolveDirections that represent how a human would
 //solve this puzzle. It does not mutate the grid. If options is nil, will use
 //reasonable defaults.
-func (self *Grid) HumanSolution(options *HumanSolveOptions) SolveDirections {
+func (self *Grid) HumanSolution(options *HumanSolveOptions) *SolveDirections {
 	clone := self.Copy()
 	defer clone.Done()
 	return clone.HumanSolve(options)
@@ -387,7 +402,9 @@ func (self *Grid) HumanSolution(options *HumanSolveOptions) SolveDirections {
 //a cell that is in the same row/cell/block as the last filled cell. Returns
 //nil if the puzzle does not have a single valid solution. If options is nil,
 //will use reasonable defaults.
-func (self *Grid) HumanSolve(options *HumanSolveOptions) SolveDirections {
+func (self *Grid) HumanSolve(options *HumanSolveOptions) *SolveDirections {
+
+	//TODO: Okay, now it's silly how much code HumanSolve and Hint share.
 
 	//Short circuit solving if it has multiple solutions.
 	if self.HasMultipleSolutions() {
@@ -400,7 +417,11 @@ func (self *Grid) HumanSolve(options *HumanSolveOptions) SolveDirections {
 
 	options.validate()
 
-	return humanSolveHelper(self, options, true)
+	snapshot := self.Copy()
+
+	steps := humanSolveHelper(self, options, true)
+
+	return &SolveDirections{snapshot, steps}
 }
 
 //SolveDirections returns a chain of SolveDirections, containing exactly one
@@ -409,9 +430,11 @@ func (self *Grid) HumanSolve(options *HumanSolveOptions) SolveDirections {
 //Fill step to do next, and why it's logically implied; the truncated return
 //value of HumanSolve. Returns nil if the puzzle has multiple solutions or is
 //otherwise invalid. If options is nil, will use reasonable defaults.
-func (self *Grid) Hint(options *HumanSolveOptions) SolveDirections {
+func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 
 	//TODO: return HintDirections instead of SolveDirections
+
+	//TODO: wait: should Hint be mutating the grid?
 
 	//TODO: test that non-fill steps before the last one are necessary to unlock
 	//the fill step at the end (cull them if not), and test that.
@@ -427,7 +450,12 @@ func (self *Grid) Hint(options *HumanSolveOptions) SolveDirections {
 
 	options.validate()
 
-	return humanSolveHelper(self, options, false)
+	snapshot := self.Copy()
+
+	steps := humanSolveHelper(self, options, false)
+
+	//TODO: set hint to True here when we have it.
+	return &SolveDirections{snapshot, steps}
 
 }
 

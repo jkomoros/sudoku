@@ -54,10 +54,10 @@ func TestHumanSolveOptionsNoGuess(t *testing.T) {
 	options.TechniquesToUse = Techniques[0:3]
 	options.NoGuess = true
 
-	steps := grid.HumanSolution(options)
+	solution := grid.HumanSolution(options)
 
-	if len(steps) != 0 {
-		t.Error("A human solve with very limited techniques and no allowed guesses was still solved: ", steps)
+	if len(solution.Steps) != 0 {
+		t.Error("A human solve with very limited techniques and no allowed guesses was still solved: ", solution)
 	}
 }
 
@@ -154,7 +154,9 @@ func TestTechniquesToUseAfterGuessHumanSolveOptions(t *testing.T) {
 	options.TechniquesToUse = []SolveTechnique{}
 	options.techniquesToUseAfterGuess = Techniques[0:5]
 
-	steps := grid.HumanSolution(options)
+	solution := grid.HumanSolution(options)
+
+	steps := solution.Steps
 
 	if len(steps) == 0 {
 		t.Fatal("Options with techniques to use after guess returned nil")
@@ -201,7 +203,9 @@ func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string
 
 	grid.Load(TEST_GRID)
 
-	steps := grid.Hint(options)
+	hint := grid.Hint(options)
+
+	steps := hint.Steps
 
 	if steps == nil || len(steps) == 0 {
 		t.Error("No steps returned from Hint", description)
@@ -231,7 +235,8 @@ func TestHumanSolveWithGuess(t *testing.T) {
 		t.Fatal("harddifficulty.sdk wasn't loaded")
 	}
 
-	steps := grid.HumanSolution(nil)
+	solution := grid.HumanSolution(nil)
+	steps := solution.Steps
 
 	if steps == nil {
 		t.Fatal("Didn't find a solution to a grid that should have needed a guess")
@@ -265,39 +270,42 @@ func TestStepsDescription(t *testing.T) {
 
 	//It's really brittle that we load techniques in this way... it changes every time we add a new early technique!
 	steps := SolveDirections{
-		&SolveStep{
-			techniquesByName["Only Legal Number"],
-			CellSlice{
-				grid.Cell(0, 0),
+		grid,
+		[]*SolveStep{
+			&SolveStep{
+				techniquesByName["Only Legal Number"],
+				CellSlice{
+					grid.Cell(0, 0),
+				},
+				IntSlice{1},
+				nil,
+				nil,
+				nil,
 			},
-			IntSlice{1},
-			nil,
-			nil,
-			nil,
-		},
-		&SolveStep{
-			techniquesByName["Pointing Pair Col"],
-			CellSlice{
-				grid.Cell(1, 0),
-				grid.Cell(1, 1),
+			&SolveStep{
+				techniquesByName["Pointing Pair Col"],
+				CellSlice{
+					grid.Cell(1, 0),
+					grid.Cell(1, 1),
+				},
+				IntSlice{1, 2},
+				CellSlice{
+					grid.Cell(1, 3),
+					grid.Cell(1, 4),
+				},
+				nil,
+				nil,
 			},
-			IntSlice{1, 2},
-			CellSlice{
-				grid.Cell(1, 3),
-				grid.Cell(1, 4),
+			&SolveStep{
+				techniquesByName["Only Legal Number"],
+				CellSlice{
+					grid.Cell(2, 0),
+				},
+				IntSlice{2},
+				nil,
+				nil,
+				nil,
 			},
-			nil,
-			nil,
-		},
-		&SolveStep{
-			techniquesByName["Only Legal Number"],
-			CellSlice{
-				grid.Cell(2, 0),
-			},
-			IntSlice{2},
-			nil,
-			nil,
-			nil,
 		},
 	}
 

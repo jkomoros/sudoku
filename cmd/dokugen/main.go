@@ -168,11 +168,11 @@ func main() {
 
 		//TODO: use of this option leads to a busy loop somewhere... Is it related to the generate-multiple-and-difficulty hang?
 
-		var directions sudoku.SolveDirections
+		var directions *sudoku.SolveDirections
 
 		if options.WALKTHROUGH || options.PRINT_STATS {
 			directions = grid.HumanSolution(nil)
-			if len(directions) == 0 {
+			if len(directions.Steps) == 0 {
 				//We couldn't solve it. Let's check and see if the puzzle is well formed.
 				if grid.HasMultipleSolutions() {
 					//TODO: figure out why guesses wouldn't be used here effectively.
@@ -183,9 +183,9 @@ func main() {
 
 		if options.WALKTHROUGH {
 			if options.OUTPUT_CSV {
-				csvRec = append(csvRec, directions.Walkthrough(grid))
+				csvRec = append(csvRec, directions.Walkthrough())
 			} else {
-				fmt.Fprintln(output, directions.Walkthrough(grid))
+				fmt.Fprintln(output, directions.Walkthrough())
 			}
 		}
 		if options.PRINT_STATS {
