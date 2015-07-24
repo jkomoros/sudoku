@@ -505,7 +505,7 @@ func humanSolveNonGuessSearcher(grid *Grid, options *HumanSolveOptions, endCondi
 			//guess not... :-)
 			return nil
 		}
-		guessSteps := humanSolveGuess(grid, options, endConditionSolved)
+		guessSteps := humanSolveGuessSearcher(grid, options, endConditionSolved)
 		if len(guessSteps) == 0 {
 			//Okay, we just totally failed.
 			return nil
@@ -516,7 +516,7 @@ func humanSolveNonGuessSearcher(grid *Grid, options *HumanSolveOptions, endCondi
 }
 
 //Called when we have run out of options at a given state and need to guess.
-func humanSolveGuess(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) []*SolveStep {
+func humanSolveGuessSearcher(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) []*SolveStep {
 
 	//Yes, using DIM*DIM is a gross hack... I really should be calling Find inside a goroutine...
 	results := make(chan *SolveStep, DIM*DIM)
