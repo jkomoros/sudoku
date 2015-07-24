@@ -392,25 +392,7 @@ func (self *Grid) HumanSolution(options *HumanSolveOptions) *SolveDirections {
 //nil if the puzzle does not have a single valid solution. If options is nil,
 //will use reasonable defaults.
 func (self *Grid) HumanSolve(options *HumanSolveOptions) *SolveDirections {
-
-	//TODO: Okay, now it's silly how much code HumanSolve and Hint share.
-
-	//Short circuit solving if it has multiple solutions.
-	if self.HasMultipleSolutions() {
-		return nil
-	}
-
-	if options == nil {
-		options = (&HumanSolveOptions{}).Default()
-	}
-
-	options.validate()
-
-	snapshot := self.Copy()
-
-	steps := humanSolveNonGuessSearcher(self, options, true)
-
-	return &SolveDirections{snapshot, steps}
+	return humanSolveHelper(self, options, true)
 }
 
 //SolveDirections returns a chain of SolveDirections, containing exactly one
@@ -428,8 +410,14 @@ func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 	//TODO: test that non-fill steps before the last one are necessary to unlock
 	//the fill step at the end (cull them if not), and test that.
 
-	//Short circuit solving of it if it has multiple solutions.
-	if self.HasMultipleSolutions() {
+	return humanSolveHelper(self, options, false)
+
+}
+
+//humanSolveHelper does most of the set up for both HumanSolve and Hint.
+func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) *SolveDirections {
+	//Short circuit solving if it has multiple solutions.
+	if grid.HasMultipleSolutions() {
 		return nil
 	}
 
@@ -439,13 +427,12 @@ func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 
 	options.validate()
 
-	snapshot := self.Copy()
+	snapshot := grid.Copy()
 
-	steps := humanSolveNonGuessSearcher(self, options, false)
+	steps := humanSolveNonGuessSearcher(grid, options, endConditionSolved)
 
-	//TODO: set hint to True here when we have it.
+	//TODO: when there's an IsHint proeprty, set it here if endConditionSolved is false.
 	return &SolveDirections{snapshot, steps}
-
 }
 
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
