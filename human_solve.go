@@ -408,7 +408,7 @@ func (self *Grid) HumanSolve(options *HumanSolveOptions) *SolveDirections {
 
 	snapshot := self.Copy()
 
-	steps := humanSolveHelper(self, options, true)
+	steps := humanSolveNonGuessSearcher(self, options, true)
 
 	return &SolveDirections{snapshot, steps}
 }
@@ -441,7 +441,7 @@ func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 
 	snapshot := self.Copy()
 
-	steps := humanSolveHelper(self, options, false)
+	steps := humanSolveNonGuessSearcher(self, options, false)
 
 	//TODO: set hint to True here when we have it.
 	return &SolveDirections{snapshot, steps}
@@ -450,7 +450,7 @@ func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
 //The core worker of human solve, it does all of the solving between branch points.
-func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) []*SolveStep {
+func humanSolveNonGuessSearcher(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) []*SolveStep {
 
 	var results []*SolveStep
 
@@ -559,7 +559,7 @@ func humanSolveGuess(grid *Grid, options *HumanSolveOptions, endConditionSolved 
 		//Even if endConditionSolved is true, this guess we will return will be an IsFill,
 		//thus terminating the search. From here on out all we're doing is verifying that
 		//we picked the right branch at the guess if endConditionSolved is not true.
-		solveSteps := humanSolveHelper(gridCopy, options, true)
+		solveSteps := humanSolveNonGuessSearcher(gridCopy, options, true)
 
 		if len(solveSteps) != 0 {
 			//Success!
