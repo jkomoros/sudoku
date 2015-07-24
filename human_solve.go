@@ -250,17 +250,6 @@ func (self *SolveStep) normalize() {
 	self.Technique.normalizeStep(self)
 }
 
-//HumanWalkthrough returns a human-readable, verbose walkthrough of how a
-//human would solve the provided puzzle, without mutating the grid. A
-//covenience wrapper around grid.HumanSolution and
-//SolveDirections.Walkthrough. If options is nil, will use reasonable
-//defaults.
-func (self *Grid) HumanWalkthrough(options *HumanSolveOptions) string {
-	//TODO: now that gridSnapshot is kep in SolveDirections, do we need this method?
-	solution := self.HumanSolution(options)
-	return solution.Walkthrough()
-}
-
 //HumanSolution returns the SolveDirections that represent how a human would
 //solve this puzzle. It does not mutate the grid. If options is nil, will use
 //reasonable defaults.
