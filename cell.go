@@ -223,8 +223,8 @@ func (self *Cell) Possible(number int) bool {
 	return self.impossibles[number] == 0 && !self.excluded[number]
 }
 
-//Possibilities returns a list of all current possibilities for this cell: all numbers for which cell.Possible
-//returns true.
+//Possibilities returns a list of all current possibilities for this cell: all
+//numbers for which cell.Possible returns true.
 func (self *Cell) Possibilities() (result IntSlice) {
 	if self.number != 0 {
 		return nil
@@ -248,9 +248,9 @@ func (self *Cell) checkInvalid() {
 	}
 }
 
-//Invalid returns true if the cell has no valid possibilities to fill in, implying that
-//the grid is in an invalid state because this cell cannot be filled with a number without
-//violating a constraint.
+//Invalid returns true if the cell has no valid possibilities to fill in,
+//implying that the grid is in an invalid state because this cell cannot be
+//filled with a number without violating a constraint.
 func (self *Cell) Invalid() bool {
 	//Returns true if no numbers are possible.
 	//TODO: figure out a way to send this back up to the solver when it happens.
@@ -303,7 +303,8 @@ func (self *Cell) implicitNumber() int {
 	return result + 1
 }
 
-//SymmetricalPartner returns the cell's partner in the grid, based on the type of symmetry requested.
+//SymmetricalPartner returns the cell's partner in the grid, based on the type
+//of symmetry requested.
 func (self *Cell) SymmetricalPartner(symmetry SymmetryType) *Cell {
 
 	if symmetry == SYMMETRY_ANY {
@@ -331,8 +332,9 @@ func (self *Cell) SymmetricalPartner(symmetry SymmetryType) *Cell {
 	return nil
 }
 
-//Neighbors returns a CellSlice of all of the cell's neighbors--the other cells in its row, column, and block.
-//The set of neighbors is the set of cells that this cell's number must not conflict with.
+//Neighbors returns a CellSlice of all of the cell's neighbors--the other
+//cells in its row, column, and block. The set of neighbors is the set of
+//cells that this cell's number must not conflict with.
 func (self *Cell) Neighbors() CellSlice {
 	if self.grid == nil || !self.grid.initalized {
 		return nil
