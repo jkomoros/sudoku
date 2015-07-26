@@ -432,6 +432,7 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	steps := humanSolveNonGuessSearcher(grid, options, endConditionSolved)
 
 	//TODO: when there's an IsHint proeprty, set it here if endConditionSolved is false.
+	//Actually, maybe it's better to set it in Hint right before returning.
 	return &SolveDirections{snapshot, steps}
 }
 
