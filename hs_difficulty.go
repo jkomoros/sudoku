@@ -88,6 +88,8 @@ func (self SolveDirections) Stats() []string {
 //include diagrams for each step.
 func (self SolveDirections) Description() []string {
 
+	//TODO: the IsHint directions don't sound as good as the old ones in OnlineSudoku did.
+
 	if len(self.Steps) == 0 {
 		return []string{"The puzzle is already solved."}
 	}
