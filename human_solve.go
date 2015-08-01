@@ -102,7 +102,7 @@ type HumanSolveOptions struct {
 
 //Grid returns a snapshot of the grid at the time this SolveDirections was
 //generated. Returns a fresh copy every time.
-func (self *SolveDirections) Grid() *Grid {
+func (self SolveDirections) Grid() *Grid {
 	//TODO: this is the only pointer receiver method on SolveDirections.
 	return self.gridSnapshot.Copy()
 }
