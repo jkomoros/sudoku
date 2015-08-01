@@ -51,7 +51,6 @@ func init() {
 	}
 }
 
-//TODO: do we not have tests for non-hint solveDirections?
 func TestHintDirections(t *testing.T) {
 
 	grid := NewGrid()
