@@ -24,8 +24,11 @@ func TestHumanSolve(t *testing.T) {
 	steps := grid.HumanSolution(nil)
 
 	if steps == nil {
-		t.Log("Human solution returned 0 techniques.")
-		t.Fail()
+		t.Fatal("Human solution returned 0 techniques.")
+	}
+
+	if steps.IsHint {
+		t.Error("Steps came back as a hint, not a full solution.")
 	}
 
 	if grid.Solved() {
@@ -211,6 +214,10 @@ func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string
 		t.Error("No steps returned from Hint", description)
 	}
 
+	if !hint.IsHint {
+		t.Error("Steps was not a hint, but a full solution.")
+	}
+
 	for count, step := range steps {
 		if count == len(steps)-1 {
 			//Last one
@@ -307,6 +314,7 @@ func TestStepsDescription(t *testing.T) {
 				nil,
 			},
 		},
+		false,
 	}
 
 	descriptions := steps.Description()

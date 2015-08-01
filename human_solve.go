@@ -33,7 +33,7 @@ const _MAX_DIFFICULTY_ITERATIONS = 50
 const _DIFFICULTY_CONVERGENCE = 0.005
 
 //SolveDirections is a list of SolveSteps that, when applied in order to its
-//Grid, would cause it to be solved.
+//Grid, would cause it to be solved (except if IsHint is true).
 type SolveDirections struct {
 	//A copy of the Grid when the SolveDirections was generated. Grab a
 	//reference from SolveDirections.Grid().
@@ -41,6 +41,10 @@ type SolveDirections struct {
 	//The list of steps that, when applied in order, would cause the
 	//SolveDirection's Grid() to be solved.
 	Steps []*SolveStep
+	//IsHint is whether the SolveDirections tells how to solve the given grid
+	//or just what the next set of steps leading to a fill step is. If true,
+	//the last step in Steps will be IsFill().
+	IsHint bool
 }
 
 //SolveStep is a step to fill in a number in a cell or narrow down the possibilities in a cell to
@@ -410,7 +414,10 @@ func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 	//TODO: test that non-fill steps before the last one are necessary to unlock
 	//the fill step at the end (cull them if not), and test that.
 
-	return humanSolveHelper(self, options, false)
+	result := humanSolveHelper(self, options, false)
+	result.IsHint = true
+
+	return result
 
 }
 
@@ -431,9 +438,7 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 
 	steps := humanSolveNonGuessSearcher(grid, options, endConditionSolved)
 
-	//TODO: when there's an IsHint proeprty, set it here if endConditionSolved is false.
-	//Actually, maybe it's better to set it in Hint right before returning.
-	return &SolveDirections{snapshot, steps}
+	return &SolveDirections{snapshot, steps, false}
 }
 
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
