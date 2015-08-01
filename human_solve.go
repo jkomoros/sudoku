@@ -394,7 +394,7 @@ func (self *Grid) HumanSolution(options *HumanSolveOptions) *SolveDirections {
 //realistic weights, as well as by doing things like being more likely to pick
 //a cell that is in the same row/cell/block as the last filled cell. Returns
 //nil if the puzzle does not have a single valid solution. If options is nil,
-//will use reasonable defaults.
+//will use reasonable defaults. Mutates the grid.
 func (self *Grid) HumanSolve(options *HumanSolveOptions) *SolveDirections {
 	return humanSolveHelper(self, options, true)
 }
@@ -404,17 +404,19 @@ func (self *Grid) HumanSolve(options *HumanSolveOptions) *SolveDirections {
 //towards being completed. It is effectively a hint to the user about what
 //Fill step to do next, and why it's logically implied; the truncated return
 //value of HumanSolve. Returns nil if the puzzle has multiple solutions or is
-//otherwise invalid. If options is nil, will use reasonable defaults.
+//otherwise invalid. If options is nil, will use reasonable defaults. Does not
+//mutate the grid.
 func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 
 	//TODO: return HintDirections instead of SolveDirections
 
-	//TODO: wait: should Hint be mutating the grid?
-
 	//TODO: test that non-fill steps before the last one are necessary to unlock
 	//the fill step at the end (cull them if not), and test that.
 
-	result := humanSolveHelper(self, options, false)
+	clone := self.Copy()
+	defer clone.Done()
+
+	result := humanSolveHelper(clone, options, false)
 	result.IsHint = true
 
 	return result

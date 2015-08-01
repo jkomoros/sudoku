@@ -206,7 +206,13 @@ func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string
 
 	grid.Load(TEST_GRID)
 
+	diagram := grid.Diagram()
+
 	hint := grid.Hint(options)
+
+	if grid.Diagram() != diagram {
+		t.Error("Hint mutated the grid but it wasn't supposed to.")
+	}
 
 	steps := hint.Steps
 
