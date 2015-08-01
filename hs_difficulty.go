@@ -6,24 +6,25 @@ import (
 	"strings"
 )
 
-//DifficultySignals is a collection of names to float64 values, representing the various signals
-//extracted from a SolveDirections, and used for the Difficulty calculation.
-//Generally not useful to package users.
+//DifficultySignals is a collection of names to float64 values, representing
+//the various signals extracted from a SolveDirections, and used for the
+//Difficulty calculation. Generally not useful to package users.
 type DifficultySignals map[string]float64
 
-//A difficulty signal generator can return more than one difficutly signal, so it doesn't just return float64
-//Each signal generator should always return a map with the SAME keys--so if you've called it once you know what the
-//next calls will have as keys.
+//A difficulty signal generator can return more than one difficutly signal, so
+//it doesn't just return float64 Each signal generator should always return a
+//map with the SAME keys--so if you've called it once you know what the next
+//calls will have as keys.
 type difficultySignalGenerator func(directions SolveDirections) DifficultySignals
 
 const _DIFFICULTY_WEIGHT_FILENAME = "difficulties.csv"
 
 var difficultySignalGenerators []difficultySignalGenerator
 
-//These are the weights that will be used to turn a list of signals into a difficulty.
-//starting weights are set in hs_difficulty_weights.go, which is auto-generated.
-//Generate those now:
-//go:generate python util/difficulty-convert.py
+//These are the weights that will be used to turn a list of signals into a
+//difficulty. starting weights are set in hs_difficulty_weights.go, which is
+//auto-generated. Generate those now: go:generate python util/difficulty-
+//convert.py
 var difficultySignalWeights map[string]float64
 
 func init() {
@@ -37,9 +38,10 @@ func init() {
 	}
 }
 
-//Stats returns a printout of interesting statistics about the SolveDirections, including number of steps,
-//difficulty (based on this solve description alone), how unrelated the cells in subsequent steps are,
-//and the values of all of the signals used to generate the difficulty.
+//Stats returns a printout of interesting statistics about the
+//SolveDirections, including number of steps, difficulty (based on this solve
+//description alone), how unrelated the cells in subsequent steps are, and the
+//values of all of the signals used to generate the difficulty.
 func (self SolveDirections) Stats() []string {
 	//TODO: test this.
 	techniqueCount := make(map[string]int)
@@ -79,9 +81,10 @@ func (self SolveDirections) Stats() []string {
 	return result
 }
 
-//Description returns a comprehensive prose description of the SolveDirections, including reasoning for each step, that
-//if followed would lead to the grid being solved. Unlike Walkthrough, Description() does not include diagrams
-//for each step.
+//Description returns a comprehensive prose description of the
+//SolveDirections, including reasoning for each step, that if followed would
+//lead to the grid being solved. Unlike Walkthrough, Description() does not
+//include diagrams for each step.
 func (self SolveDirections) Description() []string {
 
 	if len(self.Steps) == 0 {
@@ -107,8 +110,8 @@ func (self SolveDirections) Description() []string {
 	return descriptions
 }
 
-//Walkthrough prints an exhaustive set of human-readable directions that includes diagrams at each
-//step to make it easier to follow.
+//Walkthrough prints an exhaustive set of human-readable directions that
+//includes diagrams at each step to make it easier to follow.
 func (self SolveDirections) Walkthrough() string {
 
 	//TODO: test this.
@@ -153,8 +156,11 @@ func (self SolveDirections) Walkthrough() string {
 
 //Signals returns the DifficultySignals for this set of SolveDirections.
 func (self SolveDirections) Signals() DifficultySignals {
-	//Because of the contract of a DifficultySignalGenerator (that it always returns the same keys), as long as DifficultySignalGenerators stays constant
-	//it's reasonable for callers to assume that one call to Signals() will return all of the string keys you'll see any time you call Signals()
+	//Because of the contract of a DifficultySignalGenerator (that it always
+	//returns the same keys), as long as DifficultySignalGenerators stays
+	//constant it's reasonable for callers to assume that one call to
+	//Signals() will return all of the string keys you'll see any time you
+	//call Signals()
 	result := DifficultySignals{}
 	for _, generator := range difficultySignalGenerators {
 		result.add(generator(self))
@@ -171,8 +177,7 @@ func (self DifficultySignals) add(other DifficultySignals) {
 }
 
 //For keys in both, will sum them together.
-//TODO: this is confusingly named (compared to Add)
-// Do we really need both Sum and Add?
+//TODO: this is confusingly named (compared to Add)  Do we really need both Sum and Add?
 func (self DifficultySignals) sum(other DifficultySignals) {
 	for key, val := range other {
 		self[key] += val
@@ -214,8 +219,8 @@ func (self DifficultySignals) difficulty() float64 {
 //additional Signals we can generate.
 
 //This technique returns a count of how many each type of technique is seen.
-//Different techniques are different "difficulties" so seeing more of a hard technique will
-//Lead to a higher overall difficulty.
+//Different techniques are different "difficulties" so seeing more of a hard
+//technique will Lead to a higher overall difficulty.
 func signalTechnique(directions SolveDirections) DifficultySignals {
 	//Our contract is to always return every signal name, even if it's 0.0.
 	result := DifficultySignals{}
@@ -235,7 +240,8 @@ func signalNumberOfSteps(directions SolveDirections) DifficultySignals {
 	}
 }
 
-//This signal is like signalTechnique, except it returns the count divided by the TOTAL number of steps.
+//This signal is like signalTechnique, except it returns the count divided by
+//the TOTAL number of steps.
 func signalTechniquePercentage(directions SolveDirections) DifficultySignals {
 	//Our contract is to always return every signal name, even if it's 0.0.
 	result := DifficultySignals{}
@@ -261,7 +267,8 @@ func signalTechniquePercentage(directions SolveDirections) DifficultySignals {
 	return result
 }
 
-//This signal is how many steps are filled out of all steps. Presumably harder puzzles will have more non-fill steps.
+//This signal is how many steps are filled out of all steps. Presumably harder
+//puzzles will have more non-fill steps.
 func signalPercentageFilledSteps(directions SolveDirections) DifficultySignals {
 	numerator := 0.0
 	denominator := float64(len(directions.Steps))
@@ -277,10 +284,14 @@ func signalPercentageFilledSteps(directions SolveDirections) DifficultySignals {
 	}
 }
 
-//This signal is how many cells are unfilled at the beginning. Presumably harder puzzles will have fewer cells filled (although obviously this isn't necessarily true)
+//This signal is how many cells are unfilled at the beginning. Presumably
+//harder puzzles will have fewer cells filled (although obviously this isn't
+//necessarily true)
 func signalNumberUnfilled(directions SolveDirections) DifficultySignals {
 
-	//We don't have access to the underlying grid, so we'll just count how many fill steps (since each can only add one number, and no numbers are ever unfilled)
+	//We don't have access to the underlying grid, so we'll just count how
+	//many fill steps (since each can only add one number, and no numbers are
+	//ever unfilled)
 
 	count := 0.0
 	for _, step := range directions.Steps {
@@ -294,8 +305,9 @@ func signalNumberUnfilled(directions SolveDirections) DifficultySignals {
 	}
 }
 
-//This signal is how many steps into the solve directions before you encounter your first non-fill step. Non-fill steps are harder, so this signal
-//captures how easy the start of the puzzle is.
+//This signal is how many steps into the solve directions before you encounter
+//your first non-fill step. Non-fill steps are harder, so this signal captures
+//how easy the start of the puzzle is.
 func signalStepsUntilNonFill(directions SolveDirections) DifficultySignals {
 	count := 0.0
 	for _, step := range directions.Steps {
