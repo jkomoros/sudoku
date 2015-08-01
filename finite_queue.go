@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"math/rand"
+	"sync"
 )
 
 type rankedObject interface {
@@ -29,6 +30,7 @@ const _REALLOCATE_PROPORTION = 0.20
 
 type syncedFiniteQueue struct {
 	queue finiteQueue
+	lock  *sync.RWMutex
 	//TODO: should these counts actually be on the basic FiniteQueue?
 	items       int
 	activeItems int
@@ -64,6 +66,7 @@ func newFiniteQueue(min int, max int) *finiteQueue {
 
 func newSyncedFiniteQueue(min int, max int, done chan bool) *syncedFiniteQueue {
 	result := &syncedFiniteQueue{*newFiniteQueue(min, max),
+		&sync.RWMutex{},
 		0,
 		0,
 		make(chan rankedObject),
@@ -132,7 +135,12 @@ func (self *finiteQueueBucket) shuffle() {
 }
 
 func (self *syncedFiniteQueue) IsDone() bool {
-	return self.activeItems == 0 && self.items == 0
+
+	self.lock.RLock()
+	result := self.activeItems == 0 && self.items == 0
+	self.lock.RUnlock()
+
+	return result
 }
 
 func (self *syncedFiniteQueue) workLoop() {
@@ -162,9 +170,13 @@ func (self *syncedFiniteQueue) workLoop() {
 			}
 		case incoming := <-self.In:
 			self.queue.Insert(incoming)
+			self.lock.Lock()
 			self.items++
+			self.lock.Unlock()
 		case <-self.ItemDone:
+			self.lock.Lock()
 			self.activeItems--
+			self.lock.Unlock()
 			if self.IsDone() {
 				self.done <- true
 
@@ -174,8 +186,10 @@ func (self *syncedFiniteQueue) workLoop() {
 			}
 		case when(firstItem != nil && !exiting, self.Out) <- firstItem:
 			itemSent = true
+			self.lock.Lock()
 			self.items--
 			self.activeItems++
+			self.lock.Unlock()
 		}
 		//If we didn't send the item out, we need to put it back in.
 		if firstItem != nil && !itemSent {
