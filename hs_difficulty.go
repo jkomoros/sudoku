@@ -3,6 +3,7 @@ package sudoku
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 )
 
@@ -91,20 +92,37 @@ func (self SolveDirections) Description() []string {
 		return []string{"The puzzle is already solved."}
 	}
 
-	descriptions := make([]string, len(self.Steps))
+	var descriptions []string
+
+	//Hints have a special preamble.
+	if self.IsHint {
+		lastStep := self.Steps[len(self.Steps)-1]
+		//TODO: this terminology is too tuned for the Online Sudoku use case.
+		//it practice it should probably name the cell in text.
+		descriptions = append(descriptions, "Based on the other numbers you've entered, this cell can only be a "+strconv.Itoa(lastStep.TargetNums[0])+".")
+		descriptions = append(descriptions, "How do we know that?")
+		if len(self.Steps) > 1 {
+			descriptions = append(descriptions, "We can't fill any cells right away so first we need to cull some possibilities.")
+		}
+	}
 
 	for i, step := range self.Steps {
 		intro := ""
-		switch i {
-		case 0:
-			intro = "First, "
-		case len(self.Steps) - 1:
-			intro = "Finally, "
-		default:
-			//TODO: switch between "then" and "next" randomly.
-			intro = "Next, "
+		description := step.Description()
+		if len(self.Steps) > 1 {
+			description = strings.ToLower(description)
+			switch i {
+			case 0:
+				intro = "First, "
+			case len(self.Steps) - 1:
+				intro = "Finally, "
+			default:
+				//TODO: switch between "then" and "next" randomly.
+				intro = "Next, "
+			}
 		}
-		descriptions[i] = intro + strings.ToLower(step.Description())
+
+		descriptions = append(descriptions, intro+description)
 
 	}
 	return descriptions

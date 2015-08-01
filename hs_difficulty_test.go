@@ -3,6 +3,7 @@ package sudoku
 import (
 	"math"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -47,6 +48,90 @@ func init() {
 			},
 		},
 		false,
+	}
+}
+
+//TODO: do we not have tests for non-hint solveDirections?
+func TestHintDirections(t *testing.T) {
+
+	grid := NewGrid()
+
+	shortSolveDirections := SolveDirections{
+		grid,
+		[]*SolveStep{
+			{
+				techniquesByName["Necessary In Row"],
+				[]*Cell{
+					grid.Cell(2, 3),
+				},
+				IntSlice{4},
+				nil,
+				nil,
+				nil,
+			},
+		},
+		true,
+	}
+
+	descriptions := strings.Join(shortSolveDirections.Description(), " ")
+
+	shortGolden := "Based on the other numbers you've entered, this cell can only be a 4. How do we know that? We put 4 in cell (2,3) because 4 is required in the 2 row, and 3 is the only column it fits."
+
+	if descriptions != shortGolden {
+		t.Error("Got wrong description for hint. Got", descriptions, "wanted", shortGolden)
+	}
+
+	multiStepSolveDirections := SolveDirections{
+		grid,
+		[]*SolveStep{
+			{
+				techniquesByName["Naked Pair Block"],
+				[]*Cell{
+					grid.Cell(2, 3),
+					grid.Cell(2, 3),
+				},
+				IntSlice{4, 5},
+				[]*Cell{
+					grid.Cell(3, 4),
+					grid.Cell(4, 5),
+				},
+				IntSlice{2, 3},
+				nil,
+			},
+			{
+				techniquesByName["Naked Pair Block"],
+				[]*Cell{
+					grid.Cell(3, 2),
+					grid.Cell(3, 2),
+				},
+				IntSlice{4, 5},
+				[]*Cell{
+					grid.Cell(5, 5),
+					grid.Cell(4, 6),
+				},
+				IntSlice{2, 3},
+				nil,
+			},
+			{
+				techniquesByName["Necessary In Row"],
+				[]*Cell{
+					grid.Cell(2, 3),
+				},
+				IntSlice{4},
+				nil,
+				nil,
+				nil,
+			},
+		},
+		true,
+	}
+
+	descriptions = strings.Join(multiStepSolveDirections.Description(), " ")
+
+	longGolden := "Based on the other numbers you've entered, this cell can only be a 4. How do we know that? We can't fill any cells right away so first we need to cull some possibilities. First, we remove the possibilities 4 and 5 from cells (2,3) and (2,3) because 4 and 5 are only possible in (3,4) and (4,5), which means that they can't be in any other cell in block 1. Next, we remove the possibilities 4 and 5 from cells (3,2) and (3,2) because 4 and 5 are only possible in (5,5) and (4,6), which means that they can't be in any other cell in block 3. Finally, we put 4 in cell (2,3) because 4 is required in the 2 row, and 3 is the only column it fits."
+
+	if descriptions != longGolden {
+		t.Error("Got wrong description for hint. Got", descriptions, "wanted", longGolden)
 	}
 }
 
