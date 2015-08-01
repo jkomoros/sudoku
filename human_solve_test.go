@@ -1,6 +1,8 @@
 package sudoku
 
 import (
+	"reflect"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -10,7 +12,7 @@ func BenchmarkHumanSolve(b *testing.B) {
 		grid := NewGrid()
 		defer grid.Done()
 		grid.Load(TEST_GRID)
-		grid.HumanSolve()
+		grid.HumanSolve(nil)
 	}
 }
 
@@ -19,11 +21,14 @@ func TestHumanSolve(t *testing.T) {
 	defer grid.Done()
 	grid.Load(TEST_GRID)
 
-	steps := grid.HumanSolution()
+	steps := grid.HumanSolution(nil)
 
 	if steps == nil {
-		t.Log("Human solution returned 0 techniques.")
-		t.Fail()
+		t.Fatal("Human solution returned 0 techniques.")
+	}
+
+	if steps.IsHint {
+		t.Error("Steps came back as a hint, not a full solution.")
 	}
 
 	if grid.Solved() {
@@ -31,7 +36,7 @@ func TestHumanSolve(t *testing.T) {
 		t.Fail()
 	}
 
-	steps = grid.HumanSolve()
+	steps = grid.HumanSolve(nil)
 	//TODO: test to make sure that we use a wealth of different techniques. This will require a cooked random for testing.
 	if steps == nil {
 		t.Log("Human solve returned 0 techniques")
@@ -41,7 +46,197 @@ func TestHumanSolve(t *testing.T) {
 		t.Log("Human solve failed to solve the simple grid.")
 		t.Fail()
 	}
+}
 
+func TestHumanSolveOptionsNoGuess(t *testing.T) {
+	grid := NewGrid()
+	defer grid.Done()
+	grid.Load(TEST_GRID)
+
+	options := (&HumanSolveOptions{}).Default()
+	options.TechniquesToUse = Techniques[0:3]
+	options.NoGuess = true
+
+	solution := grid.HumanSolution(options)
+
+	if len(solution.Steps) != 0 {
+		t.Error("A human solve with very limited techniques and no allowed guesses was still solved: ", solution)
+	}
+}
+
+func TestShortTechniquesToUseHumanSolveOptions(t *testing.T) {
+
+	grid := NewGrid()
+	defer grid.Done()
+	grid.Load(TEST_GRID)
+
+	shortTechniqueOptions := (&HumanSolveOptions{}).Default()
+	shortTechniqueOptions.TechniquesToUse = Techniques[0:5]
+
+	steps := grid.HumanSolution(shortTechniqueOptions)
+
+	if steps == nil {
+		t.Fatal("Short technique Options returned nothing")
+	}
+}
+
+func TestHumanSolveOptionsMethods(t *testing.T) {
+
+	defaultOptions := &HumanSolveOptions{
+		15,
+		Techniques,
+		false,
+		nil,
+	}
+
+	options := &HumanSolveOptions{
+		-3,
+		nil,
+		true,
+		Techniques[0:4],
+	}
+
+	options.Default()
+
+	if !reflect.DeepEqual(options, defaultOptions) {
+		t.Error("defaultOptions came back incorrectly: ", options)
+	}
+
+	//Test the case where the user is deliberately trying to specify that no
+	//normal techniques should use (and that they should implicitly guess
+	//constantly)
+	zeroLenTechniquesOptions := (&HumanSolveOptions{}).Default()
+	zeroLenTechniquesOptions.TechniquesToUse = []SolveTechnique{}
+
+	zeroLenTechniquesOptions.validate()
+
+	if len(zeroLenTechniquesOptions.TechniquesToUse) != 0 {
+		t.Error("Validate treated a deliberate zero-len techniques to use as a nil to be replaced")
+	}
+
+	weirdOptions := &HumanSolveOptions{
+		-3,
+		nil,
+		false,
+		nil,
+	}
+
+	validatedOptions := &HumanSolveOptions{
+		1,
+		Techniques,
+		false,
+		nil,
+	}
+
+	weirdOptions.validate()
+
+	if !reflect.DeepEqual(weirdOptions, validatedOptions) {
+		t.Error("Weird options didn't validate:", weirdOptions, "wanted", validatedOptions)
+	}
+
+	guessOptions := (&HumanSolveOptions{}).Default()
+	guessOptions.TechniquesToUse = AllTechniques
+	guessOptions.validate()
+
+	for i, technique := range guessOptions.TechniquesToUse {
+		if technique == GuessTechnique {
+			t.Error("Validate didn't remove a guesstechnique (position", i, ")")
+		}
+	}
+
+	//TODO: verify edge case of single GuessTechnique is fine.
+
+}
+
+func TestTechniquesToUseAfterGuessHumanSolveOptions(t *testing.T) {
+	grid := NewGrid()
+	defer grid.Done()
+	grid.Load(TEST_GRID)
+
+	options := (&HumanSolveOptions{}).Default()
+	options.TechniquesToUse = []SolveTechnique{}
+	options.techniquesToUseAfterGuess = Techniques[0:5]
+
+	solution := grid.HumanSolution(options)
+
+	steps := solution.Steps
+
+	if len(steps) == 0 {
+		t.Fatal("Options with techniques to use after guess returned nil")
+	}
+
+	if steps[0].Technique != GuessTechnique {
+		t.Error("First technqiu with techniques to use after guess wasn't guess")
+	}
+
+	allowedTechniques := make(map[SolveTechnique]bool)
+
+	for _, technique := range Techniques[0:5] {
+		allowedTechniques[technique] = true
+	}
+
+	//Guess is also allowed to be used later, although we don't expect that.
+	allowedTechniques[GuessTechnique] = true
+
+	for i, step := range steps[1:len(steps)] {
+		if _, ok := allowedTechniques[step.Technique]; !ok {
+			t.Error("Step number", i, "was not in set of allowed techniques", step.Technique)
+		}
+	}
+
+}
+
+func TestHint(t *testing.T) {
+
+	//This is still flaky, but at least it's a little more likely to catch problems. :-/
+	for i := 0; i < 10; i++ {
+		hintTestHelper(t, nil, "base case"+strconv.Itoa(i))
+	}
+
+	options := (&HumanSolveOptions{}).Default()
+	options.TechniquesToUse = []SolveTechnique{}
+	options.techniquesToUseAfterGuess = Techniques
+
+	hintTestHelper(t, options, "guess")
+}
+
+func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string) {
+	grid := NewGrid()
+	defer grid.Done()
+
+	grid.Load(TEST_GRID)
+
+	diagram := grid.Diagram()
+
+	hint := grid.Hint(options)
+
+	if grid.Diagram() != diagram {
+		t.Error("Hint mutated the grid but it wasn't supposed to.")
+	}
+
+	steps := hint.Steps
+
+	if steps == nil || len(steps) == 0 {
+		t.Error("No steps returned from Hint", description)
+	}
+
+	if !hint.IsHint {
+		t.Error("Steps was not a hint, but a full solution.")
+	}
+
+	for count, step := range steps {
+		if count == len(steps)-1 {
+			//Last one
+			if !step.Technique.IsFill() {
+				t.Error("Non-fill step as last step in Hint: ", step.Technique.Name(), description)
+			}
+		} else {
+			//Not last one
+			if step.Technique.IsFill() {
+				t.Error("Fill step as non-last step in Hint: ", count, step.Technique.Name(), description)
+			}
+		}
+	}
 }
 
 func TestHumanSolveWithGuess(t *testing.T) {
@@ -53,7 +248,8 @@ func TestHumanSolveWithGuess(t *testing.T) {
 		t.Fatal("harddifficulty.sdk wasn't loaded")
 	}
 
-	steps := grid.HumanSolution()
+	solution := grid.HumanSolution(nil)
+	steps := solution.Steps
 
 	if steps == nil {
 		t.Fatal("Didn't find a solution to a grid that should have needed a guess")
@@ -87,40 +283,44 @@ func TestStepsDescription(t *testing.T) {
 
 	//It's really brittle that we load techniques in this way... it changes every time we add a new early technique!
 	steps := SolveDirections{
-		&SolveStep{
-			techniquesByName["Only Legal Number"],
-			CellSlice{
-				grid.Cell(0, 0),
+		grid,
+		[]*SolveStep{
+			&SolveStep{
+				techniquesByName["Only Legal Number"],
+				CellSlice{
+					grid.Cell(0, 0),
+				},
+				IntSlice{1},
+				nil,
+				nil,
+				nil,
 			},
-			IntSlice{1},
-			nil,
-			nil,
-			nil,
+			&SolveStep{
+				techniquesByName["Pointing Pair Col"],
+				CellSlice{
+					grid.Cell(1, 0),
+					grid.Cell(1, 1),
+				},
+				IntSlice{1, 2},
+				CellSlice{
+					grid.Cell(1, 3),
+					grid.Cell(1, 4),
+				},
+				nil,
+				nil,
+			},
+			&SolveStep{
+				techniquesByName["Only Legal Number"],
+				CellSlice{
+					grid.Cell(2, 0),
+				},
+				IntSlice{2},
+				nil,
+				nil,
+				nil,
+			},
 		},
-		&SolveStep{
-			techniquesByName["Pointing Pair Col"],
-			CellSlice{
-				grid.Cell(1, 0),
-				grid.Cell(1, 1),
-			},
-			IntSlice{1, 2},
-			CellSlice{
-				grid.Cell(1, 3),
-				grid.Cell(1, 4),
-			},
-			nil,
-			nil,
-		},
-		&SolveStep{
-			techniquesByName["Only Legal Number"],
-			CellSlice{
-				grid.Cell(2, 0),
-			},
-			IntSlice{2},
-			nil,
-			nil,
-			nil,
-		},
+		false,
 	}
 
 	descriptions := steps.Description()

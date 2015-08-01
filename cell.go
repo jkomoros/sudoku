@@ -27,10 +27,11 @@ const (
 	SYMMETRY_BOTH
 )
 
-//Cell represents a single cell within a grid. It maintains information about the number that is filled, the numbers that are
-//currently legal given the filled status of its neighbors, and whether any possibilities have been
-//explicitly excluded by solve techniques. Cells should not be constructed on their own; create a Grid
-//and grab references to the cells from there.
+//Cell represents a single cell within a grid. It maintains information about
+//the number that is filled, the numbers that are currently legal given the
+//filled status of its neighbors, and whether any possibilities have been
+//explicitly excluded by solve techniques. Cells should not be constructed on
+//their own; create a Grid and grab references to the cells from there.
 type Cell struct {
 	grid *Grid
 	//The number if it's explicitly set. Number() will return it if it's explicitly or implicitly set.
@@ -63,8 +64,9 @@ func (self *Cell) Block() int {
 	return self.block
 }
 
-//InGrid returns a reference to a cell in the provided grid that has the same row/column as this cell.
-//Effectively, this cell's analogue in the other grid.
+//InGrid returns a reference to a cell in the provided grid that has the same
+//row/column as this cell. Effectively, this cell's analogue in the other
+//grid.
 func (self *Cell) InGrid(grid *Grid) *Cell {
 	//Returns our analogue in the given grid.
 	if grid == nil {
@@ -86,9 +88,9 @@ func (self *Cell) Number() int {
 	return self.number
 }
 
-//SetNumber explicitly sets the number of the cell. This operation could cause the grid to become
-//invalid if it conflicts with its neighbors' numbers. This operation will affect the Possiblities()
-//of its neighbor cells.
+//SetNumber explicitly sets the number of the cell. This operation could cause
+//the grid to become invalid if it conflicts with its neighbors' numbers. This
+//operation will affect the Possiblities() of its neighbor cells.
 func (self *Cell) SetNumber(number int) {
 	//Sets the explicit number. This will affect its neighbors possibles list.
 	if self.number == number {
@@ -172,10 +174,12 @@ func (self *Cell) setImpossible(number int) {
 	}
 }
 
-//SetExcluded defines whether a possibility is considered not feasible, even if not directly precluded
-//by the Number()s of the cell's neighbors. This is used by advanced HumanSolve techniques that
-//cull possibilities that are logically excluded by the state of the grid, in a non-direct way.
-//The state of Excluded bits will affect the results of this cell's Possibilities() list.
+//SetExcluded defines whether a possibility is considered not feasible, even
+//if not directly precluded by the Number()s of the cell's neighbors. This is
+//used by advanced HumanSolve techniques that cull possibilities that are
+//logically excluded by the state of the grid, in a non-direct way. The state
+//of Excluded bits will affect the results of this cell's Possibilities()
+//list.
 func (self *Cell) SetExcluded(number int, excluded bool) {
 	number--
 	if number < 0 || number >= DIM {
@@ -190,8 +194,9 @@ func (self *Cell) SetExcluded(number int, excluded bool) {
 	}
 }
 
-//ResetExcludes sets all excluded bits to false, so that Possibilities() will be based purely
-//on direct implications of the Number()s of neighbors. See also SetExcluded.
+//ResetExcludes sets all excluded bits to false, so that Possibilities() will
+//be based purely on direct implications of the Number()s of neighbors. See
+//also SetExcluded.
 func (self *Cell) ResetExcludes() {
 	for i := 0; i < DIM; i++ {
 		self.excluded[i] = false
@@ -204,9 +209,11 @@ func (self *Cell) ResetExcludes() {
 	}
 }
 
-//Possible returns whether or not a given number is legal to fill via SetNumber, given the state of the grid (specifically,
-//the cell's neighbors) and the numbers the cell was told to explicitly exclude via SetExclude.
-//If the cell is already filled with a number, it will return false for all numbers.
+//Possible returns whether or not a given number is legal to fill via
+//SetNumber, given the state of the grid (specifically, the cell's neighbors)
+//and the numbers the cell was told to explicitly exclude via SetExclude. If
+//the cell is already filled with a number, it will return false for all
+//numbers.
 func (self *Cell) Possible(number int) bool {
 	//Number is 1 indexed, but we store it as 0-indexed
 	number--
@@ -216,8 +223,8 @@ func (self *Cell) Possible(number int) bool {
 	return self.impossibles[number] == 0 && !self.excluded[number]
 }
 
-//Possibilities returns a list of all current possibilities for this cell: all numbers for which cell.Possible
-//returns true.
+//Possibilities returns a list of all current possibilities for this cell: all
+//numbers for which cell.Possible returns true.
 func (self *Cell) Possibilities() (result IntSlice) {
 	if self.number != 0 {
 		return nil
@@ -241,9 +248,9 @@ func (self *Cell) checkInvalid() {
 	}
 }
 
-//Invalid returns true if the cell has no valid possibilities to fill in, implying that
-//the grid is in an invalid state because this cell cannot be filled with a number without
-//violating a constraint.
+//Invalid returns true if the cell has no valid possibilities to fill in,
+//implying that the grid is in an invalid state because this cell cannot be
+//filled with a number without violating a constraint.
 func (self *Cell) Invalid() bool {
 	//Returns true if no numbers are possible.
 	//TODO: figure out a way to send this back up to the solver when it happens.
@@ -296,7 +303,8 @@ func (self *Cell) implicitNumber() int {
 	return result + 1
 }
 
-//SymmetricalPartner returns the cell's partner in the grid, based on the type of symmetry requested.
+//SymmetricalPartner returns the cell's partner in the grid, based on the type
+//of symmetry requested.
 func (self *Cell) SymmetricalPartner(symmetry SymmetryType) *Cell {
 
 	if symmetry == SYMMETRY_ANY {
@@ -324,8 +332,9 @@ func (self *Cell) SymmetricalPartner(symmetry SymmetryType) *Cell {
 	return nil
 }
 
-//Neighbors returns a CellSlice of all of the cell's neighbors--the other cells in its row, column, and block.
-//The set of neighbors is the set of cells that this cell's number must not conflict with.
+//Neighbors returns a CellSlice of all of the cell's neighbors--the other
+//cells in its row, column, and block. The set of neighbors is the set of
+//cells that this cell's number must not conflict with.
 func (self *Cell) Neighbors() CellSlice {
 	if self.grid == nil || !self.grid.initalized {
 		return nil

@@ -837,14 +837,14 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 
 		converter.Load(grid, thePuzzle.puzzle)
 
-		solveDirections := make([]sudoku.SolveDirections, numSolvesToAverage)
+		solveDirections := make([]*sudoku.SolveDirections, numSolvesToAverage)
 
 		sawNil := 0
 
 		//Note: it appears that the number of solves hits a max R2 around 5 or so.
 		for i := 0; i < numSolvesToAverage; i++ {
 
-			solution := grid.HumanSolution()
+			solution := grid.HumanSolution(nil)
 			if solution == nil {
 				sawNil++
 			}
