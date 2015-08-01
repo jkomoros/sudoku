@@ -88,7 +88,7 @@ func (self SolveDirections) Stats() []string {
 func (self SolveDirections) Description() []string {
 
 	if len(self.Steps) == 0 {
-		return []string{""}
+		return []string{"The puzzle is already solved."}
 	}
 
 	descriptions := make([]string, len(self.Steps))
