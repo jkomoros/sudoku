@@ -86,6 +86,12 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 		t.Fatal(techniqueName, " didn't find a cell it should have.")
 	}
 
+	if !step.IsImplied(grid) {
+		t.Error("Only legal number step that we just found wasn't valid right afterwards.")
+	}
+
+	//TODO: test that if the grid is a bizarroGrid that isImplied is false.
+
 	description := solver.Description(step)
 	if description != "3 is the only remaining valid number for that cell" {
 		t.Error("Wrong description for ", techniqueName, ": ", description)

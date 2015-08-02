@@ -122,6 +122,16 @@ func (self *nakedSingleTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is the only remaining valid number for that cell", num)
 }
 
+func (self *nakedSingleTechnique) isImplied(step *SolveStep, grid *Grid) bool {
+	targetCell := step.TargetCells[0].InGrid(grid)
+
+	if len(targetCell.Possibilities()) == 1 {
+		return true
+	}
+
+	return false
+}
+
 func (self *nakedSingleTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 	//TODO: test that this will find multiple if they exist.
 	getter := grid.queue().NewGetter()
