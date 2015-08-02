@@ -6,10 +6,30 @@ import (
 
 func TestObviousInCollectionRow(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		targetCells:    []cellRef{{2, 3}},
-		targetSame:     _GROUP_ROW,
-		targetGroup:    2,
-		targetNums:     IntSlice([]int{7}),
+		targetCells: []cellRef{{2, 3}},
+		targetSame:  _GROUP_ROW,
+		targetGroup: 2,
+		targetNums:  IntSlice([]int{7}),
+		pointerCells: []cellRef{
+			{2, 0},
+			{2, 1},
+			{2, 2},
+			{2, 4},
+			{2, 5},
+			{2, 6},
+			{2, 7},
+			{2, 8},
+		},
+		pointerNums: IntSlice{
+			1,
+			2,
+			3,
+			4,
+			5,
+			6,
+			8,
+			9,
+		},
 		description:    "(2,3) is the only cell in row 2 that is unfilled, and it must be 7",
 		checkIsImplied: true,
 	}
@@ -20,11 +40,31 @@ func TestObviousInCollectionRow(t *testing.T) {
 
 func TestObviousInCollectionCol(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		transpose:      true,
-		targetCells:    []cellRef{{3, 2}},
-		targetSame:     _GROUP_COL,
-		targetGroup:    2,
-		targetNums:     IntSlice([]int{7}),
+		transpose:   true,
+		targetCells: []cellRef{{3, 2}},
+		targetSame:  _GROUP_COL,
+		targetGroup: 2,
+		targetNums:  IntSlice([]int{7}),
+		pointerCells: []cellRef{
+			{0, 2},
+			{1, 2},
+			{2, 2},
+			{4, 2},
+			{5, 2},
+			{6, 2},
+			{7, 2},
+			{8, 2},
+		},
+		pointerNums: IntSlice{
+			1,
+			2,
+			3,
+			4,
+			5,
+			6,
+			8,
+			9,
+		},
 		description:    "(3,2) is the only cell in column 2 that is unfilled, and it must be 7",
 		checkIsImplied: true,
 	}
@@ -35,10 +75,30 @@ func TestObviousInCollectionCol(t *testing.T) {
 
 func TestObviousInCollectionBlock(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		targetCells:    []cellRef{{4, 1}},
-		targetSame:     _GROUP_BLOCK,
-		targetGroup:    3,
-		targetNums:     IntSlice([]int{9}),
+		targetCells: []cellRef{{4, 1}},
+		targetSame:  _GROUP_BLOCK,
+		targetGroup: 3,
+		targetNums:  IntSlice([]int{9}),
+		pointerCells: []cellRef{
+			{3, 0},
+			{3, 1},
+			{3, 2},
+			{4, 0},
+			{4, 2},
+			{5, 0},
+			{5, 1},
+			{5, 2},
+		},
+		pointerNums: IntSlice{
+			1,
+			2,
+			3,
+			4,
+			5,
+			6,
+			7,
+			8,
+		},
 		description:    "(4,1) is the only cell in block 3 that is unfilled, and it must be 9",
 		checkIsImplied: true,
 	}
