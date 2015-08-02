@@ -169,6 +169,38 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 		t.Log("The only legal number technique identified the wrong number.")
 		t.Fail()
 	}
+
+	if !step.PointerNums.SameContentAs(IntSlice{1, 2, 4, 5, 6, 7, 8, 9}) {
+		t.Error("Pointer nums set wrong")
+	}
+
+	refs := []cellRef{
+		{3, 0},
+		{3, 1},
+		{3, 6},
+		{3, 8},
+		{4, 3},
+		{4, 4},
+		{6, 3},
+		{5, 3},
+		{2, 3},
+		{7, 3},
+		{8, 3},
+		{5, 5},
+		{3, 2},
+		{3, 4},
+		{0, 3},
+		{1, 3},
+		{3, 5},
+		{3, 7},
+		{4, 5},
+		{5, 4},
+	}
+
+	if !step.PointerCells.sameAsRefs(refs) {
+		t.Error("Got wrong pointer cells. Got: ", step.PointerCells, len(step.PointerCells), len(refs))
+	}
+
 	if grid.Solved() {
 		t.Log("The only legal number technique did actually mutate the grid.")
 		t.Fail()
