@@ -54,6 +54,29 @@ func (self *obviousInCollectionTechnique) Find(grid *Grid, results chan *SolveSt
 	obviousInCollection(grid, self, self.getter(grid), results, done)
 }
 
+func (self *obviousInCollectionTechnique) isImplied(step *SolveStep, grid *Grid) bool {
+	getter := self.getter(grid)
+	var index int
+	switch self.groupType {
+	case _GROUP_BLOCK:
+		index = step.TargetCells.Block()
+	case _GROUP_ROW:
+		index = step.TargetCells.Row()
+	case _GROUP_COL:
+		index = step.TargetCells.Col()
+	}
+	collection := getter(index)
+	openCells := collection.FilterByHasPossibilities()
+	if len(openCells) == 1 {
+		cell := openCells[0]
+		possibilities := cell.Possibilities()
+		if len(possibilities) == 1 && possibilities[0] == step.TargetNums[0] {
+			return true
+		}
+	}
+	return false
+}
+
 func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice, results chan *SolveStep, done chan bool) {
 	indexes := rand.Perm(DIM)
 	for _, index := range indexes {

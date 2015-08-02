@@ -6,11 +6,12 @@ import (
 
 func TestObviousInCollectionRow(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		targetCells: []cellRef{{2, 3}},
-		targetSame:  _GROUP_ROW,
-		targetGroup: 2,
-		targetNums:  IntSlice([]int{7}),
-		description: "(2,3) is the only cell in row 2 that is unfilled, and it must be 7",
+		targetCells:    []cellRef{{2, 3}},
+		targetSame:     _GROUP_ROW,
+		targetGroup:    2,
+		targetNums:     IntSlice([]int{7}),
+		description:    "(2,3) is the only cell in row 2 that is unfilled, and it must be 7",
+		checkIsImplied: true,
 	}
 	humanSolveTechniqueTestHelper(t, "obviousrow.sdk", "Obvious In Row", options)
 	techniqueVariantsTestHelper(t, "Obvious In Row")
@@ -19,12 +20,13 @@ func TestObviousInCollectionRow(t *testing.T) {
 
 func TestObviousInCollectionCol(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		transpose:   true,
-		targetCells: []cellRef{{3, 2}},
-		targetSame:  _GROUP_COL,
-		targetGroup: 2,
-		targetNums:  IntSlice([]int{7}),
-		description: "(3,2) is the only cell in column 2 that is unfilled, and it must be 7",
+		transpose:      true,
+		targetCells:    []cellRef{{3, 2}},
+		targetSame:     _GROUP_COL,
+		targetGroup:    2,
+		targetNums:     IntSlice([]int{7}),
+		description:    "(3,2) is the only cell in column 2 that is unfilled, and it must be 7",
+		checkIsImplied: true,
 	}
 	humanSolveTechniqueTestHelper(t, "obviousrow.sdk", "Obvious In Col", options)
 	techniqueVariantsTestHelper(t, "Obvious In Col")
@@ -33,11 +35,12 @@ func TestObviousInCollectionCol(t *testing.T) {
 
 func TestObviousInCollectionBlock(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		targetCells: []cellRef{{4, 1}},
-		targetSame:  _GROUP_BLOCK,
-		targetGroup: 3,
-		targetNums:  IntSlice([]int{9}),
-		description: "(4,1) is the only cell in block 3 that is unfilled, and it must be 9",
+		targetCells:    []cellRef{{4, 1}},
+		targetSame:     _GROUP_BLOCK,
+		targetGroup:    3,
+		targetNums:     IntSlice([]int{9}),
+		description:    "(4,1) is the only cell in block 3 that is unfilled, and it must be 9",
+		checkIsImplied: true,
 	}
 	humanSolveTechniqueTestHelper(t, "obviousblock.sdk", "Obvious In Block", options)
 	techniqueVariantsTestHelper(t, "Obvious In Block")
