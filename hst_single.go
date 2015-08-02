@@ -130,7 +130,19 @@ func (self *nakedSingleTechnique) Find(grid *Grid, results chan *SolveStep, done
 			return
 		}
 		cell := obj.(*Cell)
-		step := newFillSolveStep(cell, cell.implicitNumber(), self)
+		filledNeighbors := cell.Neighbors().FilterByFilled()
+		step := &SolveStep{
+			self,
+			CellSlice{
+				cell,
+			},
+			IntSlice{
+				cell.implicitNumber(),
+			},
+			filledNeighbors,
+			filledNeighbors.FilledNums(),
+			nil,
+		}
 		if step.IsUseful(grid) {
 			select {
 			case results <- step:
