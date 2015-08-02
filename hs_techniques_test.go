@@ -221,6 +221,10 @@ type solveTechniqueTestHelperOptions struct {
 	extra        interface{}
 	//If true, will loop over all steps from the technique and see if ANY of them match.
 	checkAllSteps bool
+	//If true, will check whether the step is implied by current grid state.
+	//TODO: remove this bool and just always do this once every technique has
+	//isImplied tested.
+	checkIsImplied bool
 	//A way to skip the step generator by provding your own list of steps.
 	//Useful if you're going to be do repeated calls to the test helper with the
 	//same list of steps.
@@ -332,6 +336,27 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 
 		if options.debugPrint {
 			log.Println(step)
+		}
+
+		if options.checkIsImplied {
+			if !step.IsImplied(grid) {
+				t.Fatal("Step that was just returned for the grid doesn't actually apply.")
+			}
+
+			//Now we're going to make a copy of the grid with one of the key bits
+			//changed and make sure it's not implied.
+			bizarroGrid := grid.Copy()
+			if len(step.PointerCells) == 0 || len(step.PointerNums) == 0 {
+				t.Error("Skipping bizarro grid because no pointers.")
+			}
+			cellToMuckWith := step.PointerCells[0]
+			indexToMuckWith := step.PointerNums[0]
+			cellToMuckWith.SetExcluded(indexToMuckWith, true)
+
+			if step.IsImplied(bizarroGrid) {
+				t.Fatal("Step was still valid even when the grid was mutated specifically to defeat it.")
+			}
+
 		}
 
 		variantName := options.variantName
