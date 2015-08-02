@@ -141,6 +141,15 @@ func (self CellSlice) FilterByHasPossibilities() CellSlice {
 	return self.Filter(filter)
 }
 
+//FilterByFilled returns a new CellSlice with only cells that have a number filled.
+func (self CellSlice) FilterByFilled() CellSlice {
+	//TODO: test this
+	filter := func(cell *Cell) bool {
+		return cell.Number() != 0
+	}
+	return self.Filter(filter)
+}
+
 //RemoveCells returns a new CellSlice that does not contain any of the cells included in the provided CellSlice.
 func (self CellSlice) RemoveCells(targets CellSlice) CellSlice {
 	//TODO: test this.
