@@ -50,7 +50,18 @@ func (self *guessTechnique) Find(grid *Grid, results chan *SolveStep, done chan 
 		}
 
 		num := possibilities[rand.Intn(len(possibilities))]
-		step := newFillSolveStep(cell, num, self)
+		step := &SolveStep{
+			self,
+			CellSlice{
+				cell,
+			},
+			IntSlice{
+				num,
+			},
+			nil,
+			nil,
+			nil,
+		}
 
 		//We're going to abuse pointerNums and use it to point out the other numbers we COULD have used.
 		step.PointerNums = IntSlice(possibilities).Difference(IntSlice{num})
