@@ -73,7 +73,21 @@ func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter 
 			//len(possibiltiies) SHOULD be 1, but check just in case.
 			if len(possibilities) == 1 {
 				possibility := possibilities[0]
-				step := newFillSolveStep(cell, possibility, technique)
+				otherCells := collection.RemoveCells(CellSlice{cell})
+				otherNums := otherCells.FilledNums()
+				step := &SolveStep{
+					technique,
+					CellSlice{
+						cell,
+					},
+					IntSlice{
+						possibility,
+					},
+					otherCells,
+					otherNums,
+					nil,
+					nil,
+				}
 				if step.IsUseful(grid) {
 					select {
 					case results <- step:
