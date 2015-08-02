@@ -346,15 +346,17 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 			//Now we're going to make a copy of the grid with one of the key bits
 			//changed and make sure it's not implied.
 			bizarroGrid := grid.Copy()
-			if len(step.PointerCells) == 0 || len(step.PointerNums) == 0 {
-				t.Error("Skipping bizarro grid because no pointers.")
-			}
-			cellToMuckWith := step.PointerCells[0]
-			indexToMuckWith := step.PointerNums[0]
-			cellToMuckWith.SetExcluded(indexToMuckWith, true)
+			if len(step.PointerCells) != 0 && len(step.PointerNums) == 0 {
+				cellToMuckWith := step.PointerCells[0]
+				indexToMuckWith := step.PointerNums[0]
+				cellToMuckWith.SetExcluded(indexToMuckWith, true)
 
-			if step.IsImplied(bizarroGrid) {
-				t.Fatal("Step was still valid even when the grid was mutated specifically to defeat it.")
+				if step.IsImplied(bizarroGrid) {
+					t.Fatal("Step was still valid even when the grid was mutated specifically to defeat it.")
+				}
+			} else {
+				//I don't think this is supposed ot happen, so error here.
+				t.Error("Skipping bizarro grid because no pointers.")
 			}
 
 		}
