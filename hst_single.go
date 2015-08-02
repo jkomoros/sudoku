@@ -228,7 +228,19 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 				for _, cell := range collection {
 					if cell.Possible(index + 1) {
 						//Found it... just make sure it's useful (it would be rare for it to not be).
-						step := newFillSolveStep(cell, index+1, technique)
+						otherCellsInCollection := collection.RemoveCells(CellSlice{cell})
+						step := &SolveStep{
+							technique,
+							CellSlice{
+								cell,
+							},
+							IntSlice{
+								index + 1,
+							},
+							otherCellsInCollection,
+							nil,
+							nil,
+						}
 						if step.IsUseful(grid) {
 							select {
 							case results <- step:

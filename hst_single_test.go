@@ -273,6 +273,22 @@ func TestNecessaryInRow(t *testing.T) {
 		t.Log("The necessary in row technique identified the wrong number.")
 		t.Fail()
 	}
+
+	refs := []cellRef{
+		{3, 0},
+		{3, 1},
+		{3, 2},
+		{3, 4},
+		{3, 5},
+		{3, 6},
+		{3, 7},
+		{3, 8},
+	}
+
+	if !step.PointerCells.sameAsRefs(refs) {
+		t.Error("Necessary in row didn't have right pointer cells: ", step.PointerCells)
+	}
+
 	//Can't check if grid is solved because we un-set all the other cells in the row.
 	if cell.Number() != 0 {
 		t.Log("The necessary in row technique did actually mutate the grid.")
@@ -354,6 +370,22 @@ func TestNecessaryInCol(t *testing.T) {
 		t.Log("The necessary in col technique identified the wrong number.")
 		t.Fail()
 	}
+
+	refs := []cellRef{
+		{0, 3},
+		{1, 3},
+		{2, 3},
+		{4, 3},
+		{5, 3},
+		{6, 3},
+		{7, 3},
+		{8, 3},
+	}
+
+	if !step.PointerCells.sameAsRefs(refs) {
+		t.Error("Necessary in col didn't have right pointer cells: ", step.PointerCells)
+	}
+
 	//Can't check if grid is solved because we un-set all the other cells in the row.
 	if cell.Number() != 0 {
 		t.Log("The necessary in col technique did actually mutate the grid.")
@@ -435,6 +467,22 @@ func TestNecessaryInBlock(t *testing.T) {
 		t.Log("The necessary in block technique identified the wrong number.")
 		t.Fail()
 	}
+
+	refs := []cellRef{
+		{3, 4},
+		{3, 5},
+		{4, 3},
+		{4, 4},
+		{4, 5},
+		{5, 3},
+		{5, 4},
+		{5, 5},
+	}
+
+	if !step.PointerCells.sameAsRefs(refs) {
+		t.Error("Necessary in row didn't have right pointer cells: ", step.PointerCells)
+	}
+
 	//Can't check if grid is solved because we un-set all the other cells in the row.
 	if cell.Number() != 0 {
 		t.Log("The necessary in block technique did actually mutate the grid.")
