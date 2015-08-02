@@ -55,6 +55,8 @@ func (self *obviousInCollectionTechnique) Find(grid *Grid, results chan *SolveSt
 }
 
 func (self *obviousInCollectionTechnique) isImplied(step *SolveStep, grid *Grid) bool {
+
+	//TODO: it's silly how much of the logic in this is basically repeated from obviousInCollection.
 	getter := self.getter(grid)
 	var index int
 	switch self.groupType {
