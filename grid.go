@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"strings"
+	"sync"
 )
 
 //BLOCK_DIM is the height and width of each block within the grid.
@@ -37,6 +38,7 @@ type Grid struct {
 	rows             [DIM]CellSlice
 	cols             [DIM]CellSlice
 	blocks           [DIM]CellSlice
+	queueGetterLock  sync.RWMutex
 	theQueue         *finiteQueue
 	numFilledCells   int
 	invalidCells     map[*Cell]bool
@@ -112,14 +114,22 @@ func NewGrid() *Grid {
 }
 
 func (self *Grid) queue() *finiteQueue {
-	if self.theQueue == nil {
+
+	self.queueGetterLock.RLock()
+	queue := self.theQueue
+	self.queueGetterLock.RUnlock()
+
+	if queue == nil {
+		self.queueGetterLock.Lock()
 		self.theQueue = newFiniteQueue(1, DIM)
 		for i := range self.cells {
 			//If we did i, cell, cell would just be the temp variable. So we'll grab it via the index.
 			self.theQueue.Insert(&self.cells[i])
 		}
+		queue = self.theQueue
+		self.queueGetterLock.Unlock()
 	}
-	return self.theQueue
+	return queue
 }
 
 //Done marks the grid as ready to be used by another consumer of it. This potentially allows
