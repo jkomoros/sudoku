@@ -356,6 +356,8 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 				}
 			} else {
 				//TODO: if this happens, we basically don't do the bizarro test. Ideally this wouldn't happen.
+				//I think the problem is that the fill techniques don't return PointerCells, which is actually
+				//pretty silly.
 			}
 
 		}
