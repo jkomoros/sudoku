@@ -248,6 +248,14 @@ func (self *SolveStep) TechniqueVariant() string {
 	return self.Technique.variant(self)
 }
 
+//IsImplied returns true if this solve step is logically implied by the
+//current state of grid. This is useful to test if a previously discovered
+//step is still valid even if the grid was not exactly the same as the state
+//it was found in.
+func (self *SolveStep) IsImplied(grid *Grid) bool {
+	return self.Technique.isImplied(self, grid)
+}
+
 //normalize puts the step in a known, deterministic state, which eases testing.
 func (self *SolveStep) normalize() {
 	//Different techniques will want to normalize steps in different ways.

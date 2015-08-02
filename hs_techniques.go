@@ -62,6 +62,11 @@ type SolveTechnique interface {
 	//base case.
 	variant(step *SolveStep) string
 
+	//isImplied returns true if the given step is implied by this technique at this grid state. If true,
+	//the logical deduction is valid. If false, it is invalid. If true,
+	//the logical deduction is valid. If false, it is invalid.
+	isImplied(step *SolveStep, grid *Grid) bool
+
 	//normalizeStep makes sure that the step is in a known order, mainly for testing. Most
 	//techniques just sort all of the slices, but some techniques encode meaningful information
 	//in the order of the slices so don't want to do it.
@@ -419,6 +424,11 @@ func (self *basicSolveTechnique) IsFill() bool {
 
 func (self *basicSolveTechnique) Variants() []string {
 	return []string{self.Name()}
+}
+
+//TODO: once done implementing, rempve this.
+func (self *basicSolveTechnique) isImplied(step *SolveStep, grid *Grid) bool {
+	return true
 }
 
 func (self *basicSolveTechnique) variant(step *SolveStep) string {
