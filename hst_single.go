@@ -73,6 +73,20 @@ func (self *obviousInCollectionTechnique) isImplied(step *SolveStep, grid *Grid)
 	return false
 }
 
+/*
+ * Basic shape:
+ * findHelper is the main implemenation.
+ * It takes a Generator that outputs potential steps (or rather, things that COULD be steps, but propbably aren't)
+ * (really for efficiency it's given a pointer to a step and modifies that to avoid all of the allocing)
+ * and then those steps are tested against technique.isImplied. If that's true, and the step isUseful,
+ * and the main loop still wants steps, it COPIES the step and pushes that back over the channel.
+ * At the top of the loop we also check if we should early bail.
+ *
+ * Problem: at many steps, like even in obviousInCollection, it's not a _step_ per se to test, but a group.
+ * the pattern might not work as well as I'd like...
+ *
+ */
+
 func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice, results chan *SolveStep, done chan bool) {
 	indexes := rand.Perm(DIM)
 	for _, index := range indexes {
