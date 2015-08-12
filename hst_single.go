@@ -84,6 +84,8 @@ func (self *obviousInCollectionTechnique) isImplied(step *SolveStep, grid *Grid)
  *
  * Problem: at many steps, like even in obviousInCollection, it's not a _step_ per se to test, but a group.
  * the pattern might not work as well as I'd like...
+ * // maybe having a technique.isImpliedImpl that takes more (optional) arguments of pre-calced stuff
+ * so isImplied can be a BIT expensive, but isImpliedImpl can be pretty fast.
  *
  */
 
