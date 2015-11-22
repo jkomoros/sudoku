@@ -68,6 +68,24 @@ type SolveStep struct {
 	extra interface{}
 }
 
+type solveStepCellDependencyType int
+
+const (
+	_DEPENDENCY_TYPE_IS_FILLED solveStepCellDependencyType = iota
+	_DEPENDENCY_TYPE_NUM_FILLED
+	_DEPENDENCY_TYPE_NUM_POSSIBLE
+	_DEPENDENCY_TYPE_NUM_NOT_POSSIBLE
+)
+
+//solveStepCellDependency explains a single reason why a step was valid at a
+//given grid state. It's useful for detecting if a step would have applied at
+//a slightly different cell state.
+type solveStepCellDependency struct {
+	DependencyType solveStepCellDependencyType
+	CellRef        cellRef
+	Nums           IntSlice
+}
+
 //TODO: consider passing a non-pointer humanSolveOptions so that mutations
 //deeper  in the solve stack don' tmatter.
 
