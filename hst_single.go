@@ -85,7 +85,7 @@ func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter 
 					},
 					otherCells,
 					otherNums,
-					nil,
+					otherCells.createDependencySlice(_DEPENDENCY_TYPE_IS_FILLED, nil),
 					nil,
 				}
 				if step.IsUseful(grid) {

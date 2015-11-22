@@ -30,6 +30,48 @@ func TestObviousInCollectionRow(t *testing.T) {
 			8,
 			9,
 		},
+		dependencies: []solveStepCellDependency{
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{2, 0},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{2, 1},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{2, 2},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{2, 4},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{2, 5},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{2, 6},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{2, 7},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{2, 8},
+				nil,
+			},
+		},
 		description: "(2,3) is the only cell in row 2 that is unfilled, and it must be 7",
 	}
 	humanSolveTechniqueTestHelper(t, "obviousrow.sdk", "Obvious In Row", options)
@@ -64,6 +106,48 @@ func TestObviousInCollectionCol(t *testing.T) {
 			8,
 			9,
 		},
+		dependencies: []solveStepCellDependency{
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{0, 2},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{1, 2},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{2, 2},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{4, 2},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{5, 2},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{6, 2},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{7, 2},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{8, 2},
+				nil,
+			},
+		},
 		description: "(3,2) is the only cell in column 2 that is unfilled, and it must be 7",
 	}
 	humanSolveTechniqueTestHelper(t, "obviousrow.sdk", "Obvious In Col", options)
@@ -96,6 +180,48 @@ func TestObviousInCollectionBlock(t *testing.T) {
 			6,
 			7,
 			8,
+		},
+		dependencies: []solveStepCellDependency{
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{3, 0},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{3, 1},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{3, 2},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{4, 0},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{4, 2},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{5, 0},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{5, 1},
+				nil,
+			},
+			{
+				_DEPENDENCY_TYPE_IS_FILLED,
+				cellRef{5, 2},
+				nil,
+			},
 		},
 		description: "(4,1) is the only cell in block 3 that is unfilled, and it must be 9",
 	}
