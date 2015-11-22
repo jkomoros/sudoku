@@ -399,6 +399,18 @@ func (self CellSlice) Description() string {
 	return strings.description()
 }
 
+func (self CellSlice) createDependencySlice(dependencyType solveStepCellDependencyType, nums IntSlice) []solveStepCellDependency {
+	list := make([]solveStepCellDependency, len(self))
+	for i, cell := range self {
+		list[i] = solveStepCellDependency{
+			dependencyType,
+			cell.ref(),
+			nums,
+		}
+	}
+	return list
+}
+
 func (self CellSlice) sameAsRefs(refs []cellRef) bool {
 	cellSet := make(map[string]bool)
 	for _, cell := range self {
