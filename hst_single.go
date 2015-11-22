@@ -240,6 +240,7 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 							otherCellsInCollection,
 							nil,
 							nil,
+							nil,
 						}
 						if step.IsUseful(grid) {
 							select {
