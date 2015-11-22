@@ -215,6 +215,7 @@ type solveTechniqueTestHelperOptions struct {
 	pointerCells []cellRef
 	targetNums   IntSlice
 	pointerNums  IntSlice
+	dependencies []solveStepCellDependency
 	targetSame   cellGroupType
 	targetGroup  int
 	variantName  string
@@ -361,6 +362,12 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		if !reflect.DeepEqual(step.extra, options.extra) {
 			l.Error("Extra did not match. Got", step.extra, "expected", options.extra)
 			continue
+		}
+
+		if options.dependencies != nil {
+			if !reflect.DeepEqual(step.dependencies, options.dependencies) {
+				l.Error("Dependencies did not match. Got: ", step.dependencies, "expected", options.dependencies)
+			}
 		}
 
 		if options.matchMode == solveTechniqueMatchModeAll {
