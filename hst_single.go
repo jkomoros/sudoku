@@ -142,6 +142,7 @@ func (self *nakedSingleTechnique) Find(grid *Grid, results chan *SolveStep, done
 			filledNeighbors,
 			filledNeighbors.FilledNums(),
 			nil,
+			nil,
 		}
 		if step.IsUseful(grid) {
 			select {
