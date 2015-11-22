@@ -63,6 +63,9 @@ type SolveStep struct {
 	//The specific numbers in PointerCells that lead us to remove TargetNums from TargetCells.
 	//This is only very rarely needed (at this time only for hiddenSubset techniques)
 	PointerNums IntSlice
+	//dependencies is a list of solveStepCellDependencies, ALL of which must match
+	//for this step to be validly implied.
+	dependencies []solveStepCellDependency
 	//extra is a private place that information relevant to only specific techniques
 	//can be stashed.
 	extra interface{}

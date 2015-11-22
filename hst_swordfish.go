@@ -147,6 +147,7 @@ func (self *swordfishTechnique) Find(grid *Grid, results chan *SolveStep, done c
 				pointerCells,
 				nil,
 				nil,
+				nil,
 			}
 
 			if step.IsUseful(grid) {

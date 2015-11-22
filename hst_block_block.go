@@ -103,6 +103,7 @@ func (self *blockBlockInteractionTechnique) Find(grid *Grid, results chan *Solve
 				append(firstBlockCells, secondBlockCells...),
 				nil,
 				nil,
+				nil,
 			}
 
 			if step.IsUseful(grid) {

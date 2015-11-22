@@ -63,7 +63,7 @@ func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter f
 
 				group := groups[groupIndex]
 
-				step := &SolveStep{technique, collectionGetter(i).RemoveCells(group), group.PossibilitiesUnion(), group, nil, nil}
+				step := &SolveStep{technique, collectionGetter(i).RemoveCells(group), group.PossibilitiesUnion(), group, nil, nil, nil}
 				if step.IsUseful(grid) {
 					select {
 					case results <- step:

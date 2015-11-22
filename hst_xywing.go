@@ -154,6 +154,7 @@ func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan
 								CellSlice{pivotCell, xCell, yCell},
 								IntSlice{x, y, z},
 								nil,
+								nil,
 							}
 
 							if step.IsUseful(grid) {
@@ -173,6 +174,7 @@ func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan
 						IntSlice{z},
 						CellSlice{pivotCell, xCell, yCell},
 						IntSlice{x, y, z},
+						nil,
 						nil,
 					}
 

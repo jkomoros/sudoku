@@ -66,7 +66,7 @@ func hiddenSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter 
 
 				numsToRemove := group.PossibilitiesUnion().Difference(numList)
 
-				step := &SolveStep{technique, group, numsToRemove, group, numList, nil}
+				step := &SolveStep{technique, group, numsToRemove, group, numList, nil, nil}
 				if step.IsUseful(grid) {
 					select {
 					case results <- step:
