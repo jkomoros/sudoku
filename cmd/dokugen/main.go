@@ -9,6 +9,7 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
+	"github.com/gosuri/uiprogress"
 	"github.com/jkomoros/sudoku"
 	"github.com/jkomoros/sudoku/sdkconverter"
 	"io"
@@ -132,6 +133,15 @@ func main() {
 		csvWriter = csv.NewWriter(output)
 	}
 
+	var bar *uiprogress.Bar
+
+	//TODO: do more useful / explanatory printing here.
+	if options.NUM > 1 {
+		uiprogress.DefaultProgress.Out = os.Stderr
+		uiprogress.Start()
+		bar = uiprogress.AddBar(options.NUM).PrependElapsed().AppendCompleted()
+	}
+
 	for i := 0; i < options.NUM; i++ {
 
 		if options.OUTPUT_CSV {
@@ -218,6 +228,9 @@ func main() {
 			return
 		}
 		grid.Done()
+		if options.NUM > 1 {
+			bar.Incr()
+		}
 	}
 	if options.OUTPUT_CSV {
 		csvWriter.Flush()
