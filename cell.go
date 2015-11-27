@@ -43,6 +43,7 @@ type Cell struct {
 	neighborsLock sync.RWMutex
 	neighbors     CellSlice
 	impossibles   [DIM]int
+	excludedLock  sync.RWMutex
 	excluded      [DIM]bool
 }
 
@@ -187,7 +188,9 @@ func (self *Cell) SetExcluded(number int, excluded bool) {
 	if number < 0 || number >= DIM {
 		return
 	}
+	self.excludedLock.Lock()
 	self.excluded[number] = excluded
+	self.excludedLock.Unlock()
 	//Our rank may have changed.
 	//TODO: should we check if we're invalid already?
 	if self.grid != nil {
@@ -200,9 +203,11 @@ func (self *Cell) SetExcluded(number int, excluded bool) {
 //be based purely on direct implications of the Number()s of neighbors. See
 //also SetExcluded.
 func (self *Cell) ResetExcludes() {
+	self.excludedLock.Lock()
 	for i := 0; i < DIM; i++ {
 		self.excluded[i] = false
 	}
+	self.excludedLock.Unlock()
 	//Our rank may have changed.
 	//TODO: should we check if we're invalid already?
 	if self.grid != nil {
@@ -222,7 +227,10 @@ func (self *Cell) Possible(number int) bool {
 	if number < 0 || number >= DIM {
 		return false
 	}
-	return self.impossibles[number] == 0 && !self.excluded[number]
+	self.excludedLock.RLock()
+	isExcluded := self.excluded[number]
+	self.excludedLock.RUnlock()
+	return self.impossibles[number] == 0 && !isExcluded
 }
 
 //Possibilities returns a list of all current possibilities for this cell: all
@@ -258,7 +266,10 @@ func (self *Cell) Invalid() bool {
 	//TODO: figure out a way to send this back up to the solver when it happens.
 	//TODO: shouldn't this always return true if there is a number set?
 	for i, counter := range self.impossibles {
-		if counter == 0 && !self.excluded[i] {
+		self.excludedLock.RLock()
+		excluded := self.excluded[i]
+		self.excludedLock.RUnlock()
+		if counter == 0 && !excluded {
 			return false
 		}
 	}

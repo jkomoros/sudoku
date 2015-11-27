@@ -181,9 +181,14 @@ func (self *Grid) replace(other *Grid) {
 	//Also set excludes
 	for _, otherCell := range other.cells {
 		selfCell := otherCell.InGrid(self)
+		//TODO: the fact that I'm reaching into Cell's excludeLock outside of Cell is a Smell.
+		selfCell.excludedLock.Lock()
+		otherCell.excludedLock.RLock()
 		for i := 0; i < DIM; i++ {
 			selfCell.excluded[i] = otherCell.excluded[i]
 		}
+		otherCell.excludedLock.RUnlock()
+		selfCell.excludedLock.Unlock()
 	}
 }
 
