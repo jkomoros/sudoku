@@ -381,8 +381,12 @@ func (self *Grid) cellModified(cell *Cell) {
 }
 
 func (self *Grid) cellRankChanged(cell *Cell) {
-	if self.theQueue != nil {
-		self.theQueue.Insert(cell)
+	//We don't want to create the queue if it doesn't exist. But if it does exist we want to get the real one.
+	self.queueGetterLock.RLock()
+	queue := self.theQueue
+	self.queueGetterLock.RUnlock()
+	if queue != nil {
+		queue.Insert(cell)
 	}
 }
 
