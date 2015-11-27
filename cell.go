@@ -13,6 +13,7 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 const _NUM_NEIGHBORS = (DIM-1)*3 - (BLOCK_DIM-1)*2
@@ -35,13 +36,14 @@ const (
 type Cell struct {
 	grid *Grid
 	//The number if it's explicitly set. Number() will return it if it's explicitly or implicitly set.
-	number      int
-	row         int
-	col         int
-	block       int
-	neighbors   CellSlice
-	impossibles [DIM]int
-	excluded    [DIM]bool
+	number        int
+	row           int
+	col           int
+	block         int
+	neighborsLock sync.RWMutex
+	neighbors     CellSlice
+	impossibles   [DIM]int
+	excluded      [DIM]bool
 }
 
 func newCell(grid *Grid, row int, col int) Cell {
@@ -339,7 +341,12 @@ func (self *Cell) Neighbors() CellSlice {
 	if self.grid == nil || !self.grid.initalized {
 		return nil
 	}
-	if self.neighbors == nil {
+
+	self.neighborsLock.RLock()
+	neighbors := self.neighbors
+	self.neighborsLock.RUnlock()
+
+	if neighbors == nil {
 		//We don't want duplicates, so we will collect in a map (used as a set) and then reduce.
 		neighborsMap := make(map[*Cell]bool)
 		for _, cell := range self.grid.Row(self.Row()) {
@@ -360,14 +367,17 @@ func (self *Cell) Neighbors() CellSlice {
 			}
 			neighborsMap[cell] = true
 		}
+		self.neighborsLock.Lock()
 		self.neighbors = make([]*Cell, len(neighborsMap))
 		i := 0
 		for cell := range neighborsMap {
 			self.neighbors[i] = cell
 			i++
 		}
+		neighbors = self.neighbors
+		self.neighborsLock.Unlock()
 	}
-	return self.neighbors
+	return neighbors
 
 }
 
