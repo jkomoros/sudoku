@@ -842,7 +842,11 @@ func gridDifficultyHelper(grid *Grid) float64 {
 	//Might as well run all of the human solutions in parallel
 	for i := 0; i < _NUM_SOLVES_FOR_DIFFICULTY; i++ {
 		go func(gridToUse *Grid) {
-			collector <- gridToUse.HumanSolution(nil).Signals()
+			solution := gridToUse.HumanSolution(nil)
+			if solution == nil {
+				panic(1)
+			}
+			collector <- solution.Signals()
 		}(grid)
 	}
 
