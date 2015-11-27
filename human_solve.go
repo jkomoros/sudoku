@@ -787,6 +787,10 @@ func (self *Grid) Difficulty() float64 {
 	//This is so expensive and during testing we don't care if converges.
 	//So we split out the meat of the method separately.
 
+	if self == nil {
+		return 0.0
+	}
+
 	//Yes, this memoization will fail in the (rare!) cases where a grid's actual difficulty is 0.0, but
 	//the worst case scenario is that we just return the same value.
 	if self.cachedDifficulty == 0.0 {
