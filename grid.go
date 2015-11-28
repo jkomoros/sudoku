@@ -198,6 +198,12 @@ func (self *Grid) replace(other *Grid) {
 		otherCell.excludedLock.RUnlock()
 		selfCell.excludedLock.Unlock()
 	}
+	self.cachedSolutionsLock.Lock()
+	other.cachedSolutionsLock.RLock()
+	self.cachedSolutionsRequestedLength = other.cachedSolutionsRequestedLength
+	self.cachedSolutions = other.cachedSolutions
+	other.cachedSolutionsLock.RUnlock()
+	self.cachedSolutionsLock.Unlock()
 }
 
 func (self *Grid) transpose() *Grid {

@@ -810,6 +810,8 @@ func (self *Grid) calcluateDifficulty(accurate bool) float64 {
 	average := 0.0
 	lastAverage := 0.0
 
+	self.HasMultipleSolutions()
+
 	//Since this is so expensive, in testing situations we want to run it in less accurate mode (so it goes fast!)
 	maxIterations := _MAX_DIFFICULTY_ITERATIONS
 	if !accurate {
