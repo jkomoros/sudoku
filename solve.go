@@ -52,7 +52,12 @@ func (self *Grid) Solutions() (solutions []*Grid) {
 //The actual workhorse of solutions generating. 0 means "as many as you can find". It might return more than you asked for, if it already had more results than requested sitting around.
 func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 
-	if self.cachedSolutions == nil || (max > 0 && len(self.cachedSolutions) < max) {
+	self.cachedSolutionsLock.RLock()
+	hasNoCachedSolutions := self.cachedSolutions == nil
+	cachedSolutionsLen := len(self.cachedSolutions)
+	self.cachedSolutionsLock.RUnlock()
+
+	if hasNoCachedSolutions || (max > 0 && cachedSolutionsLen < max) {
 
 		queueDone := make(chan bool, 1)
 
@@ -123,11 +128,17 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		//but we won't have as many that we could reuse.
 		queue.Exit <- true
 
+		self.cachedSolutionsLock.Lock()
 		self.cachedSolutions = solutions
+		self.cachedSolutionsLock.Unlock()
 
 	}
 
-	return self.cachedSolutions
+	//TODO: rejigger this to not need a write lock then a read lock when setting.
+	self.cachedSolutionsLock.RLock()
+	result := self.cachedSolutions
+	self.cachedSolutionsLock.RUnlock()
+	return result
 
 }
 

@@ -33,17 +33,18 @@ const (
 //Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
 //be acted on in various ways.
 type Grid struct {
-	initalized       bool
-	cells            [DIM * DIM]Cell
-	rows             [DIM]CellSlice
-	cols             [DIM]CellSlice
-	blocks           [DIM]CellSlice
-	queueGetterLock  sync.RWMutex
-	theQueue         *finiteQueue
-	numFilledCells   int
-	invalidCells     map[*Cell]bool
-	cachedSolutions  []*Grid
-	cachedDifficulty float64
+	initalized          bool
+	cells               [DIM * DIM]Cell
+	rows                [DIM]CellSlice
+	cols                [DIM]CellSlice
+	blocks              [DIM]CellSlice
+	queueGetterLock     sync.RWMutex
+	theQueue            *finiteQueue
+	numFilledCells      int
+	invalidCells        map[*Cell]bool
+	cachedSolutionsLock sync.RWMutex
+	cachedSolutions     []*Grid
+	cachedDifficulty    float64
 }
 
 var gridCache chan *Grid
@@ -376,7 +377,9 @@ func (self *Grid) cellIsValid(cell *Cell) {
 }
 
 func (self *Grid) cellModified(cell *Cell) {
+	self.cachedSolutionsLock.Lock()
 	self.cachedSolutions = nil
+	self.cachedSolutionsLock.Unlock()
 	self.cachedDifficulty = 0.0
 	if cell.Number() == 0 {
 		self.numFilledCells--
