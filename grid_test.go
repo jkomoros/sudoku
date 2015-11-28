@@ -544,8 +544,10 @@ func BenchmarkAdvancedSolve(b *testing.B) {
 
 func BenchmarkDifficulty(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		grid := GenerateGrid(nil)
+		grid := NewGrid()
+		grid.Load(ADVANCED_TEST_GRID)
 		grid.Difficulty()
+		grid.Done()
 	}
 }
 
