@@ -542,6 +542,13 @@ func BenchmarkAdvancedSolve(b *testing.B) {
 	}
 }
 
+func BenchmarkDifficulty(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		grid := GenerateGrid(nil)
+		grid.Difficulty()
+	}
+}
+
 func TestGridCache(t *testing.T) {
 	//TODO: these tests aren't that great.
 
