@@ -44,7 +44,12 @@ type Grid struct {
 	invalidCells        map[*Cell]bool
 	cachedSolutionsLock sync.RWMutex
 	cachedSolutions     []*Grid
-	cachedDifficulty    float64
+	//The number of solutions that we REQUESTED when we got back
+	//this list of cachedSolutions. This helps us avoid extra work
+	//in cases where there's only one solution but in the past we'd
+	//asked for more.
+	cachedSolutionsRequestedLength int
+	cachedDifficulty               float64
 }
 
 var gridCache chan *Grid
@@ -109,6 +114,8 @@ func NewGrid() *Grid {
 		result.cols[index] = result.cellSlice(0, index, DIM-1, index)
 		result.blocks[index] = result.cellSlice(result.blockExtents(index))
 	}
+
+	result.cachedSolutionsRequestedLength = -1
 
 	result.initalized = true
 	return result
@@ -379,6 +386,7 @@ func (self *Grid) cellIsValid(cell *Cell) {
 func (self *Grid) cellModified(cell *Cell) {
 	self.cachedSolutionsLock.Lock()
 	self.cachedSolutions = nil
+	self.cachedSolutionsRequestedLength = -1
 	self.cachedSolutionsLock.Unlock()
 	self.cachedDifficulty = 0.0
 	if cell.Number() == 0 {
