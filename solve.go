@@ -57,7 +57,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 	cachedSolutionsLen := self.cachedSolutionsRequestedLength
 	self.cachedSolutionsLock.RUnlock()
 
-	if hasNoCachedSolutions || (max > 0 && cachedSolutionsLen < max) {
+	if hasNoCachedSolutions || (max > 0 && cachedSolutionsLen < max && cachedSolutionsLen > 0) {
 
 		queueDone := make(chan bool, 1)
 

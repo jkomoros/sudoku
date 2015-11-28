@@ -115,6 +115,8 @@ func NewGrid() *Grid {
 		result.blocks[index] = result.cellSlice(result.blockExtents(index))
 	}
 
+	result.cachedSolutionsRequestedLength = -1
+
 	result.initalized = true
 	return result
 }
@@ -384,7 +386,7 @@ func (self *Grid) cellIsValid(cell *Cell) {
 func (self *Grid) cellModified(cell *Cell) {
 	self.cachedSolutionsLock.Lock()
 	self.cachedSolutions = nil
-	self.cachedSolutionsRequestedLength = 0
+	self.cachedSolutionsRequestedLength = -1
 	self.cachedSolutionsLock.Unlock()
 	self.cachedDifficulty = 0.0
 	if cell.Number() == 0 {
