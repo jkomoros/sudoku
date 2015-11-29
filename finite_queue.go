@@ -16,7 +16,8 @@ type finiteQueue struct {
 	currentBucket *finiteQueueBucket
 	//Version monotonically increases as changes are made to the underlying queue.
 	//This is how getters ensure that they stay in sync with their underlying queue.
-	version int
+	versionLock sync.RWMutex
+	version     int
 }
 
 type finiteQueueBucket struct {
@@ -55,6 +56,7 @@ func newFiniteQueue(min int, max int) *finiteQueue {
 		max,
 		make([]*finiteQueueBucket, max-min+1),
 		nil,
+		sync.RWMutex{},
 		0}
 	for i := 0; i < max-min+1; i++ {
 		result.objects[i] = &finiteQueueBucket{make([]rankedObject, 0), i + result.min, true}
@@ -219,7 +221,9 @@ func (self *finiteQueue) Insert(obj rankedObject) {
 	}
 	list.addItem(obj)
 	self.currentBucket = nil
+	self.versionLock.Lock()
 	self.version++
+	self.versionLock.Unlock()
 }
 
 func (self *finiteQueue) Get() rankedObject {
@@ -253,7 +257,9 @@ func (self *finiteQueue) getSmallerThan(max int) rankedObject {
 		item = self.currentBucket.getItem()
 	}
 
+	self.versionLock.Lock()
 	self.version++
+	self.versionLock.Unlock()
 	return item
 
 }
@@ -288,10 +294,14 @@ func (self *finiteQueueGetter) getSmallerThan(max int) rankedObject {
 		return nil
 	}
 
-	if self.baseVersion != self.queue.version {
+	self.queue.versionLock.RLock()
+	queueVersion := self.queue.version
+
+	if self.baseVersion != queueVersion {
 		self.currentBucket = nil
-		self.baseVersion = self.queue.version
+		self.baseVersion = queueVersion
 	}
+	self.queue.versionLock.RUnlock()
 
 	if self.currentBucket == nil {
 		newBucket, _ := self.queue.getBucket(self.queue.min)
