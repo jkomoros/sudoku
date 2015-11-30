@@ -428,6 +428,7 @@ func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) *SolveDirections {
 	//Short circuit solving if it has multiple solutions.
 	if grid.HasMultipleSolutions() {
+		log.Println("Grid exited early due to multiple solutions:", grid)
 		return nil
 	}
 

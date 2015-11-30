@@ -485,32 +485,43 @@ func TestAdvancedSolve(t *testing.T) {
 }
 
 func TestMultiSolutions(t *testing.T) {
-	grid := NewGrid()
-	grid.LoadFromFile(puzzlePath("multiple-solutions.sdk"))
 
-	//Test num solutions from the beginning.
-	if num := grid.NumSolutions(); num != 4 {
-		t.Error("Grid with four solutions was found to only have", num)
+	var grid *Grid
+
+	files := map[string]int{
+		"multiple-solutions.sdk":  4,
+		"multiple-solutions2.sdk": 2,
 	}
 
-	grid.Done()
+	for file, numSolutions := range files {
 
-	//Get a new version of grid to reset all caches
-	grid = NewGrid()
-	grid.LoadFromFile(puzzlePath("multiple-solutions.sdk"))
+		grid = NewGrid()
+		grid.LoadFromFile(puzzlePath(file))
 
-	if !grid.HasMultipleSolutions() {
-		t.Fatal("Grid with multiple solutions was reported as only having one.")
+		//Test num solutions from the beginning.
+		if num := grid.NumSolutions(); num != numSolutions {
+			t.Error("Grid", file, " with", numSolutions, "solutions was found to only have", num)
+		}
+
+		grid.Done()
+
+		//Get a new version of grid to reset all caches
+		grid = NewGrid()
+		grid.LoadFromFile(puzzlePath(file))
+
+		if !grid.HasMultipleSolutions() {
+			t.Fatal("Grid", file, "with multiple solutions was reported as only having one.")
+		}
+
+		//Test num solutions after already having done other solution gathering.
+		//this is in here because at one point calling this after HasMultipleSolutions
+		//would find 2 vs 1 calling it fresh.
+		if num := grid.NumSolutions(); num != numSolutions {
+			t.Error("Grid", file, "with", numSolutions, "solutions was found to only have", num, "after calling HasMultipleSolutions first.")
+		}
+
+		grid.Done()
 	}
-
-	//Test num solutions after already having done other solution gathering.
-	//this is in here because at one point calling this after HasMultipleSolutions
-	//would find 2 vs 1 calling it fresh.
-	if num := grid.NumSolutions(); num != 4 {
-		t.Error("Grid with four solutions was found to only have", num, "after calling HasMultipleSolutions first.")
-	}
-
-	grid.Done()
 
 }
 
