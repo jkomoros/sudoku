@@ -1,7 +1,10 @@
 package sudoku
 
 import (
+	"github.com/davecgh/go-spew/spew"
+	"log"
 	"math/rand"
+	"os"
 )
 
 //GenerationOptions provides configuration options for generating a sudoku puzzle.
@@ -61,6 +64,8 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 	//Do a random fill of the grid
 	grid.Fill()
 
+	log.Println("Original grid\n", grid)
+
 	//Make a copy so we don't mutate the passed in dict
 	symmetryPercentage := options.SymmetryPercentage
 
@@ -78,15 +83,38 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 		cells[i] = &grid.cells[j]
 	}
 
-	for _, cell := range cells {
+	type generateRecord struct {
+		i                   int
+		mainCell            *Cell
+		otherCell           *Cell
+		num                 int
+		otherNum            int
+		otherCellWasVacated bool
+		didFill             bool
+		mainCellWasEmpty    bool
+		gridState           string
+	}
+
+	var records []generateRecord
+
+	for i, cell := range cells {
+
+		if grid.HasMultipleSolutions() {
+			log.Println("On cell", i, "we had already gotten multiple solutions for grid", grid)
+			spew.Dump(records)
+			os.Exit(1)
+		}
 
 		num := cell.Number()
 		if num == 0 {
+			records = append(records, generateRecord{i, cell, nil, 0, 0, false, false, true, grid.DataString()})
 			continue
 		}
 
 		var otherNum int
 		var otherCell *Cell
+		var otherCellWasVacated bool
+		didFill := true
 
 		if rand.Float64() < symmetryPercentage {
 
@@ -100,6 +128,7 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 					//we get multiple solutions without noticing (which caused bug #134).
 					//So pretend like we didn't draw one.
 					otherCell = nil
+					otherCellWasVacated = true
 				} else {
 					otherNum = otherCell.Number()
 				}
@@ -121,13 +150,17 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 		if otherCell != nil {
 			otherCell.SetNumber(0)
 		}
+
 		if grid.HasMultipleSolutions() {
 			//Put it back in.
+			didFill = false
 			cell.SetNumber(num)
 			if otherCell != nil {
 				otherCell.SetNumber(otherNum)
 			}
 		}
+
+		records = append(records, generateRecord{i, cell, otherCell, num, otherNum, otherCellWasVacated, didFill, false, grid.DataString()})
 	}
 
 	return grid
