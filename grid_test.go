@@ -484,6 +484,17 @@ func TestAdvancedSolve(t *testing.T) {
 
 }
 
+func TestMultiSolutions(t *testing.T) {
+	grid := NewGrid()
+	defer grid.Done()
+	grid.LoadFromFile(puzzlePath("multiple-solutions.sdk"))
+
+	if !grid.HasMultipleSolutions() {
+		t.Fatal("Grid with multiple solutions was reported as only having one.")
+	}
+
+}
+
 func TestTranspose(t *testing.T) {
 
 	//TODO: this test doesn't verify that a grid with specific excludes set is transposed as well
