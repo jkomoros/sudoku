@@ -57,7 +57,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 	cachedSolutionsLen := self.cachedSolutionsRequestedLength
 	self.cachedSolutionsLock.RUnlock()
 
-	if hasNoCachedSolutions || (max > 0 && cachedSolutionsLen < max && cachedSolutionsLen > 0) {
+	if hasNoCachedSolutions || (max == 0 && cachedSolutionsLen != 0) || (max > 0 && cachedSolutionsLen < max && cachedSolutionsLen > 0) {
 
 		queueDone := make(chan bool, 1)
 
@@ -112,7 +112,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 			case solution := <-incomingSolutions:
 				//Add it to results
 				solutions = append(solutions, solution)
-				if len(solutions) >= max {
+				if max > 0 && len(solutions) >= max {
 					break OuterLoop
 				}
 			case <-queueDone:
