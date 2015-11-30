@@ -112,7 +112,7 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 			case solution := <-incomingSolutions:
 				//Add it to results
 				solutions = append(solutions, solution)
-				if len(solutions) >= max {
+				if max > 0 && len(solutions) >= max {
 					break OuterLoop
 				}
 			case <-queueDone:
