@@ -94,7 +94,15 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 			otherCell = cell.SymmetricalPartner(options.Symmetry)
 
 			if otherCell != nil {
-				otherNum = otherCell.Number()
+				if otherCell.Number() == 0 {
+					//We must have already un-filled it as a primary cell.
+					//If we were to unfill this, we could get in a weird state where
+					//we get multiple solutions without noticing (which caused bug #134).
+					//So pretend like we didn't draw one.
+					otherCell = nil
+				} else {
+					otherNum = otherCell.Number()
+				}
 			}
 		}
 
