@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"os"
 	"sync"
 )
 
@@ -846,7 +847,8 @@ func gridDifficultyHelper(grid *Grid) float64 {
 		go func(gridToUse *Grid) {
 			solution := gridToUse.HumanSolution(nil)
 			if solution == nil {
-				panic(1)
+				log.Println("A generated grid turned out to have mutiple solutions (or otherwise return nil), indicating a very serious error:", gridToUse.DataString())
+				os.Exit(1)
 			}
 			collector <- solution.Signals()
 		}(grid)
