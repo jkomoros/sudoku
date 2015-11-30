@@ -637,6 +637,27 @@ func TestGenerate(t *testing.T) {
 	}
 }
 
+//This is an extremely expensive test desgined to help ferret out #134.
+//TODO: remove this test!
+func TestGenerateMultipleSolutions(t *testing.T) {
+
+	if testing.Short() {
+		t.Skip("Skipping TestGenerateDiabolical in short test mode,")
+	}
+
+	var grid *Grid
+
+	for i := 0; i < 1000; i++ {
+		grid = GenerateGrid(nil)
+
+		defer grid.Done()
+
+		if grid.HasMultipleSolutions() {
+			t.Fatal("On run", i, "we got back a generated grid that has more than one solution: ", grid)
+		}
+	}
+}
+
 func TestGenerateMinFilledCells(t *testing.T) {
 	options := GenerationOptions{
 		Symmetry:           SYMMETRY_NONE,
