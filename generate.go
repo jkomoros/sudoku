@@ -4,7 +4,6 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"log"
 	"math/rand"
-	"os"
 )
 
 //GenerationOptions provides configuration options for generating a sudoku puzzle.
@@ -102,7 +101,7 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 		if grid.HasMultipleSolutions() {
 			log.Println("On cell", i, "we had already gotten multiple solutions for grid", grid)
 			spew.Dump(records)
-			os.Exit(1)
+			return grid
 		}
 
 		num := cell.Number()
