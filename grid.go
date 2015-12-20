@@ -187,7 +187,8 @@ func (self *Grid) Copy() *Grid {
 func (self *Grid) replace(other *Grid) {
 	self.Load(other.DataString())
 	//Also set excludes
-	for _, otherCell := range other.cells {
+	for index, _ := range other.cells {
+		otherCell := &other.cells[index]
 		selfCell := otherCell.InGrid(self)
 		//TODO: the fact that I'm reaching into Cell's excludeLock outside of Cell is a Smell.
 		selfCell.excludedLock.Lock()
