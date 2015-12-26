@@ -486,6 +486,10 @@ func TestAdvancedSolve(t *testing.T) {
 
 func TestMultiSolutions(t *testing.T) {
 
+	if testing.Short() {
+		t.Skip("Skipping TestMultiSolutions in short test mode,")
+	}
+
 	var grid *Grid
 
 	files := map[string]int{
@@ -493,34 +497,37 @@ func TestMultiSolutions(t *testing.T) {
 		"multiple-solutions2.sdk": 2,
 	}
 
-	for file, numSolutions := range files {
+	for i := 0; i < 1000; i++ {
 
-		grid = NewGrid()
-		grid.LoadFromFile(puzzlePath(file))
+		for file, numSolutions := range files {
 
-		//Test num solutions from the beginning.
-		if num := grid.NumSolutions(); num != numSolutions {
-			t.Error("Grid", file, " with", numSolutions, "solutions was found to only have", num)
+			grid = NewGrid()
+			grid.LoadFromFile(puzzlePath(file))
+
+			//Test num solutions from the beginning.
+			if num := grid.NumSolutions(); num != numSolutions {
+				t.Fatal("On run", i, "Grid", file, " with", numSolutions, "solutions was found to only have", num)
+			}
+
+			grid.Done()
+
+			//Get a new version of grid to reset all caches
+			grid = NewGrid()
+			grid.LoadFromFile(puzzlePath(file))
+
+			if !grid.HasMultipleSolutions() {
+				t.Fatal("On run", i, "Grid", file, "with multiple solutions was reported as only having one.")
+			}
+
+			//Test num solutions after already having done other solution gathering.
+			//this is in here because at one point calling this after HasMultipleSolutions
+			//would find 2 vs 1 calling it fresh.
+			if num := grid.NumSolutions(); num != numSolutions {
+				t.Fatal("On run", i, "Grid", file, "with", numSolutions, "solutions was found to only have", num, "after calling HasMultipleSolutions first.")
+			}
+
+			grid.Done()
 		}
-
-		grid.Done()
-
-		//Get a new version of grid to reset all caches
-		grid = NewGrid()
-		grid.LoadFromFile(puzzlePath(file))
-
-		if !grid.HasMultipleSolutions() {
-			t.Fatal("Grid", file, "with multiple solutions was reported as only having one.")
-		}
-
-		//Test num solutions after already having done other solution gathering.
-		//this is in here because at one point calling this after HasMultipleSolutions
-		//would find 2 vs 1 calling it fresh.
-		if num := grid.NumSolutions(); num != numSolutions {
-			t.Error("Grid", file, "with", numSolutions, "solutions was found to only have", num, "after calling HasMultipleSolutions first.")
-		}
-
-		grid.Done()
 	}
 
 }
