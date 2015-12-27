@@ -654,7 +654,7 @@ func TestGenerateMultipleSolutions(t *testing.T) {
 
 	var grid *Grid
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10; i++ {
 		grid = GenerateGrid(nil)
 
 		defer grid.Done()
