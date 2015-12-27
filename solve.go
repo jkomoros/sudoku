@@ -110,6 +110,10 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		for {
 			select {
 			case solution := <-incomingSolutions:
+				//incomingSolutions must have been closed because no more work to do.
+				if solution == nil {
+					break OuterLoop
+				}
 				//Add it to results
 				solutions = append(solutions, solution)
 				if max > 0 && len(solutions) >= max {
