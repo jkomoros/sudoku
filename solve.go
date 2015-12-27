@@ -125,6 +125,21 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 			}
 		}
 
+		//In some cases that previous select would have something incoming on
+		//incomingsolutions, as well as on queueDone, and queueDone would have
+		//just so happened to have won. Check for one last remaining item
+		//coming in from incomingSolutions.(Not checking for this was the
+		//reason for bug #134.)
+
+		select {
+		case solution := <-incomingSolutions:
+			if solution != nil {
+				solutions = append(solutions, solution)
+			}
+		default:
+			//Nope, guess there wasn't one left.
+		}
+
 		//There might be some things waiting to go into incomingSolutions here, but because it has a slot
 		//for every thread to be buffered, it's OK, we can just stop now.
 
