@@ -128,16 +128,22 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		//In some cases that previous select would have something incoming on
 		//incomingsolutions, as well as on queueDone, and queueDone would have
 		//just so happened to have won. Check for one last remaining item
-		//coming in from incomingSolutions.(Not checking for this was the
-		//reason for bug #134.)
+		//coming in from incomingSolutions. Technically it's possible (how?)
+		//to have multiple items waiting on incomingSolutions, so read as many
+		//as we can get without blocking.(Not checking for this was the reason
+		//for bug #134.)
 
-		select {
-		case solution := <-incomingSolutions:
-			if solution != nil {
-				solutions = append(solutions, solution)
+	DoneReading:
+		for {
+			select {
+			case solution := <-incomingSolutions:
+				if solution != nil {
+					solutions = append(solutions, solution)
+				}
+			default:
+				//Nope, guess there wasn't one left.
+				break DoneReading
 			}
-		default:
-			//Nope, guess there wasn't one left.
 		}
 
 		//There might be some things waiting to go into incomingSolutions here, but because it has a slot
