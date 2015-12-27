@@ -113,7 +113,7 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 
 		if grid.numFilledCells-numCellsToFillThisStep < options.MinFilledCells {
 			//Doing this step would leave us with too few cells filled. Finish.
-			continue
+			break
 		}
 
 		//Unfill it.
