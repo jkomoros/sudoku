@@ -121,11 +121,10 @@ func getOptions() *appOptions {
 func main() {
 
 	//TODO: figure out how to test this.
-	process(getOptions())
+	process(getOptions(), os.Stdout, os.Stderr)
 }
 
-func process(options *appOptions) {
-	output := os.Stdout
+func process(options *appOptions, output *os.File, errOutput *os.File) {
 
 	if options.HELP {
 		flag.PrintDefaults()
@@ -145,7 +144,7 @@ func process(options *appOptions) {
 
 	//TODO: do more useful / explanatory printing here.
 	if options.NUM > 1 {
-		uiprogress.DefaultProgress.Out = os.Stderr
+		uiprogress.DefaultProgress.Out = errOutput
 		uiprogress.Start()
 		bar = uiprogress.AddBar(options.NUM).PrependElapsed().AppendCompleted()
 	}
