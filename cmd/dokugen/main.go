@@ -124,7 +124,7 @@ func main() {
 	process(getOptions(), os.Stdout, os.Stderr)
 }
 
-func process(options *appOptions, output *os.File, errOutput *os.File) {
+func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter) {
 
 	if options.HELP {
 		flag.PrintDefaults()
