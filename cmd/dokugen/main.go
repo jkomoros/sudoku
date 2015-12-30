@@ -121,9 +121,10 @@ func getOptions() *appOptions {
 func main() {
 
 	//TODO: figure out how to test this.
+	process(getOptions())
+}
 
-	options := getOptions()
-
+func process(options *appOptions) {
 	output := os.Stdout
 
 	if options.HELP {
@@ -242,7 +243,6 @@ func main() {
 	if options.OUTPUT_CSV {
 		csvWriter.Flush()
 	}
-
 }
 
 func puzzleDirectoryParts(symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) []string {
