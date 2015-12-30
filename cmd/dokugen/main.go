@@ -62,9 +62,7 @@ func init() {
 	}
 }
 
-func main() {
-
-	//TODO: figure out how to test this.
+func getOptions() *appOptions {
 
 	var options appOptions
 
@@ -116,6 +114,15 @@ func main() {
 	if options.CONVERTER == nil {
 		log.Fatal("Invalid format option:", options.PUZZLE_FORMAT)
 	}
+
+	return &options
+}
+
+func main() {
+
+	//TODO: figure out how to test this.
+
+	options := getOptions()
 
 	output := os.Stdout
 
