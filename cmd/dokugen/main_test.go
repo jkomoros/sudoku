@@ -70,7 +70,7 @@ func TestCSVExportKomo(t *testing.T) {
 	options.NUM = 2
 	options.FAKE_GENERATE = true
 	options.NO_CACHE = true
-	options.OUTPUT_CSV = true
+	options.CSV = true
 	options.PRINT_STATS = true
 	options.PUZZLE_FORMAT = "komo"
 	options.NO_PROGRESS = true
@@ -113,7 +113,7 @@ func TestCSVExport(t *testing.T) {
 	options.NUM = 2
 	options.FAKE_GENERATE = true
 	options.NO_CACHE = true
-	options.OUTPUT_CSV = true
+	options.CSV = true
 	options.PRINT_STATS = true
 	options.NO_PROGRESS = true
 
@@ -154,7 +154,7 @@ func TestCSVImport(t *testing.T) {
 
 	options := getDefaultOptions()
 
-	options.OUTPUT_CSV = true
+	options.CSV = true
 	options.NO_PROGRESS = true
 	options.PUZZLE_FORMAT = "komo"
 	options.PUZZLE_TO_SOLVE = "tests/input.csv"

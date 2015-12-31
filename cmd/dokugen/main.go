@@ -55,9 +55,8 @@ type appOptions struct {
 	NO_CACHE            bool
 	PUZZLE_FORMAT       string
 	NO_PROGRESS         bool
-	//TODO: now that we're using this flag to denote incoming CSV, this variable name seems wrong.
-	OUTPUT_CSV bool
-	CONVERTER  sdkconverter.SudokuPuzzleConverter
+	CSV                 bool
+	CONVERTER           sdkconverter.SudokuPuzzleConverter
 	//Only used in testing.
 	FAKE_GENERATE bool
 	flagSet       *flag.FlagSet
@@ -95,7 +94,7 @@ func defineFlags(options *appOptions) {
 	options.flagSet.BoolVar(&options.NO_CACHE, "no-cache", false, "If provided, will not vend generated puzzles from the cache of previously generated puzzles.")
 	//TODO: the format should also be how we interpret loads, too.
 	options.flagSet.StringVar(&options.PUZZLE_FORMAT, "format", "sdk", "Which format to export puzzles from. Defaults to 'sdk'")
-	options.flagSet.BoolVar(&options.OUTPUT_CSV, "csv", false, "Export CSV, and expect inbound puzzle files to be a CSV with a puzzle per row.")
+	options.flagSet.BoolVar(&options.CSV, "csv", false, "Export CSV, and expect inbound puzzle files to be a CSV with a puzzle per row.")
 	options.flagSet.StringVar(&options.RAW_DIFFICULTY, "d", "", "difficulty, one of {gentle, easy, medium, tough}")
 	options.flagSet.BoolVar(&options.NO_PROGRESS, "no-progress", false, "If provided, will not print a progress bar")
 }
@@ -176,7 +175,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 	var csvWriter *csv.Writer
 	var csvRec []string
 
-	if options.OUTPUT_CSV {
+	if options.CSV {
 		csvWriter = csv.NewWriter(output)
 	}
 
@@ -205,7 +204,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 
 		var puzzleData []string
 
-		if options.OUTPUT_CSV {
+		if options.CSV {
 			//Load up multiple.
 			csvReader := csv.NewReader(bytes.NewReader(data))
 			rows, err := csvReader.ReadAll()
@@ -237,7 +236,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 
 	for i := 0; i < options.NUM; i++ {
 
-		if options.OUTPUT_CSV {
+		if options.CSV {
 			csvRec = nil
 		}
 
@@ -250,7 +249,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 				grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.MIN_FILLED_CELLS, options.NO_CACHE, logger)
 			}
 			//TODO: factor out all of this double-printing.
-			if options.OUTPUT_CSV {
+			if options.CSV {
 				csvRec = append(csvRec, options.CONVERTER.DataString(grid))
 			} else {
 				fmt.Fprintln(output, options.CONVERTER.DataString(grid))
@@ -281,14 +280,14 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 		}
 
 		if options.WALKTHROUGH {
-			if options.OUTPUT_CSV {
+			if options.CSV {
 				csvRec = append(csvRec, directions.Walkthrough())
 			} else {
 				fmt.Fprintln(output, directions.Walkthrough())
 			}
 		}
 		if options.PRINT_STATS {
-			if options.OUTPUT_CSV {
+			if options.CSV {
 				csvRec = append(csvRec, strconv.FormatFloat(grid.Difficulty(), 'f', -1, 64))
 				//We won't print out the directions.Stats() like we do for just printing to stdout,
 				//because that's mostly noise in this format.
@@ -302,7 +301,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 		//we are working on an inbound puzzle seems a bit hackish.
 		if options.PUZZLE_TO_SOLVE != "" {
 			grid.Solve()
-			if options.OUTPUT_CSV {
+			if options.CSV {
 				csvRec = append(csvRec, options.CONVERTER.DataString(grid))
 			} else {
 				fmt.Fprintln(output, options.CONVERTER.DataString(grid))
@@ -310,7 +309,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 			}
 		}
 
-		if options.OUTPUT_CSV {
+		if options.CSV {
 			csvWriter.Write(csvRec)
 		}
 
@@ -319,7 +318,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 			bar.Incr()
 		}
 	}
-	if options.OUTPUT_CSV {
+	if options.CSV {
 		csvWriter.Flush()
 	}
 }
