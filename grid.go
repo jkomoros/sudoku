@@ -33,7 +33,11 @@ const (
 //Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
 //be acted on in various ways.
 type Grid struct {
-	initalized          bool
+	initalized bool
+	//This is the internal representation only. Having it be a fixed array
+	//helps with memory locality and performance. However, iterating over the
+	//cells means  that you get a copy, and have to be careful not to try
+	//modifying it because the modifications won't work.
 	cells               [DIM * DIM]Cell
 	rows                [DIM]CellSlice
 	cols                [DIM]CellSlice
@@ -227,6 +231,19 @@ func (self *Grid) ResetExcludes() {
 	for i := range self.cells {
 		self.cells[i].ResetExcludes()
 	}
+}
+
+//Cells returns a CellSlice with pointers to every cell in the grid,
+//from left to right and top to bottom.
+func (self *Grid) Cells() CellSlice {
+	//Returns a CellSlice of all of the cells in order.
+	result := make(CellSlice, len(self.cells))
+	for i, _ := range self.cells {
+		//We don't use the second argument of range because that would be a copy of the cell, not the real one.
+		result[i] = &self.cells[i]
+	}
+	//TODO: cache this result
+	return result
 }
 
 //Row returns a CellSlice containing all of the cells in the given row (0 indexed), in order from left to right.

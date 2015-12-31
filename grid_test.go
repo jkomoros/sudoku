@@ -279,6 +279,41 @@ func TestGridCreation(t *testing.T) {
 	grid.Done()
 }
 
+func TestGridCells(t *testing.T) {
+	grid := NewGrid()
+	defer grid.Done()
+
+	grid.Load(TEST_GRID)
+
+	cells := grid.Cells()
+
+	if len(cells) != DIM*DIM {
+		t.Fatal("Grid.cells gave back a cellslice with wrong number of cells", len(cells))
+	}
+
+	//Make sure it's the same cells
+	for i, cell := range cells {
+		if cell.grid != grid {
+			t.Error("cell #", i, "had wrong grid")
+		}
+		if cell != grid.Cell(cell.Row(), cell.Col()) {
+			t.Error("cell #", i, "was not the same as the right one in the grid")
+		}
+	}
+
+	//make sure mutating a cell from the celllist mutates the grid.
+	cell := cells[3]
+
+	if cell.Number() != 0 {
+		t.Fatal("We expected cell #3 to be empty, but had", cell.Number())
+	}
+	cell.SetNumber(3)
+
+	if grid.Cell(0, 3).Number() != 3 {
+		t.Error("Mutating a cellin cells did not mutate the grid.")
+	}
+}
+
 func TestGridLoad(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
