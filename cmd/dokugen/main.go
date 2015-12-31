@@ -61,8 +61,6 @@ type appOptions struct {
 	flagSet       *flag.FlagSet
 }
 
-var logger *log.Logger
-
 var difficultyRanges map[string]struct {
 	low, high float64
 }
@@ -77,8 +75,6 @@ func init() {
 		"medium": {0.6, 0.7},
 		"tough":  {0.7, 1.0},
 	}
-
-	logger = log.New(os.Stderr, "", log.LstdFlags)
 }
 
 func defineFlags(options *appOptions) {
@@ -113,24 +109,24 @@ func (o *appOptions) fixUp() {
 	case "vertical":
 		o.SYMMETRY = sudoku.SYMMETRY_VERTICAL
 	default:
-		logger.Fatal("Unknown symmetry flag: ", o.RAW_SYMMETRY)
+		log.Fatal("Unknown symmetry flag: ", o.RAW_SYMMETRY)
 	}
 
 	o.RAW_DIFFICULTY = strings.ToLower(o.RAW_DIFFICULTY)
 	if o.RAW_DIFFICULTY != "" {
 		vals, ok := difficultyRanges[o.RAW_DIFFICULTY]
 		if !ok {
-			logger.Fatal("Invalid difficulty option:", o.RAW_DIFFICULTY)
+			log.Fatal("Invalid difficulty option:", o.RAW_DIFFICULTY)
 		}
 		o.MIN_DIFFICULTY = vals.low
 		o.MAX_DIFFICULTY = vals.high
-		logger.Println("Using difficulty max:", strconv.FormatFloat(vals.high, 'f', -1, 64), "min:", strconv.FormatFloat(vals.low, 'f', -1, 64))
+		log.Println("Using difficulty max:", strconv.FormatFloat(vals.high, 'f', -1, 64), "min:", strconv.FormatFloat(vals.low, 'f', -1, 64))
 	}
 
 	o.CONVERTER = sdkconverter.Converters[o.PUZZLE_FORMAT]
 
 	if o.CONVERTER == nil {
-		logger.Fatal("Invalid format option:", o.PUZZLE_FORMAT)
+		log.Fatal("Invalid format option:", o.PUZZLE_FORMAT)
 	}
 }
 
@@ -155,6 +151,8 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 		options.flagSet.PrintDefaults()
 		return
 	}
+
+	logger := log.New(errOutput, "", log.LstdFlags)
 
 	var grid *sudoku.Grid
 
@@ -186,7 +184,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 				grid = sudoku.NewGrid()
 				grid.Load(TEST_GRID)
 			} else {
-				grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.MIN_FILLED_CELLS, options.NO_CACHE)
+				grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.MIN_FILLED_CELLS, options.NO_CACHE, logger)
 			}
 			//TODO: factor out all of this double-printing.
 			if options.OUTPUT_CSV {
@@ -283,7 +281,7 @@ func puzzleDirectoryParts(symmetryType sudoku.SymmetryType, symmetryPercentage f
 	}
 }
 
-func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) bool {
+func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, logger *log.Logger) bool {
 	//TODO: we should include a hashed version of our difficulty weights file so we don't cache ones with old weights.
 	directoryParts := puzzleDirectoryParts(symmetryType, symmetryPercentage, minFilledCells)
 
@@ -367,7 +365,7 @@ func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symm
 	return nil
 }
 
-func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, skipCache bool) *sudoku.Grid {
+func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, skipCache bool, logger *log.Logger) *sudoku.Grid {
 	var result *sudoku.Grid
 
 	if !skipCache {
@@ -402,7 +400,7 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 		}
 
 		logger.Println("Rejecting grid of difficulty", difficulty)
-		if storePuzzle(result, difficulty, symmetryType, symmetryPercentage, minFilledCells) {
+		if storePuzzle(result, difficulty, symmetryType, symmetryPercentage, minFilledCells, logger) {
 			logger.Println("Stored the puzzle for future use.")
 		}
 
