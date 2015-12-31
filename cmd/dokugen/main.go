@@ -44,6 +44,7 @@ type appOptions struct {
 	PUZZLE_FORMAT       string
 	OUTPUT_CSV          bool
 	CONVERTER           sdkconverter.SudokuPuzzleConverter
+	flagSet             *flag.FlagSet
 }
 
 var difficultyRanges map[string]struct {
@@ -62,23 +63,23 @@ func init() {
 	}
 }
 
-func defineFlags(flagSet *flag.FlagSet, options *appOptions) {
-	flagSet.BoolVar(&options.GENERATE, "g", false, "if true, will generate a puzzle.")
-	flagSet.BoolVar(&options.HELP, "h", false, "If provided, will print help and exit.")
-	flagSet.IntVar(&options.NUM, "n", 1, "Number of things to generate")
-	flagSet.BoolVar(&options.PRINT_STATS, "p", false, "If provided, will print stats.")
-	flagSet.StringVar(&options.PUZZLE_TO_SOLVE, "s", "", "If provided, will solve the puzzle at the given filename and print solution.")
-	flagSet.BoolVar(&options.WALKTHROUGH, "w", false, "If provided, will print out a walkthrough to solve the provided puzzle.")
-	flagSet.StringVar(&options.RAW_SYMMETRY, "y", "vertical", "Valid values: 'none', 'both', 'horizontal', 'vertical")
-	flagSet.Float64Var(&options.SYMMETRY_PROPORTION, "r", 0.7, "What proportion of cells should be filled according to symmetry")
-	flagSet.IntVar(&options.MIN_FILLED_CELLS, "min-filled-cells", 0, "The minimum number of cells that should be filled in the generated puzzles.")
-	flagSet.Float64Var(&options.MIN_DIFFICULTY, "min", 0.0, "Minimum difficulty for generated puzzle")
-	flagSet.Float64Var(&options.MAX_DIFFICULTY, "max", 1.0, "Maximum difficulty for generated puzzle")
-	flagSet.BoolVar(&options.NO_CACHE, "no-cache", false, "If provided, will not vend generated puzzles from the cache of previously generated puzzles.")
+func defineFlags(options *appOptions) {
+	options.flagSet.BoolVar(&options.GENERATE, "g", false, "if true, will generate a puzzle.")
+	options.flagSet.BoolVar(&options.HELP, "h", false, "If provided, will print help and exit.")
+	options.flagSet.IntVar(&options.NUM, "n", 1, "Number of things to generate")
+	options.flagSet.BoolVar(&options.PRINT_STATS, "p", false, "If provided, will print stats.")
+	options.flagSet.StringVar(&options.PUZZLE_TO_SOLVE, "s", "", "If provided, will solve the puzzle at the given filename and print solution.")
+	options.flagSet.BoolVar(&options.WALKTHROUGH, "w", false, "If provided, will print out a walkthrough to solve the provided puzzle.")
+	options.flagSet.StringVar(&options.RAW_SYMMETRY, "y", "vertical", "Valid values: 'none', 'both', 'horizontal', 'vertical")
+	options.flagSet.Float64Var(&options.SYMMETRY_PROPORTION, "r", 0.7, "What proportion of cells should be filled according to symmetry")
+	options.flagSet.IntVar(&options.MIN_FILLED_CELLS, "min-filled-cells", 0, "The minimum number of cells that should be filled in the generated puzzles.")
+	options.flagSet.Float64Var(&options.MIN_DIFFICULTY, "min", 0.0, "Minimum difficulty for generated puzzle")
+	options.flagSet.Float64Var(&options.MAX_DIFFICULTY, "max", 1.0, "Maximum difficulty for generated puzzle")
+	options.flagSet.BoolVar(&options.NO_CACHE, "no-cache", false, "If provided, will not vend generated puzzles from the cache of previously generated puzzles.")
 	//TODO: the format should also be how we interpret loads, too.
-	flagSet.StringVar(&options.PUZZLE_FORMAT, "format", "sdk", "Which format to export puzzles from. Defaults to 'sdk'")
-	flagSet.BoolVar(&options.OUTPUT_CSV, "csv", false, "Output the results in CSV.")
-	flagSet.StringVar(&options.RAW_DIFFICULTY, "d", "", "difficulty, one of {gentle, easy, medium, tough}")
+	options.flagSet.StringVar(&options.PUZZLE_FORMAT, "format", "sdk", "Which format to export puzzles from. Defaults to 'sdk'")
+	options.flagSet.BoolVar(&options.OUTPUT_CSV, "csv", false, "Output the results in CSV.")
+	options.flagSet.StringVar(&options.RAW_DIFFICULTY, "d", "", "difficulty, one of {gentle, easy, medium, tough}")
 }
 
 func (o *appOptions) fixUp() {
@@ -115,8 +116,8 @@ func (o *appOptions) fixUp() {
 }
 
 func getOptions(flagSet *flag.FlagSet, flagArguments []string) *appOptions {
-	options := &appOptions{}
-	defineFlags(flagSet, options)
+	options := &appOptions{flagSet: flagSet}
+	defineFlags(options)
 	flagSet.Parse(flagArguments)
 	options.fixUp()
 	return options
@@ -124,13 +125,13 @@ func getOptions(flagSet *flag.FlagSet, flagArguments []string) *appOptions {
 
 func main() {
 	flagSet := flag.CommandLine
-	process(getOptions(flagSet, os.Args[1:]), flagSet, os.Stdout, os.Stderr)
+	process(getOptions(flagSet, os.Args[1:]), os.Stdout, os.Stderr)
 }
 
-func process(options *appOptions, flagSet *flag.FlagSet, output io.ReadWriter, errOutput io.ReadWriter) {
+func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter) {
 
 	if options.HELP {
-		flagSet.PrintDefaults()
+		options.flagSet.PrintDefaults()
 		return
 	}
 
