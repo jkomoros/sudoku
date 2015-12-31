@@ -20,6 +20,16 @@ const INT_RE = `\b\d{1,5}\b`
 
 const KOMO_PUZZLE = "6!,1!,2!,7,5,8,4!,9,3!;8,3!,5,4!,9!,6,1,7!,2!;9,4,7!,2,1,3,8,6!,5!;2,5,9,3,6!,1!,7,8!,4;1!,7,3!,8,4!,9,2!,5,6!;4,6!,8,5!,2!,7,3,1,9;3,9!,6,1,7,4,5!,2,8;7!,2!,4,9,8!,5!,6,3!,1;5!,8,1!,6,3,2,9!,4!,7!"
 
+const SOLVED_TEST_GRID = `6|1|2|7|5|8|4|9|3
+8|3|5|4|9|6|1|7|2
+9|4|7|2|1|3|8|6|5
+2|5|9|3|6|1|7|8|4
+1|7|3|8|4|9|2|5|6
+4|6|8|5|2|7|3|1|9
+3|9|6|1|7|4|5|2|8
+7|2|4|9|8|5|6|3|1
+5|8|1|6|3|2|9|4|7`
+
 var VARIANT_RE string
 
 func init() {
@@ -129,7 +139,25 @@ func TestCSVExport(t *testing.T) {
 
 }
 
-//TODO: test inputting of a puzzle
+func TestPuzzleImport(t *testing.T) {
+	options := getDefaultOptions()
+
+	options.PUZZLE_TO_SOLVE = "tests/puzzle.sdk"
+
+	expectUneventfulFixup(t, options)
+
+	output, errOutput := getOutput(options)
+
+	if errOutput != "" {
+		t.Error("For puzzle import expected no error output, got", errOutput)
+	}
+
+	if output != SOLVED_TEST_GRID+"\n" {
+		t.Error("For puzzle import expected", SOLVED_TEST_GRID+"\n", "got", output)
+	}
+}
+
+//TODO: test walkthrough
 
 func TestHelp(t *testing.T) {
 
