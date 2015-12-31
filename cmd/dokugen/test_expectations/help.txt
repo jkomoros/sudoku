@@ -8,6 +8,7 @@
   -min-filled-cells=0: The minimum number of cells that should be filled in the generated puzzles.
   -n=1: Number of things to generate
   -no-cache=false: If provided, will not vend generated puzzles from the cache of previously generated puzzles.
+  -no-progress=false: If provided, will not print a progress bar
   -p=false: If provided, will print stats.
   -r=0.7: What proportion of cells should be filled according to symmetry
   -s="": If provided, will solve the puzzle at the given filename and print solution.

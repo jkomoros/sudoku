@@ -51,6 +51,23 @@ func TestSingleGenerate(t *testing.T) {
 
 }
 
+func TestNoProgress(t *testing.T) {
+	options := getDefaultOptions()
+
+	options.GENERATE = true
+	options.NUM = 2
+	options.NO_PROGRESS = true
+	options.NO_CACHE = true
+
+	options.fixUp()
+
+	_, errOutput := getOutput(options)
+
+	if errOutput != "" {
+		t.Error("Generating multiple puzzles with -no-progress expected empty stderr, but got", errOutput)
+	}
+}
+
 //Callers should call fixUpOptions after receiving this.
 func getDefaultOptions() *appOptions {
 	options := &appOptions{

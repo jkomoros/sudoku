@@ -42,6 +42,7 @@ type appOptions struct {
 	MAX_DIFFICULTY      float64
 	NO_CACHE            bool
 	PUZZLE_FORMAT       string
+	NO_PROGRESS         bool
 	OUTPUT_CSV          bool
 	CONVERTER           sdkconverter.SudokuPuzzleConverter
 	flagSet             *flag.FlagSet
@@ -80,6 +81,7 @@ func defineFlags(options *appOptions) {
 	options.flagSet.StringVar(&options.PUZZLE_FORMAT, "format", "sdk", "Which format to export puzzles from. Defaults to 'sdk'")
 	options.flagSet.BoolVar(&options.OUTPUT_CSV, "csv", false, "Output the results in CSV.")
 	options.flagSet.StringVar(&options.RAW_DIFFICULTY, "d", "", "difficulty, one of {gentle, easy, medium, tough}")
+	options.flagSet.BoolVar(&options.NO_PROGRESS, "no-progress", false, "If provided, will not print a progress bar")
 }
 
 func (o *appOptions) fixUp() {
@@ -149,7 +151,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 	var bar *uiprogress.Bar
 
 	//TODO: do more useful / explanatory printing here.
-	if options.NUM > 1 {
+	if options.NUM > 1 && !options.NO_PROGRESS {
 		uiprogress.DefaultProgress.Out = errOutput
 		uiprogress.Start()
 		bar = uiprogress.AddBar(options.NUM).PrependElapsed().AppendCompleted()
@@ -241,7 +243,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 			return
 		}
 		grid.Done()
-		if options.NUM > 1 {
+		if bar != nil {
 			bar.Incr()
 		}
 	}
