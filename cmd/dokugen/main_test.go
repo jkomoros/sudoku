@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/csv"
 	"flag"
 	"github.com/jkomoros/sudoku"
 	"io/ioutil"
@@ -16,6 +17,8 @@ const GRID_RE = `((\d\||\.\|){8}(\d|\.)\n){8}((\d\||\.\|){8}(\d|\.))\n?`
 const OUTPUT_DIVIDER_RE = `-{25}\n?`
 const FLOAT_RE = `(\d{1,5}\.\d{4,20}|0)`
 const INT_RE = `\b\d{1,5}\b`
+
+const KOMO_PUZZLE = "6!,1!,2!,7,5,8,4!,9,3!;8,3!,5,4!,9!,6,1,7!,2!;9,4,7!,2,1,3,8,6!,5!;2,5,9,3,6!,1!,7,8!,4;1!,7,3!,8,4!,9,2!,5,6!;4,6!,8,5!,2!,7,3,1,9;3,9!,6,1,7,4,5!,2,8;7!,2!,4,9,8!,5!,6,3!,1;5!,8,1!,6,3,2,9!,4!,7!"
 
 var VARIANT_RE string
 
@@ -49,7 +52,44 @@ func expectUneventfulFixup(t *testing.T, options *appOptions) {
 	}
 }
 
-//TODO: test CSV output
+func TestCSVExport(t *testing.T) {
+	options := getDefaultOptions()
+
+	options.GENERATE = true
+	options.NUM = 2
+	options.FAKE_GENERATE = true
+	options.NO_CACHE = true
+	options.OUTPUT_CSV = true
+	options.PRINT_STATS = true
+	options.PUZZLE_FORMAT = "komo"
+	options.NO_PROGRESS = true
+
+	expectUneventfulFixup(t, options)
+
+	output, errOutput := getOutput(options)
+
+	csvReader := csv.NewReader(strings.NewReader(output))
+
+	recs, err := csvReader.ReadAll()
+
+	if errOutput != "" {
+		t.Error("For CSV generation expected no error output, got", errOutput)
+	}
+
+	if err != nil {
+		t.Fatal("CSV export was not a valid CSV", err, output)
+	}
+
+	for i, rec := range recs {
+		if rec[0] != KOMO_PUZZLE {
+			t.Error("On line", i, "of the CSV col 1 expected", KOMO_PUZZLE, ", but got", rec[0])
+		}
+		if !regularExpressionMatch(FLOAT_RE, rec[1]) {
+			t.Error("On line", i, "of the CSV col 2 expected a float, but got", rec[1])
+		}
+	}
+
+}
 
 //TODO: test inputting of a puzzle
 
@@ -194,10 +234,8 @@ func TestPuzzleFormat(t *testing.T) {
 
 	output, _ := getOutput(options)
 
-	expectedKomoPuzzle := "6!,1!,2!,7,5,8,4!,9,3!;8,3!,5,4!,9!,6,1,7!,2!;9,4,7!,2,1,3,8,6!,5!;2,5,9,3,6!,1!,7,8!,4;1!,7,3!,8,4!,9,2!,5,6!;4,6!,8,5!,2!,7,3,1,9;3,9!,6,1,7,4,5!,2,8;7!,2!,4,9,8!,5!,6,3!,1;5!,8,1!,6,3,2,9!,4!,7!\n"
-
-	if output != expectedKomoPuzzle {
-		t.Error("Didn't get right output for komo format. Got*", output, "* expected *", expectedKomoPuzzle, "*")
+	if output != KOMO_PUZZLE+"\n" {
+		t.Error("Didn't get right output for komo format. Got*", output, "* expected *", KOMO_PUZZLE+"\n", "*")
 	}
 
 }
