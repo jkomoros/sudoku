@@ -52,7 +52,7 @@ func (self SolveDirections) Stats() []string {
 		if lastStep != nil {
 			dissimilarityAccum += step.TargetCells.chainDissimilarity(lastStep.TargetCells)
 		}
-		techniqueCount[step.Technique.Name()] += 1
+		techniqueCount[step.TechniqueVariant()] += 1
 		lastStep = step
 	}
 	dissimilarityAccum /= float64(len(self.Steps))
@@ -72,9 +72,9 @@ func (self SolveDirections) Stats() []string {
 	result = append(result, divider)
 
 	//We want a stable ordering for technique counts.
-	for _, technique := range AllTechniques {
+	for _, technique := range AllTechniqueVariants {
 		//TODO: pad the technique name with enough spaces so the colon lines up.
-		result = append(result, fmt.Sprintf("%s: %d", technique.Name(), techniqueCount[technique.Name()]))
+		result = append(result, fmt.Sprintf("%s: %d", technique, techniqueCount[technique]))
 	}
 
 	result = append(result, divider)
