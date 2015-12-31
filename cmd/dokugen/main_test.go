@@ -6,10 +6,34 @@ import (
 	"github.com/jkomoros/sudoku"
 	"io/ioutil"
 	"regexp"
+	"strconv"
+	"strings"
 	"testing"
 )
 
+//regexp101.com and regexr.com are good tools for creating the regular expressions.
 const GRID_RE = `((\d\||\.\|){8}(\d|\.)\n){8}((\d\||\.\|){8}(\d|\.))\n?`
+const OUTPUT_DIVIDER_RE = `-{25}\n?`
+const FLOAT_RE = `\d{1,5}\.\d{4,20}`
+const INT_RE = `\b\d{1,5}\b`
+
+var VARIANT_RE string
+
+func init() {
+	variantsPortion := strings.Join(sudoku.AllTechniqueVariants, "|")
+	variantsPortion = strings.Replace(variantsPortion, "(", "\\(", -1)
+	variantsPortion = strings.Replace(variantsPortion, ")", "\\)", -1)
+	VARIANT_RE = "(" + variantsPortion + ")"
+}
+
+func numLineRE(word string, isFloat bool) string {
+	numPortion := INT_RE
+	if isFloat {
+		numPortion = FLOAT_RE
+	}
+	return word + `:\s` + numPortion + `\n?`
+
+}
 
 func TestHelp(t *testing.T) {
 
@@ -94,6 +118,38 @@ func TestNoProgress(t *testing.T) {
 	if errOutput != "" {
 		t.Error("Generating multiple puzzles with -no-progress expected empty stderr, but got", errOutput)
 	}
+}
+
+func TestPrintStats(t *testing.T) {
+	options := getDefaultOptions()
+
+	options.GENERATE = true
+	options.NUM = 1
+	options.PRINT_STATS = true
+	options.NO_PROGRESS = true
+	options.FAKE_GENERATE = true
+	options.NO_CACHE = true
+
+	options.fixUp()
+
+	output, _ := getOutput(options)
+
+	re := GRID_RE +
+		FLOAT_RE + `\n` +
+		OUTPUT_DIVIDER_RE +
+		numLineRE("Difficulty", true) +
+		OUTPUT_DIVIDER_RE +
+		numLineRE("Step count", false) +
+		OUTPUT_DIVIDER_RE +
+		numLineRE("Avg Dissimilarity", true) +
+		OUTPUT_DIVIDER_RE +
+		"(" + numLineRE(VARIANT_RE, false) + "){" + strconv.Itoa(len(sudoku.AllTechniqueVariants)) + "}" +
+		OUTPUT_DIVIDER_RE
+
+	if !regularExpressionMatch(re, output) {
+		t.Error("Output didn't match the expected RE for the output", output)
+	}
+
 }
 
 //Callers should call fixUpOptions after receiving this.
