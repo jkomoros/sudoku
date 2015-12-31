@@ -167,6 +167,28 @@ func TestPrintStats(t *testing.T) {
 
 }
 
+func TestPuzzleFormat(t *testing.T) {
+	options := getDefaultOptions()
+
+	options.GENERATE = true
+	options.NUM = 1
+	options.NO_PROGRESS = true
+	options.FAKE_GENERATE = true
+	options.PUZZLE_FORMAT = "komo"
+	options.NO_CACHE = true
+
+	expectUneventfulFixup(t, options)
+
+	output, _ := getOutput(options)
+
+	expectedKomoPuzzle := "6!,1!,2!,7,5,8,4!,9,3!;8,3!,5,4!,9!,6,1,7!,2!;9,4,7!,2,1,3,8,6!,5!;2,5,9,3,6!,1!,7,8!,4;1!,7,3!,8,4!,9,2!,5,6!;4,6!,8,5!,2!,7,3,1,9;3,9!,6,1,7,4,5!,2,8;7!,2!,4,9,8!,5!,6,3!,1;5!,8,1!,6,3,2,9!,4!,7!\n"
+
+	if output != expectedKomoPuzzle {
+		t.Error("Didn't get right output for komo format. Got*", output, "* expected *", expectedKomoPuzzle, "*")
+	}
+
+}
+
 func TestInvalidPuzzleFormat(t *testing.T) {
 	options := getDefaultOptions()
 
