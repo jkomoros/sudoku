@@ -44,7 +44,7 @@ func init() {
 //description alone), how unrelated the cells in subsequent steps are, and the
 //values of all of the signals used to generate the difficulty.
 func (self SolveDirections) Stats() []string {
-	//TODO: test this.
+	//TODO: test this. dokugen has a method that effectively tests this; just use that.
 	techniqueCount := make(map[string]int)
 	var lastStep *SolveStep
 	dissimilarityAccum := 0.0
