@@ -79,6 +79,10 @@ func TestCSVExportKomo(t *testing.T) {
 
 	output, errOutput := getOutput(options)
 
+	if output == "" {
+		t.Fatal("Got no output from CSV export komo")
+	}
+
 	csvReader := csv.NewReader(strings.NewReader(output))
 
 	recs, err := csvReader.ReadAll()
@@ -116,6 +120,10 @@ func TestCSVExport(t *testing.T) {
 	expectUneventfulFixup(t, options)
 
 	output, errOutput := getOutput(options)
+
+	if output == "" {
+		t.Fatal("Got no output from CSV export")
+	}
 
 	csvReader := csv.NewReader(strings.NewReader(output))
 
