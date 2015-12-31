@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-const GRID_RE = `((\d\||\.\|){8}(\d|\.)\n){8}((\d\||\.\|){8}(\d|\.))`
+const GRID_RE = `((\d\||\.\|){8}(\d|\.)\n){8}((\d\||\.\|){8}(\d|\.))\n?`
 
 func TestHelp(t *testing.T) {
 
@@ -50,10 +50,6 @@ func TestSingleGenerate(t *testing.T) {
 		t.Error("Generating a puzzle expected empty stderr, but got", errOutput)
 	}
 
-	if !regularExpressionMatch(GRID_RE, output) {
-		t.Error("Output didn't match the expected RE for a grid", output)
-	}
-
 	grid := sudoku.NewGrid()
 	grid.Load(output)
 
@@ -61,6 +57,22 @@ func TestSingleGenerate(t *testing.T) {
 		t.Error("Output for single generate was not a valid puzzle", output)
 	}
 
+}
+
+func TestMultiGenerate(t *testing.T) {
+	options := getDefaultOptions()
+
+	options.GENERATE = true
+	options.NUM = 3
+	options.NO_CACHE = true
+
+	options.fixUp()
+
+	output, _ := getOutput(options)
+
+	if !regularExpressionMatch(GRID_RE+GRID_RE+GRID_RE, output) {
+		t.Error("Output didn't match the expected RE for a grid", output)
+	}
 }
 
 func TestNoProgress(t *testing.T) {
