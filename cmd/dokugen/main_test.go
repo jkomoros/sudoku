@@ -41,7 +41,7 @@ func TestHelp(t *testing.T) {
 
 	options.HELP = true
 
-	options.fixUp()
+	options.fixUp(nil)
 	output, errOutput := getOutput(options)
 	expectations := getExpectations("help")
 
@@ -67,7 +67,7 @@ func TestSingleGenerate(t *testing.T) {
 	//We don't do FAKE_GENERATE here because we want to make sure at least one comes back legit.
 	options.NO_CACHE = true
 
-	options.fixUp()
+	options.fixUp(nil)
 
 	output, errOutput := getOutput(options)
 
@@ -93,7 +93,7 @@ func TestMultiGenerate(t *testing.T) {
 	options.FAKE_GENERATE = true
 	options.NO_CACHE = true
 
-	options.fixUp()
+	options.fixUp(nil)
 
 	output, _ := getOutput(options)
 
@@ -111,7 +111,7 @@ func TestNoProgress(t *testing.T) {
 	options.FAKE_GENERATE = true
 	options.NO_CACHE = true
 
-	options.fixUp()
+	options.fixUp(nil)
 
 	_, errOutput := getOutput(options)
 
@@ -130,7 +130,7 @@ func TestPrintStats(t *testing.T) {
 	options.FAKE_GENERATE = true
 	options.NO_CACHE = true
 
-	options.fixUp()
+	options.fixUp(nil)
 
 	output, _ := getOutput(options)
 

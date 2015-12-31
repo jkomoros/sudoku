@@ -97,7 +97,14 @@ func defineFlags(options *appOptions) {
 	options.flagSet.BoolVar(&options.NO_PROGRESS, "no-progress", false, "If provided, will not print a progress bar")
 }
 
-func (o *appOptions) fixUp() {
+func (o *appOptions) fixUp(errOutput io.ReadWriter) {
+
+	if errOutput == nil {
+		errOutput = os.Stderr
+	}
+
+	logger := log.New(errOutput, "", log.LstdFlags)
+
 	o.RAW_SYMMETRY = strings.ToLower(o.RAW_SYMMETRY)
 	switch o.RAW_SYMMETRY {
 	case "none":
@@ -109,38 +116,38 @@ func (o *appOptions) fixUp() {
 	case "vertical":
 		o.SYMMETRY = sudoku.SYMMETRY_VERTICAL
 	default:
-		log.Fatal("Unknown symmetry flag: ", o.RAW_SYMMETRY)
+		logger.Fatal("Unknown symmetry flag: ", o.RAW_SYMMETRY)
 	}
 
 	o.RAW_DIFFICULTY = strings.ToLower(o.RAW_DIFFICULTY)
 	if o.RAW_DIFFICULTY != "" {
 		vals, ok := difficultyRanges[o.RAW_DIFFICULTY]
 		if !ok {
-			log.Fatal("Invalid difficulty option:", o.RAW_DIFFICULTY)
+			logger.Fatal("Invalid difficulty option:", o.RAW_DIFFICULTY)
 		}
 		o.MIN_DIFFICULTY = vals.low
 		o.MAX_DIFFICULTY = vals.high
-		log.Println("Using difficulty max:", strconv.FormatFloat(vals.high, 'f', -1, 64), "min:", strconv.FormatFloat(vals.low, 'f', -1, 64))
+		logger.Println("Using difficulty max:", strconv.FormatFloat(vals.high, 'f', -1, 64), "min:", strconv.FormatFloat(vals.low, 'f', -1, 64))
 	}
 
 	o.CONVERTER = sdkconverter.Converters[o.PUZZLE_FORMAT]
 
 	if o.CONVERTER == nil {
-		log.Fatal("Invalid format option:", o.PUZZLE_FORMAT)
+		logger.Fatal("Invalid format option:", o.PUZZLE_FORMAT)
 	}
 }
 
-func getOptions(flagSet *flag.FlagSet, flagArguments []string) *appOptions {
+func getOptions(flagSet *flag.FlagSet, flagArguments []string, errOutput io.ReadWriter) *appOptions {
 	options := &appOptions{flagSet: flagSet}
 	defineFlags(options)
 	flagSet.Parse(flagArguments)
-	options.fixUp()
+	options.fixUp(errOutput)
 	return options
 }
 
 func main() {
 	flagSet := flag.CommandLine
-	process(getOptions(flagSet, os.Args[1:]), os.Stdout, os.Stderr)
+	process(getOptions(flagSet, os.Args[1:], nil), os.Stdout, os.Stderr)
 }
 
 func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter) {
