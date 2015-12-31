@@ -40,6 +40,7 @@ func TestSingleGenerate(t *testing.T) {
 
 	options.GENERATE = true
 	options.NUM = 1
+	//We don't do FAKE_GENERATE here because we want to make sure at least one comes back legit.
 	options.NO_CACHE = true
 
 	options.fixUp()
@@ -64,6 +65,8 @@ func TestMultiGenerate(t *testing.T) {
 
 	options.GENERATE = true
 	options.NUM = 3
+	//TestSingleGenerate already validated that generation worked; so now we can cut corners to save time.
+	options.FAKE_GENERATE = true
 	options.NO_CACHE = true
 
 	options.fixUp()
@@ -81,6 +84,7 @@ func TestNoProgress(t *testing.T) {
 	options.GENERATE = true
 	options.NUM = 2
 	options.NO_PROGRESS = true
+	options.FAKE_GENERATE = true
 	options.NO_CACHE = true
 
 	options.fixUp()

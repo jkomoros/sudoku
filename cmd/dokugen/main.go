@@ -26,6 +26,17 @@ import (
 
 const STORED_PUZZLES_DIRECTORY = ".puzzles"
 
+//Used as the grid to pass back when FAKE-GENERATE is true.
+const TEST_GRID = `6|1|2|.|.|.|4|.|3
+.|3|.|4|9|.|.|7|2
+.|.|7|.|.|.|.|6|5
+.|.|.|.|6|1|.|8|.
+1|.|3|.|4|.|2|.|6
+.|6|.|5|2|.|.|.|.
+.|9|.|.|.|.|5|.|.
+7|2|.|.|8|5|.|3|.
+5|.|1|.|.|.|9|4|7`
+
 type appOptions struct {
 	GENERATE            bool
 	HELP                bool
@@ -45,7 +56,9 @@ type appOptions struct {
 	NO_PROGRESS         bool
 	OUTPUT_CSV          bool
 	CONVERTER           sdkconverter.SudokuPuzzleConverter
-	flagSet             *flag.FlagSet
+	//Only used in testing.
+	FAKE_GENERATE bool
+	flagSet       *flag.FlagSet
 }
 
 var difficultyRanges map[string]struct {
@@ -165,7 +178,12 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 
 		//TODO: allow the type of symmetry to be configured.
 		if options.GENERATE {
-			grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.MIN_FILLED_CELLS, options.NO_CACHE)
+			if options.FAKE_GENERATE {
+				grid = sudoku.NewGrid()
+				grid.Load(TEST_GRID)
+			} else {
+				grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.MIN_FILLED_CELLS, options.NO_CACHE)
+			}
 			//TODO: factor out all of this double-printing.
 			if options.OUTPUT_CSV {
 				csvRec = append(csvRec, options.CONVERTER.DataString(grid))
