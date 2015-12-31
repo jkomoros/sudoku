@@ -52,7 +52,7 @@ func expectUneventfulFixup(t *testing.T, options *appOptions) {
 	}
 }
 
-func TestCSVExport(t *testing.T) {
+func TestCSVExportKomo(t *testing.T) {
 	options := getDefaultOptions()
 
 	options.GENERATE = true
@@ -83,6 +83,44 @@ func TestCSVExport(t *testing.T) {
 	for i, rec := range recs {
 		if rec[0] != KOMO_PUZZLE {
 			t.Error("On line", i, "of the CSV col 1 expected", KOMO_PUZZLE, ", but got", rec[0])
+		}
+		if !regularExpressionMatch(FLOAT_RE, rec[1]) {
+			t.Error("On line", i, "of the CSV col 2 expected a float, but got", rec[1])
+		}
+	}
+
+}
+
+func TestCSVExport(t *testing.T) {
+	options := getDefaultOptions()
+
+	options.GENERATE = true
+	options.NUM = 2
+	options.FAKE_GENERATE = true
+	options.NO_CACHE = true
+	options.OUTPUT_CSV = true
+	options.PRINT_STATS = true
+	options.NO_PROGRESS = true
+
+	expectUneventfulFixup(t, options)
+
+	output, errOutput := getOutput(options)
+
+	csvReader := csv.NewReader(strings.NewReader(output))
+
+	recs, err := csvReader.ReadAll()
+
+	if errOutput != "" {
+		t.Error("For CSV generation expected no error output, got", errOutput)
+	}
+
+	if err != nil {
+		t.Fatal("CSV export was not a valid CSV", err, output)
+	}
+
+	for i, rec := range recs {
+		if rec[0] != TEST_GRID {
+			t.Error("On line", i, "of the CSV col 1 expected", TEST_GRID, ", but got", rec[0])
 		}
 		if !regularExpressionMatch(FLOAT_RE, rec[1]) {
 			t.Error("On line", i, "of the CSV col 2 expected a float, but got", rec[1])
