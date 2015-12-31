@@ -14,9 +14,16 @@ func TestHelp(t *testing.T) {
 	options.HELP = true
 
 	options.fixUp()
-	getOutput(options)
+	output, errOutput := getOutput(options)
+	expectations := getExpectations("help")
 
-	//TODO: compare this to expect output
+	if output != "" {
+		t.Error("For help message, expected empty stdout, got", output)
+	}
+
+	if errOutput != expectations {
+		t.Error("For help message, got\n", errOutput, "\nwanted\n", expectations)
+	}
 }
 
 //Callers should call fixUpOptions after receiving this.
@@ -40,4 +47,9 @@ func getOutput(options *appOptions) (outputResult string, errorResult string) {
 	errorReaderBytes, _ := ioutil.ReadAll(errOutput)
 
 	return string(outputReaderBytes), string(errorReaderBytes)
+}
+
+func getExpectations(name string) string {
+	bytes, _ := ioutil.ReadFile("test_expectations/" + name + ".txt")
+	return string(bytes)
 }
