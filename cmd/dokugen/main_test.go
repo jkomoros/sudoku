@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"flag"
+	"github.com/jkomoros/sudoku"
 	"io/ioutil"
 	"testing"
 )
@@ -24,6 +25,30 @@ func TestHelp(t *testing.T) {
 	if errOutput != expectations {
 		t.Error("For help message, got\n", errOutput, "\nwanted\n", expectations)
 	}
+}
+
+func TestSingleGenerate(t *testing.T) {
+	options := getDefaultOptions()
+
+	options.GENERATE = true
+	options.NUM = 1
+	options.NO_CACHE = true
+
+	options.fixUp()
+
+	output, errOutput := getOutput(options)
+
+	if errOutput != "" {
+		t.Error("Generating a puzzle expected empty stderr, but got", errOutput)
+	}
+
+	grid := sudoku.NewGrid()
+	grid.Load(output)
+
+	if grid.Invalid() || grid.Empty() {
+		t.Error("Output for single generate was not a valid puzzle", output)
+	}
+
 }
 
 //Callers should call fixUpOptions after receiving this.
