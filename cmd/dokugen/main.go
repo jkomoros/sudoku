@@ -62,28 +62,28 @@ func init() {
 	}
 }
 
-func getOptions() *appOptions {
-
-	var options appOptions
-
-	flag.BoolVar(&options.GENERATE, "g", false, "if true, will generate a puzzle.")
-	flag.BoolVar(&options.HELP, "h", false, "If provided, will print help and exit.")
-	flag.IntVar(&options.NUM, "n", 1, "Number of things to generate")
-	flag.BoolVar(&options.PRINT_STATS, "p", false, "If provided, will print stats.")
-	flag.StringVar(&options.PUZZLE_TO_SOLVE, "s", "", "If provided, will solve the puzzle at the given filename and print solution.")
-	flag.BoolVar(&options.WALKTHROUGH, "w", false, "If provided, will print out a walkthrough to solve the provided puzzle.")
-	flag.StringVar(&options.RAW_SYMMETRY, "y", "vertical", "Valid values: 'none', 'both', 'horizontal', 'vertical")
-	flag.Float64Var(&options.SYMMETRY_PROPORTION, "r", 0.7, "What proportion of cells should be filled according to symmetry")
-	flag.IntVar(&options.MIN_FILLED_CELLS, "min-filled-cells", 0, "The minimum number of cells that should be filled in the generated puzzles.")
-	flag.Float64Var(&options.MIN_DIFFICULTY, "min", 0.0, "Minimum difficulty for generated puzzle")
-	flag.Float64Var(&options.MAX_DIFFICULTY, "max", 1.0, "Maximum difficulty for generated puzzle")
-	flag.BoolVar(&options.NO_CACHE, "no-cache", false, "If provided, will not vend generated puzzles from the cache of previously generated puzzles.")
+func defineFlags(flagSet *flag.FlagSet, options *appOptions) {
+	flagSet.BoolVar(&options.GENERATE, "g", false, "if true, will generate a puzzle.")
+	flagSet.BoolVar(&options.HELP, "h", false, "If provided, will print help and exit.")
+	flagSet.IntVar(&options.NUM, "n", 1, "Number of things to generate")
+	flagSet.BoolVar(&options.PRINT_STATS, "p", false, "If provided, will print stats.")
+	flagSet.StringVar(&options.PUZZLE_TO_SOLVE, "s", "", "If provided, will solve the puzzle at the given filename and print solution.")
+	flagSet.BoolVar(&options.WALKTHROUGH, "w", false, "If provided, will print out a walkthrough to solve the provided puzzle.")
+	flagSet.StringVar(&options.RAW_SYMMETRY, "y", "vertical", "Valid values: 'none', 'both', 'horizontal', 'vertical")
+	flagSet.Float64Var(&options.SYMMETRY_PROPORTION, "r", 0.7, "What proportion of cells should be filled according to symmetry")
+	flagSet.IntVar(&options.MIN_FILLED_CELLS, "min-filled-cells", 0, "The minimum number of cells that should be filled in the generated puzzles.")
+	flagSet.Float64Var(&options.MIN_DIFFICULTY, "min", 0.0, "Minimum difficulty for generated puzzle")
+	flagSet.Float64Var(&options.MAX_DIFFICULTY, "max", 1.0, "Maximum difficulty for generated puzzle")
+	flagSet.BoolVar(&options.NO_CACHE, "no-cache", false, "If provided, will not vend generated puzzles from the cache of previously generated puzzles.")
 	//TODO: the format should also be how we interpret loads, too.
-	flag.StringVar(&options.PUZZLE_FORMAT, "format", "sdk", "Which format to export puzzles from. Defaults to 'sdk'")
-	flag.BoolVar(&options.OUTPUT_CSV, "csv", false, "Output the results in CSV.")
-	flag.StringVar(&options.RAW_DIFFICULTY, "d", "", "difficulty, one of {gentle, easy, medium, tough}")
-	flag.Parse()
+	flagSet.StringVar(&options.PUZZLE_FORMAT, "format", "sdk", "Which format to export puzzles from. Defaults to 'sdk'")
+	flagSet.BoolVar(&options.OUTPUT_CSV, "csv", false, "Output the results in CSV.")
+	flagSet.StringVar(&options.RAW_DIFFICULTY, "d", "", "difficulty, one of {gentle, easy, medium, tough}")
+}
 
+func fixUpOptions(options *appOptions) {
+
+	//TODO: shouldn't this be a method on options?
 	options.RAW_SYMMETRY = strings.ToLower(options.RAW_SYMMETRY)
 	switch options.RAW_SYMMETRY {
 	case "none":
@@ -114,14 +114,19 @@ func getOptions() *appOptions {
 	if options.CONVERTER == nil {
 		log.Fatal("Invalid format option:", options.PUZZLE_FORMAT)
 	}
+}
 
-	return &options
+func getOptions(flagSet *flag.FlagSet, flagArguments []string) *appOptions {
+	options := &appOptions{}
+	defineFlags(flagSet, options)
+	flagSet.Parse(flagArguments)
+	fixUpOptions(options)
+	return options
 }
 
 func main() {
-
-	//TODO: figure out how to test this.
-	process(getOptions(), os.Stdout, os.Stderr)
+	flagSet := flag.CommandLine
+	process(getOptions(flagSet, os.Args[1:]), os.Stdout, os.Stderr)
 }
 
 func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter) {
