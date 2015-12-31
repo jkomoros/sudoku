@@ -9,6 +9,7 @@ import (
 	"github.com/nsf/termbox-go"
 	"log"
 	"strings"
+	"unicode/utf8"
 )
 
 type mainModel struct {
@@ -53,7 +54,16 @@ func drawGrid(grid *sudoku.Grid) {
 		//The first number in range will be byte offset, but for some items like the bullet, it's two bytes.
 		//But what we care about is that each item is a character.
 		for _, ch := range line {
-			termbox.SetCell(x, y, ch, termbox.ColorGreen, termbox.ColorDefault)
+
+			defaultColor := termbox.ColorGreen
+
+			numberRune, _ := utf8.DecodeRuneInString(sudoku.DIAGRAM_NUMBER)
+
+			if ch == numberRune {
+				defaultColor = termbox.ColorBlue
+			}
+
+			termbox.SetCell(x, y, ch, defaultColor, termbox.ColorDefault)
 			x++
 		}
 	}
