@@ -23,10 +23,8 @@ func main() {
 	defer termbox.Close()
 
 	model := &mainModel{
-		sudoku.NewGrid(),
+		sudoku.GenerateGrid(nil),
 	}
-
-	model.grid.Fill()
 
 	draw(model)
 
