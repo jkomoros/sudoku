@@ -62,7 +62,16 @@ func TestHelp(t *testing.T) {
 	expectUneventfulFixup(t, options)
 
 	output, errOutput := getOutput(options)
-	expectations := getExpectations("help")
+
+	//The output of -h is very finicky with tabs/spaces, and it's constnatly changing.
+	//So our golden will just be a generated version of the help message.
+	helpGoldenBuffer := &bytes.Buffer{}
+	options.flagSet.SetOutput(helpGoldenBuffer)
+	options.flagSet.PrintDefaults()
+
+	helpGoldenBytes, _ := ioutil.ReadAll(helpGoldenBuffer)
+
+	expectations := string(helpGoldenBytes)
 
 	if output != "" {
 		t.Error("For help message, expected empty stdout, got", output)
@@ -237,9 +246,4 @@ func getOutput(options *appOptions) (outputResult string, errorResult string) {
 	errorReaderBytes, _ := ioutil.ReadAll(errOutput)
 
 	return string(outputReaderBytes), string(errorReaderBytes)
-}
-
-func getExpectations(name string) string {
-	bytes, _ := ioutil.ReadFile("test_expectations/" + name + ".txt")
-	return string(bytes)
 }
