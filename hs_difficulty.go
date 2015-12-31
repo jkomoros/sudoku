@@ -64,7 +64,7 @@ func (self SolveDirections) Stats() []string {
 
 	result = append(result, divider)
 	//TODO: we shouldn't even include this... it's not meaningful to report the difficulty of a single solve.
-	result = append(result, fmt.Sprintf("Difficulty : %f", self.Signals().difficulty()))
+	result = append(result, fmt.Sprintf("Difficulty: %f", self.Signals().difficulty()))
 	result = append(result, divider)
 	result = append(result, fmt.Sprintf("Step count: %d", len(self.Steps)))
 	result = append(result, divider)
@@ -74,7 +74,7 @@ func (self SolveDirections) Stats() []string {
 	//We want a stable ordering for technique counts.
 	for _, technique := range AllTechniques {
 		//TODO: pad the technique name with enough spaces so the colon lines up.
-		result = append(result, fmt.Sprintf("%s : %d", technique.Name(), techniqueCount[technique.Name()]))
+		result = append(result, fmt.Sprintf("%s: %d", technique.Name(), techniqueCount[technique.Name()]))
 	}
 
 	result = append(result, divider)
