@@ -49,8 +49,12 @@ func draw(model *mainModel) {
 
 func drawGrid(grid *sudoku.Grid) {
 	for y, line := range strings.Split(grid.Diagram(), "\n") {
-		for x, ch := range line {
+		x := 0
+		//The first number in range will be byte offset, but for some items like the bullet, it's two bytes.
+		//But what we care about is that each item is a character.
+		for _, ch := range line {
 			termbox.SetCell(x, y, ch, termbox.ColorGreen, termbox.ColorDefault)
+			x++
 		}
 	}
 }
