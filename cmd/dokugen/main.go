@@ -124,13 +124,13 @@ func getOptions(flagSet *flag.FlagSet, flagArguments []string) *appOptions {
 
 func main() {
 	flagSet := flag.CommandLine
-	process(getOptions(flagSet, os.Args[1:]), os.Stdout, os.Stderr)
+	process(getOptions(flagSet, os.Args[1:]), flagSet, os.Stdout, os.Stderr)
 }
 
-func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter) {
+func process(options *appOptions, flagSet *flag.FlagSet, output io.ReadWriter, errOutput io.ReadWriter) {
 
 	if options.HELP {
-		flag.PrintDefaults()
+		flagSet.PrintDefaults()
 		return
 	}
 
