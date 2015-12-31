@@ -15,6 +15,8 @@ func main() {
 	}
 	defer termbox.Close()
 
+	i := 0
+
 mainloop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
@@ -22,8 +24,11 @@ mainloop:
 			switch ev.Key {
 			case termbox.KeyEsc:
 				break mainloop
-
+			case termbox.KeySpace:
+				termbox.SetCell(i, 0, '*', termbox.ColorBlue, termbox.ColorGreen)
+				i++
 			}
 		}
+		termbox.Flush()
 	}
 }
