@@ -14,7 +14,7 @@ import (
 //regexp101.com and regexr.com are good tools for creating the regular expressions.
 const GRID_RE = `((\d\||\.\|){8}(\d|\.)\n){8}((\d\||\.\|){8}(\d|\.))\n?`
 const OUTPUT_DIVIDER_RE = `-{25}\n?`
-const FLOAT_RE = `\d{1,5}\.\d{4,20}`
+const FLOAT_RE = `(\d{1,5}\.\d{4,20}|0)`
 const INT_RE = `\b\d{1,5}\b`
 
 var VARIANT_RE string
