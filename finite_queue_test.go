@@ -250,7 +250,9 @@ func TestSyncedFiniteQueue(t *testing.T) {
 		t.Fail()
 	}
 
-	secondQueue := newSyncedFiniteQueue(1, DIM, done)
+	secondDone := make(chan bool, 1)
+
+	secondQueue := newSyncedFiniteQueue(1, DIM, secondDone)
 	//Note that the first item does not fit in the first bucket on purpose.
 	objects := [...]*SimpleRankedObject{{3, "a"}, {4, "b"}, {4, "c"}, {5, "d"}}
 	for _, object := range objects {
