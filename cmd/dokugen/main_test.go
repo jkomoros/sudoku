@@ -35,13 +35,28 @@ func numLineRE(word string, isFloat bool) string {
 
 }
 
+func expectUneventfulFixup(t *testing.T, options *appOptions) {
+	errWriter := &bytes.Buffer{}
+
+	options.fixUp(errWriter)
+
+	errorReaderBytes, _ := ioutil.ReadAll(errWriter)
+
+	errOutput := string(errorReaderBytes)
+
+	if errOutput != "" {
+		t.Error("The options fixup was expected to be uneventful but showed", errOutput)
+	}
+}
+
 func TestHelp(t *testing.T) {
 
 	options := getDefaultOptions()
 
 	options.HELP = true
 
-	options.fixUp(nil)
+	expectUneventfulFixup(t, options)
+
 	output, errOutput := getOutput(options)
 	expectations := getExpectations("help")
 
@@ -67,7 +82,7 @@ func TestSingleGenerate(t *testing.T) {
 	//We don't do FAKE_GENERATE here because we want to make sure at least one comes back legit.
 	options.NO_CACHE = true
 
-	options.fixUp(nil)
+	expectUneventfulFixup(t, options)
 
 	output, errOutput := getOutput(options)
 
@@ -93,7 +108,7 @@ func TestMultiGenerate(t *testing.T) {
 	options.FAKE_GENERATE = true
 	options.NO_CACHE = true
 
-	options.fixUp(nil)
+	expectUneventfulFixup(t, options)
 
 	output, _ := getOutput(options)
 
@@ -111,7 +126,7 @@ func TestNoProgress(t *testing.T) {
 	options.FAKE_GENERATE = true
 	options.NO_CACHE = true
 
-	options.fixUp(nil)
+	expectUneventfulFixup(t, options)
 
 	_, errOutput := getOutput(options)
 
@@ -130,7 +145,7 @@ func TestPrintStats(t *testing.T) {
 	options.FAKE_GENERATE = true
 	options.NO_CACHE = true
 
-	options.fixUp(nil)
+	expectUneventfulFixup(t, options)
 
 	output, _ := getOutput(options)
 
