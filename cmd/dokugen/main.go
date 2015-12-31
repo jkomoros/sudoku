@@ -97,7 +97,8 @@ func defineFlags(options *appOptions) {
 	options.flagSet.BoolVar(&options.NO_PROGRESS, "no-progress", false, "If provided, will not print a progress bar")
 }
 
-func (o *appOptions) fixUp(errOutput io.ReadWriter) {
+//If it returns true, the program should quit.
+func (o *appOptions) fixUp(errOutput io.ReadWriter) bool {
 
 	if errOutput == nil {
 		errOutput = os.Stderr
@@ -116,14 +117,16 @@ func (o *appOptions) fixUp(errOutput io.ReadWriter) {
 	case "vertical":
 		o.SYMMETRY = sudoku.SYMMETRY_VERTICAL
 	default:
-		logger.Fatal("Unknown symmetry flag: ", o.RAW_SYMMETRY)
+		logger.Println("Unknown symmetry flag: ", o.RAW_SYMMETRY)
+		return true
 	}
 
 	o.RAW_DIFFICULTY = strings.ToLower(o.RAW_DIFFICULTY)
 	if o.RAW_DIFFICULTY != "" {
 		vals, ok := difficultyRanges[o.RAW_DIFFICULTY]
 		if !ok {
-			logger.Fatal("Invalid difficulty option:", o.RAW_DIFFICULTY)
+			logger.Println("Invalid difficulty option:", o.RAW_DIFFICULTY)
+			return true
 		}
 		o.MIN_DIFFICULTY = vals.low
 		o.MAX_DIFFICULTY = vals.high
@@ -133,15 +136,19 @@ func (o *appOptions) fixUp(errOutput io.ReadWriter) {
 	o.CONVERTER = sdkconverter.Converters[o.PUZZLE_FORMAT]
 
 	if o.CONVERTER == nil {
-		logger.Fatal("Invalid format option:", o.PUZZLE_FORMAT)
+		logger.Println("Invalid format option:", o.PUZZLE_FORMAT)
+		return true
 	}
+	return false
 }
 
 func getOptions(flagSet *flag.FlagSet, flagArguments []string, errOutput io.ReadWriter) *appOptions {
 	options := &appOptions{flagSet: flagSet}
 	defineFlags(options)
 	flagSet.Parse(flagArguments)
-	options.fixUp(errOutput)
+	if options.fixUp(errOutput) {
+		os.Exit(1)
+	}
 	return options
 }
 
