@@ -63,6 +63,12 @@ type appOptions struct {
 	progress      *uiprogress.Progress
 }
 
+type outputWriter struct {
+	output    io.ReadWriter
+	csvWriter *csv.Writer
+	tempRec   []string
+}
+
 var difficultyRanges map[string]struct {
 	low, high float64
 }
@@ -77,6 +83,41 @@ func init() {
 		"medium": {0.6, 0.7},
 		"tough":  {0.7, 1.0},
 	}
+}
+
+func (o *outputWriter) Write(output string, extra string) {
+	//Extra will only be written if not going to CSV
+	if o.csvWriter == nil {
+		fmt.Fprintln(o.output, output)
+		if extra != "" {
+			fmt.Fprintln(o.output, extra)
+		}
+		return
+	}
+	o.tempRec = append(o.tempRec, output)
+}
+
+func (o *outputWriter) EndOfRec() {
+	if o.csvWriter == nil {
+		return
+	}
+	o.csvWriter.Write(o.tempRec)
+	o.tempRec = nil
+}
+
+func (o *outputWriter) Done() {
+	if o.csvWriter == nil {
+		return
+	}
+	o.csvWriter.Flush()
+}
+
+func NewOutputWriter(options *appOptions, output io.ReadWriter) *outputWriter {
+	var csvWriter *csv.Writer
+	if options.CSV {
+		csvWriter = csv.NewWriter(output)
+	}
+	return &outputWriter{output, csvWriter, nil}
 }
 
 func defineFlags(options *appOptions) {
@@ -172,12 +213,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 
 	var grid *sudoku.Grid
 
-	var csvWriter *csv.Writer
-	var csvRec []string
-
-	if options.CSV {
-		csvWriter = csv.NewWriter(output)
-	}
+	writer := NewOutputWriter(options, output)
 
 	var bar *uiprogress.Bar
 
@@ -236,10 +272,6 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 
 	for i := 0; i < options.NUM; i++ {
 
-		if options.CSV {
-			csvRec = nil
-		}
-
 		//TODO: allow the type of symmetry to be configured.
 		if options.GENERATE {
 			if options.FAKE_GENERATE {
@@ -248,12 +280,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 			} else {
 				grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.MIN_FILLED_CELLS, options.NO_CACHE, logger)
 			}
-			//TODO: factor out all of this double-printing.
-			if options.CSV {
-				csvRec = append(csvRec, options.CONVERTER.DataString(grid))
-			} else {
-				fmt.Fprintln(output, options.CONVERTER.DataString(grid))
-			}
+			writer.Write(options.CONVERTER.DataString(grid), "")
 		} else if len(incomingPuzzles)-1 >= i {
 			//Load up an inbound puzzle
 			grid = incomingPuzzles[i]
@@ -280,47 +307,27 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 		}
 
 		if options.WALKTHROUGH {
-			if options.CSV {
-				csvRec = append(csvRec, directions.Walkthrough())
-			} else {
-				fmt.Fprintln(output, directions.Walkthrough())
-			}
+			writer.Write(directions.Walkthrough(), "")
 		}
 		if options.PRINT_STATS {
-			if options.CSV {
-				csvRec = append(csvRec, strconv.FormatFloat(grid.Difficulty(), 'f', -1, 64))
-				//We won't print out the directions.Stats() like we do for just printing to stdout,
-				//because that's mostly noise in this format.
-			} else {
-				fmt.Fprintln(output, grid.Difficulty())
-				//TODO: consider actually printing out the Signals stats (with a Stats method on signals)
-				fmt.Fprintln(output, strings.Join(directions.Stats(), "\n"))
-			}
+			writer.Write(strconv.FormatFloat(grid.Difficulty(), 'f', -1, 64),
+				strings.Join(directions.Stats(), "\n"))
 		}
 		//TODO: using the existence of options.PUZZLE_TO_SOLVE as the way to detect that
 		//we are working on an inbound puzzle seems a bit hackish.
 		if options.PUZZLE_TO_SOLVE != "" {
 			grid.Solve()
-			if options.CSV {
-				csvRec = append(csvRec, options.CONVERTER.DataString(grid))
-			} else {
-				fmt.Fprintln(output, options.CONVERTER.DataString(grid))
-
-			}
+			writer.Write(options.CONVERTER.DataString(grid), "")
 		}
 
-		if options.CSV {
-			csvWriter.Write(csvRec)
-		}
+		writer.EndOfRec()
 
 		grid.Done()
 		if bar != nil {
 			bar.Incr()
 		}
 	}
-	if options.CSV {
-		csvWriter.Flush()
-	}
+	writer.Done()
 }
 
 func puzzleDirectoryParts(symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) []string {
