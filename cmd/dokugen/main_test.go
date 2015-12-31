@@ -5,8 +5,11 @@ import (
 	"flag"
 	"github.com/jkomoros/sudoku"
 	"io/ioutil"
+	"regexp"
 	"testing"
 )
+
+const GRID_RE = `((\d\||\.\|){8}(\d|\.)\n){8}((\d\||\.\|){8}(\d|\.))`
 
 func TestHelp(t *testing.T) {
 
@@ -27,6 +30,11 @@ func TestHelp(t *testing.T) {
 	}
 }
 
+func regularExpressionMatch(reText string, input string) bool {
+	re := regexp.MustCompile(reText)
+	return re.MatchString(input)
+}
+
 func TestSingleGenerate(t *testing.T) {
 	options := getDefaultOptions()
 
@@ -40,6 +48,10 @@ func TestSingleGenerate(t *testing.T) {
 
 	if errOutput != "" {
 		t.Error("Generating a puzzle expected empty stderr, but got", errOutput)
+	}
+
+	if !regularExpressionMatch(GRID_RE, output) {
+		t.Error("Output didn't match the expected RE for a grid", output)
 	}
 
 	grid := sudoku.NewGrid()
