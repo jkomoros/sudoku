@@ -130,6 +130,8 @@ func main() {
 
 func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter) {
 
+	options.flagSet.SetOutput(errOutput)
+
 	if options.HELP {
 		options.flagSet.PrintDefaults()
 		return
