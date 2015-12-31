@@ -292,8 +292,12 @@ func TestSyncedFiniteQueue(t *testing.T) {
 	//Having this here helps ensure that the NEXT test's condition is true if ti will be.
 	select {
 	case <-secondQueue.done:
-		//fine
-	case <-time.After(10):
+		//As expected.
+
+	//This seems like a crazy amount of time to wait. It used to be '10', but in go 1.5 that
+	//was reliably not enough time, and deeper investigation revealed that everything was
+	//operating fine. Presumably something about when GC is scheduled or something?
+	case <-time.After(1 * time.Second):
 		t.Log("We didn't get the done signal after some time of waiting.")
 		t.Fail()
 	}
