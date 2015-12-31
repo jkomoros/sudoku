@@ -379,6 +379,11 @@ func (self *Grid) Invalid() bool {
 	return false
 }
 
+//Returns true if none of the grid's cells are filled.
+func (self *Grid) Empty() bool {
+	return self.numFilledCells == 0
+}
+
 //Called by cells when they notice they are invalid and the grid might not know that.
 func (self *Grid) cellIsInvalid(cell *Cell) {
 	//Doesn't matter if it was already set.

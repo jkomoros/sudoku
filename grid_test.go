@@ -644,6 +644,31 @@ func TestGenerate(t *testing.T) {
 	}
 }
 
+func TestGridEmpty(t *testing.T) {
+	grid := NewGrid()
+
+	if !grid.Empty() {
+		t.Error("Fresh grid wasn't empty")
+	}
+
+	grid.Load(TEST_GRID)
+
+	if grid.Empty() {
+		t.Error("A filled grid was reported as empty")
+	}
+
+	//Reset the grid
+	for r := 0; r < DIM; r++ {
+		for c := 0; c < DIM; c++ {
+			grid.Cell(r, c).SetNumber(0)
+		}
+	}
+
+	if !grid.Empty() {
+		t.Error("A forcibly cleared grid did not report as empty.")
+	}
+}
+
 //This is an extremely expensive test desgined to help ferret out #134.
 //TODO: remove this test!
 func TestGenerateMultipleSolutions(t *testing.T) {
