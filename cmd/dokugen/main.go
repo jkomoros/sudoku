@@ -81,38 +81,36 @@ func defineFlags(flagSet *flag.FlagSet, options *appOptions) {
 	flagSet.StringVar(&options.RAW_DIFFICULTY, "d", "", "difficulty, one of {gentle, easy, medium, tough}")
 }
 
-func fixUpOptions(options *appOptions) {
-
-	//TODO: shouldn't this be a method on options?
-	options.RAW_SYMMETRY = strings.ToLower(options.RAW_SYMMETRY)
-	switch options.RAW_SYMMETRY {
+func (o *appOptions) fixUp() {
+	o.RAW_SYMMETRY = strings.ToLower(o.RAW_SYMMETRY)
+	switch o.RAW_SYMMETRY {
 	case "none":
-		options.SYMMETRY = sudoku.SYMMETRY_NONE
+		o.SYMMETRY = sudoku.SYMMETRY_NONE
 	case "both":
-		options.SYMMETRY = sudoku.SYMMETRY_BOTH
+		o.SYMMETRY = sudoku.SYMMETRY_BOTH
 	case "horizontal":
-		options.SYMMETRY = sudoku.SYMMETRY_HORIZONTAL
+		o.SYMMETRY = sudoku.SYMMETRY_HORIZONTAL
 	case "vertical":
-		options.SYMMETRY = sudoku.SYMMETRY_VERTICAL
+		o.SYMMETRY = sudoku.SYMMETRY_VERTICAL
 	default:
-		log.Fatal("Unknown symmetry flag: ", options.RAW_SYMMETRY)
+		log.Fatal("Unknown symmetry flag: ", o.RAW_SYMMETRY)
 	}
 
-	options.RAW_DIFFICULTY = strings.ToLower(options.RAW_DIFFICULTY)
-	if options.RAW_DIFFICULTY != "" {
-		vals, ok := difficultyRanges[options.RAW_DIFFICULTY]
+	o.RAW_DIFFICULTY = strings.ToLower(o.RAW_DIFFICULTY)
+	if o.RAW_DIFFICULTY != "" {
+		vals, ok := difficultyRanges[o.RAW_DIFFICULTY]
 		if !ok {
-			log.Fatal("Invalid difficulty option:", options.RAW_DIFFICULTY)
+			log.Fatal("Invalid difficulty option:", o.RAW_DIFFICULTY)
 		}
-		options.MIN_DIFFICULTY = vals.low
-		options.MAX_DIFFICULTY = vals.high
+		o.MIN_DIFFICULTY = vals.low
+		o.MAX_DIFFICULTY = vals.high
 		log.Println("Using difficulty max:", strconv.FormatFloat(vals.high, 'f', -1, 64), "min:", strconv.FormatFloat(vals.low, 'f', -1, 64))
 	}
 
-	options.CONVERTER = sdkconverter.Converters[options.PUZZLE_FORMAT]
+	o.CONVERTER = sdkconverter.Converters[o.PUZZLE_FORMAT]
 
-	if options.CONVERTER == nil {
-		log.Fatal("Invalid format option:", options.PUZZLE_FORMAT)
+	if o.CONVERTER == nil {
+		log.Fatal("Invalid format option:", o.PUZZLE_FORMAT)
 	}
 }
 
@@ -120,7 +118,7 @@ func getOptions(flagSet *flag.FlagSet, flagArguments []string) *appOptions {
 	options := &appOptions{}
 	defineFlags(flagSet, options)
 	flagSet.Parse(flagArguments)
-	fixUpOptions(options)
+	options.fixUp()
 	return options
 }
 
