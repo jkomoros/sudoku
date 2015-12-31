@@ -148,6 +148,44 @@ func TestCSVExport(t *testing.T) {
 
 }
 
+func TestCSVImport(t *testing.T) {
+
+	//TODO: test importing files that are not in the expected format
+
+	options := getDefaultOptions()
+
+	options.OUTPUT_CSV = true
+	options.NO_PROGRESS = true
+	options.PUZZLE_FORMAT = "komo"
+	options.PUZZLE_TO_SOLVE = "tests/input.csv"
+
+	expectUneventfulFixup(t, options)
+
+	output, errOutput := getOutput(options)
+
+	csvReader := csv.NewReader(strings.NewReader(output))
+
+	recs, err := csvReader.ReadAll()
+
+	if output == "" {
+		t.Fatal("Got no output from CSV import")
+	}
+
+	if errOutput != "" {
+		t.Error("For CSV import expected no error output, got", errOutput)
+	}
+
+	if err != nil {
+		t.Fatal("CSV export was not a valid CSV", err, output)
+	}
+
+	for i, rec := range recs {
+		if rec[0] != SOLVED_KOMO_PUZZLE {
+			t.Error("On line", i, "of the CSV col 1 expected", SOLVED_KOMO_PUZZLE, ", but got", rec[0])
+		}
+	}
+}
+
 func TestPuzzleImportKomo(t *testing.T) {
 	options := getDefaultOptions()
 

@@ -6,6 +6,7 @@ Run with -h to see help on how to use it.
 package main
 
 import (
+	"bytes"
 	"encoding/csv"
 	"flag"
 	"fmt"
@@ -54,8 +55,9 @@ type appOptions struct {
 	NO_CACHE            bool
 	PUZZLE_FORMAT       string
 	NO_PROGRESS         bool
-	OUTPUT_CSV          bool
-	CONVERTER           sdkconverter.SudokuPuzzleConverter
+	//TODO: now that we're using this flag to denote incoming CSV, this variable name seems wrong.
+	OUTPUT_CSV bool
+	CONVERTER  sdkconverter.SudokuPuzzleConverter
 	//Only used in testing.
 	FAKE_GENERATE bool
 	flagSet       *flag.FlagSet
@@ -83,7 +85,7 @@ func defineFlags(options *appOptions) {
 	options.flagSet.BoolVar(&options.HELP, "h", false, "If provided, will print help and exit.")
 	options.flagSet.IntVar(&options.NUM, "n", 1, "Number of things to generate")
 	options.flagSet.BoolVar(&options.PRINT_STATS, "p", false, "If provided, will print stats.")
-	options.flagSet.StringVar(&options.PUZZLE_TO_SOLVE, "s", "", "If provided, will solve the puzzle at the given filename and print solution.")
+	options.flagSet.StringVar(&options.PUZZLE_TO_SOLVE, "s", "", "If provided, will solve the puzzle at the given filename and print solution. If -csv is provided, will expect the file to be a csv where the first column of each row is a puzzle in the specified puzzle format.")
 	options.flagSet.BoolVar(&options.WALKTHROUGH, "w", false, "If provided, will print out a walkthrough to solve the provided puzzle.")
 	options.flagSet.StringVar(&options.RAW_SYMMETRY, "y", "vertical", "Valid values: 'none', 'both', 'horizontal', 'vertical")
 	options.flagSet.Float64Var(&options.SYMMETRY_PROPORTION, "r", 0.7, "What proportion of cells should be filled according to symmetry")
@@ -93,7 +95,7 @@ func defineFlags(options *appOptions) {
 	options.flagSet.BoolVar(&options.NO_CACHE, "no-cache", false, "If provided, will not vend generated puzzles from the cache of previously generated puzzles.")
 	//TODO: the format should also be how we interpret loads, too.
 	options.flagSet.StringVar(&options.PUZZLE_FORMAT, "format", "sdk", "Which format to export puzzles from. Defaults to 'sdk'")
-	options.flagSet.BoolVar(&options.OUTPUT_CSV, "csv", false, "Output the results in CSV.")
+	options.flagSet.BoolVar(&options.OUTPUT_CSV, "csv", false, "Export CSV, and expect inbound puzzle files to be a CSV with a puzzle per row.")
 	options.flagSet.StringVar(&options.RAW_DIFFICULTY, "d", "", "difficulty, one of {gentle, easy, medium, tough}")
 	options.flagSet.BoolVar(&options.NO_PROGRESS, "no-progress", false, "If provided, will not print a progress bar")
 }
@@ -188,6 +190,51 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 		bar = options.progress.AddBar(options.NUM).PrependElapsed().AppendCompleted()
 	}
 
+	var incomingPuzzles []*sudoku.Grid
+
+	if options.PUZZLE_TO_SOLVE != "" {
+		//There are puzzles to load up.
+
+		data, err := ioutil.ReadFile(options.PUZZLE_TO_SOLVE)
+
+		if err != nil {
+			logger.Fatalln("Read error for specified file:", err)
+		}
+
+		var tempGrid *sudoku.Grid
+
+		var puzzleData []string
+
+		if options.OUTPUT_CSV {
+			//Load up multiple.
+			csvReader := csv.NewReader(bytes.NewReader(data))
+			rows, err := csvReader.ReadAll()
+			if err != nil {
+				logger.Fatalln("The provided input CSV was not a valid CSV:", err)
+			}
+			for _, row := range rows {
+				puzzleData = append(puzzleData, row[0])
+			}
+		} else {
+			//Just load up a single file worth.
+			puzzleData = []string{string(data)}
+		}
+
+		for _, puzz := range puzzleData {
+
+			tempGrid = sudoku.NewGrid()
+
+			//TODO: shouldn't a load method have a way to say the string provided is invalid?
+			options.CONVERTER.Load(tempGrid, string(puzz))
+
+			incomingPuzzles = append(incomingPuzzles, tempGrid)
+		}
+		//Tell the main loop how many puzzles to expect.
+		//TODO: this feels a bit like a hack, doesn't it? options.NUM is normally a user input value.
+		options.NUM = len(incomingPuzzles)
+
+	}
+
 	for i := 0; i < options.NUM; i++ {
 
 		if options.OUTPUT_CSV {
@@ -208,18 +255,9 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 			} else {
 				fmt.Fprintln(output, options.CONVERTER.DataString(grid))
 			}
-		} else if options.PUZZLE_TO_SOLVE != "" {
-			//TODO: detect if the load failed.
-			grid = sudoku.NewGrid()
-
-			data, err := ioutil.ReadFile(options.PUZZLE_TO_SOLVE)
-
-			if err != nil {
-				logger.Fatalln("Read error for specified file:", err)
-			}
-
-			//TODO: shouldn't a load method have a way to say the string provided is invalid?
-			options.CONVERTER.Load(grid, string(data))
+		} else if len(incomingPuzzles)-1 >= i {
+			//Load up an inbound puzzle
+			grid = incomingPuzzles[i]
 		}
 
 		if grid == nil {
@@ -260,6 +298,8 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 				fmt.Fprintln(output, strings.Join(directions.Stats(), "\n"))
 			}
 		}
+		//TODO: using the existence of options.PUZZLE_TO_SOLVE as the way to detect that
+		//we are working on an inbound puzzle seems a bit hackish.
 		if options.PUZZLE_TO_SOLVE != "" {
 			grid.Solve()
 			if options.OUTPUT_CSV {
@@ -274,10 +314,6 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 			csvWriter.Write(csvRec)
 		}
 
-		if options.PUZZLE_TO_SOLVE != "" {
-			//If we're asked to solve, n could only be 1 anyway.
-			return
-		}
 		grid.Done()
 		if bar != nil {
 			bar.Incr()
