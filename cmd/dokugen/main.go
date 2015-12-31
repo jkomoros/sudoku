@@ -26,6 +26,17 @@ import (
 
 const STORED_PUZZLES_DIRECTORY = ".puzzles"
 
+//Used as the grid to pass back when FAKE-GENERATE is true.
+const TEST_GRID = `6|1|2|.|.|.|4|.|3
+.|3|.|4|9|.|.|7|2
+.|.|7|.|.|.|.|6|5
+.|.|.|.|6|1|.|8|.
+1|.|3|.|4|.|2|.|6
+.|6|.|5|2|.|.|.|.
+.|9|.|.|.|.|5|.|.
+7|2|.|.|8|5|.|3|.
+5|.|1|.|.|.|9|4|7`
+
 type appOptions struct {
 	GENERATE            bool
 	HELP                bool
@@ -42,8 +53,12 @@ type appOptions struct {
 	MAX_DIFFICULTY      float64
 	NO_CACHE            bool
 	PUZZLE_FORMAT       string
+	NO_PROGRESS         bool
 	OUTPUT_CSV          bool
 	CONVERTER           sdkconverter.SudokuPuzzleConverter
+	//Only used in testing.
+	FAKE_GENERATE bool
+	flagSet       *flag.FlagSet
 }
 
 var difficultyRanges map[string]struct {
@@ -62,67 +77,96 @@ func init() {
 	}
 }
 
-func main() {
-
-	//TODO: figure out how to test this.
-
-	var options appOptions
-
-	flag.BoolVar(&options.GENERATE, "g", false, "if true, will generate a puzzle.")
-	flag.BoolVar(&options.HELP, "h", false, "If provided, will print help and exit.")
-	flag.IntVar(&options.NUM, "n", 1, "Number of things to generate")
-	flag.BoolVar(&options.PRINT_STATS, "p", false, "If provided, will print stats.")
-	flag.StringVar(&options.PUZZLE_TO_SOLVE, "s", "", "If provided, will solve the puzzle at the given filename and print solution.")
-	flag.BoolVar(&options.WALKTHROUGH, "w", false, "If provided, will print out a walkthrough to solve the provided puzzle.")
-	flag.StringVar(&options.RAW_SYMMETRY, "y", "vertical", "Valid values: 'none', 'both', 'horizontal', 'vertical")
-	flag.Float64Var(&options.SYMMETRY_PROPORTION, "r", 0.7, "What proportion of cells should be filled according to symmetry")
-	flag.IntVar(&options.MIN_FILLED_CELLS, "min-filled-cells", 0, "The minimum number of cells that should be filled in the generated puzzles.")
-	flag.Float64Var(&options.MIN_DIFFICULTY, "min", 0.0, "Minimum difficulty for generated puzzle")
-	flag.Float64Var(&options.MAX_DIFFICULTY, "max", 1.0, "Maximum difficulty for generated puzzle")
-	flag.BoolVar(&options.NO_CACHE, "no-cache", false, "If provided, will not vend generated puzzles from the cache of previously generated puzzles.")
+func defineFlags(options *appOptions) {
+	options.flagSet.BoolVar(&options.GENERATE, "g", false, "if true, will generate a puzzle.")
+	options.flagSet.BoolVar(&options.HELP, "h", false, "If provided, will print help and exit.")
+	options.flagSet.IntVar(&options.NUM, "n", 1, "Number of things to generate")
+	options.flagSet.BoolVar(&options.PRINT_STATS, "p", false, "If provided, will print stats.")
+	options.flagSet.StringVar(&options.PUZZLE_TO_SOLVE, "s", "", "If provided, will solve the puzzle at the given filename and print solution.")
+	options.flagSet.BoolVar(&options.WALKTHROUGH, "w", false, "If provided, will print out a walkthrough to solve the provided puzzle.")
+	options.flagSet.StringVar(&options.RAW_SYMMETRY, "y", "vertical", "Valid values: 'none', 'both', 'horizontal', 'vertical")
+	options.flagSet.Float64Var(&options.SYMMETRY_PROPORTION, "r", 0.7, "What proportion of cells should be filled according to symmetry")
+	options.flagSet.IntVar(&options.MIN_FILLED_CELLS, "min-filled-cells", 0, "The minimum number of cells that should be filled in the generated puzzles.")
+	options.flagSet.Float64Var(&options.MIN_DIFFICULTY, "min", 0.0, "Minimum difficulty for generated puzzle")
+	options.flagSet.Float64Var(&options.MAX_DIFFICULTY, "max", 1.0, "Maximum difficulty for generated puzzle")
+	options.flagSet.BoolVar(&options.NO_CACHE, "no-cache", false, "If provided, will not vend generated puzzles from the cache of previously generated puzzles.")
 	//TODO: the format should also be how we interpret loads, too.
-	flag.StringVar(&options.PUZZLE_FORMAT, "format", "sdk", "Which format to export puzzles from. Defaults to 'sdk'")
-	flag.BoolVar(&options.OUTPUT_CSV, "csv", false, "Output the results in CSV.")
-	flag.StringVar(&options.RAW_DIFFICULTY, "d", "", "difficulty, one of {gentle, easy, medium, tough}")
-	flag.Parse()
+	options.flagSet.StringVar(&options.PUZZLE_FORMAT, "format", "sdk", "Which format to export puzzles from. Defaults to 'sdk'")
+	options.flagSet.BoolVar(&options.OUTPUT_CSV, "csv", false, "Output the results in CSV.")
+	options.flagSet.StringVar(&options.RAW_DIFFICULTY, "d", "", "difficulty, one of {gentle, easy, medium, tough}")
+	options.flagSet.BoolVar(&options.NO_PROGRESS, "no-progress", false, "If provided, will not print a progress bar")
+}
 
-	options.RAW_SYMMETRY = strings.ToLower(options.RAW_SYMMETRY)
-	switch options.RAW_SYMMETRY {
+//If it returns true, the program should quit.
+func (o *appOptions) fixUp(errOutput io.ReadWriter) bool {
+
+	if errOutput == nil {
+		errOutput = os.Stderr
+	}
+
+	logger := log.New(errOutput, "", log.LstdFlags)
+
+	o.RAW_SYMMETRY = strings.ToLower(o.RAW_SYMMETRY)
+	switch o.RAW_SYMMETRY {
 	case "none":
-		options.SYMMETRY = sudoku.SYMMETRY_NONE
+		o.SYMMETRY = sudoku.SYMMETRY_NONE
 	case "both":
-		options.SYMMETRY = sudoku.SYMMETRY_BOTH
+		o.SYMMETRY = sudoku.SYMMETRY_BOTH
 	case "horizontal":
-		options.SYMMETRY = sudoku.SYMMETRY_HORIZONTAL
+		o.SYMMETRY = sudoku.SYMMETRY_HORIZONTAL
 	case "vertical":
-		options.SYMMETRY = sudoku.SYMMETRY_VERTICAL
+		o.SYMMETRY = sudoku.SYMMETRY_VERTICAL
 	default:
-		log.Fatal("Unknown symmetry flag: ", options.RAW_SYMMETRY)
+		logger.Println("Unknown symmetry flag: ", o.RAW_SYMMETRY)
+		return true
 	}
 
-	options.RAW_DIFFICULTY = strings.ToLower(options.RAW_DIFFICULTY)
-	if options.RAW_DIFFICULTY != "" {
-		vals, ok := difficultyRanges[options.RAW_DIFFICULTY]
+	o.RAW_DIFFICULTY = strings.ToLower(o.RAW_DIFFICULTY)
+	if o.RAW_DIFFICULTY != "" {
+		vals, ok := difficultyRanges[o.RAW_DIFFICULTY]
 		if !ok {
-			log.Fatal("Invalid difficulty option:", options.RAW_DIFFICULTY)
+			logger.Println("Invalid difficulty option:", o.RAW_DIFFICULTY)
+			return true
 		}
-		options.MIN_DIFFICULTY = vals.low
-		options.MAX_DIFFICULTY = vals.high
-		log.Println("Using difficulty max:", strconv.FormatFloat(vals.high, 'f', -1, 64), "min:", strconv.FormatFloat(vals.low, 'f', -1, 64))
+		o.MIN_DIFFICULTY = vals.low
+		o.MAX_DIFFICULTY = vals.high
+		logger.Println("Using difficulty max:", strconv.FormatFloat(vals.high, 'f', -1, 64), "min:", strconv.FormatFloat(vals.low, 'f', -1, 64))
 	}
 
-	options.CONVERTER = sdkconverter.Converters[options.PUZZLE_FORMAT]
+	o.CONVERTER = sdkconverter.Converters[o.PUZZLE_FORMAT]
 
-	if options.CONVERTER == nil {
-		log.Fatal("Invalid format option:", options.PUZZLE_FORMAT)
+	if o.CONVERTER == nil {
+		logger.Println("Invalid format option:", o.PUZZLE_FORMAT)
+		return true
 	}
+	return false
+}
 
-	output := os.Stdout
+func getOptions(flagSet *flag.FlagSet, flagArguments []string, errOutput io.ReadWriter) *appOptions {
+	options := &appOptions{flagSet: flagSet}
+	defineFlags(options)
+	flagSet.Parse(flagArguments)
+	if options.fixUp(errOutput) {
+		os.Exit(1)
+	}
+	return options
+}
+
+func main() {
+	flagSet := flag.CommandLine
+	process(getOptions(flagSet, os.Args[1:], nil), os.Stdout, os.Stderr)
+}
+
+func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter) {
+
+	options.flagSet.SetOutput(errOutput)
 
 	if options.HELP {
-		flag.PrintDefaults()
+		options.flagSet.PrintDefaults()
 		return
 	}
+
+	logger := log.New(errOutput, "", log.LstdFlags)
 
 	var grid *sudoku.Grid
 
@@ -136,8 +180,8 @@ func main() {
 	var bar *uiprogress.Bar
 
 	//TODO: do more useful / explanatory printing here.
-	if options.NUM > 1 {
-		uiprogress.DefaultProgress.Out = os.Stderr
+	if options.NUM > 1 && !options.NO_PROGRESS {
+		uiprogress.DefaultProgress.Out = errOutput
 		uiprogress.Start()
 		bar = uiprogress.AddBar(options.NUM).PrependElapsed().AppendCompleted()
 	}
@@ -150,7 +194,12 @@ func main() {
 
 		//TODO: allow the type of symmetry to be configured.
 		if options.GENERATE {
-			grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.MIN_FILLED_CELLS, options.NO_CACHE)
+			if options.FAKE_GENERATE {
+				grid = sudoku.NewGrid()
+				grid.Load(TEST_GRID)
+			} else {
+				grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.MIN_FILLED_CELLS, options.NO_CACHE, logger)
+			}
 			//TODO: factor out all of this double-printing.
 			if options.OUTPUT_CSV {
 				csvRec = append(csvRec, options.CONVERTER.DataString(grid))
@@ -164,7 +213,7 @@ func main() {
 			data, err := ioutil.ReadFile(options.PUZZLE_TO_SOLVE)
 
 			if err != nil {
-				log.Fatalln("Read error for specified file:", err)
+				logger.Fatalln("Read error for specified file:", err)
 			}
 
 			//TODO: shouldn't a load method have a way to say the string provided is invalid?
@@ -173,7 +222,7 @@ func main() {
 
 		if grid == nil {
 			//No grid to do anything with.
-			log.Fatalln("No grid loaded.")
+			logger.Fatalln("No grid loaded.")
 		}
 
 		//TODO: use of this option leads to a busy loop somewhere... Is it related to the generate-multiple-and-difficulty hang?
@@ -186,7 +235,7 @@ func main() {
 				//We couldn't solve it. Let's check and see if the puzzle is well formed.
 				if grid.HasMultipleSolutions() {
 					//TODO: figure out why guesses wouldn't be used here effectively.
-					log.Println("The puzzle had multiple solutions; that means it's not well-formed")
+					logger.Println("The puzzle had multiple solutions; that means it's not well-formed")
 				}
 			}
 		}
@@ -228,14 +277,13 @@ func main() {
 			return
 		}
 		grid.Done()
-		if options.NUM > 1 {
+		if bar != nil {
 			bar.Incr()
 		}
 	}
 	if options.OUTPUT_CSV {
 		csvWriter.Flush()
 	}
-
 }
 
 func puzzleDirectoryParts(symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) []string {
@@ -247,7 +295,7 @@ func puzzleDirectoryParts(symmetryType sudoku.SymmetryType, symmetryPercentage f
 	}
 }
 
-func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) bool {
+func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, logger *log.Logger) bool {
 	//TODO: we should include a hashed version of our difficulty weights file so we don't cache ones with old weights.
 	directoryParts := puzzleDirectoryParts(symmetryType, symmetryPercentage, minFilledCells)
 
@@ -272,7 +320,7 @@ func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.Symm
 	file, err := os.Create(fileName)
 
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return false
 	}
 
@@ -283,11 +331,11 @@ func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.Symm
 	n, err := io.WriteString(file, puzzleText)
 
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return false
 	} else {
 		if n < len(puzzleText) {
-			log.Println("Didn't write full file, only wrote", n, "bytes of", len(puzzleText))
+			logger.Println("Didn't write full file, only wrote", n, "bytes of", len(puzzleText))
 			return false
 		}
 	}
@@ -331,14 +379,14 @@ func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symm
 	return nil
 }
 
-func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, skipCache bool) *sudoku.Grid {
+func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, skipCache bool, logger *log.Logger) *sudoku.Grid {
 	var result *sudoku.Grid
 
 	if !skipCache {
 		result = vendPuzzle(min, max, symmetryType, symmetryPercentage, minFilledCells)
 
 		if result != nil {
-			log.Println("Vending a puzzle from the cache.")
+			logger.Println("Vending a puzzle from the cache.")
 			return result
 		}
 	}
@@ -354,7 +402,7 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 	for {
 		//The first time we don't bother saying what number attemp it is, because if the first run is likely to generate a useable puzzle it's just noise.
 		if count != 0 {
-			log.Println("Attempt", count, "at generating puzzle.")
+			logger.Println("Attempt", count, "at generating puzzle.")
 		}
 
 		result = sudoku.GenerateGrid(&options)
@@ -365,9 +413,9 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 			return result
 		}
 
-		log.Println("Rejecting grid of difficulty", difficulty)
-		if storePuzzle(result, difficulty, symmetryType, symmetryPercentage, minFilledCells) {
-			log.Println("Stored the puzzle for future use.")
+		logger.Println("Rejecting grid of difficulty", difficulty)
+		if storePuzzle(result, difficulty, symmetryType, symmetryPercentage, minFilledCells, logger) {
+			logger.Println("Stored the puzzle for future use.")
 		}
 
 		count++
