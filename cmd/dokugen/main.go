@@ -59,6 +59,7 @@ type appOptions struct {
 	//Only used in testing.
 	FAKE_GENERATE bool
 	flagSet       *flag.FlagSet
+	progress      *uiprogress.Progress
 }
 
 var difficultyRanges map[string]struct {
@@ -181,9 +182,10 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 
 	//TODO: do more useful / explanatory printing here.
 	if options.NUM > 1 && !options.NO_PROGRESS {
-		uiprogress.DefaultProgress.Out = errOutput
-		uiprogress.Start()
-		bar = uiprogress.AddBar(options.NUM).PrependElapsed().AppendCompleted()
+		options.progress = uiprogress.New()
+		options.progress.Out = errOutput
+		options.progress.Start()
+		bar = options.progress.AddBar(options.NUM).PrependElapsed().AppendCompleted()
 	}
 
 	for i := 0; i < options.NUM; i++ {
