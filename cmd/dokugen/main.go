@@ -61,6 +61,8 @@ type appOptions struct {
 	flagSet       *flag.FlagSet
 }
 
+var logger *log.Logger
+
 var difficultyRanges map[string]struct {
 	low, high float64
 }
@@ -75,6 +77,8 @@ func init() {
 		"medium": {0.6, 0.7},
 		"tough":  {0.7, 1.0},
 	}
+
+	logger = log.New(os.Stderr, "", log.LstdFlags)
 }
 
 func defineFlags(options *appOptions) {
@@ -109,24 +113,24 @@ func (o *appOptions) fixUp() {
 	case "vertical":
 		o.SYMMETRY = sudoku.SYMMETRY_VERTICAL
 	default:
-		log.Fatal("Unknown symmetry flag: ", o.RAW_SYMMETRY)
+		logger.Fatal("Unknown symmetry flag: ", o.RAW_SYMMETRY)
 	}
 
 	o.RAW_DIFFICULTY = strings.ToLower(o.RAW_DIFFICULTY)
 	if o.RAW_DIFFICULTY != "" {
 		vals, ok := difficultyRanges[o.RAW_DIFFICULTY]
 		if !ok {
-			log.Fatal("Invalid difficulty option:", o.RAW_DIFFICULTY)
+			logger.Fatal("Invalid difficulty option:", o.RAW_DIFFICULTY)
 		}
 		o.MIN_DIFFICULTY = vals.low
 		o.MAX_DIFFICULTY = vals.high
-		log.Println("Using difficulty max:", strconv.FormatFloat(vals.high, 'f', -1, 64), "min:", strconv.FormatFloat(vals.low, 'f', -1, 64))
+		logger.Println("Using difficulty max:", strconv.FormatFloat(vals.high, 'f', -1, 64), "min:", strconv.FormatFloat(vals.low, 'f', -1, 64))
 	}
 
 	o.CONVERTER = sdkconverter.Converters[o.PUZZLE_FORMAT]
 
 	if o.CONVERTER == nil {
-		log.Fatal("Invalid format option:", o.PUZZLE_FORMAT)
+		logger.Fatal("Invalid format option:", o.PUZZLE_FORMAT)
 	}
 }
 
@@ -197,7 +201,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 			data, err := ioutil.ReadFile(options.PUZZLE_TO_SOLVE)
 
 			if err != nil {
-				log.Fatalln("Read error for specified file:", err)
+				logger.Fatalln("Read error for specified file:", err)
 			}
 
 			//TODO: shouldn't a load method have a way to say the string provided is invalid?
@@ -206,7 +210,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 
 		if grid == nil {
 			//No grid to do anything with.
-			log.Fatalln("No grid loaded.")
+			logger.Fatalln("No grid loaded.")
 		}
 
 		//TODO: use of this option leads to a busy loop somewhere... Is it related to the generate-multiple-and-difficulty hang?
@@ -219,7 +223,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 				//We couldn't solve it. Let's check and see if the puzzle is well formed.
 				if grid.HasMultipleSolutions() {
 					//TODO: figure out why guesses wouldn't be used here effectively.
-					log.Println("The puzzle had multiple solutions; that means it's not well-formed")
+					logger.Println("The puzzle had multiple solutions; that means it's not well-formed")
 				}
 			}
 		}
@@ -304,7 +308,7 @@ func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.Symm
 	file, err := os.Create(fileName)
 
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return false
 	}
 
@@ -315,11 +319,11 @@ func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.Symm
 	n, err := io.WriteString(file, puzzleText)
 
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return false
 	} else {
 		if n < len(puzzleText) {
-			log.Println("Didn't write full file, only wrote", n, "bytes of", len(puzzleText))
+			logger.Println("Didn't write full file, only wrote", n, "bytes of", len(puzzleText))
 			return false
 		}
 	}
@@ -370,7 +374,7 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 		result = vendPuzzle(min, max, symmetryType, symmetryPercentage, minFilledCells)
 
 		if result != nil {
-			log.Println("Vending a puzzle from the cache.")
+			logger.Println("Vending a puzzle from the cache.")
 			return result
 		}
 	}
@@ -386,7 +390,7 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 	for {
 		//The first time we don't bother saying what number attemp it is, because if the first run is likely to generate a useable puzzle it's just noise.
 		if count != 0 {
-			log.Println("Attempt", count, "at generating puzzle.")
+			logger.Println("Attempt", count, "at generating puzzle.")
 		}
 
 		result = sudoku.GenerateGrid(&options)
@@ -397,9 +401,9 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 			return result
 		}
 
-		log.Println("Rejecting grid of difficulty", difficulty)
+		logger.Println("Rejecting grid of difficulty", difficulty)
 		if storePuzzle(result, difficulty, symmetryType, symmetryPercentage, minFilledCells) {
-			log.Println("Stored the puzzle for future use.")
+			logger.Println("Stored the puzzle for future use.")
 		}
 
 		count++
