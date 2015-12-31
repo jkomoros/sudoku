@@ -152,6 +152,29 @@ func TestPrintStats(t *testing.T) {
 
 }
 
+func TestInvalidPuzzleFormat(t *testing.T) {
+	options := getDefaultOptions()
+
+	options.GENERATE = true
+	options.NUM = 1
+	options.NO_PROGRESS = true
+	options.FAKE_GENERATE = true
+	options.NO_CACHE = true
+	options.PUZZLE_FORMAT = "foo"
+
+	errWriter := &bytes.Buffer{}
+
+	options.fixUp(errWriter)
+
+	errorReaderBytes, _ := ioutil.ReadAll(errWriter)
+
+	errOutput := string(errorReaderBytes)
+
+	if !strings.Contains(errOutput, "Invalid format option: foo") {
+		t.Error("Expected an error message about invalid format option. Wanted 'Invalid format option:foo', got", errOutput)
+	}
+}
+
 //Callers should call fixUpOptions after receiving this.
 func getDefaultOptions() *appOptions {
 	options := &appOptions{
