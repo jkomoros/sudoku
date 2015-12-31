@@ -19,6 +19,7 @@ const FLOAT_RE = `(\d{1,5}\.\d{4,20}|0)`
 const INT_RE = `\b\d{1,5}\b`
 
 const KOMO_PUZZLE = "6!,1!,2!,7,5,8,4!,9,3!;8,3!,5,4!,9!,6,1,7!,2!;9,4,7!,2,1,3,8,6!,5!;2,5,9,3,6!,1!,7,8!,4;1!,7,3!,8,4!,9,2!,5,6!;4,6!,8,5!,2!,7,3,1,9;3,9!,6,1,7,4,5!,2,8;7!,2!,4,9,8!,5!,6,3!,1;5!,8,1!,6,3,2,9!,4!,7!"
+const SOLVED_KOMO_PUZZLE = "6!,1!,2!,7!,5!,8!,4!,9!,3!;8!,3!,5!,4!,9!,6!,1!,7!,2!;9!,4!,7!,2!,1!,3!,8!,6!,5!;2!,5!,9!,3!,6!,1!,7!,8!,4!;1!,7!,3!,8!,4!,9!,2!,5!,6!;4!,6!,8!,5!,2!,7!,3!,1!,9!;3!,9!,6!,1!,7!,4!,5!,2!,8!;7!,2!,4!,9!,8!,5!,6!,3!,1!;5!,8!,1!,6!,3!,2!,9!,4!,7!"
 
 const SOLVED_TEST_GRID = `6|1|2|7|5|8|4|9|3
 8|3|5|4|9|6|1|7|2
@@ -137,6 +138,25 @@ func TestCSVExport(t *testing.T) {
 		}
 	}
 
+}
+
+func TestPuzzleImportKomo(t *testing.T) {
+	options := getDefaultOptions()
+
+	options.PUZZLE_TO_SOLVE = "tests/puzzle_komo.sdk"
+	options.PUZZLE_FORMAT = "komo"
+
+	expectUneventfulFixup(t, options)
+
+	output, errOutput := getOutput(options)
+
+	if errOutput != "" {
+		t.Error("For puzzle import expected no error output, got", errOutput)
+	}
+
+	if output != SOLVED_KOMO_PUZZLE+"\n" {
+		t.Error("For puzzle import with komo format expected", SOLVED_KOMO_PUZZLE+"\n", "got", output)
+	}
 }
 
 func TestPuzzleImport(t *testing.T) {
