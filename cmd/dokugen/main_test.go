@@ -49,6 +49,10 @@ func expectUneventfulFixup(t *testing.T, options *appOptions) {
 	}
 }
 
+//TODO: test CSV output
+
+//TODO: test inputting of a puzzle
+
 func TestHelp(t *testing.T) {
 
 	options := getDefaultOptions()
