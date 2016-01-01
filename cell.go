@@ -456,7 +456,7 @@ func (self *Cell) positionInBlock() (top, right, bottom, left bool) {
 	return
 }
 
-func (self *Cell) diagramRows() (rows []string) {
+func (self *Cell) diagramRows(showMarks bool) (rows []string) {
 	//We'll only draw barriers at our bottom right edge.
 	_, right, bottom, _ := self.positionInBlock()
 	current := 0
@@ -472,10 +472,18 @@ func (self *Cell) diagramRows() (rows []string) {
 				}
 			} else {
 				//Print the possibles.
-				if self.Possible(current + 1) {
-					row += strconv.Itoa(current + 1)
+				if showMarks {
+					if self.Mark(current + 1) {
+						row += strconv.Itoa(current + 1)
+					} else {
+						row += DIAGRAM_IMPOSSIBLE
+					}
 				} else {
-					row += DIAGRAM_IMPOSSIBLE
+					if self.Possible(current + 1) {
+						row += strconv.Itoa(current + 1)
+					} else {
+						row += DIAGRAM_IMPOSSIBLE
+					}
 				}
 			}
 			current++
@@ -502,5 +510,5 @@ func (self *Cell) diagramRows() (rows []string) {
 }
 
 func (self *Cell) diagram() string {
-	return strings.Join(self.diagramRows(), "\n")
+	return strings.Join(self.diagramRows(false), "\n")
 }

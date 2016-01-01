@@ -468,9 +468,11 @@ func (self *Grid) String() string {
 	return self.DataString()
 }
 
-//Diagram returns a verbose visual representation of a grid, representing not just filled numbers
-//but also what numbers in a cell are possible.
-func (self *Grid) Diagram() string {
+//Diagram returns a verbose visual representation of a grid, representing not
+//just filled numbers but also what numbers in a cell are possible. If
+//showMarks is true, instead of printing the possibles, it will print only the
+//activley added marks.
+func (self *Grid) Diagram(showMarks bool) string {
 	var rows []string
 
 	//Generate a block boundary row to use later.
@@ -486,9 +488,9 @@ func (self *Grid) Diagram() string {
 
 	for r := 0; r < DIM; r++ {
 		var tempRows []string
-		tempRows = self.Cell(r, 0).diagramRows()
+		tempRows = self.Cell(r, 0).diagramRows(showMarks)
 		for c := 1; c < DIM; c++ {
-			cellRows := self.Cell(r, c).diagramRows()
+			cellRows := self.Cell(r, c).diagramRows(showMarks)
 			for i := range tempRows {
 				tempRows[i] += cellRows[i]
 				//Are we at a block boundary?
