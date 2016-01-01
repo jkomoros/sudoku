@@ -13,7 +13,8 @@ import (
 )
 
 type mainModel struct {
-	grid *sudoku.Grid
+	grid     *sudoku.Grid
+	selected *sudoku.Cell
 }
 
 func main() {
@@ -22,9 +23,7 @@ func main() {
 	}
 	defer termbox.Close()
 
-	model := &mainModel{
-		sudoku.GenerateGrid(nil),
-	}
+	model := newModel()
 
 	draw(model)
 
@@ -39,6 +38,15 @@ mainloop:
 		}
 		draw(model)
 	}
+}
+
+func newModel() *mainModel {
+	model := &mainModel{
+		sudoku.GenerateGrid(nil),
+		nil,
+	}
+	model.selected = model.grid.Cell(0, 0)
+	return model
 }
 
 func draw(model *mainModel) {
