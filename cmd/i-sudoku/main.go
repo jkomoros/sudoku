@@ -130,6 +130,7 @@ func (m *mainModel) EnsureGrid() {
 
 func (m *mainModel) NewGrid() {
 	m.grid = sudoku.GenerateGrid(nil)
+	m.grid.LockFilledCells()
 }
 
 func (m *mainModel) SetSelectedNumber(num int) {

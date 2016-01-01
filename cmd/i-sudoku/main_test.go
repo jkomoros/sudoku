@@ -146,6 +146,12 @@ func TestEnsureGrid(t *testing.T) {
 	if model.grid == nil {
 		t.Error("EnsureGrid didn't create a grid")
 	}
+
+	for i, cell := range model.grid.Cells() {
+		if cell.Number() != 0 && !cell.Locked() {
+			t.Error("Grid from EnsureGrid didn't have numbers locked:", i, cell)
+		}
+	}
 }
 
 func TestSetSelectionNumber(t *testing.T) {
