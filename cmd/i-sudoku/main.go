@@ -80,6 +80,11 @@ func newModel() *mainModel {
 	return model
 }
 
+func (m *mainModel) StatusLine() string {
+	//TODO: return something dynamic depending on mode.
+	return "Type arrows to move, a number to input a number"
+}
+
 func (m *mainModel) ModeInputEsc() (quit bool) {
 	if m.marksToInput != nil {
 		m.ModeCancelMarkMode()
@@ -205,8 +210,11 @@ func drawGrid(model *mainModel) {
 
 	selectedTop, selectedLeft, selectedHeight, selectedWidth := model.Selected.DiagramExtents()
 
-	for y, line := range strings.Split(grid.Diagram(true), "\n") {
-		x := 0
+	x := 0
+	y := 0
+
+	for _, line := range strings.Split(grid.Diagram(true), "\n") {
+		x = 0
 		//The first number in range will be byte offset, but for some items like the bullet, it's two bytes.
 		//But what we care about is that each item is a character.
 		for _, ch := range line {
@@ -232,5 +240,12 @@ func drawGrid(model *mainModel) {
 			termbox.SetCell(x, y, ch, defaultColor, backgroundColor)
 			x++
 		}
+		y++
+	}
+
+	x = 0
+	for _, ch := range model.StatusLine() {
+		termbox.SetCell(x, y, ch, termbox.ColorWhite, termbox.ColorDefault)
+		x++
 	}
 }
