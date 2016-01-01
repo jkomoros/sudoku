@@ -20,7 +20,7 @@ const STATUS_MARKING_POSTFIX = "   ENTER to commit, ESC to cancel"
 
 type mainModel struct {
 	grid         *sudoku.Grid
-	Selected     *sudoku.Cell
+	selected     *sudoku.Cell
 	marksToInput []int
 }
 
@@ -96,6 +96,14 @@ func (m *mainModel) StatusLine() string {
 	}
 }
 
+func (m *mainModel) Selected() *sudoku.Cell {
+	return m.selected
+}
+
+func (m *mainModel) SetSelected(cell *sudoku.Cell) {
+	m.selected = cell
+}
+
 func (m *mainModel) ModeInputEsc() (quit bool) {
 	if m.marksToInput != nil {
 		m.ModeCancelMarkMode()
@@ -132,53 +140,53 @@ func (m *mainModel) ModeInputNumber(num int) {
 func (m *mainModel) EnsureSelected() {
 	m.EnsureGrid()
 	//Ensures that at least one cell is selected.
-	if m.Selected == nil {
-		m.Selected = m.grid.Cell(0, 0)
+	if m.Selected() == nil {
+		m.SetSelected(m.grid.Cell(0, 0))
 	}
 }
 
 func (m *mainModel) MoveSelectionLeft() {
 	m.EnsureSelected()
-	r := m.Selected.Row()
-	c := m.Selected.Col()
+	r := m.Selected().Row()
+	c := m.Selected().Col()
 	c--
 	if c < 0 {
 		c = 0
 	}
-	m.Selected = m.grid.Cell(r, c)
+	m.SetSelected(m.grid.Cell(r, c))
 }
 
 func (m *mainModel) MoveSelectionRight() {
 	m.EnsureSelected()
-	r := m.Selected.Row()
-	c := m.Selected.Col()
+	r := m.Selected().Row()
+	c := m.Selected().Col()
 	c++
 	if c >= sudoku.DIM {
 		c = sudoku.DIM - 1
 	}
-	m.Selected = m.grid.Cell(r, c)
+	m.SetSelected(m.grid.Cell(r, c))
 }
 
 func (m *mainModel) MoveSelectionUp() {
 	m.EnsureSelected()
-	r := m.Selected.Row()
-	c := m.Selected.Col()
+	r := m.Selected().Row()
+	c := m.Selected().Col()
 	r--
 	if r < 0 {
 		r = 0
 	}
-	m.Selected = m.grid.Cell(r, c)
+	m.SetSelected(m.grid.Cell(r, c))
 }
 
 func (m *mainModel) MoveSelectionDown() {
 	m.EnsureSelected()
-	r := m.Selected.Row()
-	c := m.Selected.Col()
+	r := m.Selected().Row()
+	c := m.Selected().Col()
 	r++
 	if r >= sudoku.DIM {
 		r = sudoku.DIM - 1
 	}
-	m.Selected = m.grid.Cell(r, c)
+	m.SetSelected(m.grid.Cell(r, c))
 }
 
 func (m *mainModel) EnsureGrid() {
@@ -194,18 +202,18 @@ func (m *mainModel) NewGrid() {
 
 func (m *mainModel) SetSelectedNumber(num int) {
 	m.EnsureSelected()
-	if m.Selected.Locked() {
+	if m.Selected().Locked() {
 		return
 	}
-	m.Selected.SetNumber(num)
+	m.Selected().SetNumber(num)
 }
 
 func (m *mainModel) ToggleSelectedMark(num int) {
 	m.EnsureSelected()
-	if m.Selected.Locked() {
+	if m.Selected().Locked() {
 		return
 	}
-	m.Selected.SetMark(num, !m.Selected.Mark(num))
+	m.Selected().SetMark(num, !m.Selected().Mark(num))
 }
 
 func draw(model *mainModel) {
@@ -216,7 +224,7 @@ func draw(model *mainModel) {
 
 	grid := model.grid
 
-	selectedTop, selectedLeft, selectedHeight, selectedWidth := model.Selected.DiagramExtents()
+	selectedTop, selectedLeft, selectedHeight, selectedWidth := model.Selected().DiagramExtents()
 
 	x := 0
 	y := 0
