@@ -211,6 +211,7 @@ func (m *mainModel) NewGrid() {
 }
 
 func (m *mainModel) SetSelectedNumber(num int) {
+	//TODO: if the number already has that number set, set 0.
 	m.EnsureSelected()
 	if m.Selected().Locked() {
 		return
