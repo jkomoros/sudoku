@@ -47,6 +47,7 @@ mainloop:
 			case 'q':
 				break mainloop
 			case 'n':
+				//TODO: since this is a destructive action, require a confirmation
 				model.NewGrid()
 			}
 		}
