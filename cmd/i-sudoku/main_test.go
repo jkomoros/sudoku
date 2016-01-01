@@ -346,4 +346,10 @@ func TestMode(t *testing.T) {
 		t.Error("ModeInputEsc in mark enter mode didn't exit mark enter mode")
 	}
 
+	model.ModeEnterMarkMode()
+	model.MoveSelectionRight()
+	if model.marksToInput != nil {
+		t.Error("Moving selection right didn't exit mark mode.")
+	}
+
 }

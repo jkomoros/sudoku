@@ -101,7 +101,12 @@ func (m *mainModel) Selected() *sudoku.Cell {
 }
 
 func (m *mainModel) SetSelected(cell *sudoku.Cell) {
+	if cell == m.selected {
+		//Already done
+		return
+	}
 	m.selected = cell
+	m.ModeCancelMarkMode()
 }
 
 func (m *mainModel) ModeInputEsc() (quit bool) {
@@ -114,7 +119,6 @@ func (m *mainModel) ModeInputEsc() (quit bool) {
 
 func (m *mainModel) ModeEnterMarkMode() {
 	//TODO: don't enter mark mode if cell is filled or locked.
-	//TODO: when changing selected, don't enter mark mode.
 	m.marksToInput = make([]int, 0)
 }
 
