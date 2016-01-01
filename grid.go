@@ -90,6 +90,7 @@ func dropGrids() {
 
 func returnGrid(grid *Grid) {
 	grid.ResetExcludes()
+	grid.ResetMarks()
 	select {
 	case gridCache <- grid:
 		//Returned it to the queue.
@@ -230,6 +231,14 @@ func (self *Grid) transpose() *Grid {
 func (self *Grid) ResetExcludes() {
 	for i := range self.cells {
 		self.cells[i].ResetExcludes()
+	}
+}
+
+//ResetMarks calls ResetMarks on all cells in the grid. See Cell.SetMark for
+//more about marks.
+func (self *Grid) ResetMarks() {
+	for i := range self.cells {
+		self.cells[i].ResetMarks()
 	}
 }
 

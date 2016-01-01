@@ -239,6 +239,14 @@ func (self *Cell) Mark(number int) bool {
 	return self.marks[number]
 }
 
+//ResetMarks removes all marks. See SetMark for a description of what marks
+//represent.
+func (self *Cell) ResetMarks() {
+	for i := 0; i < DIM; i++ {
+		self.marks[i] = false
+	}
+}
+
 //Possible returns whether or not a given number is legal to fill via
 //SetNumber, given the state of the grid (specifically, the cell's neighbors)
 //and the numbers the cell was told to explicitly exclude via SetExclude. If

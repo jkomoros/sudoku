@@ -239,6 +239,13 @@ func TestMarks(t *testing.T) {
 	if !cell.Mark(1) {
 		t.Error("Cell with a mark on 1 did not read back")
 	}
+	cell.SetMark(2, true)
+	cell.ResetMarks()
+	for i := 1; i < DIM; i++ {
+		if cell.Mark(i) {
+			t.Error("Cell that had called ResetMarks still had a mark set at", i)
+		}
+	}
 }
 
 func TestSymmetry(t *testing.T) {
