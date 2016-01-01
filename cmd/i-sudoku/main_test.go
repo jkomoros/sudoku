@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/jkomoros/sudoku"
 	"testing"
 )
 
@@ -42,6 +43,32 @@ func TestMoveSelectionLeft(t *testing.T) {
 
 	if model.Selected.Row() != 1 || model.Selected.Col() != 0 {
 		t.Error("Wrong cell selected after move left", model.Selected)
+	}
+}
+
+func TestMoveSelectionRight(t *testing.T) {
+	model := newModel()
+
+	if model.Selected == nil {
+		t.Fatal("No selected cell")
+	}
+
+	if model.Selected.Row() != 0 || model.Selected.Col() != 0 {
+		t.Error("Wrong cell selected to start", model.Selected)
+	}
+
+	model.MoveSelectionRight()
+
+	if model.Selected.Row() != 0 || model.Selected.Col() != 1 {
+		t.Error("Wrong cell selected after move right", model.Selected)
+	}
+
+	model.Selected = model.grid.Cell(1, sudoku.DIM-1)
+
+	model.MoveSelectionRight()
+
+	if model.Selected.Row() != 1 || model.Selected.Col() != sudoku.DIM-1 {
+		t.Error("Wrong cell selected after move right at bounds", model.Selected)
 	}
 }
 

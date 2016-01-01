@@ -67,6 +67,17 @@ func (m *mainModel) MoveSelectionLeft() {
 	m.Selected = m.grid.Cell(r, c)
 }
 
+func (m *mainModel) MoveSelectionRight() {
+	m.EnsureSelected()
+	r := m.Selected.Row()
+	c := m.Selected.Col()
+	c++
+	if c >= sudoku.DIM {
+		c = sudoku.DIM - 1
+	}
+	m.Selected = m.grid.Cell(r, c)
+}
+
 func (m *mainModel) MoveSelectionUp() {
 	m.EnsureSelected()
 	r := m.Selected.Row()
