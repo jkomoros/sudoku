@@ -196,11 +196,6 @@ func (m *mainModel) ToggleSelectedMark(num int) {
 }
 
 func draw(model *mainModel) {
-	drawGrid(model)
-	termbox.Flush()
-}
-
-func drawGrid(model *mainModel) {
 
 	//TODO: have a mode line after the grid for if the grid is invalid, if it's solved.
 
@@ -248,4 +243,6 @@ func drawGrid(model *mainModel) {
 		termbox.SetCell(x, y, ch, termbox.ColorWhite, termbox.ColorDefault)
 		x++
 	}
+
+	termbox.Flush()
 }
