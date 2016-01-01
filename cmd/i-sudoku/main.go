@@ -34,6 +34,14 @@ mainloop:
 			switch ev.Key {
 			case termbox.KeyEsc, termbox.KeyCtrlC:
 				break mainloop
+			case termbox.KeyArrowDown:
+				model.MoveSelectionDown()
+			case termbox.KeyArrowLeft:
+				model.MoveSelectionLeft()
+			case termbox.KeyArrowRight:
+				model.MoveSelectionRight()
+			case termbox.KeyArrowUp:
+				model.MoveSelectionUp()
 			}
 		}
 		draw(model)
