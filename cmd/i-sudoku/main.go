@@ -53,15 +53,13 @@ mainloop:
 }
 
 func newModel() *mainModel {
-	model := &mainModel{
-		sudoku.GenerateGrid(nil),
-		nil,
-	}
+	model := &mainModel{}
 	model.EnsureSelected()
 	return model
 }
 
 func (m *mainModel) EnsureSelected() {
+	m.EnsureGrid()
 	//Ensures that at least one cell is selected.
 	if m.Selected == nil {
 		m.Selected = m.grid.Cell(0, 0)
@@ -110,6 +108,16 @@ func (m *mainModel) MoveSelectionDown() {
 		r = sudoku.DIM - 1
 	}
 	m.Selected = m.grid.Cell(r, c)
+}
+
+func (m *mainModel) EnsureGrid() {
+	if m.grid == nil {
+		m.NewGrid()
+	}
+}
+
+func (m *mainModel) NewGrid() {
+	m.grid = sudoku.GenerateGrid(nil)
 }
 
 func draw(model *mainModel) {

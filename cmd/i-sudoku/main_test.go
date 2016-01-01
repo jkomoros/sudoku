@@ -123,3 +123,27 @@ func TestMoveSelectionDown(t *testing.T) {
 		t.Error("Wrong cell selected after move right at bounds", model.Selected)
 	}
 }
+
+func TestEnsureGrid(t *testing.T) {
+	model := newModel()
+
+	if model.grid == nil {
+		t.Fatal("New model had no grid")
+	}
+
+	oldData := model.grid.DataString()
+
+	model.EnsureGrid()
+
+	if model.grid.DataString() != oldData {
+		t.Error("Ensure grid blew away a grid")
+	}
+
+	model.grid = nil
+
+	model.EnsureGrid()
+
+	if model.grid == nil {
+		t.Error("EnsureGrid didn't create a grid")
+	}
+}
