@@ -243,6 +243,14 @@ func (self *Grid) ResetMarks() {
 	}
 }
 
+//UnlockCells unlocks all cells. See cell.Lock for more information on the
+//concept of locking.
+func (self *Grid) UnlockCells() {
+	for i := range self.cells {
+		self.cells[i].Unlock()
+	}
+}
+
 //Cells returns a CellSlice with pointers to every cell in the grid,
 //from left to right and top to bottom.
 func (self *Grid) Cells() CellSlice {
