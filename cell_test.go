@@ -1,8 +1,10 @@
 package sudoku
 
 import (
+	"log"
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -219,6 +221,29 @@ func TestCellCreation(t *testing.T) {
 	if cell.diagram() != TOP_LEFT_CELL_FILLED {
 		t.Log("Diagram for the top left cell filled printed out incorrectly: \n", cell.diagram())
 		t.Fail()
+	}
+}
+
+func TestDiagramExtents(t *testing.T) {
+	//Testing this for real is hard, but what we can do is as at least make
+	//sure that the given indexes aren't running into any of the edges of the
+	//diagram.
+
+	//TODO: also test that the right cells are returned.
+	grid := NewGrid()
+	diagram := grid.Diagram(false)
+	diagramRows := strings.Split(diagram, "\n")
+	for i, cell := range grid.Cells() {
+		top, left, height, width := cell.DiagramExtents()
+		for r := top; r < top+height; r++ {
+			row := diagramRows[r]
+			for c := left; c < left+width; c++ {
+				char := strings.Split(row, "")[c]
+				if char == DIAGRAM_RIGHT || char == DIAGRAM_BOTTOM || char == DIAGRAM_CORNER {
+					t.Error("In cell", i, "invalid char at", r, c)
+				}
+			}
+		}
 	}
 }
 
