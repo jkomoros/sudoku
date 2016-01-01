@@ -14,7 +14,7 @@ import (
 
 type mainModel struct {
 	grid     *sudoku.Grid
-	selected *sudoku.Cell
+	Selected *sudoku.Cell
 }
 
 func main() {
@@ -51,8 +51,8 @@ func newModel() *mainModel {
 
 func (m *mainModel) EnsureSelected() {
 	//Ensures that at least one cell is selected.
-	if m.selected == nil {
-		m.selected = m.grid.Cell(0, 0)
+	if m.Selected == nil {
+		m.Selected = m.grid.Cell(0, 0)
 	}
 }
 
@@ -65,7 +65,7 @@ func drawGrid(model *mainModel) {
 
 	grid := model.grid
 
-	selectedTop, selectedLeft, selectedHeight, selectedWidth := model.selected.DiagramExtents()
+	selectedTop, selectedLeft, selectedHeight, selectedWidth := model.Selected.DiagramExtents()
 
 	for y, line := range strings.Split(grid.Diagram(true), "\n") {
 		x := 0

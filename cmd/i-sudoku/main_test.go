@@ -7,14 +7,14 @@ import (
 func TestEnsureSelected(t *testing.T) {
 	model := newModel()
 
-	if model.selected == nil {
+	if model.Selected == nil {
 		t.Error("New model had no selected cell")
 	}
 
-	model.selected = nil
+	model.Selected = nil
 	model.EnsureSelected()
 
-	if model.selected == nil {
+	if model.Selected == nil {
 		t.Error("Model after EnsureSelected still had no selected cell")
 	}
 }
