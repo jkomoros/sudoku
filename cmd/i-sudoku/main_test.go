@@ -97,3 +97,29 @@ func TestMoveSelectionUp(t *testing.T) {
 		t.Error("Wrong cell selected after move up", model.Selected)
 	}
 }
+
+func TestMoveSelectionDown(t *testing.T) {
+	model := newModel()
+
+	if model.Selected == nil {
+		t.Fatal("No selected cell")
+	}
+
+	if model.Selected.Row() != 0 || model.Selected.Col() != 0 {
+		t.Error("Wrong cell selected to start", model.Selected)
+	}
+
+	model.MoveSelectionDown()
+
+	if model.Selected.Row() != 1 || model.Selected.Col() != 0 {
+		t.Error("Wrong cell selected after move down", model.Selected)
+	}
+
+	model.Selected = model.grid.Cell(sudoku.DIM-1, 1)
+
+	model.MoveSelectionDown()
+
+	if model.Selected.Row() != sudoku.DIM-1 || model.Selected.Col() != 1 {
+		t.Error("Wrong cell selected after move right at bounds", model.Selected)
+	}
+}

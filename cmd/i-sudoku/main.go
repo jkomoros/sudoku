@@ -89,6 +89,17 @@ func (m *mainModel) MoveSelectionUp() {
 	m.Selected = m.grid.Cell(r, c)
 }
 
+func (m *mainModel) MoveSelectionDown() {
+	m.EnsureSelected()
+	r := m.Selected.Row()
+	c := m.Selected.Col()
+	r++
+	if r >= sudoku.DIM {
+		r = sudoku.DIM - 1
+	}
+	m.Selected = m.grid.Cell(r, c)
+}
+
 func draw(model *mainModel) {
 	drawGrid(model)
 	termbox.Flush()
