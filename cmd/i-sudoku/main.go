@@ -71,6 +71,14 @@ func newModel() *mainModel {
 	return model
 }
 
+func (m *mainModel) ModeInputEsc() (quit bool) {
+	if m.marksToInput != nil {
+		m.ModeCancelMarkMode()
+		return false
+	}
+	return true
+}
+
 func (m *mainModel) ModeEnterMarkMode() {
 	m.marksToInput = make([]int, 0)
 }

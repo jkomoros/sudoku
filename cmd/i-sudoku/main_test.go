@@ -306,4 +306,18 @@ func TestMode(t *testing.T) {
 		t.Error("InputNumber after cancled mark and another InputNum didn't set num", model.Selected)
 	}
 
+	if !model.ModeInputEsc() {
+		t.Error("ModeInputEsc not in mark enter mode didn't tell us to quit.")
+	}
+
+	model.MoveSelectionRight()
+
+	model.ModeEnterMarkMode()
+	if model.ModeInputEsc() {
+		t.Error("ModeInputEsc in mark enter mode DID tell us to quit")
+	}
+	if model.marksToInput != nil {
+		t.Error("ModeInputEsc in mark enter mode didn't exit mark enter mode")
+	}
+
 }
