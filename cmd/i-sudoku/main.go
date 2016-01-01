@@ -48,10 +48,14 @@ mainloop:
 				model.MoveSelectionRight()
 			case termbox.KeyArrowUp:
 				model.MoveSelectionUp()
+			case termbox.KeyEnter:
+				model.ModeCommitMarkMode()
 			}
 			switch ev.Ch {
 			case 'q':
 				break mainloop
+			case 'm':
+				model.ModeEnterMarkMode()
 			case 'n':
 				//TODO: since this is a destructive action, require a confirmation
 				model.NewGrid()
