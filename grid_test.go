@@ -912,19 +912,36 @@ func TestLockFilledCells(t *testing.T) {
 	grid.Load(TEST_GRID)
 	defer grid.Done()
 
-	//TODO: Lock one of the unfilled cells. Then make sure that it's still locked.
+	var lockedCell *Cell
+
+	for i := range grid.cells {
+		cell := &grid.cells[i]
+
+		if cell.Number() == 0 {
+			cell.Lock()
+			lockedCell = cell
+			break
+		}
+	}
 
 	grid.LockFilledCells()
 
 	for i := range grid.cells {
-		cell := grid.cells[i]
+		cell := &grid.cells[i]
 
 		if cell.Number() != 0 && !cell.Locked() {
 			t.Error("Found a cell that was filled but not locked after LockFilledCells", cell)
 		}
 
 		if cell.Number() == 0 && cell.Locked() {
-			t.Error("Found a cell that was unfilled but locked after LockFilledCells", cell)
+
+			if cell != lockedCell {
+				t.Error("Found a cell that was unfilled but locked after LockFilledCells", cell)
+			}
 		}
+	}
+
+	if !lockedCell.Locked() {
+		t.Error("The specially locked cell was unlocked after calling LockFilledCells", lockedCell)
 	}
 }
