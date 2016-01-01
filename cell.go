@@ -487,7 +487,11 @@ func (self *Cell) diagramRows(showMarks bool) (rows []string) {
 				if r == BLOCK_DIM/2 && c == BLOCK_DIM/2 {
 					row += strconv.Itoa(self.number)
 				} else {
-					row += DIAGRAM_NUMBER
+					if self.Locked() {
+						row += DIAGRAM_LOCKED
+					} else {
+						row += DIAGRAM_NUMBER
+					}
 				}
 			} else {
 				//Print the possibles.

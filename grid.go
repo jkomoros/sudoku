@@ -28,6 +28,7 @@ const (
 	DIAGRAM_BOTTOM     = "-"
 	DIAGRAM_CORNER     = "+"
 	DIAGRAM_NUMBER     = "•"
+	DIAGRAM_LOCKED     = "X"
 )
 
 //Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
