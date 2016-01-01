@@ -148,6 +148,8 @@ func draw(model *mainModel) {
 
 func drawGrid(model *mainModel) {
 
+	//TODO: have a mode line after the grid for if the grid is invalid, if it's solved.
+
 	grid := model.grid
 
 	selectedTop, selectedLeft, selectedHeight, selectedWidth := model.Selected.DiagramExtents()
