@@ -50,11 +50,16 @@ func newModel() *mainModel {
 }
 
 func draw(model *mainModel) {
-	drawGrid(model.grid)
+	drawGrid(model)
 	termbox.Flush()
 }
 
-func drawGrid(grid *sudoku.Grid) {
+func drawGrid(model *mainModel) {
+
+	grid := model.grid
+
+	selectedTop, selectedLeft, selectedHeight, selectedWidth := model.selected.DiagramExtents()
+
 	for y, line := range strings.Split(grid.Diagram(true), "\n") {
 		x := 0
 		//The first number in range will be byte offset, but for some items like the bullet, it's two bytes.
@@ -69,7 +74,14 @@ func drawGrid(grid *sudoku.Grid) {
 				defaultColor = termbox.ColorBlue
 			}
 
-			termbox.SetCell(x, y, ch, defaultColor, termbox.ColorDefault)
+			backgroundColor := termbox.ColorDefault
+
+			if x >= selectedTop && x < (selectedTop+selectedHeight) && y >= selectedLeft && y < (selectedLeft+selectedWidth) {
+				//We're on the selected cell
+				backgroundColor = termbox.ColorWhite
+			}
+
+			termbox.SetCell(x, y, ch, defaultColor, backgroundColor)
 			x++
 		}
 	}
