@@ -46,6 +46,8 @@ mainloop:
 			switch ev.Ch {
 			case 'q':
 				break mainloop
+			case 'n':
+				model.NewGrid()
 			}
 		}
 		draw(model)
