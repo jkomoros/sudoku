@@ -123,6 +123,11 @@ func (m *mainModel) NewGrid() {
 	m.grid = sudoku.GenerateGrid(nil)
 }
 
+func (m *mainModel) SetSelectedNumber(num int) {
+	m.EnsureSelected()
+	m.Selected.SetNumber(num)
+}
+
 func draw(model *mainModel) {
 	drawGrid(model)
 	termbox.Flush()

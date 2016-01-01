@@ -147,3 +147,19 @@ func TestEnsureGrid(t *testing.T) {
 		t.Error("EnsureGrid didn't create a grid")
 	}
 }
+
+func TestSetSelectionNumber(t *testing.T) {
+	model := newModel()
+
+	model.SetSelectedNumber(1)
+
+	if model.Selected.Number() != 1 {
+		t.Error("SetSelectionNumber didn't set to 1", model.Selected)
+	}
+
+	model.SetSelectedNumber(0)
+
+	if model.Selected.Number() != 0 {
+		t.Error("SetSelectionNumber didn't set to 0", model.Selected)
+	}
+}
