@@ -55,6 +55,7 @@ mainloop:
 			case 'q':
 				break mainloop
 			case 'm':
+				//TODO: ideally Ctrl+Num would work to put in one mark. But termbox doesn't appear to let that work.
 				model.ModeEnterMarkMode()
 			case 'n':
 				//TODO: since this is a destructive action, require a confirmation
