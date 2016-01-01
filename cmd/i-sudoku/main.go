@@ -94,6 +94,8 @@ func (m *mainModel) ModeInputEsc() (quit bool) {
 }
 
 func (m *mainModel) ModeEnterMarkMode() {
+	//TODO: don't enter mark mode if cell is filled or locked.
+	//TODO: when changing selected, don't enter mark mode.
 	m.marksToInput = make([]int, 0)
 }
 
