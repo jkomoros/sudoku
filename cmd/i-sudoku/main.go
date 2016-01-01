@@ -43,6 +43,10 @@ mainloop:
 			case termbox.KeyArrowUp:
 				model.MoveSelectionUp()
 			}
+			switch ev.Ch {
+			case 'q':
+				break mainloop
+			}
 		}
 		draw(model)
 	}
