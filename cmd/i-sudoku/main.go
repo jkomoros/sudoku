@@ -158,9 +158,12 @@ func drawGrid(model *mainModel) {
 			defaultColor := termbox.ColorGreen
 
 			numberRune, _ := utf8.DecodeRuneInString(sudoku.DIAGRAM_NUMBER)
+			lockedRune, _ := utf8.DecodeRuneInString(sudoku.DIAGRAM_LOCKED)
 
 			if ch == numberRune {
 				defaultColor = termbox.ColorBlue
+			} else if ch == lockedRune {
+				defaultColor = termbox.ColorRed
 			}
 
 			backgroundColor := termbox.ColorDefault
