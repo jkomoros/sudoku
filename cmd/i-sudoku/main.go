@@ -57,7 +57,7 @@ mainloop:
 				if err != nil {
 					panic(err)
 				}
-				model.SetSelectedNumber(num)
+				model.ModeInputNumber(num)
 			}
 		}
 		draw(model)
@@ -68,6 +68,10 @@ func newModel() *mainModel {
 	model := &mainModel{}
 	model.EnsureSelected()
 	return model
+}
+
+func (m *mainModel) ModeInputNumber(num int) {
+	m.SetSelectedNumber(num)
 }
 
 func (m *mainModel) EnsureSelected() {
