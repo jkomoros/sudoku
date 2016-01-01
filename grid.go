@@ -251,6 +251,16 @@ func (self *Grid) UnlockCells() {
 	}
 }
 
+//LockFilledCells locks all cells in the grid that have a number set.
+func (self *Grid) LockFilledCells() {
+	for i := range self.cells {
+		cell := &self.cells[i]
+		if cell.Number() != 0 {
+			cell.Lock()
+		}
+	}
+}
+
 //Cells returns a CellSlice with pointers to every cell in the grid,
 //from left to right and top to bottom.
 func (self *Grid) Cells() CellSlice {
