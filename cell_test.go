@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"reflect"
 	"strconv"
 	"testing"
 )
@@ -235,11 +236,22 @@ func TestMarks(t *testing.T) {
 	if cell.Mark(DIM + 2) {
 		t.Error("Invalid index had true mark: ", DIM+2)
 	}
+
+	if len(cell.Marks()) != 0 {
+		t.Error("An empty cell already had marks")
+	}
+
 	cell.SetMark(1, true)
 	if !cell.Mark(1) {
 		t.Error("Cell with a mark on 1 did not read back")
 	}
+
 	cell.SetMark(2, true)
+
+	if !reflect.DeepEqual(cell.Marks(), IntSlice{1, 2}) {
+		t.Error("Cell with marks 1 and 2 set had wrong Marks List:", cell.Marks())
+	}
+
 	cell.ResetMarks()
 	for i := 1; i < DIM; i++ {
 		if cell.Mark(i) {

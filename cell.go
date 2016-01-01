@@ -239,6 +239,17 @@ func (self *Cell) Mark(number int) bool {
 	return self.marks[number]
 }
 
+//Marks returns an IntSlice with each mark, in ascending order.
+func (self *Cell) Marks() IntSlice {
+	var result IntSlice
+	for i := 0; i < DIM; i++ {
+		if self.marks[i] {
+			result = append(result, i+1)
+		}
+	}
+	return result
+}
+
 //ResetMarks removes all marks. See SetMark for a description of what marks
 //represent.
 func (self *Cell) ResetMarks() {
