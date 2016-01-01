@@ -14,8 +14,9 @@ import (
 )
 
 type mainModel struct {
-	grid     *sudoku.Grid
-	Selected *sudoku.Cell
+	grid         *sudoku.Grid
+	Selected     *sudoku.Cell
+	marksToInput []int
 }
 
 func main() {
@@ -70,8 +71,27 @@ func newModel() *mainModel {
 	return model
 }
 
+func (m *mainModel) ModeEnterMarkMode() {
+	m.marksToInput = make([]int, 0)
+}
+
+func (m *mainModel) ModeCommitMarkMode() {
+	for _, num := range m.marksToInput {
+		m.ToggleSelectedMark(num)
+	}
+	m.marksToInput = nil
+}
+
+func (m *mainModel) ModeCancelMarkMode() {
+	m.marksToInput = nil
+}
+
 func (m *mainModel) ModeInputNumber(num int) {
-	m.SetSelectedNumber(num)
+	if m.marksToInput == nil {
+		m.SetSelectedNumber(num)
+	} else {
+		m.marksToInput = append(m.marksToInput, num)
+	}
 }
 
 func (m *mainModel) EnsureSelected() {

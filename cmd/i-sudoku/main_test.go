@@ -254,3 +254,56 @@ func TestToggleSelectedMark(t *testing.T) {
 		t.Error("ToggleSelectedMark modified a locked cell", lockedCell)
 	}
 }
+
+func TestMode(t *testing.T) {
+	model := newModel()
+
+	//Add empty grid.
+	model.grid = sudoku.NewGrid()
+	model.Selected = nil
+
+	model.ModeInputNumber(1)
+
+	if model.Selected.Number() != 1 {
+		t.Error("InputNumber in default mode didn't add a number")
+	}
+
+	model.MoveSelectionRight()
+
+	model.ModeEnterMarkMode()
+	model.ModeInputNumber(1)
+	model.ModeInputNumber(2)
+	model.ModeCommitMarkMode()
+
+	if model.Selected.Number() != 0 {
+		t.Error("InputNumber in mark mode set the number", model.Selected)
+	}
+
+	if !model.Selected.Mark(1) {
+		t.Error("InputNumber in mark mode didn't set the first mark", model.Selected)
+	}
+
+	if !model.Selected.Mark(2) {
+		t.Error("InputNumber in mark mode didn't set the second mark", model.Selected)
+	}
+
+	model.MoveSelectionRight()
+
+	model.ModeEnterMarkMode()
+	model.ModeInputNumber(1)
+	model.ModeInputNumber(2)
+	model.ModeCancelMarkMode()
+
+	if model.Selected.Mark(1) || model.Selected.Mark(2) {
+		t.Error("InputNumber in canceled mark mode still set marks")
+	}
+
+	model.MoveSelectionRight()
+
+	model.ModeInputNumber(1)
+
+	if model.Selected.Number() != 1 {
+		t.Error("InputNumber after cancled mark and another InputNum didn't set num", model.Selected)
+	}
+
+}
