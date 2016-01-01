@@ -45,8 +45,15 @@ func newModel() *mainModel {
 		sudoku.GenerateGrid(nil),
 		nil,
 	}
-	model.selected = model.grid.Cell(0, 0)
+	model.EnsureSelected()
 	return model
+}
+
+func (m *mainModel) EnsureSelected() {
+	//Ensures that at least one cell is selected.
+	if m.selected == nil {
+		m.selected = m.grid.Cell(0, 0)
+	}
 }
 
 func draw(model *mainModel) {
