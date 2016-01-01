@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"reflect"
 	"strconv"
 	"testing"
 )
@@ -218,6 +219,44 @@ func TestCellCreation(t *testing.T) {
 	if cell.diagram() != TOP_LEFT_CELL_FILLED {
 		t.Log("Diagram for the top left cell filled printed out incorrectly: \n", cell.diagram())
 		t.Fail()
+	}
+}
+
+func TestMarks(t *testing.T) {
+	grid := NewGrid()
+	cell := grid.Cell(0, 0)
+	for i := 1; i < DIM+1; i++ {
+		if cell.Mark(i) {
+			t.Error("Zero cell had a mark:", i)
+		}
+	}
+	if cell.Mark(0) {
+		t.Error("Invalid index had true mark: 0")
+	}
+	if cell.Mark(DIM + 2) {
+		t.Error("Invalid index had true mark: ", DIM+2)
+	}
+
+	if len(cell.Marks()) != 0 {
+		t.Error("An empty cell already had marks")
+	}
+
+	cell.SetMark(1, true)
+	if !cell.Mark(1) {
+		t.Error("Cell with a mark on 1 did not read back")
+	}
+
+	cell.SetMark(2, true)
+
+	if !reflect.DeepEqual(cell.Marks(), IntSlice{1, 2}) {
+		t.Error("Cell with marks 1 and 2 set had wrong Marks List:", cell.Marks())
+	}
+
+	cell.ResetMarks()
+	for i := 1; i < DIM; i++ {
+		if cell.Mark(i) {
+			t.Error("Cell that had called ResetMarks still had a mark set at", i)
+		}
 	}
 }
 

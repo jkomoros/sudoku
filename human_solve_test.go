@@ -206,11 +206,11 @@ func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string
 
 	grid.Load(TEST_GRID)
 
-	diagram := grid.Diagram()
+	diagram := grid.Diagram(false)
 
 	hint := grid.Hint(options)
 
-	if grid.Diagram() != diagram {
+	if grid.Diagram(false) != diagram {
 		t.Error("Hint mutated the grid but it wasn't supposed to.")
 	}
 

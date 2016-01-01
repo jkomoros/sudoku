@@ -45,6 +45,8 @@ type Cell struct {
 	impossibles   [DIM]int
 	excludedLock  sync.RWMutex
 	excluded      [DIM]bool
+	//TODO: do we need a marks lock?
+	marks [DIM]bool
 }
 
 func newCell(grid *Grid, row int, col int) Cell {
@@ -213,6 +215,46 @@ func (self *Cell) ResetExcludes() {
 	if self.grid != nil {
 		self.grid.cellRankChanged(self)
 		self.checkInvalid()
+	}
+}
+
+//SetMark sets the mark at the given index to true. Marks represent number
+//marks proactively added to a cell by a user. They have no effect on the
+//solver or human solver; they only are visible when Diagram(true) is called.
+func (self *Cell) SetMark(number int, marked bool) {
+	number--
+	if number < 0 || number >= DIM {
+		return
+	}
+	self.marks[number] = marked
+}
+
+//Mark reads out whether the given mark has been set for this cell. See
+//SetMark for a description of what marks represent.
+func (self *Cell) Mark(number int) bool {
+	number--
+	if number < 0 || number >= DIM {
+		return false
+	}
+	return self.marks[number]
+}
+
+//Marks returns an IntSlice with each mark, in ascending order.
+func (self *Cell) Marks() IntSlice {
+	var result IntSlice
+	for i := 0; i < DIM; i++ {
+		if self.marks[i] {
+			result = append(result, i+1)
+		}
+	}
+	return result
+}
+
+//ResetMarks removes all marks. See SetMark for a description of what marks
+//represent.
+func (self *Cell) ResetMarks() {
+	for i := 0; i < DIM; i++ {
+		self.marks[i] = false
 	}
 }
 
@@ -414,7 +456,7 @@ func (self *Cell) positionInBlock() (top, right, bottom, left bool) {
 	return
 }
 
-func (self *Cell) diagramRows() (rows []string) {
+func (self *Cell) diagramRows(showMarks bool) (rows []string) {
 	//We'll only draw barriers at our bottom right edge.
 	_, right, bottom, _ := self.positionInBlock()
 	current := 0
@@ -430,10 +472,18 @@ func (self *Cell) diagramRows() (rows []string) {
 				}
 			} else {
 				//Print the possibles.
-				if self.Possible(current + 1) {
-					row += strconv.Itoa(current + 1)
+				if showMarks {
+					if self.Mark(current + 1) {
+						row += strconv.Itoa(current + 1)
+					} else {
+						row += DIAGRAM_IMPOSSIBLE
+					}
 				} else {
-					row += DIAGRAM_IMPOSSIBLE
+					if self.Possible(current + 1) {
+						row += strconv.Itoa(current + 1)
+					} else {
+						row += DIAGRAM_IMPOSSIBLE
+					}
 				}
 			}
 			current++
@@ -460,5 +510,5 @@ func (self *Cell) diagramRows() (rows []string) {
 }
 
 func (self *Cell) diagram() string {
-	return strings.Join(self.diagramRows(), "\n")
+	return strings.Join(self.diagramRows(false), "\n")
 }

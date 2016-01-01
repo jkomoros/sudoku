@@ -149,7 +149,7 @@ func (self SolveDirections) Walkthrough() string {
 
 	intro += "\nWhen you start, your grid looks like this:\n"
 
-	intro += clone.Diagram()
+	intro += clone.Diagram(false)
 
 	intro += "\n"
 
@@ -166,7 +166,7 @@ func (self SolveDirections) Walkthrough() string {
 
 		self.Steps[i].Apply(clone)
 
-		result += clone.Diagram()
+		result += clone.Diagram(false)
 
 		results[i] = result
 	}

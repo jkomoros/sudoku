@@ -338,16 +338,16 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
-	if grid.Diagram() != TEST_GRID_DIAGRAM {
-		t.Log("The grid did not match the expected diagram: \n", grid.Diagram())
+	if grid.Diagram(false) != TEST_GRID_DIAGRAM {
+		t.Log("The grid did not match the expected diagram: \n", grid.Diagram(false))
 		t.Fail()
 	}
 
 	//Twiddle an exclude to make sure it copies over correctly.
 	grid.Cell(2, 0).SetExcluded(4, true)
 
-	if grid.Diagram() != TEST_GRID_EXCLUDED_DIAGRAM {
-		t.Error("Diagram did not reflect the manually excluded item: \n", grid.Diagram())
+	if grid.Diagram(false) != TEST_GRID_EXCLUDED_DIAGRAM {
+		t.Error("Diagram did not reflect the manually excluded item: \n", grid.Diagram(false))
 	}
 
 	//Test copying.
@@ -385,7 +385,7 @@ func TestGridLoad(t *testing.T) {
 	}
 
 	if grid.Invalid() {
-		t.Log("Grid thought it was invalid when it wasn't: \n", grid.Diagram())
+		t.Log("Grid thought it was invalid when it wasn't: \n", grid.Diagram(false))
 		t.Fail()
 	}
 
@@ -395,7 +395,7 @@ func TestGridLoad(t *testing.T) {
 	}
 
 	if grid.Invalid() {
-		t.Log("fillSimpleCells filled in something that made the grid invalid: \n", grid.Diagram())
+		t.Log("fillSimpleCells filled in something that made the grid invalid: \n", grid.Diagram(false))
 		t.Fail()
 	}
 
