@@ -28,6 +28,7 @@ const (
 	DIAGRAM_BOTTOM     = "-"
 	DIAGRAM_CORNER     = "+"
 	DIAGRAM_NUMBER     = "•"
+	DIAGRAM_LOCKED     = "X"
 )
 
 //Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
@@ -239,6 +240,24 @@ func (self *Grid) ResetExcludes() {
 func (self *Grid) ResetMarks() {
 	for i := range self.cells {
 		self.cells[i].ResetMarks()
+	}
+}
+
+//UnlockCells unlocks all cells. See cell.Lock for more information on the
+//concept of locking.
+func (self *Grid) UnlockCells() {
+	for i := range self.cells {
+		self.cells[i].Unlock()
+	}
+}
+
+//LockFilledCells locks all cells in the grid that have a number set.
+func (self *Grid) LockFilledCells() {
+	for i := range self.cells {
+		cell := &self.cells[i]
+		if cell.Number() != 0 {
+			cell.Lock()
+		}
 	}
 }
 

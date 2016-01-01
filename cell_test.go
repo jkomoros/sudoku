@@ -260,6 +260,35 @@ func TestMarks(t *testing.T) {
 	}
 }
 
+func TestCellLock(t *testing.T) {
+	grid := NewGrid()
+	defer grid.Done()
+
+	cell := grid.Cell(3, 3)
+
+	if cell.Locked() {
+		t.Error("New cell was already locked")
+	}
+
+	cell.Lock()
+
+	if !cell.Locked() {
+		t.Error("Locked cell was not actually locked")
+	}
+
+	cell.Unlock()
+
+	if cell.Locked() {
+		t.Error("Unlocked cell was still locked")
+	}
+
+	cell.SetNumber(2)
+
+	if cell.Number() != 2 {
+		t.Error("Locking made it so SetNumber failed")
+	}
+}
+
 func TestSymmetry(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
