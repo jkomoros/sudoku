@@ -45,6 +45,8 @@ type Cell struct {
 	impossibles   [DIM]int
 	excludedLock  sync.RWMutex
 	excluded      [DIM]bool
+	//TODO: do we need a marks lock?
+	marks [DIM]bool
 }
 
 func newCell(grid *Grid, row int, col int) Cell {
@@ -214,6 +216,27 @@ func (self *Cell) ResetExcludes() {
 		self.grid.cellRankChanged(self)
 		self.checkInvalid()
 	}
+}
+
+//SetMark sets the mark at the given index to true. Marks represent number
+//marks proactively added to a cell by a user. They have no effect on the
+//solver or human solver; they only are visible when Diagram(true) is called.
+func (self *Cell) SetMark(number int, marked bool) {
+	number--
+	if number < 0 || number >= DIM {
+		return
+	}
+	self.marks[number] = marked
+}
+
+//Mark reads out whether the given mark has been set for this cell. See
+//SetMark for a description of what marks represent.
+func (self *Cell) Mark(number int) bool {
+	number--
+	if number < 0 || number >= DIM {
+		return false
+	}
+	return self.marks[number]
 }
 
 //Possible returns whether or not a given number is legal to fill via

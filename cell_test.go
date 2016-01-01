@@ -221,6 +221,26 @@ func TestCellCreation(t *testing.T) {
 	}
 }
 
+func TestMarks(t *testing.T) {
+	grid := NewGrid()
+	cell := grid.Cell(0, 0)
+	for i := 1; i < DIM+1; i++ {
+		if cell.Mark(i) {
+			t.Error("Zero cell had a mark:", i)
+		}
+	}
+	if cell.Mark(0) {
+		t.Error("Invalid index had true mark: 0")
+	}
+	if cell.Mark(DIM + 2) {
+		t.Error("Invalid index had true mark: ", DIM+2)
+	}
+	cell.SetMark(1, true)
+	if !cell.Mark(1) {
+		t.Error("Cell with a mark on 1 did not read back")
+	}
+}
+
 func TestSymmetry(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
