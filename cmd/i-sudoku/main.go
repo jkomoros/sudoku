@@ -67,6 +67,17 @@ func (m *mainModel) MoveSelectionLeft() {
 	m.Selected = m.grid.Cell(r, c)
 }
 
+func (m *mainModel) MoveSelectionUp() {
+	m.EnsureSelected()
+	r := m.Selected.Row()
+	c := m.Selected.Col()
+	r--
+	if r < 0 {
+		r = 0
+	}
+	m.Selected = m.grid.Cell(r, c)
+}
+
 func draw(model *mainModel) {
 	drawGrid(model)
 	termbox.Flush()

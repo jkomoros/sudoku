@@ -19,7 +19,7 @@ func TestEnsureSelected(t *testing.T) {
 	}
 }
 
-func TestMoveSelection(t *testing.T) {
+func TestMoveSelectionLeft(t *testing.T) {
 	model := newModel()
 
 	if model.Selected == nil {
@@ -42,5 +42,31 @@ func TestMoveSelection(t *testing.T) {
 
 	if model.Selected.Row() != 1 || model.Selected.Col() != 0 {
 		t.Error("Wrong cell selected after move left", model.Selected)
+	}
+}
+
+func TestMoveSelectionUp(t *testing.T) {
+	model := newModel()
+
+	if model.Selected == nil {
+		t.Fatal("No selected cell")
+	}
+
+	if model.Selected.Row() != 0 || model.Selected.Col() != 0 {
+		t.Error("Wrong cell selected to start", model.Selected)
+	}
+
+	model.MoveSelectionUp()
+
+	if model.Selected.Row() != 0 || model.Selected.Col() != 0 {
+		t.Error("Wrong cell selected after move up at bounds", model.Selected)
+	}
+
+	model.Selected = model.grid.Cell(1, 1)
+
+	model.MoveSelectionUp()
+
+	if model.Selected.Row() != 0 || model.Selected.Col() != 1 {
+		t.Error("Wrong cell selected after move up", model.Selected)
 	}
 }
