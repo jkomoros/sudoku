@@ -456,6 +456,20 @@ func (self *Cell) positionInBlock() (top, right, bottom, left bool) {
 	return
 }
 
+//DiagramExtents returns the top, left, height, and width coordinate in
+//grid.Diagram's output that  corresponds to the contents of this cell. The
+//top left corner is 0,0
+func (self *Cell) DiagramExtents() (top, left, height, width int) {
+	top = self.Col() * (BLOCK_DIM + 1)
+	top += self.Col() / BLOCK_DIM
+
+	left = self.Row() * (BLOCK_DIM + 1)
+	left += self.Row() / BLOCK_DIM
+
+	return top, left, BLOCK_DIM, BLOCK_DIM
+
+}
+
 func (self *Cell) diagramRows(showMarks bool) (rows []string) {
 	//We'll only draw barriers at our bottom right edge.
 	_, right, bottom, _ := self.positionInBlock()
