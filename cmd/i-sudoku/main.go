@@ -135,6 +135,9 @@ func (m *mainModel) NewGrid() {
 
 func (m *mainModel) SetSelectedNumber(num int) {
 	m.EnsureSelected()
+	if m.Selected.Locked() {
+		return
+	}
 	m.Selected.SetNumber(num)
 }
 

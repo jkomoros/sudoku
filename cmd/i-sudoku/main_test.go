@@ -157,6 +157,28 @@ func TestEnsureGrid(t *testing.T) {
 func TestSetSelectionNumber(t *testing.T) {
 	model := newModel()
 
+	var lockedCell *sudoku.Cell
+	var unlockedCell *sudoku.Cell
+
+	//Set an unlocked cell
+	for _, cell := range model.grid.Cells() {
+		if cell.Locked() {
+			if lockedCell == nil {
+				lockedCell = cell
+			}
+		}
+		if !cell.Locked() {
+			if unlockedCell == nil {
+				unlockedCell = cell
+			}
+		}
+		if lockedCell != nil && unlockedCell != nil {
+			break
+		}
+	}
+
+	model.Selected = unlockedCell
+
 	model.SetSelectedNumber(1)
 
 	if model.Selected.Number() != 1 {
@@ -168,4 +190,21 @@ func TestSetSelectionNumber(t *testing.T) {
 	if model.Selected.Number() != 0 {
 		t.Error("SetSelectionNumber didn't set to 0", model.Selected)
 	}
+
+	num := lockedCell.Number()
+
+	//Pick a number that's not the one the cell is set to.
+	numToSet := num + 1
+	if numToSet >= sudoku.DIM {
+		numToSet = 0
+	}
+
+	model.Selected = lockedCell
+
+	model.SetSelectedNumber(numToSet)
+
+	if model.Selected.Number() == numToSet {
+		t.Error("SetSelectionNumber modified a locked cell", lockedCell, num)
+	}
+
 }
