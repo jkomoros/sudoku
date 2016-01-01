@@ -8,6 +8,7 @@ import (
 	"github.com/jkomoros/sudoku"
 	"github.com/nsf/termbox-go"
 	"log"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -49,6 +50,14 @@ mainloop:
 			case 'n':
 				//TODO: since this is a destructive action, require a confirmation
 				model.NewGrid()
+			//TODO: do this in a more general way related to DIM
+			case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+				//TODO: this is a seriously gross way of converting a rune to a string.
+				num, err := strconv.Atoi(strings.Replace(strconv.QuoteRuneToASCII(ev.Ch), "'", "", -1))
+				if err != nil {
+					panic(err)
+				}
+				model.SetSelectedNumber(num)
 			}
 		}
 		draw(model)
