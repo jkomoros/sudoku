@@ -262,6 +262,10 @@ func TestMode(t *testing.T) {
 	model.grid = sudoku.NewGrid()
 	model.Selected = nil
 
+	if model.StatusLine() != STATUS_DEFAULT {
+		t.Error("Didn't get default status line in default mode.")
+	}
+
 	model.ModeInputNumber(1)
 
 	if model.Selected.Number() != 1 {
@@ -271,9 +275,18 @@ func TestMode(t *testing.T) {
 	model.MoveSelectionRight()
 
 	model.ModeEnterMarkMode()
+	if model.StatusLine() != STATUS_MARKING+"[]"+STATUS_MARKING_POSTFIX {
+		t.Error("In mark mode with no marks, didn't get expected", model.StatusLine())
+	}
 	model.ModeInputNumber(1)
 	model.ModeInputNumber(2)
+	if model.StatusLine() != STATUS_MARKING+"[1 2]"+STATUS_MARKING_POSTFIX {
+		t.Error("In makr mode with two marks, didn't get expected", model.StatusLine())
+	}
 	model.ModeCommitMarkMode()
+	if model.StatusLine() != STATUS_DEFAULT {
+		t.Error("After commiting marks, didn't have default status", model.StatusLine())
+	}
 
 	if model.Selected.Number() != 0 {
 		t.Error("InputNumber in mark mode set the number", model.Selected)
@@ -293,6 +306,10 @@ func TestMode(t *testing.T) {
 	model.ModeInputNumber(1)
 	model.ModeInputNumber(2)
 	model.ModeCancelMarkMode()
+
+	if model.StatusLine() != STATUS_DEFAULT {
+		t.Error("After canceling mark mode, status didn't go back to default.", model.StatusLine())
+	}
 
 	if model.Selected.Mark(1) || model.Selected.Mark(2) {
 		t.Error("InputNumber in canceled mark mode still set marks")

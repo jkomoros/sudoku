@@ -5,6 +5,7 @@ i-sudoku is an interactive command-line sudoku tool
 package main
 
 import (
+	"fmt"
 	"github.com/jkomoros/sudoku"
 	"github.com/nsf/termbox-go"
 	"log"
@@ -12,6 +13,10 @@ import (
 	"strings"
 	"unicode/utf8"
 )
+
+const STATUS_DEFAULT = "Type arrows to move, a number to input a number, 'm' to enter mark mode, or ESC to quit"
+const STATUS_MARKING = "MARKING:"
+const STATUS_MARKING_POSTFIX = "   ENTER to commit, ESC to cancel"
 
 type mainModel struct {
 	grid         *sudoku.Grid
@@ -82,7 +87,13 @@ func newModel() *mainModel {
 
 func (m *mainModel) StatusLine() string {
 	//TODO: return something dynamic depending on mode.
-	return "Type arrows to move, a number to input a number"
+
+	if m.marksToInput == nil {
+		return STATUS_DEFAULT
+	} else {
+		//Marks mode
+		return STATUS_MARKING + fmt.Sprint(m.marksToInput) + STATUS_MARKING_POSTFIX
+	}
 }
 
 func (m *mainModel) ModeInputEsc() (quit bool) {
