@@ -353,3 +353,26 @@ func TestMode(t *testing.T) {
 	}
 
 }
+
+func TestNoMarkModeWhenLocked(t *testing.T) {
+	model := newModel()
+	model.grid = sudoku.NewGrid()
+	model.SetSelected(nil)
+	model.EnsureSelected()
+
+	model.Selected().Lock()
+	model.ModeEnterMarkMode()
+
+	if model.marksToInput != nil {
+		t.Error("Were allowed to enter mark mode even though cell was locked.")
+	}
+
+	model.Selected().Unlock()
+	model.Selected().SetNumber(1)
+	model.ModeEnterMarkMode()
+
+	if model.marksToInput != nil {
+		t.Error("We were allowed to enter mark mode even though cell had a number in it.")
+	}
+
+}

@@ -118,7 +118,13 @@ func (m *mainModel) ModeInputEsc() (quit bool) {
 }
 
 func (m *mainModel) ModeEnterMarkMode() {
-	//TODO: don't enter mark mode if cell is filled or locked.
+	selected := m.Selected()
+	if selected != nil {
+		if selected.Number() != 0 || selected.Locked() {
+			//Dion't enter mark mode.
+			return
+		}
+	}
 	m.marksToInput = make([]int, 0)
 }
 
