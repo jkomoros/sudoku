@@ -34,7 +34,11 @@ mainloop:
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
 			switch ev.Key {
-			case termbox.KeyEsc, termbox.KeyCtrlC:
+			case termbox.KeyEsc:
+				if model.ModeInputEsc() {
+					break mainloop
+				}
+			case termbox.KeyCtrlC:
 				break mainloop
 			case termbox.KeyArrowDown:
 				model.MoveSelectionDown()
