@@ -141,6 +141,14 @@ func (m *mainModel) SetSelectedNumber(num int) {
 	m.Selected.SetNumber(num)
 }
 
+func (m *mainModel) ToggleSelectedMark(num int) {
+	m.EnsureSelected()
+	if m.Selected.Locked() {
+		return
+	}
+	m.Selected.SetMark(num, !m.Selected.Mark(num))
+}
+
 func draw(model *mainModel) {
 	drawGrid(model)
 	termbox.Flush()

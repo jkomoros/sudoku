@@ -208,3 +208,49 @@ func TestSetSelectionNumber(t *testing.T) {
 	}
 
 }
+
+func TestToggleSelectedMark(t *testing.T) {
+	model := newModel()
+
+	var lockedCell *sudoku.Cell
+	var unlockedCell *sudoku.Cell
+
+	//Set an unlocked cell
+	for _, cell := range model.grid.Cells() {
+		if cell.Locked() {
+			if lockedCell == nil {
+				lockedCell = cell
+			}
+		}
+		if !cell.Locked() {
+			if unlockedCell == nil {
+				unlockedCell = cell
+			}
+		}
+		if lockedCell != nil && unlockedCell != nil {
+			break
+		}
+	}
+
+	model.Selected = unlockedCell
+
+	model.ToggleSelectedMark(1)
+
+	if !model.Selected.Mark(1) {
+		t.Error("ToggleSelectedMark didn't mark 1", model.Selected)
+	}
+
+	model.ToggleSelectedMark(1)
+
+	if model.Selected.Mark(1) {
+		t.Error("ToggleSelectedMark didn't unmark 1", model.Selected)
+	}
+
+	model.Selected = lockedCell
+
+	model.ToggleSelectedMark(1)
+
+	if model.Selected.Mark(1) {
+		t.Error("ToggleSelectedMark modified a locked cell", lockedCell)
+	}
+}
