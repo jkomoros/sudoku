@@ -230,7 +230,7 @@ func draw(model *mainModel) {
 
 	//TODO: have a mode line after the grid for if the grid is invalid, if it's solved.
 
-	//TODO: draw which marks are ready to commit.
+	//TODO: Clear the whole screen (currently old staus lines peek through)
 
 	grid := model.grid
 
