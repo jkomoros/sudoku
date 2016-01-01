@@ -46,7 +46,8 @@ type Cell struct {
 	excludedLock  sync.RWMutex
 	excluded      [DIM]bool
 	//TODO: do we need a marks lock?
-	marks [DIM]bool
+	marks  [DIM]bool
+	locked bool
 }
 
 func newCell(grid *Grid, row int, col int) Cell {
@@ -316,6 +317,24 @@ func (self *Cell) Invalid() bool {
 		}
 	}
 	return true
+}
+
+//Lock 'locks' the cell. Locking does not change whether calls to SetNumber or
+//SetMark will fail; it only impacts Diagram().
+func (self *Cell) Lock() {
+	self.locked = true
+}
+
+//Unlock 'unlocks' the cell. See Lock for more information on the concept of
+//locking.
+func (self *Cell) Unlock() {
+	self.locked = false
+}
+
+//Locked returns whether or not the cell is locked. See Lock for more
+//information on the concept of locking.
+func (self *Cell) Locked() bool {
+	return self.locked
 }
 
 func (self *Cell) rank() int {
