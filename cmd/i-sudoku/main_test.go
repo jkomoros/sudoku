@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/jkomoros/sudoku"
+	"strings"
 	"testing"
 )
 
@@ -62,6 +63,17 @@ func TestConsoleMessage(t *testing.T) {
 
 	if model.consoleMessage != "" {
 		t.Error("A short lived console message wasn't cleared at end of event loop.")
+	}
+
+	//Test wrapping up long messages
+	model.outputWidth = 30
+
+	model.SetConsoleMessage(MARKS_MODE_FAIL_NUMBER+MARKS_MODE_FAIL_NUMBER+MARKS_MODE_FAIL_NUMBER, false)
+
+	for i, line := range strings.Split(model.consoleMessage, "\n") {
+		if len(line) > 30 {
+			t.Error("Line", i, "of long output is greater than 30 chars")
+		}
 	}
 
 }

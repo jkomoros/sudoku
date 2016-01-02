@@ -2,12 +2,15 @@ package main
 
 import (
 	"github.com/jkomoros/sudoku"
+	"github.com/mitchellh/go-wordwrap"
 )
 
 type mainModel struct {
-	grid           *sudoku.Grid
-	selected       *sudoku.Cell
-	state          InputState
+	grid     *sudoku.Grid
+	selected *sudoku.Cell
+	state    InputState
+	//The size of the console output. Not used for much.
+	outputWidth    int
 	consoleMessage string
 	//if true, will zero out console message on turn of event loop.
 	consoleMessageShort bool
@@ -45,6 +48,12 @@ func (m *mainModel) enterConfirmState(msg string, defaultAction defaultOption, y
 }
 
 func (m *mainModel) SetConsoleMessage(msg string, shortLived bool) {
+
+	if m.outputWidth != 0 {
+		//Wrap to fit in given size
+		msg = wordwrap.WrapString(msg, uint(m.outputWidth))
+	}
+
 	m.consoleMessage = msg
 	m.consoleMessageShort = shortLived
 }

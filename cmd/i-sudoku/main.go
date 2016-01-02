@@ -33,6 +33,9 @@ func main() {
 
 	model := newModel()
 
+	width, _ := termbox.Size()
+	model.outputWidth = width
+
 	draw(model)
 
 mainloop:
@@ -149,23 +152,28 @@ func draw(model *mainModel) {
 		x++
 	}
 
-	y++
-	x = 0
 	underlined = false
-	for _, ch := range model.consoleMessage {
-		if ch == '(' {
-			underlined = true
-			continue
-		} else if ch == ')' {
-			underlined = false
-			continue
+
+	splitMessage := strings.Split(model.consoleMessage, "\n")
+
+	for _, line := range splitMessage {
+		y++
+		x = 0
+		for _, ch := range line {
+			if ch == '(' {
+				underlined = true
+				continue
+			} else if ch == ')' {
+				underlined = false
+				continue
+			}
+			fg := termbox.ColorWhite
+			if underlined {
+				fg = fg | termbox.AttrBold
+			}
+			termbox.SetCell(x, y, ch, fg, termbox.ColorBlack)
+			x++
 		}
-		fg := termbox.ColorWhite
-		if underlined {
-			fg = fg | termbox.AttrBold
-		}
-		termbox.SetCell(x, y, ch, fg, termbox.ColorBlack)
-		x++
 	}
 
 	termbox.Flush()
