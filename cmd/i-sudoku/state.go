@@ -39,10 +39,6 @@ func (s *baseState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool) {
 	return false
 }
 
-func (s *baseState) enter(m *mainModel) {
-	m.state = s
-}
-
 func (s *baseState) statusLine(m *mainModel) string {
 	//TODO: in StatusLine, the keyboard shortcuts should be in bold.
 	//Perhaps make it so at open parens set to bold, at close parens set
@@ -100,6 +96,10 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 	return false
 }
 
+func (s *defaultState) enter(m *mainModel) {
+	m.state = s
+}
+
 type enterMarkState struct {
 	baseState
 	marksToInput []int
@@ -151,7 +151,7 @@ func (s *enterMarkState) enter(m *mainModel) {
 		}
 	}
 	s.marksToInput = make([]int, 0)
-	s.baseState.enter(m)
+	m.state = s
 }
 
 func (s *enterMarkState) statusLine(m *mainModel) string {
