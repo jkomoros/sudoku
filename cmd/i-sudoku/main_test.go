@@ -33,6 +33,39 @@ func TestNewGrid(t *testing.T) {
 	}
 }
 
+func TestConsoleMessage(t *testing.T) {
+	model := newModel()
+
+	if model.consoleMessage != "" {
+		t.Error("Model started out with non-empty console message", model.consoleMessage)
+	}
+
+	model.SetConsoleMessage("Test", false)
+
+	if model.consoleMessage != "Test" {
+		t.Fatal("SetConsoleMessage didn't work.")
+	}
+
+	model.EndOfEventLoop()
+
+	if model.consoleMessage != "Test" {
+		t.Error("A long lived console message didn't last past event loop.")
+	}
+
+	model.SetConsoleMessage("Short", true)
+
+	if model.consoleMessage != "Short" {
+		t.Error("Setting a short console message failed")
+	}
+
+	model.EndOfEventLoop()
+
+	if model.consoleMessage != "" {
+		t.Error("A short lived console message wasn't cleared at end of event loop.")
+	}
+
+}
+
 func TestEnsureSelected(t *testing.T) {
 	model := newModel()
 

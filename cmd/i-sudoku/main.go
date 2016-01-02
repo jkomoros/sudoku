@@ -46,6 +46,7 @@ mainloop:
 		if model.exitNow {
 			break mainloop
 		}
+		model.EndOfEventLoop()
 	}
 }
 

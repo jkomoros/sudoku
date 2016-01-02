@@ -9,6 +9,8 @@ type mainModel struct {
 	selected       *sudoku.Cell
 	state          InputState
 	consoleMessage string
+	//if true, will zero out console message on turn of event loop.
+	consoleMessageShort bool
 	//If exitNow is flipped to true, we will quit at next turn of event loop.
 	exitNow bool
 }
@@ -40,6 +42,18 @@ func (m *mainModel) enterConfirmState(msg string, defaultAction defaultOption, y
 	STATE_CONFIRM.yesAction = yesAction
 	STATE_CONFIRM.noAction = noAction
 	m.EnterState(STATE_CONFIRM)
+}
+
+func (m *mainModel) SetConsoleMessage(msg string, shortLived bool) {
+	m.consoleMessage = msg
+	m.consoleMessageShort = shortLived
+}
+
+func (m *mainModel) EndOfEventLoop() {
+	if m.consoleMessageShort {
+		m.consoleMessage = ""
+		m.consoleMessageShort = false
+	}
 }
 
 func (m *mainModel) StatusLine() string {
