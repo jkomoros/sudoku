@@ -82,8 +82,6 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 			handled = false
 		}
 		switch {
-		case evt.Ch == 'h':
-			showHint(m)
 		case evt.Ch == 'c':
 			m.EnterState(STATE_COMMAND)
 		case evt.Ch == 'm':
@@ -231,10 +229,12 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) {
 		default:
 			handled = false
 		}
-		switch evt.Ch {
-		case 'q':
+		switch {
+		case evt.Ch == 'h':
+			showHint(m)
+		case evt.Ch == 'q':
 			confirmQuit(m)
-		case 'n':
+		case evt.Ch == 'n':
 			m.enterConfirmState("Replace grid with a new one? This is a destructive action.",
 				DEFAULT_NO,
 				func() {

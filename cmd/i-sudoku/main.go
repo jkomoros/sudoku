@@ -13,10 +13,10 @@ import (
 	"unicode/utf8"
 )
 
-const STATUS_DEFAULT = "(→,←,↓,↑) to move cells, (0-9) to enter number, (m)ark mode, (h)int, other (c)ommand"
+const STATUS_DEFAULT = "(→,←,↓,↑) to move cells, (0-9) to enter number, (m)ark mode, other (c)ommand"
 const STATUS_MARKING = "MARKING:"
 const STATUS_MARKING_POSTFIX = "  (1-9) to toggle marks, (ENTER) to commit, (ESC) to cancel"
-const STATUS_COMMAND = "COMMAND: (q)uit, (n)ew puzzle, (ESC) cancel"
+const STATUS_COMMAND = "COMMAND: (h)int, (q)uit, (n)ew puzzle, (ESC) cancel"
 
 const GRID_INVALID = " INVALID "
 const GRID_VALID = "  VALID  "
