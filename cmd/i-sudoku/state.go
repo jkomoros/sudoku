@@ -62,6 +62,8 @@ type defaultState struct {
 func showHint(m *mainModel) {
 	hint := m.grid.Hint(nil)
 	m.SetConsoleMessage(strings.Join(hint.Description(), "\n"), false)
+	lastStep := hint.Steps[len(hint.Steps)-1]
+	m.SetSelected(lastStep.TargetCells[0].InGrid(m.grid))
 }
 
 func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {

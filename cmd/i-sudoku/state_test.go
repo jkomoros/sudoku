@@ -214,6 +214,8 @@ func TestCommandState(t *testing.T) {
 
 	}
 
+	oldSelected := model.Selected()
+
 	model.EnterState(STATE_COMMAND)
 
 	sendCharEvent(model, 'h')
@@ -228,6 +230,12 @@ func TestCommandState(t *testing.T) {
 
 	if model.state != STATE_DEFAULT {
 		t.Error("Choosing hint didn't lead back to default mode")
+	}
+
+	//Technically, this test has a 1/81 % chance of flaking...
+	//TODO: make this test not flaky
+	if oldSelected == model.Selected() {
+		t.Error("Hint didn't automatically select the cell specified by the hint.")
 	}
 
 }
