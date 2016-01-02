@@ -106,8 +106,13 @@ func (m *mainModel) EnsureGrid() {
 }
 
 func (m *mainModel) NewGrid() {
-	//TODO: wait, isn't the selected cell wrong now?
+	oldCell := m.Selected()
+
 	m.grid = sudoku.GenerateGrid(nil)
+	//The currently selected cell is tied to the grid, so we need to fix it up.
+	if oldCell != nil {
+		m.SetSelected(oldCell.InGrid(m.grid))
+	}
 	m.grid.LockFilledCells()
 }
 

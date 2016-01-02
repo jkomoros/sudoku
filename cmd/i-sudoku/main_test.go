@@ -5,6 +5,34 @@ import (
 	"testing"
 )
 
+func TestNewGrid(t *testing.T) {
+	model := newModel()
+
+	//We want to make sure that if a cell is selected and we make a new grid,
+	//the m.selected cell is in the new grid, not the old. This is actually
+	//hard to do. We set selected to 3,3, and then regenerate NewPuzzles until
+	//the new puzzle has am empty cell there. Then we set that number, and
+	//then make sure it was set.
+
+	unfilledNumberFound := false
+	for i := 0; i < 100; i++ {
+		model.SetSelected(model.grid.Cell(3, 3))
+		model.NewGrid()
+		if model.grid.Cell(3, 3).Number() == 0 {
+			//Found one!
+			model.SetSelectedNumber(3)
+			if model.grid.Cell(3, 3).Number() != 3 {
+				t.Error("When creating a new grid, the selected cell was in the old grid.")
+			}
+			unfilledNumberFound = true
+			break
+		}
+	}
+	if !unfilledNumberFound {
+		t.Error("In 100 times, did not find a new grid where 3,3 was unfilled.")
+	}
+}
+
 func TestEnsureSelected(t *testing.T) {
 	model := newModel()
 
