@@ -101,7 +101,7 @@ func (self SolveDirections) Description() []string {
 		lastStep := self.Steps[len(self.Steps)-1]
 		//TODO: this terminology is too tuned for the Online Sudoku use case.
 		//it practice it should probably name the cell in text.
-		descriptions = append(descriptions, "Based on the other numbers you've entered, this cell can only be a "+strconv.Itoa(lastStep.TargetNums[0])+".")
+		descriptions = append(descriptions, "Based on the other numbers you've entered, "+lastStep.TargetCells[0].ref().String()+" can only be a "+strconv.Itoa(lastStep.TargetNums[0])+".")
 		descriptions = append(descriptions, "How do we know that?")
 		if len(self.Steps) > 1 {
 			descriptions = append(descriptions, "We can't fill any cells right away so first we need to cull some possibilities.")
