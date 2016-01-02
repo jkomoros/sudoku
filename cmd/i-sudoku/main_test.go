@@ -200,6 +200,13 @@ func TestSetSelectionNumber(t *testing.T) {
 		t.Error("SetSelectionNumber didn't set to 0", model.Selected())
 	}
 
+	model.SetSelectedNumber(1)
+	model.SetSelectedNumber(1)
+
+	if model.Selected().Number() != 0 {
+		t.Error("Setting the same number on the selected cell didn't set it back to 0", model.Selected())
+	}
+
 	num := lockedCell.Number()
 
 	//Pick a number that's not the one the cell is set to.

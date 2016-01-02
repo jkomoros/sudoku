@@ -111,12 +111,17 @@ func (m *mainModel) NewGrid() {
 }
 
 func (m *mainModel) SetSelectedNumber(num int) {
-	//TODO: if the number already has that number set, set 0.
 	m.EnsureSelected()
 	if m.Selected().Locked() {
 		return
 	}
-	m.Selected().SetNumber(num)
+
+	if m.Selected().Number() != num {
+		m.Selected().SetNumber(num)
+	} else {
+		//If the number to set is already set, then empty the cell instead.
+		m.Selected().SetNumber(0)
+	}
 }
 
 func (m *mainModel) ToggleSelectedMark(num int) {
