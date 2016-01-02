@@ -54,8 +54,8 @@ func TestDefaultState(t *testing.T) {
 		t.Error("InputNumber in default mode didn't add a number")
 	}
 
-	if !sendKeyEvent(model, termbox.KeyEsc) {
-		t.Error("ModeInputEsc in DEFAULT_STATE didn't tell us to quit.")
+	if sendKeyEvent(model, termbox.KeyEsc) {
+		t.Error("ModeInputEsc in DEFAULT_STATE did tell us to quit, but it shouldn't")
 	}
 }
 

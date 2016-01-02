@@ -62,8 +62,6 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 	switch evt.Type {
 	case termbox.EventKey:
 		switch evt.Key {
-		case termbox.KeyEsc:
-			return true
 		case termbox.KeyArrowDown:
 			m.MoveSelectionDown()
 		case termbox.KeyArrowLeft:
