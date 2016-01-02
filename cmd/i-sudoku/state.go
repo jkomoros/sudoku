@@ -19,6 +19,10 @@ const (
 	MARKS_MODE_FAIL_NUMBER = "Can't enter mark mode on a cell that has a filled number."
 )
 
+func runeIsNum(ch rune) bool {
+	return ch >= '0' && ch <= '9'
+}
+
 type InputState interface {
 	//TODO: doesn't it feel weird that every method takes a main model?
 	handleInput(m *mainModel, evt termbox.Event)
@@ -72,14 +76,13 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 		default:
 			handled = false
 		}
-		switch evt.Ch {
-		case 'c':
+		switch {
+		case evt.Ch == 'c':
 			m.EnterState(STATE_COMMAND)
-		case 'm':
+		case evt.Ch == 'm':
 			//TODO: ideally Ctrl+Num would work to put in one mark. But termbox doesn't appear to let that work.
 			m.EnterState(STATE_ENTER_MARKS)
-		//TODO: do this in a more general way related to DIM
-		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		case runeIsNum(evt.Ch):
 			//TODO: this is a seriously gross way of converting a rune to a string.
 			num, err := strconv.Atoi(strings.Replace(strconv.QuoteRuneToASCII(evt.Ch), "'", "", -1))
 			if err != nil {
@@ -112,9 +115,8 @@ func (s *enterMarkState) handleInput(m *mainModel, evt termbox.Event) {
 		default:
 			handled = false
 		}
-		switch evt.Ch {
-		//TODO: do this in a more general way related to DIM
-		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		switch {
+		case runeIsNum(evt.Ch):
 			//TODO: this is a seriously gross way of converting a rune to a string.
 			num, err := strconv.Atoi(strings.Replace(strconv.QuoteRuneToASCII(evt.Ch), "'", "", -1))
 			if err != nil {
