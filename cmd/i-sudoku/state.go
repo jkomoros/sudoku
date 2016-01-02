@@ -18,11 +18,12 @@ const (
 	MARKS_MODE_FAIL_LOCKED = "Can't enter mark mode on a cell that's locked."
 	MARKS_MODE_FAIL_NUMBER = "Can't enter mark mode on a cell that has a filled number."
 	HELP_MESSAGE           = `The following commands are also available on this screen:
-{c} to enter command mode to do things like quit and load a new puzzle`
+{c} to enter command mode to do things like quit and load a new puzzle
+{h} to get a hint`
 	STATUS_DEFAULT         = "{→,←,↓,↑} to move cells, {0-9} to enter number, {m}ark mode, {?} to list other commands"
 	STATUS_MARKING         = "MARKING:"
 	STATUS_MARKING_POSTFIX = "  {1-9} to toggle marks, {ENTER} to commit, {ESC} to cancel"
-	STATUS_COMMAND         = "COMMAND: {h}int, {q}uit, {n}ew puzzle, {ESC} cancel"
+	STATUS_COMMAND         = "COMMAND: {n}ew puzzle, {q}uit, {ESC} cancel"
 )
 
 func runeIsNum(ch rune) bool {
@@ -109,6 +110,8 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 			handled = false
 		}
 		switch {
+		case evt.Ch == 'h':
+			showHint(m)
 		case evt.Ch == '?':
 			m.SetConsoleMessage(HELP_MESSAGE, true)
 		case evt.Ch == 'c':
@@ -259,9 +262,6 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) {
 			handled = false
 		}
 		switch {
-		case evt.Ch == 'h':
-			showHint(m)
-			m.EnterState(STATE_DEFAULT)
 		case evt.Ch == 'q':
 			confirmQuit(m)
 		case evt.Ch == 'n':

@@ -60,6 +60,71 @@ func TestDefaultState(t *testing.T) {
 	if model.exitNow {
 		t.Error("ModeInputEsc in DEFAULT_STATE did tell us to quit, but it shouldn't")
 	}
+
+	//Reset to a normal, solvable grid.
+
+	model = newModel()
+
+	oldSelected := model.Selected()
+
+	sendCharEvent(model, 'h')
+
+	if model.consoleMessage == "" {
+		t.Error("Asking for hint didn't give a hint")
+	}
+
+	if model.consoleMessageShort {
+		t.Error("The hint message was short")
+	}
+
+	if model.state != STATE_DEFAULT {
+		t.Error("Choosing hint didn't lead back to default mode")
+	}
+
+	//Technically, this test has a 1/81 % chance of flaking...
+	//TODO: make this test not flaky
+	if oldSelected == model.Selected() {
+		t.Error("Hint didn't automatically select the cell specified by the hint.")
+	}
+
+	lastStep := model.lastShownHint.Steps[len(model.lastShownHint.Steps)-1]
+	correctNum := lastStep.TargetNums[0]
+	wrongNum := correctNum + 1
+	if wrongNum > sudoku.DIM {
+		wrongNum = 1
+	}
+	model.SetSelectedNumber(wrongNum)
+
+	if model.consoleMessage == "" {
+		t.Error("Console message was cleared even though wrong number was entered")
+	}
+
+	model.SetSelectedNumber(correctNum)
+
+	if model.consoleMessage != "" {
+		t.Error("Console was not cleared after right hint number was entered.")
+	}
+
+	sendCharEvent(model, 'h')
+
+	hintCell := model.Selected()
+
+	//Move to a different cell to confirm that 'ENTER' reselects the cell and fills the number.
+	if hintCell.Row() < sudoku.DIM-1 {
+		model.MoveSelectionDown()
+	} else {
+		model.MoveSelectionUp()
+	}
+
+	sendKeyEvent(model, termbox.KeyEnter)
+
+	if model.Selected() != hintCell {
+		t.Error("Wrong cell had hint entered")
+	}
+
+	if model.Selected().Number() == 0 {
+		t.Error("Accepting hint didn't fill the cell")
+	}
 }
 
 func TestEnterMarksState(t *testing.T) {
@@ -212,71 +277,6 @@ func TestCommandState(t *testing.T) {
 	if model.state != STATE_DEFAULT {
 		t.Error("'Esc' in command state didn't go back to default mode")
 
-	}
-
-	oldSelected := model.Selected()
-
-	model.EnterState(STATE_COMMAND)
-
-	sendCharEvent(model, 'h')
-
-	if model.consoleMessage == "" {
-		t.Error("Asking for hint didn't give a hint")
-	}
-
-	if model.consoleMessageShort {
-		t.Error("The hint message was short")
-	}
-
-	if model.state != STATE_DEFAULT {
-		t.Error("Choosing hint didn't lead back to default mode")
-	}
-
-	//Technically, this test has a 1/81 % chance of flaking...
-	//TODO: make this test not flaky
-	if oldSelected == model.Selected() {
-		t.Error("Hint didn't automatically select the cell specified by the hint.")
-	}
-
-	lastStep := model.lastShownHint.Steps[len(model.lastShownHint.Steps)-1]
-	correctNum := lastStep.TargetNums[0]
-	wrongNum := correctNum + 1
-	if wrongNum > sudoku.DIM {
-		wrongNum = 1
-	}
-	model.SetSelectedNumber(wrongNum)
-
-	if model.consoleMessage == "" {
-		t.Error("Console message was cleared even though wrong number was entered")
-	}
-
-	model.SetSelectedNumber(correctNum)
-
-	if model.consoleMessage != "" {
-		t.Error("Console was not cleared after right hint number was entered.")
-	}
-
-	model.EnterState(STATE_COMMAND)
-
-	sendCharEvent(model, 'h')
-
-	hintCell := model.Selected()
-
-	//Move to a different cell to confirm that 'ENTER' reselects the cell and fills the number.
-	if hintCell.Row() < sudoku.DIM-1 {
-		model.MoveSelectionDown()
-	} else {
-		model.MoveSelectionUp()
-	}
-
-	sendKeyEvent(model, termbox.KeyEnter)
-
-	if model.Selected() != hintCell {
-		t.Error("Wrong cell had hint entered")
-	}
-
-	if model.Selected().Number() == 0 {
-		t.Error("Accepting hint didn't fill the cell")
 	}
 }
 
