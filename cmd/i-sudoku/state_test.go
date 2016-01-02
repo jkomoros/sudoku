@@ -256,6 +256,28 @@ func TestCommandState(t *testing.T) {
 		t.Error("Console was not cleared after right hint number was entered.")
 	}
 
+	model.EnterState(STATE_COMMAND)
+
+	sendCharEvent(model, 'h')
+
+	hintCell := model.Selected()
+
+	//Move to a different cell to confirm that 'ENTER' reselects the cell and fills the number.
+	if hintCell.Row() < sudoku.DIM-1 {
+		model.MoveSelectionDown()
+	} else {
+		model.MoveSelectionUp()
+	}
+
+	sendKeyEvent(model, termbox.KeyEnter)
+
+	if model.Selected() != hintCell {
+		t.Error("Wrong cell had hint entered")
+	}
+
+	if model.Selected().Number() == 0 {
+		t.Error("Accepting hint didn't fill the cell")
+	}
 }
 
 func TestCleanMarkList(t *testing.T) {

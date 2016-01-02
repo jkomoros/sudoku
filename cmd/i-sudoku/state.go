@@ -61,10 +61,24 @@ type defaultState struct {
 
 func showHint(m *mainModel) {
 	hint := m.grid.Hint(nil)
-	m.SetConsoleMessage(strings.Join(hint.Description(), "\n")+"\n\n"+"To clear this message, type {ESC}", false)
+	m.SetConsoleMessage(strings.Join(hint.Description(), "\n")+"\n\n"+"To accept this hint, type {ENTER}\nTo clear this message, type {ESC}", false)
 	m.lastShownHint = hint
 	lastStep := hint.Steps[len(hint.Steps)-1]
 	m.SetSelected(lastStep.TargetCells[0].InGrid(m.grid))
+}
+
+func (s *defaultState) enterHint(m *mainModel) {
+	if m.lastShownHint == nil {
+		return
+	}
+	lastStep := m.lastShownHint.Steps[len(m.lastShownHint.Steps)-1]
+	cell := lastStep.TargetCells[0]
+	num := lastStep.TargetNums[0]
+
+	m.SetSelected(cell.InGrid(m.grid))
+	m.SetSelectedNumber(num)
+
+	m.ClearConsole()
 }
 
 func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
@@ -83,6 +97,8 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 			m.MoveSelectionUp()
 		case termbox.KeyEsc:
 			m.ClearConsole()
+		case termbox.KeyEnter:
+			s.enterHint(m)
 		default:
 			handled = false
 		}
