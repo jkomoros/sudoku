@@ -205,7 +205,13 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) {
 		}
 		switch evt.Ch {
 		case 'q':
-			m.exitNow = true
+			m.enterConfirmState("Quit? Your progress will be lost.",
+				DEFAULT_NO,
+				func() {
+					m.exitNow = true
+				},
+				func() {},
+			)
 		case 'n':
 			m.enterConfirmState("Replace grid with a new one? This is a destructive action.",
 				DEFAULT_NO,

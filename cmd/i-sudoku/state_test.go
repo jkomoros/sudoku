@@ -164,11 +164,20 @@ func TestCommandState(t *testing.T) {
 	}
 
 	sendCharEvent(model, 'q')
+
+	if model.state != STATE_CONFIRM {
+		t.Error("'q' in command mode didn't got to confirm state")
+	}
+
+	sendCharEvent(model, 'y')
+
 	if !model.exitNow {
-		t.Error("In command state, 'q' didn't tell us to quit")
+		t.Error("In command state, 'q' confirmed with 'y' didn't tell us to quit")
 	}
 
 	model.exitNow = false
+
+	model.EnterState(STATE_COMMAND)
 
 	gridBefore := model.grid
 
