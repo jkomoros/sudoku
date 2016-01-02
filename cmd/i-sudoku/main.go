@@ -12,7 +12,7 @@ import (
 	"unicode/utf8"
 )
 
-const STATUS_DEFAULT = "Type arrows to move, a number to input a number, 'm' to enter mark mode, or ESC to quit"
+const STATUS_DEFAULT = "(→,←,↓,↑) to move cells, (0-9) to enter number, (m)ark mode, (c)ommand, (ESC) to quit"
 const STATUS_MARKING = "MARKING:"
 const STATUS_MARKING_POSTFIX = "   ENTER to commit, ESC to cancel"
 const STATUS_COMMAND = "COMMAND: (q)uit, (n)ew puzzle, (ESC) cancel"
