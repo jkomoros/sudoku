@@ -8,7 +8,6 @@ import (
 	"github.com/jkomoros/sudoku"
 	"github.com/nsf/termbox-go"
 	"log"
-	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -29,43 +28,11 @@ func main() {
 
 mainloop:
 	for {
-		switch ev := termbox.PollEvent(); ev.Type {
+		evt := termbox.PollEvent()
+		switch evt.Type {
 		case termbox.EventKey:
-			switch ev.Key {
-			case termbox.KeyEsc:
-				if model.ModeInputEsc() {
-					break mainloop
-				}
-			case termbox.KeyCtrlC:
+			if model.state.handleInput(model, evt) {
 				break mainloop
-			case termbox.KeyArrowDown:
-				model.MoveSelectionDown()
-			case termbox.KeyArrowLeft:
-				model.MoveSelectionLeft()
-			case termbox.KeyArrowRight:
-				model.MoveSelectionRight()
-			case termbox.KeyArrowUp:
-				model.MoveSelectionUp()
-			case termbox.KeyEnter:
-				model.ModeCommitMarkMode()
-			}
-			switch ev.Ch {
-			case 'q':
-				break mainloop
-			case 'm':
-				//TODO: ideally Ctrl+Num would work to put in one mark. But termbox doesn't appear to let that work.
-				model.ModeEnterMarkMode()
-			case 'n':
-				//TODO: since this is a destructive action, require a confirmation
-				model.NewGrid()
-			//TODO: do this in a more general way related to DIM
-			case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-				//TODO: this is a seriously gross way of converting a rune to a string.
-				num, err := strconv.Atoi(strings.Replace(strconv.QuoteRuneToASCII(ev.Ch), "'", "", -1))
-				if err != nil {
-					panic(err)
-				}
-				model.ModeInputNumber(num)
 			}
 		}
 		draw(model)
