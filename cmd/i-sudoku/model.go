@@ -106,6 +106,7 @@ func (m *mainModel) EnsureGrid() {
 }
 
 func (m *mainModel) NewGrid() {
+	//TODO: wait, isn't the selected cell wrong now?
 	m.grid = sudoku.GenerateGrid(nil)
 	m.grid.LockFilledCells()
 }
