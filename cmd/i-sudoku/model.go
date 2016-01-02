@@ -11,6 +11,7 @@ type mainModel struct {
 	state    InputState
 	//The size of the console output. Not used for much.
 	outputWidth    int
+	lastShownHint  *sudoku.SolveDirections
 	consoleMessage string
 	//if true, will zero out console message on turn of event loop.
 	consoleMessageShort bool
@@ -67,6 +68,7 @@ func (m *mainModel) EndOfEventLoop() {
 func (m *mainModel) ClearConsole() {
 	m.consoleMessage = ""
 	m.consoleMessageShort = false
+	m.lastShownHint = nil
 }
 
 func (m *mainModel) StatusLine() string {
@@ -166,6 +168,20 @@ func (m *mainModel) SetSelectedNumber(num int) {
 	} else {
 		//If the number to set is already set, then empty the cell instead.
 		m.Selected().SetNumber(0)
+	}
+
+	m.checkHintDone()
+}
+
+func (m *mainModel) checkHintDone() {
+	if m.lastShownHint == nil {
+		return
+	}
+	lastStep := m.lastShownHint.Steps[len(m.lastShownHint.Steps)-1]
+	num := lastStep.TargetNums[0]
+	cell := lastStep.TargetCells[0]
+	if cell.InGrid(m.grid).Number() == num {
+		m.ClearConsole()
 	}
 }
 

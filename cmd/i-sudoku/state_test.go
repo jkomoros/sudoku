@@ -238,6 +238,24 @@ func TestCommandState(t *testing.T) {
 		t.Error("Hint didn't automatically select the cell specified by the hint.")
 	}
 
+	lastStep := model.lastShownHint.Steps[len(model.lastShownHint.Steps)-1]
+	correctNum := lastStep.TargetNums[0]
+	wrongNum := correctNum + 1
+	if wrongNum > sudoku.DIM {
+		wrongNum = 1
+	}
+	model.SetSelectedNumber(wrongNum)
+
+	if model.consoleMessage == "" {
+		t.Error("Console message was cleared even though wrong number was entered")
+	}
+
+	model.SetSelectedNumber(correctNum)
+
+	if model.consoleMessage != "" {
+		t.Error("Console was not cleared after right hint number was entered.")
+	}
+
 }
 
 func TestCleanMarkList(t *testing.T) {
