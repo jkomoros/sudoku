@@ -16,6 +16,11 @@ const STATUS_DEFAULT = "Type arrows to move, a number to input a number, 'm' to 
 const STATUS_MARKING = "MARKING:"
 const STATUS_MARKING_POSTFIX = "   ENTER to commit, ESC to cancel"
 
+const GRID_INVALID = " INVALID "
+const GRID_VALID = "  VALID  "
+const GRID_SOLVED = "  SOLVED  "
+const GRID_NOT_SOLVED = " UNSOLVED "
+
 func main() {
 	if err := termbox.Init(); err != nil {
 		log.Fatal("Termbox initialization failed:", err)
@@ -49,8 +54,6 @@ func clearScreen() {
 }
 
 func draw(model *mainModel) {
-
-	//TODO: have a mode line after the grid for if the grid is invalid, if it's solved.
 
 	clearScreen()
 
@@ -90,6 +93,35 @@ func draw(model *mainModel) {
 		}
 		y++
 	}
+
+	x = 0
+	solvedMsg := GRID_NOT_SOLVED
+	fg := termbox.ColorBlue
+	bg := termbox.ColorBlack
+	if grid.Solved() {
+		solvedMsg = GRID_SOLVED
+		fg, bg = bg, fg
+	}
+
+	for _, ch := range solvedMsg {
+		termbox.SetCell(x, y, ch, fg, bg)
+		x++
+	}
+
+	//don't reset x; this next message should go to the right.
+	validMsg := GRID_VALID
+	fg = termbox.ColorBlue
+	bg = termbox.ColorBlack
+	if grid.Invalid() {
+		validMsg = GRID_INVALID
+		fg, bg = bg, fg
+	}
+	for _, ch := range validMsg {
+		termbox.SetCell(x, y, ch, fg, bg)
+		x++
+	}
+
+	y++
 
 	x = 0
 	for _, ch := range model.StatusLine() {
