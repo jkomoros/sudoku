@@ -71,8 +71,6 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 		switch evt.Ch {
 		case 'c':
 			m.EnterState(STATE_COMMAND)
-		//TODO: 'h' should give a hint
-		//TODO: '?' should print help to console
 		case 'm':
 			//TODO: ideally Ctrl+Num would work to put in one mark. But termbox doesn't appear to let that work.
 			m.EnterState(STATE_ENTER_MARKS)
@@ -177,11 +175,7 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 			handled = false
 		}
 		switch evt.Ch {
-		//TODO: '+' should set marks to add all Possible values that are not currently added
-		//TODO: '-' should set marks list to remove any things that are not possible.
 		case 'q':
-			//TODO: this should use a confirmState, too.
-			//...Although it's hard to do this given that we have to return whether or not to quit right now.
 			return true
 		case 'n':
 			m.enterConfirmState("Replace grid with a new one? This is a destructive action.",

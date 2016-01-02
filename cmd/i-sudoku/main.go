@@ -147,8 +147,5 @@ func draw(model *mainModel) {
 		x++
 	}
 
-	//TODO: create a console area. A few lines of the most recent messages
-	//pasted to the console. Error messages, hint texts, etc.
-
 	termbox.Flush()
 }
