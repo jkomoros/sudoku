@@ -5,6 +5,7 @@ i-sudoku is an interactive command-line sudoku tool
 package main
 
 import (
+	"fmt"
 	"github.com/jkomoros/sudoku"
 	"github.com/nsf/termbox-go"
 	"log"
@@ -22,6 +23,11 @@ const GRID_VALID = "  VALID  "
 const GRID_SOLVED = "  SOLVED  "
 const GRID_NOT_SOLVED = " UNSOLVED "
 
+//A debug override; if true will print a color palette to the screen, wait for
+//a keypress, and then quit. Useful for seeing what different colors are
+//available to use.
+const DRAW_PALETTE = false
+
 func main() {
 
 	//TODO: should be possible to run it and pass in a puzzle to use.
@@ -37,6 +43,13 @@ func main() {
 
 	width, _ := termbox.Size()
 	model.outputWidth = width
+
+	if DRAW_PALETTE {
+		drawColorPalette()
+		//Wait until something happens, generally a key is pressed.
+		termbox.PollEvent()
+		return
+	}
 
 	draw(model)
 
@@ -62,6 +75,27 @@ func clearScreen() {
 			termbox.SetCell(x, y, ' ', termbox.ColorDefault, termbox.ColorDefault)
 		}
 	}
+}
+
+func drawColorPalette() {
+	clearScreen()
+	x := 0
+	y := 0
+
+	for i := 0x00; i <= 0xFF; i++ {
+		numToPrint := "  " + fmt.Sprintf("%02X", i) + "  "
+		for _, ch := range numToPrint {
+			termbox.SetCell(x, y, ch, termbox.ColorBlack, termbox.Attribute(i))
+			x++
+		}
+		//Fit 8 print outs on a line before creating a new one
+		if i%8 == 0 {
+			x = 0
+			y++
+		}
+	}
+
+	termbox.Flush()
 }
 
 func draw(model *mainModel) {
