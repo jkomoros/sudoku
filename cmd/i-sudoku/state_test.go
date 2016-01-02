@@ -214,6 +214,18 @@ func TestCommandState(t *testing.T) {
 
 	}
 
+	model.EnterState(STATE_COMMAND)
+
+	sendCharEvent(model, 'h')
+
+	if model.consoleMessage == "" {
+		t.Error("Asking for hint didn't give a hint")
+	}
+
+	if model.consoleMessageShort {
+		t.Error("The hint message was short")
+	}
+
 }
 
 func TestCleanMarkList(t *testing.T) {
