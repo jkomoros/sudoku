@@ -15,7 +15,7 @@ var (
 type InputState interface {
 	//TODO: doesn't it feel weird that every method takes a main model?
 	handleInput(m *mainModel, evt termbox.Event) (doQuit bool)
-	enter(m *mainModel)
+	shouldEnter(m *mainModel) bool
 	statusLine(m *mainModel) string
 	newCellSelected(m *mainModel)
 }
@@ -46,6 +46,10 @@ func (s *baseState) newCellSelected(m *mainModel) {
 	//Do nothing by default.
 }
 
+func (s *baseState) shouldEnter(m *mainModel) bool {
+	return true
+}
+
 type defaultState struct {
 	baseState
 }
@@ -74,8 +78,7 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 			return true
 		case 'm':
 			//TODO: ideally Ctrl+Num would work to put in one mark. But termbox doesn't appear to let that work.
-			//TODO: it feels backwards to call enter on the state, not model.EnterState(STATE)
-			STATE_ENTER_MARKS.enter(m)
+			m.EnterState(STATE_ENTER_MARKS)
 		case 'n':
 			//TODO: since this is a destructive action, require a confirmation
 			m.NewGrid()
@@ -97,10 +100,6 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 	return false
 }
 
-func (s *defaultState) enter(m *mainModel) {
-	m.state = s
-}
-
 type enterMarkState struct {
 	baseState
 	marksToInput []int
@@ -114,7 +113,7 @@ func (s *enterMarkState) handleInput(m *mainModel, evt termbox.Event) (doQuit bo
 		case termbox.KeyEnter:
 			s.commitMarks(m)
 		case termbox.KeyEsc:
-			STATE_DEFAULT.enter(m)
+			m.EnterState(STATE_DEFAULT)
 		default:
 			handled = false
 		}
@@ -146,20 +145,20 @@ func (s *enterMarkState) commitMarks(m *mainModel) {
 		m.ToggleSelectedMark(num)
 	}
 	s.marksToInput = nil
-	STATE_DEFAULT.enter(m)
+	m.EnterState(STATE_DEFAULT)
 }
 
-func (s *enterMarkState) enter(m *mainModel) {
+func (s *enterMarkState) shouldEnter(m *mainModel) bool {
 	//TODO: if already in Mark mode, ignore.
 	selected := m.Selected()
 	if selected != nil {
 		if selected.Number() != 0 || selected.Locked() {
 			//Dion't enter mark mode.
-			return
+			return false
 		}
 	}
 	s.marksToInput = make([]int, 0)
-	m.state = s
+	return true
 }
 
 func (s *enterMarkState) statusLine(m *mainModel) string {
@@ -167,5 +166,5 @@ func (s *enterMarkState) statusLine(m *mainModel) string {
 }
 
 func (s *enterMarkState) newCellSelected(m *mainModel) {
-	STATE_DEFAULT.enter(m)
+	m.EnterState(STATE_DEFAULT)
 }

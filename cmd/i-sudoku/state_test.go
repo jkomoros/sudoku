@@ -57,7 +57,7 @@ func TestEnterMarksState(t *testing.T) {
 	model.SetSelected(nil)
 	model.EnsureSelected()
 
-	STATE_ENTER_MARKS.enter(model)
+	model.EnterState(STATE_ENTER_MARKS)
 
 	if model.state != STATE_ENTER_MARKS {
 		t.Error("Failed to enter marks state")
@@ -90,7 +90,7 @@ func TestEnterMarksState(t *testing.T) {
 
 	model.MoveSelectionRight()
 
-	STATE_ENTER_MARKS.enter(model)
+	model.EnterState(STATE_ENTER_MARKS)
 	sendNumberEvent(model, 1)
 	sendNumberEvent(model, 2)
 	if sendKeyEvent(model, termbox.KeyEsc) {
@@ -105,7 +105,7 @@ func TestEnterMarksState(t *testing.T) {
 		t.Error("InputNumber in canceled mark mode still set marks")
 	}
 
-	STATE_ENTER_MARKS.enter(model)
+	model.EnterState(STATE_ENTER_MARKS)
 	model.MoveSelectionRight()
 	if model.state == STATE_ENTER_MARKS {
 		t.Error("Moving selection right didn't exit mark mode.")
@@ -115,7 +115,7 @@ func TestEnterMarksState(t *testing.T) {
 
 	model.MoveSelectionRight()
 	model.Selected().Lock()
-	STATE_ENTER_MARKS.enter(model)
+	model.EnterState(STATE_ENTER_MARKS)
 
 	if model.state == STATE_ENTER_MARKS {
 		t.Error("Were allowed to enter mark mode even though cell was locked.")
@@ -123,7 +123,7 @@ func TestEnterMarksState(t *testing.T) {
 
 	model.Selected().Unlock()
 	model.Selected().SetNumber(1)
-	STATE_ENTER_MARKS.enter(model)
+	model.EnterState(STATE_ENTER_MARKS)
 
 	if model.state == STATE_ENTER_MARKS {
 		t.Error("We were allowed to enter mark mode even though cell had a number in it.")

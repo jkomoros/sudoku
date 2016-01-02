@@ -18,6 +18,18 @@ func newModel() *mainModel {
 	return model
 }
 
+//EnterState attempts to set the model to the given state. The state object is
+//given a chance to do initalization and potentially cancel the transition,
+//leaving the model in the same state as before.
+func (m *mainModel) EnterState(state InputState) {
+	//SetState doesn't do much, it just makes it feel less weird than
+	//STATE.enter(m) (which feels backward)
+
+	if state.shouldEnter(m) {
+		m.state = state
+	}
+}
+
 func (m *mainModel) StatusLine() string {
 	return m.state.statusLine(m)
 }
