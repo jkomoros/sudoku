@@ -8,6 +8,7 @@ import (
 )
 
 var (
+	//TODO: create a confirmationState, which takes a default (Y, N) and a state object whose commit it should call if accepted.
 	STATE_DEFAULT     = &defaultState{}
 	STATE_ENTER_MARKS = &enterMarkState{}
 )
