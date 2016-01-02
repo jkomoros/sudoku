@@ -9,12 +9,12 @@ import (
 	"unicode/utf8"
 )
 
-func sendKeyEvent(m *mainModel, k termbox.Key) bool {
+func sendKeyEvent(m *mainModel, k termbox.Key) {
 	evt := termbox.Event{
 		Type: termbox.EventKey,
 		Key:  k,
 	}
-	return m.state.handleInput(m, evt)
+	m.state.handleInput(m, evt)
 }
 
 func sendNumberEvent(m *mainModel, num int) {
@@ -27,12 +27,12 @@ func sendNumberEvent(m *mainModel, num int) {
 }
 
 //TODO: use sendCharEvent to verify that chars in all states do what they should.
-func sendCharEvent(m *mainModel, ch rune) bool {
+func sendCharEvent(m *mainModel, ch rune) {
 	evt := termbox.Event{
 		Type: termbox.EventKey,
 		Ch:   ch,
 	}
-	return m.state.handleInput(m, evt)
+	m.state.handleInput(m, evt)
 }
 
 func TestDefaultState(t *testing.T) {
@@ -55,7 +55,9 @@ func TestDefaultState(t *testing.T) {
 		t.Error("InputNumber in default mode didn't add a number")
 	}
 
-	if sendKeyEvent(model, termbox.KeyEsc) {
+	sendKeyEvent(model, termbox.KeyEsc)
+
+	if model.exitNow {
 		t.Error("ModeInputEsc in DEFAULT_STATE did tell us to quit, but it shouldn't")
 	}
 }
@@ -103,9 +105,12 @@ func TestEnterMarksState(t *testing.T) {
 	model.EnterState(STATE_ENTER_MARKS)
 	sendNumberEvent(model, 1)
 	sendNumberEvent(model, 2)
-	if sendKeyEvent(model, termbox.KeyEsc) {
+	sendKeyEvent(model, termbox.KeyEsc)
+	if model.exitNow {
 		t.Error("ModeInputEsc in mark enter state DID tell us to quit")
 	}
+	//reest
+	model.exitNow = false
 
 	if model.state != STATE_DEFAULT {
 		t.Error("Hitting esc in enter marks state didn't go back to esc")
@@ -158,9 +163,12 @@ func TestCommandState(t *testing.T) {
 		t.Error("got wrong status line for command state", model.StatusLine())
 	}
 
-	if !sendCharEvent(model, 'q') {
+	sendCharEvent(model, 'q')
+	if !model.exitNow {
 		t.Error("In command state, 'q' didn't tell us to quit")
 	}
+
+	model.exitNow = false
 
 	gridBefore := model.grid
 

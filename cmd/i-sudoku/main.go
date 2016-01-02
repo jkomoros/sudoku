@@ -40,11 +40,12 @@ mainloop:
 		evt := termbox.PollEvent()
 		switch evt.Type {
 		case termbox.EventKey:
-			if model.state.handleInput(model, evt) {
-				break mainloop
-			}
+			model.state.handleInput(model, evt)
 		}
 		draw(model)
+		if model.exitNow {
+			break mainloop
+		}
 	}
 }
 

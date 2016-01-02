@@ -16,7 +16,7 @@ var (
 
 type InputState interface {
 	//TODO: doesn't it feel weird that every method takes a main model?
-	handleInput(m *mainModel, evt termbox.Event) (doQuit bool)
+	handleInput(m *mainModel, evt termbox.Event)
 	shouldEnter(m *mainModel) bool
 	statusLine(m *mainModel) string
 	newCellSelected(m *mainModel)
@@ -24,15 +24,14 @@ type InputState interface {
 
 type baseState struct{}
 
-func (s *baseState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool) {
+func (s *baseState) handleInput(m *mainModel, evt termbox.Event) {
 	switch evt.Type {
 	case termbox.EventKey:
 		switch evt.Key {
 		case termbox.KeyCtrlC:
-			return true
+			m.exitNow = true
 		}
 	}
-	return false
 }
 
 func (s *baseState) statusLine(m *mainModel) string {
@@ -51,7 +50,7 @@ type defaultState struct {
 	baseState
 }
 
-func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool) {
+func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 
 	handled := true
 	switch evt.Type {
@@ -85,11 +84,10 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 		default:
 			if !handled {
 				//neither handler handled it; defer to base.
-				return s.baseState.handleInput(m, evt)
+				s.baseState.handleInput(m, evt)
 			}
 		}
 	}
-	return false
 }
 
 type enterMarkState struct {
@@ -97,7 +95,7 @@ type enterMarkState struct {
 	marksToInput []int
 }
 
-func (s *enterMarkState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool) {
+func (s *enterMarkState) handleInput(m *mainModel, evt termbox.Event) {
 	handled := true
 	switch evt.Type {
 	case termbox.EventKey:
@@ -121,11 +119,10 @@ func (s *enterMarkState) handleInput(m *mainModel, evt termbox.Event) (doQuit bo
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
-				return s.baseState.handleInput(m, evt)
+				s.baseState.handleInput(m, evt)
 			}
 		}
 	}
-	return false
 }
 
 func (s *enterMarkState) numberInput(num int) {
@@ -196,7 +193,7 @@ type commandState struct {
 	baseState
 }
 
-func (s *commandState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool) {
+func (s *commandState) handleInput(m *mainModel, evt termbox.Event) {
 	handled := true
 	switch evt.Type {
 	case termbox.EventKey:
@@ -208,7 +205,7 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 		}
 		switch evt.Ch {
 		case 'q':
-			return true
+			m.exitNow = true
 		case 'n':
 			m.enterConfirmState("Replace grid with a new one? This is a destructive action.",
 				DEFAULT_NO,
@@ -220,11 +217,10 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
-				return s.baseState.handleInput(m, evt)
+				s.baseState.handleInput(m, evt)
 			}
 		}
 	}
-	return false
 }
 
 func (s *commandState) statusLine(m *mainModel) string {
@@ -247,7 +243,7 @@ type confirmState struct {
 	baseState
 }
 
-func (s *confirmState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool) {
+func (s *confirmState) handleInput(m *mainModel, evt termbox.Event) {
 	handled := true
 	switch evt.Type {
 	case termbox.EventKey:
@@ -276,11 +272,10 @@ func (s *confirmState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
-				return s.baseState.handleInput(m, evt)
+				s.baseState.handleInput(m, evt)
 			}
 		}
 	}
-	return false
 }
 
 func (s *confirmState) statusLine(m *mainModel) string {

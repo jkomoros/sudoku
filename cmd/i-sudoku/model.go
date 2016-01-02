@@ -8,6 +8,8 @@ type mainModel struct {
 	grid     *sudoku.Grid
 	selected *sudoku.Cell
 	state    InputState
+	//If exitNow is flipped to true, we will quit at next turn of event loop.
+	exitNow bool
 }
 
 func newModel() *mainModel {
