@@ -71,6 +71,7 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 		switch evt.Ch {
 		case 'c':
 			m.EnterState(STATE_COMMAND)
+		//TODO: 'h' should give a hint
 		case 'm':
 			//TODO: ideally Ctrl+Num would work to put in one mark. But termbox doesn't appear to let that work.
 			m.EnterState(STATE_ENTER_MARKS)

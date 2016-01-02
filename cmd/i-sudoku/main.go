@@ -23,6 +23,9 @@ const GRID_SOLVED = "  SOLVED  "
 const GRID_NOT_SOLVED = " UNSOLVED "
 
 func main() {
+
+	//TODO: should be possible to run it and pass in a puzzle to use.
+
 	if err := termbox.Init(); err != nil {
 		log.Fatal("Termbox initialization failed:", err)
 	}
@@ -143,6 +146,9 @@ func draw(model *mainModel) {
 		termbox.SetCell(x, y, ch, fg, termbox.ColorDefault)
 		x++
 	}
+
+	//TODO: create a console area. A few lines of the most recent messages
+	//pasted to the console. Error messages, hint texts, etc.
 
 	termbox.Flush()
 }
