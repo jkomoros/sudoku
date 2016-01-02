@@ -25,6 +25,15 @@ func sendNumberEvent(m *mainModel, num int) {
 	m.state.handleInput(m, evt)
 }
 
+//TODO: use sendCharEvent to verify that chars in all states do what they should.
+func sendCharEvent(m *mainModel, ch rune) bool {
+	evt := termbox.Event{
+		Type: termbox.EventKey,
+		Ch:   ch,
+	}
+	return m.state.handleInput(m, evt)
+}
+
 func TestDefaultState(t *testing.T) {
 	model := newModel()
 	//Add empty grid.
@@ -127,6 +136,42 @@ func TestEnterMarksState(t *testing.T) {
 
 	if model.state == STATE_ENTER_MARKS {
 		t.Error("We were allowed to enter mark mode even though cell had a number in it.")
+	}
+
+}
+
+func TestCommandState(t *testing.T) {
+	model := newModel()
+	//Add empty grid.
+	model.grid = sudoku.NewGrid()
+	model.SetSelected(nil)
+	model.EnsureSelected()
+
+	model.EnterState(STATE_COMMAND)
+
+	if model.state != STATE_COMMAND {
+		t.Error("Trying to enter state command failed")
+	}
+
+	if model.StatusLine() != STATUS_COMMAND {
+		t.Error("got wrong status line for command state", model.StatusLine())
+	}
+
+	if !sendCharEvent(model, 'q') {
+		t.Error("In command state, 'q' didn't tell us to quit")
+	}
+
+	gridBefore := model.grid
+
+	sendCharEvent(model, 'n')
+	if model.grid == gridBefore {
+		t.Error("'n' in command status didn't create new grid.")
+	}
+
+	sendKeyEvent(model, termbox.KeyEsc)
+	if model.state != STATE_DEFAULT {
+		t.Error("'Esc' in command state didn't go back to default mode")
+
 	}
 
 }

@@ -11,6 +11,7 @@ var (
 	//TODO: create a confirmationState, which takes a default (Y, N) and a state object whose commit it should call if accepted.
 	STATE_DEFAULT     = &defaultState{}
 	STATE_ENTER_MARKS = &enterMarkState{}
+	STATE_COMMAND     = &commandState{}
 )
 
 type InputState interface {
@@ -75,16 +76,11 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 			handled = false
 		}
 		switch evt.Ch {
-		case 'q':
-			return true
+		case 'c':
+			m.EnterState(STATE_COMMAND)
 		case 'm':
 			//TODO: ideally Ctrl+Num would work to put in one mark. But termbox doesn't appear to let that work.
 			m.EnterState(STATE_ENTER_MARKS)
-
-		//TODO: create a commandState, (entered via 'c') where 'n', 'q', and other uncommon commands will live.
-		case 'n':
-			//TODO: since this is a destructive action, require a confirmation
-			m.NewGrid()
 		//TODO: do this in a more general way related to DIM
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			//TODO: this is a seriously gross way of converting a rune to a string.
@@ -169,4 +165,38 @@ func (s *enterMarkState) statusLine(m *mainModel) string {
 
 func (s *enterMarkState) newCellSelected(m *mainModel) {
 	m.EnterState(STATE_DEFAULT)
+}
+
+type commandState struct {
+	baseState
+}
+
+func (s *commandState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool) {
+	handled := true
+	switch evt.Type {
+	case termbox.EventKey:
+		switch evt.Key {
+		case termbox.KeyEsc:
+			m.EnterState(STATE_DEFAULT)
+		default:
+			handled = false
+		}
+		switch evt.Ch {
+		case 'q':
+			return true
+		case 'n':
+			//TODO: since this is a destructive action, require a confirmation
+			m.NewGrid()
+		default:
+			if !handled {
+				//Neither of us handled it so defer to base.
+				return s.baseState.handleInput(m, evt)
+			}
+		}
+	}
+	return false
+}
+
+func (s *commandState) statusLine(m *mainModel) string {
+	return STATUS_COMMAND
 }
