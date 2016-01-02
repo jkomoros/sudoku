@@ -121,11 +121,11 @@ func draw(model *mainModel) {
 			lockedRune, _ := utf8.DecodeRuneInString(sudoku.DIAGRAM_LOCKED)
 
 			if ch == numberRune {
-				defaultColor = termbox.ColorBlue
+				defaultColor = 0x12
 			} else if ch == lockedRune {
-				defaultColor = termbox.ColorRed
+				defaultColor = 0x35
 			} else if runeIsNum(ch) {
-				defaultColor = termbox.ColorGreen | termbox.AttrBold
+				defaultColor = termbox.ColorWhite | termbox.AttrBold
 			}
 
 			backgroundColor := termbox.ColorDefault
