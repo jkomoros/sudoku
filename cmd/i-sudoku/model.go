@@ -1,35 +1,25 @@
 package main
 
 import (
-	"fmt"
 	"github.com/jkomoros/sudoku"
 )
 
 type mainModel struct {
-	grid         *sudoku.Grid
-	selected     *sudoku.Cell
-	marksToInput []int
+	grid     *sudoku.Grid
+	selected *sudoku.Cell
+	state    InputState
 }
 
 func newModel() *mainModel {
-	model := &mainModel{}
+	model := &mainModel{
+		state: STATE_DEFAULT,
+	}
 	model.EnsureSelected()
 	return model
 }
 
 func (m *mainModel) StatusLine() string {
-	//TODO: return something dynamic depending on mode.
-
-	//TODO: in StatusLine, the keyboard shortcuts should be in bold.
-	//Perhaps make it so at open parens set to bold, at close parens set
-	//to normal.
-
-	if m.marksToInput == nil {
-		return STATUS_DEFAULT
-	} else {
-		//Marks mode
-		return STATUS_MARKING + fmt.Sprint(m.marksToInput) + STATUS_MARKING_POSTFIX
-	}
+	return m.state.statusLine(m)
 }
 
 func (m *mainModel) Selected() *sudoku.Cell {
@@ -42,46 +32,7 @@ func (m *mainModel) SetSelected(cell *sudoku.Cell) {
 		return
 	}
 	m.selected = cell
-	m.ModeCancelMarkMode()
-}
-
-func (m *mainModel) ModeInputEsc() (quit bool) {
-	if m.marksToInput != nil {
-		m.ModeCancelMarkMode()
-		return false
-	}
-	return true
-}
-
-func (m *mainModel) ModeEnterMarkMode() {
-	//TODO: if already in Mark mode, ignore.
-	selected := m.Selected()
-	if selected != nil {
-		if selected.Number() != 0 || selected.Locked() {
-			//Dion't enter mark mode.
-			return
-		}
-	}
-	m.marksToInput = make([]int, 0)
-}
-
-func (m *mainModel) ModeCommitMarkMode() {
-	for _, num := range m.marksToInput {
-		m.ToggleSelectedMark(num)
-	}
-	m.marksToInput = nil
-}
-
-func (m *mainModel) ModeCancelMarkMode() {
-	m.marksToInput = nil
-}
-
-func (m *mainModel) ModeInputNumber(num int) {
-	if m.marksToInput == nil {
-		m.SetSelectedNumber(num)
-	} else {
-		m.marksToInput = append(m.marksToInput, num)
-	}
+	m.state.newCellSelected(m)
 }
 
 func (m *mainModel) EnsureSelected() {
