@@ -106,6 +106,8 @@ func draw(model *mainModel) {
 
 	selectedTop, selectedLeft, selectedHeight, selectedWidth := model.Selected().DiagramExtents()
 
+	width, _ := termbox.Size()
+
 	x := 0
 	y := 0
 
@@ -168,6 +170,12 @@ func draw(model *mainModel) {
 		x++
 	}
 
+	//Divider
+	y++
+	for x = 0; x < width; x++ {
+		termbox.SetCell(x, y, '-', 0xf0, termbox.ColorBlack)
+	}
+
 	y++
 
 	x = 0
@@ -190,6 +198,12 @@ func draw(model *mainModel) {
 		x++
 	}
 
+	//Divider
+	y++
+	for x = 0; x < width; x++ {
+		termbox.SetCell(x, y, '-', 0xf0, termbox.ColorBlack)
+	}
+
 	underlined = false
 
 	splitMessage := strings.Split(model.consoleMessage, "\n")
@@ -205,7 +219,7 @@ func draw(model *mainModel) {
 				underlined = false
 				continue
 			}
-			fg := termbox.ColorWhite
+			fg := termbox.Attribute(0xf0)
 			if underlined {
 				fg = fg | termbox.AttrBold
 			}
