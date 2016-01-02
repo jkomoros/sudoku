@@ -228,11 +228,20 @@ func (m *mainModel) ToggleSelectedMark(num int) {
 	m.Selected().SetMark(num, !m.Selected().Mark(num))
 }
 
+func clearScreen() {
+	width, height := termbox.Size()
+	for x := 0; x < width; x++ {
+		for y := 0; y < height; y++ {
+			termbox.SetCell(x, y, ' ', termbox.ColorDefault, termbox.ColorDefault)
+		}
+	}
+}
+
 func draw(model *mainModel) {
 
 	//TODO: have a mode line after the grid for if the grid is invalid, if it's solved.
 
-	//TODO: Clear the whole screen (currently old staus lines peek through)
+	clearScreen()
 
 	grid := model.grid
 
