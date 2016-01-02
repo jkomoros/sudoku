@@ -307,11 +307,11 @@ func (s *confirmState) handleInput(m *mainModel, evt termbox.Event) {
 }
 
 func (s *confirmState) statusLine(m *mainModel) string {
-	confirmMsg := "(y) or (n)"
+	confirmMsg := "{y} or {n}"
 	if s.defaultAction == DEFAULT_YES {
-		confirmMsg = "(Y) or (n)"
+		confirmMsg = "{Y} or {n}"
 	} else if s.defaultAction == DEFAULT_NO {
-		confirmMsg = "(y) or (N)"
+		confirmMsg = "{y} or {N}"
 	}
 	return s.msg + "  " + confirmMsg
 }

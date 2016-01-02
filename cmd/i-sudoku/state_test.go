@@ -255,7 +255,7 @@ func TestConfirmState(t *testing.T) {
 		t.Error("enterConfirmState didn't lead to being in confirm state")
 	}
 
-	if model.StatusLine() != "TEST  (Y) or (n)" {
+	if model.StatusLine() != "TEST  {Y} or {n}" {
 		t.Error("Default yes confirm state had wrong status line:", model.StatusLine())
 	}
 
