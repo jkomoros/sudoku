@@ -36,12 +36,7 @@ func (s *baseState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool) {
 }
 
 func (s *baseState) statusLine(m *mainModel) string {
-	//TODO: in StatusLine, the keyboard shortcuts should be in bold.
-	//Perhaps make it so at open parens set to bold, at close parens set
-	//to normal.
-
 	return STATUS_DEFAULT
-
 }
 
 func (s *baseState) newCellSelected(m *mainModel) {
