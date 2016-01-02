@@ -30,6 +30,15 @@ func (m *mainModel) EnterState(state InputState) {
 	}
 }
 
+//enterConfirmState is a special state to set
+func (m *mainModel) enterConfirmState(msg string, defaultAction defaultOption, yesAction func(), noAction func()) {
+	STATE_CONFIRM.msg = msg
+	STATE_CONFIRM.defaultAction = defaultAction
+	STATE_CONFIRM.yesAction = yesAction
+	STATE_CONFIRM.noAction = noAction
+	m.EnterState(STATE_CONFIRM)
+}
+
 func (m *mainModel) StatusLine() string {
 	return m.state.statusLine(m)
 }

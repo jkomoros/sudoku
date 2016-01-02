@@ -12,6 +12,7 @@ var (
 	STATE_DEFAULT     = &defaultState{}
 	STATE_ENTER_MARKS = &enterMarkState{}
 	STATE_COMMAND     = &commandState{}
+	STATE_CONFIRM     = &confirmState{}
 )
 
 type InputState interface {
@@ -180,11 +181,16 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 		//TODO: '+' should set marks to add all Possible values that are not currently added
 		//TODO: '-' should set marks list to remove any things that are not possible.
 		case 'q':
+			//TODO: this should use a confirmState, too.
 			return true
 		case 'n':
-			//TODO: since this is a destructive action, require a confirmation
-			m.NewGrid()
-			m.EnterState(STATE_DEFAULT)
+			m.enterConfirmState("Replace grid with a new one? This is a destructive action.",
+				DEFAULT_NO,
+				func() {
+					m.NewGrid()
+				},
+				func() {},
+			)
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
@@ -197,4 +203,66 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 
 func (s *commandState) statusLine(m *mainModel) string {
 	return STATUS_COMMAND
+}
+
+type defaultOption int
+
+const (
+	DEFAULT_YES defaultOption = iota
+	DEFAULT_NO
+	DEFAULT_NONE
+)
+
+type confirmState struct {
+	msg           string
+	defaultAction defaultOption
+	yesAction     func()
+	noAction      func()
+	baseState
+}
+
+func (s *confirmState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool) {
+	handled := true
+	switch evt.Type {
+	case termbox.EventKey:
+		switch evt.Key {
+		case termbox.KeyEnter:
+			switch s.defaultAction {
+			case DEFAULT_YES:
+				s.yesAction()
+				m.EnterState(STATE_DEFAULT)
+			case DEFAULT_NO:
+				s.noAction()
+				m.EnterState(STATE_DEFAULT)
+			case DEFAULT_NONE:
+				//Don't do anything
+			}
+		default:
+			handled = false
+		}
+		switch evt.Ch {
+		case 'y':
+			s.yesAction()
+			m.EnterState(STATE_DEFAULT)
+		case 'n':
+			s.noAction()
+			m.EnterState(STATE_DEFAULT)
+		default:
+			if !handled {
+				//Neither of us handled it so defer to base.
+				return s.baseState.handleInput(m, evt)
+			}
+		}
+	}
+	return false
+}
+
+func (s *confirmState) statusLine(m *mainModel) string {
+	confirmMsg := "(y) or (n)"
+	if s.defaultAction == DEFAULT_YES {
+		confirmMsg = "(Y) or (n)"
+	} else if s.defaultAction == DEFAULT_NO {
+		confirmMsg = "(y) or (N)"
+	}
+	return s.msg + "  " + confirmMsg
 }

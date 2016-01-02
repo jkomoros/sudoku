@@ -164,6 +164,14 @@ func TestCommandState(t *testing.T) {
 	gridBefore := model.grid
 
 	sendCharEvent(model, 'n')
+
+	if model.state != STATE_CONFIRM {
+		t.Error("'n' didn't go to confirm state")
+	}
+
+	//confirmState has its own tests, so just pretend the user accepted.
+	sendCharEvent(model, 'y')
+
 	if model.grid == gridBefore {
 		t.Error("'n' in command status didn't create new grid.")
 	}
@@ -180,4 +188,39 @@ func TestCommandState(t *testing.T) {
 
 	}
 
+}
+
+func TestConfirmState(t *testing.T) {
+	model := newModel()
+
+	channel := make(chan bool, 1)
+
+	model.enterConfirmState("TEST", DEFAULT_YES, func() { channel <- true }, func() { channel <- false })
+
+	if model.state != STATE_CONFIRM {
+		t.Error("enterConfirmState didn't lead to being in confirm state")
+	}
+
+	if model.StatusLine() != "TEST  (Y) or (n)" {
+		t.Error("Default yes confirm state had wrong status line:", model.StatusLine())
+	}
+
+	sendCharEvent(model, 'y')
+
+	select {
+	case val := <-channel:
+		if !val {
+			t.Error("Got a value for confirm, but it was from the no action")
+		}
+		//If val is true, that's good.
+	default:
+		t.Error("No action filed after confirm state decided.")
+
+	}
+
+	if model.state != STATE_DEFAULT {
+		t.Error("After confirm accepted, not ending up in default mode.")
+	}
+
+	//TODO: test behavior with different DEFAULT_* , and with enter, y, n.
 }
