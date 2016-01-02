@@ -182,6 +182,7 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 		//TODO: '-' should set marks list to remove any things that are not possible.
 		case 'q':
 			//TODO: this should use a confirmState, too.
+			//...Although it's hard to do this given that we have to return whether or not to quit right now.
 			return true
 		case 'n':
 			m.enterConfirmState("Replace grid with a new one? This is a destructive action.",
