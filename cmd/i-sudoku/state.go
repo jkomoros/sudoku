@@ -59,6 +59,11 @@ type defaultState struct {
 	baseState
 }
 
+func showHint(m *mainModel) {
+	hint := m.grid.Hint(nil)
+	m.SetConsoleMessage(strings.Join(hint.Description(), "\n"), false)
+}
+
 func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 
 	handled := true
@@ -77,6 +82,8 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 			handled = false
 		}
 		switch {
+		case evt.Ch == 'h':
+			showHint(m)
 		case evt.Ch == 'c':
 			m.EnterState(STATE_COMMAND)
 		case evt.Ch == 'm':
