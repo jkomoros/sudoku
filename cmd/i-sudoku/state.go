@@ -130,6 +130,38 @@ func (s *enterMarkState) handleInput(m *mainModel, evt termbox.Event) (doQuit bo
 
 func (s *enterMarkState) numberInput(num int) {
 	s.marksToInput = append(s.marksToInput, num)
+
+	s.marksToInput = cleanMarkList(s.marksToInput)
+}
+
+func cleanMarkList(nums []int) []int {
+	//Now, go through and remove duplicates
+	numCount := make(map[int]int)
+	for _, num := range nums {
+		numCount[num] += 1
+	}
+	//Now we'll reconstruct the slice. For each num, if it was see an odd
+	//number of times, we'll include it--but only the first time (so we'll
+	//keep track of if we've output the number yet in numsIncluded).
+	numsIncluded := make(map[int]bool)
+
+	var result []int
+	for _, num := range nums {
+		if numCount[num]%2 == 1 {
+			//It's odd, so output it if we haven't already.
+			if !numsIncluded[num] {
+				//We haven't output it yet, so output it.
+				result = append(result, num)
+				//Keep track of that we already output it.s
+				numsIncluded[num] = true
+			}
+		}
+	}
+
+	if result == nil {
+		result = []int{}
+	}
+	return result
 }
 
 func (s *enterMarkState) commitMarks(m *mainModel) {

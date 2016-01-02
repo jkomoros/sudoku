@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/jkomoros/sudoku"
 	"github.com/nsf/termbox-go"
+	"reflect"
 	"strconv"
 	"testing"
 	"unicode/utf8"
@@ -186,6 +187,22 @@ func TestCommandState(t *testing.T) {
 	if model.state != STATE_DEFAULT {
 		t.Error("'Esc' in command state didn't go back to default mode")
 
+	}
+
+}
+
+func TestCleanMarkList(t *testing.T) {
+	cleanMarkTest(t, []int{1, 2, 3}, []int{1, 2, 3})
+	cleanMarkTest(t, []int{1, 1}, []int{})
+	cleanMarkTest(t, []int{1, 1, 1}, []int{1})
+	cleanMarkTest(t, []int{1, 2, 3, 4, 2, 1, 5}, []int{3, 4, 5})
+}
+
+func cleanMarkTest(t *testing.T, input []int, expected []int) {
+	result := cleanMarkList(input)
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Error("Got wrong result for clean marks input:", input, "expected", expected, "got", result)
 	}
 
 }
