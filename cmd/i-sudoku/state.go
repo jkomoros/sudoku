@@ -29,7 +29,7 @@ func (s *baseState) handleInput(m *mainModel, evt termbox.Event) {
 	case termbox.EventKey:
 		switch evt.Key {
 		case termbox.KeyCtrlC:
-			m.exitNow = true
+			confirmQuit(m)
 		}
 	}
 }
@@ -193,6 +193,16 @@ type commandState struct {
 	baseState
 }
 
+func confirmQuit(m *mainModel) {
+	m.enterConfirmState("Quit? Your progress will be lost.",
+		DEFAULT_NO,
+		func() {
+			m.exitNow = true
+		},
+		func() {},
+	)
+}
+
 func (s *commandState) handleInput(m *mainModel, evt termbox.Event) {
 	handled := true
 	switch evt.Type {
@@ -205,13 +215,7 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) {
 		}
 		switch evt.Ch {
 		case 'q':
-			m.enterConfirmState("Quit? Your progress will be lost.",
-				DEFAULT_NO,
-				func() {
-					m.exitNow = true
-				},
-				func() {},
-			)
+			confirmQuit(m)
 		case 'n':
 			m.enterConfirmState("Replace grid with a new one? This is a destructive action.",
 				DEFAULT_NO,
