@@ -25,16 +25,17 @@ func sendNumberEvent(m *mainModel, num int) {
 	m.state.handleInput(m, evt)
 }
 
-func TestMode(t *testing.T) {
+func TestDefaultState(t *testing.T) {
 	model := newModel()
-
-	//TODO: refactor these tests, make them be oriented around state structs.
-
 	//Add empty grid.
 	model.grid = sudoku.NewGrid()
 	model.SetSelected(nil)
 
-	if model.StatusLine() != STATUS_DEFAULT {
+	if model.state != STATE_DEFAULT {
+		t.Error("model didn't start in default state")
+	}
+
+	if STATE_DEFAULT.statusLine(model) != STATUS_DEFAULT {
 		t.Error("Didn't get default status line in default mode.")
 	}
 
@@ -44,20 +45,35 @@ func TestMode(t *testing.T) {
 		t.Error("InputNumber in default mode didn't add a number")
 	}
 
-	model.MoveSelectionRight()
+	if !sendKeyEvent(model, termbox.KeyEsc) {
+		t.Error("ModeInputEsc in DEFAULT_STATE didn't tell us to quit.")
+	}
+}
+
+func TestEnterMarksState(t *testing.T) {
+	model := newModel()
+	//Add empty grid.
+	model.grid = sudoku.NewGrid()
+	model.SetSelected(nil)
+	model.EnsureSelected()
 
 	STATE_ENTER_MARKS.enter(model)
-	if model.StatusLine() != STATUS_MARKING+"[]"+STATUS_MARKING_POSTFIX {
+
+	if model.state != STATE_ENTER_MARKS {
+		t.Error("Failed to enter marks state")
+	}
+	if STATE_ENTER_MARKS.statusLine(model) != STATUS_MARKING+"[]"+STATUS_MARKING_POSTFIX {
 		t.Error("In mark mode with no marks, didn't get expected", model.StatusLine())
 	}
 	sendNumberEvent(model, 1)
 	sendNumberEvent(model, 2)
-	if model.StatusLine() != STATUS_MARKING+"[1 2]"+STATUS_MARKING_POSTFIX {
+	if STATE_ENTER_MARKS.statusLine(model) != STATUS_MARKING+"[1 2]"+STATUS_MARKING_POSTFIX {
 		t.Error("In makr mode with two marks, didn't get expected", model.StatusLine())
 	}
 	STATE_ENTER_MARKS.commitMarks(model)
-	if model.StatusLine() != STATUS_DEFAULT {
-		t.Error("After commiting marks, didn't have default status", model.StatusLine())
+
+	if model.state != STATE_DEFAULT {
+		t.Error("Didn't go back to default state after commiting marks.")
 	}
 
 	if model.Selected().Number() != 0 {
@@ -77,36 +93,16 @@ func TestMode(t *testing.T) {
 	STATE_ENTER_MARKS.enter(model)
 	sendNumberEvent(model, 1)
 	sendNumberEvent(model, 2)
-	sendKeyEvent(model, termbox.KeyEsc)
+	if sendKeyEvent(model, termbox.KeyEsc) {
+		t.Error("ModeInputEsc in mark enter state DID tell us to quit")
+	}
 
-	if model.StatusLine() != STATUS_DEFAULT {
-		t.Error("After canceling mark mode, status didn't go back to default.", model.StatusLine())
+	if model.state != STATE_DEFAULT {
+		t.Error("Hitting esc in enter marks state didn't go back to esc")
 	}
 
 	if model.Selected().Mark(1) || model.Selected().Mark(2) {
 		t.Error("InputNumber in canceled mark mode still set marks")
-	}
-
-	model.MoveSelectionRight()
-
-	sendNumberEvent(model, 1)
-
-	if model.Selected().Number() != 1 {
-		t.Error("InputNumber after cancled mark and another InputNum didn't set num", model.Selected())
-	}
-
-	if !sendKeyEvent(model, termbox.KeyEsc) {
-		t.Error("ModeInputEsc not in mark enter mode didn't tell us to quit.")
-	}
-
-	model.MoveSelectionRight()
-
-	STATE_ENTER_MARKS.enter(model)
-	if sendKeyEvent(model, termbox.KeyEsc) {
-		t.Error("ModeInputEsc in mark enter mode DID tell us to quit")
-	}
-	if model.state == STATE_ENTER_MARKS {
-		t.Error("ModeInputEsc in mark enter mode didn't exit mark enter mode")
 	}
 
 	STATE_ENTER_MARKS.enter(model)
@@ -115,14 +111,9 @@ func TestMode(t *testing.T) {
 		t.Error("Moving selection right didn't exit mark mode.")
 	}
 
-}
+	//Make sure that enter mark mode doesn't happen if the cell is locked or filled.
 
-func TestNoMarkModeWhenLocked(t *testing.T) {
-	model := newModel()
-	model.grid = sudoku.NewGrid()
-	model.SetSelected(nil)
-	model.EnsureSelected()
-
+	model.MoveSelectionRight()
 	model.Selected().Lock()
 	STATE_ENTER_MARKS.enter(model)
 
