@@ -31,6 +31,8 @@ func main() {
 	}
 	defer termbox.Close()
 
+	termbox.SetOutputMode(termbox.Output256)
+
 	model := newModel()
 
 	width, _ := termbox.Size()
@@ -94,7 +96,7 @@ func draw(model *mainModel) {
 
 			if x >= selectedTop && x < (selectedTop+selectedHeight) && y >= selectedLeft && y < (selectedLeft+selectedWidth) {
 				//We're on the selected cell
-				backgroundColor = termbox.ColorWhite
+				backgroundColor = 0xf0
 			}
 
 			termbox.SetCell(x, y, ch, defaultColor, backgroundColor)
