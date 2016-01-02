@@ -226,6 +226,10 @@ func TestCommandState(t *testing.T) {
 		t.Error("The hint message was short")
 	}
 
+	if model.state != STATE_DEFAULT {
+		t.Error("Choosing hint didn't lead back to default mode")
+	}
+
 }
 
 func TestCleanMarkList(t *testing.T) {

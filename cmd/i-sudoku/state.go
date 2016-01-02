@@ -234,6 +234,7 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) {
 		switch {
 		case evt.Ch == 'h':
 			showHint(m)
+			m.EnterState(STATE_DEFAULT)
 		case evt.Ch == 'q':
 			confirmQuit(m)
 		case evt.Ch == 'n':
