@@ -26,13 +26,7 @@ func (s *baseState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool) {
 	switch evt.Type {
 	case termbox.EventKey:
 		switch evt.Key {
-		case termbox.KeyEsc:
-			return true
 		case termbox.KeyCtrlC:
-			return true
-		}
-		switch evt.Ch {
-		case 'q':
 			return true
 		}
 	}
@@ -57,12 +51,12 @@ type defaultState struct {
 }
 
 func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool) {
+
+	handled := true
 	switch evt.Type {
 	case termbox.EventKey:
 		switch evt.Key {
 		case termbox.KeyEsc:
-			return true
-		case termbox.KeyCtrlC:
 			return true
 		case termbox.KeyArrowDown:
 			m.MoveSelectionDown()
@@ -72,6 +66,8 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 			m.MoveSelectionRight()
 		case termbox.KeyArrowUp:
 			m.MoveSelectionUp()
+		default:
+			handled = false
 		}
 		switch evt.Ch {
 		case 'q':
@@ -91,6 +87,11 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 				panic(err)
 			}
 			m.SetSelectedNumber(num)
+		default:
+			if !handled {
+				//neither handler handled it; defer to base.
+				return s.baseState.handleInput(m, evt)
+			}
 		}
 	}
 	return false
@@ -106,14 +107,16 @@ type enterMarkState struct {
 }
 
 func (s *enterMarkState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool) {
+	handled := true
 	switch evt.Type {
 	case termbox.EventKey:
-		//TODO: ctrl-C should work in any state. Fall back on baseState's inputHandler.
 		switch evt.Key {
 		case termbox.KeyEnter:
 			s.commitMarks(m)
 		case termbox.KeyEsc:
 			STATE_DEFAULT.enter(m)
+		default:
+			handled = false
 		}
 		switch evt.Ch {
 		//TODO: do this in a more general way related to DIM
@@ -124,6 +127,11 @@ func (s *enterMarkState) handleInput(m *mainModel, evt termbox.Event) (doQuit bo
 				panic(err)
 			}
 			s.numberInput(num)
+		default:
+			if !handled {
+				//Neither of us handled it so defer to base.
+				return s.baseState.handleInput(m, evt)
+			}
 		}
 	}
 	return false
