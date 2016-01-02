@@ -88,6 +88,10 @@ func newModel() *mainModel {
 func (m *mainModel) StatusLine() string {
 	//TODO: return something dynamic depending on mode.
 
+	//TODO: in StatusLine, the keyboard shortcuts should be in bold.
+	//Perhaps make it so at open parens set to bold, at close parens set
+	//to normal.
+
 	if m.marksToInput == nil {
 		return STATUS_DEFAULT
 	} else {
