@@ -90,6 +90,8 @@ func draw(model *mainModel) {
 				defaultColor = termbox.ColorBlue
 			} else if ch == lockedRune {
 				defaultColor = termbox.ColorRed
+			} else if runeIsNum(ch) {
+				defaultColor = termbox.ColorGreen | termbox.AttrBold
 			}
 
 			backgroundColor := termbox.ColorDefault
