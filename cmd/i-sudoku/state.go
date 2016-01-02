@@ -187,6 +187,7 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 		case 'n':
 			//TODO: since this is a destructive action, require a confirmation
 			m.NewGrid()
+			m.EnterState(STATE_DEFAULT)
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.

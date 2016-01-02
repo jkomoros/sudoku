@@ -168,6 +168,12 @@ func TestCommandState(t *testing.T) {
 		t.Error("'n' in command status didn't create new grid.")
 	}
 
+	if model.state != STATE_DEFAULT {
+		t.Error("'n' in command mode didn't go back to default mode when it was done")
+	}
+
+	model.EnterState(STATE_COMMAND)
+
 	sendKeyEvent(model, termbox.KeyEsc)
 	if model.state != STATE_DEFAULT {
 		t.Error("'Esc' in command state didn't go back to default mode")
