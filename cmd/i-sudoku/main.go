@@ -170,17 +170,11 @@ func draw(model *mainModel) {
 		x++
 	}
 
-	//Divider
-	y++
-	for x = 0; x < width; x++ {
-		termbox.SetCell(x, y, '-', 0xf0, termbox.ColorBlack)
-	}
-
 	y++
 
 	x = 0
 	underlined := false
-	for _, ch := range model.StatusLine() {
+	for _, ch := range ">>> " + model.StatusLine() {
 		//The ( and ) are non-printing control characters
 		if ch == '{' {
 			underlined = true
@@ -189,19 +183,18 @@ func draw(model *mainModel) {
 			underlined = false
 			continue
 		}
-		fg := termbox.ColorWhite
+		fg := termbox.ColorBlack
 		if underlined {
 			fg = fg | termbox.AttrUnderline | termbox.AttrBold
 		}
 
-		termbox.SetCell(x, y, ch, fg, termbox.ColorDefault)
+		termbox.SetCell(x, y, ch, fg, termbox.ColorWhite)
 		x++
 	}
 
-	//Divider
-	y++
-	for x = 0; x < width; x++ {
-		termbox.SetCell(x, y, '-', 0xf0, termbox.ColorBlack)
+	for x < width {
+		termbox.SetCell(x, y, ' ', fg, termbox.ColorWhite)
+		x++
 	}
 
 	underlined = false
