@@ -5,9 +5,10 @@ import (
 )
 
 type mainModel struct {
-	grid     *sudoku.Grid
-	selected *sudoku.Cell
-	state    InputState
+	grid           *sudoku.Grid
+	selected       *sudoku.Cell
+	state          InputState
+	consoleMessage string
 	//If exitNow is flipped to true, we will quit at next turn of event loop.
 	exitNow bool
 }

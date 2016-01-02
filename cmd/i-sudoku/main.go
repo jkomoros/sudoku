@@ -148,5 +148,24 @@ func draw(model *mainModel) {
 		x++
 	}
 
+	y++
+	x = 0
+	underlined = false
+	for _, ch := range model.consoleMessage {
+		if ch == '(' {
+			underlined = true
+			continue
+		} else if ch == ')' {
+			underlined = false
+			continue
+		}
+		fg := termbox.ColorWhite
+		if underlined {
+			fg = fg | termbox.AttrBold
+		}
+		termbox.SetCell(x, y, ch, fg, termbox.ColorBlack)
+		x++
+	}
+
 	termbox.Flush()
 }
