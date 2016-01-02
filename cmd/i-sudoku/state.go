@@ -79,6 +79,8 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 		case 'm':
 			//TODO: ideally Ctrl+Num would work to put in one mark. But termbox doesn't appear to let that work.
 			m.EnterState(STATE_ENTER_MARKS)
+
+		//TODO: create a commandState, (entered via 'c') where 'n', 'q', and other uncommon commands will live.
 		case 'n':
 			//TODO: since this is a destructive action, require a confirmation
 			m.NewGrid()
