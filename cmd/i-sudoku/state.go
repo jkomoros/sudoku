@@ -159,6 +159,5 @@ func (s *enterMarkState) statusLine(m *mainModel) string {
 }
 
 func (s *enterMarkState) newCellSelected(m *mainModel) {
-	//Do nothing by default.
 	STATE_DEFAULT.enter(m)
 }

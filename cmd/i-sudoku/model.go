@@ -32,6 +32,7 @@ func (m *mainModel) SetSelected(cell *sudoku.Cell) {
 		return
 	}
 	m.selected = cell
+	m.state.newCellSelected(m)
 }
 
 func (m *mainModel) EnsureSelected() {
