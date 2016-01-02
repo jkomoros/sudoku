@@ -59,6 +59,14 @@ type defaultState struct {
 	baseState
 }
 
+func showHint(m *mainModel) {
+	hint := m.grid.Hint(nil)
+	m.SetConsoleMessage(strings.Join(hint.Description(), "\n")+"\n\n"+"To clear this message, type {ESC}", false)
+	m.lastShownHint = hint
+	lastStep := hint.Steps[len(hint.Steps)-1]
+	m.SetSelected(lastStep.TargetCells[0].InGrid(m.grid))
+}
+
 func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 
 	handled := true
@@ -73,6 +81,8 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 			m.MoveSelectionRight()
 		case termbox.KeyArrowUp:
 			m.MoveSelectionUp()
+		case termbox.KeyEsc:
+			m.ClearConsole()
 		default:
 			handled = false
 		}
@@ -224,10 +234,13 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) {
 		default:
 			handled = false
 		}
-		switch evt.Ch {
-		case 'q':
+		switch {
+		case evt.Ch == 'h':
+			showHint(m)
+			m.EnterState(STATE_DEFAULT)
+		case evt.Ch == 'q':
 			confirmQuit(m)
-		case 'n':
+		case evt.Ch == 'n':
 			m.enterConfirmState("Replace grid with a new one? This is a destructive action.",
 				DEFAULT_NO,
 				func() {
@@ -300,11 +313,11 @@ func (s *confirmState) handleInput(m *mainModel, evt termbox.Event) {
 }
 
 func (s *confirmState) statusLine(m *mainModel) string {
-	confirmMsg := "(y) or (n)"
+	confirmMsg := "{y}/{n}"
 	if s.defaultAction == DEFAULT_YES {
-		confirmMsg = "(Y) or (n)"
+		confirmMsg = "{Y}/{n}"
 	} else if s.defaultAction == DEFAULT_NO {
-		confirmMsg = "(y) or (N)"
+		confirmMsg = "{y}/{N}"
 	}
 	return s.msg + "  " + confirmMsg
 }

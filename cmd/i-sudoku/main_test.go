@@ -76,6 +76,12 @@ func TestConsoleMessage(t *testing.T) {
 		}
 	}
 
+	model.ClearConsole()
+
+	if model.consoleMessage != "" {
+		t.Error("m.ClearConsole didn't clear the console.")
+	}
+
 }
 
 func TestEnsureSelected(t *testing.T) {

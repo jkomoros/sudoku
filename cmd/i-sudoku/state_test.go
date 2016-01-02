@@ -214,6 +214,48 @@ func TestCommandState(t *testing.T) {
 
 	}
 
+	oldSelected := model.Selected()
+
+	model.EnterState(STATE_COMMAND)
+
+	sendCharEvent(model, 'h')
+
+	if model.consoleMessage == "" {
+		t.Error("Asking for hint didn't give a hint")
+	}
+
+	if model.consoleMessageShort {
+		t.Error("The hint message was short")
+	}
+
+	if model.state != STATE_DEFAULT {
+		t.Error("Choosing hint didn't lead back to default mode")
+	}
+
+	//Technically, this test has a 1/81 % chance of flaking...
+	//TODO: make this test not flaky
+	if oldSelected == model.Selected() {
+		t.Error("Hint didn't automatically select the cell specified by the hint.")
+	}
+
+	lastStep := model.lastShownHint.Steps[len(model.lastShownHint.Steps)-1]
+	correctNum := lastStep.TargetNums[0]
+	wrongNum := correctNum + 1
+	if wrongNum > sudoku.DIM {
+		wrongNum = 1
+	}
+	model.SetSelectedNumber(wrongNum)
+
+	if model.consoleMessage == "" {
+		t.Error("Console message was cleared even though wrong number was entered")
+	}
+
+	model.SetSelectedNumber(correctNum)
+
+	if model.consoleMessage != "" {
+		t.Error("Console was not cleared after right hint number was entered.")
+	}
+
 }
 
 func TestCleanMarkList(t *testing.T) {
@@ -243,7 +285,7 @@ func TestConfirmState(t *testing.T) {
 		t.Error("enterConfirmState didn't lead to being in confirm state")
 	}
 
-	if model.StatusLine() != "TEST  (Y) or (n)" {
+	if model.StatusLine() != "TEST  {Y}/{n}" {
 		t.Error("Default yes confirm state had wrong status line:", model.StatusLine())
 	}
 
