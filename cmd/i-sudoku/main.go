@@ -207,9 +207,9 @@ func draw(model *mainModel) {
 				underlined = false
 				continue
 			}
-			fg := termbox.Attribute(0xf0)
+			fg := termbox.Attribute(0xf6)
 			if underlined {
-				fg = fg | termbox.AttrBold
+				fg = termbox.Attribute(0xFC) | termbox.AttrBold
 			}
 			termbox.SetCell(x, y, ch, fg, termbox.ColorBlack)
 			x++
