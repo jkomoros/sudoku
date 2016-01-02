@@ -125,8 +125,22 @@ func draw(model *mainModel) {
 	y++
 
 	x = 0
+	underlined := false
 	for _, ch := range model.StatusLine() {
-		termbox.SetCell(x, y, ch, termbox.ColorWhite, termbox.ColorDefault)
+		//The ( and ) are non-printing control characters
+		if ch == '(' {
+			underlined = true
+			continue
+		} else if ch == ')' {
+			underlined = false
+			continue
+		}
+		fg := termbox.ColorWhite
+		if underlined {
+			fg = fg | termbox.AttrUnderline | termbox.AttrBold
+		}
+
+		termbox.SetCell(x, y, ch, fg, termbox.ColorDefault)
 		x++
 	}
 
