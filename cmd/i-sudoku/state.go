@@ -68,7 +68,7 @@ type defaultState struct {
 
 func showHint(m *mainModel) {
 	hint := m.grid.Hint(nil)
-	m.SetConsoleMessage(strings.Join(hint.Description(), "\n")+"\n\n"+"To accept this hint, type {ENTER}\nTo clear this message, type {ESC}", false)
+	m.SetConsoleMessage("{Hint}\n"+strings.Join(hint.Description(), "\n")+"\n\n"+"{ENTER} to accept, {ESC} to ignore", false)
 	m.lastShownHint = hint
 	lastStep := hint.Steps[len(hint.Steps)-1]
 	m.SetSelected(lastStep.TargetCells[0].InGrid(m.grid))
