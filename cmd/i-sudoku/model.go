@@ -57,6 +57,7 @@ func (m *mainModel) SetConsoleMessage(msg string, shortLived bool) {
 
 	m.consoleMessage = msg
 	m.consoleMessageShort = shortLived
+	m.lastShownHint = nil
 }
 
 func (m *mainModel) EndOfEventLoop() {
