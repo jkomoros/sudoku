@@ -14,6 +14,11 @@ var (
 	STATE_CONFIRM     = &confirmState{}
 )
 
+const (
+	MARKS_MODE_FAIL_LOCKED = "Can't enter mark mode on a cell that's locked."
+	MARKS_MODE_FAIL_NUMBER = "Can't enter mark mode on a cell that has a filled number."
+)
+
 type InputState interface {
 	//TODO: doesn't it feel weird that every method takes a main model?
 	handleInput(m *mainModel, evt termbox.Event)
@@ -172,8 +177,12 @@ func (s *enterMarkState) commitMarks(m *mainModel) {
 func (s *enterMarkState) shouldEnter(m *mainModel) bool {
 	selected := m.Selected()
 	if selected != nil {
-		if selected.Number() != 0 || selected.Locked() {
-			//Dion't enter mark mode.
+		if selected.Locked() {
+			m.SetConsoleMessage(MARKS_MODE_FAIL_LOCKED, true)
+			return false
+		}
+		if selected.Number() != 0 {
+			m.SetConsoleMessage(MARKS_MODE_FAIL_NUMBER, true)
 			return false
 		}
 	}

@@ -136,12 +136,20 @@ func TestEnterMarksState(t *testing.T) {
 		t.Error("Were allowed to enter mark mode even though cell was locked.")
 	}
 
+	if model.consoleMessage != MARKS_MODE_FAIL_LOCKED {
+		t.Error("Couldn't start marks mode but didn't get message in console")
+	}
+
 	model.Selected().Unlock()
 	model.Selected().SetNumber(1)
 	model.EnterState(STATE_ENTER_MARKS)
 
 	if model.state == STATE_ENTER_MARKS {
 		t.Error("We were allowed to enter mark mode even though cell had a number in it.")
+	}
+
+	if model.consoleMessage != MARKS_MODE_FAIL_NUMBER {
+		t.Error("Couldn't start marks mode but didn't get message in console")
 	}
 
 }
