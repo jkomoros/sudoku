@@ -118,6 +118,7 @@ func (m *mainModel) ModeInputEsc() (quit bool) {
 }
 
 func (m *mainModel) ModeEnterMarkMode() {
+	//TODO: if already in Mark mode, ignore.
 	selected := m.Selected()
 	if selected != nil {
 		if selected.Number() != 0 || selected.Locked() {
