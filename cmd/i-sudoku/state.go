@@ -78,6 +78,8 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 			m.MoveSelectionRight()
 		case termbox.KeyArrowUp:
 			m.MoveSelectionUp()
+		case termbox.KeyEsc:
+			m.ClearConsole()
 		default:
 			handled = false
 		}

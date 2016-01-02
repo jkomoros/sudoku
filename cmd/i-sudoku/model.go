@@ -60,9 +60,13 @@ func (m *mainModel) SetConsoleMessage(msg string, shortLived bool) {
 
 func (m *mainModel) EndOfEventLoop() {
 	if m.consoleMessageShort {
-		m.consoleMessage = ""
-		m.consoleMessageShort = false
+		m.ClearConsole()
 	}
+}
+
+func (m *mainModel) ClearConsole() {
+	m.consoleMessage = ""
+	m.consoleMessageShort = false
 }
 
 func (m *mainModel) StatusLine() string {
