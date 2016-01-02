@@ -72,6 +72,7 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 		case 'c':
 			m.EnterState(STATE_COMMAND)
 		//TODO: 'h' should give a hint
+		//TODO: '?' should print help to console
 		case 'm':
 			//TODO: ideally Ctrl+Num would work to put in one mark. But termbox doesn't appear to let that work.
 			m.EnterState(STATE_ENTER_MARKS)
@@ -176,6 +177,8 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) (doQuit bool
 			handled = false
 		}
 		switch evt.Ch {
+		//TODO: '+' should set marks to add all Possible values that are not currently added
+		//TODO: '-' should set marks list to remove any things that are not possible.
 		case 'q':
 			return true
 		case 'n':
