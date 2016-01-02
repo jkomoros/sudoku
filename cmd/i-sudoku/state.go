@@ -152,7 +152,6 @@ func (s *enterMarkState) commitMarks(m *mainModel) {
 }
 
 func (s *enterMarkState) shouldEnter(m *mainModel) bool {
-	//TODO: if already in Mark mode, ignore.
 	selected := m.Selected()
 	if selected != nil {
 		if selected.Number() != 0 || selected.Locked() {
