@@ -19,8 +19,8 @@ const (
 	GRID_VALID      = "  VALID  "
 	GRID_SOLVED     = "  SOLVED  "
 	GRID_NOT_SOLVED = " UNSOLVED "
-	FAST_MODE_ON    = "  FAST MODE ON  "
-	FAST_MODE_OFF   = "  FAST MODE OFF "
+	FAST_MODE_ON    = "  FAST MODE  "
+	FAST_MODE_OFF   = "             "
 )
 
 //A debug override; if true will print a color palette to the screen, wait for
