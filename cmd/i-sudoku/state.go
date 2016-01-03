@@ -21,9 +21,10 @@ const (
 	FAST_MODE_NO_OPEN_CELLS  = "Can't fast move: no more open cells in that direction"
 	HELP_MESSAGE             = `The following commands are also available on this screen:
 {c} to enter command mode to do things like quit and load a new puzzle
-{f} to toggle fast move mode, allowing you to skip over locked cells
-{h} to get a hint`
-	STATUS_DEFAULT         = "{→,←,↓,↑} to move cells, {0-9} to enter number, {m}ark mode, {?} to list other commands"
+{h} to get a hint
+{m} to enter mark mode on the cell, making it faster to enter marks
+{f} to toggle fast move mode, allowing you to skip over locked cells`
+	STATUS_DEFAULT         = "{→,←,↓,↑} to move cells, {0-9} to enter number, {Shift + 0-9} to toggle marks, {?} to list other commands"
 	STATUS_MARKING         = "MARKING:"
 	STATUS_MARKING_POSTFIX = "  {1-9} to toggle marks, {ENTER} to commit, {ESC} to cancel"
 	STATUS_COMMAND         = "COMMAND: {n}ew puzzle, {q}uit, {ESC} cancel"
@@ -31,6 +32,42 @@ const (
 
 func runeIsNum(ch rune) bool {
 	return ch >= '0' && ch <= '9'
+}
+
+func runeIsShiftedNum(ch rune) bool {
+	if runeIsNum(ch) {
+		return false
+	}
+	return runeIsNum(shiftedNumRuneToNum(ch))
+}
+
+func shiftedNumRuneToNum(ch rune) rune {
+	//Note: this assumes an american keyboard layout
+	//TODO: make this resilient to other keyboard layouts, perhaps with a way
+	//for the user to 'train' it.
+	switch ch {
+	case '!':
+		return '1'
+	case '@':
+		return '2'
+	case '#':
+		return '3'
+	case '$':
+		return '4'
+	case '%':
+		return '5'
+	case '^':
+		return '6'
+	case '&':
+		return '7'
+	case '*':
+		return '8'
+	case '(':
+		return '9'
+	case ')':
+		return '0'
+	}
+	return ch
 }
 
 type InputState interface {
@@ -124,6 +161,12 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 		case evt.Ch == 'm':
 			//TODO: ideally Ctrl+Num would work to put in one mark. But termbox doesn't appear to let that work.
 			m.EnterState(STATE_ENTER_MARKS)
+		case runeIsShiftedNum(evt.Ch):
+			num, err := strconv.Atoi(strings.Replace(strconv.QuoteRuneToASCII(shiftedNumRuneToNum(evt.Ch)), "'", "", -1))
+			if err != nil {
+				panic(err)
+			}
+			m.ToggleSelectedMark(num)
 		case runeIsNum(evt.Ch):
 			//TODO: this is a seriously gross way of converting a rune to a string.
 			num, err := strconv.Atoi(strings.Replace(strconv.QuoteRuneToASCII(evt.Ch), "'", "", -1))

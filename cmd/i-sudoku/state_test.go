@@ -55,6 +55,20 @@ func TestDefaultState(t *testing.T) {
 		t.Error("InputNumber in default mode didn't add a number")
 	}
 
+	model.MoveSelectionRight(false)
+
+	sendCharEvent(model, '!')
+
+	if !model.Selected().Mark(1) {
+		t.Error("Sending a shifted 1 on a cell didn't turn on the 1 mark")
+	}
+
+	sendCharEvent(model, '!')
+
+	if model.Selected().Mark(1) {
+		t.Error("Sending a shifted 1 on a cell with a 1 mark didn't remove it")
+	}
+
 	sendKeyEvent(model, termbox.KeyEsc)
 
 	if model.exitNow {
