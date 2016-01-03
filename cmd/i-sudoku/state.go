@@ -25,7 +25,7 @@ const (
 {+} or {=} to set the selected cell's marks to all legal marks
 {-} to remove all invalid marks from the selected cell
 {m} to enter mark mode on the cell, making it faster to enter marks
-{f} to toggle fast move mode, allowing you to skip over locked cells`
+{f} to toggle fast move mode, allowing you to skip over filled cells`
 	STATUS_DEFAULT         = "{→,←,↓,↑} to move cells, {0-9} to enter number, {Shift + 0-9} to toggle marks, {?} to list other commands"
 	STATUS_MARKING         = "MARKING:"
 	STATUS_MARKING_POSTFIX = "  {1-9} to toggle marks, {ENTER} to commit, {ESC} to cancel"

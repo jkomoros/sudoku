@@ -107,7 +107,7 @@ func (m *mainModel) MoveSelectionLeft(fast bool) {
 		if c < 0 {
 			c = 0
 		}
-		if fast && m.grid.Cell(r, c).Locked() {
+		if fast && m.grid.Cell(r, c).Number() != 0 {
 			if c == 0 {
 				//We're at the end and didn't find anything.
 				//guess there's nothing to find.
@@ -130,7 +130,7 @@ func (m *mainModel) MoveSelectionRight(fast bool) {
 		if c >= sudoku.DIM {
 			c = sudoku.DIM - 1
 		}
-		if fast && m.grid.Cell(r, c).Locked() {
+		if fast && m.grid.Cell(r, c).Number() != 0 {
 			if c == sudoku.DIM-1 {
 				//We're at the end and didn't find anything.
 				//guess there's nothing to find.
@@ -153,7 +153,7 @@ func (m *mainModel) MoveSelectionUp(fast bool) {
 		if r < 0 {
 			r = 0
 		}
-		if fast && m.grid.Cell(r, c).Locked() {
+		if fast && m.grid.Cell(r, c).Number() != 0 {
 			if r == 0 {
 				//We're at the end and didn't find anything.
 				//guess there's nothing to find.
@@ -176,7 +176,7 @@ func (m *mainModel) MoveSelectionDown(fast bool) {
 		if r >= sudoku.DIM {
 			r = sudoku.DIM - 1
 		}
-		if fast && m.grid.Cell(r, c).Locked() {
+		if fast && m.grid.Cell(r, c).Number() != 0 {
 			if r == sudoku.DIM-1 {
 				//We're at the end and didn't find anything.
 				//guess there's nothing to find.
