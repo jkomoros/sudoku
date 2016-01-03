@@ -26,7 +26,7 @@ const (
 	STATUS_MARKING         = "MARKING:"
 	STATUS_MARKING_POSTFIX = "  {1-9} to toggle marks, {ENTER} to commit, {ESC} to cancel"
 	STATUS_COMMAND         = "COMMAND: {n}ew puzzle, {q}uit, {ESC} cancel"
-	STATUS_FAST_MODE       = "{FASTMOVE}: {→,←,↓,↑} to move cells, skipping over locked cells. {ESC} to cancel."
+	STATUS_FAST_MODE       = "{FASTMOVE}: {→,←,↓,↑} to move cells, skipping over locked cells. {ESC} or {f} to cancel."
 )
 
 func runeIsNum(ch rune) bool {
@@ -374,6 +374,8 @@ func (s *fastMoveState) handleInput(m *mainModel, evt termbox.Event) {
 			handled = false
 		}
 		switch evt.Ch {
+		case 'f':
+			m.EnterState(STATE_DEFAULT)
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
