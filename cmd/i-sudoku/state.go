@@ -26,7 +26,7 @@ const (
 	STATUS_MARKING         = "MARKING:"
 	STATUS_MARKING_POSTFIX = "  {1-9} to toggle marks, {ENTER} to commit, {ESC} to cancel"
 	STATUS_COMMAND         = "COMMAND: {n}ew puzzle, {q}uit, {ESC} cancel"
-	STATUS_FAST_MODE       = "{→,←,↓,↑} to move cells, skipping over locked cells. {ESC} to cancel."
+	STATUS_FAST_MODE       = "{FASTMOVE}: {→,←,↓,↑} to move cells, skipping over locked cells. {ESC} to cancel."
 )
 
 func runeIsNum(ch rune) bool {
