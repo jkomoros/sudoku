@@ -107,9 +107,16 @@ func drawGrid(y int, model *mainModel) (endY int) {
 	fg := termbox.ColorBlack
 	bg := termbox.ColorGreen
 
+	//The column where the grid starts
+	gridLeft := 1
+
+	termbox.SetCell(0, y, ' ', fg, bg)
+	x++
+
 	for i := 0; i < sudoku.DIM; i++ {
 
 		cellLeft, _, _, _ := grid.Cell(0, i).DiagramExtents()
+		cellLeft += gridLeft
 		//Pad until we get to the start of this cell area
 		for x < cellLeft {
 			termbox.SetCell(x, y, '|', fg, bg)
@@ -127,8 +134,10 @@ func drawGrid(y int, model *mainModel) (endY int) {
 	selectedTop, selectedLeft, selectedHeight, selectedWidth := model.Selected().DiagramExtents()
 	//Correct the selected coordinate for the offset of the grid from the top.
 	selectedLeft += y
+	selectedTop += gridLeft
 	for _, line := range lines {
-		x = 0
+		//Grid starts at 1 cell over from left edge
+		x = gridLeft
 		//The first number in range will be byte offset, but for some items like the bullet, it's two bytes.
 		//But what we care about is that each item is a character.
 		for _, ch := range line {
