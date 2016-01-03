@@ -128,8 +128,14 @@ func TestDefaultState(t *testing.T) {
 
 	sendCharEvent(model, 'f')
 
-	if model.state != STATE_FAST_MOVE {
+	if !model.fastMode {
 		t.Error("'f' from default mode didn't enter fast move mode")
+	}
+
+	sendCharEvent(model, 'f')
+
+	if model.fastMode {
+		t.Error("'f' again didn't turn off fast move mode")
 	}
 }
 

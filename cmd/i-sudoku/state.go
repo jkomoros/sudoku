@@ -12,7 +12,6 @@ var (
 	STATE_ENTER_MARKS = &enterMarkState{}
 	STATE_COMMAND     = &commandState{}
 	STATE_CONFIRM     = &confirmState{}
-	STATE_FAST_MOVE   = &fastMoveState{}
 )
 
 const (
@@ -22,13 +21,12 @@ const (
 	FAST_MODE_NO_OPEN_CELLS  = "Can't fast move: no more open cells in that direction"
 	HELP_MESSAGE             = `The following commands are also available on this screen:
 {c} to enter command mode to do things like quit and load a new puzzle
-{f} to enter fast move mode, allowing you to skip over locked cells
+{f} to toggle fast move mode, allowing you to skip over locked cells
 {h} to get a hint`
 	STATUS_DEFAULT         = "{→,←,↓,↑} to move cells, {0-9} to enter number, {m}ark mode, {?} to list other commands"
 	STATUS_MARKING         = "MARKING:"
 	STATUS_MARKING_POSTFIX = "  {1-9} to toggle marks, {ENTER} to commit, {ESC} to cancel"
 	STATUS_COMMAND         = "COMMAND: {n}ew puzzle, {q}uit, {ESC} cancel"
-	STATUS_FAST_MODE       = "{FASTMOVE}: {→,←,↓,↑} to move cells, skipping over locked cells. {ESC} or {f} to cancel."
 )
 
 func runeIsNum(ch rune) bool {
@@ -100,13 +98,13 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 	case termbox.EventKey:
 		switch evt.Key {
 		case termbox.KeyArrowDown:
-			m.MoveSelectionDown(false)
+			m.MoveSelectionDown(m.fastMode)
 		case termbox.KeyArrowLeft:
-			m.MoveSelectionLeft(false)
+			m.MoveSelectionLeft(m.fastMode)
 		case termbox.KeyArrowRight:
-			m.MoveSelectionRight(false)
+			m.MoveSelectionRight(m.fastMode)
 		case termbox.KeyArrowUp:
-			m.MoveSelectionUp(false)
+			m.MoveSelectionUp(m.fastMode)
 		case termbox.KeyEsc:
 			m.ClearConsole()
 		case termbox.KeyEnter:
@@ -118,7 +116,7 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 		case evt.Ch == 'h':
 			showHint(m)
 		case evt.Ch == 'f':
-			m.EnterState(STATE_FAST_MOVE)
+			m.fastMode = !m.fastMode
 		case evt.Ch == '?':
 			m.SetConsoleMessage(HELP_MESSAGE, true)
 		case evt.Ch == 'c':
@@ -351,42 +349,4 @@ func (s *confirmState) statusLine(m *mainModel) string {
 		confirmMsg = "{y}/{N}"
 	}
 	return s.msg + "  " + confirmMsg
-}
-
-type fastMoveState struct {
-	baseState
-}
-
-func (s *fastMoveState) handleInput(m *mainModel, evt termbox.Event) {
-	handled := true
-	switch evt.Type {
-	case termbox.EventKey:
-		switch evt.Key {
-		case termbox.KeyArrowDown:
-			m.MoveSelectionDown(true)
-		case termbox.KeyArrowLeft:
-			m.MoveSelectionLeft(true)
-		case termbox.KeyArrowRight:
-			m.MoveSelectionRight(true)
-		case termbox.KeyArrowUp:
-			m.MoveSelectionUp(true)
-		case termbox.KeyEsc:
-			m.EnterState(STATE_DEFAULT)
-		default:
-			handled = false
-		}
-		switch evt.Ch {
-		case 'f':
-			m.EnterState(STATE_DEFAULT)
-		default:
-			if !handled {
-				//Neither of us handled it so defer to base.
-				s.baseState.handleInput(m, evt)
-			}
-		}
-	}
-}
-
-func (s *fastMoveState) statusLine(m *mainModel) string {
-	return STATUS_FAST_MODE
 }

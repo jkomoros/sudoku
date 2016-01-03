@@ -9,6 +9,7 @@ type mainModel struct {
 	grid     *sudoku.Grid
 	selected *sudoku.Cell
 	state    InputState
+	fastMode bool
 	//The size of the console output. Not used for much.
 	outputWidth    int
 	lastShownHint  *sudoku.SolveDirections
