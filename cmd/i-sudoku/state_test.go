@@ -111,9 +111,9 @@ func TestDefaultState(t *testing.T) {
 
 	//Move to a different cell to confirm that 'ENTER' reselects the cell and fills the number.
 	if hintCell.Row() < sudoku.DIM-1 {
-		model.MoveSelectionDown()
+		model.MoveSelectionDown(false)
 	} else {
-		model.MoveSelectionUp()
+		model.MoveSelectionUp(false)
 	}
 
 	sendKeyEvent(model, termbox.KeyEnter)
@@ -165,7 +165,7 @@ func TestEnterMarksState(t *testing.T) {
 		t.Error("InputNumber in mark mode didn't set the second mark", model.Selected())
 	}
 
-	model.MoveSelectionRight()
+	model.MoveSelectionRight(false)
 
 	model.EnterState(STATE_ENTER_MARKS)
 	sendNumberEvent(model, 1)
@@ -186,14 +186,14 @@ func TestEnterMarksState(t *testing.T) {
 	}
 
 	model.EnterState(STATE_ENTER_MARKS)
-	model.MoveSelectionRight()
+	model.MoveSelectionRight(false)
 	if model.state == STATE_ENTER_MARKS {
 		t.Error("Moving selection right didn't exit mark mode.")
 	}
 
 	//Make sure that enter mark mode doesn't happen if the cell is locked or filled.
 
-	model.MoveSelectionRight()
+	model.MoveSelectionRight(false)
 	model.Selected().Lock()
 	model.EnterState(STATE_ENTER_MARKS)
 

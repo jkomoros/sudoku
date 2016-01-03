@@ -97,48 +97,92 @@ func (m *mainModel) EnsureSelected() {
 	}
 }
 
-func (m *mainModel) MoveSelectionLeft() {
+func (m *mainModel) MoveSelectionLeft(fast bool) {
 	m.EnsureSelected()
 	r := m.Selected().Row()
 	c := m.Selected().Col()
-	c--
-	if c < 0 {
-		c = 0
+	for {
+		c--
+		if c < 0 {
+			c = 0
+		}
+		if fast && m.grid.Cell(r, c).Locked() {
+			if c == 0 {
+				//We're at the end and didn't find anything.
+				//guess there's nothing to find.
+				return
+			}
+			continue
+		}
+		m.SetSelected(m.grid.Cell(r, c))
+		break
 	}
-	m.SetSelected(m.grid.Cell(r, c))
 }
 
-func (m *mainModel) MoveSelectionRight() {
+func (m *mainModel) MoveSelectionRight(fast bool) {
 	m.EnsureSelected()
 	r := m.Selected().Row()
 	c := m.Selected().Col()
-	c++
-	if c >= sudoku.DIM {
-		c = sudoku.DIM - 1
+	for {
+		c++
+		if c >= sudoku.DIM {
+			c = sudoku.DIM - 1
+		}
+		if fast && m.grid.Cell(r, c).Locked() {
+			if c == sudoku.DIM-1 {
+				//We're at the end and didn't find anything.
+				//guess there's nothing to find.
+				return
+			}
+			continue
+		}
+		m.SetSelected(m.grid.Cell(r, c))
+		break
 	}
-	m.SetSelected(m.grid.Cell(r, c))
 }
 
-func (m *mainModel) MoveSelectionUp() {
+func (m *mainModel) MoveSelectionUp(fast bool) {
 	m.EnsureSelected()
 	r := m.Selected().Row()
 	c := m.Selected().Col()
-	r--
-	if r < 0 {
-		r = 0
+	for {
+		r--
+		if r < 0 {
+			r = 0
+		}
+		if fast && m.grid.Cell(r, c).Locked() {
+			if r == 0 {
+				//We're at the end and didn't find anything.
+				//guess there's nothing to find.
+				return
+			}
+			continue
+		}
+		m.SetSelected(m.grid.Cell(r, c))
+		break
 	}
-	m.SetSelected(m.grid.Cell(r, c))
 }
 
-func (m *mainModel) MoveSelectionDown() {
+func (m *mainModel) MoveSelectionDown(fast bool) {
 	m.EnsureSelected()
 	r := m.Selected().Row()
 	c := m.Selected().Col()
-	r++
-	if r >= sudoku.DIM {
-		r = sudoku.DIM - 1
+	for {
+		r++
+		if r >= sudoku.DIM {
+			r = sudoku.DIM - 1
+		}
+		if fast && m.grid.Cell(r, c).Locked() {
+			if r == sudoku.DIM-1 {
+				//We're at the end and didn't find anything.
+				//guess there's nothing to find.
+				return
+			}
+			continue
+		}
+		m.SetSelected(m.grid.Cell(r, c))
+		break
 	}
-	m.SetSelected(m.grid.Cell(r, c))
 }
 
 func (m *mainModel) EnsureGrid() {

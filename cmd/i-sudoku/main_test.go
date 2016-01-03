@@ -6,6 +6,16 @@ import (
 	"testing"
 )
 
+const FAST_MOVE_TEST_GRID = `.|.|.|.|1|.|.|.|.
+.|.|.|.|1|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|1|.|.|.|.
+1|1|.|1|.|1|.|1|1
+.|.|.|.|1|.|.|.|.
+.|.|.|.|.|.|.|.|.
+.|.|.|.|1|.|.|.|.
+.|.|.|.|1|.|.|.|.`
+
 func TestNewGrid(t *testing.T) {
 	model := newModel()
 
@@ -119,7 +129,7 @@ func TestMoveSelectionLeft(t *testing.T) {
 		t.Error("Wrong cell selected to start", model.Selected())
 	}
 
-	model.MoveSelectionLeft()
+	model.MoveSelectionLeft(false)
 
 	if model.Selected().Row() != 0 || model.Selected().Col() != 0 {
 		t.Error("Wrong cell selected after move left at bounds", model.Selected())
@@ -127,10 +137,30 @@ func TestMoveSelectionLeft(t *testing.T) {
 
 	model.SetSelected(model.grid.Cell(1, 1))
 
-	model.MoveSelectionLeft()
+	model.MoveSelectionLeft(false)
 
 	if model.Selected().Row() != 1 || model.Selected().Col() != 0 {
 		t.Error("Wrong cell selected after move left", model.Selected())
+	}
+
+	//Test fast move
+	newGrid := sudoku.NewGrid()
+	newGrid.Load(FAST_MOVE_TEST_GRID)
+	newGrid.LockFilledCells()
+
+	model.grid = newGrid
+	model.SetSelected(model.grid.Cell(4, 4))
+
+	model.MoveSelectionLeft(true)
+
+	if model.Selected() != model.grid.Cell(4, 2) {
+		t.Error("Fast move didn't skip the locked cell", model.Selected())
+	}
+	//No more spots to the left; should stay still.
+	model.MoveSelectionLeft(true)
+
+	if model.Selected() != model.grid.Cell(4, 2) {
+		t.Error("Fast move moved even though no more cells left in that direction")
 	}
 }
 
@@ -145,7 +175,7 @@ func TestMoveSelectionRight(t *testing.T) {
 		t.Error("Wrong cell selected to start", model.Selected())
 	}
 
-	model.MoveSelectionRight()
+	model.MoveSelectionRight(false)
 
 	if model.Selected().Row() != 0 || model.Selected().Col() != 1 {
 		t.Error("Wrong cell selected after move right", model.Selected())
@@ -153,10 +183,30 @@ func TestMoveSelectionRight(t *testing.T) {
 
 	model.SetSelected(model.grid.Cell(1, sudoku.DIM-1))
 
-	model.MoveSelectionRight()
+	model.MoveSelectionRight(false)
 
 	if model.Selected().Row() != 1 || model.Selected().Col() != sudoku.DIM-1 {
 		t.Error("Wrong cell selected after move right at bounds", model.Selected())
+	}
+
+	//Test fast move
+	newGrid := sudoku.NewGrid()
+	newGrid.Load(FAST_MOVE_TEST_GRID)
+	newGrid.LockFilledCells()
+
+	model.grid = newGrid
+	model.SetSelected(model.grid.Cell(4, 4))
+
+	model.MoveSelectionRight(true)
+
+	if model.Selected() != model.grid.Cell(4, 6) {
+		t.Error("Fast move didn't skip the locked cell", model.Selected())
+	}
+	//No more spots to the left; should stay still.
+	model.MoveSelectionRight(true)
+
+	if model.Selected() != model.grid.Cell(4, 6) {
+		t.Error("Fast move moved even though no more cells left in that direction")
 	}
 }
 
@@ -171,7 +221,7 @@ func TestMoveSelectionUp(t *testing.T) {
 		t.Error("Wrong cell selected to start", model.Selected())
 	}
 
-	model.MoveSelectionUp()
+	model.MoveSelectionUp(false)
 
 	if model.Selected().Row() != 0 || model.Selected().Col() != 0 {
 		t.Error("Wrong cell selected after move up at bounds", model.Selected())
@@ -179,10 +229,30 @@ func TestMoveSelectionUp(t *testing.T) {
 
 	model.SetSelected(model.grid.Cell(1, 1))
 
-	model.MoveSelectionUp()
+	model.MoveSelectionUp(false)
 
 	if model.Selected().Row() != 0 || model.Selected().Col() != 1 {
 		t.Error("Wrong cell selected after move up", model.Selected())
+	}
+
+	//Test fast move
+	newGrid := sudoku.NewGrid()
+	newGrid.Load(FAST_MOVE_TEST_GRID)
+	newGrid.LockFilledCells()
+
+	model.grid = newGrid
+	model.SetSelected(model.grid.Cell(4, 4))
+
+	model.MoveSelectionUp(true)
+
+	if model.Selected() != model.grid.Cell(2, 4) {
+		t.Error("Fast move didn't skip the locked cell", model.Selected())
+	}
+	//No more spots to the left; should stay still.
+	model.MoveSelectionUp(true)
+
+	if model.Selected() != model.grid.Cell(2, 4) {
+		t.Error("Fast move moved even though no more cells left in that direction")
 	}
 }
 
@@ -197,7 +267,7 @@ func TestMoveSelectionDown(t *testing.T) {
 		t.Error("Wrong cell selected to start", model.Selected())
 	}
 
-	model.MoveSelectionDown()
+	model.MoveSelectionDown(false)
 
 	if model.Selected().Row() != 1 || model.Selected().Col() != 0 {
 		t.Error("Wrong cell selected after move down", model.Selected())
@@ -205,10 +275,30 @@ func TestMoveSelectionDown(t *testing.T) {
 
 	model.SetSelected(model.grid.Cell(sudoku.DIM-1, 1))
 
-	model.MoveSelectionDown()
+	model.MoveSelectionDown(false)
 
 	if model.Selected().Row() != sudoku.DIM-1 || model.Selected().Col() != 1 {
 		t.Error("Wrong cell selected after move right at bounds", model.Selected())
+	}
+
+	//Test fast move
+	newGrid := sudoku.NewGrid()
+	newGrid.Load(FAST_MOVE_TEST_GRID)
+	newGrid.LockFilledCells()
+
+	model.grid = newGrid
+	model.SetSelected(model.grid.Cell(4, 4))
+
+	model.MoveSelectionDown(true)
+
+	if model.Selected() != model.grid.Cell(6, 4) {
+		t.Error("Fast move didn't skip the locked cell", model.Selected())
+	}
+	//No more spots to the left; should stay still.
+	model.MoveSelectionDown(true)
+
+	if model.Selected() != model.grid.Cell(6, 4) {
+		t.Error("Fast move moved even though no more cells left in that direction")
 	}
 }
 

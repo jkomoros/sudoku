@@ -95,13 +95,13 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 	case termbox.EventKey:
 		switch evt.Key {
 		case termbox.KeyArrowDown:
-			m.MoveSelectionDown()
+			m.MoveSelectionDown(false)
 		case termbox.KeyArrowLeft:
-			m.MoveSelectionLeft()
+			m.MoveSelectionLeft(false)
 		case termbox.KeyArrowRight:
-			m.MoveSelectionRight()
+			m.MoveSelectionRight(false)
 		case termbox.KeyArrowUp:
-			m.MoveSelectionUp()
+			m.MoveSelectionUp(false)
 		case termbox.KeyEsc:
 			m.ClearConsole()
 		case termbox.KeyEnter:
