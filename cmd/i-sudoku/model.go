@@ -251,3 +251,12 @@ func (m *mainModel) FillSelectedWithLegalMarks() {
 		m.Selected().SetMark(num, true)
 	}
 }
+
+func (m *mainModel) RemoveInvalidMarksFromSelected() {
+	m.EnsureSelected()
+	for _, num := range m.Selected().Marks() {
+		if !m.Selected().Possible(num) {
+			m.Selected().SetMark(num, false)
+		}
+	}
+}

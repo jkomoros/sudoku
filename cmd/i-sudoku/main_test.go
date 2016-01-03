@@ -307,7 +307,7 @@ func TestFillSelectedWithLegalMarks(t *testing.T) {
 	model.grid = sudoku.NewGrid()
 	model.SetSelected(nil)
 
-	model.ToggleSelectedMark(1)
+	model.ToggleSelectedMark(4)
 
 	for i := 3; i < sudoku.DIM; i++ {
 		cell := model.grid.Cell(0, i)
@@ -318,6 +318,14 @@ func TestFillSelectedWithLegalMarks(t *testing.T) {
 
 	if !model.Selected().Marks().SameAs(sudoku.IntSlice{1, 2, 3}) {
 		t.Error("Fill selected marks on a cell got wrong result", model.Selected().Marks())
+	}
+
+	model.ToggleSelectedMark(4)
+
+	model.RemoveInvalidMarksFromSelected()
+
+	if !model.Selected().Marks().SameAs(sudoku.IntSlice{1, 2, 3}) {
+		t.Error("Remove invalid marks got wrong result", model.Selected().Marks())
 	}
 }
 
