@@ -125,6 +125,12 @@ func TestDefaultState(t *testing.T) {
 	if model.Selected().Number() == 0 {
 		t.Error("Accepting hint didn't fill the cell")
 	}
+
+	sendCharEvent(model, 'f')
+
+	if model.state != STATE_FAST_MOVE {
+		t.Error("'f' from default mode didn't enter fast move mode")
+	}
 }
 
 func TestEnterMarksState(t *testing.T) {
@@ -330,3 +336,5 @@ func TestConfirmState(t *testing.T) {
 
 	//TODO: test behavior with different DEFAULT_* , and with enter, y, n.
 }
+
+//TODO: test fast move mode

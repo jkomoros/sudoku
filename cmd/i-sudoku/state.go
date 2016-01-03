@@ -12,6 +12,7 @@ var (
 	STATE_ENTER_MARKS = &enterMarkState{}
 	STATE_COMMAND     = &commandState{}
 	STATE_CONFIRM     = &confirmState{}
+	STATE_FAST_MOVE   = &fastMoveState{}
 )
 
 const (
@@ -19,11 +20,13 @@ const (
 	MARKS_MODE_FAIL_NUMBER = "Can't enter mark mode on a cell that has a filled number."
 	HELP_MESSAGE           = `The following commands are also available on this screen:
 {c} to enter command mode to do things like quit and load a new puzzle
+{f} to enter fast move mode, allowing you to skip over locked cells
 {h} to get a hint`
 	STATUS_DEFAULT         = "{→,←,↓,↑} to move cells, {0-9} to enter number, {m}ark mode, {?} to list other commands"
 	STATUS_MARKING         = "MARKING:"
 	STATUS_MARKING_POSTFIX = "  {1-9} to toggle marks, {ENTER} to commit, {ESC} to cancel"
 	STATUS_COMMAND         = "COMMAND: {n}ew puzzle, {q}uit, {ESC} cancel"
+	STATUS_FAST_MODE       = "{→,←,↓,↑} to move cells, skipping over locked cells. {ESC} to cancel."
 )
 
 func runeIsNum(ch rune) bool {
@@ -112,6 +115,8 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 		switch {
 		case evt.Ch == 'h':
 			showHint(m)
+		case evt.Ch == 'f':
+			m.EnterState(STATE_FAST_MOVE)
 		case evt.Ch == '?':
 			m.SetConsoleMessage(HELP_MESSAGE, true)
 		case evt.Ch == 'c':
@@ -344,4 +349,40 @@ func (s *confirmState) statusLine(m *mainModel) string {
 		confirmMsg = "{y}/{N}"
 	}
 	return s.msg + "  " + confirmMsg
+}
+
+type fastMoveState struct {
+	baseState
+}
+
+func (s *fastMoveState) handleInput(m *mainModel, evt termbox.Event) {
+	handled := true
+	switch evt.Type {
+	case termbox.EventKey:
+		switch evt.Key {
+		case termbox.KeyArrowDown:
+			m.MoveSelectionDown(true)
+		case termbox.KeyArrowLeft:
+			m.MoveSelectionLeft(true)
+		case termbox.KeyArrowRight:
+			m.MoveSelectionRight(true)
+		case termbox.KeyArrowUp:
+			m.MoveSelectionUp(true)
+		case termbox.KeyEsc:
+			m.EnterState(STATE_DEFAULT)
+		default:
+			handled = false
+		}
+		switch evt.Ch {
+		default:
+			if !handled {
+				//Neither of us handled it so defer to base.
+				s.baseState.handleInput(m, evt)
+			}
+		}
+	}
+}
+
+func (s *fastMoveState) statusLine(m *mainModel) string {
+	return STATUS_FAST_MODE
 }
