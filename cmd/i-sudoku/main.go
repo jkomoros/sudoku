@@ -13,10 +13,14 @@ import (
 	"unicode/utf8"
 )
 
-const GRID_INVALID = " INVALID "
-const GRID_VALID = "  VALID  "
-const GRID_SOLVED = "  SOLVED  "
-const GRID_NOT_SOLVED = " UNSOLVED "
+const (
+	GRID_INVALID    = " INVALID "
+	GRID_VALID      = "  VALID  "
+	GRID_SOLVED     = "  SOLVED  "
+	GRID_NOT_SOLVED = " UNSOLVED "
+	FAST_MODE_ON    = "  FAST MODE ON  "
+	FAST_MODE_OFF   = "  FAST MODE OFF "
+)
 
 //A debug override; if true will print a color palette to the screen, wait for
 //a keypress, and then quit. Useful for seeing what different colors are
@@ -161,6 +165,18 @@ func draw(model *mainModel) {
 		fg, bg = bg, fg
 	}
 	for _, ch := range validMsg {
+		termbox.SetCell(x, y, ch, fg, bg)
+		x++
+	}
+
+	fastModeMsg := FAST_MODE_OFF
+	fg = termbox.ColorBlue
+	bg = termbox.ColorBlack
+	if model.fastMode {
+		fastModeMsg = FAST_MODE_ON
+		fg, bg = bg, fg
+	}
+	for _, ch := range fastModeMsg {
 		termbox.SetCell(x, y, ch, fg, bg)
 		x++
 	}
