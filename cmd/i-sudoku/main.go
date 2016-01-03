@@ -102,8 +102,6 @@ func drawGrid(y int, model *mainModel) (endY int) {
 	var x int
 	grid := model.grid
 
-	lines := strings.Split(grid.Diagram(true), "\n")
-
 	fg := termbox.ColorBlack
 	bg := termbox.ColorGreen
 
@@ -154,7 +152,7 @@ func drawGrid(y int, model *mainModel) (endY int) {
 	//Correct the selected coordinate for the offset of the grid from the top.
 	selectedLeft += gridTop
 	selectedTop += gridLeft
-	for _, line := range lines {
+	for _, line := range strings.Split(grid.Diagram(true), "\n") {
 		//Grid starts at 1 cell over from left edge
 		x = gridLeft
 		//The first number in range will be byte offset, but for some items like the bullet, it's two bytes.
