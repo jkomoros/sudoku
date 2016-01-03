@@ -9,6 +9,7 @@ import (
 	"github.com/jkomoros/sudoku"
 	"github.com/nsf/termbox-go"
 	"log"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -100,8 +101,33 @@ func drawColorPalette() {
 func drawGrid(y int, model *mainModel) (endY int) {
 	var x int
 	grid := model.grid
+
+	lines := strings.Split(grid.Diagram(true), "\n")
+
+	fg := termbox.ColorBlack
+	bg := termbox.ColorGreen
+
+	for i := 0; i < sudoku.DIM; i++ {
+
+		cellLeft, _, _, _ := grid.Cell(0, i).DiagramExtents()
+		//Pad until we get to the start of this cell area
+		for x < cellLeft {
+			termbox.SetCell(x, y, '|', fg, bg)
+			x++
+		}
+		for _, ch := range " " + strconv.Itoa(i) + " " {
+			termbox.SetCell(x, y, ch, fg, bg)
+			x++
+		}
+	}
+
+	y++
+
+	//TODO: I'm pretty sure top/left are reversed
 	selectedTop, selectedLeft, selectedHeight, selectedWidth := model.Selected().DiagramExtents()
-	for _, line := range strings.Split(grid.Diagram(true), "\n") {
+	//Correct the selected coordinate for the offset of the grid from the top.
+	selectedLeft += y
+	for _, line := range lines {
 		x = 0
 		//The first number in range will be byte offset, but for some items like the bullet, it's two bytes.
 		//But what we care about is that each item is a character.
