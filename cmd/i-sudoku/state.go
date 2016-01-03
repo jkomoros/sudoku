@@ -165,7 +165,7 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 			showHint(m)
 		case evt.Ch == 'f':
 			m.fastMode = !m.fastMode
-		case evt.Ch == '?':
+		case evt.Ch == '?', evt.Ch == '/':
 			m.SetConsoleMessage(HELP_MESSAGE, true)
 		case evt.Ch == '+', evt.Ch == '=':
 			m.FillSelectedWithLegalMarks()
