@@ -243,3 +243,11 @@ func (m *mainModel) ToggleSelectedMark(num int) {
 	}
 	m.Selected().SetMark(num, !m.Selected().Mark(num))
 }
+
+func (m *mainModel) FillSelectedWithLegalMarks() {
+	m.EnsureSelected()
+	m.Selected().ResetMarks()
+	for _, num := range m.Selected().Possibilities() {
+		m.Selected().SetMark(num, true)
+	}
+}
