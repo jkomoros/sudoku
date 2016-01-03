@@ -109,6 +109,7 @@ func drawGrid(y int, model *mainModel) (endY int) {
 
 	//The column where the grid starts
 	gridLeft := 1
+	gridTop := 1
 
 	termbox.SetCell(0, y, ' ', fg, bg)
 	x++
@@ -130,10 +131,28 @@ func drawGrid(y int, model *mainModel) (endY int) {
 
 	y++
 
+	//Draw diagram down left rail
+	x = 0
+	tempY := y
+	for i := 0; i < sudoku.DIM; i++ {
+
+		_, cellTop, _, _ := grid.Cell(i, 0).DiagramExtents()
+		cellTop += gridTop
+		//Pad until we get to the start of this cell area
+		for tempY < cellTop {
+			termbox.SetCell(x, tempY, '-', fg, bg)
+			tempY++
+		}
+		for _, ch := range " " + strconv.Itoa(i) + " " {
+			termbox.SetCell(x, tempY, ch, fg, bg)
+			tempY++
+		}
+	}
+
 	//TODO: I'm pretty sure top/left are reversed
 	selectedTop, selectedLeft, selectedHeight, selectedWidth := model.Selected().DiagramExtents()
 	//Correct the selected coordinate for the offset of the grid from the top.
-	selectedLeft += y
+	selectedLeft += gridTop
 	selectedTop += gridLeft
 	for _, line := range lines {
 		//Grid starts at 1 cell over from left edge
