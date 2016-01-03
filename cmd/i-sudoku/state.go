@@ -19,6 +19,7 @@ const (
 	MARKS_MODE_FAIL_LOCKED   = "Can't enter mark mode on a cell that's locked."
 	MARKS_MODE_FAIL_NUMBER   = "Can't enter mark mode on a cell that has a filled number."
 	DEFAULT_MODE_FAIL_LOCKED = "Can't enter a number in a locked cell."
+	FAST_MODE_NO_OPEN_CELLS  = "Can't fast move: no more open cells in that direction"
 	HELP_MESSAGE             = `The following commands are also available on this screen:
 {c} to enter command mode to do things like quit and load a new puzzle
 {f} to enter fast move mode, allowing you to skip over locked cells

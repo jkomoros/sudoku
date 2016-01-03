@@ -110,6 +110,7 @@ func (m *mainModel) MoveSelectionLeft(fast bool) {
 			if c == 0 {
 				//We're at the end and didn't find anything.
 				//guess there's nothing to find.
+				m.SetConsoleMessage(FAST_MODE_NO_OPEN_CELLS, true)
 				return
 			}
 			continue
@@ -132,6 +133,7 @@ func (m *mainModel) MoveSelectionRight(fast bool) {
 			if c == sudoku.DIM-1 {
 				//We're at the end and didn't find anything.
 				//guess there's nothing to find.
+				m.SetConsoleMessage(FAST_MODE_NO_OPEN_CELLS, true)
 				return
 			}
 			continue
@@ -154,6 +156,7 @@ func (m *mainModel) MoveSelectionUp(fast bool) {
 			if r == 0 {
 				//We're at the end and didn't find anything.
 				//guess there's nothing to find.
+				m.SetConsoleMessage(FAST_MODE_NO_OPEN_CELLS, true)
 				return
 			}
 			continue
@@ -176,6 +179,7 @@ func (m *mainModel) MoveSelectionDown(fast bool) {
 			if r == sudoku.DIM-1 {
 				//We're at the end and didn't find anything.
 				//guess there's nothing to find.
+				m.SetConsoleMessage(FAST_MODE_NO_OPEN_CELLS, true)
 				return
 			}
 			continue
