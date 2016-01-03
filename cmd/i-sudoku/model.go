@@ -205,6 +205,7 @@ func (m *mainModel) NewGrid() {
 func (m *mainModel) SetSelectedNumber(num int) {
 	m.EnsureSelected()
 	if m.Selected().Locked() {
+		m.SetConsoleMessage(DEFAULT_MODE_FAIL_LOCKED, true)
 		return
 	}
 

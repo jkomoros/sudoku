@@ -16,9 +16,10 @@ var (
 )
 
 const (
-	MARKS_MODE_FAIL_LOCKED = "Can't enter mark mode on a cell that's locked."
-	MARKS_MODE_FAIL_NUMBER = "Can't enter mark mode on a cell that has a filled number."
-	HELP_MESSAGE           = `The following commands are also available on this screen:
+	MARKS_MODE_FAIL_LOCKED   = "Can't enter mark mode on a cell that's locked."
+	MARKS_MODE_FAIL_NUMBER   = "Can't enter mark mode on a cell that has a filled number."
+	DEFAULT_MODE_FAIL_LOCKED = "Can't enter a number in a locked cell."
+	HELP_MESSAGE             = `The following commands are also available on this screen:
 {c} to enter command mode to do things like quit and load a new puzzle
 {f} to enter fast move mode, allowing you to skip over locked cells
 {h} to get a hint`
