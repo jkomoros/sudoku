@@ -153,6 +153,18 @@ func TestDefaultState(t *testing.T) {
 	}
 }
 
+func TestHintOnSolvedGrid(t *testing.T) {
+	//This used to crash before we fixed it, so adding a regression test.
+	model := newModel()
+	model.grid = sudoku.NewGrid()
+	model.grid.Fill()
+
+	showHint(model)
+
+	//If we didn't crash, we're good.
+
+}
+
 func TestEnterMarksState(t *testing.T) {
 	model := newModel()
 	//Add empty grid.
