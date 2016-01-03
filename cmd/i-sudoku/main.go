@@ -97,19 +97,10 @@ func drawColorPalette() {
 	termbox.Flush()
 }
 
-func draw(model *mainModel) {
-
-	clearScreen()
-
+func drawGrid(y int, model *mainModel) (endY int) {
+	var x int
 	grid := model.grid
-
 	selectedTop, selectedLeft, selectedHeight, selectedWidth := model.Selected().DiagramExtents()
-
-	width, _ := termbox.Size()
-
-	x := 0
-	y := 0
-
 	for _, line := range strings.Split(grid.Diagram(true), "\n") {
 		x = 0
 		//The first number in range will be byte offset, but for some items like the bullet, it's two bytes.
@@ -141,8 +132,14 @@ func draw(model *mainModel) {
 		}
 		y++
 	}
+	//The last loop added one extra to y.
+	y--
+	return y
+}
 
-	x = 0
+func drawToggleLine(y int, model *mainModel) (newY int) {
+	x := 0
+	grid := model.grid
 	solvedMsg := GRID_NOT_SOLVED
 	fg := termbox.ColorBlue
 	bg := termbox.ColorBlack
@@ -180,10 +177,12 @@ func draw(model *mainModel) {
 		termbox.SetCell(x, y, ch, fg, bg)
 		x++
 	}
+	return y
+}
 
-	y++
-
-	x = 0
+func drawStatusLine(y int, model *mainModel) (newY int) {
+	x := 0
+	var fg termbox.Attribute
 	underlined := false
 	for _, ch := range ">>> " + model.StatusLine() {
 		//The ( and ) are non-printing control characters
@@ -194,7 +193,7 @@ func draw(model *mainModel) {
 			underlined = false
 			continue
 		}
-		fg := termbox.ColorBlack
+		fg = termbox.ColorBlack
 		if underlined {
 			fg = fg | termbox.AttrUnderline | termbox.AttrBold
 		}
@@ -203,17 +202,25 @@ func draw(model *mainModel) {
 		x++
 	}
 
+	width, _ := termbox.Size()
+
 	for x < width {
 		termbox.SetCell(x, y, ' ', fg, termbox.ColorWhite)
 		x++
 	}
+	return y
+}
 
-	underlined = false
+func drawConsole(y int, model *mainModel) (newY int) {
+
+	x := 0
+
+	underlined := false
 
 	splitMessage := strings.Split(model.consoleMessage, "\n")
 
 	for _, line := range splitMessage {
-		y++
+
 		x = 0
 		for _, ch := range line {
 			if ch == '{' {
@@ -230,7 +237,26 @@ func draw(model *mainModel) {
 			termbox.SetCell(x, y, ch, fg, termbox.ColorBlack)
 			x++
 		}
+		y++
 	}
+	//y is one too many
+	y--
+	return y
+}
+
+func draw(model *mainModel) {
+
+	clearScreen()
+
+	y := 0
+
+	y = drawGrid(y, model)
+	y++
+	y = drawToggleLine(y, model)
+	y++
+	y = drawStatusLine(y, model)
+	y++
+	y = drawConsole(y, model)
 
 	termbox.Flush()
 }
