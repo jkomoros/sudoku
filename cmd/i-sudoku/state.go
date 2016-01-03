@@ -22,7 +22,7 @@ const (
 	HELP_MESSAGE             = `The following commands are also available on this screen:
 {c} to enter command mode to do things like quit and load a new puzzle
 {h} to get a hint
-{+} to set the selected cell's marks to all legal marks
+{+} or {=} to set the selected cell's marks to all legal marks
 {m} to enter mark mode on the cell, making it faster to enter marks
 {f} to toggle fast move mode, allowing you to skip over locked cells`
 	STATUS_DEFAULT         = "{→,←,↓,↑} to move cells, {0-9} to enter number, {Shift + 0-9} to toggle marks, {?} to list other commands"
@@ -166,7 +166,7 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 			m.fastMode = !m.fastMode
 		case evt.Ch == '?':
 			m.SetConsoleMessage(HELP_MESSAGE, true)
-		case evt.Ch == '+':
+		case evt.Ch == '+', evt.Ch == '=':
 			m.FillSelectedWithLegalMarks()
 		case evt.Ch == 'c':
 			m.EnterState(STATE_COMMAND)
