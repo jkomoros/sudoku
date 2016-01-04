@@ -105,6 +105,13 @@ func drawGrid(y int, model *mainModel) (endY int) {
 	fg := termbox.ColorBlack
 	bg := termbox.ColorGreen
 
+	//TODO: make these colors match the mode colors
+	if model.grid.Invalid() {
+		bg = termbox.ColorRed
+	} else if model.grid.Solved() {
+		bg = termbox.ColorYellow
+	}
+
 	//The column where the grid starts
 	gridLeft := 1
 	gridTop := 1
@@ -147,6 +154,8 @@ func drawGrid(y int, model *mainModel) (endY int) {
 		}
 	}
 
+	fg, bg = bg, fg
+
 	//TODO: I'm pretty sure top/left are reversed
 	selectedTop, selectedLeft, selectedHeight, selectedWidth := model.Selected().DiagramExtents()
 	//Correct the selected coordinate for the offset of the grid from the top.
@@ -159,7 +168,7 @@ func drawGrid(y int, model *mainModel) (endY int) {
 		//But what we care about is that each item is a character.
 		for _, ch := range line {
 
-			defaultColor := termbox.ColorGreen
+			defaultColor := fg
 
 			numberRune, _ := utf8.DecodeRuneInString(sudoku.DIAGRAM_NUMBER)
 			lockedRune, _ := utf8.DecodeRuneInString(sudoku.DIAGRAM_LOCKED)
@@ -172,8 +181,7 @@ func drawGrid(y int, model *mainModel) (endY int) {
 				defaultColor = termbox.ColorWhite | termbox.AttrBold
 			}
 
-			backgroundColor := termbox.ColorDefault
-
+			backgroundColor := bg
 			if x >= selectedTop && x < (selectedTop+selectedHeight) && y >= selectedLeft && y < (selectedLeft+selectedWidth) {
 				//We're on the selected cell
 				backgroundColor = 0xf0
