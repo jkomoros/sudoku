@@ -1,7 +1,6 @@
 package sudoku
 
 import (
-	"log"
 	"reflect"
 	"strconv"
 	"strings"

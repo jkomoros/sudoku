@@ -74,7 +74,7 @@ func TestHintDirections(t *testing.T) {
 
 	descriptions := strings.Join(shortSolveDirections.Description(), " ")
 
-	shortGolden := "Based on the other numbers you've entered, this cell can only be a 4. How do we know that? We put 4 in cell (2,3) because 4 is required in the 2 row, and 3 is the only column it fits."
+	shortGolden := "Based on the other numbers you've entered, (2,3) can only be a 4. How do we know that? We put 4 in cell (2,3) because 4 is required in the 2 row, and 3 is the only column it fits."
 
 	if descriptions != shortGolden {
 		t.Error("Got wrong description for hint. Got", descriptions, "wanted", shortGolden)
@@ -127,7 +127,7 @@ func TestHintDirections(t *testing.T) {
 
 	descriptions = strings.Join(multiStepSolveDirections.Description(), " ")
 
-	longGolden := "Based on the other numbers you've entered, this cell can only be a 4. How do we know that? We can't fill any cells right away so first we need to cull some possibilities. First, we remove the possibilities 4 and 5 from cells (2,3) and (2,3) because 4 and 5 are only possible in (3,4) and (4,5), which means that they can't be in any other cell in block 1. Next, we remove the possibilities 4 and 5 from cells (3,2) and (3,2) because 4 and 5 are only possible in (5,5) and (4,6), which means that they can't be in any other cell in block 3. Finally, we put 4 in cell (2,3) because 4 is required in the 2 row, and 3 is the only column it fits."
+	longGolden := "Based on the other numbers you've entered, (2,3) can only be a 4. How do we know that? We can't fill any cells right away so first we need to cull some possibilities. First, we remove the possibilities 4 and 5 from cells (2,3) and (2,3) because 4 and 5 are only possible in (3,4) and (4,5), which means that they can't be in any other cell in block 1. Next, we remove the possibilities 4 and 5 from cells (3,2) and (3,2) because 4 and 5 are only possible in (5,5) and (4,6), which means that they can't be in any other cell in block 3. Finally, we put 4 in cell (2,3) because 4 is required in the 2 row, and 3 is the only column it fits."
 
 	if descriptions != longGolden {
 		t.Error("Got wrong description for hint. Got", descriptions, "wanted", longGolden)
