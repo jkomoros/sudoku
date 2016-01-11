@@ -146,13 +146,13 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 	case termbox.EventKey:
 		switch evt.Key {
 		case termbox.KeyArrowDown:
-			m.MoveSelectionDown(m.toggles[TOGGLE_FAST_MODE].Value())
+			m.MoveSelectionDown(m.FastMode())
 		case termbox.KeyArrowLeft:
-			m.MoveSelectionLeft(m.toggles[TOGGLE_FAST_MODE].Value())
+			m.MoveSelectionLeft(m.FastMode())
 		case termbox.KeyArrowRight:
-			m.MoveSelectionRight(m.toggles[TOGGLE_FAST_MODE].Value())
+			m.MoveSelectionRight(m.FastMode())
 		case termbox.KeyArrowUp:
-			m.MoveSelectionUp(m.toggles[TOGGLE_FAST_MODE].Value())
+			m.MoveSelectionUp(m.FastMode())
 		case termbox.KeyEsc:
 			m.ClearConsole()
 		case termbox.KeyEnter:
@@ -164,8 +164,7 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 		case evt.Ch == 'h':
 			showHint(m)
 		case evt.Ch == 'f':
-			//TODO: this should be a model mutator method
-			m.toggles[TOGGLE_FAST_MODE].Toggle()
+			m.ToggleFastMode()
 		case evt.Ch == '?', evt.Ch == '/':
 			m.SetConsoleMessage(HELP_MESSAGE, true)
 		case evt.Ch == '+', evt.Ch == '=':

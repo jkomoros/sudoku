@@ -251,6 +251,14 @@ func (m *mainModel) MoveSelectionDown(fast bool) {
 	}
 }
 
+func (m *mainModel) FastMode() bool {
+	return m.toggles[TOGGLE_FAST_MODE].Value()
+}
+
+func (m *mainModel) ToggleFastMode() {
+	m.toggles[TOGGLE_FAST_MODE].Toggle()
+}
+
 func (m *mainModel) EnsureGrid() {
 	if m.grid == nil {
 		m.NewGrid()
