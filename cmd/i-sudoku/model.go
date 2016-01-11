@@ -3,13 +3,13 @@ package main
 import (
 	"github.com/jkomoros/sudoku"
 	"github.com/mitchellh/go-wordwrap"
+	"github.com/nsf/termbox-go"
 )
 
 type mainModel struct {
 	grid     *sudoku.Grid
 	selected *sudoku.Cell
 	state    InputState
-	fastMode bool
 	//The size of the console output. Not used for much.
 	outputWidth    int
 	lastShownHint  *sudoku.SolveDirections
@@ -18,14 +18,75 @@ type mainModel struct {
 	consoleMessageShort bool
 	//If exitNow is flipped to true, we will quit at next turn of event loop.
 	exitNow bool
+	toggles []toggle
+}
+
+const (
+	TOGGLE_SOLVED = iota
+	TOGGLE_INVALID
+	TOGGLE_FAST_MODE
+)
+
+type toggle struct {
+	Value     func() bool
+	Toggle    func()
+	OnText    string
+	OffText   string
+	GridColor termbox.Attribute
 }
 
 func newModel() *mainModel {
 	model := &mainModel{
 		state: STATE_DEFAULT,
 	}
+	model.setUpToggles()
 	model.EnsureSelected()
 	return model
+}
+
+func (m *mainModel) setUpToggles() {
+
+	//State variable for the closure
+	var fastMode bool
+
+	m.toggles = []toggle{
+		//Solved
+		{
+			func() bool {
+				return m.grid.Solved()
+			},
+			func() {
+				//Do nothing; read only
+			},
+			"  SOLVED  ",
+			" UNSOLVED ",
+			termbox.ColorYellow,
+		},
+		//invalid
+		{
+			func() bool {
+				return m.grid.Invalid()
+			},
+			func() {
+				//Read only
+			},
+			" INVALID ",
+			"  VALID  ",
+			termbox.ColorRed,
+		},
+		//Fast mode
+		{
+			func() bool {
+				return fastMode
+			},
+			func() {
+				fastMode = !fastMode
+			},
+			"  FAST MODE  ",
+			"             ",
+			termbox.ColorBlue,
+		},
+	}
 }
 
 //EnterState attempts to set the model to the given state. The state object is

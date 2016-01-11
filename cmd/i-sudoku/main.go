@@ -14,15 +14,6 @@ import (
 	"unicode/utf8"
 )
 
-const (
-	GRID_INVALID    = " INVALID "
-	GRID_VALID      = "  VALID  "
-	GRID_SOLVED     = "  SOLVED  "
-	GRID_NOT_SOLVED = " UNSOLVED "
-	FAST_MODE_ON    = "  FAST MODE  "
-	FAST_MODE_OFF   = "             "
-)
-
 //A debug override; if true will print a color palette to the screen, wait for
 //a keypress, and then quit. Useful for seeing what different colors are
 //available to use.
@@ -199,43 +190,19 @@ func drawGrid(y int, model *mainModel) (endY int) {
 
 func drawToggleLine(y int, model *mainModel) (newY int) {
 	x := 0
-	grid := model.grid
-	solvedMsg := GRID_NOT_SOLVED
-	fg := termbox.ColorBlue
-	bg := termbox.ColorBlack
-	if grid.Solved() {
-		solvedMsg = GRID_SOLVED
-		fg, bg = bg, fg
-	}
 
-	for _, ch := range solvedMsg {
-		termbox.SetCell(x, y, ch, fg, bg)
-		x++
-	}
-
-	//don't reset x; this next message should go to the right.
-	validMsg := GRID_VALID
-	fg = termbox.ColorBlue
-	bg = termbox.ColorBlack
-	if grid.Invalid() {
-		validMsg = GRID_INVALID
-		fg, bg = bg, fg
-	}
-	for _, ch := range validMsg {
-		termbox.SetCell(x, y, ch, fg, bg)
-		x++
-	}
-
-	fastModeMsg := FAST_MODE_OFF
-	fg = termbox.ColorBlue
-	bg = termbox.ColorBlack
-	if model.fastMode {
-		fastModeMsg = FAST_MODE_ON
-		fg, bg = bg, fg
-	}
-	for _, ch := range fastModeMsg {
-		termbox.SetCell(x, y, ch, fg, bg)
-		x++
+	for _, toggle := range model.toggles {
+		msg := toggle.OffText
+		fg := toggle.GridColor
+		bg := termbox.ColorBlack
+		if toggle.Value() {
+			msg = toggle.OnText
+			fg, bg = bg, fg
+		}
+		for _, ch := range msg {
+			termbox.SetCell(x, y, ch, fg, bg)
+			x++
+		}
 	}
 	return y
 }
