@@ -56,7 +56,7 @@ func main() {
 		}
 	}()
 
-	timeTick := time.Tick(time.Second * 1)
+	timeTick := time.Tick(time.Millisecond * 750)
 
 mainloop:
 	for {
