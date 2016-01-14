@@ -123,12 +123,6 @@ func drawGrid(y int, model *mainModel) (endY int) {
 		}
 	}
 
-	if model.grid.Invalid() {
-		bg = termbox.ColorRed
-	} else if model.grid.Solved() {
-		bg = termbox.ColorYellow
-	}
-
 	//The column where the grid starts
 	gridLeft := 1
 	gridTop := 1
