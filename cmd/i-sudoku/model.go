@@ -25,6 +25,7 @@ const (
 	TOGGLE_SOLVED = iota
 	TOGGLE_INVALID
 	TOGGLE_FAST_MODE
+	TOGGLE_MARK_MODE
 )
 
 type toggle struct {
@@ -48,6 +49,7 @@ func (m *mainModel) setUpToggles() {
 
 	//State variable for the closure
 	var fastMode bool
+	var markMode bool
 
 	m.toggles = []toggle{
 		//Solved
@@ -85,6 +87,18 @@ func (m *mainModel) setUpToggles() {
 			"  FAST MODE  ",
 			"             ",
 			termbox.ColorBlue,
+		},
+		//Mark mode
+		{
+			func() bool {
+				return markMode
+			},
+			func() {
+				markMode = !markMode
+			},
+			" MARKING ",
+			"         ",
+			termbox.ColorCyan,
 		},
 	}
 }
@@ -259,6 +273,14 @@ func (m *mainModel) ToggleFastMode() {
 	m.toggles[TOGGLE_FAST_MODE].Toggle()
 }
 
+func (m *mainModel) MarkMode() bool {
+	return m.toggles[TOGGLE_MARK_MODE].Value()
+}
+
+func (m *mainModel) ToggleMarkMode() {
+	m.toggles[TOGGLE_MARK_MODE].Toggle()
+}
+
 func (m *mainModel) EnsureGrid() {
 	if m.grid == nil {
 		m.NewGrid()
@@ -308,6 +330,11 @@ func (m *mainModel) checkHintDone() {
 func (m *mainModel) ToggleSelectedMark(num int) {
 	m.EnsureSelected()
 	if m.Selected().Locked() {
+		m.SetConsoleMessage(MARKS_MODE_FAIL_LOCKED, true)
+		return
+	}
+	if m.Selected().Number() != 0 {
+		m.SetConsoleMessage(MARKS_MODE_FAIL_NUMBER, true)
 		return
 	}
 	m.Selected().SetMark(num, !m.Selected().Mark(num))

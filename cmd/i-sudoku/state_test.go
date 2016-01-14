@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/jkomoros/sudoku"
 	"github.com/nsf/termbox-go"
-	"reflect"
 	"strconv"
 	"testing"
 	"unicode/utf8"
@@ -172,24 +171,13 @@ func TestEnterMarksState(t *testing.T) {
 	model.SetSelected(nil)
 	model.EnsureSelected()
 
-	model.EnterState(STATE_ENTER_MARKS)
+	model.ToggleMarkMode()
 
-	if model.state != STATE_ENTER_MARKS {
+	if !model.MarkMode() {
 		t.Error("Failed to enter marks state")
-	}
-	if STATE_ENTER_MARKS.statusLine(model) != STATUS_MARKING+"[]"+STATUS_MARKING_POSTFIX {
-		t.Error("In mark mode with no marks, didn't get expected", model.StatusLine())
 	}
 	sendNumberEvent(model, 1)
 	sendNumberEvent(model, 2)
-	if STATE_ENTER_MARKS.statusLine(model) != STATUS_MARKING+"[1 2]"+STATUS_MARKING_POSTFIX {
-		t.Error("In makr mode with two marks, didn't get expected", model.StatusLine())
-	}
-	STATE_ENTER_MARKS.commitMarks(model)
-
-	if model.state != STATE_DEFAULT {
-		t.Error("Didn't go back to default state after commiting marks.")
-	}
 
 	if model.Selected().Number() != 0 {
 		t.Error("InputNumber in mark mode set the number", model.Selected())
@@ -204,55 +192,35 @@ func TestEnterMarksState(t *testing.T) {
 	}
 
 	model.MoveSelectionRight(false)
-
-	model.EnterState(STATE_ENTER_MARKS)
-	sendNumberEvent(model, 1)
-	sendNumberEvent(model, 2)
-	sendKeyEvent(model, termbox.KeyEsc)
-	if model.exitNow {
-		t.Error("ModeInputEsc in mark enter state DID tell us to quit")
-	}
-	//reest
-	model.exitNow = false
-
-	if model.state != STATE_DEFAULT {
-		t.Error("Hitting esc in enter marks state didn't go back to esc")
-	}
-
-	if model.Selected().Mark(1) || model.Selected().Mark(2) {
-		t.Error("InputNumber in canceled mark mode still set marks")
-	}
-
-	model.EnterState(STATE_ENTER_MARKS)
-	model.MoveSelectionRight(false)
-	if model.state == STATE_ENTER_MARKS {
-		t.Error("Moving selection right didn't exit mark mode.")
+	if !model.MarkMode() {
+		t.Error("Moving selection right DID exit mark mode.")
 	}
 
 	//Make sure that enter mark mode doesn't happen if the cell is locked or filled.
 
 	model.MoveSelectionRight(false)
 	model.Selected().Lock()
-	model.EnterState(STATE_ENTER_MARKS)
 
-	if model.state == STATE_ENTER_MARKS {
-		t.Error("Were allowed to enter mark mode even though cell was locked.")
+	model.ToggleSelectedMark(1)
+
+	if model.Selected().Mark(1) {
+		t.Error("Toggled mark on locked cell")
 	}
 
 	if model.consoleMessage != MARKS_MODE_FAIL_LOCKED {
-		t.Error("Couldn't start marks mode but didn't get message in console")
+		t.Error("Trying to mark locked cell didn't console message")
 	}
 
 	model.Selected().Unlock()
 	model.Selected().SetNumber(1)
-	model.EnterState(STATE_ENTER_MARKS)
+	model.ToggleSelectedMark(1)
 
-	if model.state == STATE_ENTER_MARKS {
-		t.Error("We were allowed to enter mark mode even though cell had a number in it.")
+	if model.Selected().Mark(1) {
+		t.Error("Toggled mark on filled cell")
 	}
 
 	if model.consoleMessage != MARKS_MODE_FAIL_NUMBER {
-		t.Error("Couldn't start marks mode but didn't get message in console")
+		t.Error("Trying to mark filled cell didn't console message")
 	}
 
 }
@@ -316,22 +284,6 @@ func TestCommandState(t *testing.T) {
 		t.Error("'Esc' in command state didn't go back to default mode")
 
 	}
-}
-
-func TestCleanMarkList(t *testing.T) {
-	cleanMarkTest(t, []int{1, 2, 3}, []int{1, 2, 3})
-	cleanMarkTest(t, []int{1, 1}, []int{})
-	cleanMarkTest(t, []int{1, 1, 1}, []int{1})
-	cleanMarkTest(t, []int{1, 2, 3, 4, 2, 1, 5}, []int{3, 4, 5})
-}
-
-func cleanMarkTest(t *testing.T, input []int, expected []int) {
-	result := cleanMarkList(input)
-
-	if !reflect.DeepEqual(result, expected) {
-		t.Error("Got wrong result for clean marks input:", input, "expected", expected, "got", result)
-	}
-
 }
 
 func TestConfirmState(t *testing.T) {
