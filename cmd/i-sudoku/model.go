@@ -24,8 +24,8 @@ type mainModel struct {
 const (
 	TOGGLE_SOLVED = iota
 	TOGGLE_INVALID
-	TOGGLE_FAST_MODE
 	TOGGLE_MARK_MODE
+	TOGGLE_FAST_MODE
 )
 
 type toggle struct {
@@ -76,18 +76,6 @@ func (m *mainModel) setUpToggles() {
 			"  VALID  ",
 			termbox.ColorRed,
 		},
-		//Fast mode
-		{
-			func() bool {
-				return fastMode
-			},
-			func() {
-				fastMode = !fastMode
-			},
-			"  FAST MODE  ",
-			"             ",
-			termbox.ColorBlue,
-		},
 		//Mark mode
 		{
 			func() bool {
@@ -99,6 +87,18 @@ func (m *mainModel) setUpToggles() {
 			" MARKING ",
 			"         ",
 			termbox.ColorCyan,
+		},
+		//Fast mode
+		{
+			func() bool {
+				return fastMode
+			},
+			func() {
+				fastMode = !fastMode
+			},
+			"  FAST MODE  ",
+			"             ",
+			termbox.ColorBlue,
 		},
 	}
 }
