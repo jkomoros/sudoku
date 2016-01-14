@@ -115,12 +115,20 @@ func drawGrid(y int, model *mainModel) (endY int) {
 	fg := termbox.ColorBlack
 	bg := termbox.ColorGreen
 
+	var toggleBackgrounds []termbox.Attribute
+
+	//Figure out which possible colors we should paint the grid in.
 	//Iterate through toggles backwards, since earlier ones have higher preference
 	for i := len(model.toggles) - 1; i >= 0; i-- {
 		toggle := model.toggles[i]
 		if toggle.Value() {
-			bg = toggle.GridColor
+			toggleBackgrounds = append(toggleBackgrounds, toggle.GridColor)
 		}
+	}
+	//Now, as long as there's one possibiltiy, select a grid color to paint.
+	//Otherwise, just leave it as default.
+	if len(toggleBackgrounds) > 0 {
+		bg = toggleBackgrounds[tickCount%len(toggleBackgrounds)]
 	}
 
 	//The column where the grid starts
