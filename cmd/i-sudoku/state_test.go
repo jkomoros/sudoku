@@ -164,6 +164,103 @@ func TestHintOnSolvedGrid(t *testing.T) {
 
 }
 
+func TestSingleMarkEnter(t *testing.T) {
+	model := newModel()
+
+	model.grid = sudoku.NewGrid()
+	model.SetSelected(nil)
+	model.EnsureSelected()
+
+	//Test that it fails on 0 mark cell
+
+	sendKeyEvent(model, termbox.KeyEnter)
+
+	if model.Selected().Number() != 0 {
+		t.Error("Enter on 0 mark cell put a mark")
+	}
+
+	if model.consoleMessage != SINGLE_FILL_MORE_THAN_ONE_MARK {
+		t.Error("Enter on 0 mark cell did not print error message")
+	}
+
+	//Test that it works on one mark cell
+
+	model.Selected().SetMark(1, true)
+
+	sendKeyEvent(model, termbox.KeyEnter)
+
+	if model.Selected().Number() == 0 {
+		t.Error("Enter on 1 mark cell set wrong num marks")
+	}
+
+	if model.Selected().Number() != 1 {
+		t.Error("Enter on 1 mark cell didn't set right mark")
+	}
+
+	//Test that it fails on two mark cells
+
+	model.MoveSelectionRight(false)
+
+	model.Selected().SetMark(1, true)
+	model.Selected().SetMark(2, true)
+
+	sendKeyEvent(model, termbox.KeyEnter)
+
+	if model.Selected().Number() != 0 {
+		t.Error("Enter on 2 mark cell put a mark: ", model.Selected())
+	}
+
+	if model.consoleMessage != SINGLE_FILL_MORE_THAN_ONE_MARK {
+		t.Error("Enter on 2 mark cell did not print error message")
+	}
+
+	//Test that it fails on a locked cell
+
+	model.MoveSelectionRight(false)
+	model.SetSelectedNumber(1)
+	model.Selected().Lock()
+	model.Selected().SetMark(2, true)
+
+	sendKeyEvent(model, termbox.KeyEnter)
+
+	if model.Selected().Number() != 1 {
+		t.Error("Enter on locked cell put a mark")
+	}
+
+	if model.consoleMessage != DEFAULT_MODE_FAIL_LOCKED {
+		t.Error("Enter on locked cell did not print error message:", model.consoleMessage)
+	}
+
+	//Now, test that if you hit enter on a hint cell it fills hint.
+
+	model = newModel()
+
+	sendCharEvent(model, 'h')
+
+	lastStep := model.lastShownHint.Steps[len(model.lastShownHint.Steps)-1]
+	num := lastStep.TargetNums[0]
+
+	markNum := num + 1
+
+	if markNum > sudoku.DIM {
+		markNum = 1
+	}
+
+	//hint cell is now selected.
+
+	model.ToggleSelectedMark(markNum)
+
+	sendKeyEvent(model, termbox.KeyEnter)
+
+	if model.Selected().Number() == markNum {
+		t.Error("Enter on hint cell set single mark num")
+	}
+
+	if model.Selected().Number() != num {
+		t.Error("Enter on hint cell with a single mark did not fill hint.")
+	}
+}
+
 func TestEnterMarksState(t *testing.T) {
 	model := newModel()
 	//Add empty grid.

@@ -13,15 +13,17 @@ var (
 )
 
 const (
-	MARKS_MODE_FAIL_LOCKED   = "Can't enter mark mode on a cell that's locked."
-	MARKS_MODE_FAIL_NUMBER   = "Can't enter mark mode on a cell that has a filled number."
-	DEFAULT_MODE_FAIL_LOCKED = "Can't enter a number in a locked cell."
-	FAST_MODE_NO_OPEN_CELLS  = "Can't fast move: no more open cells in that direction"
-	HELP_MESSAGE             = `The following commands are also available on this screen:
+	MARKS_MODE_FAIL_LOCKED         = "Can't enter mark mode on a cell that's locked."
+	MARKS_MODE_FAIL_NUMBER         = "Can't enter mark mode on a cell that has a filled number."
+	DEFAULT_MODE_FAIL_LOCKED       = "Can't enter a number in a locked cell."
+	FAST_MODE_NO_OPEN_CELLS        = "Can't fast move: no more open cells in that direction"
+	SINGLE_FILL_MORE_THAN_ONE_MARK = "The cell does not have precisely one mark set."
+	HELP_MESSAGE                   = `The following commands are also available on this screen:
 {c} to enter command mode to do things like quit and load a new puzzle
 {h} to get a hint
 {+} or {=} to set the selected cell's marks to all legal marks
 {-} to remove all invalid marks from the selected cell
+{<enter>} to set a cell to the number that is the only current mark
 {m} to enter mark mode, so all numbers entered will toggle marks
 {f} to toggle fast move mode, allowing you to skip over filled cells`
 	STATUS_DEFAULT = "{→,←,↓,↑} to move cells, {0-9} to enter number, {Shift + 0-9} to toggle marks, {?} to list other commands"
@@ -152,7 +154,11 @@ func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
 		case termbox.KeyEsc:
 			m.ClearConsole()
 		case termbox.KeyEnter:
-			s.enterHint(m)
+			if m.lastShownHint != nil {
+				s.enterHint(m)
+			} else {
+				m.SetSelectedToOnlyMark()
+			}
 		default:
 			handled = false
 		}

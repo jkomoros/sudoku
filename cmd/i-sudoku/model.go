@@ -302,6 +302,18 @@ func (m *mainModel) NewGrid() {
 	m.grid.LockFilledCells()
 }
 
+//If the selected cell has only one mark, fill it.
+func (m *mainModel) SetSelectedToOnlyMark() {
+	m.EnsureSelected()
+	marks := m.Selected().Marks()
+	if len(marks) != 1 {
+		m.SetConsoleMessage(SINGLE_FILL_MORE_THAN_ONE_MARK, true)
+		return
+	}
+	//Rely on SetSelectedNumber to barf if it's not allowed for some other reason.
+	m.SetSelectedNumber(marks[0])
+}
+
 func (m *mainModel) SetSelectedNumber(num int) {
 	m.EnsureSelected()
 	if m.Selected().Locked() {
