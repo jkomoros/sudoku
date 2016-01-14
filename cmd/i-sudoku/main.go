@@ -11,6 +11,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -18,6 +19,8 @@ import (
 //a keypress, and then quit. Useful for seeing what different colors are
 //available to use.
 const DRAW_PALETTE = false
+
+var tickCount int
 
 func main() {
 
@@ -44,13 +47,27 @@ func main() {
 
 	draw(model)
 
+	eventChan := make(chan termbox.Event, 1)
+	go func() {
+		for {
+			eventChan <- termbox.PollEvent()
+		}
+	}()
+
+	timeTick := time.Tick(time.Second * 1)
+
 mainloop:
 	for {
-		evt := termbox.PollEvent()
-		switch evt.Type {
-		case termbox.EventKey:
-			model.state.handleInput(model, evt)
+		select {
+		case evt := <-eventChan:
+			switch evt.Type {
+			case termbox.EventKey:
+				model.state.handleInput(model, evt)
+			}
+		case <-timeTick:
+			tickCount++
 		}
+
 		draw(model)
 		if model.exitNow {
 			break mainloop
