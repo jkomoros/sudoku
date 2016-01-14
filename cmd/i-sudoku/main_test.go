@@ -57,7 +57,7 @@ func TestConsoleMessage(t *testing.T) {
 		t.Fatal("SetConsoleMessage didn't work.")
 	}
 
-	model.EndOfEventLoop()
+	model.WillProcessEvent()
 
 	if model.consoleMessage != "Test" {
 		t.Error("A long lived console message didn't last past event loop.")
@@ -69,7 +69,7 @@ func TestConsoleMessage(t *testing.T) {
 		t.Error("Setting a short console message failed")
 	}
 
-	model.EndOfEventLoop()
+	model.WillProcessEvent()
 
 	if model.consoleMessage != "" {
 		t.Error("A short lived console message wasn't cleared at end of event loop.")

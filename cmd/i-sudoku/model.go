@@ -136,7 +136,11 @@ func (m *mainModel) SetConsoleMessage(msg string, shortLived bool) {
 	m.lastShownHint = nil
 }
 
-func (m *mainModel) EndOfEventLoop() {
+//WillProcessEvent is cleared right before we call handleInput on the current
+//state--that is, right before we process an event. That is a convenient time
+//to clear state and prepare for the next state. This is *not* called before a
+//timer/display tick.
+func (m *mainModel) WillProcessEvent() {
 	if m.consoleMessageShort {
 		m.ClearConsole()
 	}

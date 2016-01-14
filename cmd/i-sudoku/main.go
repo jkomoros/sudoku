@@ -64,6 +64,7 @@ mainloop:
 		case evt := <-eventChan:
 			switch evt.Type {
 			case termbox.EventKey:
+				model.WillProcessEvent()
 				model.state.handleInput(model, evt)
 			}
 		case <-timeTick:
@@ -74,7 +75,6 @@ mainloop:
 		if model.exitNow {
 			break mainloop
 		}
-		model.EndOfEventLoop()
 	}
 }
 
