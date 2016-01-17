@@ -72,33 +72,33 @@ func shiftedNumRuneToNum(ch rune) rune {
 
 type InputState interface {
 	//TODO: doesn't it feel weird that every method takes a main model?
-	handleInput(m *mainController, evt termbox.Event)
-	shouldEnter(m *mainController) bool
-	statusLine(m *mainController) string
-	newCellSelected(m *mainController)
+	handleInput(c *mainController, evt termbox.Event)
+	shouldEnter(c *mainController) bool
+	statusLine(c *mainController) string
+	newCellSelected(c *mainController)
 }
 
 type baseState struct{}
 
-func (s *baseState) handleInput(m *mainController, evt termbox.Event) {
+func (s *baseState) handleInput(c *mainController, evt termbox.Event) {
 	switch evt.Type {
 	case termbox.EventKey:
 		switch evt.Key {
 		case termbox.KeyCtrlC:
-			confirmQuit(m)
+			confirmQuit(c)
 		}
 	}
 }
 
-func (s *baseState) statusLine(m *mainController) string {
+func (s *baseState) statusLine(c *mainController) string {
 	return STATUS_DEFAULT
 }
 
-func (s *baseState) newCellSelected(m *mainController) {
+func (s *baseState) newCellSelected(c *mainController) {
 	//Do nothing by default.
 }
 
-func (s *baseState) shouldEnter(m *mainController) bool {
+func (s *baseState) shouldEnter(c *mainController) bool {
 	return true
 }
 
@@ -106,99 +106,99 @@ type defaultState struct {
 	baseState
 }
 
-func showHint(m *mainController) {
+func showHint(c *mainController) {
 
 	//TODO: shouldn't this be a method on model?  The rule of thumb is no
 	//modifying state in model except in model methods.
-	hint := m.grid.Hint(nil)
+	hint := c.grid.Hint(nil)
 
 	if len(hint.Steps) == 0 {
-		m.SetConsoleMessage("No hint to give.", true)
+		c.SetConsoleMessage("No hint to give.", true)
 		return
 	}
-	m.SetConsoleMessage("{Hint}\n"+strings.Join(hint.Description(), "\n")+"\n\n"+"{ENTER} to accept, {ESC} to ignore", false)
+	c.SetConsoleMessage("{Hint}\n"+strings.Join(hint.Description(), "\n")+"\n\n"+"{ENTER} to accept, {ESC} to ignore", false)
 	//This hast to be after setting console message, since SetConsoleMessage clears the last hint.
-	m.lastShownHint = hint
+	c.lastShownHint = hint
 	lastStep := hint.Steps[len(hint.Steps)-1]
-	m.SetSelected(lastStep.TargetCells[0].InGrid(m.grid))
+	c.SetSelected(lastStep.TargetCells[0].InGrid(c.grid))
 }
 
-func (s *defaultState) enterHint(m *mainController) {
-	if m.lastShownHint == nil {
+func (s *defaultState) enterHint(c *mainController) {
+	if c.lastShownHint == nil {
 		return
 	}
-	lastStep := m.lastShownHint.Steps[len(m.lastShownHint.Steps)-1]
+	lastStep := c.lastShownHint.Steps[len(c.lastShownHint.Steps)-1]
 	cell := lastStep.TargetCells[0]
 	num := lastStep.TargetNums[0]
 
-	m.SetSelected(cell.InGrid(m.grid))
-	m.SetSelectedNumber(num)
+	c.SetSelected(cell.InGrid(c.grid))
+	c.SetSelectedNumber(num)
 
-	m.ClearConsole()
+	c.ClearConsole()
 }
 
-func (s *defaultState) handleInput(m *mainController, evt termbox.Event) {
+func (s *defaultState) handleInput(c *mainController, evt termbox.Event) {
 
 	handled := true
 	switch evt.Type {
 	case termbox.EventKey:
 		switch evt.Key {
 		case termbox.KeyArrowDown:
-			m.MoveSelectionDown(m.FastMode())
+			c.MoveSelectionDown(c.FastMode())
 		case termbox.KeyArrowLeft:
-			m.MoveSelectionLeft(m.FastMode())
+			c.MoveSelectionLeft(c.FastMode())
 		case termbox.KeyArrowRight:
-			m.MoveSelectionRight(m.FastMode())
+			c.MoveSelectionRight(c.FastMode())
 		case termbox.KeyArrowUp:
-			m.MoveSelectionUp(m.FastMode())
+			c.MoveSelectionUp(c.FastMode())
 		case termbox.KeyEsc:
-			m.ClearConsole()
+			c.ClearConsole()
 		case termbox.KeyEnter:
-			if m.lastShownHint != nil {
-				s.enterHint(m)
+			if c.lastShownHint != nil {
+				s.enterHint(c)
 			} else {
-				m.SetSelectedToOnlyMark()
+				c.SetSelectedToOnlyMark()
 			}
 		default:
 			handled = false
 		}
 		switch {
 		case evt.Ch == 'h':
-			showHint(m)
+			showHint(c)
 		case evt.Ch == 'f':
-			m.ToggleFastMode()
+			c.ToggleFastMode()
 		case evt.Ch == '?', evt.Ch == '/':
-			m.SetConsoleMessage(HELP_MESSAGE, true)
+			c.SetConsoleMessage(HELP_MESSAGE, true)
 		case evt.Ch == '+', evt.Ch == '=':
-			m.FillSelectedWithLegalMarks()
+			c.FillSelectedWithLegalMarks()
 		case evt.Ch == '-':
-			m.RemoveInvalidMarksFromSelected()
+			c.RemoveInvalidMarksFromSelected()
 		case evt.Ch == 'c':
-			m.EnterState(STATE_COMMAND)
+			c.EnterState(STATE_COMMAND)
 		case evt.Ch == 'm':
-			m.ToggleMarkMode()
+			c.ToggleMarkMode()
 		case runeIsShiftedNum(evt.Ch):
 			//TODO: ideally Ctrl+Num would work to put in one mark. But termbox doesn't appear to let that work.
 			num, err := strconv.Atoi(strings.Replace(strconv.QuoteRuneToASCII(shiftedNumRuneToNum(evt.Ch)), "'", "", -1))
 			if err != nil {
 				panic(err)
 			}
-			m.ToggleSelectedMark(num)
+			c.ToggleSelectedMark(num)
 		case runeIsNum(evt.Ch):
 			//TODO: this is a seriously gross way of converting a rune to a string.
 			num, err := strconv.Atoi(strings.Replace(strconv.QuoteRuneToASCII(evt.Ch), "'", "", -1))
 			if err != nil {
 				panic(err)
 			}
-			if m.MarkMode() {
-				m.ToggleSelectedMark(num)
+			if c.MarkMode() {
+				c.ToggleSelectedMark(num)
 			} else {
-				m.SetSelectedNumber(num)
+				c.SetSelectedNumber(num)
 			}
 		default:
 			if !handled {
 				//neither handler handled it; defer to base.
-				s.baseState.handleInput(m, evt)
+				s.baseState.handleInput(c, evt)
 			}
 		}
 	}
@@ -208,55 +208,55 @@ type commandState struct {
 	baseState
 }
 
-func confirmQuit(m *mainController) {
-	m.enterConfirmState("Quit? Your progress will be lost.",
+func confirmQuit(c *mainController) {
+	c.enterConfirmState("Quit? Your progress will be lost.",
 		DEFAULT_NO,
 		func() {
-			m.exitNow = true
+			c.exitNow = true
 		},
 		func() {},
 	)
 }
 
-func (s *commandState) handleInput(m *mainController, evt termbox.Event) {
+func (s *commandState) handleInput(c *mainController, evt termbox.Event) {
 	handled := true
 	switch evt.Type {
 	case termbox.EventKey:
 		switch evt.Key {
 		case termbox.KeyEsc:
-			m.EnterState(STATE_DEFAULT)
+			c.EnterState(STATE_DEFAULT)
 		default:
 			handled = false
 		}
 		switch {
 		case evt.Ch == 'q':
-			confirmQuit(m)
+			confirmQuit(c)
 		case evt.Ch == 'n':
-			m.enterConfirmState("Replace grid with a new one? This is a destructive action.",
+			c.enterConfirmState("Replace grid with a new one? This is a destructive action.",
 				DEFAULT_NO,
 				func() {
-					m.NewGrid()
+					c.NewGrid()
 				},
 				func() {},
 			)
 		case evt.Ch == 'r':
-			m.enterConfirmState("Reset? Your progress will be lost.",
+			c.enterConfirmState("Reset? Your progress will be lost.",
 				DEFAULT_NO,
 				func() {
-					m.ResetGrid()
+					c.ResetGrid()
 				},
 				func() {},
 			)
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
-				s.baseState.handleInput(m, evt)
+				s.baseState.handleInput(c, evt)
 			}
 		}
 	}
 }
 
-func (s *commandState) statusLine(m *mainController) string {
+func (s *commandState) statusLine(c *mainController) string {
 	return STATUS_COMMAND
 }
 
@@ -276,7 +276,7 @@ type confirmState struct {
 	baseState
 }
 
-func (s *confirmState) handleInput(m *mainController, evt termbox.Event) {
+func (s *confirmState) handleInput(c *mainController, evt termbox.Event) {
 	handled := true
 	switch evt.Type {
 	case termbox.EventKey:
@@ -285,10 +285,10 @@ func (s *confirmState) handleInput(m *mainController, evt termbox.Event) {
 			switch s.defaultAction {
 			case DEFAULT_YES:
 				s.yesAction()
-				m.EnterState(STATE_DEFAULT)
+				c.EnterState(STATE_DEFAULT)
 			case DEFAULT_NO:
 				s.noAction()
-				m.EnterState(STATE_DEFAULT)
+				c.EnterState(STATE_DEFAULT)
 			case DEFAULT_NONE:
 				//Don't do anything
 			}
@@ -298,20 +298,20 @@ func (s *confirmState) handleInput(m *mainController, evt termbox.Event) {
 		switch evt.Ch {
 		case 'y':
 			s.yesAction()
-			m.EnterState(STATE_DEFAULT)
+			c.EnterState(STATE_DEFAULT)
 		case 'n':
 			s.noAction()
-			m.EnterState(STATE_DEFAULT)
+			c.EnterState(STATE_DEFAULT)
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
-				s.baseState.handleInput(m, evt)
+				s.baseState.handleInput(c, evt)
 			}
 		}
 	}
 }
 
-func (s *confirmState) statusLine(m *mainController) string {
+func (s *confirmState) statusLine(c *mainController) string {
 	confirmMsg := "{y}/{n}"
 	if s.defaultAction == DEFAULT_YES {
 		confirmMsg = "{Y}/{n}"

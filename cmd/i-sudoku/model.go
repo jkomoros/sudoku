@@ -37,12 +37,12 @@ type toggle struct {
 }
 
 func newController() *mainController {
-	model := &mainController{
+	c := &mainController{
 		state: STATE_DEFAULT,
 	}
-	model.setUpToggles()
-	model.EnsureSelected()
-	return model
+	c.setUpToggles()
+	c.EnsureSelected()
+	return c
 }
 
 func (c *mainController) setUpToggles() {
@@ -103,9 +103,9 @@ func (c *mainController) setUpToggles() {
 	}
 }
 
-//EnterState attempts to set the model to the given state. The state object is
-//given a chance to do initalization and potentially cancel the transition,
-//leaving the model in the same state as before.
+//EnterState attempts to set the controller to the given state. The state
+//object is given a chance to do initalization and potentially cancel the
+//transition, leaving the controller in the same state as before.
 func (c *mainController) EnterState(state InputState) {
 	//SetState doesn't do much, it just makes it feel less weird than
 	//STATE.enter(m) (which feels backward)
