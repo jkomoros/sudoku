@@ -101,6 +101,24 @@ func TestConvenienceFuncs(t *testing.T) {
 	}
 }
 
+func TestLoadInto(t *testing.T) {
+	grid := Load(loadTestPuzzle("converter_one_komo.sdk"))
+
+	expected := loadTestPuzzle("converter_one.sdk")
+	if grid.DataString() != expected {
+		t.Error("Loading komo puzzle 1 loaded wrong; got", grid.DataString(), "wanted ", expected)
+	}
+
+	LoadInto(grid, loadTestPuzzle("converter_two_komo.sdk"))
+
+	expected = loadTestPuzzle("converter_two.sdk")
+
+	if grid.DataString() != expected {
+		t.Error("Loading komo puzzle 2 loaded wrong; got", grid.DataString(), "wanted", expected)
+	}
+
+}
+
 func TestFormat(t *testing.T) {
 	result := Format(loadTestPuzzle("converter_one.sdk"))
 	if result != "sdk" {

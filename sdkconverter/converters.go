@@ -86,6 +86,27 @@ func Format(puzzle string) string {
 	return ""
 }
 
+//Load returns a new grid that is loaded up from the provided puzzle string.
+//The format is guessed from the input string. If no valid format is guessed,
+//an empty (non-nil) grid is returned.
+func Load(puzzle string) *sudoku.Grid {
+	grid := sudoku.NewGrid()
+	LoadInto(grid, puzzle)
+	return grid
+}
+
+//LoadInto loads the given puzzle state into the given grid. The format of the
+//puzzle string is guessed. If no valid format can be detected, the grid won't
+//be modified.
+func LoadInto(grid *sudoku.Grid, puzzle string) {
+	formatString := Format(puzzle)
+	converter := Converters[formatString]
+	if converter == nil {
+		return
+	}
+	converter.Load(grid, puzzle)
+}
+
 func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) bool {
 	//TODO: also handle odd things like user-provided marks and other things.
 
