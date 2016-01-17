@@ -75,6 +75,17 @@ func ToOther(format string, sdk string) (other string) {
 	return converter.DataString(grid)
 }
 
+//Format returns the most likely format type for the provided puzzle string,
+//or "" if none are valid.
+func Format(puzzle string) string {
+	for format, converter := range Converters {
+		if converter.Valid(puzzle) {
+			return format
+		}
+	}
+	return ""
+}
+
 func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) bool {
 	//TODO: also handle odd things like user-provided marks and other things.
 

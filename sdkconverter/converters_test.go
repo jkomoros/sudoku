@@ -101,6 +101,21 @@ func TestConvenienceFuncs(t *testing.T) {
 	}
 }
 
+func TestFormat(t *testing.T) {
+	result := Format(loadTestPuzzle("converter_one.sdk"))
+	if result != "sdk" {
+		t.Error("Format guessed wrong format:", result)
+	}
+	result = Format(loadTestPuzzle("converter_one_komo.sdk"))
+	if result != "komo" {
+		t.Error("Format guessed wrong format for komo puzzle: ", result)
+	}
+	result = Format(loadTestPuzzle("invalid_sdk_too_short.sdk"))
+	if result != "" {
+		t.Error("Format guessed wrong format for an unknown puzzle type", result)
+	}
+}
+
 func converterTesterHelper(t *testing.T, testLoad bool, format string, otherFile string, sdkFile string) {
 
 	converter := Converters[format]
