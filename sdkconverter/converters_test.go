@@ -60,6 +60,7 @@ func TestSDKConverterValid(t *testing.T) {
 	validTestHelper(t, "sdk", "sdk_no_sep.sdk", true)
 	validTestHelper(t, "sdk", "invalid_sdk_invalid_char.sdk", false)
 	validTestHelper(t, "sdk", "invalid_sdk_too_short.sdk", false)
+	validTestHelper(t, "sdk", "converter_one_komo.sdk", false)
 }
 
 func validTestHelper(t *testing.T, format string, file string, expected bool) {
