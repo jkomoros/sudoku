@@ -70,7 +70,7 @@ func ToOther(format string, sdk string) (other string) {
 		return ""
 	}
 
-	grid.Load(sdk)
+	grid.LoadSDK(sdk)
 
 	return converter.DataString(grid)
 }
@@ -132,7 +132,7 @@ func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) bool {
 	//We added an extra \n in the last runthrough, remove it.
 	result = strings.TrimSuffix(result, "\n")
 
-	grid.Load(result)
+	grid.LoadSDK(result)
 
 	return true
 }
@@ -205,7 +205,7 @@ func (c *sdkConverter) Load(grid *sudoku.Grid, puzzle string) bool {
 	if !c.Valid(puzzle) {
 		return false
 	}
-	grid.Load(puzzle)
+	grid.LoadSDK(puzzle)
 	return true
 }
 

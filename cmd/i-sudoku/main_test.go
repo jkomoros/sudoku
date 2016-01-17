@@ -145,7 +145,7 @@ func TestMoveSelectionLeft(t *testing.T) {
 
 	//Test fast move
 	newGrid := sudoku.NewGrid()
-	newGrid.Load(FAST_MOVE_TEST_GRID)
+	newGrid.LoadSDK(FAST_MOVE_TEST_GRID)
 	newGrid.LockFilledCells()
 
 	model.grid = newGrid
@@ -191,7 +191,7 @@ func TestMoveSelectionRight(t *testing.T) {
 
 	//Test fast move
 	newGrid := sudoku.NewGrid()
-	newGrid.Load(FAST_MOVE_TEST_GRID)
+	newGrid.LoadSDK(FAST_MOVE_TEST_GRID)
 	newGrid.LockFilledCells()
 
 	model.grid = newGrid
@@ -237,7 +237,7 @@ func TestMoveSelectionUp(t *testing.T) {
 
 	//Test fast move
 	newGrid := sudoku.NewGrid()
-	newGrid.Load(FAST_MOVE_TEST_GRID)
+	newGrid.LoadSDK(FAST_MOVE_TEST_GRID)
 	newGrid.LockFilledCells()
 
 	model.grid = newGrid
@@ -283,7 +283,7 @@ func TestMoveSelectionDown(t *testing.T) {
 
 	//Test fast move
 	newGrid := sudoku.NewGrid()
-	newGrid.Load(FAST_MOVE_TEST_GRID)
+	newGrid.LoadSDK(FAST_MOVE_TEST_GRID)
 	newGrid.LockFilledCells()
 
 	model.grid = newGrid

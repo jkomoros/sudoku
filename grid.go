@@ -153,11 +153,12 @@ func (self *Grid) Done() {
 	returnGrid(self)
 }
 
-//Load takes the string data and parses it into the puzzle. The format is the 'sdk' format:
-//a `.` marks an empty cell, a number denotes a filled cell, and a newline marks a new row.
-//Load also accepts other variations on the sdk format, including one with a `|` between each cell.
+//LoadSDK takes the string data and parses it into the puzzle. The format is
+//the 'sdk' format: a `.` marks an empty cell, a number denotes a filled cell,
+//and an (optional) newline marks a new row. LoadSDK also accepts other
+//variations on the sdk format, including one with a `|` between each cell.
 //For other sudoku formats see the sdkconverter subpackage.
-func (self *Grid) Load(data string) {
+func (self *Grid) LoadSDK(data string) {
 	//All col separators are basically just to make it easier to read. Remove them.
 	data = strings.Replace(data, ALT_COL_SEP, COL_SEP, -1)
 	data = strings.Replace(data, COL_SEP, "", -1)
@@ -177,7 +178,7 @@ func (self *Grid) LoadFromFile(path string) bool {
 	if err != nil {
 		return false
 	}
-	self.Load(string(data))
+	self.LoadSDK(string(data))
 	return true
 }
 
@@ -191,9 +192,9 @@ func (self *Grid) Copy() *Grid {
 
 //Copies the state of the other grid into self, so they look the same.
 func (self *Grid) replace(other *Grid) {
-	self.Load(other.DataString())
+	self.LoadSDK(other.DataString())
 	//Also set excludes
-	for index, _ := range other.cells {
+	for index := range other.cells {
 		otherCell := &other.cells[index]
 		selfCell := otherCell.InGrid(self)
 		//TODO: the fact that I'm reaching into Cell's excludeLock outside of Cell is a Smell.
@@ -282,7 +283,7 @@ func (self *Grid) LockFilledCells() {
 func (self *Grid) Cells() CellSlice {
 	//Returns a CellSlice of all of the cells in order.
 	result := make(CellSlice, len(self.cells))
-	for i, _ := range self.cells {
+	for i := range self.cells {
 		//We don't use the second argument of range because that would be a copy of the cell, not the real one.
 		result[i] = &self.cells[i]
 	}

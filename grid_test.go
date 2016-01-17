@@ -168,7 +168,7 @@ func TestGridCreation(t *testing.T) {
 	rowData := strings.Join(nCopies(cellData, DIM), COL_SEP)
 	data := strings.Join(nCopies(rowData, DIM), ROW_SEP)
 	grid := NewGrid()
-	grid.Load(data)
+	grid.LoadSDK(data)
 	if len(grid.cells) != DIM*DIM {
 		t.Log("Didn't generate enough cells")
 		t.Fail()
@@ -283,7 +283,7 @@ func TestGridCells(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
 
-	grid.Load(TEST_GRID)
+	grid.LoadSDK(TEST_GRID)
 
 	cells := grid.Cells()
 
@@ -317,7 +317,7 @@ func TestGridCells(t *testing.T) {
 func TestGridLoad(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
-	grid.Load(TEST_GRID)
+	grid.LoadSDK(TEST_GRID)
 
 	cell := grid.Cell(0, 0)
 
@@ -574,7 +574,7 @@ func TestTranspose(t *testing.T) {
 
 	grid := NewGrid()
 	defer grid.Done()
-	grid.Load(TEST_GRID)
+	grid.LoadSDK(TEST_GRID)
 	transposedGrid := grid.transpose()
 	defer transposedGrid.Done()
 	if transposedGrid == nil {
@@ -619,7 +619,7 @@ func BenchmarkFill(b *testing.B) {
 func BenchmarkAdvancedSolve(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		grid := NewGrid()
-		grid.Load(ADVANCED_TEST_GRID)
+		grid.LoadSDK(ADVANCED_TEST_GRID)
 		grid.Solve()
 		grid.Done()
 	}
@@ -628,7 +628,7 @@ func BenchmarkAdvancedSolve(b *testing.B) {
 func BenchmarkDifficulty(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		grid := NewGrid()
-		grid.Load(ADVANCED_TEST_GRID)
+		grid.LoadSDK(ADVANCED_TEST_GRID)
 		grid.Difficulty()
 		grid.Done()
 	}
@@ -686,7 +686,7 @@ func TestGridEmpty(t *testing.T) {
 		t.Error("Fresh grid wasn't empty")
 	}
 
-	grid.Load(TEST_GRID)
+	grid.LoadSDK(TEST_GRID)
 
 	if grid.Empty() {
 		t.Error("A filled grid was reported as empty")
@@ -909,7 +909,7 @@ func TestUnlockCells(t *testing.T) {
 
 func TestResetUnlockedCells(t *testing.T) {
 	grid := NewGrid()
-	grid.Load(TEST_GRID)
+	grid.LoadSDK(TEST_GRID)
 	defer grid.Done()
 
 	grid.LockFilledCells()
@@ -935,7 +935,7 @@ func TestResetUnlockedCells(t *testing.T) {
 
 func TestLockFilledCells(t *testing.T) {
 	grid := NewGrid()
-	grid.Load(TEST_GRID)
+	grid.LoadSDK(TEST_GRID)
 	defer grid.Done()
 
 	var lockedCell *Cell

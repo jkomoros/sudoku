@@ -51,7 +51,7 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
 	//Load up a solved grid
-	grid.Load(SOLVED_TEST_GRID)
+	grid.LoadSDK(SOLVED_TEST_GRID)
 	cell := grid.Cell(3, 3)
 	num := cell.Number()
 	cell.SetNumber(0)
@@ -113,7 +113,7 @@ func TestNecessaryInRow(t *testing.T) {
 	//We DON'T call grid.done because we will have poked some unrealistic values into the cells.
 
 	//Load up a solved grid
-	grid.Load(SOLVED_TEST_GRID)
+	grid.LoadSDK(SOLVED_TEST_GRID)
 
 	//We're going to cheat an set up an unrealistic grid.
 
@@ -194,7 +194,7 @@ func TestNecessaryInCol(t *testing.T) {
 	//We DON'T call grid.done because we will have poked some unrealistic values into the cells.
 
 	//Load up a solved grid
-	grid.Load(SOLVED_TEST_GRID)
+	grid.LoadSDK(SOLVED_TEST_GRID)
 
 	//We're going to cheat an set up an unrealistic grid.
 
@@ -275,7 +275,7 @@ func TestNecessaryInBlock(t *testing.T) {
 	//We DON'T call grid.done because we will have poked some unrealistic values into the cells.
 
 	//Load up a solved grid
-	grid.Load(SOLVED_TEST_GRID)
+	grid.LoadSDK(SOLVED_TEST_GRID)
 
 	//We're going to cheat an set up an unrealistic grid.
 

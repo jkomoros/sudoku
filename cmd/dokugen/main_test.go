@@ -276,7 +276,7 @@ func TestSingleGenerate(t *testing.T) {
 	}
 
 	grid := sudoku.NewGrid()
-	grid.Load(output)
+	grid.LoadSDK(output)
 
 	if grid.Invalid() || grid.Empty() {
 		t.Error("Output for single generate was not a valid puzzle", output)

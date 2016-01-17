@@ -276,7 +276,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 		if options.GENERATE {
 			if options.FAKE_GENERATE {
 				grid = sudoku.NewGrid()
-				grid.Load(TEST_GRID)
+				grid.LoadSDK(TEST_GRID)
 			} else {
 				grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.MIN_FILLED_CELLS, options.NO_CACHE, logger)
 			}

@@ -22,7 +22,7 @@ func (self *Grid) Solve() bool {
 	if len(solutions) == 0 {
 		return false
 	}
-	self.Load(solutions[0].DataString())
+	self.LoadSDK(solutions[0].DataString())
 	return true
 }
 

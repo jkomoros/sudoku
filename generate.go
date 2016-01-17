@@ -36,7 +36,7 @@ func (self *Grid) Fill() bool {
 	solutions := self.nOrFewerSolutions(1)
 
 	if len(solutions) != 0 {
-		self.Load(solutions[0].DataString())
+		self.LoadSDK(solutions[0].DataString())
 		return true
 	}
 

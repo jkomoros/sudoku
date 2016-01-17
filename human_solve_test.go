@@ -11,7 +11,7 @@ func BenchmarkHumanSolve(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		grid := NewGrid()
 		defer grid.Done()
-		grid.Load(TEST_GRID)
+		grid.LoadSDK(TEST_GRID)
 		grid.HumanSolve(nil)
 	}
 }
@@ -19,7 +19,7 @@ func BenchmarkHumanSolve(b *testing.B) {
 func TestHumanSolve(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
-	grid.Load(TEST_GRID)
+	grid.LoadSDK(TEST_GRID)
 
 	steps := grid.HumanSolution(nil)
 
@@ -51,7 +51,7 @@ func TestHumanSolve(t *testing.T) {
 func TestHumanSolveOptionsNoGuess(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
-	grid.Load(TEST_GRID)
+	grid.LoadSDK(TEST_GRID)
 
 	options := (&HumanSolveOptions{}).Default()
 	options.TechniquesToUse = Techniques[0:3]
@@ -68,7 +68,7 @@ func TestShortTechniquesToUseHumanSolveOptions(t *testing.T) {
 
 	grid := NewGrid()
 	defer grid.Done()
-	grid.Load(TEST_GRID)
+	grid.LoadSDK(TEST_GRID)
 
 	shortTechniqueOptions := (&HumanSolveOptions{}).Default()
 	shortTechniqueOptions.TechniquesToUse = Techniques[0:5]
@@ -151,7 +151,7 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 func TestTechniquesToUseAfterGuessHumanSolveOptions(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
-	grid.Load(TEST_GRID)
+	grid.LoadSDK(TEST_GRID)
 
 	options := (&HumanSolveOptions{}).Default()
 	options.TechniquesToUse = []SolveTechnique{}
@@ -204,7 +204,7 @@ func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string
 	grid := NewGrid()
 	defer grid.Done()
 
-	grid.Load(TEST_GRID)
+	grid.LoadSDK(TEST_GRID)
 
 	diagram := grid.Diagram(false)
 
@@ -414,7 +414,7 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 func TestPuzzleDifficulty(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
-	grid.Load(TEST_GRID)
+	grid.LoadSDK(TEST_GRID)
 
 	//We use the cheaper one for testing so it completes faster.
 	difficulty := grid.calcluateDifficulty(false)
