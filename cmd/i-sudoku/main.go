@@ -59,7 +59,7 @@ func main() {
 
 	flagSet := flag.CommandLine
 	options := getOptions(flagSet, os.Args[1:], nil)
-	model := makeMainModel(options, os.Stderr)
+	c := makeMainController(options, os.Stderr)
 
 	if err := termbox.Init(); err != nil {
 		log.Fatal("Termbox initialization failed:", err)
@@ -76,17 +76,17 @@ func main() {
 	}
 
 	width, _ := termbox.Size()
-	model.outputWidth = width
+	c.outputWidth = width
 
-	mainLoop(model)
+	mainLoop(c)
 
 }
 
-func makeMainModel(options *appOptions, errOutput io.ReadWriter) *mainController {
+func makeMainController(options *appOptions, errOutput io.ReadWriter) *mainController {
 
 	logger := log.New(errOutput, "", log.LstdFlags)
 
-	model := newController()
+	c := newController()
 
 	if options.START_PUZZLE_FILENAME != "" {
 		puzzleBytes, err := ioutil.ReadFile(options.START_PUZZLE_FILENAME)
@@ -103,18 +103,18 @@ func makeMainModel(options *appOptions, errOutput io.ReadWriter) *mainController
 		//TODO: this logic should all be wrapped in SetGrid logic, since it's
 		//so finicky.
 
-		model.grid = sdkconverter.Load(puzzle)
-		model.grid.LockFilledCells()
-		model.SetSelected(nil)
-		model.EnsureSelected()
+		c.grid = sdkconverter.Load(puzzle)
+		c.grid.LockFilledCells()
+		c.SetSelected(nil)
+		c.EnsureSelected()
 
 	}
 
-	return model
+	return c
 }
 
-func mainLoop(model *mainController) {
-	draw(model)
+func mainLoop(c *mainController) {
+	draw(c)
 
 	eventChan := make(chan termbox.Event, 1)
 	go func() {
@@ -131,15 +131,15 @@ mainloop:
 		case evt := <-eventChan:
 			switch evt.Type {
 			case termbox.EventKey:
-				model.WillProcessEvent()
-				model.state.handleInput(model, evt)
+				c.WillProcessEvent()
+				c.state.handleInput(c, evt)
 			}
 		case <-timeTick:
 			tickCount++
 		}
 
-		draw(model)
-		if model.exitNow {
+		draw(c)
+		if c.exitNow {
 			break mainloop
 		}
 	}

@@ -486,7 +486,7 @@ func TestProvideStarterPuzzle(t *testing.T) {
 
 	errOutput := &bytes.Buffer{}
 
-	model := makeMainModel(options, errOutput)
+	c := makeMainController(options, errOutput)
 
 	errorReaderBytes, _ := ioutil.ReadAll(errOutput)
 
@@ -494,7 +494,7 @@ func TestProvideStarterPuzzle(t *testing.T) {
 
 	goldenPuzzle, _ := ioutil.ReadFile("puzzles/converter_one.sdk")
 
-	if model.grid.DataString() != string(goldenPuzzle) {
+	if c.grid.DataString() != string(goldenPuzzle) {
 		t.Error("Loading a normal puzzle with command line option failed.")
 	}
 
