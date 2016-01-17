@@ -244,7 +244,7 @@ func TestHumanSolveWithGuess(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
 
-	if !grid.LoadFromFile(puzzlePath("harddifficulty.sdk")) {
+	if !grid.LoadSDKFromFile(puzzlePath("harddifficulty.sdk")) {
 		t.Fatal("harddifficulty.sdk wasn't loaded")
 	}
 
@@ -438,7 +438,7 @@ func TestPuzzleDifficulty(t *testing.T) {
 
 func puzzleDifficultyHelper(filename string, t *testing.T) {
 	otherGrid := NewGrid()
-	if !otherGrid.LoadFromFile(puzzlePath(filename)) {
+	if !otherGrid.LoadSDKFromFile(puzzlePath(filename)) {
 		t.Log("Whoops, couldn't load the file to test:", filename)
 		t.Fail()
 	}

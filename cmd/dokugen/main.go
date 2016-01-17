@@ -414,7 +414,7 @@ func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symm
 				//Found a puzzle!
 				grid := sudoku.NewGrid()
 				fullFileName := filepath.Join(directory, file.Name())
-				grid.LoadFromFile(fullFileName)
+				grid.LoadSDKFromFile(fullFileName)
 				os.Remove(fullFileName)
 				return grid
 			}

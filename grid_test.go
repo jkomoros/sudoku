@@ -437,7 +437,7 @@ func TestGridLoad(t *testing.T) {
 func TestAdvancedSolve(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
-	grid.LoadFromFile(puzzlePath("advancedtestgrid.sdk"))
+	grid.LoadSDKFromFile(puzzlePath("advancedtestgrid.sdk"))
 
 	if grid.DataString() != ADVANCED_TEST_GRID {
 		t.Log("Advanced grid didn't survive a roundtrip to DataString")
@@ -537,7 +537,7 @@ func TestMultiSolutions(t *testing.T) {
 		for file, numSolutions := range files {
 
 			grid = NewGrid()
-			grid.LoadFromFile(puzzlePath(file))
+			grid.LoadSDKFromFile(puzzlePath(file))
 
 			//Test num solutions from the beginning.
 			if num := grid.NumSolutions(); num != numSolutions {
@@ -548,7 +548,7 @@ func TestMultiSolutions(t *testing.T) {
 
 			//Get a new version of grid to reset all caches
 			grid = NewGrid()
-			grid.LoadFromFile(puzzlePath(file))
+			grid.LoadSDKFromFile(puzzlePath(file))
 
 			if !grid.HasMultipleSolutions() {
 				t.Fatal("On run", i, "Grid", file, "with multiple solutions was reported as only having one.")
@@ -866,7 +866,7 @@ func puzzlePath(name string) string {
 
 func TestLoadFromFile(t *testing.T) {
 	grid := NewGrid()
-	if !grid.LoadFromFile(puzzlePath("hiddenpair1.sdk")) {
+	if !grid.LoadSDKFromFile(puzzlePath("hiddenpair1.sdk")) {
 		t.Log("Grid loading failed.")
 		t.Fail()
 	}

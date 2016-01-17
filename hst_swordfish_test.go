@@ -11,7 +11,7 @@ func swordfishExampleGrid(t *testing.T) *Grid {
 
 	puzzleName := "swordfish_example.sdk"
 
-	if !grid.LoadFromFile(puzzlePath(puzzleName)) {
+	if !grid.LoadSDKFromFile(puzzlePath(puzzleName)) {
 		t.Fatal("Couldn't load puzzle ", puzzleName)
 	}
 

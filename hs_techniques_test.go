@@ -278,7 +278,7 @@ func humanSolveTechniqueTestHelperStepGenerator(t *testing.T, puzzleName string,
 		grid = options.stepsToCheck.grid
 	} else {
 		grid = NewGrid()
-		if !grid.LoadFromFile(puzzlePath(puzzleName)) {
+		if !grid.LoadSDKFromFile(puzzlePath(puzzleName)) {
 			t.Fatal("Couldn't load puzzle ", puzzleName)
 		}
 	}

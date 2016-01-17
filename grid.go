@@ -171,9 +171,9 @@ func (self *Grid) LoadSDK(data string) {
 	}
 }
 
-//LoadFromFile is a simple convenience wrapper around Load that loads a grid based on the contents
+//LoadSDKFromFile is a simple convenience wrapper around LoadSDK that loads a grid based on the contents
 //of the file at the given path.
-func (self *Grid) LoadFromFile(path string) bool {
+func (self *Grid) LoadSDKFromFile(path string) bool {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return false

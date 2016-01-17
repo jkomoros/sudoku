@@ -243,7 +243,7 @@ func TestChainDissimilarity(t *testing.T) {
 func TestFilledNums(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
-	if !grid.LoadFromFile(puzzlePath("nakedpairblock1.sdk")) {
+	if !grid.LoadSDKFromFile(puzzlePath("nakedpairblock1.sdk")) {
 		t.Fatal("Couldn't load file")
 	}
 

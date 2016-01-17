@@ -7,7 +7,7 @@ import (
 func TestSubsetCellsWithNUniquePossibilities(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
-	if !grid.LoadFromFile(puzzlePath("hiddenpair1_filled.sdk")) {
+	if !grid.LoadSDKFromFile(puzzlePath("hiddenpair1_filled.sdk")) {
 		t.Log("Failed to load hiddenpair1_filled.sdk")
 		t.Fail()
 	}
