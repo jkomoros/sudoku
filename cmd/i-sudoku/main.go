@@ -7,10 +7,15 @@ command-line sudoku game in its own right.
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/jkomoros/sudoku"
+	"github.com/jkomoros/sudoku/sdkconverter"
 	"github.com/nsf/termbox-go"
+	"io"
+	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -24,9 +29,37 @@ const DRAW_PALETTE = false
 
 var tickCount int
 
+type appOptions struct {
+	START_PUZZLE_FILENAME string
+	//accounting
+	flagSet *flag.FlagSet
+}
+
+func defineFlags(options *appOptions) {
+	options.flagSet.StringVar(&options.START_PUZZLE_FILENAME, "p", "", "filename of a puzzle (any format) to start from")
+}
+
+//If it returns true, the program should quit.
+func (o *appOptions) fixUp(errOutput io.ReadWriter) bool {
+	//No processing necessary yet
+	return false
+}
+
+func getOptions(flagSet *flag.FlagSet, flagArguments []string, errOutput io.ReadWriter) *appOptions {
+	options := &appOptions{flagSet: flagSet}
+	defineFlags(options)
+	flagSet.Parse(flagArguments)
+	if options.fixUp(errOutput) {
+		os.Exit(1)
+	}
+	return options
+}
+
 func main() {
 
-	//TODO: should be possible to run it and pass in a puzzle to use.
+	flagSet := flag.CommandLine
+	options := getOptions(flagSet, os.Args[1:], nil)
+	model := makeMainModel(options, os.Stderr)
 
 	if err := termbox.Init(); err != nil {
 		log.Fatal("Termbox initialization failed:", err)
@@ -43,14 +76,40 @@ func main() {
 	}
 
 	width, _ := termbox.Size()
-	model := makeMainModel(width)
+	model.outputWidth = width
+
 	mainLoop(model)
 
 }
 
-func makeMainModel(width int) *mainModel {
+func makeMainModel(options *appOptions, errOutput io.ReadWriter) *mainModel {
+
+	logger := log.New(errOutput, "", log.LstdFlags)
+
 	model := newModel()
-	model.outputWidth = width
+
+	if options.START_PUZZLE_FILENAME != "" {
+		puzzleBytes, err := ioutil.ReadFile(options.START_PUZZLE_FILENAME)
+
+		if err != nil {
+			logger.Fatalln("Invalid file:", err)
+		}
+		puzzle := string(puzzleBytes)
+
+		if sdkconverter.Format(puzzle) == "" {
+			logger.Fatalln("Provided puzzle is in unknown format.")
+		}
+
+		//TODO: this logic should all be wrapped in SetGrid logic, since it's
+		//so finicky.
+
+		model.grid = sdkconverter.Load(puzzle)
+		model.grid.LockFilledCells()
+		model.SetSelected(nil)
+		model.EnsureSelected()
+
+	}
+
 	return model
 }
 

@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
+	"flag"
 	"github.com/jkomoros/sudoku"
+	"io/ioutil"
 	"strings"
 	"testing"
 )
@@ -465,4 +468,39 @@ func TestToggleSelectedMark(t *testing.T) {
 	if model.Selected().Mark(1) {
 		t.Error("ToggleSelectedMark modified a locked cell", lockedCell)
 	}
+}
+
+//Callers should call fixUpOptions after receiving this.
+func getDefaultOptions() *appOptions {
+	options := &appOptions{
+		flagSet: flag.NewFlagSet("main", flag.ExitOnError),
+	}
+	defineFlags(options)
+	options.flagSet.Parse([]string{})
+	return options
+}
+
+func TestProvideStarterPuzzle(t *testing.T) {
+	options := getDefaultOptions()
+	options.START_PUZZLE_FILENAME = "puzzles/converter_one.sdk"
+
+	errOutput := &bytes.Buffer{}
+
+	model := makeMainModel(options, errOutput)
+
+	errorReaderBytes, _ := ioutil.ReadAll(errOutput)
+
+	errMessage := string(errorReaderBytes)
+
+	goldenPuzzle, _ := ioutil.ReadFile("puzzles/converter_one.sdk")
+
+	if model.grid.DataString() != string(goldenPuzzle) {
+		t.Error("Loading a normal puzzle with command line option failed.")
+	}
+
+	if errMessage != "" {
+		t.Error("Got error message on successful read", errMessage)
+	}
+	//TODO: test that an invalid file errors
+	//TODO: test that an invalid puzzle string errors
 }
