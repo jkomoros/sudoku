@@ -16,9 +16,10 @@ import (
 const _KOMO_CELL_RE = `\d!?:?(\[(\d\.)*\d\])?`
 
 type SudokuPuzzleConverter interface {
-	//Load loads the puzzle defined by `puzzle`, in the format tied to this partcular converter,
-	//into the provided grid.
-	Load(grid *sudoku.Grid, puzzle string)
+	//Load loads the puzzle defined by `puzzle`, in the format tied to this
+	//partcular converter, into the provided grid. Returns false if the puzzle
+	//couldn't be loaded (generally because it's invalid)
+	Load(grid *sudoku.Grid, puzzle string) bool
 	//DataString returns the serialization of the provided grid in the format provided by this converter.
 	DataString(grid *sudoku.Grid) string
 	//Valid returns true if the provided string will successfully deserialize
@@ -74,11 +75,11 @@ func ToOther(format string, sdk string) (other string) {
 	return converter.DataString(grid)
 }
 
-func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) {
+func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) bool {
 	//TODO: also handle odd things like user-provided marks and other things.
 
 	if !c.Valid(puzzle) {
-		return
+		return false
 	}
 
 	var result string
@@ -100,6 +101,8 @@ func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) {
 	result = strings.TrimSuffix(result, "\n")
 
 	grid.Load(result)
+
+	return true
 }
 
 func (c *komoConverter) DataString(grid *sudoku.Grid) string {
@@ -166,11 +169,12 @@ func (c *komoConverter) Valid(puzzle string) bool {
 	return true
 }
 
-func (c *sdkConverter) Load(grid *sudoku.Grid, puzzle string) {
+func (c *sdkConverter) Load(grid *sudoku.Grid, puzzle string) bool {
 	if !c.Valid(puzzle) {
-		return
+		return false
 	}
 	grid.Load(puzzle)
+	return true
 }
 
 func (c *sdkConverter) DataString(grid *sudoku.Grid) string {
