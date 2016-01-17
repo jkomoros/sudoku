@@ -6,7 +6,7 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-type mainModel struct {
+type mainController struct {
 	grid     *sudoku.Grid
 	selected *sudoku.Cell
 	state    InputState
@@ -36,8 +36,8 @@ type toggle struct {
 	GridColor termbox.Attribute
 }
 
-func newModel() *mainModel {
-	model := &mainModel{
+func newModel() *mainController {
+	model := &mainController{
 		state: STATE_DEFAULT,
 	}
 	model.setUpToggles()
@@ -45,7 +45,7 @@ func newModel() *mainModel {
 	return model
 }
 
-func (m *mainModel) setUpToggles() {
+func (m *mainController) setUpToggles() {
 
 	//State variable for the closure
 	var fastMode bool
@@ -106,7 +106,7 @@ func (m *mainModel) setUpToggles() {
 //EnterState attempts to set the model to the given state. The state object is
 //given a chance to do initalization and potentially cancel the transition,
 //leaving the model in the same state as before.
-func (m *mainModel) EnterState(state InputState) {
+func (m *mainController) EnterState(state InputState) {
 	//SetState doesn't do much, it just makes it feel less weird than
 	//STATE.enter(m) (which feels backward)
 
@@ -116,7 +116,7 @@ func (m *mainModel) EnterState(state InputState) {
 }
 
 //enterConfirmState is a special state to set
-func (m *mainModel) enterConfirmState(msg string, defaultAction defaultOption, yesAction func(), noAction func()) {
+func (m *mainController) enterConfirmState(msg string, defaultAction defaultOption, yesAction func(), noAction func()) {
 	STATE_CONFIRM.msg = msg
 	STATE_CONFIRM.defaultAction = defaultAction
 	STATE_CONFIRM.yesAction = yesAction
@@ -124,7 +124,7 @@ func (m *mainModel) enterConfirmState(msg string, defaultAction defaultOption, y
 	m.EnterState(STATE_CONFIRM)
 }
 
-func (m *mainModel) SetConsoleMessage(msg string, shortLived bool) {
+func (m *mainController) SetConsoleMessage(msg string, shortLived bool) {
 
 	if m.outputWidth != 0 {
 		//Wrap to fit in given size
@@ -140,27 +140,27 @@ func (m *mainModel) SetConsoleMessage(msg string, shortLived bool) {
 //state--that is, right before we process an event. That is a convenient time
 //to clear state and prepare for the next state. This is *not* called before a
 //timer/display tick.
-func (m *mainModel) WillProcessEvent() {
+func (m *mainController) WillProcessEvent() {
 	if m.consoleMessageShort {
 		m.ClearConsole()
 	}
 }
 
-func (m *mainModel) ClearConsole() {
+func (m *mainController) ClearConsole() {
 	m.consoleMessage = ""
 	m.consoleMessageShort = false
 	m.lastShownHint = nil
 }
 
-func (m *mainModel) StatusLine() string {
+func (m *mainController) StatusLine() string {
 	return m.state.statusLine(m)
 }
 
-func (m *mainModel) Selected() *sudoku.Cell {
+func (m *mainController) Selected() *sudoku.Cell {
 	return m.selected
 }
 
-func (m *mainModel) SetSelected(cell *sudoku.Cell) {
+func (m *mainController) SetSelected(cell *sudoku.Cell) {
 	if cell == m.selected {
 		//Already done
 		return
@@ -169,7 +169,7 @@ func (m *mainModel) SetSelected(cell *sudoku.Cell) {
 	m.state.newCellSelected(m)
 }
 
-func (m *mainModel) EnsureSelected() {
+func (m *mainController) EnsureSelected() {
 	m.EnsureGrid()
 	//Ensures that at least one cell is selected.
 	if m.Selected() == nil {
@@ -177,7 +177,7 @@ func (m *mainModel) EnsureSelected() {
 	}
 }
 
-func (m *mainModel) MoveSelectionLeft(fast bool) {
+func (m *mainController) MoveSelectionLeft(fast bool) {
 	m.EnsureSelected()
 	r := m.Selected().Row()
 	c := m.Selected().Col()
@@ -200,7 +200,7 @@ func (m *mainModel) MoveSelectionLeft(fast bool) {
 	}
 }
 
-func (m *mainModel) MoveSelectionRight(fast bool) {
+func (m *mainController) MoveSelectionRight(fast bool) {
 	m.EnsureSelected()
 	r := m.Selected().Row()
 	c := m.Selected().Col()
@@ -223,7 +223,7 @@ func (m *mainModel) MoveSelectionRight(fast bool) {
 	}
 }
 
-func (m *mainModel) MoveSelectionUp(fast bool) {
+func (m *mainController) MoveSelectionUp(fast bool) {
 	m.EnsureSelected()
 	r := m.Selected().Row()
 	c := m.Selected().Col()
@@ -246,7 +246,7 @@ func (m *mainModel) MoveSelectionUp(fast bool) {
 	}
 }
 
-func (m *mainModel) MoveSelectionDown(fast bool) {
+func (m *mainController) MoveSelectionDown(fast bool) {
 	m.EnsureSelected()
 	r := m.Selected().Row()
 	c := m.Selected().Col()
@@ -269,29 +269,29 @@ func (m *mainModel) MoveSelectionDown(fast bool) {
 	}
 }
 
-func (m *mainModel) FastMode() bool {
+func (m *mainController) FastMode() bool {
 	return m.toggles[TOGGLE_FAST_MODE].Value()
 }
 
-func (m *mainModel) ToggleFastMode() {
+func (m *mainController) ToggleFastMode() {
 	m.toggles[TOGGLE_FAST_MODE].Toggle()
 }
 
-func (m *mainModel) MarkMode() bool {
+func (m *mainController) MarkMode() bool {
 	return m.toggles[TOGGLE_MARK_MODE].Value()
 }
 
-func (m *mainModel) ToggleMarkMode() {
+func (m *mainController) ToggleMarkMode() {
 	m.toggles[TOGGLE_MARK_MODE].Toggle()
 }
 
-func (m *mainModel) EnsureGrid() {
+func (m *mainController) EnsureGrid() {
 	if m.grid == nil {
 		m.NewGrid()
 	}
 }
 
-func (m *mainModel) NewGrid() {
+func (m *mainController) NewGrid() {
 	oldCell := m.Selected()
 
 	m.grid = sudoku.GenerateGrid(nil)
@@ -302,12 +302,12 @@ func (m *mainModel) NewGrid() {
 	m.grid.LockFilledCells()
 }
 
-func (m *mainModel) ResetGrid() {
+func (m *mainController) ResetGrid() {
 	m.grid.ResetUnlockedCells()
 }
 
 //If the selected cell has only one mark, fill it.
-func (m *mainModel) SetSelectedToOnlyMark() {
+func (m *mainController) SetSelectedToOnlyMark() {
 	m.EnsureSelected()
 	marks := m.Selected().Marks()
 	if len(marks) != 1 {
@@ -318,7 +318,7 @@ func (m *mainModel) SetSelectedToOnlyMark() {
 	m.SetSelectedNumber(marks[0])
 }
 
-func (m *mainModel) SetSelectedNumber(num int) {
+func (m *mainController) SetSelectedNumber(num int) {
 	m.EnsureSelected()
 	if m.Selected().Locked() {
 		m.SetConsoleMessage(DEFAULT_MODE_FAIL_LOCKED, true)
@@ -335,7 +335,7 @@ func (m *mainModel) SetSelectedNumber(num int) {
 	m.checkHintDone()
 }
 
-func (m *mainModel) checkHintDone() {
+func (m *mainController) checkHintDone() {
 	if m.lastShownHint == nil {
 		return
 	}
@@ -347,7 +347,7 @@ func (m *mainModel) checkHintDone() {
 	}
 }
 
-func (m *mainModel) ToggleSelectedMark(num int) {
+func (m *mainController) ToggleSelectedMark(num int) {
 	m.EnsureSelected()
 	if m.Selected().Locked() {
 		m.SetConsoleMessage(MARKS_MODE_FAIL_LOCKED, true)
@@ -360,7 +360,7 @@ func (m *mainModel) ToggleSelectedMark(num int) {
 	m.Selected().SetMark(num, !m.Selected().Mark(num))
 }
 
-func (m *mainModel) FillSelectedWithLegalMarks() {
+func (m *mainController) FillSelectedWithLegalMarks() {
 	m.EnsureSelected()
 	m.Selected().ResetMarks()
 	for _, num := range m.Selected().Possibilities() {
@@ -368,7 +368,7 @@ func (m *mainModel) FillSelectedWithLegalMarks() {
 	}
 }
 
-func (m *mainModel) RemoveInvalidMarksFromSelected() {
+func (m *mainController) RemoveInvalidMarksFromSelected() {
 	m.EnsureSelected()
 	for _, num := range m.Selected().Marks() {
 		if !m.Selected().Possible(num) {

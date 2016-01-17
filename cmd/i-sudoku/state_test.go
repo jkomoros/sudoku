@@ -8,7 +8,7 @@ import (
 	"unicode/utf8"
 )
 
-func sendKeyEvent(m *mainModel, k termbox.Key) {
+func sendKeyEvent(m *mainController, k termbox.Key) {
 	evt := termbox.Event{
 		Type: termbox.EventKey,
 		Key:  k,
@@ -16,7 +16,7 @@ func sendKeyEvent(m *mainModel, k termbox.Key) {
 	m.state.handleInput(m, evt)
 }
 
-func sendNumberEvent(m *mainModel, num int) {
+func sendNumberEvent(m *mainController, num int) {
 	ch, _ := utf8.DecodeRuneInString(strconv.Itoa(num))
 	evt := termbox.Event{
 		Type: termbox.EventKey,
@@ -26,7 +26,7 @@ func sendNumberEvent(m *mainModel, num int) {
 }
 
 //TODO: use sendCharEvent to verify that chars in all states do what they should.
-func sendCharEvent(m *mainModel, ch rune) {
+func sendCharEvent(m *mainController, ch rune) {
 	evt := termbox.Event{
 		Type: termbox.EventKey,
 		Ch:   ch,

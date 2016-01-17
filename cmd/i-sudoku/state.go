@@ -72,15 +72,15 @@ func shiftedNumRuneToNum(ch rune) rune {
 
 type InputState interface {
 	//TODO: doesn't it feel weird that every method takes a main model?
-	handleInput(m *mainModel, evt termbox.Event)
-	shouldEnter(m *mainModel) bool
-	statusLine(m *mainModel) string
-	newCellSelected(m *mainModel)
+	handleInput(m *mainController, evt termbox.Event)
+	shouldEnter(m *mainController) bool
+	statusLine(m *mainController) string
+	newCellSelected(m *mainController)
 }
 
 type baseState struct{}
 
-func (s *baseState) handleInput(m *mainModel, evt termbox.Event) {
+func (s *baseState) handleInput(m *mainController, evt termbox.Event) {
 	switch evt.Type {
 	case termbox.EventKey:
 		switch evt.Key {
@@ -90,15 +90,15 @@ func (s *baseState) handleInput(m *mainModel, evt termbox.Event) {
 	}
 }
 
-func (s *baseState) statusLine(m *mainModel) string {
+func (s *baseState) statusLine(m *mainController) string {
 	return STATUS_DEFAULT
 }
 
-func (s *baseState) newCellSelected(m *mainModel) {
+func (s *baseState) newCellSelected(m *mainController) {
 	//Do nothing by default.
 }
 
-func (s *baseState) shouldEnter(m *mainModel) bool {
+func (s *baseState) shouldEnter(m *mainController) bool {
 	return true
 }
 
@@ -106,7 +106,7 @@ type defaultState struct {
 	baseState
 }
 
-func showHint(m *mainModel) {
+func showHint(m *mainController) {
 
 	//TODO: shouldn't this be a method on model?  The rule of thumb is no
 	//modifying state in model except in model methods.
@@ -123,7 +123,7 @@ func showHint(m *mainModel) {
 	m.SetSelected(lastStep.TargetCells[0].InGrid(m.grid))
 }
 
-func (s *defaultState) enterHint(m *mainModel) {
+func (s *defaultState) enterHint(m *mainController) {
 	if m.lastShownHint == nil {
 		return
 	}
@@ -137,7 +137,7 @@ func (s *defaultState) enterHint(m *mainModel) {
 	m.ClearConsole()
 }
 
-func (s *defaultState) handleInput(m *mainModel, evt termbox.Event) {
+func (s *defaultState) handleInput(m *mainController, evt termbox.Event) {
 
 	handled := true
 	switch evt.Type {
@@ -208,7 +208,7 @@ type commandState struct {
 	baseState
 }
 
-func confirmQuit(m *mainModel) {
+func confirmQuit(m *mainController) {
 	m.enterConfirmState("Quit? Your progress will be lost.",
 		DEFAULT_NO,
 		func() {
@@ -218,7 +218,7 @@ func confirmQuit(m *mainModel) {
 	)
 }
 
-func (s *commandState) handleInput(m *mainModel, evt termbox.Event) {
+func (s *commandState) handleInput(m *mainController, evt termbox.Event) {
 	handled := true
 	switch evt.Type {
 	case termbox.EventKey:
@@ -256,7 +256,7 @@ func (s *commandState) handleInput(m *mainModel, evt termbox.Event) {
 	}
 }
 
-func (s *commandState) statusLine(m *mainModel) string {
+func (s *commandState) statusLine(m *mainController) string {
 	return STATUS_COMMAND
 }
 
@@ -276,7 +276,7 @@ type confirmState struct {
 	baseState
 }
 
-func (s *confirmState) handleInput(m *mainModel, evt termbox.Event) {
+func (s *confirmState) handleInput(m *mainController, evt termbox.Event) {
 	handled := true
 	switch evt.Type {
 	case termbox.EventKey:
@@ -311,7 +311,7 @@ func (s *confirmState) handleInput(m *mainModel, evt termbox.Event) {
 	}
 }
 
-func (s *confirmState) statusLine(m *mainModel) string {
+func (s *confirmState) statusLine(m *mainController) string {
 	confirmMsg := "{y}/{n}"
 	if s.defaultAction == DEFAULT_YES {
 		confirmMsg = "{Y}/{n}"

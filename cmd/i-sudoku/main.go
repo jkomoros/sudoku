@@ -82,7 +82,7 @@ func main() {
 
 }
 
-func makeMainModel(options *appOptions, errOutput io.ReadWriter) *mainModel {
+func makeMainModel(options *appOptions, errOutput io.ReadWriter) *mainController {
 
 	logger := log.New(errOutput, "", log.LstdFlags)
 
@@ -113,7 +113,7 @@ func makeMainModel(options *appOptions, errOutput io.ReadWriter) *mainModel {
 	return model
 }
 
-func mainLoop(model *mainModel) {
+func mainLoop(model *mainController) {
 	draw(model)
 
 	eventChan := make(chan termbox.Event, 1)
@@ -175,7 +175,7 @@ func drawColorPalette() {
 	termbox.Flush()
 }
 
-func drawGrid(y int, model *mainModel) (endY int) {
+func drawGrid(y int, model *mainController) (endY int) {
 	var x int
 	grid := model.grid
 
@@ -283,7 +283,7 @@ func drawGrid(y int, model *mainModel) (endY int) {
 	return y
 }
 
-func drawToggleLine(y int, model *mainModel) (newY int) {
+func drawToggleLine(y int, model *mainController) (newY int) {
 	x := 0
 
 	for _, toggle := range model.toggles {
@@ -302,7 +302,7 @@ func drawToggleLine(y int, model *mainModel) (newY int) {
 	return y
 }
 
-func drawStatusLine(y int, model *mainModel) (newY int) {
+func drawStatusLine(y int, model *mainController) (newY int) {
 	x := 0
 	var fg termbox.Attribute
 	underlined := false
@@ -333,7 +333,7 @@ func drawStatusLine(y int, model *mainModel) (newY int) {
 	return y
 }
 
-func drawConsole(y int, model *mainModel) (newY int) {
+func drawConsole(y int, model *mainController) (newY int) {
 
 	x := 0
 
@@ -366,7 +366,7 @@ func drawConsole(y int, model *mainModel) (newY int) {
 	return y
 }
 
-func draw(model *mainModel) {
+func draw(model *mainController) {
 
 	clearScreen()
 
