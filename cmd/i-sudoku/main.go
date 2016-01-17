@@ -35,11 +35,6 @@ func main() {
 
 	termbox.SetOutputMode(termbox.Output256)
 
-	model := newModel()
-
-	width, _ := termbox.Size()
-	model.outputWidth = width
-
 	if DRAW_PALETTE {
 		drawColorPalette()
 		//Wait until something happens, generally a key is pressed.
@@ -47,8 +42,16 @@ func main() {
 		return
 	}
 
+	width, _ := termbox.Size()
+	model := makeMainModel(width)
 	mainLoop(model)
 
+}
+
+func makeMainModel(width int) *mainModel {
+	model := newModel()
+	model.outputWidth = width
+	return model
 }
 
 func mainLoop(model *mainModel) {
