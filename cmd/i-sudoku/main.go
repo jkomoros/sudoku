@@ -175,9 +175,9 @@ func drawColorPalette() {
 	termbox.Flush()
 }
 
-func drawGrid(y int, model *mainController) (endY int) {
+func drawGrid(y int, c *mainController) (endY int) {
 	var x int
-	grid := model.grid
+	grid := c.grid
 
 	fg := termbox.ColorBlack
 	bg := termbox.ColorGreen
@@ -186,8 +186,8 @@ func drawGrid(y int, model *mainController) (endY int) {
 
 	//Figure out which possible colors we should paint the grid in.
 	//Iterate through toggles backwards, since earlier ones have higher preference
-	for i := len(model.toggles) - 1; i >= 0; i-- {
-		toggle := model.toggles[i]
+	for i := len(c.toggles) - 1; i >= 0; i-- {
+		toggle := c.toggles[i]
 		if toggle.Value() {
 			toggleBackgrounds = append(toggleBackgrounds, toggle.GridColor)
 		}
@@ -243,7 +243,7 @@ func drawGrid(y int, model *mainController) (endY int) {
 	fg, bg = bg, fg
 
 	//TODO: I'm pretty sure top/left are reversed
-	selectedTop, selectedLeft, selectedHeight, selectedWidth := model.Selected().DiagramExtents()
+	selectedTop, selectedLeft, selectedHeight, selectedWidth := c.Selected().DiagramExtents()
 	//Correct the selected coordinate for the offset of the grid from the top.
 	selectedLeft += gridTop
 	selectedTop += gridLeft
@@ -283,10 +283,10 @@ func drawGrid(y int, model *mainController) (endY int) {
 	return y
 }
 
-func drawToggleLine(y int, model *mainController) (newY int) {
+func drawToggleLine(y int, c *mainController) (newY int) {
 	x := 0
 
-	for _, toggle := range model.toggles {
+	for _, toggle := range c.toggles {
 		msg := toggle.OffText
 		fg := toggle.GridColor
 		bg := termbox.ColorBlack
@@ -302,11 +302,11 @@ func drawToggleLine(y int, model *mainController) (newY int) {
 	return y
 }
 
-func drawStatusLine(y int, model *mainController) (newY int) {
+func drawStatusLine(y int, c *mainController) (newY int) {
 	x := 0
 	var fg termbox.Attribute
 	underlined := false
-	for _, ch := range ">>> " + model.StatusLine() {
+	for _, ch := range ">>> " + c.StatusLine() {
 		//The ( and ) are non-printing control characters
 		if ch == '{' {
 			underlined = true
@@ -333,13 +333,13 @@ func drawStatusLine(y int, model *mainController) (newY int) {
 	return y
 }
 
-func drawConsole(y int, model *mainController) (newY int) {
+func drawConsole(y int, c *mainController) (newY int) {
 
 	x := 0
 
 	underlined := false
 
-	splitMessage := strings.Split(model.consoleMessage, "\n")
+	splitMessage := strings.Split(c.consoleMessage, "\n")
 
 	for _, line := range splitMessage {
 
@@ -366,19 +366,19 @@ func drawConsole(y int, model *mainController) (newY int) {
 	return y
 }
 
-func draw(model *mainController) {
+func draw(c *mainController) {
 
 	clearScreen()
 
 	y := 0
 
-	y = drawGrid(y, model)
+	y = drawGrid(y, c)
 	y++
-	y = drawToggleLine(y, model)
+	y = drawToggleLine(y, c)
 	y++
-	y = drawStatusLine(y, model)
+	y = drawStatusLine(y, c)
 	y++
-	y = drawConsole(y, model)
+	y = drawConsole(y, c)
 
 	termbox.Flush()
 }
