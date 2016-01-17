@@ -243,6 +243,22 @@ func (self *Grid) ResetMarks() {
 	}
 }
 
+//ResetUnlockedCells clears out numbers, marks, and excludes from each cell
+//that is unlocked. In general a locked cell represents a number present in
+//the original puzzle, so this method effectively clears all user
+//modifications back to the start of the puzzle.
+func (self *Grid) ResetUnlockedCells() {
+	for i := range self.cells {
+		cell := &self.cells[i]
+		if cell.Locked() {
+			continue
+		}
+		cell.SetNumber(0)
+		cell.ResetMarks()
+		cell.ResetExcludes()
+	}
+}
+
 //UnlockCells unlocks all cells. See cell.Lock for more information on the
 //concept of locking.
 func (self *Grid) UnlockCells() {
