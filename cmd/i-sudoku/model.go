@@ -302,6 +302,10 @@ func (m *mainModel) NewGrid() {
 	m.grid.LockFilledCells()
 }
 
+func (m *mainModel) ResetGrid() {
+	m.grid.ResetUnlockedCells()
+}
+
 //If the selected cell has only one mark, fill it.
 func (m *mainModel) SetSelectedToOnlyMark() {
 	m.EnsureSelected()

@@ -152,6 +152,37 @@ func TestDefaultState(t *testing.T) {
 	}
 }
 
+func TestReset(t *testing.T) {
+	m := newModel()
+
+	var cell *sudoku.Cell
+
+	//find an unfilled cell.
+	for _, candidateCell := range m.grid.Cells() {
+		if candidateCell.Locked() {
+			continue
+		}
+		cell = candidateCell
+		break
+	}
+	//Enter command mode
+	sendCharEvent(m, 'c')
+
+	cell.SetNumber(3)
+
+	sendCharEvent(m, 'r')
+
+	if cell.Number() == 0 {
+		t.Error("The grid was reset without confirmation")
+	}
+
+	sendCharEvent(m, 'y')
+
+	if cell.Number() != 0 {
+		t.Error("After confirming reset it wasn't.")
+	}
+}
+
 func TestHintOnSolvedGrid(t *testing.T) {
 	//This used to crash before we fixed it, so adding a regression test.
 	model := newModel()
