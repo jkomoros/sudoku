@@ -36,7 +36,7 @@ type toggle struct {
 	GridColor termbox.Attribute
 }
 
-func newModel() *mainController {
+func newController() *mainController {
 	model := &mainController{
 		state: STATE_DEFAULT,
 	}

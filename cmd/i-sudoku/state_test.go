@@ -35,7 +35,7 @@ func sendCharEvent(m *mainController, ch rune) {
 }
 
 func TestDefaultState(t *testing.T) {
-	model := newModel()
+	model := newController()
 	//Add empty grid.
 	model.grid = sudoku.NewGrid()
 	model.SetSelected(nil)
@@ -76,7 +76,7 @@ func TestDefaultState(t *testing.T) {
 
 	//Reset to a normal, solvable grid.
 
-	model = newModel()
+	model = newController()
 
 	oldSelected := model.Selected()
 
@@ -153,7 +153,7 @@ func TestDefaultState(t *testing.T) {
 }
 
 func TestReset(t *testing.T) {
-	m := newModel()
+	m := newController()
 
 	var cell *sudoku.Cell
 
@@ -185,7 +185,7 @@ func TestReset(t *testing.T) {
 
 func TestHintOnSolvedGrid(t *testing.T) {
 	//This used to crash before we fixed it, so adding a regression test.
-	model := newModel()
+	model := newController()
 	model.grid = sudoku.NewGrid()
 	model.grid.Fill()
 
@@ -196,7 +196,7 @@ func TestHintOnSolvedGrid(t *testing.T) {
 }
 
 func TestSingleMarkEnter(t *testing.T) {
-	model := newModel()
+	model := newController()
 
 	model.grid = sudoku.NewGrid()
 	model.SetSelected(nil)
@@ -264,7 +264,7 @@ func TestSingleMarkEnter(t *testing.T) {
 
 	//Now, test that if you hit enter on a hint cell it fills hint.
 
-	model = newModel()
+	model = newController()
 
 	sendCharEvent(model, 'h')
 
@@ -293,7 +293,7 @@ func TestSingleMarkEnter(t *testing.T) {
 }
 
 func TestEnterMarksState(t *testing.T) {
-	model := newModel()
+	model := newController()
 	//Add empty grid.
 	model.grid = sudoku.NewGrid()
 	model.SetSelected(nil)
@@ -354,7 +354,7 @@ func TestEnterMarksState(t *testing.T) {
 }
 
 func TestCommandState(t *testing.T) {
-	model := newModel()
+	model := newController()
 	//Add empty grid.
 	model.grid = sudoku.NewGrid()
 	model.SetSelected(nil)
@@ -415,7 +415,7 @@ func TestCommandState(t *testing.T) {
 }
 
 func TestConfirmState(t *testing.T) {
-	model := newModel()
+	model := newController()
 
 	channel := make(chan bool, 1)
 

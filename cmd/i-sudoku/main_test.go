@@ -20,7 +20,7 @@ const FAST_MOVE_TEST_GRID = `.|.|.|.|1|.|.|.|.
 .|.|.|.|1|.|.|.|.`
 
 func TestNewGrid(t *testing.T) {
-	model := newModel()
+	model := newController()
 
 	//We want to make sure that if a cell is selected and we make a new grid,
 	//the m.selected cell is in the new grid, not the old. This is actually
@@ -48,7 +48,7 @@ func TestNewGrid(t *testing.T) {
 }
 
 func TestConsoleMessage(t *testing.T) {
-	model := newModel()
+	model := newController()
 
 	if model.consoleMessage != "" {
 		t.Error("Model started out with non-empty console message", model.consoleMessage)
@@ -98,7 +98,7 @@ func TestConsoleMessage(t *testing.T) {
 }
 
 func TestEnsureSelected(t *testing.T) {
-	model := newModel()
+	model := newController()
 
 	if model.Selected() == nil {
 		t.Error("New model had no selected cell")
@@ -113,7 +113,7 @@ func TestEnsureSelected(t *testing.T) {
 }
 
 func TestSelected(t *testing.T) {
-	model := newModel()
+	model := newController()
 	next := model.grid.Cell(2, 2)
 	model.SetSelected(next)
 	if model.Selected() != next {
@@ -122,7 +122,7 @@ func TestSelected(t *testing.T) {
 }
 
 func TestMoveSelectionLeft(t *testing.T) {
-	model := newModel()
+	model := newController()
 
 	if model.Selected() == nil {
 		t.Fatal("No selected cell")
@@ -168,7 +168,7 @@ func TestMoveSelectionLeft(t *testing.T) {
 }
 
 func TestMoveSelectionRight(t *testing.T) {
-	model := newModel()
+	model := newController()
 
 	if model.Selected() == nil {
 		t.Fatal("No selected cell")
@@ -214,7 +214,7 @@ func TestMoveSelectionRight(t *testing.T) {
 }
 
 func TestMoveSelectionUp(t *testing.T) {
-	model := newModel()
+	model := newController()
 
 	if model.Selected() == nil {
 		t.Fatal("No selected cell")
@@ -260,7 +260,7 @@ func TestMoveSelectionUp(t *testing.T) {
 }
 
 func TestMoveSelectionDown(t *testing.T) {
-	model := newModel()
+	model := newController()
 
 	if model.Selected() == nil {
 		t.Fatal("No selected cell")
@@ -306,7 +306,7 @@ func TestMoveSelectionDown(t *testing.T) {
 }
 
 func TestFillSelectedWithLegalMarks(t *testing.T) {
-	model := newModel()
+	model := newController()
 	model.grid = sudoku.NewGrid()
 	model.SetSelected(nil)
 
@@ -333,7 +333,7 @@ func TestFillSelectedWithLegalMarks(t *testing.T) {
 }
 
 func TestEnsureGrid(t *testing.T) {
-	model := newModel()
+	model := newController()
 
 	if model.grid == nil {
 		t.Fatal("New model had no grid")
@@ -363,7 +363,7 @@ func TestEnsureGrid(t *testing.T) {
 }
 
 func TestSetSelectionNumber(t *testing.T) {
-	model := newModel()
+	model := newController()
 
 	var lockedCell *sudoku.Cell
 	var unlockedCell *sudoku.Cell
@@ -425,7 +425,7 @@ func TestSetSelectionNumber(t *testing.T) {
 }
 
 func TestToggleSelectedMark(t *testing.T) {
-	model := newModel()
+	model := newController()
 
 	var lockedCell *sudoku.Cell
 	var unlockedCell *sudoku.Cell

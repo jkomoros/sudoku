@@ -86,7 +86,7 @@ func makeMainModel(options *appOptions, errOutput io.ReadWriter) *mainController
 
 	logger := log.New(errOutput, "", log.LstdFlags)
 
-	model := newModel()
+	model := newController()
 
 	if options.START_PUZZLE_FILENAME != "" {
 		puzzleBytes, err := ioutil.ReadFile(options.START_PUZZLE_FILENAME)
