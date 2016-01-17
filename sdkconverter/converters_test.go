@@ -26,6 +26,14 @@ func TestKomoConverterDataString(t *testing.T) {
 	}
 }
 
+func TestKomoConverterValid(t *testing.T) {
+	validTestHelper(t, "komo", "converter_one_komo.sdk", true)
+	validTestHelper(t, "komo", "converter_two_komo.sdk", true)
+	validTestHelper(t, "komo", "komo_with_marks.sdk", true)
+	validTestHelper(t, "komo", "invalid_komo_too_short.sdk", false)
+	validTestHelper(t, "komo", "converter_one.sdk", false)
+}
+
 func TestSDKConverterLoad(t *testing.T) {
 	tests := [][2]string{
 		{"converter_one.sdk", "converter_one.sdk"},

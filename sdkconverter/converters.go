@@ -3,6 +3,7 @@ package sdkconverter
 
 import (
 	"github.com/jkomoros/sudoku"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -11,6 +12,8 @@ import (
 /*
  * Converters convert to and from non-default file formats for sudoku puzzles.
  */
+
+const _KOMO_CELL_RE = `\d!?:?(\[(\d\.)*\d\])?`
 
 type SudokuPuzzleConverter interface {
 	//Load loads the puzzle defined by `puzzle`, in the format tied to this partcular converter,
@@ -96,6 +99,10 @@ func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) {
 }
 
 func (c *komoConverter) DataString(grid *sudoku.Grid) string {
+
+	//TODO: understand marks, user-filled numbers.
+	//TODO: actually lock locked cells.
+
 	//The komo puzzle format fills all cells and marks which ones are 'locked',
 	//whereas the default sdk format simply leaves non-'locked' cells as blank.
 	//So we need to solve the puzzle.
@@ -126,7 +133,32 @@ func (c *komoConverter) DataString(grid *sudoku.Grid) string {
 }
 
 func (c *komoConverter) Valid(puzzle string) bool {
-	//TODO: implement this for real and test
+
+	rows := strings.Split(puzzle, ";")
+
+	if len(rows) != sudoku.DIM {
+		//Too few rows!
+		return false
+	}
+
+	cellRE := regexp.MustCompile(_KOMO_CELL_RE)
+
+	for _, row := range rows {
+		cols := strings.Split(row, ",")
+		if len(cols) != sudoku.DIM {
+			//Too few cols!
+			return false
+		}
+		for _, col := range cols {
+			if !cellRE.MatchString(col) {
+				return false
+			}
+			//TODO: have this validate spaces that have:
+			//* branchNumbers
+			//* branchMarks
+			//* customBox number
+		}
+	}
 	return true
 }
 
