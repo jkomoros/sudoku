@@ -45,17 +45,17 @@ func newController() *mainController {
 	return model
 }
 
-func (m *mainController) setUpToggles() {
+func (c *mainController) setUpToggles() {
 
 	//State variable for the closure
 	var fastMode bool
 	var markMode bool
 
-	m.toggles = []toggle{
+	c.toggles = []toggle{
 		//Solved
 		{
 			func() bool {
-				return m.grid.Solved()
+				return c.grid.Solved()
 			},
 			func() {
 				//Do nothing; read only
@@ -67,7 +67,7 @@ func (m *mainController) setUpToggles() {
 		//invalid
 		{
 			func() bool {
-				return m.grid.Invalid()
+				return c.grid.Invalid()
 			},
 			func() {
 				//Read only
@@ -106,119 +106,119 @@ func (m *mainController) setUpToggles() {
 //EnterState attempts to set the model to the given state. The state object is
 //given a chance to do initalization and potentially cancel the transition,
 //leaving the model in the same state as before.
-func (m *mainController) EnterState(state InputState) {
+func (c *mainController) EnterState(state InputState) {
 	//SetState doesn't do much, it just makes it feel less weird than
 	//STATE.enter(m) (which feels backward)
 
-	if state.shouldEnter(m) {
-		m.state = state
+	if state.shouldEnter(c) {
+		c.state = state
 	}
 }
 
 //enterConfirmState is a special state to set
-func (m *mainController) enterConfirmState(msg string, defaultAction defaultOption, yesAction func(), noAction func()) {
+func (c *mainController) enterConfirmState(msg string, defaultAction defaultOption, yesAction func(), noAction func()) {
 	STATE_CONFIRM.msg = msg
 	STATE_CONFIRM.defaultAction = defaultAction
 	STATE_CONFIRM.yesAction = yesAction
 	STATE_CONFIRM.noAction = noAction
-	m.EnterState(STATE_CONFIRM)
+	c.EnterState(STATE_CONFIRM)
 }
 
-func (m *mainController) SetConsoleMessage(msg string, shortLived bool) {
+func (c *mainController) SetConsoleMessage(msg string, shortLived bool) {
 
-	if m.outputWidth != 0 {
+	if c.outputWidth != 0 {
 		//Wrap to fit in given size
-		msg = wordwrap.WrapString(msg, uint(m.outputWidth))
+		msg = wordwrap.WrapString(msg, uint(c.outputWidth))
 	}
 
-	m.consoleMessage = msg
-	m.consoleMessageShort = shortLived
-	m.lastShownHint = nil
+	c.consoleMessage = msg
+	c.consoleMessageShort = shortLived
+	c.lastShownHint = nil
 }
 
 //WillProcessEvent is cleared right before we call handleInput on the current
 //state--that is, right before we process an event. That is a convenient time
 //to clear state and prepare for the next state. This is *not* called before a
 //timer/display tick.
-func (m *mainController) WillProcessEvent() {
-	if m.consoleMessageShort {
-		m.ClearConsole()
+func (c *mainController) WillProcessEvent() {
+	if c.consoleMessageShort {
+		c.ClearConsole()
 	}
 }
 
-func (m *mainController) ClearConsole() {
-	m.consoleMessage = ""
-	m.consoleMessageShort = false
-	m.lastShownHint = nil
+func (c *mainController) ClearConsole() {
+	c.consoleMessage = ""
+	c.consoleMessageShort = false
+	c.lastShownHint = nil
 }
 
-func (m *mainController) StatusLine() string {
-	return m.state.statusLine(m)
+func (c *mainController) StatusLine() string {
+	return c.state.statusLine(c)
 }
 
-func (m *mainController) Selected() *sudoku.Cell {
-	return m.selected
+func (c *mainController) Selected() *sudoku.Cell {
+	return c.selected
 }
 
-func (m *mainController) SetSelected(cell *sudoku.Cell) {
-	if cell == m.selected {
+func (c *mainController) SetSelected(cell *sudoku.Cell) {
+	if cell == c.selected {
 		//Already done
 		return
 	}
-	m.selected = cell
-	m.state.newCellSelected(m)
+	c.selected = cell
+	c.state.newCellSelected(c)
 }
 
-func (m *mainController) EnsureSelected() {
-	m.EnsureGrid()
+func (c *mainController) EnsureSelected() {
+	c.EnsureGrid()
 	//Ensures that at least one cell is selected.
-	if m.Selected() == nil {
-		m.SetSelected(m.grid.Cell(0, 0))
+	if c.Selected() == nil {
+		c.SetSelected(c.grid.Cell(0, 0))
 	}
 }
 
-func (m *mainController) MoveSelectionLeft(fast bool) {
-	m.EnsureSelected()
-	r := m.Selected().Row()
-	c := m.Selected().Col()
+func (c *mainController) MoveSelectionLeft(fast bool) {
+	c.EnsureSelected()
+	row := c.Selected().Row()
+	col := c.Selected().Col()
 	for {
-		c--
-		if c < 0 {
-			c = 0
+		col--
+		if col < 0 {
+			col = 0
 		}
-		if fast && m.grid.Cell(r, c).Number() != 0 {
-			if c == 0 {
+		if fast && c.grid.Cell(row, col).Number() != 0 {
+			if col == 0 {
 				//We're at the end and didn't find anything.
 				//guess there's nothing to find.
-				m.SetConsoleMessage(FAST_MODE_NO_OPEN_CELLS, true)
+				c.SetConsoleMessage(FAST_MODE_NO_OPEN_CELLS, true)
 				return
 			}
 			continue
 		}
-		m.SetSelected(m.grid.Cell(r, c))
+		c.SetSelected(c.grid.Cell(row, col))
 		break
 	}
 }
 
-func (m *mainController) MoveSelectionRight(fast bool) {
-	m.EnsureSelected()
-	r := m.Selected().Row()
-	c := m.Selected().Col()
+func (c *mainController) MoveSelectionRight(fast bool) {
+	c.EnsureSelected()
+	row := c.Selected().Row()
+	col := c.Selected().Col()
 	for {
-		c++
-		if c >= sudoku.DIM {
-			c = sudoku.DIM - 1
+		col++
+		if col >= sudoku.DIM {
+			col = sudoku.DIM - 1
 		}
-		if fast && m.grid.Cell(r, c).Number() != 0 {
-			if c == sudoku.DIM-1 {
+		if fast && c.grid.Cell(row, col).Number() != 0 {
+			if col == sudoku.DIM-1 {
 				//We're at the end and didn't find anything.
 				//guess there's nothing to find.
-				m.SetConsoleMessage(FAST_MODE_NO_OPEN_CELLS, true)
+				c.SetConsoleMessage(FAST_MODE_NO_OPEN_CELLS, true)
 				return
 			}
 			continue
 		}
-		m.SetSelected(m.grid.Cell(r, c))
+		c.SetSelected(c.grid.Cell(row, col))
 		break
 	}
 }
@@ -291,88 +291,88 @@ func (m *mainController) EnsureGrid() {
 	}
 }
 
-func (m *mainController) NewGrid() {
-	oldCell := m.Selected()
+func (c *mainController) NewGrid() {
+	oldCell := c.Selected()
 
-	m.grid = sudoku.GenerateGrid(nil)
+	c.grid = sudoku.GenerateGrid(nil)
 	//The currently selected cell is tied to the grid, so we need to fix it up.
 	if oldCell != nil {
-		m.SetSelected(oldCell.InGrid(m.grid))
+		c.SetSelected(oldCell.InGrid(c.grid))
 	}
-	m.grid.LockFilledCells()
+	c.grid.LockFilledCells()
 }
 
-func (m *mainController) ResetGrid() {
-	m.grid.ResetUnlockedCells()
+func (c *mainController) ResetGrid() {
+	c.grid.ResetUnlockedCells()
 }
 
 //If the selected cell has only one mark, fill it.
-func (m *mainController) SetSelectedToOnlyMark() {
-	m.EnsureSelected()
-	marks := m.Selected().Marks()
+func (c *mainController) SetSelectedToOnlyMark() {
+	c.EnsureSelected()
+	marks := c.Selected().Marks()
 	if len(marks) != 1 {
-		m.SetConsoleMessage(SINGLE_FILL_MORE_THAN_ONE_MARK, true)
+		c.SetConsoleMessage(SINGLE_FILL_MORE_THAN_ONE_MARK, true)
 		return
 	}
 	//Rely on SetSelectedNumber to barf if it's not allowed for some other reason.
-	m.SetSelectedNumber(marks[0])
+	c.SetSelectedNumber(marks[0])
 }
 
-func (m *mainController) SetSelectedNumber(num int) {
-	m.EnsureSelected()
-	if m.Selected().Locked() {
-		m.SetConsoleMessage(DEFAULT_MODE_FAIL_LOCKED, true)
+func (c *mainController) SetSelectedNumber(num int) {
+	c.EnsureSelected()
+	if c.Selected().Locked() {
+		c.SetConsoleMessage(DEFAULT_MODE_FAIL_LOCKED, true)
 		return
 	}
 
-	if m.Selected().Number() != num {
-		m.Selected().SetNumber(num)
+	if c.Selected().Number() != num {
+		c.Selected().SetNumber(num)
 	} else {
 		//If the number to set is already set, then empty the cell instead.
-		m.Selected().SetNumber(0)
+		c.Selected().SetNumber(0)
 	}
 
-	m.checkHintDone()
+	c.checkHintDone()
 }
 
-func (m *mainController) checkHintDone() {
-	if m.lastShownHint == nil {
+func (c *mainController) checkHintDone() {
+	if c.lastShownHint == nil {
 		return
 	}
-	lastStep := m.lastShownHint.Steps[len(m.lastShownHint.Steps)-1]
+	lastStep := c.lastShownHint.Steps[len(c.lastShownHint.Steps)-1]
 	num := lastStep.TargetNums[0]
 	cell := lastStep.TargetCells[0]
-	if cell.InGrid(m.grid).Number() == num {
-		m.ClearConsole()
+	if cell.InGrid(c.grid).Number() == num {
+		c.ClearConsole()
 	}
 }
 
-func (m *mainController) ToggleSelectedMark(num int) {
-	m.EnsureSelected()
-	if m.Selected().Locked() {
-		m.SetConsoleMessage(MARKS_MODE_FAIL_LOCKED, true)
+func (c *mainController) ToggleSelectedMark(num int) {
+	c.EnsureSelected()
+	if c.Selected().Locked() {
+		c.SetConsoleMessage(MARKS_MODE_FAIL_LOCKED, true)
 		return
 	}
-	if m.Selected().Number() != 0 {
-		m.SetConsoleMessage(MARKS_MODE_FAIL_NUMBER, true)
+	if c.Selected().Number() != 0 {
+		c.SetConsoleMessage(MARKS_MODE_FAIL_NUMBER, true)
 		return
 	}
-	m.Selected().SetMark(num, !m.Selected().Mark(num))
+	c.Selected().SetMark(num, !c.Selected().Mark(num))
 }
 
-func (m *mainController) FillSelectedWithLegalMarks() {
-	m.EnsureSelected()
-	m.Selected().ResetMarks()
-	for _, num := range m.Selected().Possibilities() {
-		m.Selected().SetMark(num, true)
+func (c *mainController) FillSelectedWithLegalMarks() {
+	c.EnsureSelected()
+	c.Selected().ResetMarks()
+	for _, num := range c.Selected().Possibilities() {
+		c.Selected().SetMark(num, true)
 	}
 }
 
-func (m *mainController) RemoveInvalidMarksFromSelected() {
-	m.EnsureSelected()
-	for _, num := range m.Selected().Marks() {
-		if !m.Selected().Possible(num) {
-			m.Selected().SetMark(num, false)
+func (c *mainController) RemoveInvalidMarksFromSelected() {
+	c.EnsureSelected()
+	for _, num := range c.Selected().Marks() {
+		if !c.Selected().Possible(num) {
+			c.Selected().SetMark(num, false)
 		}
 	}
 }
