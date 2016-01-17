@@ -46,6 +46,35 @@ func TestSDKConverterDataString(t *testing.T) {
 	}
 }
 
+func TestSDKConverterValid(t *testing.T) {
+	validTestHelper(t, "sdk", "converter_one.sdk", true)
+	validTestHelper(t, "sdk", "converter_two.sdk", true)
+	validTestHelper(t, "sdk", "sdk_no_sep.sdk", true)
+	validTestHelper(t, "sdk", "invalid_sdk_invalid_char.sdk", false)
+	validTestHelper(t, "sdk", "invalid_sdk_too_short.sdk", false)
+}
+
+func validTestHelper(t *testing.T, format string, file string, expected bool) {
+	converter := Converters[format]
+
+	if converter == nil {
+		t.Fatal("Couldn't find converter of format", format)
+	}
+
+	contents := loadTestPuzzle(file)
+
+	if contents == "" {
+		t.Fatal("Couldn't load", file)
+	}
+
+	result := converter.Valid(contents)
+
+	if result != expected {
+		t.Error("Got wrong result for file", contents, "got", result, "expected", expected)
+	}
+
+}
+
 func TestConvenienceFuncs(t *testing.T) {
 	sdk := loadTestPuzzle("converter_one.sdk")
 	other := loadTestPuzzle("converter_one_komo.sdk")

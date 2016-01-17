@@ -5,6 +5,7 @@ import (
 	"github.com/jkomoros/sudoku"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 /*
@@ -17,6 +18,10 @@ type SudokuPuzzleConverter interface {
 	Load(grid *sudoku.Grid, puzzle string)
 	//DataString returns the serialization of the provided grid in the format provided by this converter.
 	DataString(grid *sudoku.Grid) string
+	//Valid returns true if the provided string will successfully deserialize
+	//with the given converter to a grid. For example, if the string contains
+	//data only 50 cells, this should return false.
+	Valid(puzzle string) bool
 }
 
 type komoConverter struct {
@@ -120,10 +125,52 @@ func (c *komoConverter) DataString(grid *sudoku.Grid) string {
 	return result
 }
 
+func (c *komoConverter) Valid(puzzle string) bool {
+	//TODO: implement this for real and test
+	return true
+}
+
 func (c *sdkConverter) Load(grid *sudoku.Grid, puzzle string) {
 	grid.Load(puzzle)
 }
 
 func (c *sdkConverter) DataString(grid *sudoku.Grid) string {
 	return grid.DataString()
+}
+
+func (c *sdkConverter) Valid(puzzle string) bool {
+
+	//The SDK format is essentially just DIM * DIM characters that are either
+	//0-DIM or a '.'. Col separators and newlines are stripped.
+
+	//Strip out all newlines and col seps.
+	puzzle = strings.Replace(puzzle, sudoku.COL_SEP, "", -1)
+	puzzle = strings.Replace(puzzle, sudoku.ALT_COL_SEP, "", -1)
+	puzzle = strings.Replace(puzzle, "\n", "", -1)
+
+	if len(puzzle) != sudoku.DIM*sudoku.DIM {
+		//Wrong length!
+		return false
+	}
+
+	//Make sure every character is either an int 0-DIM or a '.'
+
+	//make map of legal chars
+
+	legalChars := make(map[rune]bool)
+
+	legalChars['.'] = true
+	for i := 0; i <= sudoku.DIM; i++ {
+		ch, _ := utf8.DecodeRuneInString(strconv.Itoa(i))
+		legalChars[ch] = true
+	}
+
+	for _, ch := range puzzle {
+		if !legalChars[ch] {
+			//Illegal character!
+			return false
+		}
+	}
+
+	return true
 }
