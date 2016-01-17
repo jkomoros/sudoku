@@ -47,6 +47,11 @@ func main() {
 		return
 	}
 
+	mainLoop(model)
+
+}
+
+func mainLoop(model *mainModel) {
 	draw(model)
 
 	eventChan := make(chan termbox.Event, 1)
