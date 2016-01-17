@@ -77,6 +77,10 @@ func ToOther(format string, sdk string) (other string) {
 func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) {
 	//TODO: also handle odd things like user-provided marks and other things.
 
+	if !c.Valid(puzzle) {
+		return
+	}
+
 	var result string
 
 	rows := strings.Split(puzzle, ";")
@@ -163,6 +167,9 @@ func (c *komoConverter) Valid(puzzle string) bool {
 }
 
 func (c *sdkConverter) Load(grid *sudoku.Grid, puzzle string) {
+	if !c.Valid(puzzle) {
+		return
+	}
 	grid.Load(puzzle)
 }
 
