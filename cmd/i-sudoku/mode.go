@@ -326,13 +326,18 @@ func (s *confirmMode) statusLine(c *mainController) string {
 }
 
 type loadMode struct {
-	//TODO: store the current input, where the cursor is.
+	//TODO: store where the cursor is.
+	input string
 	baseMode
 }
 
 func (m *loadMode) statusLine(c *mainController) string {
-	//TODO: include the current input
-	return STATUS_LOAD
+	return STATUS_LOAD + m.input
+}
+
+func (m *loadMode) shouldEnter(c *mainController) bool {
+	m.input = ""
+	return true
 }
 
 func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
@@ -350,6 +355,7 @@ func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
 		}
 		switch evt.Ch {
 		default:
+			m.input += string(evt.Ch)
 			if !handled {
 				//Neither of us handled it so defer to base.
 				m.baseMode.handleInput(c, evt)

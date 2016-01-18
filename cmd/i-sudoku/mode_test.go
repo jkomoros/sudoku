@@ -453,10 +453,23 @@ func TestLoadMode(t *testing.T) {
 		t.Error("c then l didn't get us into load mode")
 	}
 
+	sendCharEvent(c, 'm')
+
+	if MODE_LOAD.input != "m" {
+		t.Error("Typing m in load mode didn't type m in the input")
+	}
+
 	sendKeyEvent(c, termbox.KeyEsc)
 
 	if c.mode != MODE_DEFAULT {
 		t.Error("Esc in load mode didn't go back to default.")
+	}
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 'l')
+
+	if MODE_LOAD.input != "" {
+		t.Error("Going back into load mode didn't reset the input")
 	}
 }
 
