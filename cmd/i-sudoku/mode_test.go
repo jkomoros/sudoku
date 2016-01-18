@@ -47,6 +47,10 @@ func TestDefaultMode(t *testing.T) {
 		t.Error("Didn't get default status line in default mode.")
 	}
 
+	if model.mode.cursorLocation(model) != -1 {
+		t.Error("Cursor not off screen in default mode.")
+	}
+
 	sendNumberEvent(model, 1)
 
 	if model.Selected().Number() != 1 {
@@ -457,6 +461,11 @@ func TestLoadMode(t *testing.T) {
 
 	if MODE_LOAD.input != "m" {
 		t.Error("Typing m in load mode didn't type m in the input")
+	}
+
+	cursorX := c.mode.cursorLocation(c)
+	if cursorX != len(STATUS_LOAD)+len(MODE_LOAD.input) {
+		t.Error("Cursor in wrong location, should be at end of input")
 	}
 
 	sendKeyEvent(c, termbox.KeyEsc)

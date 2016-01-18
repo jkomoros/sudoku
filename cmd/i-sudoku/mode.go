@@ -78,6 +78,10 @@ type InputMode interface {
 	shouldEnter(c *mainController) bool
 	statusLine(c *mainController) string
 	newCellSelected(c *mainController)
+	//Cursor location is always in the status bar; it's a matter of how far to
+	//right in that bar it is. -1 renders it offscreen, effectively meaning
+	//'no cursor'
+	cursorLocation(c *mainController) (x int)
 }
 
 type baseMode struct{}
@@ -90,6 +94,11 @@ func (s *baseMode) handleInput(c *mainController, evt termbox.Event) {
 			confirmQuit(c)
 		}
 	}
+}
+
+func (s *baseMode) cursorLocation(c *mainController) int {
+	//By default the cursor should be offscreen.
+	return -1
 }
 
 func (s *baseMode) statusLine(c *mainController) string {
@@ -326,9 +335,13 @@ func (s *confirmMode) statusLine(c *mainController) string {
 }
 
 type loadMode struct {
-	//TODO: store where the cursor is.
+	//TODO: store where the cursor is, supporting backspace and insertion.
 	input string
 	baseMode
+}
+
+func (m *loadMode) cursorLocation(c *mainController) int {
+	return len(STATUS_LOAD) + len(m.input)
 }
 
 func (m *loadMode) statusLine(c *mainController) string {
