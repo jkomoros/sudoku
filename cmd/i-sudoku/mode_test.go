@@ -521,6 +521,21 @@ func TestLoadMode(t *testing.T) {
 	if MODE_LOAD.cursorOffset != 0 {
 		t.Error("Cursor offset wasn't reset back to 0")
 	}
+
+	sendCharEvent(c, 'a')
+	sendCharEvent(c, 'b')
+	sendCharEvent(c, 'c')
+
+	sendKeyEvent(c, termbox.KeyArrowLeft)
+	sendCharEvent(c, 'd')
+
+	if MODE_LOAD.input != "abdc" {
+		t.Error("Adding a character in middle of string came out wrong:", MODE_LOAD.input)
+	}
+
+	if MODE_LOAD.cursorOffset != 3 {
+		t.Error("After adding a character in middle of string, cursor was in wrong loc", MODE_LOAD.cursorOffset)
+	}
 }
 
 //TODO: test fast move mode
