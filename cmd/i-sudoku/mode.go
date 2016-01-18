@@ -458,14 +458,54 @@ func (m *loadMode) tabComplete(c *mainController) {
 		m.input = directoryPortion + matchedCompletions[0]
 		m.cursorOffset = len(m.input)
 	} else if len(matchedCompletions) > 0 {
-		c.SetConsoleMessage("{Possible completions}\n"+strings.Join(matchedCompletions, "\n"), true)
+		prefix := longestCommonPrefix(matchedCompletions)
+		//In some cases the prefix will be the part already typed in; in that
+		//case, print completions.
+		if prefix != "" && prefix != rest {
+			m.input = directoryPortion + prefix
+			m.cursorOffset = len(m.input)
+		} else {
+			//Just list the valid completions
+			//TODO: when listing completions here, factor out prefix
+			c.SetConsoleMessage("{Possible completions}\n"+strings.Join(matchedCompletions, "\n"), true)
+		}
 	}
+	//TODO: if completions is none, print an error message here.
+}
 
-	//TODO: if all of the matchedCompletions have a common prefix, then
-	//autocomplete that prefix. We want LCP arrays, and the way to construct
-	//them in golang is nicely captured at
-	//http://rosettacode.org/wiki/Longest_common_prefix#Go
-
+func longestCommonPrefix(files []string) string {
+	//This implementation was inspired by some of the examples on
+	//http://rosettacode.org/wiki/Longest_common_prefix#
+	if len(files) == 0 {
+		return ""
+	}
+	if len(files) == 1 {
+		return files[0]
+	}
+	//find the min and max string,sorted by bytes
+	min := files[0]
+	max := files[1]
+	for _, file := range files {
+		if file < min {
+			min = file
+		}
+		if file > max {
+			max = file
+		}
+	}
+	//Find the longestCommonPrefix of the min and max
+	maxIndex := len(min)
+	if len(max) < maxIndex {
+		maxIndex = len(max)
+	}
+	for i := 0; i < maxIndex; i++ {
+		if min[i] != max[i] {
+			//Found first bit where they differ, return everything up until this point
+			return min[:i]
+		}
+	}
+	//If we walked through min and max and found no differences, just return min
+	return min
 }
 
 func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {

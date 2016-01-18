@@ -633,7 +633,7 @@ func TestLoadMode(t *testing.T) {
 		t.Error("Tab complete on a thing with no obvious fill did something")
 	}
 
-	if c.consoleMessage != "{Possible completions}\nconverter_one.sdk\ninvalid_sdk_too_short.sdk" {
+	if c.consoleMessage != "{Possible completions}\nconverter_copy.sdk\nconverter_one.sdk\ninvalid_sdk_too_short.sdk" {
 		t.Error("Got wrong console message on ambiguous tab:", c.consoleMessage)
 	}
 
@@ -647,6 +647,39 @@ func TestLoadMode(t *testing.T) {
 
 	if MODE_LOAD.cursorOffset != len(MODE_LOAD.input) {
 		t.Error("Tab complete didn't move to end of input.")
+	}
+
+	sendKeyEvent(c, termbox.KeyEsc)
+
+	//Try completion with a prefix
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 'l')
+	sendCharEvent(c, 'p')
+	sendKeyEvent(c, termbox.KeyTab)
+	//autocompleted to 'puzzles/'
+	sendCharEvent(c, 'c')
+	sendKeyEvent(c, termbox.KeyTab)
+
+	if MODE_LOAD.input != "puzzles/converter_" {
+		t.Error("Tab on prefix didn't fill out to end of longested common prefix")
+	}
+}
+
+func TestLongestCommonPrefix(t *testing.T) {
+	//This is actually kind of a dumb way to encode test cases, because we
+	//can't have two tests with the same expected result.
+	testCases := map[string][]string{
+		"123":  {"123", "1234"},
+		"":     {},
+		"abc":  {"abc", "abc"},
+		"abcd": {"abcd"},
+	}
+
+	for expected, testSet := range testCases {
+		result := longestCommonPrefix(testSet)
+		if result != expected {
+			t.Error("Got wrong result, got", result, "expected", expected, "for", testSet)
+		}
 	}
 }
 
