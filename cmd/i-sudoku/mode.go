@@ -10,6 +10,7 @@ var (
 	MODE_DEFAULT = &defaultMode{}
 	MODE_COMMAND = &commandMode{}
 	MODE_CONFIRM = &confirmMode{}
+	MODE_LOAD    = &loadMode{}
 )
 
 const (
@@ -27,7 +28,8 @@ const (
 {m} to enter mark mode, so all numbers entered will toggle marks
 {f} to toggle fast move mode, allowing you to skip over filled cells`
 	STATUS_DEFAULT = "{→,←,↓,↑} to move cells, {0-9} to enter number, {Shift + 0-9} to toggle marks, {?} to list other commands"
-	STATUS_COMMAND = "COMMAND: {n}ew puzzle, {q}uit, {r}eset puzzle, {ESC} cancel"
+	STATUS_COMMAND = "COMMAND: {n}ew puzzle, {q}uit, {l}oad puzzle, {r}eset puzzle, {ESC} cancel"
+	STATUS_LOAD    = "Filename? {Enter} to commit, {Esc} to cancel:"
 )
 
 func runeIsNum(ch rune) bool {
@@ -247,6 +249,8 @@ func (s *commandMode) handleInput(c *mainController, evt termbox.Event) {
 				},
 				func() {},
 			)
+		case evt.Ch == 'l':
+			c.EnterMode(MODE_LOAD)
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
@@ -319,4 +323,37 @@ func (s *confirmMode) statusLine(c *mainController) string {
 		confirmMsg = "{y}/{N}"
 	}
 	return s.msg + "  " + confirmMsg
+}
+
+type loadMode struct {
+	//TODO: store the current input, where the cursor is.
+	baseMode
+}
+
+func (m *loadMode) statusLine(c *mainController) string {
+	//TODO: include the current input
+	return STATUS_LOAD
+}
+
+func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
+	handled := true
+	switch evt.Type {
+	case termbox.EventKey:
+		switch evt.Key {
+		case termbox.KeyEnter:
+			//TODO: do something real
+			c.EnterMode(MODE_DEFAULT)
+		case termbox.KeyEsc:
+			c.EnterMode(MODE_DEFAULT)
+		default:
+			handled = false
+		}
+		switch evt.Ch {
+		default:
+			if !handled {
+				//Neither of us handled it so defer to base.
+				m.baseMode.handleInput(c, evt)
+			}
+		}
+	}
 }

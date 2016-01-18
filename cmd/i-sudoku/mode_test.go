@@ -443,4 +443,21 @@ func TestConfirmMode(t *testing.T) {
 	//TODO: test behavior with different DEFAULT_* , and with enter, y, n.
 }
 
+func TestLoadMode(t *testing.T) {
+	c := newController()
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 'l')
+
+	if c.mode != MODE_LOAD {
+		t.Error("c then l didn't get us into load mode")
+	}
+
+	sendKeyEvent(c, termbox.KeyEsc)
+
+	if c.mode != MODE_DEFAULT {
+		t.Error("Esc in load mode didn't go back to default.")
+	}
+}
+
 //TODO: test fast move mode
