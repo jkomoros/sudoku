@@ -559,6 +559,64 @@ func TestLoadMode(t *testing.T) {
 	if MODE_LOAD.input != "" {
 		t.Error("Removing all input still left some")
 	}
+
+	currentGrid := c.Grid().DataString()
+
+	//Try loading for real
+
+	//Try an invalid file name
+
+	for _, ch := range "INVALIDPUZZLEFILE" {
+		sendCharEvent(c, ch)
+	}
+	sendKeyEvent(c, termbox.KeyEnter)
+	if c.consoleMessage == "" {
+		t.Error("Trying to load invalid puzzle didn't show error message")
+	}
+	if c.Grid().DataString() != currentGrid {
+		t.Error("Trying to load an invalid puzzle mutated grid")
+	}
+	if c.mode != MODE_DEFAULT {
+		t.Error("Trying to load invalid puzzle didn't go back to default mode")
+	}
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 'l')
+
+	//Try an invalid puzzle
+	for _, ch := range "puzzles/invalid_sdk_too_short.sdk" {
+		sendCharEvent(c, ch)
+	}
+	sendKeyEvent(c, termbox.KeyEnter)
+	if c.consoleMessage == "" {
+		t.Error("Trying to load invalid puzzle didn't show error message")
+	}
+	if c.Grid().DataString() != currentGrid {
+		t.Error("Trying to load an invalid puzzle mutated grid")
+	}
+	if c.mode != MODE_DEFAULT {
+		t.Error("Trying to load invalid puzzle didn't go back to default mode")
+	}
+
+	//Try a good puzzle
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 'l')
+
+	for _, ch := range "puzzles/converter_one.sdk" {
+		sendCharEvent(c, ch)
+	}
+	sendKeyEvent(c, termbox.KeyEnter)
+	if c.consoleMessage != GRID_LOADED_MESSAGE {
+		t.Error("Trying to load valid puzzle didn't show load message:", c.consoleMessage)
+	}
+	if c.Grid().DataString() == currentGrid {
+		t.Error("Trying to load a valid puzzle didn't mutate grid")
+	}
+	if c.mode != MODE_DEFAULT {
+		t.Error("Trying to load valid puzzle didn't go back to default mode")
+	}
+
 }
 
 //TODO: test fast move mode

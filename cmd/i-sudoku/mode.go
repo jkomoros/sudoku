@@ -1,7 +1,9 @@
 package main
 
 import (
+	"github.com/jkomoros/sudoku/sdkconverter"
 	"github.com/nsf/termbox-go"
+	"io/ioutil"
 	"strconv"
 	"strings"
 )
@@ -19,6 +21,7 @@ const (
 	DEFAULT_MODE_FAIL_LOCKED       = "Can't enter a number in a locked cell."
 	FAST_MODE_NO_OPEN_CELLS        = "Can't fast move: no more open cells in that direction"
 	SINGLE_FILL_MORE_THAN_ONE_MARK = "The cell does not have precisely one mark set."
+	GRID_LOADED_MESSAGE            = "Grid successfully loaded."
 	HELP_MESSAGE                   = `The following commands are also available on this screen:
 {c} to enter command mode to do things like quit and load a new puzzle
 {h} to get a hint
@@ -374,6 +377,28 @@ func (m *loadMode) addCharAtCursor(ch rune) {
 	m.moveCursorRight()
 }
 
+func (m *loadMode) loadPuzzle(c *mainController) {
+	contents, err := ioutil.ReadFile(m.input)
+
+	if err != nil {
+		c.SetConsoleMessage("Couldn't read file:"+err.Error(), true)
+		c.EnterMode(MODE_DEFAULT)
+		return
+	}
+
+	puzzle := string(contents)
+
+	if sdkconverter.Format(puzzle) == "" {
+		c.SetConsoleMessage("Puzzle wasn't in recognized format.", true)
+		c.EnterMode(MODE_DEFAULT)
+		return
+	}
+
+	c.SetConsoleMessage(GRID_LOADED_MESSAGE, true)
+	c.SetGrid(sdkconverter.Load(puzzle))
+	c.EnterMode(MODE_DEFAULT)
+}
+
 func (m *loadMode) removeCharAtCursor() {
 	if len(m.input) == 0 {
 		return
@@ -397,8 +422,7 @@ func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
 	case termbox.EventKey:
 		switch evt.Key {
 		case termbox.KeyEnter:
-			//TODO: do something real
-			c.EnterMode(MODE_DEFAULT)
+			m.loadPuzzle(c)
 		case termbox.KeyEsc:
 			c.EnterMode(MODE_DEFAULT)
 		case termbox.KeyArrowLeft:
