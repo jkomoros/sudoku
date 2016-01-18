@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/jkomoros/sudoku/sdkconverter"
 	"github.com/nsf/termbox-go"
 	"io/ioutil"
 	"strconv"
@@ -378,24 +377,7 @@ func (m *loadMode) addCharAtCursor(ch rune) {
 }
 
 func (m *loadMode) loadPuzzle(c *mainController) {
-	contents, err := ioutil.ReadFile(m.input)
-
-	if err != nil {
-		c.SetConsoleMessage("Couldn't read file:"+err.Error(), true)
-		c.EnterMode(MODE_DEFAULT)
-		return
-	}
-
-	puzzle := string(contents)
-
-	if sdkconverter.Format(puzzle) == "" {
-		c.SetConsoleMessage("Puzzle wasn't in recognized format.", true)
-		c.EnterMode(MODE_DEFAULT)
-		return
-	}
-
-	c.SetConsoleMessage(GRID_LOADED_MESSAGE, true)
-	c.SetGrid(sdkconverter.Load(puzzle))
+	c.LoadGridFromFile(m.input)
 	c.EnterMode(MODE_DEFAULT)
 }
 

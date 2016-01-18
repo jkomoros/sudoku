@@ -2,8 +2,10 @@ package main
 
 import (
 	"github.com/jkomoros/sudoku"
+	"github.com/jkomoros/sudoku/sdkconverter"
 	"github.com/mitchellh/go-wordwrap"
 	"github.com/nsf/termbox-go"
+	"io/ioutil"
 )
 
 type mainController struct {
@@ -170,6 +172,29 @@ func (c *mainController) SetGrid(grid *sudoku.Grid) {
 	if c.grid != nil {
 		c.grid.LockFilledCells()
 	}
+}
+
+func (c *mainController) LoadGridFromFile(file string) {
+
+	if file == "" {
+		return
+	}
+
+	puzzleBytes, err := ioutil.ReadFile(file)
+
+	if err != nil {
+		c.SetConsoleMessage("Invalid file: "+err.Error(), true)
+		return
+	}
+	puzzle := string(puzzleBytes)
+
+	if sdkconverter.Format(puzzle) == "" {
+		c.SetConsoleMessage("Provided puzzle is in unknown format.", true)
+		return
+	}
+
+	c.SetGrid(sdkconverter.Load(puzzle))
+	c.SetConsoleMessage(GRID_LOADED_MESSAGE, true)
 }
 
 func (c *mainController) Selected() *sudoku.Cell {

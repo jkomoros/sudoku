@@ -10,10 +10,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/jkomoros/sudoku"
-	"github.com/jkomoros/sudoku/sdkconverter"
 	"github.com/nsf/termbox-go"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
@@ -84,25 +82,9 @@ func main() {
 
 func makeMainController(options *appOptions, errOutput io.ReadWriter) *mainController {
 
-	logger := log.New(errOutput, "", log.LstdFlags)
-
 	c := newController()
 
-	if options.START_PUZZLE_FILENAME != "" {
-		puzzleBytes, err := ioutil.ReadFile(options.START_PUZZLE_FILENAME)
-
-		if err != nil {
-			logger.Fatalln("Invalid file:", err)
-		}
-		puzzle := string(puzzleBytes)
-
-		if sdkconverter.Format(puzzle) == "" {
-			logger.Fatalln("Provided puzzle is in unknown format.")
-		}
-
-		c.SetGrid(sdkconverter.Load(puzzle))
-
-	}
+	c.LoadGridFromFile(options.START_PUZZLE_FILENAME)
 
 	return c
 }
