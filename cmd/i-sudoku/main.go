@@ -324,6 +324,9 @@ func drawStatusLine(y int, c *mainController) (newY int) {
 		termbox.SetCell(x, y, ' ', fg, termbox.ColorWhite)
 		x++
 	}
+
+	termbox.SetCursor(c.mode.cursorLocation(c), y)
+
 	return y
 }
 

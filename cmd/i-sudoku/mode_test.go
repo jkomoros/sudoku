@@ -47,6 +47,10 @@ func TestDefaultMode(t *testing.T) {
 		t.Error("Didn't get default status line in default mode.")
 	}
 
+	if model.mode.cursorLocation(model) != -1 {
+		t.Error("Cursor not off screen in default mode.")
+	}
+
 	sendNumberEvent(model, 1)
 
 	if model.Selected().Number() != 1 {
@@ -441,6 +445,178 @@ func TestConfirmMode(t *testing.T) {
 	}
 
 	//TODO: test behavior with different DEFAULT_* , and with enter, y, n.
+}
+
+func TestLoadMode(t *testing.T) {
+	c := newController()
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 'l')
+
+	if c.mode != MODE_LOAD {
+		t.Error("c then l didn't get us into load mode")
+	}
+
+	if MODE_LOAD.cursorOffset != 0 {
+		t.Error("Cursor offset wasn't 0 to start")
+	}
+
+	sendCharEvent(c, 'm')
+
+	if MODE_LOAD.cursorOffset != 1 {
+		t.Error("Typing a character didn't move the cursor")
+	}
+
+	if MODE_LOAD.input != "m" {
+		t.Error("Typing m in load mode didn't type m in the input")
+	}
+
+	cursorX := c.mode.cursorLocation(c)
+	if cursorX != len(STATUS_LOAD)+len(MODE_LOAD.input) {
+		t.Error("Cursor in wrong location, should be at end of input")
+	}
+
+	sendKeyEvent(c, termbox.KeyArrowRight)
+
+	if MODE_LOAD.cursorOffset != 1 {
+		t.Error("Moving right at end of input moved off end")
+	}
+
+	sendKeyEvent(c, termbox.KeyArrowLeft)
+
+	if MODE_LOAD.cursorOffset != 0 {
+		t.Error("Moving left didn't move cursor back to beginning")
+	}
+
+	sendKeyEvent(c, termbox.KeyArrowLeft)
+
+	if MODE_LOAD.cursorOffset != 0 {
+		t.Error("Moving left at front of input went off end")
+	}
+
+	sendKeyEvent(c, termbox.KeyArrowRight)
+	sendKeyEvent(c, termbox.KeyBackspace2)
+
+	if MODE_LOAD.cursorOffset != 0 {
+		t.Error("Backspace at end of input didn't remove it")
+	}
+
+	if MODE_LOAD.input != "" {
+		t.Error("Backspace at end of input didn't make it zero length")
+	}
+
+	sendKeyEvent(c, termbox.KeyEsc)
+
+	if c.mode != MODE_DEFAULT {
+		t.Error("Esc in load mode didn't go back to default.")
+	}
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 'l')
+
+	if MODE_LOAD.input != "" {
+		t.Error("Going back into load mode didn't reset the input")
+	}
+
+	if MODE_LOAD.cursorOffset != 0 {
+		t.Error("Cursor offset wasn't reset back to 0")
+	}
+
+	sendCharEvent(c, 'a')
+	sendCharEvent(c, 'b')
+	sendCharEvent(c, 'c')
+
+	sendKeyEvent(c, termbox.KeyArrowLeft)
+	sendCharEvent(c, 'd')
+
+	if MODE_LOAD.input != "abdc" {
+		t.Error("Adding a character in middle of string came out wrong:", MODE_LOAD.input)
+	}
+
+	if MODE_LOAD.cursorOffset != 3 {
+		t.Error("After adding a character in middle of string, cursor was in wrong loc", MODE_LOAD.cursorOffset)
+	}
+
+	sendKeyEvent(c, termbox.KeyBackspace2)
+
+	if MODE_LOAD.input != "abc" {
+		t.Error("Backspace in middle had wrong result: ", MODE_LOAD.input)
+	}
+
+	if MODE_LOAD.cursorOffset != 2 {
+		t.Error("Backspace in middle had wrong result: ", MODE_LOAD.cursorOffset)
+	}
+
+	//move cursor to end
+	sendKeyEvent(c, termbox.KeyArrowRight)
+
+	//Try to delete FOUR characters
+	sendKeyEvent(c, termbox.KeyBackspace2)
+	sendKeyEvent(c, termbox.KeyBackspace2)
+	sendKeyEvent(c, termbox.KeyBackspace2)
+	sendKeyEvent(c, termbox.KeyBackspace2)
+
+	if MODE_LOAD.input != "" {
+		t.Error("Removing all input still left some")
+	}
+
+	currentGrid := c.Grid().DataString()
+
+	//Try loading for real
+
+	//Try an invalid file name
+
+	for _, ch := range "INVALIDPUZZLEFILE" {
+		sendCharEvent(c, ch)
+	}
+	sendKeyEvent(c, termbox.KeyEnter)
+	if c.consoleMessage == "" {
+		t.Error("Trying to load invalid puzzle didn't show error message")
+	}
+	if c.Grid().DataString() != currentGrid {
+		t.Error("Trying to load an invalid puzzle mutated grid")
+	}
+	if c.mode != MODE_DEFAULT {
+		t.Error("Trying to load invalid puzzle didn't go back to default mode")
+	}
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 'l')
+
+	//Try an invalid puzzle
+	for _, ch := range "puzzles/invalid_sdk_too_short.sdk" {
+		sendCharEvent(c, ch)
+	}
+	sendKeyEvent(c, termbox.KeyEnter)
+	if c.consoleMessage == "" {
+		t.Error("Trying to load invalid puzzle didn't show error message")
+	}
+	if c.Grid().DataString() != currentGrid {
+		t.Error("Trying to load an invalid puzzle mutated grid")
+	}
+	if c.mode != MODE_DEFAULT {
+		t.Error("Trying to load invalid puzzle didn't go back to default mode")
+	}
+
+	//Try a good puzzle
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 'l')
+
+	for _, ch := range "puzzles/converter_one.sdk" {
+		sendCharEvent(c, ch)
+	}
+	sendKeyEvent(c, termbox.KeyEnter)
+	if c.consoleMessage != GRID_LOADED_MESSAGE {
+		t.Error("Trying to load valid puzzle didn't show load message:", c.consoleMessage)
+	}
+	if c.Grid().DataString() == currentGrid {
+		t.Error("Trying to load a valid puzzle didn't mutate grid")
+	}
+	if c.mode != MODE_DEFAULT {
+		t.Error("Trying to load valid puzzle didn't go back to default mode")
+	}
+
 }
 
 //TODO: test fast move mode
