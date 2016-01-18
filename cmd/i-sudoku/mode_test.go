@@ -37,8 +37,7 @@ func sendCharEvent(m *mainController, ch rune) {
 func TestDefaultMode(t *testing.T) {
 	model := newController()
 	//Add empty grid.
-	model.grid = sudoku.NewGrid()
-	model.SetSelected(nil)
+	model.SetGrid(sudoku.NewGrid())
 
 	if model.mode != MODE_DEFAULT {
 		t.Error("model didn't start in default state")
@@ -158,7 +157,7 @@ func TestReset(t *testing.T) {
 	var cell *sudoku.Cell
 
 	//find an unfilled cell.
-	for _, candidateCell := range m.grid.Cells() {
+	for _, candidateCell := range m.Grid().Cells() {
 		if candidateCell.Locked() {
 			continue
 		}
@@ -186,8 +185,9 @@ func TestReset(t *testing.T) {
 func TestHintOnSolvedGrid(t *testing.T) {
 	//This used to crash before we fixed it, so adding a regression test.
 	model := newController()
-	model.grid = sudoku.NewGrid()
-	model.grid.Fill()
+	grid := sudoku.NewGrid()
+	grid.Fill()
+	model.SetGrid(grid)
 
 	showHint(model)
 
@@ -198,9 +198,7 @@ func TestHintOnSolvedGrid(t *testing.T) {
 func TestSingleMarkEnter(t *testing.T) {
 	model := newController()
 
-	model.grid = sudoku.NewGrid()
-	model.SetSelected(nil)
-	model.EnsureSelected()
+	model.SetGrid(sudoku.NewGrid())
 
 	//Test that it fails on 0 mark cell
 
@@ -295,9 +293,7 @@ func TestSingleMarkEnter(t *testing.T) {
 func TestEnterMarksMode(t *testing.T) {
 	model := newController()
 	//Add empty grid.
-	model.grid = sudoku.NewGrid()
-	model.SetSelected(nil)
-	model.EnsureSelected()
+	model.SetGrid(sudoku.NewGrid())
 
 	model.ToggleMarkMode()
 
@@ -356,9 +352,7 @@ func TestEnterMarksMode(t *testing.T) {
 func TestCommandMode(t *testing.T) {
 	model := newController()
 	//Add empty grid.
-	model.grid = sudoku.NewGrid()
-	model.SetSelected(nil)
-	model.EnsureSelected()
+	model.SetGrid(sudoku.NewGrid())
 
 	model.EnterMode(MODE_COMMAND)
 
@@ -386,7 +380,7 @@ func TestCommandMode(t *testing.T) {
 
 	model.EnterMode(MODE_COMMAND)
 
-	gridBefore := model.grid
+	gridBefore := model.Grid()
 
 	sendCharEvent(model, 'n')
 
@@ -397,7 +391,7 @@ func TestCommandMode(t *testing.T) {
 	//confirmState has its own tests, so just pretend the user accepted.
 	sendCharEvent(model, 'y')
 
-	if model.grid == gridBefore {
+	if model.Grid() == gridBefore {
 		t.Error("'n' in command status didn't create new grid.")
 	}
 

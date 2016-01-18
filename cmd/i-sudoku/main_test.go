@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"github.com/jkomoros/sudoku"
+	"github.com/jkomoros/sudoku/sdkconverter"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -30,12 +31,12 @@ func TestNewGrid(t *testing.T) {
 
 	unfilledNumberFound := false
 	for i := 0; i < 100; i++ {
-		model.SetSelected(model.grid.Cell(3, 3))
+		model.SetSelected(model.Grid().Cell(3, 3))
 		model.NewGrid()
-		if model.grid.Cell(3, 3).Number() == 0 {
+		if model.Grid().Cell(3, 3).Number() == 0 {
 			//Found one!
 			model.SetSelectedNumber(3)
-			if model.grid.Cell(3, 3).Number() != 3 {
+			if model.Grid().Cell(3, 3).Number() != 3 {
 				t.Error("When creating a new grid, the selected cell was in the old grid.")
 			}
 			unfilledNumberFound = true
@@ -114,7 +115,7 @@ func TestEnsureSelected(t *testing.T) {
 
 func TestSelected(t *testing.T) {
 	model := newController()
-	next := model.grid.Cell(2, 2)
+	next := model.Grid().Cell(2, 2)
 	model.SetSelected(next)
 	if model.Selected() != next {
 		t.Error("Set selected didn't change the selected cell.")
@@ -138,7 +139,7 @@ func TestMoveSelectionLeft(t *testing.T) {
 		t.Error("Wrong cell selected after move left at bounds", model.Selected())
 	}
 
-	model.SetSelected(model.grid.Cell(1, 1))
+	model.SetSelected(model.Grid().Cell(1, 1))
 
 	model.MoveSelectionLeft(false)
 
@@ -147,22 +148,19 @@ func TestMoveSelectionLeft(t *testing.T) {
 	}
 
 	//Test fast move
-	newGrid := sudoku.NewGrid()
-	newGrid.LoadSDK(FAST_MOVE_TEST_GRID)
-	newGrid.LockFilledCells()
+	model.SetGrid(sdkconverter.Load(FAST_MOVE_TEST_GRID))
 
-	model.grid = newGrid
-	model.SetSelected(model.grid.Cell(4, 4))
+	model.SetSelected(model.Grid().Cell(4, 4))
 
 	model.MoveSelectionLeft(true)
 
-	if model.Selected() != model.grid.Cell(4, 2) {
+	if model.Selected() != model.Grid().Cell(4, 2) {
 		t.Error("Fast move didn't skip the locked cell", model.Selected())
 	}
 	//No more spots to the left; should stay still.
 	model.MoveSelectionLeft(true)
 
-	if model.Selected() != model.grid.Cell(4, 2) {
+	if model.Selected() != model.Grid().Cell(4, 2) {
 		t.Error("Fast move moved even though no more cells left in that direction")
 	}
 }
@@ -184,7 +182,7 @@ func TestMoveSelectionRight(t *testing.T) {
 		t.Error("Wrong cell selected after move right", model.Selected())
 	}
 
-	model.SetSelected(model.grid.Cell(1, sudoku.DIM-1))
+	model.SetSelected(model.Grid().Cell(1, sudoku.DIM-1))
 
 	model.MoveSelectionRight(false)
 
@@ -193,22 +191,19 @@ func TestMoveSelectionRight(t *testing.T) {
 	}
 
 	//Test fast move
-	newGrid := sudoku.NewGrid()
-	newGrid.LoadSDK(FAST_MOVE_TEST_GRID)
-	newGrid.LockFilledCells()
+	model.SetGrid(sdkconverter.Load(FAST_MOVE_TEST_GRID))
 
-	model.grid = newGrid
-	model.SetSelected(model.grid.Cell(4, 4))
+	model.SetSelected(model.Grid().Cell(4, 4))
 
 	model.MoveSelectionRight(true)
 
-	if model.Selected() != model.grid.Cell(4, 6) {
+	if model.Selected() != model.Grid().Cell(4, 6) {
 		t.Error("Fast move didn't skip the locked cell", model.Selected())
 	}
 	//No more spots to the left; should stay still.
 	model.MoveSelectionRight(true)
 
-	if model.Selected() != model.grid.Cell(4, 6) {
+	if model.Selected() != model.Grid().Cell(4, 6) {
 		t.Error("Fast move moved even though no more cells left in that direction")
 	}
 }
@@ -230,7 +225,7 @@ func TestMoveSelectionUp(t *testing.T) {
 		t.Error("Wrong cell selected after move up at bounds", model.Selected())
 	}
 
-	model.SetSelected(model.grid.Cell(1, 1))
+	model.SetSelected(model.Grid().Cell(1, 1))
 
 	model.MoveSelectionUp(false)
 
@@ -239,22 +234,19 @@ func TestMoveSelectionUp(t *testing.T) {
 	}
 
 	//Test fast move
-	newGrid := sudoku.NewGrid()
-	newGrid.LoadSDK(FAST_MOVE_TEST_GRID)
-	newGrid.LockFilledCells()
+	model.SetGrid(sdkconverter.Load(FAST_MOVE_TEST_GRID))
 
-	model.grid = newGrid
-	model.SetSelected(model.grid.Cell(4, 4))
+	model.SetSelected(model.Grid().Cell(4, 4))
 
 	model.MoveSelectionUp(true)
 
-	if model.Selected() != model.grid.Cell(2, 4) {
+	if model.Selected() != model.Grid().Cell(2, 4) {
 		t.Error("Fast move didn't skip the locked cell", model.Selected())
 	}
 	//No more spots to the left; should stay still.
 	model.MoveSelectionUp(true)
 
-	if model.Selected() != model.grid.Cell(2, 4) {
+	if model.Selected() != model.Grid().Cell(2, 4) {
 		t.Error("Fast move moved even though no more cells left in that direction")
 	}
 }
@@ -276,7 +268,7 @@ func TestMoveSelectionDown(t *testing.T) {
 		t.Error("Wrong cell selected after move down", model.Selected())
 	}
 
-	model.SetSelected(model.grid.Cell(sudoku.DIM-1, 1))
+	model.SetSelected(model.Grid().Cell(sudoku.DIM-1, 1))
 
 	model.MoveSelectionDown(false)
 
@@ -285,35 +277,31 @@ func TestMoveSelectionDown(t *testing.T) {
 	}
 
 	//Test fast move
-	newGrid := sudoku.NewGrid()
-	newGrid.LoadSDK(FAST_MOVE_TEST_GRID)
-	newGrid.LockFilledCells()
+	model.SetGrid(sdkconverter.Load(FAST_MOVE_TEST_GRID))
 
-	model.grid = newGrid
-	model.SetSelected(model.grid.Cell(4, 4))
+	model.SetSelected(model.Grid().Cell(4, 4))
 
 	model.MoveSelectionDown(true)
 
-	if model.Selected() != model.grid.Cell(6, 4) {
+	if model.Selected() != model.Grid().Cell(6, 4) {
 		t.Error("Fast move didn't skip the locked cell", model.Selected())
 	}
 	//No more spots to the left; should stay still.
 	model.MoveSelectionDown(true)
 
-	if model.Selected() != model.grid.Cell(6, 4) {
+	if model.Selected() != model.Grid().Cell(6, 4) {
 		t.Error("Fast move moved even though no more cells left in that direction")
 	}
 }
 
 func TestFillSelectedWithLegalMarks(t *testing.T) {
 	model := newController()
-	model.grid = sudoku.NewGrid()
-	model.SetSelected(nil)
+	model.SetGrid(sudoku.NewGrid())
 
 	model.ToggleSelectedMark(4)
 
 	for i := 3; i < sudoku.DIM; i++ {
-		cell := model.grid.Cell(0, i)
+		cell := model.Grid().Cell(0, i)
 		cell.SetNumber(i + 1)
 	}
 
@@ -335,27 +323,26 @@ func TestFillSelectedWithLegalMarks(t *testing.T) {
 func TestEnsureGrid(t *testing.T) {
 	model := newController()
 
-	if model.grid == nil {
+	if model.Grid() == nil {
 		t.Fatal("New model had no grid")
 	}
 
-	oldData := model.grid.DataString()
+	oldData := model.Grid().DataString()
 
 	model.EnsureGrid()
 
-	if model.grid.DataString() != oldData {
+	if model.Grid().DataString() != oldData {
 		t.Error("Ensure grid blew away a grid")
 	}
 
-	model.grid = nil
-
+	model.SetGrid(nil)
 	model.EnsureGrid()
 
-	if model.grid == nil {
+	if model.Grid() == nil {
 		t.Error("EnsureGrid didn't create a grid")
 	}
 
-	for i, cell := range model.grid.Cells() {
+	for i, cell := range model.Grid().Cells() {
 		if cell.Number() != 0 && !cell.Locked() {
 			t.Error("Grid from EnsureGrid didn't have numbers locked:", i, cell)
 		}
@@ -369,7 +356,7 @@ func TestSetSelectionNumber(t *testing.T) {
 	var unlockedCell *sudoku.Cell
 
 	//Set an unlocked cell
-	for _, cell := range model.grid.Cells() {
+	for _, cell := range model.Grid().Cells() {
 		if cell.Locked() {
 			if lockedCell == nil {
 				lockedCell = cell
@@ -431,7 +418,7 @@ func TestToggleSelectedMark(t *testing.T) {
 	var unlockedCell *sudoku.Cell
 
 	//Set an unlocked cell
-	for _, cell := range model.grid.Cells() {
+	for _, cell := range model.Grid().Cells() {
 		if cell.Locked() {
 			if lockedCell == nil {
 				lockedCell = cell
@@ -494,7 +481,7 @@ func TestProvideStarterPuzzle(t *testing.T) {
 
 	goldenPuzzle, _ := ioutil.ReadFile("puzzles/converter_one.sdk")
 
-	if c.grid.DataString() != string(goldenPuzzle) {
+	if c.Grid().DataString() != string(goldenPuzzle) {
 		t.Error("Loading a normal puzzle with command line option failed.")
 	}
 

@@ -110,7 +110,7 @@ func showHint(c *mainController) {
 
 	//TODO: shouldn't this be a method on model?  The rule of thumb is no
 	//modifying state in model except in model methods.
-	hint := c.grid.Hint(nil)
+	hint := c.Grid().Hint(nil)
 
 	if len(hint.Steps) == 0 {
 		c.SetConsoleMessage("No hint to give.", true)
@@ -120,7 +120,7 @@ func showHint(c *mainController) {
 	//This hast to be after setting console message, since SetConsoleMessage clears the last hint.
 	c.lastShownHint = hint
 	lastStep := hint.Steps[len(hint.Steps)-1]
-	c.SetSelected(lastStep.TargetCells[0].InGrid(c.grid))
+	c.SetSelected(lastStep.TargetCells[0].InGrid(c.Grid()))
 }
 
 func (s *defaultMode) enterHint(c *mainController) {
@@ -131,7 +131,7 @@ func (s *defaultMode) enterHint(c *mainController) {
 	cell := lastStep.TargetCells[0]
 	num := lastStep.TargetNums[0]
 
-	c.SetSelected(cell.InGrid(c.grid))
+	c.SetSelected(cell.InGrid(c.Grid()))
 	c.SetSelectedNumber(num)
 
 	c.ClearConsole()

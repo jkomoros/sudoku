@@ -100,13 +100,7 @@ func makeMainController(options *appOptions, errOutput io.ReadWriter) *mainContr
 			logger.Fatalln("Provided puzzle is in unknown format.")
 		}
 
-		//TODO: this logic should all be wrapped in SetGrid logic, since it's
-		//so finicky.
-
-		c.grid = sdkconverter.Load(puzzle)
-		c.grid.LockFilledCells()
-		c.SetSelected(nil)
-		c.EnsureSelected()
+		c.SetGrid(sdkconverter.Load(puzzle))
 
 	}
 
@@ -177,7 +171,7 @@ func drawColorPalette() {
 
 func drawGrid(y int, c *mainController) (endY int) {
 	var x int
-	grid := c.grid
+	grid := c.Grid()
 
 	fg := termbox.ColorBlack
 	bg := termbox.ColorGreen

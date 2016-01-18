@@ -55,7 +55,7 @@ func (c *mainController) setUpToggles() {
 		//Solved
 		{
 			func() bool {
-				return c.grid.Solved()
+				return c.Grid().Solved()
 			},
 			func() {
 				//Do nothing; read only
@@ -67,7 +67,7 @@ func (c *mainController) setUpToggles() {
 		//invalid
 		{
 			func() bool {
-				return c.grid.Invalid()
+				return c.Grid().Invalid()
 			},
 			func() {
 				//Read only
@@ -156,6 +156,22 @@ func (c *mainController) StatusLine() string {
 	return c.mode.statusLine(c)
 }
 
+func (c *mainController) Grid() *sudoku.Grid {
+	return c.grid
+}
+
+func (c *mainController) SetGrid(grid *sudoku.Grid) {
+	oldCell := c.Selected()
+	c.grid = grid
+	//The currently selected cell is tied to the grid, so we need to fix it up.
+	if oldCell != nil {
+		c.SetSelected(oldCell.InGrid(c.grid))
+	}
+	if c.grid != nil {
+		c.grid.LockFilledCells()
+	}
+}
+
 func (c *mainController) Selected() *sudoku.Cell {
 	return c.selected
 }
@@ -173,7 +189,7 @@ func (c *mainController) EnsureSelected() {
 	c.EnsureGrid()
 	//Ensures that at least one cell is selected.
 	if c.Selected() == nil {
-		c.SetSelected(c.grid.Cell(0, 0))
+		c.SetSelected(c.Grid().Cell(0, 0))
 	}
 }
 
@@ -186,7 +202,7 @@ func (c *mainController) MoveSelectionLeft(fast bool) {
 		if col < 0 {
 			col = 0
 		}
-		if fast && c.grid.Cell(row, col).Number() != 0 {
+		if fast && c.Grid().Cell(row, col).Number() != 0 {
 			if col == 0 {
 				//We're at the end and didn't find anything.
 				//guess there's nothing to find.
@@ -195,7 +211,7 @@ func (c *mainController) MoveSelectionLeft(fast bool) {
 			}
 			continue
 		}
-		c.SetSelected(c.grid.Cell(row, col))
+		c.SetSelected(c.Grid().Cell(row, col))
 		break
 	}
 }
@@ -209,7 +225,7 @@ func (c *mainController) MoveSelectionRight(fast bool) {
 		if col >= sudoku.DIM {
 			col = sudoku.DIM - 1
 		}
-		if fast && c.grid.Cell(row, col).Number() != 0 {
+		if fast && c.Grid().Cell(row, col).Number() != 0 {
 			if col == sudoku.DIM-1 {
 				//We're at the end and didn't find anything.
 				//guess there's nothing to find.
@@ -218,7 +234,7 @@ func (c *mainController) MoveSelectionRight(fast bool) {
 			}
 			continue
 		}
-		c.SetSelected(c.grid.Cell(row, col))
+		c.SetSelected(c.Grid().Cell(row, col))
 		break
 	}
 }
@@ -232,7 +248,7 @@ func (m *mainController) MoveSelectionUp(fast bool) {
 		if r < 0 {
 			r = 0
 		}
-		if fast && m.grid.Cell(r, c).Number() != 0 {
+		if fast && m.Grid().Cell(r, c).Number() != 0 {
 			if r == 0 {
 				//We're at the end and didn't find anything.
 				//guess there's nothing to find.
@@ -241,7 +257,7 @@ func (m *mainController) MoveSelectionUp(fast bool) {
 			}
 			continue
 		}
-		m.SetSelected(m.grid.Cell(r, c))
+		m.SetSelected(m.Grid().Cell(r, c))
 		break
 	}
 }
@@ -255,7 +271,7 @@ func (m *mainController) MoveSelectionDown(fast bool) {
 		if r >= sudoku.DIM {
 			r = sudoku.DIM - 1
 		}
-		if fast && m.grid.Cell(r, c).Number() != 0 {
+		if fast && m.Grid().Cell(r, c).Number() != 0 {
 			if r == sudoku.DIM-1 {
 				//We're at the end and didn't find anything.
 				//guess there's nothing to find.
@@ -264,7 +280,7 @@ func (m *mainController) MoveSelectionDown(fast bool) {
 			}
 			continue
 		}
-		m.SetSelected(m.grid.Cell(r, c))
+		m.SetSelected(m.Grid().Cell(r, c))
 		break
 	}
 }
@@ -286,24 +302,17 @@ func (m *mainController) ToggleMarkMode() {
 }
 
 func (m *mainController) EnsureGrid() {
-	if m.grid == nil {
+	if m.Grid() == nil {
 		m.NewGrid()
 	}
 }
 
 func (c *mainController) NewGrid() {
-	oldCell := c.Selected()
-
-	c.grid = sudoku.GenerateGrid(nil)
-	//The currently selected cell is tied to the grid, so we need to fix it up.
-	if oldCell != nil {
-		c.SetSelected(oldCell.InGrid(c.grid))
-	}
-	c.grid.LockFilledCells()
+	c.SetGrid(sudoku.GenerateGrid(nil))
 }
 
 func (c *mainController) ResetGrid() {
-	c.grid.ResetUnlockedCells()
+	c.Grid().ResetUnlockedCells()
 }
 
 //If the selected cell has only one mark, fill it.
@@ -342,7 +351,7 @@ func (c *mainController) checkHintDone() {
 	lastStep := c.lastShownHint.Steps[len(c.lastShownHint.Steps)-1]
 	num := lastStep.TargetNums[0]
 	cell := lastStep.TargetCells[0]
-	if cell.InGrid(c.grid).Number() == num {
+	if cell.InGrid(c.Grid()).Number() == num {
 		c.ClearConsole()
 	}
 }
