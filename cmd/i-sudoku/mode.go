@@ -335,7 +335,6 @@ func (s *confirmMode) statusLine(c *mainController) string {
 }
 
 type loadMode struct {
-	//TODO: store where the cursor is, supporting backspace and insertion.
 	input string
 	//which index of the input string the cursor is at
 	cursorOffset int
