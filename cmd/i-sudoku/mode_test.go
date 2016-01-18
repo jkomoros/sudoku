@@ -494,6 +494,17 @@ func TestLoadMode(t *testing.T) {
 		t.Error("Moving left at front of input went off end")
 	}
 
+	sendKeyEvent(c, termbox.KeyArrowRight)
+	sendKeyEvent(c, termbox.KeyBackspace2)
+
+	if MODE_LOAD.cursorOffset != 0 {
+		t.Error("Backspace at end of input didn't remove it")
+	}
+
+	if MODE_LOAD.input != "" {
+		t.Error("Backspace at end of input didn't make it zero length")
+	}
+
 	sendKeyEvent(c, termbox.KeyEsc)
 
 	if c.mode != MODE_DEFAULT {

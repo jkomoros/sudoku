@@ -376,6 +376,15 @@ func (m *loadMode) addCharAtCursor(ch rune) {
 	m.moveCursorRight()
 }
 
+func (m *loadMode) removeCharAtCursor() {
+	//TODO: support removing character not at end of line
+	if len(m.input) == 0 {
+		return
+	}
+	m.input = m.input[:len(m.input)-1]
+	m.moveCursorLeft()
+}
+
 func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
 	handled := true
 	switch evt.Type {
@@ -390,7 +399,8 @@ func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
 			m.moveCursorLeft()
 		case termbox.KeyArrowRight:
 			m.moveCursorRight()
-		//TODO: support backspace
+		case termbox.KeyBackspace, termbox.KeyBackspace2:
+			m.removeCharAtCursor()
 		default:
 			handled = false
 		}
