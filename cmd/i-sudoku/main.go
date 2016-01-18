@@ -325,7 +325,12 @@ func drawStatusLine(y int, c *mainController) (newY int) {
 		x++
 	}
 
-	termbox.SetCursor(c.mode.cursorLocation(c), y)
+	//Draw the cursor. To make it flash, every other time draw it offscreen.
+	if tickCount%2 == 0 {
+		termbox.SetCursor(c.mode.cursorLocation(c), y)
+	} else {
+		termbox.SetCursor(-1, y)
+	}
 
 	return y
 }
