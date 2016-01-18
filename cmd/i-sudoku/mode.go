@@ -416,6 +416,55 @@ func (m *loadMode) removeCharAtCursor() {
 	m.moveCursorLeft()
 }
 
+func (m *loadMode) tabComplete(c *mainController) {
+	//Only do tab complete if at end of input
+	if m.cursorOffset != len(m.input) {
+		return
+	}
+	//Interpret input as a path. Split everthing before the last '/' as the directory to scan
+	//and everything after as the prefix to filter those things with.
+	//TODO: change this sep on other platforms?
+	splitPath := strings.Split(m.input, "/")
+	directoryPortion := strings.Join(splitPath[:len(splitPath)-1], "/")
+
+	if directoryPortion != "" {
+		directoryPortion += "/"
+	}
+
+	rest := splitPath[len(splitPath)-1]
+	possibleCompletions, err := ioutil.ReadDir("./" + directoryPortion)
+
+	if err != nil {
+		c.SetConsoleMessage("No valid directory"+err.Error(), true)
+		return
+	}
+
+	//Now, process possibleCompletions, filtering down ones that don't have the prefix.
+	var matchedCompletions []string
+	for _, completion := range possibleCompletions {
+		if strings.HasPrefix(completion.Name(), rest) {
+			//Found one!
+
+			completionToAdd := completion.Name()
+			if completion.IsDir() {
+				completionToAdd += "/"
+			}
+			matchedCompletions = append(matchedCompletions, completionToAdd)
+		}
+	}
+
+	if len(matchedCompletions) == 1 {
+		//There's only one completion!
+		m.input = directoryPortion + matchedCompletions[0]
+		m.cursorOffset = len(m.input)
+	}
+	//TODO: put other completions into console.
+
+	//TODO: if all of the matchedCompletions have a common prefix, then
+	//autocomplete that prefix.
+
+}
+
 func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
 	handled := true
 	switch evt.Type {
@@ -431,6 +480,8 @@ func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
 			m.moveCursorRight()
 		case termbox.KeyBackspace, termbox.KeyBackspace2:
 			m.removeCharAtCursor()
+		case termbox.KeyTab:
+			m.tabComplete(c)
 		default:
 			handled = false
 		}

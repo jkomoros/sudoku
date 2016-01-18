@@ -617,6 +617,33 @@ func TestLoadMode(t *testing.T) {
 		t.Error("Trying to load valid puzzle didn't go back to default mode")
 	}
 
+	//Tab completion
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 'l')
+	sendCharEvent(c, 'p')
+	sendKeyEvent(c, termbox.KeyTab)
+
+	if MODE_LOAD.input != "puzzles/" {
+		t.Error("tab on 'p' didn't complete to puzzles")
+	}
+
+	sendKeyEvent(c, termbox.KeyTab)
+
+	if MODE_LOAD.input != "puzzles/" {
+		t.Error("Tab complete on a thing with no obvious fill did something")
+	}
+
+	sendCharEvent(c, 'i')
+
+	sendKeyEvent(c, termbox.KeyTab)
+
+	if MODE_LOAD.input != "puzzles/invalid_sdk_too_short.sdk" {
+		t.Error("Second valid autocomplete filled wrong thing")
+	}
+
+	if MODE_LOAD.cursorOffset != len(MODE_LOAD.input) {
+		t.Error("Tab complete didn't move to end of input.")
+	}
 }
 
 //TODO: test fast move mode
