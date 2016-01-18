@@ -371,6 +371,7 @@ func (m *loadMode) moveCursorRight() {
 }
 
 func (m *loadMode) addCharAtCursor(ch rune) {
+	//TODO: support splicing into the middle of the input
 	m.input += string(ch)
 	m.moveCursorRight()
 }
