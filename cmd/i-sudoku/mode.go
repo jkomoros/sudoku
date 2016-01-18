@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	STATE_DEFAULT = &defaultState{}
-	STATE_COMMAND = &commandState{}
-	STATE_CONFIRM = &confirmState{}
+	MODE_DEFAULT = &defaultMode{}
+	MODE_COMMAND = &commandMode{}
+	MODE_CONFIRM = &confirmMode{}
 )
 
 const (
@@ -70,7 +70,7 @@ func shiftedNumRuneToNum(ch rune) rune {
 	return ch
 }
 
-type InputState interface {
+type InputMode interface {
 	//TODO: doesn't it feel weird that every method takes a main model?
 	handleInput(c *mainController, evt termbox.Event)
 	shouldEnter(c *mainController) bool
@@ -78,9 +78,9 @@ type InputState interface {
 	newCellSelected(c *mainController)
 }
 
-type baseState struct{}
+type baseMode struct{}
 
-func (s *baseState) handleInput(c *mainController, evt termbox.Event) {
+func (s *baseMode) handleInput(c *mainController, evt termbox.Event) {
 	switch evt.Type {
 	case termbox.EventKey:
 		switch evt.Key {
@@ -90,20 +90,20 @@ func (s *baseState) handleInput(c *mainController, evt termbox.Event) {
 	}
 }
 
-func (s *baseState) statusLine(c *mainController) string {
+func (s *baseMode) statusLine(c *mainController) string {
 	return STATUS_DEFAULT
 }
 
-func (s *baseState) newCellSelected(c *mainController) {
+func (s *baseMode) newCellSelected(c *mainController) {
 	//Do nothing by default.
 }
 
-func (s *baseState) shouldEnter(c *mainController) bool {
+func (s *baseMode) shouldEnter(c *mainController) bool {
 	return true
 }
 
-type defaultState struct {
-	baseState
+type defaultMode struct {
+	baseMode
 }
 
 func showHint(c *mainController) {
@@ -123,7 +123,7 @@ func showHint(c *mainController) {
 	c.SetSelected(lastStep.TargetCells[0].InGrid(c.grid))
 }
 
-func (s *defaultState) enterHint(c *mainController) {
+func (s *defaultMode) enterHint(c *mainController) {
 	if c.lastShownHint == nil {
 		return
 	}
@@ -137,7 +137,7 @@ func (s *defaultState) enterHint(c *mainController) {
 	c.ClearConsole()
 }
 
-func (s *defaultState) handleInput(c *mainController, evt termbox.Event) {
+func (s *defaultMode) handleInput(c *mainController, evt termbox.Event) {
 
 	handled := true
 	switch evt.Type {
@@ -174,7 +174,7 @@ func (s *defaultState) handleInput(c *mainController, evt termbox.Event) {
 		case evt.Ch == '-':
 			c.RemoveInvalidMarksFromSelected()
 		case evt.Ch == 'c':
-			c.EnterState(STATE_COMMAND)
+			c.EnterMode(MODE_COMMAND)
 		case evt.Ch == 'm':
 			c.ToggleMarkMode()
 		case runeIsShiftedNum(evt.Ch):
@@ -198,18 +198,18 @@ func (s *defaultState) handleInput(c *mainController, evt termbox.Event) {
 		default:
 			if !handled {
 				//neither handler handled it; defer to base.
-				s.baseState.handleInput(c, evt)
+				s.baseMode.handleInput(c, evt)
 			}
 		}
 	}
 }
 
-type commandState struct {
-	baseState
+type commandMode struct {
+	baseMode
 }
 
 func confirmQuit(c *mainController) {
-	c.enterConfirmState("Quit? Your progress will be lost.",
+	c.enterConfirmMode("Quit? Your progress will be lost.",
 		DEFAULT_NO,
 		func() {
 			c.exitNow = true
@@ -218,13 +218,13 @@ func confirmQuit(c *mainController) {
 	)
 }
 
-func (s *commandState) handleInput(c *mainController, evt termbox.Event) {
+func (s *commandMode) handleInput(c *mainController, evt termbox.Event) {
 	handled := true
 	switch evt.Type {
 	case termbox.EventKey:
 		switch evt.Key {
 		case termbox.KeyEsc:
-			c.EnterState(STATE_DEFAULT)
+			c.EnterMode(MODE_DEFAULT)
 		default:
 			handled = false
 		}
@@ -232,7 +232,7 @@ func (s *commandState) handleInput(c *mainController, evt termbox.Event) {
 		case evt.Ch == 'q':
 			confirmQuit(c)
 		case evt.Ch == 'n':
-			c.enterConfirmState("Replace grid with a new one? This is a destructive action.",
+			c.enterConfirmMode("Replace grid with a new one? This is a destructive action.",
 				DEFAULT_NO,
 				func() {
 					c.NewGrid()
@@ -240,7 +240,7 @@ func (s *commandState) handleInput(c *mainController, evt termbox.Event) {
 				func() {},
 			)
 		case evt.Ch == 'r':
-			c.enterConfirmState("Reset? Your progress will be lost.",
+			c.enterConfirmMode("Reset? Your progress will be lost.",
 				DEFAULT_NO,
 				func() {
 					c.ResetGrid()
@@ -250,13 +250,13 @@ func (s *commandState) handleInput(c *mainController, evt termbox.Event) {
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
-				s.baseState.handleInput(c, evt)
+				s.baseMode.handleInput(c, evt)
 			}
 		}
 	}
 }
 
-func (s *commandState) statusLine(c *mainController) string {
+func (s *commandMode) statusLine(c *mainController) string {
 	return STATUS_COMMAND
 }
 
@@ -268,15 +268,15 @@ const (
 	DEFAULT_NONE
 )
 
-type confirmState struct {
+type confirmMode struct {
 	msg           string
 	defaultAction defaultOption
 	yesAction     func()
 	noAction      func()
-	baseState
+	baseMode
 }
 
-func (s *confirmState) handleInput(c *mainController, evt termbox.Event) {
+func (s *confirmMode) handleInput(c *mainController, evt termbox.Event) {
 	handled := true
 	switch evt.Type {
 	case termbox.EventKey:
@@ -285,10 +285,10 @@ func (s *confirmState) handleInput(c *mainController, evt termbox.Event) {
 			switch s.defaultAction {
 			case DEFAULT_YES:
 				s.yesAction()
-				c.EnterState(STATE_DEFAULT)
+				c.EnterMode(MODE_DEFAULT)
 			case DEFAULT_NO:
 				s.noAction()
-				c.EnterState(STATE_DEFAULT)
+				c.EnterMode(MODE_DEFAULT)
 			case DEFAULT_NONE:
 				//Don't do anything
 			}
@@ -298,20 +298,20 @@ func (s *confirmState) handleInput(c *mainController, evt termbox.Event) {
 		switch evt.Ch {
 		case 'y':
 			s.yesAction()
-			c.EnterState(STATE_DEFAULT)
+			c.EnterMode(MODE_DEFAULT)
 		case 'n':
 			s.noAction()
-			c.EnterState(STATE_DEFAULT)
+			c.EnterMode(MODE_DEFAULT)
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
-				s.baseState.handleInput(c, evt)
+				s.baseMode.handleInput(c, evt)
 			}
 		}
 	}
 }
 
-func (s *confirmState) statusLine(c *mainController) string {
+func (s *confirmMode) statusLine(c *mainController) string {
 	confirmMsg := "{y}/{n}"
 	if s.defaultAction == DEFAULT_YES {
 		confirmMsg = "{Y}/{n}"

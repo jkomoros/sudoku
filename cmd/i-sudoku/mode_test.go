@@ -13,7 +13,7 @@ func sendKeyEvent(m *mainController, k termbox.Key) {
 		Type: termbox.EventKey,
 		Key:  k,
 	}
-	m.state.handleInput(m, evt)
+	m.mode.handleInput(m, evt)
 }
 
 func sendNumberEvent(m *mainController, num int) {
@@ -22,7 +22,7 @@ func sendNumberEvent(m *mainController, num int) {
 		Type: termbox.EventKey,
 		Ch:   ch,
 	}
-	m.state.handleInput(m, evt)
+	m.mode.handleInput(m, evt)
 }
 
 //TODO: use sendCharEvent to verify that chars in all states do what they should.
@@ -31,20 +31,20 @@ func sendCharEvent(m *mainController, ch rune) {
 		Type: termbox.EventKey,
 		Ch:   ch,
 	}
-	m.state.handleInput(m, evt)
+	m.mode.handleInput(m, evt)
 }
 
-func TestDefaultState(t *testing.T) {
+func TestDefaultMode(t *testing.T) {
 	model := newController()
 	//Add empty grid.
 	model.grid = sudoku.NewGrid()
 	model.SetSelected(nil)
 
-	if model.state != STATE_DEFAULT {
+	if model.mode != MODE_DEFAULT {
 		t.Error("model didn't start in default state")
 	}
 
-	if STATE_DEFAULT.statusLine(model) != STATUS_DEFAULT {
+	if MODE_DEFAULT.statusLine(model) != STATUS_DEFAULT {
 		t.Error("Didn't get default status line in default mode.")
 	}
 
@@ -90,7 +90,7 @@ func TestDefaultState(t *testing.T) {
 		t.Error("The hint message was short")
 	}
 
-	if model.state != STATE_DEFAULT {
+	if model.mode != MODE_DEFAULT {
 		t.Error("Choosing hint didn't lead back to default mode")
 	}
 
@@ -292,7 +292,7 @@ func TestSingleMarkEnter(t *testing.T) {
 	}
 }
 
-func TestEnterMarksState(t *testing.T) {
+func TestEnterMarksMode(t *testing.T) {
 	model := newController()
 	//Add empty grid.
 	model.grid = sudoku.NewGrid()
@@ -353,16 +353,16 @@ func TestEnterMarksState(t *testing.T) {
 
 }
 
-func TestCommandState(t *testing.T) {
+func TestCommandMode(t *testing.T) {
 	model := newController()
 	//Add empty grid.
 	model.grid = sudoku.NewGrid()
 	model.SetSelected(nil)
 	model.EnsureSelected()
 
-	model.EnterState(STATE_COMMAND)
+	model.EnterMode(MODE_COMMAND)
 
-	if model.state != STATE_COMMAND {
+	if model.mode != MODE_COMMAND {
 		t.Error("Trying to enter state command failed")
 	}
 
@@ -372,7 +372,7 @@ func TestCommandState(t *testing.T) {
 
 	sendCharEvent(model, 'q')
 
-	if model.state != STATE_CONFIRM {
+	if model.mode != MODE_CONFIRM {
 		t.Error("'q' in command mode didn't got to confirm state")
 	}
 
@@ -384,13 +384,13 @@ func TestCommandState(t *testing.T) {
 
 	model.exitNow = false
 
-	model.EnterState(STATE_COMMAND)
+	model.EnterMode(MODE_COMMAND)
 
 	gridBefore := model.grid
 
 	sendCharEvent(model, 'n')
 
-	if model.state != STATE_CONFIRM {
+	if model.mode != MODE_CONFIRM {
 		t.Error("'n' didn't go to confirm state")
 	}
 
@@ -401,27 +401,27 @@ func TestCommandState(t *testing.T) {
 		t.Error("'n' in command status didn't create new grid.")
 	}
 
-	if model.state != STATE_DEFAULT {
+	if model.mode != MODE_DEFAULT {
 		t.Error("'n' in command mode didn't go back to default mode when it was done")
 	}
 
-	model.EnterState(STATE_COMMAND)
+	model.EnterMode(MODE_COMMAND)
 
 	sendKeyEvent(model, termbox.KeyEsc)
-	if model.state != STATE_DEFAULT {
+	if model.mode != MODE_DEFAULT {
 		t.Error("'Esc' in command state didn't go back to default mode")
 
 	}
 }
 
-func TestConfirmState(t *testing.T) {
+func TestConfirmMode(t *testing.T) {
 	model := newController()
 
 	channel := make(chan bool, 1)
 
-	model.enterConfirmState("TEST", DEFAULT_YES, func() { channel <- true }, func() { channel <- false })
+	model.enterConfirmMode("TEST", DEFAULT_YES, func() { channel <- true }, func() { channel <- false })
 
-	if model.state != STATE_CONFIRM {
+	if model.mode != MODE_CONFIRM {
 		t.Error("enterConfirmState didn't lead to being in confirm state")
 	}
 
@@ -442,7 +442,7 @@ func TestConfirmState(t *testing.T) {
 
 	}
 
-	if model.state != STATE_DEFAULT {
+	if model.mode != MODE_DEFAULT {
 		t.Error("After confirm accepted, not ending up in default mode.")
 	}
 

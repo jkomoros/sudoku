@@ -132,7 +132,7 @@ mainloop:
 			switch evt.Type {
 			case termbox.EventKey:
 				c.WillProcessEvent()
-				c.state.handleInput(c, evt)
+				c.mode.handleInput(c, evt)
 			}
 		case <-timeTick:
 			tickCount++

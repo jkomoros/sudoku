@@ -9,7 +9,7 @@ import (
 type mainController struct {
 	grid     *sudoku.Grid
 	selected *sudoku.Cell
-	state    InputState
+	mode     InputMode
 	//The size of the console output. Not used for much.
 	outputWidth    int
 	lastShownHint  *sudoku.SolveDirections
@@ -38,7 +38,7 @@ type toggle struct {
 
 func newController() *mainController {
 	c := &mainController{
-		state: STATE_DEFAULT,
+		mode: MODE_DEFAULT,
 	}
 	c.setUpToggles()
 	c.EnsureSelected()
@@ -106,22 +106,22 @@ func (c *mainController) setUpToggles() {
 //EnterState attempts to set the controller to the given state. The state
 //object is given a chance to do initalization and potentially cancel the
 //transition, leaving the controller in the same state as before.
-func (c *mainController) EnterState(state InputState) {
+func (c *mainController) EnterMode(state InputMode) {
 	//SetState doesn't do much, it just makes it feel less weird than
 	//STATE.enter(m) (which feels backward)
 
 	if state.shouldEnter(c) {
-		c.state = state
+		c.mode = state
 	}
 }
 
 //enterConfirmState is a special state to set
-func (c *mainController) enterConfirmState(msg string, defaultAction defaultOption, yesAction func(), noAction func()) {
-	STATE_CONFIRM.msg = msg
-	STATE_CONFIRM.defaultAction = defaultAction
-	STATE_CONFIRM.yesAction = yesAction
-	STATE_CONFIRM.noAction = noAction
-	c.EnterState(STATE_CONFIRM)
+func (c *mainController) enterConfirmMode(msg string, defaultAction defaultOption, yesAction func(), noAction func()) {
+	MODE_CONFIRM.msg = msg
+	MODE_CONFIRM.defaultAction = defaultAction
+	MODE_CONFIRM.yesAction = yesAction
+	MODE_CONFIRM.noAction = noAction
+	c.EnterMode(MODE_CONFIRM)
 }
 
 func (c *mainController) SetConsoleMessage(msg string, shortLived bool) {
@@ -153,7 +153,7 @@ func (c *mainController) ClearConsole() {
 }
 
 func (c *mainController) StatusLine() string {
-	return c.state.statusLine(c)
+	return c.mode.statusLine(c)
 }
 
 func (c *mainController) Selected() *sudoku.Cell {
@@ -166,7 +166,7 @@ func (c *mainController) SetSelected(cell *sudoku.Cell) {
 		return
 	}
 	c.selected = cell
-	c.state.newCellSelected(c)
+	c.mode.newCellSelected(c)
 }
 
 func (c *mainController) EnsureSelected() {
