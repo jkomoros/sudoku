@@ -466,8 +466,14 @@ func (m *loadMode) tabComplete(c *mainController) {
 			m.cursorOffset = len(m.input)
 		} else {
 			//Just list the valid completions
-			//TODO: when listing completions here, factor out prefix
-			c.SetConsoleMessage("{Possible completions}\n"+strings.Join(matchedCompletions, "\n"), true)
+
+			//We'll print out strings where the part that's not prefixed is bolded.
+			var unprefixedMatchedCompletions []string
+			for _, match := range matchedCompletions {
+				unprefixedMatchedCompletions = append(unprefixedMatchedCompletions, prefix+"{"+strings.TrimPrefix(match, prefix)+"}")
+			}
+
+			c.SetConsoleMessage("{Possible completions}\n"+strings.Join(unprefixedMatchedCompletions, "\n"), true)
 		}
 	} else if len(matchedCompletions) == 0 {
 		c.SetConsoleMessage("{No valid completions}", true)
