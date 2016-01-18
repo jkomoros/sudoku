@@ -633,7 +633,7 @@ func TestLoadMode(t *testing.T) {
 		t.Error("Tab complete on a thing with no obvious fill did something")
 	}
 
-	if c.consoleMessage != "{Possible completions}\nconverter_copy.sdk\nconverter_one.sdk\ninvalid_sdk_too_short.sdk" {
+	if c.consoleMessage != "{Possible completions}\n{converter_copy.sdk}\n{converter_one.sdk}\n{invalid_sdk_too_short.sdk}" {
 		t.Error("Got wrong console message on ambiguous tab:", c.consoleMessage)
 	}
 
