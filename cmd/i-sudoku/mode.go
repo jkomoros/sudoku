@@ -457,8 +457,9 @@ func (m *loadMode) tabComplete(c *mainController) {
 		//There's only one completion!
 		m.input = directoryPortion + matchedCompletions[0]
 		m.cursorOffset = len(m.input)
+	} else if len(matchedCompletions) > 0 {
+		c.SetConsoleMessage("{Possible completions}\n"+strings.Join(matchedCompletions, "\n"), true)
 	}
-	//TODO: put other completions into console.
 
 	//TODO: if all of the matchedCompletions have a common prefix, then
 	//autocomplete that prefix.

@@ -633,6 +633,10 @@ func TestLoadMode(t *testing.T) {
 		t.Error("Tab complete on a thing with no obvious fill did something")
 	}
 
+	if c.consoleMessage != "{Possible completions}\nconverter_one.sdk\ninvalid_sdk_too_short.sdk" {
+		t.Error("Got wrong console message on ambiguous tab:", c.consoleMessage)
+	}
+
 	sendCharEvent(c, 'i')
 
 	sendKeyEvent(c, termbox.KeyTab)
