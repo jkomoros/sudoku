@@ -469,8 +469,9 @@ func (m *loadMode) tabComplete(c *mainController) {
 			//TODO: when listing completions here, factor out prefix
 			c.SetConsoleMessage("{Possible completions}\n"+strings.Join(matchedCompletions, "\n"), true)
 		}
+	} else if len(matchedCompletions) == 0 {
+		c.SetConsoleMessage("{No valid completions}", true)
 	}
-	//TODO: if completions is none, print an error message here.
 }
 
 func longestCommonPrefix(files []string) string {
