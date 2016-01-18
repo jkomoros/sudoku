@@ -462,7 +462,9 @@ func (m *loadMode) tabComplete(c *mainController) {
 	}
 
 	//TODO: if all of the matchedCompletions have a common prefix, then
-	//autocomplete that prefix.
+	//autocomplete that prefix. We want LCP arrays, and the way to construct
+	//them in golang is nicely captured at
+	//http://rosettacode.org/wiki/Longest_common_prefix#Go
 
 }
 
