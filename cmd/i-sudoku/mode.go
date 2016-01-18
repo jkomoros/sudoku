@@ -337,11 +337,13 @@ func (s *confirmMode) statusLine(c *mainController) string {
 type loadMode struct {
 	//TODO: store where the cursor is, supporting backspace and insertion.
 	input string
+	//which index of the input string the cursor is at
+	cursorOffset int
 	baseMode
 }
 
 func (m *loadMode) cursorLocation(c *mainController) int {
-	return len(STATUS_LOAD) + len(m.input)
+	return len(STATUS_LOAD) + m.cursorOffset
 }
 
 func (m *loadMode) statusLine(c *mainController) string {
@@ -350,7 +352,27 @@ func (m *loadMode) statusLine(c *mainController) string {
 
 func (m *loadMode) shouldEnter(c *mainController) bool {
 	m.input = ""
+	m.cursorOffset = 0
 	return true
+}
+
+func (m *loadMode) moveCursorLeft() {
+	m.cursorOffset--
+	if m.cursorOffset < 0 {
+		m.cursorOffset = 0
+	}
+}
+
+func (m *loadMode) moveCursorRight() {
+	m.cursorOffset++
+	if m.cursorOffset > len(m.input) {
+		m.cursorOffset = len(m.input)
+	}
+}
+
+func (m *loadMode) addCharAtCursor(ch rune) {
+	m.input += string(ch)
+	m.moveCursorRight()
 }
 
 func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
@@ -363,12 +385,18 @@ func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
 			c.EnterMode(MODE_DEFAULT)
 		case termbox.KeyEsc:
 			c.EnterMode(MODE_DEFAULT)
+		case termbox.KeyArrowLeft:
+			m.moveCursorLeft()
+		case termbox.KeyArrowRight:
+			m.moveCursorRight()
+		//TODO: support backspace
 		default:
 			handled = false
 		}
-		switch evt.Ch {
+		switch {
+		case evt.Ch != 0:
+			m.addCharAtCursor(evt.Ch)
 		default:
-			m.input += string(evt.Ch)
 			if !handled {
 				//Neither of us handled it so defer to base.
 				m.baseMode.handleInput(c, evt)

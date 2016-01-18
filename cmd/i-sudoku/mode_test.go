@@ -457,7 +457,15 @@ func TestLoadMode(t *testing.T) {
 		t.Error("c then l didn't get us into load mode")
 	}
 
+	if MODE_LOAD.cursorOffset != 0 {
+		t.Error("Cursor offset wasn't 0 to start")
+	}
+
 	sendCharEvent(c, 'm')
+
+	if MODE_LOAD.cursorOffset != 1 {
+		t.Error("Typing a character didn't move the cursor")
+	}
 
 	if MODE_LOAD.input != "m" {
 		t.Error("Typing m in load mode didn't type m in the input")
@@ -466,6 +474,24 @@ func TestLoadMode(t *testing.T) {
 	cursorX := c.mode.cursorLocation(c)
 	if cursorX != len(STATUS_LOAD)+len(MODE_LOAD.input) {
 		t.Error("Cursor in wrong location, should be at end of input")
+	}
+
+	sendKeyEvent(c, termbox.KeyArrowRight)
+
+	if MODE_LOAD.cursorOffset != 1 {
+		t.Error("Moving right at end of input moved off end")
+	}
+
+	sendKeyEvent(c, termbox.KeyArrowLeft)
+
+	if MODE_LOAD.cursorOffset != 0 {
+		t.Error("Moving left didn't move cursor back to beginning")
+	}
+
+	sendKeyEvent(c, termbox.KeyArrowLeft)
+
+	if MODE_LOAD.cursorOffset != 0 {
+		t.Error("Moving left at front of input went off end")
 	}
 
 	sendKeyEvent(c, termbox.KeyEsc)
@@ -479,6 +505,10 @@ func TestLoadMode(t *testing.T) {
 
 	if MODE_LOAD.input != "" {
 		t.Error("Going back into load mode didn't reset the input")
+	}
+
+	if MODE_LOAD.cursorOffset != 0 {
+		t.Error("Cursor offset wasn't reset back to 0")
 	}
 }
 
