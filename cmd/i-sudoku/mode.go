@@ -376,11 +376,19 @@ func (m *loadMode) addCharAtCursor(ch rune) {
 }
 
 func (m *loadMode) removeCharAtCursor() {
-	//TODO: support removing character not at end of line
 	if len(m.input) == 0 {
 		return
 	}
-	m.input = m.input[:len(m.input)-1]
+	if len(m.input) == m.cursorOffset {
+		//Treat removing at end specially, since otherwise we'd index off the
+		//end of the string.
+		m.input = m.input[:m.cursorOffset-1]
+	} else if m.cursorOffset == 0 {
+		//Avoid indexing off the lower end
+		m.input = m.input[m.cursorOffset:len(m.input)]
+	} else {
+		m.input = m.input[:m.cursorOffset-1] + m.input[m.cursorOffset:len(m.input)]
+	}
 	m.moveCursorLeft()
 }
 

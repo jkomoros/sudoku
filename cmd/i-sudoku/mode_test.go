@@ -536,6 +536,29 @@ func TestLoadMode(t *testing.T) {
 	if MODE_LOAD.cursorOffset != 3 {
 		t.Error("After adding a character in middle of string, cursor was in wrong loc", MODE_LOAD.cursorOffset)
 	}
+
+	sendKeyEvent(c, termbox.KeyBackspace2)
+
+	if MODE_LOAD.input != "abc" {
+		t.Error("Backspace in middle had wrong result: ", MODE_LOAD.input)
+	}
+
+	if MODE_LOAD.cursorOffset != 2 {
+		t.Error("Backspace in middle had wrong result: ", MODE_LOAD.cursorOffset)
+	}
+
+	//move cursor to end
+	sendKeyEvent(c, termbox.KeyArrowRight)
+
+	//Try to delete FOUR characters
+	sendKeyEvent(c, termbox.KeyBackspace2)
+	sendKeyEvent(c, termbox.KeyBackspace2)
+	sendKeyEvent(c, termbox.KeyBackspace2)
+	sendKeyEvent(c, termbox.KeyBackspace2)
+
+	if MODE_LOAD.input != "" {
+		t.Error("Removing all input still left some")
+	}
 }
 
 //TODO: test fast move mode
