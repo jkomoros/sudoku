@@ -672,6 +672,14 @@ func TestLoadMode(t *testing.T) {
 		t.Error("Ctrl-A didn't move cursor to front")
 	}
 
+	//Test ctrl-e
+
+	sendKeyEvent(c, termbox.KeyCtrlE)
+
+	if MODE_LOAD.cursorOffset != len(MODE_LOAD.input) {
+		t.Error("Ctrl-E didn't move to end of line")
+	}
+
 }
 
 func TestLongestCommonPrefix(t *testing.T) {
