@@ -379,6 +379,10 @@ func (m *loadMode) moveCursorToBack() {
 	m.cursorOffset = len(m.input)
 }
 
+func (m *loadMode) deleteToEndOfLine() {
+	m.input = m.input[:m.cursorOffset]
+}
+
 func (m *loadMode) addCharAtCursor(ch rune) {
 	m.input = m.input[0:m.cursorOffset] + string(ch) + m.input[m.cursorOffset:len(m.input)]
 	m.moveCursorRight()
@@ -526,6 +530,8 @@ func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
 			m.moveCursorToFront()
 		case termbox.KeyCtrlE:
 			m.moveCursorToBack()
+		case termbox.KeyCtrlK:
+			m.deleteToEndOfLine()
 		default:
 			handled = false
 		}

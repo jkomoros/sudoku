@@ -680,6 +680,21 @@ func TestLoadMode(t *testing.T) {
 		t.Error("Ctrl-E didn't move to end of line")
 	}
 
+	//Test ctrl-k
+
+	currentInput := MODE_LOAD.input
+
+	sendKeyEvent(c, termbox.KeyArrowLeft)
+	sendKeyEvent(c, termbox.KeyArrowLeft)
+
+	sendKeyEvent(c, termbox.KeyCtrlK)
+
+	expectedInput := currentInput[:len(currentInput)-2]
+
+	if MODE_LOAD.input != expectedInput {
+		t.Error("Ctrl-K in middle didn't remove expected characters")
+	}
+
 }
 
 func TestLongestCommonPrefix(t *testing.T) {
