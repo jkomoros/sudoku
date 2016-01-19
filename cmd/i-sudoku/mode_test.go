@@ -663,6 +663,15 @@ func TestLoadMode(t *testing.T) {
 	if MODE_LOAD.input != "puzzles/converter_" {
 		t.Error("Tab on prefix didn't fill out to end of longested common prefix")
 	}
+
+	//Test ctrl-a
+
+	sendKeyEvent(c, termbox.KeyCtrlA)
+
+	if MODE_LOAD.cursorOffset != 0 {
+		t.Error("Ctrl-A didn't move cursor to front")
+	}
+
 }
 
 func TestLongestCommonPrefix(t *testing.T) {

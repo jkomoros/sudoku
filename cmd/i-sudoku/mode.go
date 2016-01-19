@@ -371,6 +371,10 @@ func (m *loadMode) moveCursorRight() {
 	}
 }
 
+func (m *loadMode) moveCursorToFront() {
+	m.cursorOffset = 0
+}
+
 func (m *loadMode) addCharAtCursor(ch rune) {
 	m.input = m.input[0:m.cursorOffset] + string(ch) + m.input[m.cursorOffset:len(m.input)]
 	m.moveCursorRight()
@@ -514,6 +518,8 @@ func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
 			m.removeCharAtCursor()
 		case termbox.KeyTab:
 			m.tabComplete(c)
+		case termbox.KeyCtrlA:
+			m.moveCursorToFront()
 		default:
 			handled = false
 		}
