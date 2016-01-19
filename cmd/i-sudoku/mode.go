@@ -455,7 +455,7 @@ func (m *loadMode) tabComplete(c *mainController) {
 				unprefixedMatchedCompletions = append(unprefixedMatchedCompletions, prefix+"{"+strings.TrimPrefix(match, prefix)+"}")
 			}
 
-			c.SetConsoleMessage("{Possible completions}\n"+strings.Join(unprefixedMatchedCompletions, "\n"), true)
+			c.SetConsoleMessage("Possible completions\n"+strings.Join(unprefixedMatchedCompletions, "\n"), true)
 		}
 	} else if len(matchedCompletions) == 0 {
 		c.SetConsoleMessage("{No valid completions}", true)
