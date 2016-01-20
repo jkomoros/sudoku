@@ -107,6 +107,72 @@ func LoadInto(grid *sudoku.Grid, puzzle string) {
 	converter.Load(grid, puzzle)
 }
 
+type cellInfo struct {
+	number int
+	locked bool
+	marks  sudoku.IntSlice
+}
+
+func (i cellInfo) fillCell(cell *sudoku.Cell) {
+	cell.SetNumber(i.number)
+	if i.locked {
+		cell.Lock()
+	} else {
+		cell.Unlock()
+	}
+	for _, num := range i.marks {
+		cell.SetMark(num, true)
+	}
+}
+
+func parseKomoCell(data string) cellInfo {
+	//How many characters into the string we are. We can't use the index from
+	//range, because that's byte offset, which we don't care about.
+	i := 0
+
+	result := cellInfo{}
+
+	solutionNumber := 0
+
+	//TODO: having this hand-rolled parser feels really brittle
+	inMarkSection := false
+
+	for _, ch := range data {
+
+		if i == 0 {
+			//The first char must be the solutionNumber.
+			solutionNumber, _ = strconv.Atoi(string(ch))
+		} else if inMarkSection {
+			switch ch {
+			case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+				num, _ := strconv.Atoi(string(ch))
+				result.marks = append(result.marks, num)
+			case '.':
+				//Mark delim. OK
+			case ']':
+				inMarkSection = false
+			}
+		} else {
+			switch ch {
+			case '!':
+				result.locked = true
+				result.number = solutionNumber
+			//TODO: better way of checking for it being an int, tied to DIM
+			case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+				//User filled number since not in postion 0
+				result.number, _ = strconv.Atoi(string(ch))
+			case '[':
+				inMarkSection = true
+			default:
+				//Unknown
+				panic(ch)
+			}
+		}
+		i++
+	}
+	return result
+}
+
 func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) bool {
 	//TODO: also handle odd things like user-provided marks and other things.
 
@@ -114,25 +180,15 @@ func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) bool {
 		return false
 	}
 
-	var result string
+	//TODO: reset grid?
 
 	rows := strings.Split(puzzle, ";")
-	for _, row := range rows {
+	for r, row := range rows {
 		cols := strings.Split(row, ",")
-		for _, col := range cols {
-			if strings.Contains(col, "!") {
-				result += strings.TrimSuffix(col, "!")
-			} else {
-				result += "."
-			}
+		for c, col := range cols {
+			parseKomoCell(col).fillCell(grid.Cell(r, c))
 		}
-		result += "\n"
 	}
-
-	//We added an extra \n in the last runthrough, remove it.
-	result = strings.TrimSuffix(result, "\n")
-
-	grid.LoadSDK(result)
 
 	return true
 }

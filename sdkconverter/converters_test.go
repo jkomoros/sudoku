@@ -14,6 +14,14 @@ func TestKomoConverterLoad(t *testing.T) {
 	for _, test := range tests {
 		converterTesterHelper(t, true, "komo", test[0], test[1])
 	}
+
+	//Test marks come in
+	grid := Load(loadTestPuzzle("komo_with_marks.sdk"))
+	cell := grid.Cell(0, 0)
+
+	if !cell.Marks().SameContentAs(sudoku.IntSlice{2, 3, 4}) {
+		t.Error("Komo importer didn't bring in marks. Got", cell.Marks())
+	}
 }
 
 func TestKomoConverterDataString(t *testing.T) {
