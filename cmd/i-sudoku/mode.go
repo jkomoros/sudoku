@@ -192,14 +192,14 @@ func (s *defaultMode) handleInput(c *mainController, evt termbox.Event) {
 			c.ToggleMarkMode()
 		case runeIsShiftedNum(evt.Ch):
 			//TODO: ideally Ctrl+Num would work to put in one mark. But termbox doesn't appear to let that work.
-			num, err := strconv.Atoi(strings.Replace(strconv.QuoteRuneToASCII(shiftedNumRuneToNum(evt.Ch)), "'", "", -1))
+			num, err := strconv.Atoi(string(shiftedNumRuneToNum(evt.Ch)))
 			if err != nil {
 				panic(err)
 			}
 			c.ToggleSelectedMark(num)
 		case runeIsNum(evt.Ch):
 			//TODO: this is a seriously gross way of converting a rune to a string.
-			num, err := strconv.Atoi(strings.Replace(strconv.QuoteRuneToASCII(evt.Ch), "'", "", -1))
+			num, err := strconv.Atoi(string(evt.Ch))
 			if err != nil {
 				panic(err)
 			}
