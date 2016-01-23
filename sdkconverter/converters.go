@@ -232,6 +232,15 @@ func (c *komoConverter) DataString(grid *sudoku.Grid) string {
 					result += ":" + strconv.Itoa(cell.Number())
 				}
 			}
+			if len(cell.Marks()) != 0 {
+				result += "["
+				var stringMarkList []string
+				for _, mark := range cell.Marks() {
+					stringMarkList = append(stringMarkList, strconv.Itoa(mark))
+				}
+				result += strings.Join(stringMarkList, ".")
+				result += "]"
+			}
 			if c != sudoku.DIM-1 {
 				result += ","
 			}

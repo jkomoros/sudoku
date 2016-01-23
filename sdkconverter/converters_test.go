@@ -27,7 +27,28 @@ func TestKomoConverterLoad(t *testing.T) {
 	}
 }
 
-//TODO: test round trip of komo once we output marks too.
+func TestKomoRoundTrip(t *testing.T) {
+
+	files := []string{"converter_one_komo.sdk",
+		"converter_two_komo.sdk",
+		"komo_with_marks.sdk",
+	}
+
+	for _, test := range files {
+
+		puzzle := loadTestPuzzle(test)
+
+		converter := Converters["komo"]
+		grid := sudoku.NewGrid()
+		converter.Load(grid, puzzle)
+		dataString := converter.DataString(grid)
+
+		if dataString != puzzle {
+			t.Error("Failed round trip with file", test, "Got", dataString, "\nExpected", puzzle)
+		}
+
+	}
+}
 
 func TestKomoConverterDataString(t *testing.T) {
 	tests := [][2]string{
