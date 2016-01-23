@@ -289,8 +289,6 @@ func (c *komoConverter) Valid(puzzle string) bool {
 }
 
 func (c *dokuConverter) DataString(grid *sudoku.Grid) string {
-	//TODO: if there are no locked cells or marks, output an sdk
-
 	result := ""
 	for r := 0; r < sudoku.DIM; r++ {
 		for c := 0; c < sudoku.DIM; c++ {
