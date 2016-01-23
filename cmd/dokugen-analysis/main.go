@@ -918,6 +918,7 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 
 		solveStats = cache.getStatsForPuzzle(thePuzzle)
 
+		//TODO: if the len we get back is not what we expected, throw out the whole cache and start over.
 		if solveStats != nil && len(solveStats) == len(signalNames) {
 
 			if verbose {
