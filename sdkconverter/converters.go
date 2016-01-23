@@ -1,4 +1,43 @@
-//Package sdkconverter provides a set of converters to and from sudoku's default sdk format.
+/*
+Package sdkconverter provides a set of converters to and from sudoku's default sdk format.
+
+It supports three file types: 'sdk', 'doku', and 'komo'.
+
+
+SDK is the default file format of the main library, and many other sudoku
+tools. Rows are delimited by new lines, and columns are delimited by a
+single pipe character ('|'). Optionally the column delimiter may be replaced
+with two pipes, or no characters. Each cell is represented by a single
+character, 0-9 or '.'. '0' and '.' denote an unfilled cell. The sdk format
+does not support marks, locks, or user-filled numbers. The SDK format is the
+default format primarily because it is simple and understood by many other
+tools.
+
+The doku format's rows are delimited by line breaks and columns are
+delimited by "|". Each cell consists of (in order):
+
+* Either a space, period, or number 0-9, denoting the number that is
+currently filled in the space.
+
+* An optional "!" if the cell's number is locked
+
+* An optional list of 1 or more marks, contained in "(" and ")" and
+separated by ","
+
+* 0 or more spaces or tabs (useful for lining up the file's
+columns for clarity)
+
+If there are no locked cells, marks, or extra whitespace in any cells, then
+either only the column delimiters OR both the column and row delimiters may be
+omitted. Thus, every valid SDK file is a valid doku file. Doku is the
+recommended format for any uses that include user modifications of the cell.
+
+komo is a legacy format that is used in certain online sudoku games. Like doku
+it can store user modifications to the grid. Unlike all of the other formats,
+it  requires that each cell store the solution number for that cell, meaning
+it is unable to store grids that have no valid solution.
+
+*/
 package sdkconverter
 
 import (
@@ -324,23 +363,6 @@ func (c *dokuConverter) DataString(grid *sudoku.Grid) string {
 }
 
 func (c *dokuConverter) Valid(puzzle string) bool {
-
-	//TODO: Hoist this format documentation somewhere more visible, and
-	//document other formats, too.
-
-	//The doku format's rows are delimited by line breaks and columns are
-	//delimited by "|". Each cell consists of (in order):
-	// * Either a space, period, or number 0-9, denoting the number that is
-	//   currently filled in the space.
-	// * An optional "!" if the cell's number is locked
-	// * An optional list of 1 or more marks, contained in "(" and ")" and
-	//   separated by ","
-	// * 0 or more spaces or tabs (useful for lining up the file's
-	//   columns for clarity)
-	//If there are no locked cells, marks, or extra whitespace in any cells,
-	//then either only the column delimiters OR both the column and row
-	//delimiters may be omitted. Thus, every valid SDK file is a valid doku
-	//file.
 
 	if strings.HasSuffix(puzzle, "\n") {
 		puzzle = puzzle[:len(puzzle)-1]
