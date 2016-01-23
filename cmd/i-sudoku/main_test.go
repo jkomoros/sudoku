@@ -372,6 +372,14 @@ func TestSetSelectionNumber(t *testing.T) {
 		}
 	}
 
+	if lockedCell == nil {
+		t.Fatal("Couldn't find a locked cell to test")
+	}
+
+	if unlockedCell == nil {
+		t.Fatal("Couldn't find an unlocked cell to test")
+	}
+
 	model.SetSelected(unlockedCell)
 
 	model.SetSelectedNumber(1)
@@ -432,6 +440,14 @@ func TestToggleSelectedMark(t *testing.T) {
 		if lockedCell != nil && unlockedCell != nil {
 			break
 		}
+	}
+
+	if lockedCell == nil {
+		t.Fatal("Couldn't find a locked cell to test")
+	}
+
+	if unlockedCell == nil {
+		t.Fatal("Couldn't find an unlocked cell to test")
 	}
 
 	model.SetSelected(unlockedCell)
