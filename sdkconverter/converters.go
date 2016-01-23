@@ -14,6 +14,7 @@ import (
  */
 
 const _KOMO_CELL_RE = `\d!?(:\d)?(\[(\d\.)*\d\])?`
+const _DOKU_CELL_RE = `( |\.|\d)!?(\((\d,)*\d\))?( |\t)*`
 
 type SudokuPuzzleConverter interface {
 	//Load loads the puzzle defined by `puzzle`, in the format tied to this
@@ -293,8 +294,42 @@ func (c *dokuConverter) DataString(grid *sudoku.Grid) string {
 }
 
 func (c *dokuConverter) Valid(puzzle string) bool {
-	//TODO: implement this
-	return false
+
+	//TODO: document the format somewhere. (And the other formats, for that
+	//matter)
+
+	if strings.HasSuffix(puzzle, "\n") {
+		puzzle = puzzle[:len(puzzle)-1]
+	}
+
+	//In the simplest case, a Doku reduces down to a valid SDK.
+	if Converters["sdk"].Valid(puzzle) {
+		return true
+	}
+	//OK, it's not the simple case, let's see if it's valid.
+	rows := strings.Split(puzzle, "\n")
+
+	if len(rows) != sudoku.DIM {
+		return false
+	}
+
+	cellRE := regexp.MustCompile(_DOKU_CELL_RE)
+
+	for _, row := range rows {
+		cols := strings.Split(row, "|")
+		if len(cols) != sudoku.DIM {
+			//Too few cols!
+			return false
+		}
+		for _, col := range cols {
+			if !cellRE.MatchString(col) {
+				return false
+			}
+		}
+	}
+
+	return true
+
 }
 
 func (c *dokuConverter) Load(grid *sudoku.Grid, puzzle string) bool {

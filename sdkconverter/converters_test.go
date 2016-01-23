@@ -6,11 +6,18 @@ import (
 	"testing"
 )
 
-func TestDokuConverter(t *testing.T) {
-	c := Converters["doku"]
-	if c == nil {
-		t.Error("Couldn't find the doku converter")
-	}
+func TestDokuConverterValid(t *testing.T) {
+	//All sdk files are valid dokus
+	validTestHelper(t, "doku", "converter_one.sdk", true)
+	validTestHelper(t, "doku", "converter_two.sdk", true)
+	validTestHelper(t, "doku", "sdk_no_sep.sdk", true)
+
+	//Two SDKs it shouldn't match
+	validTestHelper(t, "doku", "komo_with_marks.sdk", false)
+	validTestHelper(t, "doku", "invalid_sdk_too_short.sdk", false)
+
+	validTestHelper(t, "doku", "doku_complex.doku", true)
+
 }
 
 func TestKomoConverterLoad(t *testing.T) {
