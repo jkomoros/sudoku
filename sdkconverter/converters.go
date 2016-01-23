@@ -346,9 +346,80 @@ func (c *dokuConverter) Valid(puzzle string) bool {
 
 }
 
+func parseDokuCell(data string) cellInfo {
+	//How many characters into the string we are. We can't use the index from
+	//range, because that's byte offset, which we don't care about.
+	i := 0
+
+	result := cellInfo{}
+
+	//TODO: having this hand-rolled parser feels really brittle
+	inMarkSection := false
+
+	for _, ch := range data {
+
+		if i == 0 {
+			//The first character is the filled number.
+			switch ch {
+			case '0', '.', ' ':
+				result.number = 0
+			case '1', '2', '3', '4', '5', '6', '7', '8', '9':
+				result.number, _ = strconv.Atoi(string(ch))
+			}
+		} else if inMarkSection {
+			switch ch {
+			case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+				num, _ := strconv.Atoi(string(ch))
+				result.marks = append(result.marks, num)
+			case ',':
+				//Mark delim. OK
+			case ')':
+				inMarkSection = false
+			}
+		} else {
+			switch ch {
+			case '!':
+				result.locked = true
+			case '(':
+				inMarkSection = true
+			case ' ', '\t':
+				//Whitespace, OK
+			default:
+				//Unknown
+				panic(ch)
+			}
+		}
+		i++
+	}
+	return result
+}
+
 func (c *dokuConverter) Load(grid *sudoku.Grid, puzzle string) bool {
-	//TODO: implement this
-	return false
+
+	if !c.Valid(puzzle) {
+		return false
+	}
+
+	sConverter := Converters["sdk"]
+	if sConverter.Valid(puzzle) {
+		//it's a valid sdk, just use that
+		return sConverter.Load(grid, puzzle)
+	}
+
+	//It's a more complex doku.
+	if strings.HasSuffix(puzzle, "\n") {
+		puzzle = puzzle[:len(puzzle)-1]
+	}
+
+	rows := strings.Split(puzzle, "\n")
+	for r, row := range rows {
+		cols := strings.Split(row, "|")
+		for c, col := range cols {
+			parseDokuCell(col).fillCell(grid.Cell(r, c))
+		}
+	}
+
+	return true
 }
 
 func (c *sdkConverter) Load(grid *sudoku.Grid, puzzle string) bool {

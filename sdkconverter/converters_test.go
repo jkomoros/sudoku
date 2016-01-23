@@ -20,6 +20,32 @@ func TestDokuConverterValid(t *testing.T) {
 
 }
 
+func TestDokuConverterLoad(t *testing.T) {
+	tests := [][2]string{
+		{"converter_one_doku.doku", "converter_one.sdk"},
+		{"converter_two_doku.doku", "converter_two.sdk"},
+	}
+	for _, test := range tests {
+		converterTesterHelper(t, true, "doku", test[0], test[1])
+	}
+
+	//Test locked numbers and marks, since the two tests above can't exercise
+	//those since sdk doesn't have them
+	grid := Load(loadTestPuzzle("doku_complex.doku"))
+	cell := grid.Cell(0, 0)
+
+	if !cell.Marks().SameContentAs(sudoku.IntSlice{2, 3, 4}) {
+		t.Error("Doku importer didn't bring in marks. Got", cell.Marks())
+	}
+
+	cell = grid.Cell(0, 1)
+
+	if !cell.Locked() {
+		t.Error("Locked cell wasn't actually locked")
+	}
+
+}
+
 func TestKomoConverterLoad(t *testing.T) {
 	tests := [][2]string{
 		{"converter_one_komo.sdk", "converter_one.sdk"},
