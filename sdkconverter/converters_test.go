@@ -6,6 +6,69 @@ import (
 	"testing"
 )
 
+func TestDokuConverterValid(t *testing.T) {
+	//All sdk files are valid dokus
+	validTestHelper(t, "doku", "converter_one.sdk", true)
+	validTestHelper(t, "doku", "converter_two.sdk", true)
+	validTestHelper(t, "doku", "sdk_no_sep.sdk", true)
+
+	//Two SDKs it shouldn't match
+	validTestHelper(t, "doku", "komo_with_marks.sdk", false)
+	validTestHelper(t, "doku", "invalid_sdk_too_short.sdk", false)
+
+	validTestHelper(t, "doku", "doku_complex.doku", true)
+
+}
+
+func TestDokuConverterLoad(t *testing.T) {
+	tests := [][2]string{
+		{"converter_one_doku.doku", "converter_one.sdk"},
+		{"converter_two_doku.doku", "converter_two.sdk"},
+	}
+	for _, test := range tests {
+		converterTesterHelper(t, true, "doku", test[0], test[1])
+	}
+
+	//Test that when we load an SDK we don't lock the filled cells.
+	grid := Load(loadTestPuzzle("converter_one.sdk"))
+	cell := grid.Cell(0, 1)
+	if cell.Locked() {
+		t.Error("Loading a doku that was a valid sdk erroneously locked a cell")
+	}
+
+	//Test locked numbers and marks, since the two tests above can't exercise
+	//those since sdk doesn't have them
+	grid = Load(loadTestPuzzle("doku_complex.doku"))
+	cell = grid.Cell(0, 0)
+
+	if !cell.Marks().SameContentAs(sudoku.IntSlice{2, 3, 4}) {
+		t.Error("Doku importer didn't bring in marks. Got", cell.Marks())
+	}
+
+	cell = grid.Cell(0, 1)
+
+	if !cell.Locked() {
+		t.Error("Locked cell wasn't actually locked")
+	}
+
+}
+
+func TestDokuConverterDataString(t *testing.T) {
+
+	complexDoku := loadTestPuzzle("doku_complex.doku")
+	complexDokuNormalized := loadTestPuzzle("doku_complex_normalized.doku")
+
+	grid := Load(complexDoku)
+
+	doku := Converters["doku"]
+
+	dokuDataString := doku.DataString(grid)
+
+	if dokuDataString != complexDokuNormalized {
+		t.Error("Datastring for complex doku wrong. Got", dokuDataString, "expected", complexDokuNormalized)
+	}
+}
+
 func TestKomoConverterLoad(t *testing.T) {
 	tests := [][2]string{
 		{"converter_one_komo.sdk", "converter_one.sdk"},
@@ -155,12 +218,17 @@ func TestLoadInto(t *testing.T) {
 
 func TestFormat(t *testing.T) {
 	result := Format(loadTestPuzzle("converter_one.sdk"))
-	if result != "sdk" {
+	//doku and sdk are both valid options
+	if result != "sdk" && result != "doku" {
 		t.Error("Format guessed wrong format:", result)
 	}
 	result = Format(loadTestPuzzle("converter_one_komo.sdk"))
 	if result != "komo" {
 		t.Error("Format guessed wrong format for komo puzzle: ", result)
+	}
+	result = Format(loadTestPuzzle("doku_complex.doku"))
+	if result != "doku" {
+		t.Error("Format guessed wrong format for doku puzzle: ", result)
 	}
 	result = Format(loadTestPuzzle("invalid_sdk_too_short.sdk"))
 	if result != "" {

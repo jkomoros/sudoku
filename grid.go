@@ -153,22 +153,21 @@ func (self *Grid) Done() {
 	returnGrid(self)
 }
 
-//LoadSDK takes the string data and parses it into the puzzle. The format is
-//the 'sdk' format: a `.` marks an empty cell, a number denotes a filled cell,
-//and an (optional) newline marks a new row. LoadSDK also accepts other
-//variations on the sdk format, including one with a `|` between each cell.
-//For other sudoku formats see the sdkconverter subpackage. LoadSDK "locks"
-//the cells that are filled. See cell.Lock for more on the concept of locking.
+//LoadSDK loads a puzzle in SDK format. Unlike Load, LoadSDK "locks" the cells
+//that are filled. See cell.Lock for more on the concept of locking.
 func (self *Grid) LoadSDK(data string) {
 
 	self.UnlockCells()
-	self.load(data)
+	self.Load(data)
 	self.LockFilledCells()
 }
 
-//Load actually loads in data in SDK format into the puzzle, and that's it.
-//LoadSDK is a thin wrapper.
-func (self *Grid) load(data string) {
+//Load takes the string data and parses it into the puzzle. The format is the
+//'sdk' format: a `.` marks an empty cell, a number denotes a filled cell, and
+//an (optional) newline marks a new row. Load also accepts other variations on
+//the sdk format, including one with a `|` between each cell. For other sudoku
+//formats see the sdkconverter subpackage.
+func (self *Grid) Load(data string) {
 	//All col separators are basically just to make it easier to read. Remove them.
 	data = strings.Replace(data, ALT_COL_SEP, COL_SEP, -1)
 	data = strings.Replace(data, COL_SEP, "", -1)
