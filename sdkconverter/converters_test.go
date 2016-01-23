@@ -29,10 +29,17 @@ func TestDokuConverterLoad(t *testing.T) {
 		converterTesterHelper(t, true, "doku", test[0], test[1])
 	}
 
+	//Test that when we load an SDK we don't lock the filled cells.
+	grid := Load(loadTestPuzzle("converter_one.sdk"))
+	cell := grid.Cell(0, 1)
+	if cell.Locked() {
+		t.Error("Loading a doku that was a valid sdk erroneously locked a cell")
+	}
+
 	//Test locked numbers and marks, since the two tests above can't exercise
 	//those since sdk doesn't have them
-	grid := Load(loadTestPuzzle("doku_complex.doku"))
-	cell := grid.Cell(0, 0)
+	grid = Load(loadTestPuzzle("doku_complex.doku"))
+	cell = grid.Cell(0, 0)
 
 	if !cell.Marks().SameContentAs(sudoku.IntSlice{2, 3, 4}) {
 		t.Error("Doku importer didn't bring in marks. Got", cell.Marks())

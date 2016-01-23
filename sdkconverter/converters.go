@@ -426,7 +426,7 @@ func (c *sdkConverter) Load(grid *sudoku.Grid, puzzle string) bool {
 	if !c.Valid(puzzle) {
 		return false
 	}
-	grid.LoadSDK(puzzle)
+	grid.Load(puzzle)
 	return true
 }
 
