@@ -295,8 +295,22 @@ func (c *dokuConverter) DataString(grid *sudoku.Grid) string {
 
 func (c *dokuConverter) Valid(puzzle string) bool {
 
-	//TODO: document the format somewhere. (And the other formats, for that
-	//matter)
+	//TODO: Hoist this format documentation somewhere more visible, and
+	//document other formats, too.
+
+	//The doku format's rows are delimited by line breaks and columns are
+	//delimited by "|". Each cell consists of (in order):
+	// * Either a space, period, or number 0-9, denoting the number that is
+	//   currently filled in the space.
+	// * An optional "!" if the cell's number is locked
+	// * An optional list of 1 or more marks, contained in "(" and ")" and
+	//   separated by ","
+	// * 0 or more spaces or tabs (useful for lining up the file's
+	//   columns for clarity)
+	//If there are no locked cells, marks, or extra whitespace in any cells,
+	//then either only the column delimiters OR both the column and row
+	//delimiters may be omitted. Thus, every valid SDK file is a valid doku
+	//file.
 
 	if strings.HasSuffix(puzzle, "\n") {
 		puzzle = puzzle[:len(puzzle)-1]
