@@ -803,11 +803,60 @@ func openSolvesCache() *solvesCache {
 	if err != nil {
 		log.Fatal("Couldn't open solves cache db:", err)
 	}
-	//TODO: erase the entire database if the hash of the difficulty model is different.
-	//If we erase it, stuff in the current hash ID.
 
 	//TODO: if --clear is passed, clear the cache.
 	return &solvesCache{db}
+}
+
+func (c *solvesCache) verifyFresh(expectedRecLength int) {
+	//TODO: erase the entire database if the hash of the difficulty model is different.
+	//If we erase it, stuff in the current hash ID.
+
+	//Check that a random record we read back has the expected number of signals.
+
+	//TODO: this is a brittle way to make sure the numbers mean what we think
+	//they mean; ideally it should be json blobs with the signal names.
+	var shouldDelete bool
+
+	c.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(_SOLVES_BUCKET))
+		if bucket == nil {
+			return nil
+		}
+
+		//We just need a random key
+		cursor := bucket.Cursor()
+
+		k, v := cursor.First()
+
+		if k == nil {
+			//Ah, nothing's in yet, so it's fine.
+			return nil
+		}
+		if len(strings.Split(string(v), ",")) != expectedRecLength {
+
+			shouldDelete = true
+		}
+		return nil
+	})
+
+	if shouldDelete {
+		log.Println("The cache had the wrong number of signals. Erasing.")
+		c.deleteSolves()
+	}
+
+}
+
+//deleteSolves removes all solves in the bucket. Shoudl be called as soon as
+//you notice the cache has values that are stale.
+func (c *solvesCache) deleteSolves() {
+	c.db.Update(func(tx *bolt.Tx) error {
+		err := tx.DeleteBucket([]byte(_SOLVES_BUCKET))
+		if err != nil {
+			log.Fatal("Couldn't delete the solves bucket")
+		}
+		return nil
+	})
 }
 
 func (c *solvesCache) Close() {
@@ -890,9 +939,6 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 
 	*/
 
-	cache := openSolvesCache()
-	defer cache.Close()
-
 	var result [][]float64
 
 	signalNames := allSignalNames()
@@ -902,6 +948,10 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 	for i, signalName := range signalNames {
 		nameToIndex[signalName] = i
 	}
+
+	cache := openSolvesCache()
+	cache.verifyFresh(len(signalNames))
+	defer cache.Close()
 
 	i := 0
 
