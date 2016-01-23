@@ -677,6 +677,12 @@ func TestGenerate(t *testing.T) {
 		t.Log("We got back a generated grid that has more than one solution.")
 		t.Fail()
 	}
+
+	for i, cell := range grid.Cells() {
+		if cell.Locked() {
+			t.Error("Cell", i, "was locked coming back from Generate, which is unexpected")
+		}
+	}
 }
 
 func TestGridEmpty(t *testing.T) {
