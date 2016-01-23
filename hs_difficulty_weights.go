@@ -2,6 +2,12 @@
 
 package sudoku
 
+//DIFFICULTY_MODEL is a unique string representing the exact difficulty 
+//model in use.Every time a new model is trained, this value will change. 
+//Therefore, if the value is different than last time you checked, the model has changed. 
+//This is useful for throwing out caches that assume the same difficulty model is in use.
+const DIFFICULTY_MODEL = "D360A34D3DD7E5C5EF85133A555F87"
+
 func init() {
 	difficultySignalWeights = map[string]float64{
 		"Block Block Interactions Count" : 0.0004,
