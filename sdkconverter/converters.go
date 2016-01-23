@@ -220,10 +220,17 @@ func (c *komoConverter) DataString(grid *sudoku.Grid) string {
 	result := ""
 	for r := 0; r < sudoku.DIM; r++ {
 		for c := 0; c < sudoku.DIM; c++ {
-			cell := solvedGrid.Cell(r, c)
-			result += strconv.Itoa(cell.Number())
-			if grid.Cell(r, c).Number() != 0 {
+			solutionCell := solvedGrid.Cell(r, c)
+			cell := grid.Cell(r, c)
+			result += strconv.Itoa(solutionCell.Number())
+			if cell.Locked() {
 				result += "!"
+			} else {
+				//If it's not locked, and a user has input a number, output
+				//that.
+				if cell.Number() != 0 {
+					result += ":" + strconv.Itoa(cell.Number())
+				}
 			}
 			if c != sudoku.DIM-1 {
 				result += ","

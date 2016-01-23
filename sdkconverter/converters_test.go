@@ -22,10 +22,12 @@ func TestKomoConverterLoad(t *testing.T) {
 	if !cell.Marks().SameContentAs(sudoku.IntSlice{2, 3, 4}) {
 		t.Error("Komo importer didn't bring in marks. Got", cell.Marks())
 	}
-	if cell.Number() != 5 {
+	if cell.Number() != 9 {
 		t.Error("Komo importer didn't bring in user-filled number")
 	}
 }
+
+//TODO: test round trip of komo once we output marks too.
 
 func TestKomoConverterDataString(t *testing.T) {
 	tests := [][2]string{
