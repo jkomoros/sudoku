@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/boltdb/bolt"
 	"github.com/jkomoros/sudoku"
 	"github.com/jkomoros/sudoku/sdkconverter"
 	"github.com/sajari/regression"
@@ -24,6 +25,7 @@ import (
 	"runtime"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 const _DB_CONFIG_FILENAME = "db_config.SECRET.json"
@@ -32,6 +34,9 @@ const _QUERY_LIMIT = 100
 const _PENALTY_PERCENTAGE_CUTOFF = 0.01
 const _MATRIX_DIFFERENCE_CUTOFF = 0.00001
 const _MAX_MATRIX_POWER = 50
+
+const _SOLVES_CACHE_FILENAME = ".solves_cache.db"
+const _SOLVES_BUCKET = "solves"
 
 const _NORMALIZED_LOWER_BOUND = 0.0
 const _NORMALIZED_UPPER_BOUND = 0.9
@@ -92,6 +97,10 @@ type dbConfig struct {
 }
 
 var config dbConfig
+
+type solvesCache struct {
+	db *bolt.DB
+}
 
 type solve struct {
 	puzzleID    int
@@ -789,6 +798,81 @@ func calculateRelativeDifficulty() []*puzzle {
 	return puzzles
 }
 
+func openSolvesCache() *solvesCache {
+	db, err := bolt.Open(_SOLVES_CACHE_FILENAME, 0600, nil)
+	if err != nil {
+		log.Fatal("Couldn't open solves cache db:", err)
+	}
+	//TODO: erase the entire database if the hash of the difficulty model is different.
+	//If we erase it, stuff in the current hash ID.
+
+	//TODO: if --clear is passed, clear the cache.
+	return &solvesCache{db}
+}
+
+func (c *solvesCache) Close() {
+	c.db.Close()
+}
+
+func (c *solvesCache) getStatsForPuzzle(puz *puzzle) []float64 {
+	var data string
+	err := c.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(_SOLVES_BUCKET))
+		if bucket == nil {
+			return nil
+		}
+		result := bucket.Get([]byte(strconv.Itoa(puz.id)))
+
+		if result != nil {
+			//result is only valid in the tx, but string() copies it... right?
+			data = string(result)
+		}
+		return nil
+	})
+
+	if err != nil {
+		log.Fatal("Got error trying to do get transaction", err)
+	}
+
+	if data == "" {
+		return nil
+	}
+	//Parse data
+	var result []float64
+
+	for _, dataPoint := range strings.Split(data, ",") {
+
+		flt, err := strconv.ParseFloat(dataPoint, 64)
+		if err != nil {
+			log.Fatal("Invalid float found in database:", flt)
+		}
+		result = append(result, flt)
+	}
+
+	return result
+}
+
+func (c *solvesCache) putStatsForPuzzle(puz *puzzle, data []float64) {
+
+	//Convert the floats to strings to serialize
+	var stringified []string
+	for _, variable := range data {
+		stringified = append(stringified, strconv.FormatFloat(variable, 'f', -1, 64))
+	}
+
+	err := c.db.Update(func(tx *bolt.Tx) error {
+		bucket, err := tx.CreateBucketIfNotExists([]byte(_SOLVES_BUCKET))
+		if err != nil {
+			return err
+		}
+		return bucket.Put([]byte(strconv.Itoa(puz.id)), []byte(strings.Join(stringified, ",")))
+	})
+
+	if err != nil {
+		log.Fatal("Cache put failed for puzzle", puz)
+	}
+}
+
 func solvePuzzles(puzzles []*puzzle) [][]float64 {
 
 	//TODO: update this comment to reflect what we actually do in THIS function.
@@ -805,6 +889,9 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 		see: http://onlinestatbook.com/2/regression/multiple_regression.html
 
 	*/
+
+	cache := openSolvesCache()
+	defer cache.Close()
 
 	var result [][]float64
 
@@ -825,53 +912,71 @@ func solvePuzzles(puzzles []*puzzle) [][]float64 {
 			break
 		}
 
-		if verbose {
-			log.Println("Solving puzzle #", j)
-		}
+		//Check if we've already solved this one.
 
-		grid := sudoku.NewGrid()
-		converter := sdkconverter.Converters["komo"]
-		if converter == nil {
-			log.Fatal("Couldn't find komo converter")
-		}
+		var solveStats []float64
 
-		converter.Load(grid, thePuzzle.puzzle)
+		solveStats = cache.getStatsForPuzzle(thePuzzle)
 
-		solveDirections := make([]*sudoku.SolveDirections, numSolvesToAverage)
+		if solveStats != nil && len(solveStats) == len(signalNames) {
 
-		sawNil := 0
-
-		//Note: it appears that the number of solves hits a max R2 around 5 or so.
-		for i := 0; i < numSolvesToAverage; i++ {
-
-			solution := grid.HumanSolution(nil)
-			if solution == nil {
-				sawNil++
+			if verbose {
+				log.Println("Retrieving puzzle #", j, "from cache")
 			}
-			solveDirections[i] = solution
-		}
 
-		if sawNil > 0 {
-			log.Println("Puzzle #", thePuzzle.id, " was not able to be solved on ", sawNil, " of ", numSolvesToAverage, " runthroughs. Skipping.")
-			continue
-		}
+		} else {
+			//We'll have to generate the stats fresh
+			if verbose {
+				log.Println("Solving puzzle #", j)
+			}
 
-		solveStats := make([]float64, len(signalNames))
+			grid := sudoku.NewGrid()
+			converter := sdkconverter.Converters["komo"]
+			if converter == nil {
+				log.Fatal("Couldn't find komo converter")
+			}
 
-		//Accumulate number of times we've seen each technique across all solves.
-		for _, directions := range solveDirections {
-			for name, val := range directions.Signals() {
-				if index, ok := nameToIndex[name]; ok {
-					solveStats[index] += val
-				} else {
-					log.Fatal("For some reason we encountered a signal name that wasn't in hte list of signal names: ", name)
+			converter.Load(grid, thePuzzle.puzzle)
+
+			solveDirections := make([]*sudoku.SolveDirections, numSolvesToAverage)
+
+			sawNil := 0
+
+			//Note: it appears that the number of solves hits a max R2 around 5 or so.
+			for i := 0; i < numSolvesToAverage; i++ {
+
+				solution := grid.HumanSolution(nil)
+				if solution == nil {
+					sawNil++
+				}
+				solveDirections[i] = solution
+			}
+
+			if sawNil > 0 {
+				log.Println("Puzzle #", thePuzzle.id, " was not able to be solved on ", sawNil, " of ", numSolvesToAverage, " runthroughs. Skipping.")
+				continue
+			}
+
+			solveStats = make([]float64, len(signalNames))
+
+			//Accumulate number of times we've seen each technique across all solves.
+			for _, directions := range solveDirections {
+				for name, val := range directions.Signals() {
+					if index, ok := nameToIndex[name]; ok {
+						solveStats[index] += val
+					} else {
+						log.Fatal("For some reason we encountered a signal name that wasn't in hte list of signal names: ", name)
+					}
 				}
 			}
-		}
 
-		//Convert each technique to an average by dividing by the number of different solves
-		for i := range solveStats {
-			solveStats[i] /= float64(numSolvesToAverage)
+			//Convert each technique to an average by dividing by the number of different solves
+			for i := range solveStats {
+				solveStats[i] /= float64(numSolvesToAverage)
+			}
+
+			//Now, put these in the cache for the future.
+			cache.putStatsForPuzzle(thePuzzle, solveStats)
 		}
 
 		//Put the userRelativeDifficulty in front, as later stages will expect.
