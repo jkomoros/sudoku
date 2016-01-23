@@ -171,7 +171,7 @@ func converterTesterHelper(t *testing.T, testLoad bool, format string, otherFile
 		converter.Load(grid, other)
 
 		if grid.DataString() != sdk {
-			t.Error("Expected", sdk, "got", grid.DataString(), "for input", other)
+			t.Error("Loading", otherFile, sdkFile, format, "Expected", sdk, "got", grid.DataString(), "for input", other)
 		}
 	} else {
 		grid.LoadSDK(sdk)
@@ -179,7 +179,7 @@ func converterTesterHelper(t *testing.T, testLoad bool, format string, otherFile
 		data := converter.DataString(grid)
 
 		if data != other {
-			t.Error("Expected", other, "got", data, "for input", sdk)
+			t.Error("DataString", otherFile, sdkFile, format, "Expected", other, "got", data, "for input", sdk)
 		}
 	}
 }
