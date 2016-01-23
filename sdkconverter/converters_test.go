@@ -53,6 +53,22 @@ func TestDokuConverterLoad(t *testing.T) {
 
 }
 
+func TestDokuConverterDataString(t *testing.T) {
+
+	complexDoku := loadTestPuzzle("doku_complex.doku")
+	complexDokuNormalized := loadTestPuzzle("doku_complex_normalized.doku")
+
+	grid := Load(complexDoku)
+
+	doku := Converters["doku"]
+
+	dokuDataString := doku.DataString(grid)
+
+	if dokuDataString != complexDokuNormalized {
+		t.Error("Datastring for complex doku wrong. Got", dokuDataString, "expected", complexDokuNormalized)
+	}
+}
+
 func TestKomoConverterLoad(t *testing.T) {
 	tests := [][2]string{
 		{"converter_one_komo.sdk", "converter_one.sdk"},

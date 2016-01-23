@@ -289,8 +289,40 @@ func (c *komoConverter) Valid(puzzle string) bool {
 }
 
 func (c *dokuConverter) DataString(grid *sudoku.Grid) string {
-	//TODO: implement this
-	return ""
+	//TODO: if there are no locked cells or marks, output an sdk
+
+	result := ""
+	for r := 0; r < sudoku.DIM; r++ {
+		for c := 0; c < sudoku.DIM; c++ {
+			cell := grid.Cell(r, c)
+			if cell.Number() == 0 {
+				//TODO: for this (any pipes) we should use sudoku's constants,
+				//right?
+				result += "."
+			} else {
+				result += strconv.Itoa(cell.Number())
+			}
+			if cell.Locked() {
+				result += "!"
+			}
+			if len(cell.Marks()) != 0 {
+				result += "("
+				var stringMarkList []string
+				for _, mark := range cell.Marks() {
+					stringMarkList = append(stringMarkList, strconv.Itoa(mark))
+				}
+				result += strings.Join(stringMarkList, ",")
+				result += ")"
+			}
+			if c != sudoku.DIM-1 {
+				result += "|"
+			}
+		}
+		if r != sudoku.DIM-1 {
+			result += "\n"
+		}
+	}
+	return result
 }
 
 func (c *dokuConverter) Valid(puzzle string) bool {
