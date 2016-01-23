@@ -37,6 +37,7 @@ const _MAX_MATRIX_POWER = 50
 
 const _SOLVES_CACHE_FILENAME = ".solves_cache.db"
 const _SOLVES_BUCKET = "solves"
+const _SOLVES_DIFFICULTY_BUCKET = "difficulty"
 
 const _NORMALIZED_LOWER_BOUND = 0.0
 const _NORMALIZED_UPPER_BOUND = 0.9
@@ -804,19 +805,47 @@ func openSolvesCache() *solvesCache {
 		log.Fatal("Couldn't open solves cache db:", err)
 	}
 
-	//TODO: if --clear is passed, clear the cache.
+	//TODO: if --clear is passed, clear the cache. Not a HUGE deal, since you can just delete that if you want.
 	return &solvesCache{db}
 }
 
 func (c *solvesCache) verifyFresh(expectedRecLength int) {
-	//TODO: erase the entire database if the hash of the difficulty model is different.
-	//If we erase it, stuff in the current hash ID.
+	var shouldDelete bool
+	//Make sure the current difficulty hash is what we expect.
+
+	c.db.Update(func(tx *bolt.Tx) error {
+		bucket, _ := tx.CreateBucketIfNotExists([]byte(_SOLVES_DIFFICULTY_BUCKET))
+		if bucket == nil {
+			return nil
+		}
+		v := bucket.Get([]byte(_SOLVES_DIFFICULTY_BUCKET))
+		if v == nil {
+			//OK, must be new. Store the current difficulty model
+			bucket.Put([]byte(_SOLVES_DIFFICULTY_BUCKET), []byte(sudoku.DIFFICULTY_MODEL))
+			return nil
+		}
+		if verbose {
+			log.Println("Current difficulty model is", sudoku.DIFFICULTY_MODEL)
+			log.Println("Cache's difficulty model is", string(v))
+		}
+
+		if string(v) != sudoku.DIFFICULTY_MODEL {
+			//Stale!
+			shouldDelete = true
+		}
+		return nil
+	})
+
+	if shouldDelete {
+		log.Println("The cache was populated with a pervious difficulty model. Erasing.")
+		c.deleteSolves()
+		return
+	}
 
 	//Check that a random record we read back has the expected number of signals.
 
 	//TODO: this is a brittle way to make sure the numbers mean what we think
 	//they mean; ideally it should be json blobs with the signal names.
-	var shouldDelete bool
 
 	c.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(_SOLVES_BUCKET))
@@ -855,6 +884,15 @@ func (c *solvesCache) deleteSolves() {
 		if err != nil {
 			log.Fatal("Couldn't delete the solves bucket")
 		}
+
+		//Store the current difficulty model
+		bucket, _ := tx.CreateBucketIfNotExists([]byte(_SOLVES_DIFFICULTY_BUCKET))
+		if bucket == nil {
+			return nil
+		}
+
+		bucket.Put([]byte(_SOLVES_DIFFICULTY_BUCKET), []byte(sudoku.DIFFICULTY_MODEL))
+
 		return nil
 	})
 }
