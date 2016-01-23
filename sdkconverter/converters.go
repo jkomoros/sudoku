@@ -13,7 +13,7 @@ import (
  * Converters convert to and from non-default file formats for sudoku puzzles.
  */
 
-const _KOMO_CELL_RE = `\d!?:?(\[(\d\.)*\d\])?`
+const _KOMO_CELL_RE = `\d!?(:\d)?(\[(\d\.)*\d\])?`
 
 type SudokuPuzzleConverter interface {
 	//Load loads the puzzle defined by `puzzle`, in the format tied to this
@@ -136,6 +136,7 @@ func parseKomoCell(data string) cellInfo {
 
 	//TODO: having this hand-rolled parser feels really brittle
 	inMarkSection := false
+	expectingUserNumber := false
 
 	for _, ch := range data {
 
@@ -152,15 +153,23 @@ func parseKomoCell(data string) cellInfo {
 			case ']':
 				inMarkSection = false
 			}
+		} else if expectingUserNumber {
+			switch ch {
+			//TODO: better way of checking for it being an int, tied to DIM
+			case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+				//User filled number since not in postion 0
+				result.number, _ = strconv.Atoi(string(ch))
+			default:
+				panic(ch)
+			}
+			expectingUserNumber = false
 		} else {
 			switch ch {
 			case '!':
 				result.locked = true
 				result.number = solutionNumber
-			//TODO: better way of checking for it being an int, tied to DIM
-			case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-				//User filled number since not in postion 0
-				result.number, _ = strconv.Atoi(string(ch))
+			case ':':
+				expectingUserNumber = true
 			case '[':
 				inMarkSection = true
 			default:
