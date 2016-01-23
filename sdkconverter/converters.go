@@ -31,17 +31,22 @@ type SudokuPuzzleConverter interface {
 type komoConverter struct {
 }
 
+type dokuConverter struct {
+}
+
 //This one is a total pass through, just for convenience.
 type sdkConverter struct {
 }
 
-//Converters is a list of the provided converters. Currently only "komo" and "sdk" (a pass-through) are provided.
+//Converters is a list of the provided converters. Currently only "komo",
+//"doku", and "sdk" (a pass-through) are provided.
 var Converters map[string]SudokuPuzzleConverter
 
 func init() {
 	Converters = make(map[string]SudokuPuzzleConverter)
 	Converters["komo"] = &komoConverter{}
 	Converters["sdk"] = &sdkConverter{}
+	Converters["doku"] = &dokuConverter{}
 }
 
 //ToSDK is a convenience wrapper that takes the name of a format and the puzzle data
@@ -280,6 +285,21 @@ func (c *komoConverter) Valid(puzzle string) bool {
 		}
 	}
 	return true
+}
+
+func (c *dokuConverter) DataString(grid *sudoku.Grid) string {
+	//TODO: implement this
+	return ""
+}
+
+func (c *dokuConverter) Valid(puzzle string) bool {
+	//TODO: implement this
+	return false
+}
+
+func (c *dokuConverter) Load(grid *sudoku.Grid, puzzle string) bool {
+	//TODO: implement this
+	return false
 }
 
 func (c *sdkConverter) Load(grid *sudoku.Grid, puzzle string) bool {

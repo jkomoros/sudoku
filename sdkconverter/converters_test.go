@@ -6,6 +6,13 @@ import (
 	"testing"
 )
 
+func TestDokuConverter(t *testing.T) {
+	c := Converters["doku"]
+	if c == nil {
+		t.Error("Couldn't find the doku converter")
+	}
+}
+
 func TestKomoConverterLoad(t *testing.T) {
 	tests := [][2]string{
 		{"converter_one_komo.sdk", "converter_one.sdk"},
