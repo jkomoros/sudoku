@@ -177,7 +177,21 @@ func (c *mainController) SetGrid(grid *sudoku.Grid) {
 		c.SetSelected(oldCell.InGrid(c.grid))
 	}
 	if c.grid != nil {
-		c.grid.LockFilledCells()
+		//IF there are already some locked cells, we assume that only those
+		//cells should be locked. If there aren't any locked cells at all, we
+		//assume that all filled cells should be locked.
+
+		//TODO: this seems like magic behavior that's hard to reason about.
+		foundLockedCell := false
+		for _, cell := range c.grid.Cells() {
+			if cell.Locked() {
+				foundLockedCell = true
+				break
+			}
+		}
+		if !foundLockedCell {
+			c.grid.LockFilledCells()
+		}
 	}
 }
 
@@ -206,9 +220,6 @@ func (c *mainController) LoadGridFromFile(file string) {
 }
 
 func (c *mainController) SaveGrid() {
-
-	//TODO: there's a bug: when you load in a grid in doku format that has a
-	//user-filled number, it becomes locked.
 
 	//TODO: only allow writing if we've cleared that c.filename is allowed to
 	//be written to.
