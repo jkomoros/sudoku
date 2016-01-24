@@ -128,6 +128,11 @@ func (c *mainController) enterConfirmMode(msg string, defaultAction defaultOptio
 	c.EnterMode(MODE_CONFIRM)
 }
 
+func (c *mainController) enterFileInputMode(onCommit func(string)) {
+	MODE_LOAD.onCommit = onCommit
+	c.EnterMode(MODE_LOAD)
+}
+
 func (c *mainController) SetConsoleMessage(msg string, shortLived bool) {
 
 	if c.outputWidth != 0 {

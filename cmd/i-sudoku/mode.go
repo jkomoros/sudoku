@@ -261,7 +261,9 @@ func (s *commandMode) handleInput(c *mainController, evt termbox.Event) {
 				func() {},
 			)
 		case evt.Ch == 'l':
-			c.EnterMode(MODE_LOAD)
+			c.enterFileInputMode(func(input string) {
+				c.LoadGridFromFile(input)
+			})
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
@@ -340,6 +342,7 @@ type loadMode struct {
 	input string
 	//which index of the input string the cursor is at
 	cursorOffset int
+	onCommit     func(string)
 	baseMode
 }
 
@@ -515,7 +518,10 @@ func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
 	case termbox.EventKey:
 		switch evt.Key {
 		case termbox.KeyEnter:
-			m.loadPuzzle(c)
+			if m.onCommit != nil {
+				m.onCommit(m.input)
+			}
+			c.EnterMode(MODE_DEFAULT)
 		case termbox.KeyEsc:
 			c.EnterMode(MODE_DEFAULT)
 		case termbox.KeyArrowLeft:
