@@ -477,7 +477,7 @@ func TestToggleSelectedMark(t *testing.T) {
 func TestSaveGrid(t *testing.T) {
 	c := newController()
 
-	testFileName := "puzzles/TEMPORARY_TEST_FILE.doku"
+	testFileName := "test_puzzles/TEMPORARY_TEST_FILE.doku"
 
 	//Make sure the test file doesn't exist.
 
@@ -523,7 +523,7 @@ func getDefaultOptions() *appOptions {
 
 func TestProvideStarterPuzzle(t *testing.T) {
 	options := getDefaultOptions()
-	options.START_PUZZLE_FILENAME = "puzzles/converter_one.sdk"
+	options.START_PUZZLE_FILENAME = "test_puzzles/converter_one.sdk"
 
 	errOutput := &bytes.Buffer{}
 
@@ -533,7 +533,7 @@ func TestProvideStarterPuzzle(t *testing.T) {
 
 	errMessage := string(errorReaderBytes)
 
-	goldenPuzzle, _ := ioutil.ReadFile("puzzles/converter_one.sdk")
+	goldenPuzzle, _ := ioutil.ReadFile("test_puzzles/converter_one.sdk")
 
 	if c.Grid().DataString() != string(goldenPuzzle) {
 		t.Error("Loading a normal puzzle with command line option failed.")

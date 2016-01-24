@@ -584,7 +584,7 @@ func TestLoadMode(t *testing.T) {
 	sendCharEvent(c, 'l')
 
 	//Try an invalid puzzle
-	for _, ch := range "puzzles/invalid_sdk_too_short.sdk" {
+	for _, ch := range "test_puzzles/invalid_sdk_too_short.sdk" {
 		sendCharEvent(c, ch)
 	}
 	sendKeyEvent(c, termbox.KeyEnter)
@@ -603,7 +603,7 @@ func TestLoadMode(t *testing.T) {
 	sendCharEvent(c, 'c')
 	sendCharEvent(c, 'l')
 
-	for _, ch := range "puzzles/converter_one.sdk" {
+	for _, ch := range "test_puzzles/converter_one.sdk" {
 		sendCharEvent(c, ch)
 	}
 	sendKeyEvent(c, termbox.KeyEnter)
@@ -620,16 +620,16 @@ func TestLoadMode(t *testing.T) {
 	//Tab completion
 	sendCharEvent(c, 'c')
 	sendCharEvent(c, 'l')
-	sendCharEvent(c, 'p')
+	sendCharEvent(c, 't')
 	sendKeyEvent(c, termbox.KeyTab)
 
-	if MODE_FILE_INPUT.input != "puzzles/" {
+	if MODE_FILE_INPUT.input != "test_puzzles/" {
 		t.Error("tab on 'p' didn't complete to puzzles")
 	}
 
 	sendKeyEvent(c, termbox.KeyTab)
 
-	if MODE_FILE_INPUT.input != "puzzles/" {
+	if MODE_FILE_INPUT.input != "test_puzzles/" {
 		t.Error("Tab complete on a thing with no obvious fill did something")
 	}
 
@@ -641,7 +641,7 @@ func TestLoadMode(t *testing.T) {
 
 	sendKeyEvent(c, termbox.KeyTab)
 
-	if MODE_FILE_INPUT.input != "puzzles/invalid_sdk_too_short.sdk" {
+	if MODE_FILE_INPUT.input != "test_puzzles/invalid_sdk_too_short.sdk" {
 		t.Error("Second valid autocomplete filled wrong thing")
 	}
 
@@ -654,13 +654,13 @@ func TestLoadMode(t *testing.T) {
 	//Try completion with a prefix
 	sendCharEvent(c, 'c')
 	sendCharEvent(c, 'l')
-	sendCharEvent(c, 'p')
+	sendCharEvent(c, 't')
 	sendKeyEvent(c, termbox.KeyTab)
 	//autocompleted to 'puzzles/'
 	sendCharEvent(c, 'c')
 	sendKeyEvent(c, termbox.KeyTab)
 
-	if MODE_FILE_INPUT.input != "puzzles/converter_" {
+	if MODE_FILE_INPUT.input != "test_puzzles/converter_" {
 		t.Error("Tab on prefix didn't fill out to end of longested common prefix")
 	}
 
