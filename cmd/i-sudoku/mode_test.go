@@ -453,55 +453,55 @@ func TestLoadMode(t *testing.T) {
 	sendCharEvent(c, 'c')
 	sendCharEvent(c, 'l')
 
-	if c.mode != MODE_LOAD {
+	if c.mode != MODE_FILE_INPUT {
 		t.Error("c then l didn't get us into load mode")
 	}
 
-	if MODE_LOAD.cursorOffset != 0 {
+	if MODE_FILE_INPUT.cursorOffset != 0 {
 		t.Error("Cursor offset wasn't 0 to start")
 	}
 
 	sendCharEvent(c, 'm')
 
-	if MODE_LOAD.cursorOffset != 1 {
+	if MODE_FILE_INPUT.cursorOffset != 1 {
 		t.Error("Typing a character didn't move the cursor")
 	}
 
-	if MODE_LOAD.input != "m" {
+	if MODE_FILE_INPUT.input != "m" {
 		t.Error("Typing m in load mode didn't type m in the input")
 	}
 
 	cursorX := c.mode.cursorLocation(c)
-	if cursorX != len(STATUS_LOAD)+len(MODE_LOAD.input) {
+	if cursorX != len(STATUS_LOAD)+len(MODE_FILE_INPUT.input) {
 		t.Error("Cursor in wrong location, should be at end of input")
 	}
 
 	sendKeyEvent(c, termbox.KeyArrowRight)
 
-	if MODE_LOAD.cursorOffset != 1 {
+	if MODE_FILE_INPUT.cursorOffset != 1 {
 		t.Error("Moving right at end of input moved off end")
 	}
 
 	sendKeyEvent(c, termbox.KeyArrowLeft)
 
-	if MODE_LOAD.cursorOffset != 0 {
+	if MODE_FILE_INPUT.cursorOffset != 0 {
 		t.Error("Moving left didn't move cursor back to beginning")
 	}
 
 	sendKeyEvent(c, termbox.KeyArrowLeft)
 
-	if MODE_LOAD.cursorOffset != 0 {
+	if MODE_FILE_INPUT.cursorOffset != 0 {
 		t.Error("Moving left at front of input went off end")
 	}
 
 	sendKeyEvent(c, termbox.KeyArrowRight)
 	sendKeyEvent(c, termbox.KeyBackspace2)
 
-	if MODE_LOAD.cursorOffset != 0 {
+	if MODE_FILE_INPUT.cursorOffset != 0 {
 		t.Error("Backspace at end of input didn't remove it")
 	}
 
-	if MODE_LOAD.input != "" {
+	if MODE_FILE_INPUT.input != "" {
 		t.Error("Backspace at end of input didn't make it zero length")
 	}
 
@@ -514,11 +514,11 @@ func TestLoadMode(t *testing.T) {
 	sendCharEvent(c, 'c')
 	sendCharEvent(c, 'l')
 
-	if MODE_LOAD.input != "" {
+	if MODE_FILE_INPUT.input != "" {
 		t.Error("Going back into load mode didn't reset the input")
 	}
 
-	if MODE_LOAD.cursorOffset != 0 {
+	if MODE_FILE_INPUT.cursorOffset != 0 {
 		t.Error("Cursor offset wasn't reset back to 0")
 	}
 
@@ -529,22 +529,22 @@ func TestLoadMode(t *testing.T) {
 	sendKeyEvent(c, termbox.KeyArrowLeft)
 	sendCharEvent(c, 'd')
 
-	if MODE_LOAD.input != "abdc" {
-		t.Error("Adding a character in middle of string came out wrong:", MODE_LOAD.input)
+	if MODE_FILE_INPUT.input != "abdc" {
+		t.Error("Adding a character in middle of string came out wrong:", MODE_FILE_INPUT.input)
 	}
 
-	if MODE_LOAD.cursorOffset != 3 {
-		t.Error("After adding a character in middle of string, cursor was in wrong loc", MODE_LOAD.cursorOffset)
+	if MODE_FILE_INPUT.cursorOffset != 3 {
+		t.Error("After adding a character in middle of string, cursor was in wrong loc", MODE_FILE_INPUT.cursorOffset)
 	}
 
 	sendKeyEvent(c, termbox.KeyBackspace2)
 
-	if MODE_LOAD.input != "abc" {
-		t.Error("Backspace in middle had wrong result: ", MODE_LOAD.input)
+	if MODE_FILE_INPUT.input != "abc" {
+		t.Error("Backspace in middle had wrong result: ", MODE_FILE_INPUT.input)
 	}
 
-	if MODE_LOAD.cursorOffset != 2 {
-		t.Error("Backspace in middle had wrong result: ", MODE_LOAD.cursorOffset)
+	if MODE_FILE_INPUT.cursorOffset != 2 {
+		t.Error("Backspace in middle had wrong result: ", MODE_FILE_INPUT.cursorOffset)
 	}
 
 	//move cursor to end
@@ -556,7 +556,7 @@ func TestLoadMode(t *testing.T) {
 	sendKeyEvent(c, termbox.KeyBackspace2)
 	sendKeyEvent(c, termbox.KeyBackspace2)
 
-	if MODE_LOAD.input != "" {
+	if MODE_FILE_INPUT.input != "" {
 		t.Error("Removing all input still left some")
 	}
 
@@ -623,13 +623,13 @@ func TestLoadMode(t *testing.T) {
 	sendCharEvent(c, 'p')
 	sendKeyEvent(c, termbox.KeyTab)
 
-	if MODE_LOAD.input != "puzzles/" {
+	if MODE_FILE_INPUT.input != "puzzles/" {
 		t.Error("tab on 'p' didn't complete to puzzles")
 	}
 
 	sendKeyEvent(c, termbox.KeyTab)
 
-	if MODE_LOAD.input != "puzzles/" {
+	if MODE_FILE_INPUT.input != "puzzles/" {
 		t.Error("Tab complete on a thing with no obvious fill did something")
 	}
 
@@ -641,11 +641,11 @@ func TestLoadMode(t *testing.T) {
 
 	sendKeyEvent(c, termbox.KeyTab)
 
-	if MODE_LOAD.input != "puzzles/invalid_sdk_too_short.sdk" {
+	if MODE_FILE_INPUT.input != "puzzles/invalid_sdk_too_short.sdk" {
 		t.Error("Second valid autocomplete filled wrong thing")
 	}
 
-	if MODE_LOAD.cursorOffset != len(MODE_LOAD.input) {
+	if MODE_FILE_INPUT.cursorOffset != len(MODE_FILE_INPUT.input) {
 		t.Error("Tab complete didn't move to end of input.")
 	}
 
@@ -660,7 +660,7 @@ func TestLoadMode(t *testing.T) {
 	sendCharEvent(c, 'c')
 	sendKeyEvent(c, termbox.KeyTab)
 
-	if MODE_LOAD.input != "puzzles/converter_" {
+	if MODE_FILE_INPUT.input != "puzzles/converter_" {
 		t.Error("Tab on prefix didn't fill out to end of longested common prefix")
 	}
 
@@ -668,7 +668,7 @@ func TestLoadMode(t *testing.T) {
 
 	sendKeyEvent(c, termbox.KeyCtrlA)
 
-	if MODE_LOAD.cursorOffset != 0 {
+	if MODE_FILE_INPUT.cursorOffset != 0 {
 		t.Error("Ctrl-A didn't move cursor to front")
 	}
 
@@ -676,13 +676,13 @@ func TestLoadMode(t *testing.T) {
 
 	sendKeyEvent(c, termbox.KeyCtrlE)
 
-	if MODE_LOAD.cursorOffset != len(MODE_LOAD.input) {
+	if MODE_FILE_INPUT.cursorOffset != len(MODE_FILE_INPUT.input) {
 		t.Error("Ctrl-E didn't move to end of line")
 	}
 
 	//Test ctrl-k
 
-	currentInput := MODE_LOAD.input
+	currentInput := MODE_FILE_INPUT.input
 
 	sendKeyEvent(c, termbox.KeyArrowLeft)
 	sendKeyEvent(c, termbox.KeyArrowLeft)
@@ -691,7 +691,7 @@ func TestLoadMode(t *testing.T) {
 
 	expectedInput := currentInput[:len(currentInput)-2]
 
-	if MODE_LOAD.input != expectedInput {
+	if MODE_FILE_INPUT.input != expectedInput {
 		t.Error("Ctrl-K in middle didn't remove expected characters")
 	}
 

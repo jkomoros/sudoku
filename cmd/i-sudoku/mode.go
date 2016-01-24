@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	MODE_DEFAULT = &defaultMode{}
-	MODE_COMMAND = &commandMode{}
-	MODE_CONFIRM = &confirmMode{}
-	MODE_LOAD    = &loadMode{}
+	MODE_DEFAULT    = &defaultMode{}
+	MODE_COMMAND    = &commandMode{}
+	MODE_CONFIRM    = &confirmMode{}
+	MODE_FILE_INPUT = &fileInputMode{}
 )
 
 const (
@@ -338,7 +338,7 @@ func (s *confirmMode) statusLine(c *mainController) string {
 	return s.msg + "  " + confirmMsg
 }
 
-type loadMode struct {
+type fileInputMode struct {
 	input string
 	//which index of the input string the cursor is at
 	cursorOffset int
@@ -346,57 +346,57 @@ type loadMode struct {
 	baseMode
 }
 
-func (m *loadMode) cursorLocation(c *mainController) int {
+func (m *fileInputMode) cursorLocation(c *mainController) int {
 	return len(STATUS_LOAD) + m.cursorOffset
 }
 
-func (m *loadMode) statusLine(c *mainController) string {
+func (m *fileInputMode) statusLine(c *mainController) string {
 	return STATUS_LOAD + m.input
 }
 
-func (m *loadMode) shouldEnter(c *mainController) bool {
+func (m *fileInputMode) shouldEnter(c *mainController) bool {
 	m.input = ""
 	m.cursorOffset = 0
 	return true
 }
 
-func (m *loadMode) moveCursorLeft() {
+func (m *fileInputMode) moveCursorLeft() {
 	m.cursorOffset--
 	if m.cursorOffset < 0 {
 		m.cursorOffset = 0
 	}
 }
 
-func (m *loadMode) moveCursorRight() {
+func (m *fileInputMode) moveCursorRight() {
 	m.cursorOffset++
 	if m.cursorOffset > len(m.input) {
 		m.cursorOffset = len(m.input)
 	}
 }
 
-func (m *loadMode) moveCursorToFront() {
+func (m *fileInputMode) moveCursorToFront() {
 	m.cursorOffset = 0
 }
 
-func (m *loadMode) moveCursorToBack() {
+func (m *fileInputMode) moveCursorToBack() {
 	m.cursorOffset = len(m.input)
 }
 
-func (m *loadMode) deleteToEndOfLine() {
+func (m *fileInputMode) deleteToEndOfLine() {
 	m.input = m.input[:m.cursorOffset]
 }
 
-func (m *loadMode) addCharAtCursor(ch rune) {
+func (m *fileInputMode) addCharAtCursor(ch rune) {
 	m.input = m.input[0:m.cursorOffset] + string(ch) + m.input[m.cursorOffset:len(m.input)]
 	m.moveCursorRight()
 }
 
-func (m *loadMode) loadPuzzle(c *mainController) {
+func (m *fileInputMode) loadPuzzle(c *mainController) {
 	c.LoadGridFromFile(m.input)
 	c.EnterMode(MODE_DEFAULT)
 }
 
-func (m *loadMode) removeCharAtCursor() {
+func (m *fileInputMode) removeCharAtCursor() {
 	if len(m.input) == 0 {
 		return
 	}
@@ -413,7 +413,7 @@ func (m *loadMode) removeCharAtCursor() {
 	m.moveCursorLeft()
 }
 
-func (m *loadMode) tabComplete(c *mainController) {
+func (m *fileInputMode) tabComplete(c *mainController) {
 	//Only do tab complete if at end of input
 	if m.cursorOffset != len(m.input) {
 		return
@@ -512,7 +512,7 @@ func longestCommonPrefix(files []string) string {
 	return min
 }
 
-func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
+func (m *fileInputMode) handleInput(c *mainController, evt termbox.Event) {
 	handled := true
 	switch evt.Type {
 	case termbox.EventKey:

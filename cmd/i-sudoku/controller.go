@@ -129,8 +129,8 @@ func (c *mainController) enterConfirmMode(msg string, defaultAction defaultOptio
 }
 
 func (c *mainController) enterFileInputMode(onCommit func(string)) {
-	MODE_LOAD.onCommit = onCommit
-	c.EnterMode(MODE_LOAD)
+	MODE_FILE_INPUT.onCommit = onCommit
+	c.EnterMode(MODE_FILE_INPUT)
 }
 
 func (c *mainController) SetConsoleMessage(msg string, shortLived bool) {
