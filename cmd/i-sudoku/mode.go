@@ -265,10 +265,7 @@ func (s *commandMode) handleInput(c *mainController, evt termbox.Event) {
 				c.LoadGridFromFile(input)
 			})
 		case evt.Ch == 's':
-			c.enterFileInputMode(func(input string) {
-				c.SetFilename(input)
-				c.SaveGrid()
-			})
+			c.SaveCommandIssued()
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.

@@ -219,6 +219,7 @@ func (c *mainController) LoadGridFromFile(file string) {
 	c.filename = file
 }
 
+//Actually save
 func (c *mainController) SaveGrid() {
 
 	//TODO: only allow writing if we've cleared that c.filename is allowed to
@@ -237,6 +238,22 @@ func (c *mainController) SaveGrid() {
 	}
 
 	ioutil.WriteFile(c.filename, []byte(converter.DataString(c.Grid())), 0644)
+
+	c.SetConsoleMessage("Puzzle saved to "+c.filename, true)
+}
+
+//The user told us to save. what we actually do depends on current state.
+func (c *mainController) SaveCommandIssued() {
+	if c.filename == "" {
+		c.enterFileInputMode(func(input string) {
+			c.SetFilename(input)
+			c.SaveGrid()
+			c.EnterMode(MODE_DEFAULT)
+		})
+		return
+	}
+	c.SaveGrid()
+	c.EnterMode(MODE_DEFAULT)
 }
 
 func (c *mainController) Filename() string {
