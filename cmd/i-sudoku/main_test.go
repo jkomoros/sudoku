@@ -504,6 +504,10 @@ func TestProvideStarterPuzzle(t *testing.T) {
 	if errMessage != "" {
 		t.Error("Got error message on successful read", errMessage)
 	}
+
+	if c.Filename() != options.START_PUZZLE_FILENAME {
+		t.Error("Loading from file didn't set filename in controller")
+	}
 	//TODO: test that an invalid file errors
 	//TODO: test that an invalid puzzle string errors
 }

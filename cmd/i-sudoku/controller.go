@@ -13,7 +13,9 @@ type mainController struct {
 	selected *sudoku.Cell
 	mode     InputMode
 	//The size of the console output. Not used for much.
-	outputWidth    int
+	outputWidth int
+	//TODO: store fileOKToSave bool if we've confirmed this file is OK to save to.
+	filename       string
 	lastShownHint  *sudoku.SolveDirections
 	consoleMessage string
 	//if true, will zero out console message on turn of event loop.
@@ -195,6 +197,15 @@ func (c *mainController) LoadGridFromFile(file string) {
 
 	c.SetGrid(sdkconverter.Load(puzzle))
 	c.SetConsoleMessage(GRID_LOADED_MESSAGE, true)
+	c.filename = file
+}
+
+func (c *mainController) Filename() string {
+	return c.filename
+}
+
+func (c *mainController) SetFilename(filename string) {
+	c.filename = filename
 }
 
 func (c *mainController) Selected() *sudoku.Cell {
