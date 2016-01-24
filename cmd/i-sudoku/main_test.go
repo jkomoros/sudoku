@@ -6,6 +6,7 @@ import (
 	"github.com/jkomoros/sudoku"
 	"github.com/jkomoros/sudoku/sdkconverter"
 	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 )
@@ -471,6 +472,43 @@ func TestToggleSelectedMark(t *testing.T) {
 	if model.Selected().Mark(1) {
 		t.Error("ToggleSelectedMark modified a locked cell", lockedCell)
 	}
+}
+
+func TestSaveGrid(t *testing.T) {
+	c := newController()
+
+	testFileName := "puzzles/TEMPORARY_TEST_FILE.doku"
+
+	//Make sure the test file doesn't exist.
+
+	if _, err := os.Stat(testFileName); !os.IsNotExist(err) {
+		//it does exist.
+		os.Remove(testFileName)
+	}
+
+	c.SetFilename(testFileName)
+	c.SaveGrid()
+
+	gridState := c.Grid().Diagram(true)
+
+	if _, err := os.Stat(testFileName); os.IsNotExist(err) {
+		t.Fatal("Saving grid didn't actually save a file")
+	}
+
+	//Blow away the grid
+	c.SetGrid(nil)
+
+	c.LoadGridFromFile(testFileName)
+
+	newGridState := c.Grid().Diagram(true)
+
+	if gridState != newGridState {
+		t.Error("The file that was saved didn't put the grid back in the same state.")
+	}
+
+	//Now remove the file
+	os.Remove(testFileName)
+
 }
 
 //Callers should call fixUpOptions after receiving this.

@@ -205,6 +205,29 @@ func (c *mainController) LoadGridFromFile(file string) {
 	c.filename = file
 }
 
+func (c *mainController) SaveGrid() {
+
+	//TODO: there's a bug: when you load in a grid in doku format that has a
+	//user-filled number, it becomes locked.
+
+	//TODO: only allow writing if we've cleared that c.filename is allowed to
+	//be written to.
+
+	if c.filename == "" {
+		return
+	}
+
+	converter := sdkconverter.Converters["doku"]
+
+	//TODO: if the filename doesn't have an extension, add doku.
+
+	if converter == nil {
+		return
+	}
+
+	ioutil.WriteFile(c.filename, []byte(converter.DataString(c.Grid())), 0644)
+}
+
 func (c *mainController) Filename() string {
 	return c.filename
 }

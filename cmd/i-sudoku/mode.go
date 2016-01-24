@@ -30,7 +30,7 @@ const (
 {m} to enter mark mode, so all numbers entered will toggle marks
 {f} to toggle fast move mode, allowing you to skip over filled cells`
 	STATUS_DEFAULT = "{→,←,↓,↑} to move cells, {0-9} to enter number, {Shift + 0-9} to toggle marks, {?} to list other commands"
-	STATUS_COMMAND = "COMMAND: {n}ew puzzle, {q}uit, {l}oad puzzle, {r}eset puzzle, {ESC} cancel"
+	STATUS_COMMAND = "COMMAND: {n}ew puzzle, {q}uit, {l}oad puzzle, {s}ave puzzle, {r}eset puzzle, {ESC} cancel"
 	STATUS_LOAD    = "Filename? {Enter} to commit, {Esc} to cancel:"
 )
 
@@ -263,6 +263,11 @@ func (s *commandMode) handleInput(c *mainController, evt termbox.Event) {
 		case evt.Ch == 'l':
 			c.enterFileInputMode(func(input string) {
 				c.LoadGridFromFile(input)
+			})
+		case evt.Ch == 's':
+			c.enterFileInputMode(func(input string) {
+				c.SetFilename(input)
+				c.SaveGrid()
 			})
 		default:
 			if !handled {
