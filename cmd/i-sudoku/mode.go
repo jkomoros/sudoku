@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	MODE_DEFAULT = &defaultMode{}
-	MODE_COMMAND = &commandMode{}
-	MODE_CONFIRM = &confirmMode{}
-	MODE_LOAD    = &loadMode{}
+	MODE_DEFAULT    = &defaultMode{}
+	MODE_COMMAND    = &commandMode{}
+	MODE_CONFIRM    = &confirmMode{}
+	MODE_FILE_INPUT = &fileInputMode{}
 )
 
 const (
@@ -30,7 +30,7 @@ const (
 {m} to enter mark mode, so all numbers entered will toggle marks
 {f} to toggle fast move mode, allowing you to skip over filled cells`
 	STATUS_DEFAULT = "{→,←,↓,↑} to move cells, {0-9} to enter number, {Shift + 0-9} to toggle marks, {?} to list other commands"
-	STATUS_COMMAND = "COMMAND: {n}ew puzzle, {q}uit, {l}oad puzzle, {r}eset puzzle, {ESC} cancel"
+	STATUS_COMMAND = "COMMAND: {n}ew puzzle, {q}uit, {l}oad puzzle, {s}ave puzzle, {r}eset puzzle, {ESC} cancel"
 	STATUS_LOAD    = "Filename? {Enter} to commit, {Esc} to cancel:"
 )
 
@@ -249,19 +249,29 @@ func (s *commandMode) handleInput(c *mainController, evt termbox.Event) {
 				DEFAULT_NO,
 				func() {
 					c.NewGrid()
+					c.EnterMode(MODE_DEFAULT)
 				},
-				func() {},
+				func() {
+					c.EnterMode(MODE_DEFAULT)
+				},
 			)
 		case evt.Ch == 'r':
 			c.enterConfirmMode("Reset? Your progress will be lost.",
 				DEFAULT_NO,
 				func() {
 					c.ResetGrid()
+					c.EnterMode(MODE_DEFAULT)
 				},
-				func() {},
+				func() {
+					c.EnterMode(MODE_DEFAULT)
+				},
 			)
 		case evt.Ch == 'l':
-			c.EnterMode(MODE_LOAD)
+			c.enterFileInputMode(func(input string) {
+				c.LoadGridFromFile(input)
+			})
+		case evt.Ch == 's':
+			c.SaveCommandIssued()
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
@@ -313,10 +323,8 @@ func (s *confirmMode) handleInput(c *mainController, evt termbox.Event) {
 		switch evt.Ch {
 		case 'y':
 			s.yesAction()
-			c.EnterMode(MODE_DEFAULT)
 		case 'n':
 			s.noAction()
-			c.EnterMode(MODE_DEFAULT)
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
@@ -336,64 +344,65 @@ func (s *confirmMode) statusLine(c *mainController) string {
 	return s.msg + "  " + confirmMsg
 }
 
-type loadMode struct {
+type fileInputMode struct {
 	input string
 	//which index of the input string the cursor is at
 	cursorOffset int
+	onCommit     func(string)
 	baseMode
 }
 
-func (m *loadMode) cursorLocation(c *mainController) int {
+func (m *fileInputMode) cursorLocation(c *mainController) int {
 	return len(STATUS_LOAD) + m.cursorOffset
 }
 
-func (m *loadMode) statusLine(c *mainController) string {
+func (m *fileInputMode) statusLine(c *mainController) string {
 	return STATUS_LOAD + m.input
 }
 
-func (m *loadMode) shouldEnter(c *mainController) bool {
+func (m *fileInputMode) shouldEnter(c *mainController) bool {
 	m.input = ""
 	m.cursorOffset = 0
 	return true
 }
 
-func (m *loadMode) moveCursorLeft() {
+func (m *fileInputMode) moveCursorLeft() {
 	m.cursorOffset--
 	if m.cursorOffset < 0 {
 		m.cursorOffset = 0
 	}
 }
 
-func (m *loadMode) moveCursorRight() {
+func (m *fileInputMode) moveCursorRight() {
 	m.cursorOffset++
 	if m.cursorOffset > len(m.input) {
 		m.cursorOffset = len(m.input)
 	}
 }
 
-func (m *loadMode) moveCursorToFront() {
+func (m *fileInputMode) moveCursorToFront() {
 	m.cursorOffset = 0
 }
 
-func (m *loadMode) moveCursorToBack() {
+func (m *fileInputMode) moveCursorToBack() {
 	m.cursorOffset = len(m.input)
 }
 
-func (m *loadMode) deleteToEndOfLine() {
+func (m *fileInputMode) deleteToEndOfLine() {
 	m.input = m.input[:m.cursorOffset]
 }
 
-func (m *loadMode) addCharAtCursor(ch rune) {
+func (m *fileInputMode) addCharAtCursor(ch rune) {
 	m.input = m.input[0:m.cursorOffset] + string(ch) + m.input[m.cursorOffset:len(m.input)]
 	m.moveCursorRight()
 }
 
-func (m *loadMode) loadPuzzle(c *mainController) {
+func (m *fileInputMode) loadPuzzle(c *mainController) {
 	c.LoadGridFromFile(m.input)
 	c.EnterMode(MODE_DEFAULT)
 }
 
-func (m *loadMode) removeCharAtCursor() {
+func (m *fileInputMode) removeCharAtCursor() {
 	if len(m.input) == 0 {
 		return
 	}
@@ -410,7 +419,7 @@ func (m *loadMode) removeCharAtCursor() {
 	m.moveCursorLeft()
 }
 
-func (m *loadMode) tabComplete(c *mainController) {
+func (m *fileInputMode) tabComplete(c *mainController) {
 	//Only do tab complete if at end of input
 	if m.cursorOffset != len(m.input) {
 		return
@@ -509,13 +518,16 @@ func longestCommonPrefix(files []string) string {
 	return min
 }
 
-func (m *loadMode) handleInput(c *mainController, evt termbox.Event) {
+func (m *fileInputMode) handleInput(c *mainController, evt termbox.Event) {
 	handled := true
 	switch evt.Type {
 	case termbox.EventKey:
 		switch evt.Key {
 		case termbox.KeyEnter:
-			m.loadPuzzle(c)
+			if m.onCommit != nil {
+				m.onCommit(m.input)
+			}
+			c.EnterMode(MODE_DEFAULT)
 		case termbox.KeyEsc:
 			c.EnterMode(MODE_DEFAULT)
 		case termbox.KeyArrowLeft:

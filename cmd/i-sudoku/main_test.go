@@ -5,7 +5,9 @@ import (
 	"flag"
 	"github.com/jkomoros/sudoku"
 	"github.com/jkomoros/sudoku/sdkconverter"
+	"github.com/nsf/termbox-go"
 	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 )
@@ -473,6 +475,95 @@ func TestToggleSelectedMark(t *testing.T) {
 	}
 }
 
+func TestSaveGrid(t *testing.T) {
+	c := newController()
+
+	testFileName := "test_puzzles/TEMPORARY_TEST_FILE.doku"
+
+	//Make sure the test file doesn't exist.
+
+	if _, err := os.Stat(testFileName); !os.IsNotExist(err) {
+		//it does exist.
+		os.Remove(testFileName)
+	}
+
+	c.SetFilename(testFileName)
+	c.SaveGrid()
+
+	defer func() {
+		//Now remove the file
+		os.Remove(testFileName)
+	}()
+
+	gridState := c.Grid().Diagram(true)
+
+	if _, err := os.Stat(testFileName); os.IsNotExist(err) {
+		t.Fatal("Saving grid didn't actually save a file")
+	}
+
+	//Blow away the grid
+	c.SetGrid(nil)
+
+	c.LoadGridFromFile(testFileName)
+
+	newGridState := c.Grid().Diagram(true)
+
+	if gridState != newGridState {
+		t.Error("The file that was saved didn't put the grid back in the same state.")
+	}
+
+	//OK, now let's test out the commands using this file we've saved.
+
+	c = newController()
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 'l')
+
+	for _, ch := range testFileName {
+		sendCharEvent(c, ch)
+	}
+
+	sendKeyEvent(c, termbox.KeyEnter)
+
+	//OK, should be loaded up now.
+
+	if c.Grid().Diagram(true) != gridState {
+		t.Fatal("We didn't load back up the puzzle")
+	}
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 's')
+
+	if c.mode != MODE_CONFIRM {
+		t.Error("Hitting save on a loaded file didn't confirm")
+	}
+
+	sendCharEvent(c, 'n')
+
+	if c.mode != MODE_FILE_INPUT {
+		t.Error("Hitting no on overwrite didn't put us in file entry")
+	}
+
+	for _, ch := range testFileName {
+		sendCharEvent(c, ch)
+	}
+
+	sendKeyEvent(c, termbox.KeyEnter)
+
+	//Now, saves should be automatic.
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 's')
+
+	if !strings.HasPrefix(c.consoleMessage, PUZZLE_SAVED_MESSAGE) {
+		t.Error("Didn't save an OK file")
+	}
+
+	if c.mode != MODE_DEFAULT {
+		t.Error("Saving an OK file didn't go back to default")
+	}
+}
+
 //Callers should call fixUpOptions after receiving this.
 func getDefaultOptions() *appOptions {
 	options := &appOptions{
@@ -485,7 +576,7 @@ func getDefaultOptions() *appOptions {
 
 func TestProvideStarterPuzzle(t *testing.T) {
 	options := getDefaultOptions()
-	options.START_PUZZLE_FILENAME = "puzzles/converter_one.sdk"
+	options.START_PUZZLE_FILENAME = "test_puzzles/converter_one.sdk"
 
 	errOutput := &bytes.Buffer{}
 
@@ -495,7 +586,7 @@ func TestProvideStarterPuzzle(t *testing.T) {
 
 	errMessage := string(errorReaderBytes)
 
-	goldenPuzzle, _ := ioutil.ReadFile("puzzles/converter_one.sdk")
+	goldenPuzzle, _ := ioutil.ReadFile("test_puzzles/converter_one.sdk")
 
 	if c.Grid().DataString() != string(goldenPuzzle) {
 		t.Error("Loading a normal puzzle with command line option failed.")
@@ -503,6 +594,10 @@ func TestProvideStarterPuzzle(t *testing.T) {
 
 	if errMessage != "" {
 		t.Error("Got error message on successful read", errMessage)
+	}
+
+	if c.Filename() != options.START_PUZZLE_FILENAME {
+		t.Error("Loading from file didn't set filename in controller")
 	}
 	//TODO: test that an invalid file errors
 	//TODO: test that an invalid puzzle string errors
