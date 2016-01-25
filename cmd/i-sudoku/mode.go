@@ -269,6 +269,7 @@ func (s *commandMode) handleInput(c *mainController, evt termbox.Event) {
 		case evt.Ch == 'l':
 			c.enterFileInputMode(func(input string) {
 				c.LoadGridFromFile(input)
+				c.EnterMode(MODE_DEFAULT)
 			})
 		case evt.Ch == 's':
 			c.SaveCommandIssued()
@@ -527,7 +528,6 @@ func (m *fileInputMode) handleInput(c *mainController, evt termbox.Event) {
 			if m.onCommit != nil {
 				m.onCommit(m.input)
 			}
-			c.EnterMode(MODE_DEFAULT)
 		case termbox.KeyEsc:
 			c.EnterMode(MODE_DEFAULT)
 		case termbox.KeyArrowLeft:
