@@ -41,11 +41,11 @@ const (
 )
 
 type toggle struct {
-	Value     func() bool
-	Toggle    func()
-	OnText    string
-	OffText   string
-	GridColor termbox.Attribute
+	Value   func() bool
+	Toggle  func()
+	OnText  string
+	OffText string
+	Color   termbox.Attribute
 }
 
 func newController() *mainController {

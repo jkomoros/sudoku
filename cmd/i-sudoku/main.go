@@ -165,7 +165,7 @@ func drawGrid(y int, c *mainController) (endY int) {
 	for i := len(c.toggles) - 1; i >= 0; i-- {
 		toggle := c.toggles[i]
 		if toggle.Value() {
-			toggleBackgrounds = append(toggleBackgrounds, toggle.GridColor)
+			toggleBackgrounds = append(toggleBackgrounds, toggle.Color)
 		}
 	}
 	//Now, as long as there's one possibiltiy, select a grid color to paint.
@@ -264,7 +264,7 @@ func drawToggleLine(y int, c *mainController) (newY int) {
 
 	for _, toggle := range c.toggles {
 		msg := toggle.OffText
-		fg := toggle.GridColor
+		fg := toggle.Color
 		bg := termbox.ColorBlack
 		if toggle.Value() {
 			msg = toggle.OnText
