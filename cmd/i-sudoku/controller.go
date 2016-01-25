@@ -41,11 +41,12 @@ const (
 )
 
 type toggle struct {
-	Value   func() bool
-	Toggle  func()
-	OnText  string
-	OffText string
-	Color   termbox.Attribute
+	Value     func() bool
+	Toggle    func()
+	OnText    string
+	OffText   string
+	Color     termbox.Attribute
+	ColorGrid bool
 }
 
 func newController() *mainController {
@@ -75,6 +76,7 @@ func (c *mainController) setUpToggles() {
 			"  SOLVED  ",
 			" UNSOLVED ",
 			termbox.ColorYellow,
+			true,
 		},
 		//invalid
 		{
@@ -87,6 +89,7 @@ func (c *mainController) setUpToggles() {
 			" INVALID ",
 			"  VALID  ",
 			termbox.ColorRed,
+			true,
 		},
 		//Mark mode
 		{
@@ -99,6 +102,7 @@ func (c *mainController) setUpToggles() {
 			" MARKING ",
 			"         ",
 			termbox.ColorCyan,
+			false,
 		},
 		//Fast mode
 		{
@@ -111,6 +115,7 @@ func (c *mainController) setUpToggles() {
 			"  FAST MODE  ",
 			"             ",
 			termbox.ColorBlue,
+			false,
 		},
 		//Unsaved
 		{
@@ -123,6 +128,7 @@ func (c *mainController) setUpToggles() {
 			" UNSAVED ",
 			"  SAVED  ",
 			termbox.ColorMagenta,
+			false,
 		},
 	}
 }

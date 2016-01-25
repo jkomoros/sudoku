@@ -164,7 +164,7 @@ func drawGrid(y int, c *mainController) (endY int) {
 	//Iterate through toggles backwards, since earlier ones have higher preference
 	for i := len(c.toggles) - 1; i >= 0; i-- {
 		toggle := c.toggles[i]
-		if toggle.Value() {
+		if toggle.Value() && toggle.ColorGrid {
 			toggleBackgrounds = append(toggleBackgrounds, toggle.Color)
 		}
 	}
