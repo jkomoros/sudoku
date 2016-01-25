@@ -7,6 +7,7 @@ import (
 	"github.com/nsf/termbox-go"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 const (
@@ -342,6 +343,23 @@ func (c *mainController) IsSaved() bool {
 func (c *mainController) SetFilename(filename string) {
 	c.filename = filename
 	c.fileOKToSave = true
+}
+
+func (c *mainController) ShowHint() {
+
+	//TODO: shouldn't this be a method on model?  The rule of thumb is no
+	//modifying state in model except in model methods.
+	hint := c.Grid().Hint(nil)
+
+	if len(hint.Steps) == 0 {
+		c.SetConsoleMessage("No hint to give.", true)
+		return
+	}
+	c.SetConsoleMessage("{Hint}\n"+strings.Join(hint.Description(), "\n")+"\n\n"+"{ENTER} to accept, {ESC} to ignore", false)
+	//This hast to be after setting console message, since SetConsoleMessage clears the last hint.
+	c.lastShownHint = hint
+	lastStep := hint.Steps[len(hint.Steps)-1]
+	c.SetSelected(lastStep.TargetCells[0].InGrid(c.Grid()))
 }
 
 func (c *mainController) Selected() *sudoku.Cell {

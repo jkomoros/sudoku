@@ -570,6 +570,19 @@ func TestSaveGrid(t *testing.T) {
 	}
 }
 
+func TestHintOnSolvedGrid(t *testing.T) {
+	//This used to crash before we fixed it, so adding a regression test.
+	model := newController()
+	grid := sudoku.NewGrid()
+	grid.Fill()
+	model.SetGrid(grid)
+
+	model.ShowHint()
+
+	//If we didn't crash, we're good.
+
+}
+
 //Callers should call fixUpOptions after receiving this.
 func getDefaultOptions() *appOptions {
 	options := &appOptions{

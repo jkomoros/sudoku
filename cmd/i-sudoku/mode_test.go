@@ -186,19 +186,6 @@ func TestReset(t *testing.T) {
 	}
 }
 
-func TestHintOnSolvedGrid(t *testing.T) {
-	//This used to crash before we fixed it, so adding a regression test.
-	model := newController()
-	grid := sudoku.NewGrid()
-	grid.Fill()
-	model.SetGrid(grid)
-
-	showHint(model)
-
-	//If we didn't crash, we're good.
-
-}
-
 func TestSingleMarkEnter(t *testing.T) {
 	model := newController()
 
