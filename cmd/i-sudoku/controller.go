@@ -346,9 +346,6 @@ func (c *mainController) SetFilename(filename string) {
 }
 
 func (c *mainController) ShowHint() {
-
-	//TODO: shouldn't this be a method on model?  The rule of thumb is no
-	//modifying state in model except in model methods.
 	hint := c.Grid().Hint(nil)
 
 	if len(hint.Steps) == 0 {
