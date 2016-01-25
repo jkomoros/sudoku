@@ -8,30 +8,30 @@ import (
 	"unicode/utf8"
 )
 
-func sendKeyEvent(m *mainController, k termbox.Key) {
+func sendKeyEvent(c *mainController, k termbox.Key) {
 	evt := termbox.Event{
 		Type: termbox.EventKey,
 		Key:  k,
 	}
-	m.mode.handleInput(m, evt)
+	c.mode.handleInput(c, evt)
 }
 
-func sendNumberEvent(m *mainController, num int) {
+func sendNumberEvent(c *mainController, num int) {
 	ch, _ := utf8.DecodeRuneInString(strconv.Itoa(num))
 	evt := termbox.Event{
 		Type: termbox.EventKey,
 		Ch:   ch,
 	}
-	m.mode.handleInput(m, evt)
+	c.mode.handleInput(c, evt)
 }
 
 //TODO: use sendCharEvent to verify that chars in all states do what they should.
-func sendCharEvent(m *mainController, ch rune) {
+func sendCharEvent(c *mainController, ch rune) {
 	evt := termbox.Event{
 		Type: termbox.EventKey,
 		Ch:   ch,
 	}
-	m.mode.handleInput(m, evt)
+	c.mode.handleInput(c, evt)
 }
 
 func TestDefaultMode(t *testing.T) {
