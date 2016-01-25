@@ -28,9 +28,10 @@ const (
 {-} to remove all invalid marks from the selected cell
 {<enter>} to set a cell to the number that is the only current mark
 {m} to enter mark mode, so all numbers entered will toggle marks
-{f} to toggle fast move mode, allowing you to skip over filled cells`
+{f} to toggle fast move mode, allowing you to skip over filled cells
+{s} to quick-save to the last used filename`
 	STATUS_DEFAULT = "{→,←,↓,↑} to move cells, {0-9} to enter number, {Shift + 0-9} to toggle marks, {?} to list other commands"
-	STATUS_COMMAND = "COMMAND: {n}ew puzzle, {q}uit, {l}oad puzzle, {s}ave puzzle, {r}eset puzzle, {ESC} cancel"
+	STATUS_COMMAND = "COMMAND: {n}ew puzzle, {q}uit, {l}oad puzzle..., {s}ave puzzle as..., {r}eset puzzle, {ESC} cancel"
 	STATUS_LOAD    = "Filename? {Enter} to commit, {Esc} to cancel:"
 )
 
@@ -159,6 +160,8 @@ func (s *defaultMode) handleInput(c *mainController, evt termbox.Event) {
 			c.EnterMode(MODE_COMMAND)
 		case evt.Ch == 'm':
 			c.ToggleMarkMode()
+		case evt.Ch == 's':
+			c.SaveCommandIssued()
 		case runeIsShiftedNum(evt.Ch):
 			//TODO: ideally Ctrl+Num would work to put in one mark. But termbox doesn't appear to let that work.
 			num, err := strconv.Atoi(string(shiftedNumRuneToNum(evt.Ch)))
@@ -241,7 +244,7 @@ func (s *commandMode) handleInput(c *mainController, evt termbox.Event) {
 				c.EnterMode(MODE_DEFAULT)
 			})
 		case evt.Ch == 's':
-			c.SaveCommandIssued()
+			c.SaveAsCommandIssued()
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.

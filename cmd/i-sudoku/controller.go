@@ -277,9 +277,17 @@ func (c *mainController) SaveGrid() {
 	c.saveSnapshot()
 }
 
-//The user told us to save. what we actually do depends on current state.
 func (c *mainController) SaveCommandIssued() {
-	if c.filename == "" {
+	c.saveCommandImpl(false)
+}
+
+func (c *mainController) SaveAsCommandIssued() {
+	c.saveCommandImpl(true)
+}
+
+//The user told us to save. what we actually do depends on current state.
+func (c *mainController) saveCommandImpl(forceFilenamePrompt bool) {
+	if c.filename == "" || forceFilenamePrompt {
 		c.enterFileInputMode(func(input string) {
 			if _, err := os.Stat(input); err == nil {
 				//The file exists. Confirm.

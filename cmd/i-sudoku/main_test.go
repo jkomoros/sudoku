@@ -531,7 +531,6 @@ func TestSaveGrid(t *testing.T) {
 		t.Fatal("We didn't load back up the puzzle")
 	}
 
-	sendCharEvent(c, 'c')
 	sendCharEvent(c, 's')
 
 	if c.mode != MODE_CONFIRM {
@@ -558,7 +557,6 @@ func TestSaveGrid(t *testing.T) {
 
 	//Now, saves should be automatic.
 
-	sendCharEvent(c, 'c')
 	sendCharEvent(c, 's')
 
 	if !strings.HasPrefix(c.consoleMessage, PUZZLE_SAVED_MESSAGE) {
@@ -567,6 +565,15 @@ func TestSaveGrid(t *testing.T) {
 
 	if c.mode != MODE_DEFAULT {
 		t.Error("Saving an OK file didn't go back to default")
+	}
+
+	//Test save as always prompts, even though we ahve a fast filename set.
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 's')
+
+	if c.mode != MODE_FILE_INPUT {
+		t.Error("Save as didn't go straight to file input")
 	}
 }
 
