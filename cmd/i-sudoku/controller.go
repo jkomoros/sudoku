@@ -8,14 +8,20 @@ import (
 	"io/ioutil"
 )
 
+const (
+	PUZZLE_SAVED_MESSAGE = "Puzzle saved to "
+)
+
 type mainController struct {
 	grid     *sudoku.Grid
 	selected *sudoku.Cell
 	mode     InputMode
 	//The size of the console output. Not used for much.
 	outputWidth int
-	//TODO: store fileOKToSave bool if we've confirmed this file is OK to save to.
-	filename       string
+	filename    string
+	//If we load up a file, we aren't sure that overwriting the file is OK.
+	//This stores whether we've verified that we can save here.
+	fileOKToSave   bool
 	lastShownHint  *sudoku.SolveDirections
 	consoleMessage string
 	//if true, will zero out console message on turn of event loop.
@@ -217,15 +223,17 @@ func (c *mainController) LoadGridFromFile(file string) {
 	c.SetGrid(sdkconverter.Load(puzzle))
 	c.SetConsoleMessage(GRID_LOADED_MESSAGE, true)
 	c.filename = file
+	c.fileOKToSave = false
 }
 
 //Actually save
 func (c *mainController) SaveGrid() {
 
-	//TODO: only allow writing if we've cleared that c.filename is allowed to
-	//be written to.
-
 	if c.filename == "" {
+		return
+	}
+
+	if !c.fileOKToSave {
 		return
 	}
 
@@ -239,7 +247,7 @@ func (c *mainController) SaveGrid() {
 
 	ioutil.WriteFile(c.filename, []byte(converter.DataString(c.Grid())), 0644)
 
-	c.SetConsoleMessage("Puzzle saved to "+c.filename, true)
+	c.SetConsoleMessage(PUZZLE_SAVED_MESSAGE+c.filename, true)
 }
 
 //The user told us to save. what we actually do depends on current state.
@@ -252,6 +260,20 @@ func (c *mainController) SaveCommandIssued() {
 		})
 		return
 	}
+	if !c.fileOKToSave {
+		c.enterConfirmMode("OK to save to "+c.filename+"?",
+			DEFAULT_YES,
+			func() {
+				c.fileOKToSave = true
+				c.SaveCommandIssued()
+			},
+			func() {
+				c.SetFilename("")
+				c.SaveCommandIssued()
+			},
+		)
+		return
+	}
 	c.SaveGrid()
 	c.EnterMode(MODE_DEFAULT)
 }
@@ -262,6 +284,7 @@ func (c *mainController) Filename() string {
 
 func (c *mainController) SetFilename(filename string) {
 	c.filename = filename
+	c.fileOKToSave = true
 }
 
 func (c *mainController) Selected() *sudoku.Cell {

@@ -5,6 +5,7 @@ import (
 	"flag"
 	"github.com/jkomoros/sudoku"
 	"github.com/jkomoros/sudoku/sdkconverter"
+	"github.com/nsf/termbox-go"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -489,6 +490,11 @@ func TestSaveGrid(t *testing.T) {
 	c.SetFilename(testFileName)
 	c.SaveGrid()
 
+	defer func() {
+		//Now remove the file
+		os.Remove(testFileName)
+	}()
+
 	gridState := c.Grid().Diagram(true)
 
 	if _, err := os.Stat(testFileName); os.IsNotExist(err) {
@@ -506,9 +512,56 @@ func TestSaveGrid(t *testing.T) {
 		t.Error("The file that was saved didn't put the grid back in the same state.")
 	}
 
-	//Now remove the file
-	os.Remove(testFileName)
+	//OK, now let's test out the commands using this file we've saved.
 
+	c = newController()
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 'l')
+
+	for _, ch := range testFileName {
+		sendCharEvent(c, ch)
+	}
+
+	sendKeyEvent(c, termbox.KeyEnter)
+
+	//OK, should be loaded up now.
+
+	if c.Grid().Diagram(true) != gridState {
+		t.Fatal("We didn't load back up the puzzle")
+	}
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 's')
+
+	if c.mode != MODE_CONFIRM {
+		t.Error("Hitting save on a loaded file didn't confirm")
+	}
+
+	sendCharEvent(c, 'n')
+
+	if c.mode != MODE_FILE_INPUT {
+		t.Error("Hitting no on overwrite didn't put us in file entry")
+	}
+
+	for _, ch := range testFileName {
+		sendCharEvent(c, ch)
+	}
+
+	sendKeyEvent(c, termbox.KeyEnter)
+
+	//Now, saves should be automatic.
+
+	sendCharEvent(c, 'c')
+	sendCharEvent(c, 's')
+
+	if !strings.HasPrefix(c.consoleMessage, PUZZLE_SAVED_MESSAGE) {
+		t.Error("Didn't save an OK file")
+	}
+
+	if c.mode != MODE_DEFAULT {
+		t.Error("Saving an OK file didn't go back to default")
+	}
 }
 
 //Callers should call fixUpOptions after receiving this.
