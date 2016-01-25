@@ -18,6 +18,7 @@ type mainController struct {
 	mode     InputMode
 	//The size of the console output. Not used for much.
 	outputWidth int
+	isSaved     bool
 	filename    string
 	//If we load up a file, we aren't sure that overwriting the file is OK.
 	//This stores whether we've verified that we can save here.
@@ -36,6 +37,7 @@ const (
 	TOGGLE_INVALID
 	TOGGLE_MARK_MODE
 	TOGGLE_FAST_MODE
+	TOGGLE_UNSAVED
 )
 
 type toggle struct {
@@ -109,6 +111,18 @@ func (c *mainController) setUpToggles() {
 			"  FAST MODE  ",
 			"             ",
 			termbox.ColorBlue,
+		},
+		//Unsaved
+		{
+			func() bool {
+				return !c.IsSaved()
+			},
+			func() {
+				//Read only
+			},
+			" UNSAVED ",
+			"  SAVED  ",
+			termbox.ColorMagenta,
 		},
 	}
 }
@@ -199,6 +213,7 @@ func (c *mainController) SetGrid(grid *sudoku.Grid) {
 			c.grid.LockFilledCells()
 		}
 	}
+	c.PuzzleModified()
 }
 
 func (c *mainController) LoadGridFromFile(file string) {
@@ -224,6 +239,7 @@ func (c *mainController) LoadGridFromFile(file string) {
 	c.SetConsoleMessage(GRID_LOADED_MESSAGE, true)
 	c.filename = file
 	c.fileOKToSave = false
+	c.isSaved = true
 }
 
 //Actually save
@@ -248,6 +264,8 @@ func (c *mainController) SaveGrid() {
 	ioutil.WriteFile(c.filename, []byte(converter.DataString(c.Grid())), 0644)
 
 	c.SetConsoleMessage(PUZZLE_SAVED_MESSAGE+c.filename, true)
+
+	c.isSaved = true
 }
 
 //The user told us to save. what we actually do depends on current state.
@@ -280,6 +298,14 @@ func (c *mainController) SaveCommandIssued() {
 
 func (c *mainController) Filename() string {
 	return c.filename
+}
+
+func (c *mainController) IsSaved() bool {
+	return c.isSaved
+}
+
+func (c *mainController) PuzzleModified() {
+	c.isSaved = false
 }
 
 func (c *mainController) SetFilename(filename string) {
@@ -457,6 +483,7 @@ func (c *mainController) SetSelectedNumber(num int) {
 	}
 
 	c.checkHintDone()
+	c.PuzzleModified()
 }
 
 func (c *mainController) checkHintDone() {
@@ -482,6 +509,7 @@ func (c *mainController) ToggleSelectedMark(num int) {
 		return
 	}
 	c.Selected().SetMark(num, !c.Selected().Mark(num))
+	c.PuzzleModified()
 }
 
 func (c *mainController) FillSelectedWithLegalMarks() {
@@ -490,6 +518,7 @@ func (c *mainController) FillSelectedWithLegalMarks() {
 	for _, num := range c.Selected().Possibilities() {
 		c.Selected().SetMark(num, true)
 	}
+	c.PuzzleModified()
 }
 
 func (c *mainController) RemoveInvalidMarksFromSelected() {
@@ -499,4 +528,5 @@ func (c *mainController) RemoveInvalidMarksFromSelected() {
 			c.Selected().SetMark(num, false)
 		}
 	}
+	c.PuzzleModified()
 }
