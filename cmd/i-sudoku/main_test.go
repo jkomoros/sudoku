@@ -550,6 +550,12 @@ func TestSaveGrid(t *testing.T) {
 
 	sendKeyEvent(c, termbox.KeyEnter)
 
+	if c.mode != MODE_CONFIRM {
+		t.Error("Even though we selected an existing file we didn't get asked to overwrite.")
+	}
+
+	sendCharEvent(c, 'y')
+
 	//Now, saves should be automatic.
 
 	sendCharEvent(c, 'c')

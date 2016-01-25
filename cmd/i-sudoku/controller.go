@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/go-wordwrap"
 	"github.com/nsf/termbox-go"
 	"io/ioutil"
+	"os"
 )
 
 const (
@@ -278,6 +279,22 @@ func (c *mainController) SaveGrid() {
 func (c *mainController) SaveCommandIssued() {
 	if c.filename == "" {
 		c.enterFileInputMode(func(input string) {
+			if _, err := os.Stat(input); err == nil {
+				//The file exists. Confirm.
+				_ = "breakpoint"
+				c.enterConfirmMode(input+" already exists. Overwrite?",
+					DEFAULT_YES,
+					func() {
+						c.SetFilename(input)
+						c.SaveCommandIssued()
+					},
+					func() {
+						//Don't write and try again.
+						c.SaveCommandIssued()
+					},
+				)
+				return
+			}
 			c.SetFilename(input)
 			c.SaveGrid()
 			c.EnterMode(MODE_DEFAULT)
