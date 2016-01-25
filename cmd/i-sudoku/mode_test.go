@@ -417,7 +417,16 @@ func TestConfirmMode(t *testing.T) {
 
 	channel := make(chan bool, 1)
 
-	model.enterConfirmMode("TEST", DEFAULT_YES, func() { channel <- true }, func() { channel <- false })
+	model.enterConfirmMode("TEST", DEFAULT_YES,
+		func() {
+			channel <- true
+			model.EnterMode(MODE_DEFAULT)
+		},
+		func() {
+			channel <- false
+			model.EnterMode(MODE_DEFAULT)
+		},
+	)
 
 	if model.mode != MODE_CONFIRM {
 		t.Error("enterConfirmState didn't lead to being in confirm state")

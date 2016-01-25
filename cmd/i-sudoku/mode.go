@@ -249,16 +249,22 @@ func (s *commandMode) handleInput(c *mainController, evt termbox.Event) {
 				DEFAULT_NO,
 				func() {
 					c.NewGrid()
+					c.EnterMode(MODE_DEFAULT)
 				},
-				func() {},
+				func() {
+					c.EnterMode(MODE_DEFAULT)
+				},
 			)
 		case evt.Ch == 'r':
 			c.enterConfirmMode("Reset? Your progress will be lost.",
 				DEFAULT_NO,
 				func() {
 					c.ResetGrid()
+					c.EnterMode(MODE_DEFAULT)
 				},
-				func() {},
+				func() {
+					c.EnterMode(MODE_DEFAULT)
+				},
 			)
 		case evt.Ch == 'l':
 			c.enterFileInputMode(func(input string) {
@@ -317,10 +323,8 @@ func (s *confirmMode) handleInput(c *mainController, evt termbox.Event) {
 		switch evt.Ch {
 		case 'y':
 			s.yesAction()
-			c.EnterMode(MODE_DEFAULT)
 		case 'n':
 			s.noAction()
-			c.EnterMode(MODE_DEFAULT)
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
