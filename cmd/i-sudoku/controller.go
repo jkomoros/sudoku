@@ -362,6 +362,20 @@ func (c *mainController) ShowHint() {
 	c.SetSelected(lastStep.TargetCells[0].InGrid(c.Grid()))
 }
 
+func (c *mainController) EnterHint() {
+	if c.lastShownHint == nil {
+		return
+	}
+	lastStep := c.lastShownHint.Steps[len(c.lastShownHint.Steps)-1]
+	cell := lastStep.TargetCells[0]
+	num := lastStep.TargetNums[0]
+
+	c.SetSelected(cell.InGrid(c.Grid()))
+	c.SetSelectedNumber(num)
+
+	c.ClearConsole()
+}
+
 func (c *mainController) Selected() *sudoku.Cell {
 	return c.selected
 }

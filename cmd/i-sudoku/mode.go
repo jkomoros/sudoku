@@ -119,20 +119,6 @@ type defaultMode struct {
 	baseMode
 }
 
-func (s *defaultMode) enterHint(c *mainController) {
-	if c.lastShownHint == nil {
-		return
-	}
-	lastStep := c.lastShownHint.Steps[len(c.lastShownHint.Steps)-1]
-	cell := lastStep.TargetCells[0]
-	num := lastStep.TargetNums[0]
-
-	c.SetSelected(cell.InGrid(c.Grid()))
-	c.SetSelectedNumber(num)
-
-	c.ClearConsole()
-}
-
 func (s *defaultMode) handleInput(c *mainController, evt termbox.Event) {
 
 	handled := true
@@ -151,7 +137,7 @@ func (s *defaultMode) handleInput(c *mainController, evt termbox.Event) {
 			c.ClearConsole()
 		case termbox.KeyEnter:
 			if c.lastShownHint != nil {
-				s.enterHint(c)
+				c.EnterHint()
 			} else {
 				c.SetSelectedToOnlyMark()
 			}
