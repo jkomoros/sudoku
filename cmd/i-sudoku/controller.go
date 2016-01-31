@@ -15,7 +15,7 @@ const (
 )
 
 type mainController struct {
-	grid     *sudoku.Grid
+	model    *model
 	selected *sudoku.Cell
 	mode     InputMode
 	//The size of the console output. Not used for much.
@@ -54,7 +54,8 @@ type toggle struct {
 
 func newController() *mainController {
 	c := &mainController{
-		mode: MODE_DEFAULT,
+		model: &model{},
+		mode:  MODE_DEFAULT,
 	}
 	c.setUpToggles()
 	c.EnsureSelected()
@@ -195,31 +196,31 @@ func (c *mainController) StatusLine() string {
 }
 
 func (c *mainController) Grid() *sudoku.Grid {
-	return c.grid
+	return c.model.grid
 }
 
 func (c *mainController) SetGrid(grid *sudoku.Grid) {
 	oldCell := c.Selected()
-	c.grid = grid
+	c.model.grid = grid
 	//The currently selected cell is tied to the grid, so we need to fix it up.
 	if oldCell != nil {
-		c.SetSelected(oldCell.InGrid(c.grid))
+		c.SetSelected(oldCell.InGrid(c.model.grid))
 	}
-	if c.grid != nil {
+	if c.model.grid != nil {
 		//IF there are already some locked cells, we assume that only those
 		//cells should be locked. If there aren't any locked cells at all, we
 		//assume that all filled cells should be locked.
 
 		//TODO: this seems like magic behavior that's hard to reason about.
 		foundLockedCell := false
-		for _, cell := range c.grid.Cells() {
+		for _, cell := range c.model.grid.Cells() {
 			if cell.Locked() {
 				foundLockedCell = true
 				break
 			}
 		}
 		if !foundLockedCell {
-			c.grid.LockFilledCells()
+			c.model.grid.LockFilledCells()
 		}
 	}
 	c.snapshot = ""
