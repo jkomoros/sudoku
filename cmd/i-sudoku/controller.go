@@ -195,6 +195,8 @@ func (c *mainController) StatusLine() string {
 	return c.mode.statusLine(c)
 }
 
+//TODO: should this vend a copy of the grid? I want to make it so the only
+//easy way to mutate the grid is via model mutators.
 func (c *mainController) Grid() *sudoku.Grid {
 	return c.model.grid
 }
