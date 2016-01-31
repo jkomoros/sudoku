@@ -30,11 +30,14 @@ func (m *model) SetGrid(grid *sudoku.Grid) {
 }
 
 func (m *model) SetMarks(row, col int, marksToggle map[int]bool) {
+	//TODO: add a copy of marksToggle that only has valid marks for the current state.
+	//right now if marksToggle has a no-op instruction, it can get in weird states.
 	mutator := &markMutator{row, col, marksToggle}
 	mutator.Apply(m)
 }
 
 func (m *model) SetNumber(row, col int, num int) {
+	//TODO: this should also only add an action if the specified cell is not already num.
 	cell := m.grid.Cell(row, col)
 	if cell == nil {
 		return
@@ -54,7 +57,6 @@ func (m *markMutator) Apply(model *model) {
 }
 
 func (m *markMutator) Undo(model *model) {
-	//TODO: test this method
 	cell := model.grid.Cell(m.row, m.col)
 	if cell == nil {
 		return
