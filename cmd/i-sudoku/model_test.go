@@ -13,7 +13,7 @@ func TestMarkMutator(t *testing.T) {
 
 	cell.SetMark(1, true)
 
-	mutator := markMutator{0, 0, map[int]bool{1: false, 2: true}}
+	mutator := markCommand{0, 0, map[int]bool{1: false, 2: true}}
 
 	mutator.Apply(model)
 
@@ -34,7 +34,7 @@ func TestNumberMutator(t *testing.T) {
 
 	cell := model.grid.Cell(0, 0)
 
-	mutator := numberMutator{0, 0, 1, 0}
+	mutator := numberCommand{0, 0, 1, 0}
 
 	mutator.Apply(model)
 

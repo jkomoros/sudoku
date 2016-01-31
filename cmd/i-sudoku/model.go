@@ -9,17 +9,17 @@ type model struct {
 }
 
 //TODO: rename Mutator to command
-type modelMutator interface {
+type command interface {
 	Apply(m *model)
 	Undo(m *model)
 }
 
-type markMutator struct {
+type markCommand struct {
 	row, col    int
 	marksToggle map[int]bool
 }
 
-type numberMutator struct {
+type numberCommand struct {
 	row, col int
 	number   int
 	//Necessary so we can undo.
@@ -33,7 +33,7 @@ func (m *model) SetGrid(grid *sudoku.Grid) {
 func (m *model) SetMarks(row, col int, marksToggle map[int]bool) {
 	//TODO: add a copy of marksToggle that only has valid marks for the current state.
 	//right now if marksToggle has a no-op instruction, it can get in weird states.
-	mutator := &markMutator{row, col, marksToggle}
+	mutator := &markCommand{row, col, marksToggle}
 	mutator.Apply(m)
 }
 
@@ -43,7 +43,7 @@ func (m *model) SetNumber(row, col int, num int) {
 	if cell == nil {
 		return
 	}
-	mutator := &numberMutator{row, col, num, cell.Number()}
+	mutator := &numberCommand{row, col, num, cell.Number()}
 	mutator.Apply(m)
 }
 
@@ -51,7 +51,7 @@ func (m *model) SetNumber(row, col int, num int) {
 //modelMutator if it wouldn't be a no-op. Then, test that they return nil if
 //it would be a no op, including omitting marks that would be a no op.
 
-func (m *markMutator) Apply(model *model) {
+func (m *markCommand) Apply(model *model) {
 	cell := model.grid.Cell(m.row, m.col)
 	if cell == nil {
 		return
@@ -61,7 +61,7 @@ func (m *markMutator) Apply(model *model) {
 	}
 }
 
-func (m *markMutator) Undo(model *model) {
+func (m *markCommand) Undo(model *model) {
 	cell := model.grid.Cell(m.row, m.col)
 	if cell == nil {
 		return
@@ -72,7 +72,7 @@ func (m *markMutator) Undo(model *model) {
 	}
 }
 
-func (n *numberMutator) Apply(model *model) {
+func (n *numberCommand) Apply(model *model) {
 	cell := model.grid.Cell(n.row, n.col)
 	if cell == nil {
 		return
@@ -80,7 +80,7 @@ func (n *numberMutator) Apply(model *model) {
 	cell.SetNumber(n.number)
 }
 
-func (n *numberMutator) Undo(model *model) {
+func (n *numberCommand) Undo(model *model) {
 	cell := model.grid.Cell(n.row, n.col)
 	if cell == nil {
 		return
