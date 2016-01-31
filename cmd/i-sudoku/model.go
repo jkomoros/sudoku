@@ -18,6 +18,11 @@ type markMutator struct {
 	marksToggle map[int]bool
 }
 
+type numberMutator struct {
+	row, col int
+	number   int
+}
+
 func (m *model) SetGrid(grid *sudoku.Grid) {
 	m.grid = grid
 }
@@ -28,11 +33,8 @@ func (m *model) SetMarks(row, col int, marksToggle map[int]bool) {
 }
 
 func (m *model) SetNumber(row, col int, num int) {
-	cell := m.grid.Cell(row, col)
-	if cell == nil {
-		return
-	}
-	cell.SetNumber(num)
+	mutator := &numberMutator{row, col, num}
+	mutator.Apply(m)
 }
 
 func (m *markMutator) Apply(model *model) {
@@ -43,4 +45,12 @@ func (m *markMutator) Apply(model *model) {
 	for key, value := range m.marksToggle {
 		cell.SetMark(key, value)
 	}
+}
+
+func (n *numberMutator) Apply(model *model) {
+	cell := model.grid.Cell(n.row, n.col)
+	if cell == nil {
+		return
+	}
+	cell.SetNumber(n.number)
 }
