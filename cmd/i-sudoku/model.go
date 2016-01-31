@@ -46,6 +46,10 @@ func (m *model) SetNumber(row, col int, num int) {
 	mutator.Apply(m)
 }
 
+//TODO: implement model.new{Mark|Number}Mutator, which only return a
+//modelMutator if it wouldn't be a no-op. Then, test that they return nil if
+//it would be a no op, including omitting marks that would be a no op.
+
 func (m *markMutator) Apply(model *model) {
 	cell := model.grid.Cell(m.row, m.col)
 	if cell == nil {
