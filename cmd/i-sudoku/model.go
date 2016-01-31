@@ -80,7 +80,6 @@ func (n *numberMutator) Apply(model *model) {
 }
 
 func (n *numberMutator) Undo(model *model) {
-	//TODO: test this method
 	cell := model.grid.Cell(n.row, n.col)
 	if cell == nil {
 		return

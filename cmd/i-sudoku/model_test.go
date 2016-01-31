@@ -27,3 +27,25 @@ func TestMarkMutator(t *testing.T) {
 		t.Error("Got wrong marks after undoing:", cell.Marks())
 	}
 }
+
+func TestNumberMutator(t *testing.T) {
+	model := &model{}
+	model.SetGrid(sudoku.NewGrid())
+
+	cell := model.grid.Cell(0, 0)
+
+	mutator := numberMutator{0, 0, 1, 0}
+
+	mutator.Apply(model)
+
+	if cell.Number() != 1 {
+		t.Error("Number mutator didn't add the number")
+	}
+
+	mutator.Undo(model)
+
+	if cell.Number() != 0 {
+		t.Error("Number mutator didn't undo")
+	}
+
+}
