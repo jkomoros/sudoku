@@ -21,6 +21,8 @@ type markMutator struct {
 type numberMutator struct {
 	row, col int
 	number   int
+	//Necessary so we can undo.
+	oldNumber int
 }
 
 func (m *model) SetGrid(grid *sudoku.Grid) {
@@ -33,7 +35,11 @@ func (m *model) SetMarks(row, col int, marksToggle map[int]bool) {
 }
 
 func (m *model) SetNumber(row, col int, num int) {
-	mutator := &numberMutator{row, col, num}
+	cell := m.grid.Cell(row, col)
+	if cell == nil {
+		return
+	}
+	mutator := &numberMutator{row, col, num, cell.Number()}
 	mutator.Apply(m)
 }
 
