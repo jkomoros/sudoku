@@ -203,7 +203,7 @@ func (c *mainController) Grid() *sudoku.Grid {
 
 func (c *mainController) SetGrid(grid *sudoku.Grid) {
 	oldCell := c.Selected()
-	c.model.grid = grid
+	c.model.SetGrid(grid)
 	//The currently selected cell is tied to the grid, so we need to fix it up.
 	if oldCell != nil {
 		c.SetSelected(oldCell.InGrid(c.model.grid))
