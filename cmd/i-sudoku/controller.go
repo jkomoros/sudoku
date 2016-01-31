@@ -576,22 +576,26 @@ func (c *mainController) ToggleSelectedMark(num int) {
 		c.SetConsoleMessage(MARKS_MODE_FAIL_NUMBER, true)
 		return
 	}
-	c.Selected().SetMark(num, !c.Selected().Mark(num))
+	c.model.SetMarks(c.Selected().Row(), c.Selected().Col(), map[int]bool{num: !c.Selected().Mark(num)})
 }
 
 func (c *mainController) FillSelectedWithLegalMarks() {
 	c.EnsureSelected()
 	c.Selected().ResetMarks()
+	markMap := make(map[int]bool)
 	for _, num := range c.Selected().Possibilities() {
-		c.Selected().SetMark(num, true)
+		markMap[num] = true
 	}
+	c.model.SetMarks(c.Selected().Row(), c.Selected().Col(), markMap)
 }
 
 func (c *mainController) RemoveInvalidMarksFromSelected() {
 	c.EnsureSelected()
+	markMap := make(map[int]bool)
 	for _, num := range c.Selected().Marks() {
 		if !c.Selected().Possible(num) {
-			c.Selected().SetMark(num, false)
+			markMap[num] = false
 		}
 	}
+	c.model.SetMarks(c.Selected().Row(), c.Selected().Col(), markMap)
 }
