@@ -17,3 +17,11 @@ func (m *model) SetMarks(row, col int, marksToggle map[int]bool) {
 		cell.SetMark(key, value)
 	}
 }
+
+func (m *model) SetNumber(row, col int, num int) {
+	cell := m.grid.Cell(row, col)
+	if cell == nil {
+		return
+	}
+	cell.SetNumber(num)
+}

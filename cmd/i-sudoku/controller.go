@@ -547,10 +547,10 @@ func (c *mainController) SetSelectedNumber(num int) {
 	}
 
 	if c.Selected().Number() != num {
-		c.Selected().SetNumber(num)
+		c.model.SetNumber(c.Selected().Row(), c.Selected().Col(), num)
 	} else {
 		//If the number to set is already set, then empty the cell instead.
-		c.Selected().SetNumber(0)
+		c.model.SetNumber(c.Selected().Row(), c.Selected().Col(), 0)
 	}
 
 	c.checkHintDone()
