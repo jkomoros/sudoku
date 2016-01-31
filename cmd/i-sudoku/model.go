@@ -10,7 +10,7 @@ type model struct {
 
 type modelMutator interface {
 	Apply(m *model)
-	//TODO: add an Undo method
+	Undo(m *model)
 }
 
 type markMutator struct {
@@ -53,10 +53,31 @@ func (m *markMutator) Apply(model *model) {
 	}
 }
 
+func (m *markMutator) Undo(model *model) {
+	//TODO: test this method
+	cell := model.grid.Cell(m.row, m.col)
+	if cell == nil {
+		return
+	}
+	for key, value := range m.marksToggle {
+		//Set the opposite since we're undoing.
+		cell.SetMark(key, !value)
+	}
+}
+
 func (n *numberMutator) Apply(model *model) {
 	cell := model.grid.Cell(n.row, n.col)
 	if cell == nil {
 		return
 	}
 	cell.SetNumber(n.number)
+}
+
+func (n *numberMutator) Undo(model *model) {
+	//TODO: test this method
+	cell := model.grid.Cell(n.row, n.col)
+	if cell == nil {
+		return
+	}
+	cell.SetNumber(n.oldNumber)
 }
