@@ -530,18 +530,18 @@ func (c *mainController) ResetGrid() {
 func (c *mainController) Undo() {
 	//TODO: test that this prints a message if there's nothing to undo.
 	if c.model.Undo() {
-		c.SetConsoleMessage("No moves to undo.", true)
-	} else {
 		c.SetConsoleMessage("Undid one move.", true)
+	} else {
+		c.SetConsoleMessage("No moves to undo.", true)
 	}
 }
 
 func (c *mainController) Redo() {
 	//TODO: test that this prints a message if there's nothing to redo.
 	if c.model.Redo() {
-		c.SetConsoleMessage("No moves to redo.", true)
-	} else {
 		c.SetConsoleMessage("Redid one move.", true)
+	} else {
+		c.SetConsoleMessage("No moves to redo.", true)
 	}
 }
 
