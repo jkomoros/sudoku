@@ -339,6 +339,12 @@ func puzzleDirectoryParts(symmetryType sudoku.SymmetryType, symmetryPercentage f
 	}
 }
 
+type StoredPuzzle struct {
+	options *sudoku.GenerationOptions
+	//In DOKU format
+	puzzleData string
+}
+
 func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, logger *log.Logger) bool {
 	//TODO: we should include a hashed version of our difficulty weights file so we don't cache ones with old weights.
 	directoryParts := puzzleDirectoryParts(symmetryType, symmetryPercentage, minFilledCells)
