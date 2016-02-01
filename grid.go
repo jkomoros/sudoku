@@ -211,9 +211,15 @@ func (self *Grid) replace(other *Grid) {
 		otherCell.excludedLock.RLock()
 		for i := 0; i < DIM; i++ {
 			selfCell.excluded[i] = otherCell.excluded[i]
+			selfCell.marks[i] = otherCell.marks[i]
 		}
 		otherCell.excludedLock.RUnlock()
 		selfCell.excludedLock.Unlock()
+		if otherCell.Locked() {
+			selfCell.Lock()
+		} else {
+			selfCell.Unlock()
+		}
 	}
 	self.cachedSolutionsLock.Lock()
 	other.cachedSolutionsLock.RLock()

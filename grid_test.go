@@ -146,6 +146,29 @@ func init() {
 	runtime.GOMAXPROCS(_NUM_SOLVER_THREADS)
 }
 
+func TestGridCopy(t *testing.T) {
+	grid := NewGrid()
+	grid.LoadSDK(ADVANCED_TEST_GRID)
+
+	cell := grid.Cell(0, 0)
+	cell.SetMark(3, true)
+	cell.SetMark(4, true)
+
+	cell = grid.Cell(0, 2)
+	cell.SetExcluded(3, true)
+	cell.SetExcluded(4, true)
+
+	gridCopy := grid.Copy()
+
+	if grid.Diagram(true) != gridCopy.Diagram(true) {
+		t.Error("Grid and copy don't match in marks")
+	}
+
+	if grid.Diagram(false) != gridCopy.Diagram(false) {
+		t.Error("Grid and copy don't match in terms of excludes")
+	}
+}
+
 func TestGridCreation(t *testing.T) {
 
 	blockUpperLeftRow := make([]int, DIM)
