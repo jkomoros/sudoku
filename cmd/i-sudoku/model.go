@@ -5,7 +5,14 @@ import (
 )
 
 type model struct {
-	grid *sudoku.Grid
+	grid     *sudoku.Grid
+	commands *commandList
+}
+
+type commandList struct {
+	c    command
+	next *commandList
+	prev *commandList
 }
 
 type command interface {
@@ -25,6 +32,19 @@ type numberCommand struct {
 	oldNumber int
 }
 
+func (m *model) executeCommand(c command) {
+	//TODO: if command isn't the rightmost element, splice it in and forget
+	//others.
+
+	m.commands = &commandList{
+		c:    c,
+		next: nil,
+		prev: m.commands,
+	}
+
+	c.Apply(m)
+}
+
 func (m *model) SetGrid(grid *sudoku.Grid) {
 	m.grid = grid
 }
@@ -34,7 +54,7 @@ func (m *model) SetMarks(row, col int, marksToggle map[int]bool) {
 	if command == nil {
 		return
 	}
-	command.Apply(m)
+	m.executeCommand(command)
 }
 
 func (m *model) newMarkCommand(row, col int, marksToggle map[int]bool) *markCommand {
@@ -66,7 +86,7 @@ func (m *model) SetNumber(row, col int, num int) {
 	if command == nil {
 		return
 	}
-	command.Apply(m)
+	m.executeCommand(command)
 }
 
 func (m *model) newNumberCommand(row, col int, num int) *numberCommand {
