@@ -96,7 +96,8 @@ func (m *model) Redo() bool {
 }
 
 func (m *model) SetGrid(grid *sudoku.Grid) {
-	//TODO: clear out command list.
+	m.commands = nil
+	m.currentCommand = nil
 	m.grid = grid
 }
 

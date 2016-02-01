@@ -133,4 +133,16 @@ func TestUndoRedo(t *testing.T) {
 	if model.Redo() {
 		t.Error("Able to redo even though just spliced in a new move.")
 	}
+
+	//verify setting a new grid clears history
+
+	model.SetGrid(sudoku.NewGrid())
+
+	if model.Undo() {
+		t.Error("Could undo on a new grid")
+	}
+
+	if model.Redo() {
+		t.Error("Could undo on an old grid")
+	}
 }
