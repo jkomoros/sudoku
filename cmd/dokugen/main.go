@@ -407,6 +407,8 @@ func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.Symm
 
 func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) *sudoku.Grid {
 
+	//TODO: test storePuzzle and vendPuzzle
+
 	db, err := bolt.Open(_STORED_PUZZLES_DB, 0600, nil)
 	if err != nil {
 		//TODO: pass in logger
