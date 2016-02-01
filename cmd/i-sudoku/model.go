@@ -5,8 +5,9 @@ import (
 )
 
 type model struct {
-	grid     *sudoku.Grid
-	commands *commandList
+	grid           *sudoku.Grid
+	currentCommand *commandList
+	commands       *commandList
 }
 
 type commandList struct {
@@ -33,19 +34,55 @@ type numberCommand struct {
 }
 
 func (m *model) executeCommand(c command) {
-	//TODO: if command isn't the rightmost element, splice it in and forget
-	//others.
-
-	m.commands = &commandList{
+	listItem := &commandList{
 		c:    c,
 		next: nil,
-		prev: m.commands,
+		prev: m.currentCommand,
 	}
+
+	m.commands = listItem
+	if m.currentCommand != nil {
+		m.currentCommand.next = listItem
+	}
+	m.currentCommand = listItem
 
 	c.Apply(m)
 }
 
+//Undo returns true if there was something to undo.
+func (m *model) Undo() bool {
+	if m.currentCommand == nil {
+		return false
+	}
+	if m.currentCommand.prev == nil {
+		return false
+	}
+
+	m.currentCommand.c.Undo(m)
+
+	m.currentCommand = m.currentCommand.prev
+
+	return true
+}
+
+//Redo returns true if there was something to redo.
+func (m *model) Redo() bool {
+	if m.currentCommand == nil {
+		return false
+	}
+	if m.currentCommand.next == nil {
+		return false
+	}
+
+	m.currentCommand = m.currentCommand.next
+
+	m.currentCommand.c.Apply(m)
+
+	return true
+}
+
 func (m *model) SetGrid(grid *sudoku.Grid) {
+	//TODO: clear out command list.
 	m.grid = grid
 }
 

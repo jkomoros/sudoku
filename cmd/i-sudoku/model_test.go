@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"github.com/jkomoros/sudoku"
 	"testing"
 )
@@ -60,4 +61,71 @@ func TestNumberMutator(t *testing.T) {
 		t.Error("Number mutator didn't undo")
 	}
 
+}
+
+func TestUndoRedo(t *testing.T) {
+
+	model := &model{}
+	model.SetGrid(sudoku.NewGrid())
+
+	rememberedStates := []string{
+		model.grid.Diagram(true),
+	}
+
+	model.SetNumber(0, 0, 1)
+
+	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
+
+	model.SetNumber(0, 1, 2)
+
+	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
+
+	model.SetNumber(0, 0, 3)
+
+	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
+
+	model.SetMarks(0, 2, map[int]bool{3: true, 4: true})
+
+	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
+
+	model.SetMarks(0, 2, map[int]bool{1: true, 4: false})
+
+	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
+
+	if model.Redo() {
+		t.Error("Able to redo even though at end")
+	}
+
+	spew.Println(model.commands)
+
+	for i := len(rememberedStates) - 1; i >= 1; i-- {
+		if model.grid.Diagram(true) != rememberedStates[i] {
+			t.Error("Remembere state wrong for state", i)
+		}
+		if !model.Undo() {
+			t.Error("Couldn't undo early: ", i)
+		}
+	}
+
+	//Verify we can't undo at beginning
+
+	if model.Undo() {
+		t.Error("Could undo even though it was the beginning.")
+	}
+
+	for i := 0; i < 3; i++ {
+		if model.grid.Diagram(true) != rememberedStates[i] {
+			t.Error("Remembered states wrong for state", i, "when redoing")
+		}
+
+		if !model.Redo() {
+			t.Error("Unable to redo")
+		}
+	}
+
+	model.SetNumber(2, 0, 3)
+
+	if model.Redo() {
+		t.Error("Able to redo even though just spliced in a new move.")
+	}
 }
