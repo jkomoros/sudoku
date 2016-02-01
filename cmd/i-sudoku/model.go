@@ -32,6 +32,9 @@ func (m *model) SetGrid(grid *sudoku.Grid) {
 
 func (m *model) SetMarks(row, col int, marksToggle map[int]bool) {
 	command := m.newMarkCommand(row, col, marksToggle)
+	if command == nil {
+		return
+	}
 	command.Apply(m)
 }
 
