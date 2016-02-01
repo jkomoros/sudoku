@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/davecgh/go-spew/spew"
 	"github.com/jkomoros/sudoku"
 	"testing"
 )
@@ -95,8 +94,6 @@ func TestUndoRedo(t *testing.T) {
 	if model.Redo() {
 		t.Error("Able to redo even though at end")
 	}
-
-	spew.Println(model.commands)
 
 	for i := len(rememberedStates) - 1; i >= 1; i-- {
 		if model.grid.Diagram(true) != rememberedStates[i] {

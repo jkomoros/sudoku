@@ -54,9 +54,6 @@ func (m *model) Undo() bool {
 	if m.currentCommand == nil {
 		return false
 	}
-	if m.currentCommand.prev == nil {
-		return false
-	}
 
 	m.currentCommand.c.Undo(m)
 
@@ -67,14 +64,27 @@ func (m *model) Undo() bool {
 
 //Redo returns true if there was something to redo.
 func (m *model) Redo() bool {
+
+	var commandToApply *commandList
+
 	if m.currentCommand == nil {
-		return false
+		//If there is a non-nil commands, go all the way to the beginning,
+		//because we're currently pointing at state 0
+		commandToApply = m.commands
+		for commandToApply.prev != nil {
+			commandToApply = commandToApply.prev
+		}
+	} else {
+		//Normaly operation is just to move to the next command in the list
+		//and apply it.
+		commandToApply = m.currentCommand.next
 	}
-	if m.currentCommand.next == nil {
+
+	if commandToApply == nil {
 		return false
 	}
 
-	m.currentCommand = m.currentCommand.next
+	m.currentCommand = commandToApply
 
 	m.currentCommand.c.Apply(m)
 
