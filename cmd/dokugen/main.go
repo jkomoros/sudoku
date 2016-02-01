@@ -18,6 +18,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"runtime"
 	"strconv"
@@ -405,8 +406,103 @@ func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.Symm
 }
 
 func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) *sudoku.Grid {
-	//TODO: implement for real
-	return nil
+
+	db, err := bolt.Open(_STORED_PUZZLES_DB, 0600, nil)
+	if err != nil {
+		//TODO: pass in logger
+		log.Fatalln("Couldn't open DB file", err)
+		return nil
+	}
+	defer db.Close()
+
+	converter := sdkconverter.Converters["doku"]
+
+	if converter == nil {
+		log.Fatalln("Couldn't find doku converter")
+	}
+
+	var finalPuzzle string
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		bucket, err := tx.CreateBucketIfNotExists([]byte(sudoku.DIFFICULTY_MODEL))
+		if err != nil {
+			return err
+		}
+
+		var matchingPuzzles map[string]string
+
+		bucket.ForEach(func(key, value []byte) error {
+			var puzzleInfo *StoredPuzzle
+
+			err := json.Unmarshal(value, puzzleInfo)
+			if err != nil {
+				return err
+			}
+
+			if puzzleInfo.Options.MinFilledCells != minFilledCells {
+				//Doesn't match
+				return nil
+			}
+
+			if puzzleInfo.Options.SymmetryPercentage != symmetryPercentage {
+				//Doesn't match
+				return nil
+			}
+
+			if puzzleInfo.Options.Symmetry != symmetryType {
+				//Doesn't match
+				return nil
+			}
+
+			if puzzleInfo.Difficulty > max || puzzleInfo.Difficulty < min {
+				//Doesn't match
+				return nil
+			}
+
+			//Does match!
+			matchingPuzzles[string(key)] = puzzleInfo.PuzzleData
+			return nil
+
+		})
+
+		//Select one at random
+
+		if len(matchingPuzzles) == 0 {
+			//No puzzles matched.
+			return nil
+		}
+
+		var keys []string
+
+		for key, _ := range matchingPuzzles {
+			keys = append(keys, key)
+		}
+
+		key := keys[rand.Intn(len(keys))]
+
+		finalPuzzle = matchingPuzzles[key]
+
+		//Doesn't matter that much if we can't delete the key.
+		err = bucket.Delete([]byte(key))
+
+		if err != nil {
+			//TODO: shouldn't we ahve a logger here?
+			log.Println("Couldn't delete the key we picked:", err)
+		}
+
+		return nil
+
+	})
+
+	if finalPuzzle == "" {
+		return nil
+	}
+
+	grid := sudoku.NewGrid()
+
+	converter.Load(grid, finalPuzzle)
+
+	return grid
 }
 
 func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, skipCache bool, logger *log.Logger) *sudoku.Grid {
