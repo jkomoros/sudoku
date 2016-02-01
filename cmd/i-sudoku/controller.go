@@ -527,6 +527,20 @@ func (c *mainController) ResetGrid() {
 	c.Grid().ResetUnlockedCells()
 }
 
+func (c *mainController) Undo() {
+	//TODO: test that this prints a message if there's nothing to undo.
+	if !c.model.Undo() {
+		c.SetConsoleMessage("No moves to undo.", true)
+	}
+}
+
+func (c *mainController) Redo() {
+	//TODO: test that this prints a message if there's nothing to redo.
+	if !c.model.Redo() {
+		c.SetConsoleMessage("No moves to redo.", true)
+	}
+}
+
 //If the selected cell has only one mark, fill it.
 func (c *mainController) SetSelectedToOnlyMark() {
 	c.EnsureSelected()
