@@ -13,15 +13,21 @@ func TestMarkMutator(t *testing.T) {
 
 	cell.SetMark(1, true)
 
-	mutator := markCommand{0, 0, map[int]bool{1: false, 2: true}}
+	command := model.newMarkCommand(0, 0, map[int]bool{1: true})
 
-	mutator.Apply(model)
+	if command != nil {
+		t.Error("Got invalid command, expected nil", command)
+	}
+
+	command = model.newMarkCommand(0, 0, map[int]bool{1: false, 2: true, 3: false})
+
+	command.Apply(model)
 
 	if !cell.Marks().SameContentAs(sudoku.IntSlice{2}) {
 		t.Error("Got wrong marks after mutating:", cell.Marks())
 	}
 
-	mutator.Undo(model)
+	command.Undo(model)
 
 	if !cell.Marks().SameContentAs(sudoku.IntSlice{1}) {
 		t.Error("Got wrong marks after undoing:", cell.Marks())

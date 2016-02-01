@@ -31,10 +31,32 @@ func (m *model) SetGrid(grid *sudoku.Grid) {
 }
 
 func (m *model) SetMarks(row, col int, marksToggle map[int]bool) {
-	//TODO: add a copy of marksToggle that only has valid marks for the current state.
-	//right now if marksToggle has a no-op instruction, it can get in weird states.
-	mutator := &markCommand{row, col, marksToggle}
-	mutator.Apply(m)
+	command := m.newMarkCommand(row, col, marksToggle)
+	command.Apply(m)
+}
+
+func (m *model) newMarkCommand(row, col int, marksToggle map[int]bool) *markCommand {
+	//Only keep marks in the toggle that won't be a no-op
+	newMarksToggle := make(map[int]bool)
+
+	cell := m.grid.Cell(row, col)
+
+	if cell == nil {
+		return nil
+	}
+	for key, value := range marksToggle {
+		if cell.Mark(key) != value {
+			//Good, keep it
+			newMarksToggle[key] = value
+		}
+	}
+
+	if len(newMarksToggle) == 0 {
+		//The command would be a no op!
+		return nil
+	}
+
+	return &markCommand{row, col, newMarksToggle}
 }
 
 func (m *model) SetNumber(row, col int, num int) {
