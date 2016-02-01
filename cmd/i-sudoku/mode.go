@@ -27,6 +27,8 @@ const (
 {+} or {=} to set the selected cell's marks to all legal marks
 {-} to remove all invalid marks from the selected cell
 {<enter>} to set a cell to the number that is the only current mark
+{u} to undo a move
+{r} to redo a move
 {m} to enter mark mode, so all numbers entered will toggle marks
 {f} to toggle fast move mode, allowing you to skip over filled cells
 {s} to quick-save to the last used filename`
@@ -162,6 +164,11 @@ func (s *defaultMode) handleInput(c *mainController, evt termbox.Event) {
 			c.ToggleMarkMode()
 		case evt.Ch == 's':
 			c.SaveCommandIssued()
+		//TODO: test that u/r undo and redo
+		case evt.Ch == 'u':
+			c.Undo()
+		case evt.Ch == 'r':
+			c.Redo()
 		case runeIsShiftedNum(evt.Ch):
 			//TODO: ideally Ctrl+Num would work to put in one mark. But termbox doesn't appear to let that work.
 			num, err := strconv.Atoi(string(shiftedNumRuneToNum(evt.Ch)))
@@ -217,7 +224,7 @@ func (s *commandMode) handleInput(c *mainController, evt termbox.Event) {
 		case evt.Ch == 'q':
 			confirmQuit(c)
 		case evt.Ch == 'n':
-			c.enterConfirmMode("Replace grid with a new one? This is a destructive action.",
+			c.enterConfirmMode("Replace grid with a new one? This cannot be undone.",
 				DEFAULT_NO,
 				func() {
 					c.NewGrid()
@@ -228,7 +235,7 @@ func (s *commandMode) handleInput(c *mainController, evt termbox.Event) {
 				},
 			)
 		case evt.Ch == 'r':
-			c.enterConfirmMode("Reset? Your progress will be lost.",
+			c.enterConfirmMode("Reset? Your progress will be lost. This cannot be undone.",
 				DEFAULT_NO,
 				func() {
 					c.ResetGrid()
@@ -239,6 +246,7 @@ func (s *commandMode) handleInput(c *mainController, evt termbox.Event) {
 				},
 			)
 		case evt.Ch == 'l':
+			//TODO: confirm they want to load a puzzle and blow away state
 			c.enterFileInputMode(func(input string) {
 				c.LoadGridFromFile(input)
 				c.EnterMode(MODE_DEFAULT)

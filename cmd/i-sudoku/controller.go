@@ -15,7 +15,7 @@ const (
 )
 
 type mainController struct {
-	grid     *sudoku.Grid
+	model    *model
 	selected *sudoku.Cell
 	mode     InputMode
 	//The size of the console output. Not used for much.
@@ -54,7 +54,8 @@ type toggle struct {
 
 func newController() *mainController {
 	c := &mainController{
-		mode: MODE_DEFAULT,
+		model: &model{},
+		mode:  MODE_DEFAULT,
 	}
 	c.setUpToggles()
 	c.EnsureSelected()
@@ -194,32 +195,34 @@ func (c *mainController) StatusLine() string {
 	return c.mode.statusLine(c)
 }
 
+//TODO: should this vend a copy of the grid? I want to make it so the only
+//easy way to mutate the grid is via model mutators.
 func (c *mainController) Grid() *sudoku.Grid {
-	return c.grid
+	return c.model.grid
 }
 
 func (c *mainController) SetGrid(grid *sudoku.Grid) {
 	oldCell := c.Selected()
-	c.grid = grid
+	c.model.SetGrid(grid)
 	//The currently selected cell is tied to the grid, so we need to fix it up.
 	if oldCell != nil {
-		c.SetSelected(oldCell.InGrid(c.grid))
+		c.SetSelected(oldCell.InGrid(c.model.grid))
 	}
-	if c.grid != nil {
+	if c.model.grid != nil {
 		//IF there are already some locked cells, we assume that only those
 		//cells should be locked. If there aren't any locked cells at all, we
 		//assume that all filled cells should be locked.
 
 		//TODO: this seems like magic behavior that's hard to reason about.
 		foundLockedCell := false
-		for _, cell := range c.grid.Cells() {
+		for _, cell := range c.model.grid.Cells() {
 			if cell.Locked() {
 				foundLockedCell = true
 				break
 			}
 		}
 		if !foundLockedCell {
-			c.grid.LockFilledCells()
+			c.model.grid.LockFilledCells()
 		}
 	}
 	c.snapshot = ""
@@ -524,6 +527,24 @@ func (c *mainController) ResetGrid() {
 	c.Grid().ResetUnlockedCells()
 }
 
+func (c *mainController) Undo() {
+	//TODO: test that this prints a message if there's nothing to undo.
+	if c.model.Undo() {
+		c.SetConsoleMessage("Undid one move.", true)
+	} else {
+		c.SetConsoleMessage("No moves to undo.", true)
+	}
+}
+
+func (c *mainController) Redo() {
+	//TODO: test that this prints a message if there's nothing to redo.
+	if c.model.Redo() {
+		c.SetConsoleMessage("Redid one move.", true)
+	} else {
+		c.SetConsoleMessage("No moves to redo.", true)
+	}
+}
+
 //If the selected cell has only one mark, fill it.
 func (c *mainController) SetSelectedToOnlyMark() {
 	c.EnsureSelected()
@@ -544,10 +565,10 @@ func (c *mainController) SetSelectedNumber(num int) {
 	}
 
 	if c.Selected().Number() != num {
-		c.Selected().SetNumber(num)
+		c.model.SetNumber(c.Selected().Row(), c.Selected().Col(), num)
 	} else {
 		//If the number to set is already set, then empty the cell instead.
-		c.Selected().SetNumber(0)
+		c.model.SetNumber(c.Selected().Row(), c.Selected().Col(), 0)
 	}
 
 	c.checkHintDone()
@@ -575,22 +596,26 @@ func (c *mainController) ToggleSelectedMark(num int) {
 		c.SetConsoleMessage(MARKS_MODE_FAIL_NUMBER, true)
 		return
 	}
-	c.Selected().SetMark(num, !c.Selected().Mark(num))
+	c.model.SetMarks(c.Selected().Row(), c.Selected().Col(), map[int]bool{num: !c.Selected().Mark(num)})
 }
 
 func (c *mainController) FillSelectedWithLegalMarks() {
 	c.EnsureSelected()
 	c.Selected().ResetMarks()
+	markMap := make(map[int]bool)
 	for _, num := range c.Selected().Possibilities() {
-		c.Selected().SetMark(num, true)
+		markMap[num] = true
 	}
+	c.model.SetMarks(c.Selected().Row(), c.Selected().Col(), markMap)
 }
 
 func (c *mainController) RemoveInvalidMarksFromSelected() {
 	c.EnsureSelected()
+	markMap := make(map[int]bool)
 	for _, num := range c.Selected().Marks() {
 		if !c.Selected().Possible(num) {
-			c.Selected().SetMark(num, false)
+			markMap[num] = false
 		}
 	}
+	c.model.SetMarks(c.Selected().Row(), c.Selected().Col(), markMap)
 }
