@@ -67,6 +67,14 @@ func TestUndoRedo(t *testing.T) {
 	model := &model{}
 	model.SetGrid(sudoku.NewGrid())
 
+	if model.Undo() {
+		t.Error("Could undo on a fresh grid")
+	}
+
+	if model.Redo() {
+		t.Error("Could redo on a fresh grid")
+	}
+
 	rememberedStates := []string{
 		model.grid.Diagram(true),
 	}

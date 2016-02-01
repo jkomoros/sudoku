@@ -65,6 +65,10 @@ func (m *model) Undo() bool {
 //Redo returns true if there was something to redo.
 func (m *model) Redo() bool {
 
+	if m.commands == nil {
+		return false
+	}
+
 	var commandToApply *commandList
 
 	if m.currentCommand == nil {
