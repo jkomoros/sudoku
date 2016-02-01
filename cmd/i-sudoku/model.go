@@ -8,7 +8,6 @@ type model struct {
 	grid *sudoku.Grid
 }
 
-//TODO: rename Mutator to command
 type command interface {
 	Apply(m *model)
 	Undo(m *model)
