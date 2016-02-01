@@ -40,15 +40,21 @@ func TestNumberMutator(t *testing.T) {
 
 	cell := model.grid.Cell(0, 0)
 
-	mutator := numberCommand{0, 0, 1, 0}
+	command := model.newNumberCommand(0, 0, 0)
 
-	mutator.Apply(model)
+	if command != nil {
+		t.Error("Got non-nil number command for a no op")
+	}
+
+	command = model.newNumberCommand(0, 0, 1)
+
+	command.Apply(model)
 
 	if cell.Number() != 1 {
 		t.Error("Number mutator didn't add the number")
 	}
 
-	mutator.Undo(model)
+	command.Undo(model)
 
 	if cell.Number() != 0 {
 		t.Error("Number mutator didn't undo")

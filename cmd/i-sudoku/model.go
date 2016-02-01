@@ -63,18 +63,26 @@ func (m *model) newMarkCommand(row, col int, marksToggle map[int]bool) *markComm
 }
 
 func (m *model) SetNumber(row, col int, num int) {
-	//TODO: this should also only add an action if the specified cell is not already num.
-	cell := m.grid.Cell(row, col)
-	if cell == nil {
+	command := m.newNumberCommand(row, col, num)
+	if command == nil {
 		return
 	}
-	mutator := &numberCommand{row, col, num, cell.Number()}
-	mutator.Apply(m)
+	command.Apply(m)
 }
 
-//TODO: implement model.new{Mark|Number}Mutator, which only return a
-//modelMutator if it wouldn't be a no-op. Then, test that they return nil if
-//it would be a no op, including omitting marks that would be a no op.
+func (m *model) newNumberCommand(row, col int, num int) *numberCommand {
+	cell := m.grid.Cell(row, col)
+
+	if cell == nil {
+		return nil
+	}
+
+	if cell.Number() == num {
+		return nil
+	}
+
+	return &numberCommand{row, col, num, cell.Number()}
+}
 
 func (m *markCommand) Apply(model *model) {
 	cell := model.grid.Cell(m.row, m.col)
