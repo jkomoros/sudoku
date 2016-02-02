@@ -733,6 +733,29 @@ func TestGridEmpty(t *testing.T) {
 	}
 }
 
+func TestGenerationOptions(t *testing.T) {
+	//Set Bozo options and make sure they're overwritten.
+	options := &GenerationOptions{
+		Symmetry:           SYMMETRY_ANY,
+		SymmetryPercentage: 0.0,
+		MinFilledCells:     DIM,
+	}
+
+	options.Default()
+
+	if options.Symmetry != SYMMETRY_VERTICAL {
+		t.Error("Wrong symmetry")
+	}
+
+	if options.SymmetryPercentage != 0.7 {
+		t.Error("Wrong Symmetry percentage")
+	}
+
+	if options.MinFilledCells != 0 {
+		t.Error("Wrong MinFilledCells")
+	}
+}
+
 //This is an extremely expensive test desgined to help ferret out #134.
 //TODO: remove this test!
 func TestGenerateMultipleSolutions(t *testing.T) {
