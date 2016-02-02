@@ -428,13 +428,14 @@ func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symm
 	err = db.Update(func(tx *bolt.Tx) error {
 		bucket, err := tx.CreateBucketIfNotExists([]byte(sudoku.DIFFICULTY_MODEL))
 		if err != nil {
+			log.Println(err)
 			return err
 		}
 
-		var matchingPuzzles map[string]string
+		matchingPuzzles := make(map[string]string)
 
 		bucket.ForEach(func(key, value []byte) error {
-			var puzzleInfo *StoredPuzzle
+			puzzleInfo := &StoredPuzzle{}
 
 			err := json.Unmarshal(value, puzzleInfo)
 			if err != nil {
