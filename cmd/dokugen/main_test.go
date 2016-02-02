@@ -6,6 +6,8 @@ import (
 	"flag"
 	"github.com/jkomoros/sudoku"
 	"io/ioutil"
+	"log"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -393,6 +395,59 @@ func TestInvalidPuzzleFormat(t *testing.T) {
 	if !strings.Contains(errOutput, "Invalid format option: foo") {
 		t.Error("Expected an error message about invalid format option. Wanted 'Invalid format option:foo', got", errOutput)
 	}
+}
+
+func TestVendAndStorePuzzle(t *testing.T) {
+
+	const TEST_DB_NAME = "TEMPORARY_TEST.db"
+	defer func() {
+		os.Remove(TEST_DB_NAME)
+	}()
+
+	logger := log.New(os.Stderr, "", log.LstdFlags)
+
+	//Make sure the test DB is gone
+	if _, err := os.Stat(TEST_DB_NAME); !os.IsNotExist(err) {
+		os.Remove(TEST_DB_NAME)
+	}
+
+	grid := sudoku.NewGrid()
+	grid.LoadSDK(TEST_GRID)
+
+	//TODO: use sudoku.GenerationOptions.Default(), if it existed.
+
+	result := vendPuzzle(TEST_DB_NAME, 0.0, 1.0, sudoku.SYMMETRY_VERTICAL, 0.7, 0)
+
+	if result != nil {
+		t.Fatal("Able to vend from empty DB")
+	}
+
+	storePuzzle(TEST_DB_NAME, grid, 0.5, sudoku.SYMMETRY_VERTICAL, 0.7, 0, logger)
+
+	//Read from wrong difficulty number
+
+	result = vendPuzzle(TEST_DB_NAME, 0.1, 0.3, sudoku.SYMMETRY_VERTICAL, 0.7, 0)
+
+	if result != nil {
+		t.Error("Able to vend even though wrong difficulty")
+	}
+
+	result = vendPuzzle(TEST_DB_NAME, 0.4, 0.6, sudoku.SYMMETRY_VERTICAL, 0.7, 0)
+
+	if result == nil {
+		t.Error("Didn't vend even though it was the right difficulty range")
+	}
+
+	if result.DataString() != TEST_GRID {
+		t.Error("Got wrong grid back from vendPuzzle")
+	}
+
+	result = vendPuzzle(TEST_DB_NAME, 0.4, 0.6, sudoku.SYMMETRY_VERTICAL, 0.7, 0)
+
+	if result != nil {
+		t.Error("Got back a puzzle even though DB should be empty.")
+	}
+
 }
 
 //Callers should call fixUpOptions after receiving this.

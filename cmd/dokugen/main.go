@@ -8,16 +8,18 @@ package main
 import (
 	"bytes"
 	"encoding/csv"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/boltdb/bolt"
 	"github.com/gosuri/uiprogress"
 	"github.com/jkomoros/sudoku"
 	"github.com/jkomoros/sudoku/sdkconverter"
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
-	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -25,7 +27,7 @@ import (
 
 //TODO: let people pass in a filename to export to.
 
-const STORED_PUZZLES_DIRECTORY = ".puzzles"
+const _STORED_PUZZLES_DB = ".puzzle_cache"
 
 //Used as the grid to pass back when FAKE-GENERATE is true.
 const TEST_GRID = `6|1|2|.|.|.|4|.|3
@@ -330,104 +332,187 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 	writer.Done()
 }
 
-func puzzleDirectoryParts(symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) []string {
-	return []string{
-		STORED_PUZZLES_DIRECTORY,
-		"SYM_TYPE_" + strconv.Itoa(int(symmetryType)),
-		"SYM_PERCENTAGE_" + strconv.FormatFloat(symmetryPercentage, 'f', -1, 64),
-		"MIN_FILED_CELLS_" + strconv.Itoa(minFilledCells),
-	}
+type StoredPuzzle struct {
+	Options    *sudoku.GenerationOptions
+	Difficulty float64
+	//In DOKU format
+	PuzzleData string
 }
 
-func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, logger *log.Logger) bool {
-	//TODO: we should include a hashed version of our difficulty weights file so we don't cache ones with old weights.
-	directoryParts := puzzleDirectoryParts(symmetryType, symmetryPercentage, minFilledCells)
+//TODO: take a sudoku.GenerationOptions to simplify signature
+func storePuzzle(dbName string, grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, logger *log.Logger) bool {
 
-	fileNamePart := strconv.FormatFloat(difficulty, 'f', -1, 64) + ".sdk"
+	db, err := bolt.Open(dbName, 0600, nil)
+	if err != nil {
+		logger.Fatalln("Couldn't open DB file", err)
+		return false
+	}
+	defer db.Close()
 
-	pathSoFar := ""
+	converter := sdkconverter.Converters["doku"]
 
-	for i, part := range directoryParts {
-		if i == 0 {
-			pathSoFar = part
-		} else {
-			pathSoFar = filepath.Join(pathSoFar, part)
-		}
-		if _, err := os.Stat(pathSoFar); os.IsNotExist(err) {
-			//need to create it.
-			os.Mkdir(pathSoFar, 0700)
-		}
+	if converter == nil {
+		logger.Fatalln("Couldn't find doku converter")
 	}
 
-	fileName := filepath.Join(pathSoFar, fileNamePart)
+	puzzleData := converter.DataString(grid)
 
-	file, err := os.Create(fileName)
+	if puzzleData == "" {
+		logger.Fatalln("Puzzle didn't convert to doku format cleanly")
+	}
+
+	puzzleObj := &StoredPuzzle{
+		Options: &sudoku.GenerationOptions{
+			Symmetry:           symmetryType,
+			SymmetryPercentage: symmetryPercentage,
+			MinFilledCells:     minFilledCells,
+		},
+		Difficulty: difficulty,
+		PuzzleData: puzzleData,
+	}
+
+	jsonBlob, err := json.MarshalIndent(puzzleObj, "", "    ")
+	if err != nil {
+		logger.Fatalln("Json couldn't be marshalled", err)
+	}
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		bucket, err := tx.CreateBucketIfNotExists([]byte(sudoku.DIFFICULTY_MODEL))
+		if err != nil {
+			return err
+		}
+
+		id, err := bucket.NextSequence()
+
+		if err != nil {
+			return err
+		}
+
+		err = bucket.Put([]byte(strconv.Itoa(int(id))), []byte(jsonBlob))
+		if err != nil {
+			return err
+		}
+
+		//It worked
+		return nil
+
+	})
 
 	if err != nil {
-		logger.Println(err)
+		logger.Fatalln("Transacation failed: ", err)
 		return false
 	}
 
-	defer file.Close()
-
-	puzzleText := grid.DataString()
-
-	n, err := io.WriteString(file, puzzleText)
-
-	if err != nil {
-		logger.Println(err)
-		return false
-	} else {
-		if n < len(puzzleText) {
-			logger.Println("Didn't write full file, only wrote", n, "bytes of", len(puzzleText))
-			return false
-		}
-	}
 	return true
 }
 
-func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) *sudoku.Grid {
+//TODO: take a sudoku.GenerationOptions to simplify signature
+func vendPuzzle(dbName string, min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) *sudoku.Grid {
 
-	directory := filepath.Join(puzzleDirectoryParts(symmetryType, symmetryPercentage, minFilledCells)...)
-
-	if files, err := ioutil.ReadDir(directory); os.IsNotExist(err) {
-		//The directory doesn't exist.
+	db, err := bolt.Open(dbName, 0600, nil)
+	if err != nil {
+		//TODO: pass in logger
+		log.Fatalln("Couldn't open DB file", err)
 		return nil
-	} else {
-		//OK, the directory exists, now see which puzzles are there and if any fit. If one does, vend it and delete the file.
-		for _, file := range files {
-			//See what this actually returns.
-			filenameParts := strings.Split(file.Name(), ".")
-
-			//Remember: there's a dot in the filename due to the float seperator.
-			//TODO: shouldn't "sdk" be in a constant somewhere?
-			if len(filenameParts) != 3 || filenameParts[2] != "sdk" {
-				continue
-			}
-
-			difficulty, err := strconv.ParseFloat(strings.Join(filenameParts[0:2], "."), 64)
-			if err != nil {
-				continue
-			}
-
-			if min <= difficulty && difficulty <= max {
-				//Found a puzzle!
-				grid := sudoku.NewGrid()
-				fullFileName := filepath.Join(directory, file.Name())
-				grid.LoadSDKFromFile(fullFileName)
-				os.Remove(fullFileName)
-				return grid
-			}
-		}
 	}
-	return nil
+	defer db.Close()
+
+	converter := sdkconverter.Converters["doku"]
+
+	if converter == nil {
+		log.Fatalln("Couldn't find doku converter")
+	}
+
+	var finalPuzzle string
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		bucket, err := tx.CreateBucketIfNotExists([]byte(sudoku.DIFFICULTY_MODEL))
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+
+		matchingPuzzles := make(map[string]string)
+
+		bucket.ForEach(func(key, value []byte) error {
+			puzzleInfo := &StoredPuzzle{}
+
+			err := json.Unmarshal(value, puzzleInfo)
+			if err != nil {
+				return err
+			}
+
+			if puzzleInfo.Options.MinFilledCells != minFilledCells {
+				//Doesn't match
+				return nil
+			}
+
+			if puzzleInfo.Options.SymmetryPercentage != symmetryPercentage {
+				//Doesn't match
+				return nil
+			}
+
+			if puzzleInfo.Options.Symmetry != symmetryType {
+				//Doesn't match
+				return nil
+			}
+
+			if puzzleInfo.Difficulty > max || puzzleInfo.Difficulty < min {
+				//Doesn't match
+				return nil
+			}
+
+			//Does match!
+			matchingPuzzles[string(key)] = puzzleInfo.PuzzleData
+			return nil
+
+		})
+
+		//Select one at random
+
+		if len(matchingPuzzles) == 0 {
+			//No puzzles matched.
+			return nil
+		}
+
+		var keys []string
+
+		for key, _ := range matchingPuzzles {
+			keys = append(keys, key)
+		}
+
+		key := keys[rand.Intn(len(keys))]
+
+		finalPuzzle = matchingPuzzles[key]
+
+		//Doesn't matter that much if we can't delete the key.
+		err = bucket.Delete([]byte(key))
+
+		if err != nil {
+			//TODO: shouldn't we ahve a logger here?
+			log.Println("Couldn't delete the key we picked:", err)
+		}
+
+		return nil
+
+	})
+
+	if finalPuzzle == "" {
+		return nil
+	}
+
+	grid := sudoku.NewGrid()
+
+	converter.Load(grid, finalPuzzle)
+
+	return grid
 }
 
 func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, skipCache bool, logger *log.Logger) *sudoku.Grid {
 	var result *sudoku.Grid
 
 	if !skipCache {
-		result = vendPuzzle(min, max, symmetryType, symmetryPercentage, minFilledCells)
+		result = vendPuzzle(_STORED_PUZZLES_DB, min, max, symmetryType, symmetryPercentage, minFilledCells)
 
 		if result != nil {
 			logger.Println("Vending a puzzle from the cache.")
@@ -458,7 +543,7 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 		}
 
 		logger.Println("Rejecting grid of difficulty", difficulty)
-		if storePuzzle(result, difficulty, symmetryType, symmetryPercentage, minFilledCells, logger) {
+		if storePuzzle(_STORED_PUZZLES_DB, result, difficulty, symmetryType, symmetryPercentage, minFilledCells, logger) {
 			logger.Println("Stored the puzzle for future use.")
 		}
 
