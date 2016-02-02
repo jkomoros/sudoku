@@ -339,9 +339,9 @@ type StoredPuzzle struct {
 	PuzzleData string
 }
 
-func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, logger *log.Logger) bool {
+func storePuzzle(dbName string, grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, logger *log.Logger) bool {
 
-	db, err := bolt.Open(_STORED_PUZZLES_DB, 0600, nil)
+	db, err := bolt.Open(dbName, 0600, nil)
 	if err != nil {
 		logger.Fatalln("Couldn't open DB file", err)
 		return false
@@ -405,11 +405,11 @@ func storePuzzle(grid *sudoku.Grid, difficulty float64, symmetryType sudoku.Symm
 	return true
 }
 
-func vendPuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) *sudoku.Grid {
+func vendPuzzle(dbName string, min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) *sudoku.Grid {
 
 	//TODO: test storePuzzle and vendPuzzle
 
-	db, err := bolt.Open(_STORED_PUZZLES_DB, 0600, nil)
+	db, err := bolt.Open(dbName, 0600, nil)
 	if err != nil {
 		//TODO: pass in logger
 		log.Fatalln("Couldn't open DB file", err)
@@ -512,7 +512,7 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 	var result *sudoku.Grid
 
 	if !skipCache {
-		result = vendPuzzle(min, max, symmetryType, symmetryPercentage, minFilledCells)
+		result = vendPuzzle(_STORED_PUZZLES_DB, min, max, symmetryType, symmetryPercentage, minFilledCells)
 
 		if result != nil {
 			logger.Println("Vending a puzzle from the cache.")
@@ -543,7 +543,7 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 		}
 
 		logger.Println("Rejecting grid of difficulty", difficulty)
-		if storePuzzle(result, difficulty, symmetryType, symmetryPercentage, minFilledCells, logger) {
+		if storePuzzle(_STORED_PUZZLES_DB, result, difficulty, symmetryType, symmetryPercentage, minFilledCells, logger) {
 			logger.Println("Stored the puzzle for future use.")
 		}
 
