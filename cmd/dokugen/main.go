@@ -280,7 +280,12 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 				grid = sudoku.NewGrid()
 				grid.LoadSDK(TEST_GRID)
 			} else {
-				grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, options.SYMMETRY, options.SYMMETRY_PROPORTION, options.MIN_FILLED_CELLS, options.NO_CACHE, logger)
+				gOptions := &sudoku.GenerationOptions{
+					Symmetry:           options.SYMMETRY,
+					SymmetryPercentage: options.SYMMETRY_PROPORTION,
+					MinFilledCells:     options.MIN_FILLED_CELLS,
+				}
+				grid = generatePuzzle(options.MIN_DIFFICULTY, options.MAX_DIFFICULTY, gOptions, options.NO_CACHE, logger)
 			}
 			writer.Write(options.CONVERTER.DataString(grid), "")
 		} else if len(incomingPuzzles)-1 >= i {
@@ -340,7 +345,7 @@ type StoredPuzzle struct {
 }
 
 //TODO: take a sudoku.GenerationOptions to simplify signature
-func storePuzzle(dbName string, grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, logger *log.Logger) bool {
+func storePuzzle(dbName string, grid *sudoku.Grid, difficulty float64, options *sudoku.GenerationOptions, logger *log.Logger) bool {
 
 	db, err := bolt.Open(dbName, 0600, nil)
 	if err != nil {
@@ -362,11 +367,7 @@ func storePuzzle(dbName string, grid *sudoku.Grid, difficulty float64, symmetryT
 	}
 
 	puzzleObj := &StoredPuzzle{
-		Options: &sudoku.GenerationOptions{
-			Symmetry:           symmetryType,
-			SymmetryPercentage: symmetryPercentage,
-			MinFilledCells:     minFilledCells,
-		},
+		Options:    options,
 		Difficulty: difficulty,
 		PuzzleData: puzzleData,
 	}
@@ -407,7 +408,7 @@ func storePuzzle(dbName string, grid *sudoku.Grid, difficulty float64, symmetryT
 }
 
 //TODO: take a sudoku.GenerationOptions to simplify signature
-func vendPuzzle(dbName string, min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) *sudoku.Grid {
+func vendPuzzle(dbName string, min float64, max float64, options *sudoku.GenerationOptions) *sudoku.Grid {
 
 	db, err := bolt.Open(dbName, 0600, nil)
 	if err != nil {
@@ -442,17 +443,17 @@ func vendPuzzle(dbName string, min float64, max float64, symmetryType sudoku.Sym
 				return err
 			}
 
-			if puzzleInfo.Options.MinFilledCells != minFilledCells {
+			if puzzleInfo.Options.MinFilledCells != options.MinFilledCells {
 				//Doesn't match
 				return nil
 			}
 
-			if puzzleInfo.Options.SymmetryPercentage != symmetryPercentage {
+			if puzzleInfo.Options.SymmetryPercentage != options.SymmetryPercentage {
 				//Doesn't match
 				return nil
 			}
 
-			if puzzleInfo.Options.Symmetry != symmetryType {
+			if puzzleInfo.Options.Symmetry != options.Symmetry {
 				//Doesn't match
 				return nil
 			}
@@ -508,22 +509,16 @@ func vendPuzzle(dbName string, min float64, max float64, symmetryType sudoku.Sym
 	return grid
 }
 
-func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, skipCache bool, logger *log.Logger) *sudoku.Grid {
+func generatePuzzle(min float64, max float64, options *sudoku.GenerationOptions, skipCache bool, logger *log.Logger) *sudoku.Grid {
 	var result *sudoku.Grid
 
 	if !skipCache {
-		result = vendPuzzle(_STORED_PUZZLES_DB, min, max, symmetryType, symmetryPercentage, minFilledCells)
+		result = vendPuzzle(_STORED_PUZZLES_DB, min, max, options)
 
 		if result != nil {
 			logger.Println("Vending a puzzle from the cache.")
 			return result
 		}
-	}
-
-	options := sudoku.GenerationOptions{
-		Symmetry:           symmetryType,
-		SymmetryPercentage: symmetryPercentage,
-		MinFilledCells:     minFilledCells,
 	}
 
 	//We'll have to generate one ourselves.
@@ -534,7 +529,7 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 			logger.Println("Attempt", count, "at generating puzzle.")
 		}
 
-		result = sudoku.GenerateGrid(&options)
+		result = sudoku.GenerateGrid(options)
 
 		difficulty := result.Difficulty()
 
@@ -543,7 +538,7 @@ func generatePuzzle(min float64, max float64, symmetryType sudoku.SymmetryType, 
 		}
 
 		logger.Println("Rejecting grid of difficulty", difficulty)
-		if storePuzzle(_STORED_PUZZLES_DB, result, difficulty, symmetryType, symmetryPercentage, minFilledCells, logger) {
+		if storePuzzle(_STORED_PUZZLES_DB, result, difficulty, options, logger) {
 			logger.Println("Stored the puzzle for future use.")
 		}
 

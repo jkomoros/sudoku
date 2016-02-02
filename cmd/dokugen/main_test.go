@@ -416,23 +416,25 @@ func TestVendAndStorePuzzle(t *testing.T) {
 
 	//TODO: use sudoku.GenerationOptions.Default(), if it existed.
 
-	result := vendPuzzle(TEST_DB_NAME, 0.0, 1.0, sudoku.SYMMETRY_VERTICAL, 0.7, 0)
+	options := (&sudoku.GenerationOptions{}).Default()
+
+	result := vendPuzzle(TEST_DB_NAME, 0.0, 1.0, options)
 
 	if result != nil {
 		t.Fatal("Able to vend from empty DB")
 	}
 
-	storePuzzle(TEST_DB_NAME, grid, 0.5, sudoku.SYMMETRY_VERTICAL, 0.7, 0, logger)
+	storePuzzle(TEST_DB_NAME, grid, 0.5, options, logger)
 
 	//Read from wrong difficulty number
 
-	result = vendPuzzle(TEST_DB_NAME, 0.1, 0.3, sudoku.SYMMETRY_VERTICAL, 0.7, 0)
+	result = vendPuzzle(TEST_DB_NAME, 0.1, 0.3, options)
 
 	if result != nil {
 		t.Error("Able to vend even though wrong difficulty")
 	}
 
-	result = vendPuzzle(TEST_DB_NAME, 0.4, 0.6, sudoku.SYMMETRY_VERTICAL, 0.7, 0)
+	result = vendPuzzle(TEST_DB_NAME, 0.4, 0.6, options)
 
 	if result == nil {
 		t.Error("Didn't vend even though it was the right difficulty range")
@@ -442,7 +444,7 @@ func TestVendAndStorePuzzle(t *testing.T) {
 		t.Error("Got wrong grid back from vendPuzzle")
 	}
 
-	result = vendPuzzle(TEST_DB_NAME, 0.4, 0.6, sudoku.SYMMETRY_VERTICAL, 0.7, 0)
+	result = vendPuzzle(TEST_DB_NAME, 0.4, 0.6, options)
 
 	if result != nil {
 		t.Error("Got back a puzzle even though DB should be empty.")
