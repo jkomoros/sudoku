@@ -409,8 +409,6 @@ func storePuzzle(dbName string, grid *sudoku.Grid, difficulty float64, symmetryT
 //TODO: take a sudoku.GenerationOptions to simplify signature
 func vendPuzzle(dbName string, min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) *sudoku.Grid {
 
-	//TODO: test storePuzzle and vendPuzzle
-
 	db, err := bolt.Open(dbName, 0600, nil)
 	if err != nil {
 		//TODO: pass in logger
