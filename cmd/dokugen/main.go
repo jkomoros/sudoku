@@ -339,6 +339,7 @@ type StoredPuzzle struct {
 	PuzzleData string
 }
 
+//TODO: take a sudoku.GenerationOptions to simplify signature
 func storePuzzle(dbName string, grid *sudoku.Grid, difficulty float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int, logger *log.Logger) bool {
 
 	db, err := bolt.Open(dbName, 0600, nil)
@@ -405,6 +406,7 @@ func storePuzzle(dbName string, grid *sudoku.Grid, difficulty float64, symmetryT
 	return true
 }
 
+//TODO: take a sudoku.GenerationOptions to simplify signature
 func vendPuzzle(dbName string, min float64, max float64, symmetryType sudoku.SymmetryType, symmetryPercentage float64, minFilledCells int) *sudoku.Grid {
 
 	//TODO: test storePuzzle and vendPuzzle
