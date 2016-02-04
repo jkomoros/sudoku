@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gosuri/uitable"
 	"github.com/jkomoros/sudoku"
 	"github.com/jkomoros/sudoku/sdkconverter"
 	"github.com/mitchellh/go-wordwrap"
@@ -387,16 +388,15 @@ func (c *mainController) ShowDebugHint() {
 
 	sort.Sort(&nextSteps{steps, probabilities})
 
-	//TODO: sort steps by increasing probability
-
 	msg := "{Possible steps} (" + strconv.Itoa(len(steps)) + " possibilities)\n"
 
-	//TODO: Table-aligned output
+	table := uitable.New()
+
 	for i, step := range steps {
-		msg += strconv.Itoa(i) + ": " + strconv.FormatFloat(probabilities[i], 'f', 4, 64) + " " + step.TechniqueVariant() + " " + step.TargetCells.Description() + step.TargetNums.Description() + "\n"
+		table.AddRow(strconv.Itoa(i), strconv.FormatFloat(probabilities[i], 'f', 4, 64), step.TechniqueVariant(), step.TargetCells.Description(), step.TargetNums.Description())
 	}
 
-	c.SetConsoleMessage(msg, true)
+	c.SetConsoleMessage(msg+table.String(), true)
 }
 
 func (c *mainController) ShowHint() {
