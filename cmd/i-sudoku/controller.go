@@ -357,7 +357,10 @@ func (c *mainController) SetFilename(filename string) {
 }
 
 func (c *mainController) ShowHint() {
-	hint := c.Grid().Hint(nil)
+	options := &sudoku.HumanSolveOptions{}
+	options.Defaults()
+	options.NumOptionsToCalculate = 100
+	hint := c.Grid().Hint(options)
 
 	if len(hint.Steps) == 0 {
 		c.SetConsoleMessage("No hint to give.", true)
