@@ -105,23 +105,28 @@ type HumanSolveOptions struct {
 	techniquesToUseAfterGuess []SolveTechnique
 }
 
+//DefaultHumanSolveOptions returns a HumanSolveOptions object configured to
+//have reasonable defaults.
+func DefaultHumanSolveOptions() *HumanSolveOptions {
+	result := &HumanSolveOptions{}
+
+	result.NumOptionsToCalculate = 15
+	result.TechniquesToUse = Techniques
+	result.NoGuess = false
+
+	//Have to set even zero valued properties, because the Options isn't
+	//necessarily default initalized.
+	result.techniquesToUseAfterGuess = nil
+
+	return result
+
+}
+
 //Grid returns a snapshot of the grid at the time this SolveDirections was
 //generated. Returns a fresh copy every time.
 func (self SolveDirections) Grid() *Grid {
 	//TODO: this is the only pointer receiver method on SolveDirections.
 	return self.gridSnapshot.Copy()
-}
-
-//Defaults sets the given HumanSolveOptions to have reasonable defaults.
-func (self *HumanSolveOptions) Defaults() {
-
-	self.NumOptionsToCalculate = 15
-	self.TechniquesToUse = Techniques
-	self.NoGuess = false
-
-	//Have to set even zero valued properties, because the Options isn't
-	//necessarily default initalized.
-	self.techniquesToUseAfterGuess = nil
 }
 
 //Modifies the options object to make sure all of the options are set
@@ -427,8 +432,7 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	}
 
 	if options == nil {
-		options = &HumanSolveOptions{}
-		options.Defaults()
+		options = DefaultHumanSolveOptions()
 	}
 
 	options.validate()

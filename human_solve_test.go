@@ -53,8 +53,7 @@ func TestHumanSolveOptionsNoGuess(t *testing.T) {
 	defer grid.Done()
 	grid.LoadSDK(TEST_GRID)
 
-	options := &HumanSolveOptions{}
-	options.Defaults()
+	options := DefaultHumanSolveOptions()
 	options.TechniquesToUse = Techniques[0:3]
 	options.NoGuess = true
 
@@ -71,8 +70,7 @@ func TestShortTechniquesToUseHumanSolveOptions(t *testing.T) {
 	defer grid.Done()
 	grid.LoadSDK(TEST_GRID)
 
-	shortTechniqueOptions := &HumanSolveOptions{}
-	shortTechniqueOptions.Defaults()
+	shortTechniqueOptions := DefaultHumanSolveOptions()
 	shortTechniqueOptions.TechniquesToUse = Techniques[0:5]
 
 	steps := grid.HumanSolution(shortTechniqueOptions)
@@ -91,14 +89,7 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 		nil,
 	}
 
-	options := &HumanSolveOptions{
-		-3,
-		nil,
-		true,
-		Techniques[0:4],
-	}
-
-	options.Defaults()
+	options := DefaultHumanSolveOptions()
 
 	if !reflect.DeepEqual(options, defaultOptions) {
 		t.Error("defaultOptions came back incorrectly: ", options)
@@ -107,8 +98,7 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 	//Test the case where the user is deliberately trying to specify that no
 	//normal techniques should use (and that they should implicitly guess
 	//constantly)
-	zeroLenTechniquesOptions := &HumanSolveOptions{}
-	zeroLenTechniquesOptions.Defaults()
+	zeroLenTechniquesOptions := DefaultHumanSolveOptions()
 	zeroLenTechniquesOptions.TechniquesToUse = []SolveTechnique{}
 
 	zeroLenTechniquesOptions.validate()
@@ -137,8 +127,7 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 		t.Error("Weird options didn't validate:", weirdOptions, "wanted", validatedOptions)
 	}
 
-	guessOptions := &HumanSolveOptions{}
-	guessOptions.Defaults()
+	guessOptions := DefaultHumanSolveOptions()
 	guessOptions.TechniquesToUse = AllTechniques
 	guessOptions.validate()
 
@@ -157,8 +146,7 @@ func TestTechniquesToUseAfterGuessHumanSolveOptions(t *testing.T) {
 	defer grid.Done()
 	grid.LoadSDK(TEST_GRID)
 
-	options := &HumanSolveOptions{}
-	options.Defaults()
+	options := DefaultHumanSolveOptions()
 	options.TechniquesToUse = []SolveTechnique{}
 	options.techniquesToUseAfterGuess = Techniques[0:5]
 
@@ -198,8 +186,7 @@ func TestHint(t *testing.T) {
 		hintTestHelper(t, nil, "base case"+strconv.Itoa(i))
 	}
 
-	options := &HumanSolveOptions{}
-	options.Defaults()
+	options := DefaultHumanSolveOptions()
 	options.TechniquesToUse = []SolveTechnique{}
 	options.techniquesToUseAfterGuess = Techniques
 

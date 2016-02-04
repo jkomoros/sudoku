@@ -357,8 +357,7 @@ func (c *mainController) SetFilename(filename string) {
 }
 
 func (c *mainController) ShowHint() {
-	options := &sudoku.HumanSolveOptions{}
-	options.Defaults()
+	options := sudoku.DefaultHumanSolveOptions()
 	options.NumOptionsToCalculate = 100
 	hint := c.Grid().Hint(options)
 

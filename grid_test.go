@@ -734,14 +734,8 @@ func TestGridEmpty(t *testing.T) {
 }
 
 func TestGenerationOptions(t *testing.T) {
-	//Set Bozo options and make sure they're overwritten.
-	options := &GenerationOptions{
-		Symmetry:           SYMMETRY_ANY,
-		SymmetryPercentage: 0.0,
-		MinFilledCells:     DIM,
-	}
 
-	options.Defaults()
+	options := DefaultGenerationOptions()
 
 	if options.Symmetry != SYMMETRY_VERTICAL {
 		t.Error("Wrong symmetry")
