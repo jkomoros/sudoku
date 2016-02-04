@@ -741,7 +741,7 @@ func TestGenerationOptions(t *testing.T) {
 		MinFilledCells:     DIM,
 	}
 
-	options.Default()
+	options.Defaults()
 
 	if options.Symmetry != SYMMETRY_VERTICAL {
 		t.Error("Wrong symmetry")

@@ -112,12 +112,8 @@ func (self SolveDirections) Grid() *Grid {
 	return self.gridSnapshot.Copy()
 }
 
-//Sets the given HumanSolveOptions to have reasonable defaults. Returns itself
-//for convenience, allowing `options := (&HumanSolveOptions{}).Default()`
-func (self *HumanSolveOptions) Default() *HumanSolveOptions {
-
-	//TODO: the (&HumanSolveOptions{}).Default() pattern is a bit weird.
-	//consider just doing a package global DefaultHumanSolveOptions.
+//Defaults sets the given HumanSolveOptions to have reasonable defaults.
+func (self *HumanSolveOptions) Defaults() {
 
 	self.NumOptionsToCalculate = 15
 	self.TechniquesToUse = Techniques
@@ -126,7 +122,6 @@ func (self *HumanSolveOptions) Default() *HumanSolveOptions {
 	//Have to set even zero valued properties, because the Options isn't
 	//necessarily default initalized.
 	self.techniquesToUseAfterGuess = nil
-	return self
 }
 
 //Modifies the options object to make sure all of the options are set
@@ -432,7 +427,8 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	}
 
 	if options == nil {
-		options = (&HumanSolveOptions{}).Default()
+		options = &HumanSolveOptions{}
+		options.Defaults()
 	}
 
 	options.validate()

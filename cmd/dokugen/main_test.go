@@ -414,9 +414,8 @@ func TestVendAndStorePuzzle(t *testing.T) {
 	grid := sudoku.NewGrid()
 	grid.LoadSDK(TEST_GRID)
 
-	//TODO: use sudoku.GenerationOptions.Default(), if it existed.
-
-	options := (&sudoku.GenerationOptions{}).Default()
+	options := &sudoku.GenerationOptions{}
+	options.Defaults()
 
 	result := vendPuzzle(TEST_DB_NAME, 0.0, 1.0, options)
 

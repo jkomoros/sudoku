@@ -17,14 +17,11 @@ type GenerationOptions struct {
 	MinFilledCells int
 }
 
-//Default sets the given HumanSolveOptions to have reasonable defaults.
-//Returns itself for convenience, allowing `options :=
-//(&GenerationOptions{}).Default()`
-func (g *GenerationOptions) Default() *GenerationOptions {
+//Defaults sets the given HumanSolveOptions to have reasonable defaults.
+func (g *GenerationOptions) Defaults() {
 	g.Symmetry = SYMMETRY_VERTICAL
 	g.SymmetryPercentage = 0.7
 	g.MinFilledCells = 0
-	return g
 }
 
 //Fill will find a random filling of the puzzle such that every cell is filled and no cells conflict with their neighbors. If it cannot find one,
@@ -54,7 +51,8 @@ func (self *Grid) Fill() bool {
 func GenerateGrid(options *GenerationOptions) *Grid {
 
 	if options == nil {
-		options = (&GenerationOptions{}).Default()
+		options = &GenerationOptions{}
+		options.Defaults()
 	}
 
 	grid := NewGrid()
