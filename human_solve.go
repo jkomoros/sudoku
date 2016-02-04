@@ -444,6 +444,42 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	return &SolveDirections{snapshot, steps, false}
 }
 
+//HumanSolvePossibleSteps returns a list of SolveSteps that could apply at
+//this state, along with the likelihood that a human would pick each one. Note
+//that the probabilities are *inverted*, meaning that a number close to 0
+//should be much more likely to be picked than a higher number. The optional
+//lastStep argument is the last action that was performed on the grid, and is
+//used primarily to tweak invertedProbabilities and make, for example, it more
+//likely to pick cells in the same block as the cell that was just filled.
+//This method is the workhorse at the core of HumanSolve() and is exposed here
+//primarily so users of this library can get a peek at which possibilites
+//exist at each step. cmd/i-sudoku is one user of this method.
+func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastStep *SolveStep) (steps []*SolveStep, invertedProbabilities []float64) {
+	if self.Invalid() {
+		//We must have been in a branch and found an invalidity.
+		//Bail immediately.
+		return nil, nil
+	}
+
+	steps = runTechniques(options.TechniquesToUse, self, options.NumOptionsToCalculate)
+
+	//Now pick one to apply.
+	if len(steps) == 0 {
+		return nil, nil
+	}
+
+	//TODO: consider if we should stop picking techniques based on their weight here.
+	//Now that Find returns a slice instead of a single, we're already much more likely to select an "easy" technique. ... Right?
+
+	invertedProbabilities = make([]float64, len(steps))
+	for i, possibility := range steps {
+		invertedProbabilities[i] = possibility.HumanLikelihood()
+	}
+
+	tweakChainedStepsWeights(lastStep, steps, invertedProbabilities)
+	return
+}
+
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
 //The core worker of human solve, it does all of the solving between branch points.
 func humanSolveNonGuessSearcher(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) []*SolveStep {
@@ -462,29 +498,12 @@ func humanSolveNonGuessSearcher(grid *Grid, options *HumanSolveOptions, endCondi
 
 		firstRun = false
 
-		if grid.Invalid() {
-			//We must have been in a branch and found an invalidity.
-			//Bail immediately.
-			return nil
-		}
+		possibilities, possibilitiesWeights := grid.HumanSolvePossibleSteps(options, lastStep)
 
-		possibilities := runTechniques(options.TechniquesToUse, grid, options.NumOptionsToCalculate)
-
-		//Now pick one to apply.
 		if len(possibilities) == 0 {
-			//Hmm, didn't find any possivbilities. We failed. :-(
+			//Hmm, we failed to find anything :-/
 			break
 		}
-
-		//TODO: consider if we should stop picking techniques based on their weight here.
-		//Now that Find returns a slice instead of a single, we're already much more likely to select an "easy" technique. ... Right?
-
-		possibilitiesWeights := make([]float64, len(possibilities))
-		for i, possibility := range possibilities {
-			possibilitiesWeights[i] = possibility.HumanLikelihood()
-		}
-
-		tweakChainedStepsWeights(lastStep, possibilities, possibilitiesWeights)
 
 		step := possibilities[randomIndexWithInvertedWeights(possibilitiesWeights)]
 
