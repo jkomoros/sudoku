@@ -7,6 +7,7 @@ import (
 	"github.com/nsf/termbox-go"
 	"io/ioutil"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -357,12 +358,34 @@ func (c *mainController) SetFilename(filename string) {
 	c.fileOKToSave = true
 }
 
+//Just used for sorting the steps by probabilities
+type nextSteps struct {
+	steps         []*sudoku.SolveStep
+	probabilities []float64
+}
+
+func (n *nextSteps) Len() int {
+	return len(n.steps)
+}
+
+func (n *nextSteps) Less(i, j int) bool {
+	//We want to have lower probabilities first
+	return n.probabilities[i] < n.probabilities[j]
+}
+
+func (n *nextSteps) Swap(i, j int) {
+	n.steps[i], n.steps[j] = n.steps[j], n.steps[i]
+	n.probabilities[i], n.probabilities[j] = n.probabilities[j], n.probabilities[i]
+}
+
 func (c *mainController) ShowDebugHint() {
 	options := sudoku.DefaultHumanSolveOptions()
 	options.NumOptionsToCalculate = 100
 
 	//TODO: feed in a synthesized last step based on the last cell touched.
 	steps, probabilities := c.Grid().HumanSolvePossibleSteps(options, nil)
+
+	sort.Sort(&nextSteps{steps, probabilities})
 
 	//TODO: sort steps by increasing probability
 
