@@ -455,6 +455,11 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 //primarily so users of this library can get a peek at which possibilites
 //exist at each step. cmd/i-sudoku is one user of this method.
 func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastStep *SolveStep) (steps []*SolveStep, invertedProbabilities []float64) {
+
+	//TODO: should lastStep be a step, or just a single cell? It seems way
+	//easier for most users to just pass in a single cell, and that's all
+	//that's (currently) required.
+
 	if self.Invalid() {
 		//We must have been in a branch and found an invalidity.
 		//Bail immediately.
