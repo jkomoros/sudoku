@@ -24,6 +24,7 @@ const (
 	HELP_MESSAGE                   = `The following commands are also available on this screen:
 {c} to enter command mode to do things like quit and load a new puzzle
 {h} to get a hint
+	{Ctrl-h} to get a debug hint print-out
 {+} or {=} to set the selected cell's marks to all legal marks
 {-} to remove all invalid marks from the selected cell
 {<enter>} to set a cell to the number that is the only current mark
@@ -136,6 +137,8 @@ func (s *defaultMode) handleInput(c *mainController, evt termbox.Event) {
 			c.MoveSelectionRight(c.FastMode())
 		case termbox.KeyArrowUp:
 			c.MoveSelectionUp(c.FastMode())
+		case termbox.KeyCtrlH:
+			c.ShowDebugHint()
 		case termbox.KeyEsc:
 			c.ClearConsole()
 		case termbox.KeyEnter:

@@ -587,7 +587,18 @@ func TestHintOnSolvedGrid(t *testing.T) {
 	model.ShowHint()
 
 	//If we didn't crash, we're good.
+}
 
+func TestShowDebugHint(t *testing.T) {
+	c := newController()
+
+	sendKeyEvent(c, termbox.KeyCtrlH)
+
+	//TODO: test that a /useful/ output was printed.
+
+	if !strings.HasPrefix(c.consoleMessage, "{Possible steps}") {
+		t.Error("Ctrl-H didn't show debug hint output")
+	}
 }
 
 //Callers should call fixUpOptions after receiving this.

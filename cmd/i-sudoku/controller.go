@@ -7,6 +7,7 @@ import (
 	"github.com/nsf/termbox-go"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -354,6 +355,25 @@ func (c *mainController) IsSaved() bool {
 func (c *mainController) SetFilename(filename string) {
 	c.filename = filename
 	c.fileOKToSave = true
+}
+
+func (c *mainController) ShowDebugHint() {
+	options := sudoku.DefaultHumanSolveOptions()
+	options.NumOptionsToCalculate = 100
+
+	//TODO: feed in a synthesized last step based on the last cell touched.
+	steps, probabilities := c.Grid().HumanSolvePossibleSteps(options, nil)
+
+	//TODO: sort steps by increasing probability
+
+	msg := "{Possible steps} (" + strconv.Itoa(len(steps)) + " possibilities)\n"
+
+	//TODO: Table-aligned output
+	for i, step := range steps {
+		msg += strconv.Itoa(i) + ": " + strconv.FormatFloat(probabilities[i], 'f', 4, 64) + " " + step.TechniqueVariant() + " " + step.TargetCells.Description() + step.TargetNums.Description() + "\n"
+	}
+
+	c.SetConsoleMessage(msg, true)
 }
 
 func (c *mainController) ShowHint() {
