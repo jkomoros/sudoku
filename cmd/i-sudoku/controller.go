@@ -392,8 +392,11 @@ func (c *mainController) ShowDebugHint() {
 
 	table := uitable.New()
 
+	cumulative := 0.0
+
 	for i, step := range steps {
-		table.AddRow(strconv.Itoa(i), fmt.Sprintf("%4.2f", probabilities[i]*100)+"%", step.TechniqueVariant(), step.TargetCells.Description(), step.TargetNums.Description())
+		cumulative += probabilities[i] * 100
+		table.AddRow(strconv.Itoa(i), fmt.Sprintf("%4.2f", probabilities[i]*100)+"%", fmt.Sprintf("%4.2f", cumulative)+"%", step.TechniqueVariant(), step.TargetCells.Description(), step.TargetNums.Description())
 	}
 
 	c.SetConsoleMessage(msg+table.String(), true)
