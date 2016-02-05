@@ -63,6 +63,10 @@ func denegativizeWeights(weights []float64) []float64 {
 }
 
 func randomIndexWithInvertedWeights(invertedWeights []float64) int {
+	return randomIndexWithNormalizedWeights(invertWeights(invertedWeights))
+}
+
+func invertWeights(invertedWeights []float64) []float64 {
 	//TODO: this function means that the worst weighted item will have a weight of 0.0. Isn't that wrong? Maybe it should be +1 to everythign?
 	weights := make([]float64, len(invertedWeights))
 
@@ -83,9 +87,7 @@ func randomIndexWithInvertedWeights(invertedWeights []float64) int {
 	}
 
 	//But now you need to renormalize since they won't sum to 1.
-	reNormalizedWeights := normalizedWeights(weights)
-
-	return randomIndexWithNormalizedWeights(reNormalizedWeights)
+	return normalizedWeights(weights)
 }
 
 func randomIndexWithWeights(weights []float64) int {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gosuri/uitable"
 	"github.com/jkomoros/sudoku"
 	"github.com/jkomoros/sudoku/sdkconverter"
@@ -370,8 +371,7 @@ func (n *nextSteps) Len() int {
 }
 
 func (n *nextSteps) Less(i, j int) bool {
-	//We want to have lower probabilities first
-	return n.probabilities[i] < n.probabilities[j]
+	return n.probabilities[i] > n.probabilities[j]
 }
 
 func (n *nextSteps) Swap(i, j int) {
@@ -393,7 +393,7 @@ func (c *mainController) ShowDebugHint() {
 	table := uitable.New()
 
 	for i, step := range steps {
-		table.AddRow(strconv.Itoa(i), strconv.FormatFloat(probabilities[i], 'f', 4, 64), step.TechniqueVariant(), step.TargetCells.Description(), step.TargetNums.Description())
+		table.AddRow(strconv.Itoa(i), fmt.Sprintf("%4.2f", probabilities[i]*100)+"%", step.TechniqueVariant(), step.TargetCells.Description(), step.TargetNums.Description())
 	}
 
 	c.SetConsoleMessage(msg+table.String(), true)

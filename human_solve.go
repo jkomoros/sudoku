@@ -445,16 +445,15 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 }
 
 //HumanSolvePossibleSteps returns a list of SolveSteps that could apply at
-//this state, along with the likelihood that a human would pick each one. Note
-//that the probabilities are *inverted*, meaning that a number close to 0
-//should be much more likely to be picked than a higher number. The optional
-//lastStep argument is the last action that was performed on the grid, and is
-//used primarily to tweak invertedProbabilities and make, for example, it more
-//likely to pick cells in the same block as the cell that was just filled.
-//This method is the workhorse at the core of HumanSolve() and is exposed here
-//primarily so users of this library can get a peek at which possibilites
-//exist at each step. cmd/i-sudoku is one user of this method.
-func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastStep *SolveStep) (steps []*SolveStep, invertedProbabilities []float64) {
+//this state, along with the probability distribution that a human would pick
+//each one. The optional lastStep argument is the last action that was
+//performed on the grid, and is used primarily to tweak the probability
+//distribution and make, for example, it more likely to pick cells in the same
+//block as the cell that was just filled. This method is the workhorse at the
+//core of HumanSolve() and is exposed here primarily so users of this library
+//can get a peek at which possibilites exist at each step. cmd/i-sudoku is one
+//user of this method.
+func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastStep *SolveStep) (steps []*SolveStep, probabilityDistribution []float64) {
 
 	//TODO: should lastStep be a step, or just a single cell? It seems way
 	//easier for most users to just pass in a single cell, and that's all
@@ -476,13 +475,13 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastStep *
 	//TODO: consider if we should stop picking techniques based on their weight here.
 	//Now that Find returns a slice instead of a single, we're already much more likely to select an "easy" technique. ... Right?
 
-	invertedProbabilities = make([]float64, len(steps))
+	invertedProbabilities := make([]float64, len(steps))
 	for i, possibility := range steps {
 		invertedProbabilities[i] = possibility.HumanLikelihood()
 	}
 
 	tweakChainedStepsWeights(lastStep, steps, invertedProbabilities)
-	return
+	return steps, invertWeights(invertedProbabilities)
 }
 
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
@@ -503,14 +502,14 @@ func humanSolveNonGuessSearcher(grid *Grid, options *HumanSolveOptions, endCondi
 
 		firstRun = false
 
-		possibilities, possibilitiesWeights := grid.HumanSolvePossibleSteps(options, lastStep)
+		possibilities, probabilityDistribution := grid.HumanSolvePossibleSteps(options, lastStep)
 
 		if len(possibilities) == 0 {
 			//Hmm, we failed to find anything :-/
 			break
 		}
 
-		step := possibilities[randomIndexWithInvertedWeights(possibilitiesWeights)]
+		step := possibilities[randomIndexWithNormalizedWeights(probabilityDistribution)]
 
 		results = append(results, step)
 		lastStep = step

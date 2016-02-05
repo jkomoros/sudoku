@@ -243,6 +243,16 @@ func TestWeightedRandomDistribution(t *testing.T) {
 			testCase.description)
 	}
 
+	for _, testCase := range cases {
+		distribution := invertWeights(testCase.input)
+
+		for i, num := range distribution {
+			if math.Abs(num-testCase.expected[i]) > 0.01 {
+				t.Error("Got wrong distribution for", testCase.description, "at", i, "Got", distribution, "Wanted", testCase.expected)
+			}
+		}
+	}
+
 }
 
 func randomIndexDistributionHelper(t *testing.T, theFunc func([]float64) int, input []float64, expectedDistribution []float64, testCase string) {
