@@ -19,16 +19,28 @@ type commandList struct {
 type command interface {
 	Apply(m *model)
 	Undo(m *model)
+	ModifiedCells(m *model) sudoku.CellSlice
+}
+
+type baseCommand struct {
+	row, col int
+}
+
+func (b *baseCommand) ModifiedCells(m *model) sudoku.CellSlice {
+	if m == nil || m.grid == nil {
+		return nil
+	}
+	return sudoku.CellSlice{m.grid.Cell(b.row, b.col)}
 }
 
 type markCommand struct {
-	row, col    int
+	baseCommand
 	marksToggle map[int]bool
 }
 
 type numberCommand struct {
-	row, col int
-	number   int
+	baseCommand
+	number int
 	//Necessary so we can undo.
 	oldNumber int
 }
@@ -130,7 +142,7 @@ func (m *model) newMarkCommand(row, col int, marksToggle map[int]bool) *markComm
 		return nil
 	}
 
-	return &markCommand{row, col, newMarksToggle}
+	return &markCommand{baseCommand{row, col}, newMarksToggle}
 }
 
 func (m *model) SetNumber(row, col int, num int) {
@@ -152,7 +164,7 @@ func (m *model) newNumberCommand(row, col int, num int) *numberCommand {
 		return nil
 	}
 
-	return &numberCommand{row, col, num, cell.Number()}
+	return &numberCommand{baseCommand{row, col}, num, cell.Number()}
 }
 
 func (m *markCommand) Apply(model *model) {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/jkomoros/sudoku"
+	"reflect"
 	"testing"
 )
 
@@ -32,6 +33,10 @@ func TestMarkMutator(t *testing.T) {
 	if !cell.Marks().SameContentAs(sudoku.IntSlice{1}) {
 		t.Error("Got wrong marks after undoing:", cell.Marks())
 	}
+
+	if !reflect.DeepEqual(command.ModifiedCells(model), sudoku.CellSlice{model.grid.Cell(0, 0)}) {
+		t.Error("Didn't get right Modified Cells")
+	}
 }
 
 func TestNumberMutator(t *testing.T) {
@@ -58,6 +63,10 @@ func TestNumberMutator(t *testing.T) {
 
 	if cell.Number() != 0 {
 		t.Error("Number mutator didn't undo")
+	}
+
+	if !reflect.DeepEqual(command.ModifiedCells(model), sudoku.CellSlice{model.grid.Cell(0, 0)}) {
+		t.Error("Didn't get right Modified Cells")
 	}
 
 }
