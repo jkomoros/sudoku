@@ -453,7 +453,7 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 //filled. This method is the workhorse at the core of HumanSolve() and is
 //exposed here primarily so users of this library can get a peek at which
 //possibilites exist at each step. cmd/i-sudoku is one user of this method.
-func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifiedCells CellSlice) (steps []*SolveStep, probabilityDistribution []float64) {
+func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifiedCells CellSlice) (steps []*SolveStep, distribution ProbabilityDistribution) {
 
 	if self.Invalid() {
 		//We must have been in a branch and found an invalidity.
@@ -471,13 +471,13 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifi
 	//TODO: consider if we should stop picking techniques based on their weight here.
 	//Now that Find returns a slice instead of a single, we're already much more likely to select an "easy" technique. ... Right?
 
-	invertedProbabilities := make([]float64, len(steps))
+	invertedProbabilities := make(ProbabilityDistribution, len(steps))
 	for i, possibility := range steps {
 		invertedProbabilities[i] = possibility.HumanLikelihood()
 	}
 
 	tweakChainedStepsWeights(lastModifiedCells, steps, invertedProbabilities)
-	return steps, invertWeights(invertedProbabilities)
+	return steps, invertedProbabilities.invert()
 }
 
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
@@ -511,7 +511,7 @@ func humanSolveNonGuessSearcher(grid *Grid, options *HumanSolveOptions, endCondi
 			break
 		}
 
-		step := possibilities[randomIndexWithNormalizedWeights(probabilityDistribution)]
+		step := possibilities[probabilityDistribution.RandomIndex()]
 
 		results = append(results, step)
 		lastStep = step

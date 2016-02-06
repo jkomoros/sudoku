@@ -11,82 +11,82 @@ const _ALLOWABLE_DIFF_WEIGHTED_DISTRIBUTION = 0.01
 
 func TestRandomWeightedIndex(t *testing.T) {
 
-	result := randomIndexWithNormalizedWeights([]float64{1.0, 0.0})
+	result := ProbabilityDistribution{1.0, 0.0}.RandomIndex()
 	if result != 0 {
 		t.Log("Got wrong result with random weights")
 		t.Fail()
 	}
-	result = randomIndexWithNormalizedWeights([]float64{0.5, 0.0, 0.5})
+	result = ProbabilityDistribution{0.5, 0.0, 0.5}.RandomIndex()
 	if result != 0 && result != 2 {
 		t.Log("Didn't get one of two legal weights")
 		t.Fail()
 	}
-	result = randomIndexWithNormalizedWeights([]float64{0.0, 0.0, 1.0})
+	result = ProbabilityDistribution{0.0, 0.0, 1.0}.RandomIndex()
 	if result != 2 {
 		t.Log("Should have gotten last item in random weights; we didn't")
 		t.Fail()
 	}
 
-	if weightsNormalized([]float64{1.0, 0.000001}) {
+	if (ProbabilityDistribution{1.0, 0.000001}.normalized()) {
 		t.Log("thought weights were normalized when they weren't")
 		t.Fail()
 	}
-	if !weightsNormalized([]float64{0.5, 0.25, 0.25}) {
+	if !(ProbabilityDistribution{0.5, 0.25, 0.25}.normalized()) {
 		t.Log("Didn't think weights were normalized but they were")
 		t.Fail()
 	}
 
-	if weightsNormalized([]float64{0.5, -0.25, 0.25}) {
+	if (ProbabilityDistribution{0.5, -0.25, 0.25}.normalized()) {
 		t.Error("A negative weight was considered normal.")
 	}
 
 	rand.Seed(1)
-	result = randomIndexWithInvertedWeights([]float64{0.0, 0.0, 1.0})
+	result = ProbabilityDistribution{0.0, 0.0, 1.0}.invert().RandomIndex()
 	if result == 2 {
 		t.Error("Got the wrong index for inverted weights")
 	}
 
-	weightResult := normalizedWeights([]float64{2.0, 1.0, 1.0})
+	weightResult := ProbabilityDistribution{2.0, 1.0, 1.0}.normalize()
 	if weightResult[0] != 0.5 || weightResult[1] != 0.25 || weightResult[2] != 0.25 {
 		t.Log("Nomralized weights came back wrong")
 		t.Fail()
 	}
 
-	weightResult = normalizedWeights([]float64{1.0, 1.0, -0.5})
+	weightResult = ProbabilityDistribution{1.0, 1.0, -0.5}.normalize()
 	if weightResult[0] != 0.5 || weightResult[1] != 0.5 || weightResult[2] != 0 {
 		t.Error("Normalized weights with a negative came back wrong: ", weightResult)
 	}
 
-	weightResult = normalizedWeights([]float64{-0.25, -0.5, 0.25})
+	weightResult = ProbabilityDistribution{-0.25, -0.5, 0.25}.normalize()
 	if weightResult[0] != 0.25 || weightResult[1] != 0 || weightResult[2] != 0.75 {
 		t.Error("Normalized weights with two different negative numbers came back wrong: ", weightResult)
 	}
 
-	result = randomIndexWithWeights([]float64{1.0, 0.0})
+	result = ProbabilityDistribution{1.0, 0.0}.RandomIndex()
 	if result != 0 {
 		t.Log("Got wrong result with random weights")
 		t.Fail()
 	}
-	result = randomIndexWithWeights([]float64{5.0, 0.0, 5.0})
+	result = ProbabilityDistribution{5.0, 0.0, 5.0}.RandomIndex()
 	if result != 0 && result != 2 {
 		t.Log("Didn't get one of two legal weights")
 		t.Fail()
 	}
-	result = randomIndexWithWeights([]float64{0.0, 0.0, 5.0})
+	result = ProbabilityDistribution{0.0, 0.0, 5.0}.RandomIndex()
 	if result != 2 {
 		t.Log("Should have gotten last item in random weights; we didn't")
 		t.Fail()
 	}
 	for i := 0; i < 100; i++ {
 		rand.Seed(int64(i))
-		result = randomIndexWithWeights([]float64{1.0, 10.0, 0.5, -1.0, 0.0, 6.4})
+		result = ProbabilityDistribution{1.0, 10.0, 0.5, -1.0, 0.0, 6.4}.RandomIndex()
 		if result == 3 {
 			t.Error("Random index with weights picked wrong index with seed ", i)
 		}
 	}
 	for i := 0; i < 100; i++ {
 		rand.Seed(int64(i))
-		result = randomIndexWithWeights([]float64{1.0, 10.0, 0.5, 1.0, 0.0, 6.4, 0.0})
+		result = ProbabilityDistribution{1.0, 10.0, 0.5, 1.0, 0.0, 6.4, 0.0}.RandomIndex()
 		if result == 4 || result == 6 {
 			t.Error("Random index with weights that ended in zero picked wrong index with seed ", i)
 		}
@@ -99,19 +99,19 @@ func TestWeightedRandomDistribution(t *testing.T) {
 	//in HumanSolve.
 
 	type distributionTestCase struct {
-		input       []float64
-		expected    []float64
+		input       ProbabilityDistribution
+		expected    ProbabilityDistribution
 		description string
 	}
 
 	cases := []distributionTestCase{
 		{
-			[]float64{
+			ProbabilityDistribution{
 				0.0,
 				1.0,
 				2.0,
 			},
-			[]float64{
+			ProbabilityDistribution{
 				0.3505,
 				0.33333333333,
 				0.3162,
@@ -119,30 +119,30 @@ func TestWeightedRandomDistribution(t *testing.T) {
 			"0 1 2",
 		},
 		{
-			[]float64{
+			ProbabilityDistribution{
 				0.0,
 			},
-			[]float64{
+			ProbabilityDistribution{
 				1.0,
 			},
 			"0.0",
 		},
 		{
-			[]float64{
+			ProbabilityDistribution{
 				10.0,
 			},
-			[]float64{
+			ProbabilityDistribution{
 				1.0,
 			},
 			"10.0",
 		},
 		{
-			[]float64{
+			ProbabilityDistribution{
 				0.5,
 				0.5,
 				1.0,
 			},
-			[]float64{
+			ProbabilityDistribution{
 				0.337,
 				0.337,
 				0.327,
@@ -150,7 +150,7 @@ func TestWeightedRandomDistribution(t *testing.T) {
 			"0.5, 0.5, 1.0",
 		},
 		{
-			[]float64{
+			ProbabilityDistribution{
 				1.0,
 				100.0,
 				0.5,
@@ -158,7 +158,7 @@ func TestWeightedRandomDistribution(t *testing.T) {
 				0.0,
 				6.4,
 			},
-			[]float64{
+			ProbabilityDistribution{
 				0.2019,
 				0.0012,
 				0.2072,
@@ -169,7 +169,7 @@ func TestWeightedRandomDistribution(t *testing.T) {
 			"1.0, 100.0, 0.5, -1.0, 0.0, 6.4",
 		},
 		{
-			[]float64{
+			ProbabilityDistribution{
 				3.0,
 				3.0,
 				4.0,
@@ -180,7 +180,7 @@ func TestWeightedRandomDistribution(t *testing.T) {
 				100.0,
 				400.0,
 			},
-			[]float64{
+			ProbabilityDistribution{
 				0.1721,
 				0.1721,
 				0.1635,
@@ -195,7 +195,7 @@ func TestWeightedRandomDistribution(t *testing.T) {
 		},
 		//This demonstrates the same problem as the case above, but is more pure
 		{
-			[]float64{
+			ProbabilityDistribution{
 				0.0,
 				1.0,
 				2.0,
@@ -203,7 +203,7 @@ func TestWeightedRandomDistribution(t *testing.T) {
 				8.0,
 				16.0,
 			},
-			[]float64{
+			ProbabilityDistribution{
 				0.2086,
 				0.1979,
 				0.1891,
@@ -214,7 +214,7 @@ func TestWeightedRandomDistribution(t *testing.T) {
 			"Straight power of two increase 31",
 		},
 		{
-			[]float64{
+			ProbabilityDistribution{
 				1.0,
 				2.0,
 				3.0,
@@ -222,7 +222,7 @@ func TestWeightedRandomDistribution(t *testing.T) {
 				10.0,
 				1000.0,
 			},
-			[]float64{
+			ProbabilityDistribution{
 				0.2291,
 				0.219,
 				0.2075,
@@ -237,14 +237,13 @@ func TestWeightedRandomDistribution(t *testing.T) {
 	for _, testCase := range cases {
 		randomIndexDistributionHelper(
 			t,
-			randomIndexWithInvertedWeights,
 			testCase.input,
 			testCase.expected,
 			testCase.description)
 	}
 
 	for _, testCase := range cases {
-		distribution := invertWeights(testCase.input)
+		distribution := testCase.input.invert()
 
 		for i, num := range distribution {
 			if math.Abs(num-testCase.expected[i]) > 0.01 {
@@ -255,7 +254,7 @@ func TestWeightedRandomDistribution(t *testing.T) {
 
 }
 
-func randomIndexDistributionHelper(t *testing.T, theFunc func([]float64) int, input []float64, expectedDistribution []float64, testCase string) {
+func randomIndexDistributionHelper(t *testing.T, input ProbabilityDistribution, expectedDistribution ProbabilityDistribution, testCase string) {
 
 	if len(input) != len(expectedDistribution) {
 		t.Fatal("Given differently sized input and expected distribution")
@@ -265,7 +264,7 @@ func randomIndexDistributionHelper(t *testing.T, theFunc func([]float64) int, in
 	results := make([]int, len(expectedDistribution))
 	for i := 0; i < _NUM_RUNS_TEST_WEIGHTED_DISTRIBUTION; i++ {
 		rand.Seed(int64(i))
-		result := theFunc(input)
+		result := input.invert().RandomIndex()
 		results[result]++
 	}
 
