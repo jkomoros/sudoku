@@ -305,10 +305,10 @@ func (s *confirmMode) handleInput(c *mainController, evt termbox.Event) {
 			handled = false
 		}
 		switch evt.Ch {
-		case 'y':
+		case 'y', 'Y':
 			s.yesAction()
 			c.EnterMode(MODE_DEFAULT)
-		case 'n':
+		case 'n', 'N':
 			s.noAction()
 			c.EnterMode(MODE_DEFAULT)
 		default:
