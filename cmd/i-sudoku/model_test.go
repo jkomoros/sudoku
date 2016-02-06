@@ -88,25 +88,34 @@ func TestUndoRedo(t *testing.T) {
 		model.grid.Diagram(true),
 	}
 
+	rememberedModfiedCells := []sudoku.CellSlice{
+		nil,
+	}
+
 	model.SetNumber(0, 0, 1)
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 0)})
 
 	model.SetNumber(0, 1, 2)
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 1)})
 
 	model.SetNumber(0, 0, 3)
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 0)})
 
 	model.SetMarks(0, 2, map[int]bool{3: true, 4: true})
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 2)})
 
 	model.SetMarks(0, 2, map[int]bool{1: true, 4: false})
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 2)})
 
 	if model.Redo() {
 		t.Error("Able to redo even though at end")
@@ -115,6 +124,9 @@ func TestUndoRedo(t *testing.T) {
 	for i := len(rememberedStates) - 1; i >= 1; i-- {
 		if model.grid.Diagram(true) != rememberedStates[i] {
 			t.Error("Remembere state wrong for state", i)
+		}
+		if !reflect.DeepEqual(model.LastModifiedCells(), rememberedModfiedCells[i]) {
+			t.Error("Wrong last modified cells", i)
 		}
 		if !model.Undo() {
 			t.Error("Couldn't undo early: ", i)
@@ -130,6 +142,9 @@ func TestUndoRedo(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		if model.grid.Diagram(true) != rememberedStates[i] {
 			t.Error("Remembered states wrong for state", i, "when redoing")
+		}
+		if !reflect.DeepEqual(model.LastModifiedCells(), rememberedModfiedCells[i]) {
+			t.Error("Wrong last modified cells", i)
 		}
 
 		if !model.Redo() {

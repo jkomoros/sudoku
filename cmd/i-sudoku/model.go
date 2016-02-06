@@ -61,6 +61,14 @@ func (m *model) executeCommand(c command) {
 	c.Apply(m)
 }
 
+func (m *model) LastModifiedCells() sudoku.CellSlice {
+	if m.currentCommand == nil {
+		return nil
+	}
+
+	return m.currentCommand.c.ModifiedCells(m)
+}
+
 //Undo returns true if there was something to undo.
 func (m *model) Undo() bool {
 	if m.currentCommand == nil {
