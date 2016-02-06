@@ -383,8 +383,7 @@ func (c *mainController) ShowDebugHint() {
 	options := sudoku.DefaultHumanSolveOptions()
 	options.NumOptionsToCalculate = 100
 
-	//TODO: feed in a synthesized last step based on the last cell touched.
-	steps, probabilities := c.Grid().HumanSolvePossibleSteps(options, nil)
+	steps, probabilities := c.Grid().HumanSolvePossibleSteps(options, c.model.LastModifiedCells())
 
 	sort.Sort(&nextSteps{steps, probabilities})
 
