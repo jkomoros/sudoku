@@ -393,7 +393,7 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 		10.0,
 	}
 
-	tweakChainedStepsWeights(lastStep, possibilities, weights)
+	tweakChainedStepsWeights(lastStep.TargetCells, possibilities, weights)
 
 	lastWeight := 0.0
 	for i, weight := range weights {

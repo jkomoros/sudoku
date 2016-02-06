@@ -446,18 +446,14 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 
 //HumanSolvePossibleSteps returns a list of SolveSteps that could apply at
 //this state, along with the probability distribution that a human would pick
-//each one. The optional lastStep argument is the last action that was
-//performed on the grid, and is used primarily to tweak the probability
-//distribution and make, for example, it more likely to pick cells in the same
-//block as the cell that was just filled. This method is the workhorse at the
-//core of HumanSolve() and is exposed here primarily so users of this library
-//can get a peek at which possibilites exist at each step. cmd/i-sudoku is one
-//user of this method.
-func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastStep *SolveStep) (steps []*SolveStep, probabilityDistribution []float64) {
-
-	//TODO: should lastStep be a step, or just a single cell? It seems way
-	//easier for most users to just pass in a single cell, and that's all
-	//that's (currently) required.
+//each one. The optional lastModifiedCells argument is the list of cells that
+//were touched in the last action that was performed on the grid, and is used
+//primarily to tweak the probability distribution and make, for example, it
+//more likely to pick cells in the same block as the cell that was just
+//filled. This method is the workhorse at the core of HumanSolve() and is
+//exposed here primarily so users of this library can get a peek at which
+//possibilites exist at each step. cmd/i-sudoku is one user of this method.
+func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifiedCells CellSlice) (steps []*SolveStep, probabilityDistribution []float64) {
 
 	if self.Invalid() {
 		//We must have been in a branch and found an invalidity.
@@ -480,7 +476,7 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastStep *
 		invertedProbabilities[i] = possibility.HumanLikelihood()
 	}
 
-	tweakChainedStepsWeights(lastStep, steps, invertedProbabilities)
+	tweakChainedStepsWeights(lastModifiedCells, steps, invertedProbabilities)
 	return steps, invertWeights(invertedProbabilities)
 }
 
@@ -502,7 +498,13 @@ func humanSolveNonGuessSearcher(grid *Grid, options *HumanSolveOptions, endCondi
 
 		firstRun = false
 
-		possibilities, probabilityDistribution := grid.HumanSolvePossibleSteps(options, lastStep)
+		var cells CellSlice
+
+		if lastStep != nil {
+			cells = lastStep.TargetCells
+		}
+
+		possibilities, probabilityDistribution := grid.HumanSolvePossibleSteps(options, cells)
 
 		if len(possibilities) == 0 {
 			//Hmm, we failed to find anything :-/
@@ -620,17 +622,18 @@ func humanSolveGuessSearcher(grid *Grid, options *HumanSolveOptions, endConditio
 }
 
 //This function will tweak weights quite a bit to make it more likely that we will pick a subsequent step that
-// is 'related' to the last step. For example, if the last step had targetCells that shared a row, then a step with
+// is 'related' to the cells modified in the last step. For example, if the
+// last step had targetCells that shared a row, then a step with
 //target cells in that same row will be more likely this step. This captures the fact that humans, in practice,
 //will have 'chains' of steps that are all related.
-func tweakChainedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, weights []float64) {
+func tweakChainedStepsWeights(lastModififedCells CellSlice, possibilities []*SolveStep, weights []float64) {
 
 	if len(possibilities) != len(weights) {
 		log.Println("Mismatched lenghts of weights and possibilities: ", possibilities, weights)
 		return
 	}
 
-	if lastStep == nil || len(possibilities) == 0 {
+	if lastModififedCells == nil || len(possibilities) == 0 {
 		return
 	}
 
@@ -643,7 +646,7 @@ func tweakChainedStepsWeights(lastStep *SolveStep, possibilities []*SolveStep, w
 		//It turns out that we probably want to STRENGTHEN the effect.
 		//Logically we should be attenuating Dissimilarity here, but for some reason the math.Pow(dissimilairty, 10) doesn't actually
 		//appear to work here, which is maddening.
-		weights[i] *= possibility.TargetCells.chainDissimilarity(lastStep.TargetCells)
+		weights[i] *= possibility.TargetCells.chainDissimilarity(lastModififedCells)
 	}
 }
 
