@@ -209,7 +209,9 @@ func confirmQuit(c *mainController) {
 		func() {
 			c.exitNow = true
 		},
-		func() {},
+		func() {
+			c.EnterMode(MODE_DEFAULT)
+		},
 	)
 }
 
@@ -294,10 +296,8 @@ func (s *confirmMode) handleInput(c *mainController, evt termbox.Event) {
 			switch s.defaultAction {
 			case DEFAULT_YES:
 				s.yesAction()
-				c.EnterMode(MODE_DEFAULT)
 			case DEFAULT_NO:
 				s.noAction()
-				c.EnterMode(MODE_DEFAULT)
 			case DEFAULT_NONE:
 				//Don't do anything
 			}
@@ -307,10 +307,8 @@ func (s *confirmMode) handleInput(c *mainController, evt termbox.Event) {
 		switch evt.Ch {
 		case 'y', 'Y':
 			s.yesAction()
-			c.EnterMode(MODE_DEFAULT)
 		case 'n', 'N':
 			s.noAction()
-			c.EnterMode(MODE_DEFAULT)
 		default:
 			if !handled {
 				//Neither of us handled it so defer to base.
