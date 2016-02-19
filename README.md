@@ -7,6 +7,10 @@ You can find documentation at http://godoc.org/github.com/jkomoros/sudoku
 
 ##Included commands
 
+###i-sudoku
+
+i-sudoku is an interactive command line sudoku game. Part of its goal is to make debugging hints and human solves easier, although it is sufficiently full-featured to stand on its own as a fun sudoku program.
+
 ###dokugen
 
 Dokugen is a simple command line utility exposing the main functionality of the sudoku package, including solving, generating, and difficutly-rating puzzles.
