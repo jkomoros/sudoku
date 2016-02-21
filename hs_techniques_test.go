@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"fmt"
+	"github.com/kr/pretty"
 	"log"
 	"reflect"
 	"testing"
@@ -35,8 +36,8 @@ func TestAllVariantNames(t *testing.T) {
 		"Naked Quad Block",
 		"Naked Quad Row",
 		"Naked Quad Col",
-		"XWing Row",
 		"Pointing Pair Row",
+		"XWing Row",
 		"Pointing Pair Col",
 		"XWing Col",
 		"Block Block Interactions",
@@ -62,7 +63,7 @@ func TestAllVariantNames(t *testing.T) {
 		"Guess",
 	}
 	if !reflect.DeepEqual(expected, AllTechniqueVariants) {
-		t.Error("Got wrong technique variants. Expected", expected, "got", AllTechniqueVariants)
+		t.Error("Got wrong technique variants. Expected", expected, "got", AllTechniqueVariants, "\nDifferences:\n", pretty.Diff(expected, AllTechniqueVariants))
 	}
 }
 

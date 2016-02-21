@@ -393,7 +393,7 @@ func init() {
 	}
 
 	//Sort Techniques in order of humanLikelihood
-	sort.Sort(techniqueByLikelihood(Techniques))
+	sort.Stable(techniqueByLikelihood(Techniques))
 
 	//Guess is always the highest, so AllTechniques should already be sorted.
 	AllTechniques = append(Techniques, GuessTechnique)
