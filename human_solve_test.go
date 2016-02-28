@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"math"
 	"reflect"
 	"strconv"
 	"testing"
@@ -393,6 +394,12 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 		10.0,
 	}
 
+	expected := []float64{
+		3.540133174641434e-08,
+		0.00209041323829402,
+		10,
+	}
+
 	results := tweakChainedStepsWeights(lastStep.TargetCells, possibilities, weights)
 
 	lastWeight := 0.0
@@ -401,6 +408,12 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 			t.Error("Tweak Chained Steps Weights didn't tweak things in the right direction: ", results, "at", i)
 		}
 		lastWeight = weight
+	}
+
+	for i, weight := range results {
+		if math.Abs(expected[i]-weight) > 0.00001 {
+			t.Error("Index", i, "was different than expected. Got", weight, "wanted", expected[i])
+		}
 	}
 }
 
