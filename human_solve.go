@@ -651,9 +651,7 @@ func tweakChainedStepsWeights(lastModififedCells CellSlice, possibilities []*Sol
 		//Logically we should be attenuating Dissimilarity here, but for some reason the math.Pow(dissimilairty, 10) doesn't actually
 		//appear to work here, which is maddening.
 
-		//Invert
-		//TODO: we should flip it to be chainSimilarity and get rid of this reversing.
-		similarity := 1.0 - possibility.TargetCells.chainDissimilarity(lastModififedCells)
+		similarity := possibility.TargetCells.chainSimilarity(lastModififedCells)
 		//Make sure that similarity is higher than 1 so raising 2 to this power will make it go up.
 		similarity *= 10
 

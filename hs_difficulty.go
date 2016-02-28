@@ -47,15 +47,15 @@ func (self SolveDirections) Stats() []string {
 	//TODO: test this. dokugen has a method that effectively tests this; just use that.
 	techniqueCount := make(map[string]int)
 	var lastStep *SolveStep
-	dissimilarityAccum := 0.0
+	similarityAccum := 0.0
 	for _, step := range self.Steps {
 		if lastStep != nil {
-			dissimilarityAccum += step.TargetCells.chainDissimilarity(lastStep.TargetCells)
+			similarityAccum += step.TargetCells.chainSimilarity(lastStep.TargetCells)
 		}
 		techniqueCount[step.TechniqueVariant()] += 1
 		lastStep = step
 	}
-	dissimilarityAccum /= float64(len(self.Steps))
+	similarityAccum /= float64(len(self.Steps))
 
 	var result []string
 
@@ -68,7 +68,7 @@ func (self SolveDirections) Stats() []string {
 	result = append(result, divider)
 	result = append(result, fmt.Sprintf("Step count: %d", len(self.Steps)))
 	result = append(result, divider)
-	result = append(result, fmt.Sprintf("Avg Dissimilarity: %f", dissimilarityAccum))
+	result = append(result, fmt.Sprintf("Avg Similarity: %f", similarityAccum))
 	result = append(result, divider)
 
 	//We want a stable ordering for technique counts.

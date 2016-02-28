@@ -283,18 +283,20 @@ func (self CellSlice) Map(mapper func(*Cell)) {
 	}
 }
 
-//TODO: should this be in this file? It's awfully specific to HumanSolve needs, and extremely complex.
-//TODO: is this how you spell this?
-func (self CellSlice) chainDissimilarity(other CellSlice) float64 {
-	//Returns a value between 0.0 and 1.0 depending on how 'similar' the CellSlices are.
+//chainSimilarity returns a value between 0.0 and 1.0 depending on how
+//'similar' the CellSlices are. For example, two cells that are in the same
+//row within the same block are very similar; cells that are in different
+//rows, cols, and blocks are extremelye dissimilar.
+func (self CellSlice) chainSimilarity(other CellSlice) float64 {
 
+	//TODO: should this be in this file? It's awfully specific to HumanSolve needs, and extremely complex.
 	if other == nil || len(self) == 0 || len(other) == 0 {
 		return 1.0
 	}
 
 	//Note: it doesn't ACTUALLY guarantee a value lower than 1.0 (it might be possible to hit those; reasoning about the maximum value is tricky).
 
-	//Note: a 0.0 means extremely similar, and 1.0 means extremely dissimilar. (This is natural because HumanSolve wnats invertedWeights)
+	//Note: a 1.0 means extremely similar, and 0.0 means extremely dissimilar.
 
 	//Similarity, here, does not mean the overlap of cells that are in both sets--it means how related the blocks/rows/groups are
 	//to one another. This is used in HumanSolve to boost the likelihood of picking steps that are some how 'chained' to the step
@@ -371,9 +373,11 @@ func (self CellSlice) chainDissimilarity(other CellSlice) float64 {
 		result = 2.0
 	}
 
-	//We strengthen the effect quite a bit here, otherwise we don't see much of an impact in SolveDirections.
-	//The lower the dissimilarity, the stronger the effect will be.
-	return result / 2.0
+	//Normalize between 0.0 and 1.0
+	result = result / 2.0
+
+	//Currently similar things are 0 and dissimilar things are 1.0; flip it.
+	return 1.0 - result
 
 }
 

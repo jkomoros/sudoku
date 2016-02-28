@@ -120,7 +120,8 @@ func (self chainTestResults) Len() int {
 }
 
 func (self chainTestResults) Less(i, j int) bool {
-	return self[i].value < self[j].value
+	//Want it high to low
+	return self[i].value > self[j].value
 }
 
 func (self chainTestResults) Swap(i, j int) {
@@ -216,14 +217,14 @@ func TestChainDissimilarity(t *testing.T) {
 		for _, ref := range test.two {
 			listTwo = append(listTwo, ref.Cell(grid))
 		}
-		dissimilarity := listOne.chainDissimilarity(listTwo)
-		if dissimilarity < 0.0 {
-			t.Fatal(test.name, "failed with a dissimilarity less than 0.0: ", dissimilarity)
+		similarity := listOne.chainSimilarity(listTwo)
+		if similarity < 0.0 {
+			t.Fatal(test.name, "failed with a dissimilarity less than 0.0: ", similarity)
 		}
-		if dissimilarity > 1.0 {
-			t.Fatal(test.name, "failed with a dissimilarity great than 1.0:", dissimilarity)
+		if similarity > 1.0 {
+			t.Fatal(test.name, "failed with a dissimilarity great than 1.0:", similarity)
 		}
-		result := chainTestResult{test.name, dissimilarity, equivalenceGroup}
+		result := chainTestResult{test.name, similarity, equivalenceGroup}
 		results = append(results, result)
 	}
 
