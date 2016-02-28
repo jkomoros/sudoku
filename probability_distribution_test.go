@@ -3,11 +3,21 @@ package sudoku
 import (
 	"math"
 	"math/rand"
+	"reflect"
 	"testing"
 )
 
 const _NUM_RUNS_TEST_WEIGHTED_DISTRIBUTION = 10000
 const _ALLOWABLE_DIFF_WEIGHTED_DISTRIBUTION = 0.01
+
+func TestTweakProbabilityDistribution(t *testing.T) {
+	amountToTweak := []float64{1.0, 2.0, 0.5}
+	result := ProbabilityDistribution{0.5, 0.25, 0.25}.tweak(amountToTweak)
+
+	if !reflect.DeepEqual(result, ProbabilityDistribution{0.4444444444444444, 0.4444444444444444, 0.1111111111111111}) {
+		t.Error("Got wrong result. Got", result)
+	}
+}
 
 func TestRandomWeightedIndex(t *testing.T) {
 

@@ -73,6 +73,24 @@ func (d ProbabilityDistribution) denegativize() ProbabilityDistribution {
 	return fixedWeights
 }
 
+//tweak takes an amount to tweak each probability and returns a new
+//ProbabilityDistribution where each probability is multiplied by tweak and
+//the entire distribution is normalized. Useful for strengthening some
+//probabilities and reducing others.
+func (d ProbabilityDistribution) tweak(amountToTweak []float64) ProbabilityDistribution {
+	//sanity check that the tweak amounts are same length
+	if len(d) != len(amountToTweak) {
+		return d
+	}
+	result := make(ProbabilityDistribution, len(d))
+
+	for i, num := range d {
+		result[i] = num * amountToTweak[i]
+	}
+
+	return result.normalize()
+}
+
 //invert returns a new probability distribution like this one, but "flipped"
 //so low values have a high chance of occurring and high values have a low
 //chance. The curve used to invert is expoential.
