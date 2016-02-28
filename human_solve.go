@@ -629,9 +629,9 @@ func humanSolveGuessSearcher(grid *Grid, options *HumanSolveOptions, endConditio
 // last step had targetCells that shared a row, then a step with
 //target cells in that same row will be more likely this step. This captures the fact that humans, in practice,
 //will have 'chains' of steps that are all related.
-func tweakChainedStepsWeights(lastModififedCells CellSlice, possibilities []*SolveStep) (tweaks []float64) {
+func tweakChainedStepsWeights(lastModififedCells CellSlice, possibilities []*SolveStep) (tweaks probabilityDistributionTweak) {
 
-	result := make([]float64, len(possibilities))
+	result := make(probabilityDistributionTweak, len(possibilities))
 
 	//Initialize result to a no op tweaks
 	for i := 0; i < len(possibilities); i++ {

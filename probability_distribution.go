@@ -9,6 +9,10 @@ import (
 //indexes.
 type ProbabilityDistribution []float64
 
+//probabiliyDistributionTweak represents tweaks to make to a
+//ProbabilityDistribution via tweak(). 1.0 is no effect.
+type probabilityDistributionTweak []float64
+
 //Normalized returns true if the distribution is normalized: that is, the
 //distribution sums to 1.0
 func (d ProbabilityDistribution) normalized() bool {
@@ -77,15 +81,15 @@ func (d ProbabilityDistribution) denegativize() ProbabilityDistribution {
 //ProbabilityDistribution where each probability is multiplied by tweak and
 //the entire distribution is normalized. Useful for strengthening some
 //probabilities and reducing others.
-func (d ProbabilityDistribution) tweak(amountToTweak []float64) ProbabilityDistribution {
+func (d ProbabilityDistribution) tweak(tweak probabilityDistributionTweak) ProbabilityDistribution {
 	//sanity check that the tweak amounts are same length
-	if len(d) != len(amountToTweak) {
+	if len(d) != len(tweak) {
 		return d
 	}
 	result := make(ProbabilityDistribution, len(d))
 
 	for i, num := range d {
-		result[i] = num * amountToTweak[i]
+		result[i] = num * tweak[i]
 	}
 
 	return result.normalize()
