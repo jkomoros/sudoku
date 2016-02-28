@@ -476,8 +476,10 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifi
 		invertedProbabilities[i] = possibility.HumanLikelihood()
 	}
 
-	tweakedInvertedProbabilities := ProbabilityDistribution(tweakChainedStepsWeights(lastModifiedCells, steps, invertedProbabilities))
-	return steps, tweakedInvertedProbabilities.invert()
+	d := invertedProbabilities.invert()
+
+	newDistribution := ProbabilityDistribution(tweakChainedStepsWeights(lastModifiedCells, steps, d))
+	return steps, newDistribution
 }
 
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
@@ -626,18 +628,18 @@ func humanSolveGuessSearcher(grid *Grid, options *HumanSolveOptions, endConditio
 // last step had targetCells that shared a row, then a step with
 //target cells in that same row will be more likely this step. This captures the fact that humans, in practice,
 //will have 'chains' of steps that are all related.
-func tweakChainedStepsWeights(lastModififedCells CellSlice, possibilities []*SolveStep, weights []float64) []float64 {
+func tweakChainedStepsWeights(lastModififedCells CellSlice, possibilities []*SolveStep, distribution ProbabilityDistribution) ProbabilityDistribution {
 
-	if len(possibilities) != len(weights) {
-		log.Println("Mismatched lenghts of weights and possibilities: ", possibilities, weights)
-		return weights
+	if len(possibilities) != len(distribution) {
+		log.Println("Mismatched lenghts of weights and possibilities: ", possibilities, distribution)
+		return distribution
 	}
 
 	if lastModififedCells == nil || len(possibilities) == 0 {
-		return weights
+		return distribution
 	}
 
-	result := make([]float64, len(weights))
+	result := make(ProbabilityDistribution, len(distribution))
 
 	for i := 0; i < len(possibilities); i++ {
 		possibility := possibilities[i]
@@ -648,10 +650,17 @@ func tweakChainedStepsWeights(lastModififedCells CellSlice, possibilities []*Sol
 		//It turns out that we probably want to STRENGTHEN the effect.
 		//Logically we should be attenuating Dissimilarity here, but for some reason the math.Pow(dissimilairty, 10) doesn't actually
 		//appear to work here, which is maddening.
-		result[i] = weights[i] * math.Pow(possibility.TargetCells.chainDissimilarity(lastModififedCells), 10)
+
+		//Invert
+		//TODO: we should flip it to be chainSimilarity and get rid of this reversing.
+		similarity := 1.0 - possibility.TargetCells.chainDissimilarity(lastModififedCells)
+		//Make sure that similarity is higher than 1 so raising 2 to this power will make it go up.
+		similarity *= 10
+
+		result[i] = distribution[i] * math.Pow(10, similarity)
 	}
 
-	return result
+	return result.normalize()
 }
 
 func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps int) []*SolveStep {
