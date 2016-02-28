@@ -478,7 +478,8 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifi
 
 	d := invertedProbabilities.invert()
 
-	newDistribution := ProbabilityDistribution(tweakChainedStepsWeights(lastModifiedCells, steps, d))
+	newDistribution := d.tweak(tweakChainedStepsWeights(lastModifiedCells, steps))
+
 	return steps, newDistribution
 }
 
@@ -628,18 +629,18 @@ func humanSolveGuessSearcher(grid *Grid, options *HumanSolveOptions, endConditio
 // last step had targetCells that shared a row, then a step with
 //target cells in that same row will be more likely this step. This captures the fact that humans, in practice,
 //will have 'chains' of steps that are all related.
-func tweakChainedStepsWeights(lastModififedCells CellSlice, possibilities []*SolveStep, distribution ProbabilityDistribution) ProbabilityDistribution {
+func tweakChainedStepsWeights(lastModififedCells CellSlice, possibilities []*SolveStep) (tweaks []float64) {
 
-	if len(possibilities) != len(distribution) {
-		log.Println("Mismatched lenghts of weights and possibilities: ", possibilities, distribution)
-		return distribution
+	result := make([]float64, len(possibilities))
+
+	//Initialize result to a no op tweaks
+	for i := 0; i < len(possibilities); i++ {
+		result[i] = 1.0
 	}
 
 	if lastModififedCells == nil || len(possibilities) == 0 {
-		return distribution
+		return result
 	}
-
-	result := make(ProbabilityDistribution, len(distribution))
 
 	for i := 0; i < len(possibilities); i++ {
 		possibility := possibilities[i]
@@ -655,10 +656,10 @@ func tweakChainedStepsWeights(lastModififedCells CellSlice, possibilities []*Sol
 		//Make sure that similarity is higher than 1 so raising 2 to this power will make it go up.
 		similarity *= 10
 
-		result[i] = distribution[i] * math.Pow(10, similarity)
+		result[i] = math.Pow(10, similarity)
 	}
 
-	return result.normalize()
+	return result
 }
 
 func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps int) []*SolveStep {
