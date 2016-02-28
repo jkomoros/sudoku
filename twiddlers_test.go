@@ -20,7 +20,7 @@ func TestDefaultProbabilityDistributionTweak(t *testing.T) {
 
 }
 
-func TestTweakChainedStepsWeights(t *testing.T) {
+func TestTwiddleChainedSteps(t *testing.T) {
 
 	//TODO: test other, harder cases as well.
 	grid := NewGrid()
