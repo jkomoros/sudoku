@@ -479,7 +479,7 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifi
 	d := invertedProbabilities.invert()
 
 	for _, twiddler := range twiddlers {
-		d = d.tweak(twiddler(steps, lastModifiedCells))
+		d = d.tweak(twiddler(steps, self, lastModifiedCells))
 	}
 
 	return steps, d

@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-type probabilityTwiddler func([]*SolveStep, CellSlice) probabilityDistributionTweak
+type probabilityTwiddler func([]*SolveStep, *Grid, CellSlice) probabilityDistributionTweak
 
 //twiddlers is the list of all of the twiddlers we should apply to change the
 //probability distribution of possibilities at each step. They capture biases
@@ -24,7 +24,7 @@ func init() {
 // last step had targetCells that shared a row, then a step with
 //target cells in that same row will be more likely this step. This captures the fact that humans, in practice,
 //will have 'chains' of steps that are all related.
-func twiddleChainedSteps(possibilities []*SolveStep, lastModififedCells CellSlice) (tweaks probabilityDistributionTweak) {
+func twiddleChainedSteps(possibilities []*SolveStep, grid *Grid, lastModififedCells CellSlice) (tweaks probabilityDistributionTweak) {
 
 	result := make(probabilityDistributionTweak, len(possibilities))
 
