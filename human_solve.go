@@ -478,7 +478,7 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifi
 
 	d := invertedProbabilities.invert()
 
-	newDistribution := d.tweak(tweakChainedStepsWeights(lastModifiedCells, steps))
+	newDistribution := d.tweak(tweakChainedStepsWeights(steps, lastModifiedCells))
 
 	return steps, newDistribution
 }
@@ -629,7 +629,7 @@ func humanSolveGuessSearcher(grid *Grid, options *HumanSolveOptions, endConditio
 // last step had targetCells that shared a row, then a step with
 //target cells in that same row will be more likely this step. This captures the fact that humans, in practice,
 //will have 'chains' of steps that are all related.
-func tweakChainedStepsWeights(lastModififedCells CellSlice, possibilities []*SolveStep) (tweaks probabilityDistributionTweak) {
+func tweakChainedStepsWeights(possibilities []*SolveStep, lastModififedCells CellSlice) (tweaks probabilityDistributionTweak) {
 
 	result := make(probabilityDistributionTweak, len(possibilities))
 
