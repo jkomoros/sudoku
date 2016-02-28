@@ -19,6 +19,18 @@ func init() {
 	}
 }
 
+//Returns a no-op (all 1.0) probabilityDistributionTweak of the given length.
+func defaultProbabilityDistributionTweak(length int) probabilityDistributionTweak {
+	result := make(probabilityDistributionTweak, length)
+
+	//Initialize result to a no op tweaks
+	for i := 0; i < length; i++ {
+		result[i] = 1.0
+	}
+
+	return result
+}
+
 //This function will tweak weights quite a bit to make it more likely that we will pick a subsequent step that
 // is 'related' to the cells modified in the last step. For example, if the
 // last step had targetCells that shared a row, then a step with
@@ -26,12 +38,7 @@ func init() {
 //will have 'chains' of steps that are all related.
 func twiddleChainedSteps(possibilities []*SolveStep, grid *Grid, lastModififedCells CellSlice) (tweaks probabilityDistributionTweak) {
 
-	result := make(probabilityDistributionTweak, len(possibilities))
-
-	//Initialize result to a no op tweaks
-	for i := 0; i < len(possibilities); i++ {
-		result[i] = 1.0
-	}
+	result := defaultProbabilityDistributionTweak(len(possibilities))
 
 	if lastModififedCells == nil || len(possibilities) == 0 {
 		return result

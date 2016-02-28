@@ -2,8 +2,23 @@ package sudoku
 
 import (
 	"math"
+	"reflect"
 	"testing"
 )
+
+func TestDefaultProbabilityDistributionTweak(t *testing.T) {
+	result := defaultProbabilityDistributionTweak(3)
+	expected := probabilityDistributionTweak{
+		1.0,
+		1.0,
+		1.0,
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Error("Got wrong result from defaultProbabilityDistributionTweak. Got", result, "expected", expected)
+	}
+
+}
 
 func TestTweakChainedStepsWeights(t *testing.T) {
 
