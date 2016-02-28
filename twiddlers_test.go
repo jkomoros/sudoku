@@ -58,7 +58,7 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 		1.0,
 	}
 
-	results := tweakChainedStepsWeights(possibilities, lastStep.TargetCells)
+	results := twiddleChainedSteps(possibilities, lastStep.TargetCells)
 
 	lastWeight := math.MaxFloat64
 	for i, weight := range results {

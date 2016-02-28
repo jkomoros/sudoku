@@ -478,9 +478,11 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifi
 
 	d := invertedProbabilities.invert()
 
-	newDistribution := d.tweak(tweakChainedStepsWeights(steps, lastModifiedCells))
+	for _, twiddler := range twiddlers {
+		d = d.tweak(twiddler(steps, lastModifiedCells))
+	}
 
-	return steps, newDistribution
+	return steps, d
 }
 
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
