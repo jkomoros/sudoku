@@ -31,6 +31,51 @@ func defaultProbabilityDistributionTweak(length int) probabilityDistributionTwea
 	return result
 }
 
+//twiddleCommonNumbers will twiddle up steps whose TargetNumbers are over-
+//represented in the grid (but not DIM). This captures that humans, in
+//practice, will often choose to look for cells to fill for a number that is
+//represented more in the grid, since they're more likely to be constrained by
+//neighorbors with the same number.
+func twiddleCommonNumbers(possibilities []*SolveStep, grid *Grid, lastModififedCells CellSlice) (tweaks probabilityDistributionTweak) {
+	//Calculate which numbers are most represented in the grid.
+	numCounts := make(map[int]int)
+
+	for _, cell := range grid.Cells() {
+		if cell.Number() == 0 {
+			continue
+		}
+		numCounts[cell.Number()]++
+	}
+
+	//Remove counts for targetNums that are already filled in every block.
+	//This shouldn't matter, since no steps should suggest filling it, but
+	//just as a sanity check.
+	for key, val := range numCounts {
+		if val == DIM {
+			delete(numCounts, key)
+		}
+	}
+
+	result := defaultProbabilityDistributionTweak(len(possibilities))
+
+	for i, possibility := range possibilities {
+		//Skip steps that aren't fill or fill multiple
+		if !possibility.Technique.IsFill() || len(possibility.TargetNums) > 1 {
+			continue
+		}
+
+		count := numCounts[possibility.TargetNums[0]]
+		if count == 0 {
+			count = 1
+		}
+		//TODO: figure out the curve/amount to tweak by.
+		result[i] *= float64(count)
+	}
+
+	return result
+
+}
+
 //This function will tweak weights quite a bit to make it more likely that we will pick a subsequent step that
 // is 'related' to the cells modified in the last step. For example, if the
 // last step had targetCells that shared a row, then a step with
