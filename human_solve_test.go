@@ -393,12 +393,12 @@ func TestTweakChainedStepsWeights(t *testing.T) {
 		10.0,
 	}
 
-	tweakChainedStepsWeights(lastStep.TargetCells, possibilities, weights)
+	results := tweakChainedStepsWeights(lastStep.TargetCells, possibilities, weights)
 
 	lastWeight := 0.0
-	for i, weight := range weights {
+	for i, weight := range results {
 		if weight <= lastWeight {
-			t.Error("Tweak Chained Steps Weights didn't tweak things in the right direction: ", weights, "at", i)
+			t.Error("Tweak Chained Steps Weights didn't tweak things in the right direction: ", results, "at", i)
 		}
 		lastWeight = weight
 	}

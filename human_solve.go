@@ -476,8 +476,8 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifi
 		invertedProbabilities[i] = possibility.HumanLikelihood()
 	}
 
-	tweakChainedStepsWeights(lastModifiedCells, steps, invertedProbabilities)
-	return steps, invertedProbabilities.invert()
+	tweakedInvertedProbabilities := ProbabilityDistribution(tweakChainedStepsWeights(lastModifiedCells, steps, invertedProbabilities))
+	return steps, tweakedInvertedProbabilities.invert()
 }
 
 //Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
@@ -626,16 +626,18 @@ func humanSolveGuessSearcher(grid *Grid, options *HumanSolveOptions, endConditio
 // last step had targetCells that shared a row, then a step with
 //target cells in that same row will be more likely this step. This captures the fact that humans, in practice,
 //will have 'chains' of steps that are all related.
-func tweakChainedStepsWeights(lastModififedCells CellSlice, possibilities []*SolveStep, weights []float64) {
+func tweakChainedStepsWeights(lastModififedCells CellSlice, possibilities []*SolveStep, weights []float64) []float64 {
 
 	if len(possibilities) != len(weights) {
 		log.Println("Mismatched lenghts of weights and possibilities: ", possibilities, weights)
-		return
+		return weights
 	}
 
 	if lastModififedCells == nil || len(possibilities) == 0 {
-		return
+		return weights
 	}
+
+	result := make([]float64, len(weights))
 
 	for i := 0; i < len(possibilities); i++ {
 		possibility := possibilities[i]
@@ -646,8 +648,10 @@ func tweakChainedStepsWeights(lastModififedCells CellSlice, possibilities []*Sol
 		//It turns out that we probably want to STRENGTHEN the effect.
 		//Logically we should be attenuating Dissimilarity here, but for some reason the math.Pow(dissimilairty, 10) doesn't actually
 		//appear to work here, which is maddening.
-		weights[i] *= possibility.TargetCells.chainDissimilarity(lastModififedCells)
+		result[i] = weights[i] * possibility.TargetCells.chainDissimilarity(lastModififedCells)
 	}
+
+	return result
 }
 
 func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps int) []*SolveStep {
