@@ -11,6 +11,7 @@ const outputFile = "solves.arff"
 
 type appOptions struct {
 	inFile  string
+	help    bool
 	flagSet *flag.FlagSet
 }
 
@@ -37,6 +38,7 @@ func (a *appOptions) defineFlags() {
 		return
 	}
 	a.flagSet.StringVar(&a.inFile, "i", "solves.csv", "Which file to read from")
+	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 }
 
 func (a *appOptions) parse(args []string) {
@@ -56,7 +58,10 @@ func main() {
 	options := newAppOptions(flag.CommandLine)
 	options.parse(os.Args[1:])
 
-	//TODO: print help when -h is passed.
+	if options.help {
+		options.flagSet.PrintDefaults()
+		return
+	}
 
 	//TODO: allow configuring just a relativedifficulties file and run the whole pipeline
 
