@@ -17,16 +17,16 @@ const pathFromWekaTrainer = "../a-b-tester/"
 //TODO: amek this resilient to not being run in the package's directory
 
 type appOptions struct {
-	message string
-	help    bool
-	flagSet *flag.FlagSet
+	relativeDifficultiesFile string
+	help                     bool
+	flagSet                  *flag.FlagSet
 }
 
 func (a *appOptions) defineFlags() {
 	if a.flagSet == nil {
 		return
 	}
-	a.flagSet.StringVar(&a.message, "m", "Hello, world!", "The message to print to the screen")
+	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties_SAMPLED.csv", "The file to use as relative difficulties input")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 }
 
@@ -46,11 +46,9 @@ func main() {
 	a := newAppOptions(flag.CommandLine)
 	a.parse(os.Args[1:])
 
-	log.Println(a.message)
-
 	//TODO: support sampling from relative_difficulties via command line option here.
 
-	runSolves("relativedifficulties_SAMPLED.csv", "solves_SAMPLED.csv")
+	runSolves(a.relativeDifficultiesFile, "solves_SAMPLED.csv")
 
 	runWeka("solves_SAMPLED.csv", "analysis_SAMPLED.txt")
 
