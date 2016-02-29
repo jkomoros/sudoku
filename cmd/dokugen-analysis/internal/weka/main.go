@@ -3,14 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 )
 
+//TODO: rename this to tempArff or something.
 const outputFile = "solves.arff"
 
 type appOptions struct {
 	inFile  string
+	outFile string
 	help    bool
 	flagSet *flag.FlagSet
 }
@@ -38,6 +41,7 @@ func (a *appOptions) defineFlags() {
 		return
 	}
 	a.flagSet.StringVar(&a.inFile, "i", "solves.csv", "Which file to read from")
+	a.flagSet.StringVar(&a.outFile, "o", "analysis.txt", "Which file to output analysis to")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 }
 
@@ -90,10 +94,9 @@ func main() {
 		"-C", "1.0", "-N", "2", "-I", `weka.classifiers.functions.supportVector.RegSMOImproved -L 0.001 -W 1 -P 1.0E-12 -T 0.001 -V`,
 		"-K", `weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 1.0`, "-c", "first", "-i", "-t", "solves.arff")
 
-	trainCmd.Stdout = os.Stdout
 	trainCmd.Stderr = os.Stderr
 
-	err = trainCmd.Run()
+	output, err := trainCmd.Output()
 
 	if err != nil {
 		fmt.Println(err)
@@ -102,7 +105,7 @@ func main() {
 
 	//TODO: extract the r2 for comparison.
 
-	//TODO: store the output in a file that we overwrite each time (so the user has it if they want it)
+	ioutil.WriteFile(options.outFile, output, 0644)
 
 	//Remove the temporary arff file.
 	os.Remove(outputFile)
