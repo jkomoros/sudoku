@@ -4,7 +4,10 @@ import (
 	"flag"
 	"log"
 	"os"
+	"os/exec"
 )
+
+//TODO: amek this resilient to not being run in the package's directory
 
 type appOptions struct {
 	message string
@@ -37,4 +40,21 @@ func main() {
 	a.parse(os.Args[1:])
 
 	log.Println(a.message)
+
+	runSolves("test.csv", "out.csv")
+}
+
+func runSolves(inputFile, outputFile string) {
+
+	//Build the dokugen-analysis executable to make sure we get the freshest version of the sudoku pacakge.
+	cmd := exec.Command("go", "build")
+	cmd.Dir = "../../"
+	err := cmd.Run()
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	//TODO: Execute the executable
+
 }
