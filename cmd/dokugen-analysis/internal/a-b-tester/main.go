@@ -11,6 +11,9 @@ import (
 const pathToDokugenAnalysis = "../../"
 const pathFromDokugenAnalysis = "internal/a-b-tester/"
 
+const pathToWekaTrainer = "../weka-trainer/"
+const pathFromWekaTrainer = "../a-b-tester/"
+
 //TODO: amek this resilient to not being run in the package's directory
 
 type appOptions struct {
@@ -45,7 +48,11 @@ func main() {
 
 	log.Println(a.message)
 
+	//TODO: support sampling from relative_difficulties via command line option here.
+
 	runSolves("relativedifficulties_SAMPLED.csv", "solves_SAMPLED.csv")
+
+	runWeka("solves_SAMPLED.csv", "analysis_SAMPLED.txt")
 
 	//TODO: should we be cleaning up the files we output (perhaps only if option provided?0)
 }
@@ -53,6 +60,10 @@ func main() {
 func runSolves(difficultiesFile, solvesOutputFile string) {
 
 	os.Chdir(pathToDokugenAnalysis)
+
+	defer func() {
+		os.Chdir(pathFromDokugenAnalysis)
+	}()
 
 	//Build the dokugen-analysis executable to make sure we get the freshest version of the sudoku pacakge.
 	cmd := exec.Command("go", "build")
@@ -74,6 +85,35 @@ func runSolves(difficultiesFile, solvesOutputFile string) {
 	analysisCmd.Stdout = outFile
 	analysisCmd.Stderr = os.Stderr
 	err = analysisCmd.Run()
+
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func runWeka(solvesFile string, analysisFile string) {
+
+	os.Chdir(pathToWekaTrainer)
+
+	defer func() {
+		os.Chdir(pathFromWekaTrainer)
+	}()
+
+	//Build the weka-trainer executable to make sure we get the freshest version of the sudoku pacakge.
+	cmd := exec.Command("go", "build")
+	err := cmd.Run()
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	trainCmd := exec.Command("./weka-trainer", "-i", path.Join(pathFromWekaTrainer, solvesFile), "-o", path.Join(pathFromWekaTrainer, analysisFile))
+	trainCmd.Stdout = os.Stdout
+	trainCmd.Stderr = os.Stderr
+	err = trainCmd.Run()
+
+	//TODO: parse the r2 here
 
 	if err != nil {
 		log.Println(err)
