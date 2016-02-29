@@ -19,6 +19,7 @@ const pathFromWekaTrainer = "../a-b-tester/"
 type appOptions struct {
 	relativeDifficultiesFile string
 	solvesFile               string
+	analysisFile             string
 	help                     bool
 	flagSet                  *flag.FlagSet
 }
@@ -29,6 +30,7 @@ func (a *appOptions) defineFlags() {
 	}
 	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties_SAMPLED.csv", "The file to use as relative difficulties input")
 	a.flagSet.StringVar(&a.solvesFile, "s", "solves.csv", "The file to output solves to")
+	a.flagSet.StringVar(&a.analysisFile, "a", "analysis.txt", "The file to output analysis to")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 }
 
@@ -52,7 +54,7 @@ func main() {
 
 	runSolves(a.relativeDifficultiesFile, a.solvesFile)
 
-	runWeka(a.solvesFile, "analysis_SAMPLED.txt")
+	runWeka(a.solvesFile, a.analysisFile)
 
 	//TODO: should we be cleaning up the files we output (perhaps only if option provided?0)
 }
