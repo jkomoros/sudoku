@@ -58,6 +58,7 @@ var printPuzzleTechniques bool
 var inputIsSolveData bool
 var outputSolveHeader bool
 var numSolvesToAverage int
+var noSolvesCache bool
 
 func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
@@ -74,6 +75,7 @@ func init() {
 	flag.BoolVar(&inputIsSolveData, "i", false, "If calculating weights, providing this switch will say the input CSV is solve data, not puzzle user difficulty.")
 	flag.BoolVar(&outputSolveHeader, "h", false, "If true and outputting solve data, will include a header row.")
 	flag.IntVar(&numSolvesToAverage, "num-solves", 10, "Number of solves to run and then average together")
+	flag.BoolVar(&noSolvesCache, "no-cache", false, "If provided, will not use the solves cache")
 
 	//We're going to be doing some heavy-duty matrix multiplication, and the matrix package can take advantage of multiple cores.
 	runtime.GOMAXPROCS(6)
@@ -805,11 +807,20 @@ func openSolvesCache() *solvesCache {
 		log.Fatal("Couldn't open solves cache db:", err)
 	}
 
+	if noSolvesCache {
+		log.Println("Not using the solves cache.")
+	}
+
 	//TODO: if --clear is passed, clear the cache. Not a HUGE deal, since you can just delete that if you want.
 	return &solvesCache{db}
 }
 
 func (c *solvesCache) verifyFresh(expectedRecLength int) {
+
+	if noSolvesCache {
+		return
+	}
+
 	var shouldDelete bool
 	//Make sure the current difficulty hash is what we expect.
 
@@ -879,6 +890,11 @@ func (c *solvesCache) verifyFresh(expectedRecLength int) {
 //deleteSolves removes all solves in the bucket. Shoudl be called as soon as
 //you notice the cache has values that are stale.
 func (c *solvesCache) deleteSolves() {
+
+	if noSolvesCache {
+		return
+	}
+
 	c.db.Update(func(tx *bolt.Tx) error {
 		err := tx.DeleteBucket([]byte(_SOLVES_BUCKET))
 		if err != nil {
@@ -902,6 +918,11 @@ func (c *solvesCache) Close() {
 }
 
 func (c *solvesCache) getStatsForPuzzle(puz *puzzle) []float64 {
+
+	if noSolvesCache {
+		return nil
+	}
+
 	var data string
 	err := c.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(_SOLVES_BUCKET))
@@ -940,6 +961,10 @@ func (c *solvesCache) getStatsForPuzzle(puz *puzzle) []float64 {
 }
 
 func (c *solvesCache) putStatsForPuzzle(puz *puzzle, data []float64) {
+
+	if noSolvesCache {
+		return
+	}
 
 	//Convert the floats to strings to serialize
 	var stringified []string
