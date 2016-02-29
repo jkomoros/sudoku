@@ -28,12 +28,9 @@ func main() {
 
 	//TODO: allow configuring a different in file.
 
-	//TODO: factor out the class path
-
 	//First, convert the file to arff.
 
-	cmd := exec.Command("java",
-		"-cp", "/Applications/weka-3-6-11-oracle-jvm.app/Contents/Java/weka.jar", "weka.core.converters.CSVLoader", "solves.csv")
+	cmd := execJavaCommand("weka.core.converters.CSVLoader", "solves.csv")
 
 	out, err := os.Create("solves.arff")
 
@@ -53,4 +50,14 @@ func main() {
 
 	//TODO: delete the arff files.
 
+}
+
+func execJavaCommand(input ...string) *exec.Cmd {
+
+	var args []string
+	args = append(args, "-cp")
+	args = append(args, "/Applications/weka-3-6-11-oracle-jvm.app/Contents/Java/weka.jar")
+	args = append(args, input...)
+
+	return exec.Command("java", args...)
 }
