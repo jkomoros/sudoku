@@ -70,9 +70,13 @@ func runSolves(difficultiesFile, solvesOutputFile string) {
 		return
 	}
 
-	analysisCmd := exec.Command("dokugen-analysis", "-a", "-v", "-w", "-t", "-h", "-no-cache", path.Join(pathFromDokugenAnalysis, difficultiesFile))
+	analysisCmd := exec.Command("./dokugen-analysis", "-a", "-v", "-w", "-t", "-h", "-no-cache", path.Join(pathFromDokugenAnalysis, difficultiesFile))
 	analysisCmd.Stdout = outFile
 	analysisCmd.Stderr = os.Stderr
-	analysisCmd.Run()
+	err = analysisCmd.Run()
+
+	if err != nil {
+		log.Println(err)
+	}
 
 }
