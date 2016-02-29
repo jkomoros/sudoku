@@ -7,6 +7,8 @@ import (
 	"os/exec"
 )
 
+const pathToDokugenAnalysis = "../../"
+
 //TODO: amek this resilient to not being run in the package's directory
 
 type appOptions struct {
@@ -48,7 +50,7 @@ func runSolves(inputFile, outputFile string) {
 
 	//Build the dokugen-analysis executable to make sure we get the freshest version of the sudoku pacakge.
 	cmd := exec.Command("go", "build")
-	cmd.Dir = "../../"
+	cmd.Dir = pathToDokugenAnalysis
 	err := cmd.Run()
 
 	if err != nil {
