@@ -26,6 +26,10 @@ import (
 
 func main() {
 
+	//TODO: allow configuring a different in file.
+
+	//TODO: factor out the class path
+
 	//First, convert the file to arff.
 
 	cmd := exec.Command("java",
