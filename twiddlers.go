@@ -16,6 +16,7 @@ var twiddlers []probabilityTwiddler
 func init() {
 	twiddlers = []probabilityTwiddler{
 		twiddleChainedSteps,
+		twiddleCommonNumbers,
 	}
 }
 
