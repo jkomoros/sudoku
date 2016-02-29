@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 )
 
@@ -30,16 +31,21 @@ func main() {
 	cmd := exec.Command("java",
 		"-cp", "/Applications/weka-3-6-11-oracle-jvm.app/Contents/Java/weka.jar", "weka.core.converters.CSVLoader", "solves.csv")
 
-	output, err := cmd.Output()
+	out, err := os.Create("solves.arff")
 
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println(err)
 		return
 	}
 
-	//TODO: redirect to a (temporary!) arff file.
+	cmd.Stdout = out
 
-	fmt.Println(string(output))
+	err = cmd.Run()
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	//TODO: delete the arff files.
 
