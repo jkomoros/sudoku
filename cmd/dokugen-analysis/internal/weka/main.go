@@ -50,6 +50,10 @@ func main() {
 		return
 	}
 
+	//TODO: do the training.
+
+	//TODO: extract the r2 for comparison.
+
 	//Remove the temporary arff file.
 	os.Remove(outputFile)
 
