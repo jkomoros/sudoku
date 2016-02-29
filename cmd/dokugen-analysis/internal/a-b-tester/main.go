@@ -16,7 +16,13 @@ const pathFromWekaTrainer = "../a-b-tester/"
 
 //TODO: amek this resilient to not being run in the package's directory
 
+//TODO: allow the user to specify git branches to switch between for the before and after to do automated comparisons.
+//TODO: allow the user to specify multiple branches/configs to test, and it reports the best config.
+
 type appOptions struct {
+
+	//TODO: allow configuring a suffix, e.g. "BEFORE", "AFTER" that is appended to all output files
+	//TODO: allow -a and -b to automatically set suffix to BEFORE/AFTER
 	relativeDifficultiesFile string
 	solvesFile               string
 	analysisFile             string
