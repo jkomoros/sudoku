@@ -29,18 +29,11 @@ awk 'NR == 1 || NR % 10 == 0' relativedifficulties.csv > relativedifficulties_SA
 
 ## Quick A/B pattern
 
-To quickkly tell if a change to the library helped r2, from dokugen-analysis folder, run:
+To quickkly tell if a change to the library helped r2, create a relativedifficulties.csv in internal/a-b-tester. Then from a-b-tester run:
 
-go run main.go mock_data.go -a -v -w -t -h -no-cache relativedifficulties_SAMPLED.csv > internal/weka-trainer/solves_BEFORE.csv
+go build && ./a-b-tester -r relativedifficulties.csv
 
-Then make the change, then run:
-
-go run main.go mock_data.go -a -v -w -t -h -no-cache relativedifficulties_SAMPLED.csv > internal/weka-trainer/solves_AFTER.csv
-
-Then, from internal/weka-trainer, run: 
-
-go build && ./weka-trainer -i solves_BEFORE.csv -o analysis_BEFORE.txt
-go build && ./weka-trainer -i solves_AFTER.csv -o analysis_AFTER.txt
+Then make the change you want to compare against, and run it again.
 
 And see which one prints a higher r2 to the screen.
 
