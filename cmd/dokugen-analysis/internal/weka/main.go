@@ -1,12 +1,18 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
 )
 
 const outputFile = "solves.arff"
+
+type appOptions struct {
+	inFile  string
+	flagSet *flag.FlagSet
+}
 
 /*
 
@@ -26,15 +32,37 @@ const outputFile = "solves.arff"
 
 */
 
+func (a *appOptions) defineFlags() {
+	if a.flagSet == nil {
+		return
+	}
+	a.flagSet.StringVar(&a.inFile, "i", "solves.csv", "Which file to read from")
+}
+
+func (a *appOptions) parse(args []string) {
+	a.flagSet.Parse(args)
+}
+
+func newAppOptions(flagSet *flag.FlagSet) *appOptions {
+	a := &appOptions{
+		flagSet: flagSet,
+	}
+	a.defineFlags()
+	return a
+}
+
 func main() {
 
-	//TODO: allow configuring a different in file.
+	options := newAppOptions(flag.CommandLine)
+	options.parse(os.Args[1:])
+
+	//TODO: print help when -h is passed.
 
 	//TODO: allow configuring just a relativedifficulties file and run the whole pipeline
 
 	//First, convert the file to arff.
 
-	cmd := execJavaCommand("weka.core.converters.CSVLoader", "solves.csv")
+	cmd := execJavaCommand("weka.core.converters.CSVLoader", options.inFile)
 
 	out, err := os.Create(outputFile)
 
