@@ -5,9 +5,11 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 )
 
 const pathToDokugenAnalysis = "../../"
+const pathFromDokugenAnalysis = "internal/a-b-tester/"
 
 //TODO: amek this resilient to not being run in the package's directory
 
@@ -43,20 +45,34 @@ func main() {
 
 	log.Println(a.message)
 
-	runSolves("test.csv", "out.csv")
+	runSolves("relativedifficulties_SAMPLED.csv", "solves_SAMPLED.csv")
+
+	//TODO: should we be cleaning up the files we output (perhaps only if option provided?0)
 }
 
-func runSolves(inputFile, outputFile string) {
+func runSolves(difficultiesFile, solvesOutputFile string) {
+
+	os.Chdir(pathToDokugenAnalysis)
 
 	//Build the dokugen-analysis executable to make sure we get the freshest version of the sudoku pacakge.
 	cmd := exec.Command("go", "build")
-	cmd.Dir = pathToDokugenAnalysis
 	err := cmd.Run()
 
 	if err != nil {
 		log.Println(err)
+		return
 	}
 
-	//TODO: Execute the executable
+	outFile, err := os.Create(path.Join(pathFromDokugenAnalysis, solvesOutputFile))
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	analysisCmd := exec.Command("dokugen-analysis", "-a", "-v", "-w", "-t", "-h", "-no-cache", path.Join(pathFromDokugenAnalysis, difficultiesFile))
+	analysisCmd.Stdout = outFile
+	analysisCmd.Stderr = os.Stderr
+	analysisCmd.Run()
 
 }
