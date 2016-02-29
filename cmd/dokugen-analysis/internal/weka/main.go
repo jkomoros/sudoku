@@ -8,8 +8,7 @@ import (
 	"os/exec"
 )
 
-//TODO: rename this to tempArff or something.
-const outputFile = "solves.arff"
+const temporaryArff = "solves.arff"
 
 type appOptions struct {
 	inFile  string
@@ -73,7 +72,7 @@ func main() {
 
 	cmd := execJavaCommand("weka.core.converters.CSVLoader", options.inFile)
 
-	out, err := os.Create(outputFile)
+	out, err := os.Create(temporaryArff)
 
 	if err != nil {
 		fmt.Println(err)
@@ -108,7 +107,7 @@ func main() {
 	ioutil.WriteFile(options.outFile, output, 0644)
 
 	//Remove the temporary arff file.
-	os.Remove(outputFile)
+	os.Remove(temporaryArff)
 
 }
 
