@@ -6,6 +6,8 @@ import (
 	"os/exec"
 )
 
+const outputFile = "solves.arff"
+
 /*
 
 
@@ -32,7 +34,7 @@ func main() {
 
 	cmd := execJavaCommand("weka.core.converters.CSVLoader", "solves.csv")
 
-	out, err := os.Create("solves.arff")
+	out, err := os.Create(outputFile)
 
 	if err != nil {
 		fmt.Println(err)
@@ -48,7 +50,8 @@ func main() {
 		return
 	}
 
-	//TODO: delete the arff files.
+	//Remove the temporary arff file.
+	os.Remove(outputFile)
 
 }
 
