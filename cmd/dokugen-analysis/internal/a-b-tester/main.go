@@ -18,6 +18,7 @@ const pathFromWekaTrainer = "../a-b-tester/"
 
 type appOptions struct {
 	relativeDifficultiesFile string
+	solvesFile               string
 	help                     bool
 	flagSet                  *flag.FlagSet
 }
@@ -27,6 +28,7 @@ func (a *appOptions) defineFlags() {
 		return
 	}
 	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties_SAMPLED.csv", "The file to use as relative difficulties input")
+	a.flagSet.StringVar(&a.solvesFile, "s", "solves.csv", "The file to output solves to")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 }
 
@@ -48,9 +50,9 @@ func main() {
 
 	//TODO: support sampling from relative_difficulties via command line option here.
 
-	runSolves(a.relativeDifficultiesFile, "solves_SAMPLED.csv")
+	runSolves(a.relativeDifficultiesFile, a.solvesFile)
 
-	runWeka("solves_SAMPLED.csv", "analysis_SAMPLED.txt")
+	runWeka(a.solvesFile, "analysis_SAMPLED.txt")
 
 	//TODO: should we be cleaning up the files we output (perhaps only if option provided?0)
 }
