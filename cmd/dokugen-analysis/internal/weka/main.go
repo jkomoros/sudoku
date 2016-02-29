@@ -30,6 +30,8 @@ func main() {
 
 	//TODO: allow configuring a different in file.
 
+	//TODO: allow configuring just a relativedifficulties file and run the whole pipeline
+
 	//First, convert the file to arff.
 
 	cmd := execJavaCommand("weka.core.converters.CSVLoader", "solves.csv")
@@ -50,9 +52,24 @@ func main() {
 		return
 	}
 
-	//TODO: do the training.
+	//Do the training
+	trainCmd := execJavaCommand("weka.classifiers.functions.SMOreg",
+		"-C", "1.0", "-N", "2", "-I", `weka.classifiers.functions.supportVector.RegSMOImproved -L 0.001 -W 1 -P 1.0E-12 -T 0.001 -V`,
+		"-K", `weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 1.0`, "-c", "first", "-i", "-t", "solves.arff")
+
+	trainCmd.Stdout = os.Stdout
+	trainCmd.Stderr = os.Stderr
+
+	err = trainCmd.Run()
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	//TODO: extract the r2 for comparison.
+
+	//TODO: store the output in a file that we overwrite each time (so the user has it if they want it)
 
 	//Remove the temporary arff file.
 	os.Remove(outputFile)
