@@ -21,6 +21,12 @@ In root of project, run `go generate`. Test the change and then commit.
 Install pip: `sudo easy_install pip`
 Install scikit: `sudo pip install -U numpy scipy scikit-learn`
 
+## Creating a sampled relative_difficulties
+
+To create a sampled relativedifficulties, build a full relativedifficulties.csv. Then run:
+
+awk 'NR == 1 || NR % 10 == 0' relativedifficulties.csv > relativedifficulties_SAMPLED.csv
+
 ## Quick A/B pattern
 
 To quickkly tell if a change to the library helped r2, from dokugen-analysis folder, run:
