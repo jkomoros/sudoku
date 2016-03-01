@@ -1,3 +1,12 @@
+/* a-b-tester is a utility program that makes it easy to test and see if a
+/* change to the core library is helping us build a better model. Normal usage
+/* is to provide it a relativedifficulties.csv file and then it will output
+/* r2, but you can also compare multiple configs and have it report the best
+/* one. To do that, create different branches with each configuration set.
+/* Then run a-b-tester with -b and a space delimited string of branch names to
+/* try. a-b-tester will run each in turn, save out analysis and solves files
+/* for each, and then report which one has the best r2.*/
+
 package main
 
 import (
