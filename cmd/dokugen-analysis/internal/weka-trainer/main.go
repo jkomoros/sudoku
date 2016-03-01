@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -61,7 +62,7 @@ func main() {
 	out, err := os.Create(temporaryArff)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 
@@ -70,7 +71,7 @@ func main() {
 	err = cmd.Run()
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 
@@ -84,7 +85,7 @@ func main() {
 	output, err := trainCmd.Output()
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 
