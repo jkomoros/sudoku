@@ -19,6 +19,8 @@ const pathFromWekaTrainer = "../a-b-tester/"
 
 //TODO: allow the user to specify multiple branches/configs to test, and it reports the best config.
 
+//TODO: allow the user to generate relativedifficulties from scratch, too, which automates the entire pipeline.
+
 type appOptions struct {
 	relativeDifficultiesFile string
 	solvesFile               string
