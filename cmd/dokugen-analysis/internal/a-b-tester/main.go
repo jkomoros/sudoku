@@ -151,6 +151,10 @@ func checkoutGitBranch(branch string) bool {
 		return false
 	}
 
+	//TODO: switching branches always prints something to stderr. Probably the
+	//better approach is to have a gitCurrentBranch that runs 'git branch' and
+	//parses output.
+
 	if len(combinedOutput) > 0 {
 		log.Println(string(combinedOutput))
 		return false
