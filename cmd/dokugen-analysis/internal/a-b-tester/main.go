@@ -68,6 +68,12 @@ func main() {
 
 	for _, branch := range a.branchesList {
 
+		if branch == "" {
+			log.Println("Staying on the current branch.")
+		} else {
+			log.Println("Switching to branch", branch)
+		}
+
 		//a.analysisFile and a.solvesFile have had their extension removed, if they had one.
 		effectiveSolvesFile := a.solvesFile + ".csv"
 		effectiveAnalysisFile := a.analysisFile + ".txt"
