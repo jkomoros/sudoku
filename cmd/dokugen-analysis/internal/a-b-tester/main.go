@@ -17,10 +17,6 @@ const pathFromWekaTrainer = "../a-b-tester/"
 
 //TODO: amek this resilient to not being run in the package's directory
 
-//TODO: allow the user to specify git branches to switch between for the
-//before and after to do automated comparisons. (Verify that the checkout
-//works--that there's no unstashed changes.)
-
 //TODO: allow the user to specify multiple branches/configs to test, and it reports the best config.
 
 type appOptions struct {
@@ -92,6 +88,8 @@ func main() {
 		runSolves(a.relativeDifficultiesFile, effectiveSolvesFile)
 
 		runWeka(effectiveSolvesFile, effectiveAnalysisFile)
+
+		//TODO: understand r2 so we can compare and find the best branch.
 	}
 
 	//TODO: should we be cleaning up the files we output (perhaps only if option provided?0)
