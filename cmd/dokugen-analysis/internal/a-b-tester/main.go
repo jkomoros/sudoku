@@ -30,7 +30,8 @@ type appOptions struct {
 	relativeDifficultiesFile string
 	solvesFile               string
 	analysisFile             string
-	branch                   string
+	branches                 string
+	branchesList             []string
 	help                     bool
 	flagSet                  *flag.FlagSet
 }
@@ -39,15 +40,22 @@ func (a *appOptions) defineFlags() {
 	if a.flagSet == nil {
 		return
 	}
-	a.flagSet.StringVar(&a.branch, "b", "", "Git branch to checkout")
+	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
 	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties_SAMPLED.csv", "The file to use as relative difficulties input")
 	a.flagSet.StringVar(&a.solvesFile, "s", "solves.csv", "The file to output solves to")
 	a.flagSet.StringVar(&a.analysisFile, "a", "analysis.txt", "The file to output analysis to")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 }
 
+func (a *appOptions) fixUp() {
+	a.branchesList = strings.Split(a.branches, " ")
+	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
+	a.analysisFile = strings.Replace(a.analysisFile, ".txt", "", -1)
+}
+
 func (a *appOptions) parse(args []string) {
 	a.flagSet.Parse(args)
+	a.fixUp()
 }
 
 func newAppOptions(flagSet *flag.FlagSet) *appOptions {
@@ -62,16 +70,29 @@ func main() {
 	a := newAppOptions(flag.CommandLine)
 	a.parse(os.Args[1:])
 
-	if !checkoutGitBranch(a.branch) {
-		log.Println("Couldn't switch to branch", a.branch, " (perhaps you have uncommitted changes?). Quitting.")
-		return
+	for _, branch := range a.branchesList {
+
+		//a.analysisFile and a.solvesFile have had their extension removed, if they had one.
+		effectiveSolvesFile := a.solvesFile + ".csv"
+		effectiveAnalysisFile := a.analysisFile + ".txt"
+
+		if branch != "" {
+
+			effectiveSolvesFile = a.solvesFile + "_" + strings.ToUpper(branch) + ".csv"
+			effectiveAnalysisFile = a.analysisFile + "_" + strings.ToUpper(branch) + ".txt"
+		}
+
+		if !checkoutGitBranch(branch) {
+			log.Println("Couldn't switch to branch", branch, " (perhaps you have uncommitted changes?). Quitting.")
+			return
+		}
+
+		//TODO: support sampling from relative_difficulties via command line option here.
+
+		runSolves(a.relativeDifficultiesFile, effectiveSolvesFile)
+
+		runWeka(effectiveSolvesFile, effectiveAnalysisFile)
 	}
-
-	//TODO: support sampling from relative_difficulties via command line option here.
-
-	runSolves(a.relativeDifficultiesFile, a.solvesFile)
-
-	runWeka(a.solvesFile, a.analysisFile)
 
 	//TODO: should we be cleaning up the files we output (perhaps only if option provided?0)
 }
