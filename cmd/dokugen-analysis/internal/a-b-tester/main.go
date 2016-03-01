@@ -62,7 +62,10 @@ func main() {
 	a := newAppOptions(flag.CommandLine)
 	a.parse(os.Args[1:])
 
-	checkoutGitBranch(a.branch)
+	if !checkoutGitBranch(a.branch) {
+		log.Println("Couldn't switch to branch", a.branch, " (perhaps you have uncommitted changes?). Quitting.")
+		return
+	}
 
 	//TODO: support sampling from relative_difficulties via command line option here.
 
@@ -167,20 +170,9 @@ func checkoutGitBranch(branch string) bool {
 	}
 
 	checkoutCmd := exec.Command("git", "checkout", branch)
+	checkoutCmd.Run()
 
-	combinedOutput, err := checkoutCmd.CombinedOutput()
-
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-
-	//TODO: switching branches always prints something to stderr. Probably the
-	//better approach is to have a gitCurrentBranch that runs 'git branch' and
-	//parses output.
-
-	if len(combinedOutput) > 0 {
-		log.Println(string(combinedOutput))
+	if gitCurrentBranch() != branch {
 		return false
 	}
 
