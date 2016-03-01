@@ -188,6 +188,7 @@ func runWeka(solvesFile string, analysisFile string) float64 {
 func extractR2(input string) float64 {
 
 	input = strings.TrimPrefix(input, "R2 = ")
+	input = strings.TrimSpace(input)
 
 	result, _ := strconv.ParseFloat(input, 64)
 
