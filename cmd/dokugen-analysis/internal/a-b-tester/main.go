@@ -31,8 +31,6 @@ const rowSeparator = "****************"
 
 //TODO: amek this resilient to not being run in the package's directory
 
-//TODO: allow the user to generate relativedifficulties from scratch, too, which automates the entire pipeline.
-
 type appOptions struct {
 	relativeDifficultiesFile string
 	solvesFile               string
@@ -104,8 +102,6 @@ func main() {
 			return
 		}
 
-		//TODO: support sampling from relative_difficulties via command line option here.
-
 		runSolves(a.relativeDifficultiesFile, effectiveSolvesFile)
 
 		branchKey := branch
@@ -122,8 +118,6 @@ func main() {
 		//one branch was run
 		printR2Table(results)
 	}
-
-	//TODO: should we be cleaning up the files we output (perhaps only if option provided?0)
 
 	if gitCurrentBranch() != startingBranch {
 		checkoutGitBranch(startingBranch)
