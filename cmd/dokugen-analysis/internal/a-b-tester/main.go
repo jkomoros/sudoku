@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 )
 
 const pathToDokugenAnalysis = "../../"
@@ -134,6 +135,29 @@ func runWeka(solvesFile string, analysisFile string) {
 		log.Println(err)
 	}
 
+}
+
+//gitCurrentBranch returns the current branch that the current repo is in.
+func gitCurrentBranch() string {
+	branchCmd := exec.Command("git", "branch")
+
+	output, err := branchCmd.Output()
+
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+
+	for _, line := range strings.Split(string(output), "\n") {
+		if strings.Contains(line, "*") {
+			//Found it!
+			line = strings.Replace(line, "*", "", -1)
+			line = strings.TrimSpace(line)
+			return line
+		}
+	}
+
+	return ""
 }
 
 func checkoutGitBranch(branch string) bool {
