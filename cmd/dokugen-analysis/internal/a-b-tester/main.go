@@ -108,6 +108,18 @@ func main() {
 		results[branchKey] = runWeka(effectiveSolvesFile, effectiveAnalysisFile)
 	}
 
+	if len(results) > 1 {
+		//We only need to go to the trouble of painting the table if more than
+		//one branch was run
+		printR2Table(results)
+	}
+
+	//TODO: should we be cleaning up the files we output (perhaps only if option provided?0)
+
+	//TODO: switch back to the branch we started on.
+}
+
+func printR2Table(results map[string]float64) {
 	bestR2 := 0.0
 	bestR2Branch := ""
 
@@ -136,10 +148,6 @@ func main() {
 
 	fmt.Println(table.String())
 	fmt.Println(rowSeparator)
-
-	//TODO: should we be cleaning up the files we output (perhaps only if option provided?0)
-
-	//TODO: switch back to the branch we started on.
 }
 
 func runSolves(difficultiesFile, solvesOutputFile string) {
