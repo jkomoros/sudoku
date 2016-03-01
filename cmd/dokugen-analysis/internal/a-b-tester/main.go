@@ -108,22 +108,34 @@ func main() {
 		results[branchKey] = runWeka(effectiveSolvesFile, effectiveAnalysisFile)
 	}
 
+	bestR2 := 0.0
+	bestR2Branch := ""
+
+	for key, val := range results {
+		if val > bestR2 {
+			bestR2 = val
+			bestR2Branch = key
+		}
+	}
+
 	fmt.Println(rowSeparator)
 	fmt.Println("Results:")
 	fmt.Println(rowSeparator)
 
 	table := uitable.New()
 
-	table.AddRow("Branch", "R2")
+	table.AddRow("Best?", "Branch", "R2")
 
 	for key, val := range results {
-		table.AddRow(key, val)
+		isBest := " "
+		if key == bestR2Branch {
+			isBest = "*"
+		}
+		table.AddRow(isBest, key, val)
 	}
 
 	fmt.Println(table.String())
 	fmt.Println(rowSeparator)
-
-	//TODO: highlight the branch with highest r2
 
 	//TODO: should we be cleaning up the files we output (perhaps only if option provided?0)
 
