@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strconv"
 	"strings"
 )
 
@@ -66,6 +67,8 @@ func main() {
 	a := newAppOptions(flag.CommandLine)
 	a.parse(os.Args[1:])
 
+	results := make(map[string]float64)
+
 	for _, branch := range a.branchesList {
 
 		if branch == "" {
@@ -93,14 +96,26 @@ func main() {
 
 		runSolves(a.relativeDifficultiesFile, effectiveSolvesFile)
 
-		runWeka(effectiveSolvesFile, effectiveAnalysisFile)
+		branchKey := branch
 
-		//TODO: understand r2 so we can compare and find the best branch.
+		if branchKey == "" {
+			branchKey = "DEFAULT"
+		}
+
+		results[branchKey] = runWeka(effectiveSolvesFile, effectiveAnalysisFile)
 	}
 
-	//TODO: print out remembered r2 here, bolding the one that is best.
+	fmt.Println("Results:")
+	for key, val := range results {
+		//TODO: pretty print in a table
+		fmt.Println(key, "=", val)
+	}
+
+	//TODO: highlight the branch with highest r2
 
 	//TODO: should we be cleaning up the files we output (perhaps only if option provided?0)
+
+	//TODO: switch back to the branch we started on.
 }
 
 func runSolves(difficultiesFile, solvesOutputFile string) {
@@ -137,7 +152,7 @@ func runSolves(difficultiesFile, solvesOutputFile string) {
 	}
 }
 
-func runWeka(solvesFile string, analysisFile string) {
+func runWeka(solvesFile string, analysisFile string) float64 {
 
 	os.Chdir(pathToWekaTrainer)
 
@@ -151,7 +166,7 @@ func runWeka(solvesFile string, analysisFile string) {
 
 	if err != nil {
 		log.Println(err)
-		return
+		return 0.0
 	}
 
 	trainCmd := exec.Command("./weka-trainer", "-i", path.Join(pathFromWekaTrainer, solvesFile), "-o", path.Join(pathFromWekaTrainer, analysisFile))
@@ -160,10 +175,23 @@ func runWeka(solvesFile string, analysisFile string) {
 
 	if err != nil {
 		log.Println(err)
-		return
+		return 0.0
 	}
 
 	fmt.Printf("%s", string(output))
+
+	return extractR2(string(output))
+
+}
+
+//extractR2 extracts R2 out of the string formatted like "R2 = <float>"
+func extractR2(input string) float64 {
+
+	input = strings.TrimPrefix(input, "R2 = ")
+
+	result, _ := strconv.ParseFloat(input, 64)
+
+	return result
 
 }
 
