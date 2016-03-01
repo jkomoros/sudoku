@@ -79,6 +79,8 @@ func main() {
 
 	results := make(map[string]float64)
 
+	startingBranch := gitCurrentBranch()
+
 	for _, branch := range a.branchesList {
 
 		if branch == "" {
@@ -123,7 +125,9 @@ func main() {
 
 	//TODO: should we be cleaning up the files we output (perhaps only if option provided?0)
 
-	//TODO: switch back to the branch we started on.
+	if gitCurrentBranch() != startingBranch {
+		checkoutGitBranch(startingBranch)
+	}
 }
 
 func printR2Table(results map[string]float64) {
