@@ -131,3 +131,23 @@ func runWeka(solvesFile string, analysisFile string) {
 	}
 
 }
+
+func checkoutGitBranch(branch string) bool {
+
+	checkoutCmd := exec.Command("git", "checkout", branch)
+
+	combinedOutput, err := checkoutCmd.CombinedOutput()
+
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	if len(combinedOutput) > 0 {
+		log.Println(string(combinedOutput))
+		return false
+	}
+
+	return true
+
+}
