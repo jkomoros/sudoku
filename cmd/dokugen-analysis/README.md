@@ -4,6 +4,8 @@ cd to cmd/dokugen-analysis
 
 (If you don't have a good internet connection and have saved db info in mock_data.secret.csv, then add -m to all of these)
 
+Note: now the preferred way to do this (once you have relativedifficulties generated) is just to use a-b-tester (see below).
+
 go run main.go mock_data.go -a -v -p > relativedifficulties.csv
 go run main.go mock_data.go -a -v -w -t -h relativedifficulties.csv > solves.csv
 
@@ -29,12 +31,9 @@ awk 'NR == 1 || NR % 10 == 0' relativedifficulties.csv > relativedifficulties_SA
 
 ## Quick A/B pattern
 
-To quickkly tell if a change to the library helped r2, create a relativedifficulties.csv in internal/a-b-tester. Then from a-b-tester run:
+To quickkly tell if a change to the library helped r2, create a relativedifficulties.csv in internal/a-b-tester. Then create branches with each configuration (one can just be master if you're doing a/b). Then run:
 
-go build && ./a-b-tester -r relativedifficulties.csv
+go build && ./a-b-tester -r relativedifficulties.csv -b "master branch-name"
 
-Then make the change you want to compare against, and run it again.
+and it will try both branches and output which one is better.
 
-And see which one prints a higher r2 to the screen.
-
-*TODO* Implement a script that does this automatically
