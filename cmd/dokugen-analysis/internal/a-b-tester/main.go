@@ -16,7 +16,10 @@ const pathFromWekaTrainer = "../a-b-tester/"
 
 //TODO: amek this resilient to not being run in the package's directory
 
-//TODO: allow the user to specify git branches to switch between for the before and after to do automated comparisons.
+//TODO: allow the user to specify git branches to switch between for the
+//before and after to do automated comparisons. (Verify that the checkout
+//works--that there's no unstashed changes.)
+
 //TODO: allow the user to specify multiple branches/configs to test, and it reports the best config.
 
 type appOptions struct {
