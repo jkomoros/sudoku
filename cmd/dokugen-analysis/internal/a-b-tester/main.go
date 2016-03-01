@@ -29,6 +29,7 @@ type appOptions struct {
 	relativeDifficultiesFile string
 	solvesFile               string
 	analysisFile             string
+	branch                   string
 	help                     bool
 	flagSet                  *flag.FlagSet
 }
@@ -37,6 +38,7 @@ func (a *appOptions) defineFlags() {
 	if a.flagSet == nil {
 		return
 	}
+	a.flagSet.StringVar(&a.branch, "b", "", "Git branch to checkout")
 	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties_SAMPLED.csv", "The file to use as relative difficulties input")
 	a.flagSet.StringVar(&a.solvesFile, "s", "solves.csv", "The file to output solves to")
 	a.flagSet.StringVar(&a.analysisFile, "a", "analysis.txt", "The file to output analysis to")
@@ -58,6 +60,8 @@ func newAppOptions(flagSet *flag.FlagSet) *appOptions {
 func main() {
 	a := newAppOptions(flag.CommandLine)
 	a.parse(os.Args[1:])
+
+	checkoutGitBranch(a.branch)
 
 	//TODO: support sampling from relative_difficulties via command line option here.
 
@@ -133,6 +137,10 @@ func runWeka(solvesFile string, analysisFile string) {
 }
 
 func checkoutGitBranch(branch string) bool {
+
+	if branch == "" {
+		return true
+	}
 
 	checkoutCmd := exec.Command("git", "checkout", branch)
 
