@@ -22,8 +22,6 @@ const rowSeparator = "****************"
 
 //TODO: amek this resilient to not being run in the package's directory
 
-//TODO: allow the user to specify multiple branches/configs to test, and it reports the best config.
-
 //TODO: allow the user to generate relativedifficulties from scratch, too, which automates the entire pipeline.
 
 type appOptions struct {
