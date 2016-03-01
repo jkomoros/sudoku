@@ -20,9 +20,6 @@ const pathFromWekaTrainer = "../a-b-tester/"
 //TODO: allow the user to specify multiple branches/configs to test, and it reports the best config.
 
 type appOptions struct {
-
-	//TODO: allow configuring a suffix, e.g. "BEFORE", "AFTER" that is appended to all output files
-	//TODO: allow -a and -b to automatically set suffix to BEFORE/AFTER
 	relativeDifficultiesFile string
 	solvesFile               string
 	analysisFile             string
