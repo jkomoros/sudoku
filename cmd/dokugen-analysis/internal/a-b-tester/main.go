@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -154,15 +155,15 @@ func runWeka(solvesFile string, analysisFile string) {
 	}
 
 	trainCmd := exec.Command("./weka-trainer", "-i", path.Join(pathFromWekaTrainer, solvesFile), "-o", path.Join(pathFromWekaTrainer, analysisFile))
-	trainCmd.Stdout = os.Stdout
 	trainCmd.Stderr = os.Stderr
-	err = trainCmd.Run()
-
-	//TODO: parse the r2 here
+	output, err := trainCmd.Output()
 
 	if err != nil {
 		log.Println(err)
+		return
 	}
+
+	fmt.Printf("%s", string(output))
 
 }
 
