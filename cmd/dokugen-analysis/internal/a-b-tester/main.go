@@ -92,6 +92,8 @@ func main() {
 		//TODO: understand r2 so we can compare and find the best branch.
 	}
 
+	//TODO: print out remembered r2 here, bolding the one that is best.
+
 	//TODO: should we be cleaning up the files we output (perhaps only if option provided?0)
 }
 
