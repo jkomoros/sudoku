@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/gosuri/uitable"
 	"log"
 	"os"
 	"os/exec"
@@ -16,6 +17,8 @@ const pathFromDokugenAnalysis = "internal/a-b-tester/"
 
 const pathToWekaTrainer = "../weka-trainer/"
 const pathFromWekaTrainer = "../a-b-tester/"
+
+const rowSeparator = "****************"
 
 //TODO: amek this resilient to not being run in the package's directory
 
@@ -99,17 +102,26 @@ func main() {
 		branchKey := branch
 
 		if branchKey == "" {
-			branchKey = "DEFAULT"
+			branchKey = "<default>"
 		}
 
 		results[branchKey] = runWeka(effectiveSolvesFile, effectiveAnalysisFile)
 	}
 
+	fmt.Println(rowSeparator)
 	fmt.Println("Results:")
+	fmt.Println(rowSeparator)
+
+	table := uitable.New()
+
+	table.AddRow("Branch", "R2")
+
 	for key, val := range results {
-		//TODO: pretty print in a table
-		fmt.Println(key, "=", val)
+		table.AddRow(key, val)
 	}
+
+	fmt.Println(table.String())
+	fmt.Println(rowSeparator)
 
 	//TODO: highlight the branch with highest r2
 
