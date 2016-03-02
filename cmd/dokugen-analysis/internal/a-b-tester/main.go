@@ -351,6 +351,9 @@ func gitUncommittedChanges() bool {
 	//only prefix that we should ignore, since it means untracked files.
 
 	for _, line := range strings.Split(string(output), "\n") {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
 		if !strings.HasPrefix(line, "??") {
 			//Found a non-committed change
 			return true
