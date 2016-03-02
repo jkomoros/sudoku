@@ -30,6 +30,9 @@ const pathFromWekaTrainer = "../a-b-tester/"
 
 const rowSeparator = "****************"
 
+const uncommittedChangesBranchName = "STASHED"
+const committedChangesBranchName = "COMMITTED"
+
 //TODO: amek this resilient to not being run in the package's directory
 
 type appOptions struct {
@@ -62,8 +65,20 @@ func (a *appOptions) fixUp() error {
 	}
 	if a.stashMode {
 		a.startingWithUncommittedChanges = gitUncommittedChanges()
+		if a.startingWithUncommittedChanges {
+			a.branchesList = []string{
+				uncommittedChangesBranchName,
+				committedChangesBranchName,
+			}
+		} else {
+			a.branchesList = []string{
+				committedChangesBranchName,
+				uncommittedChangesBranchName,
+			}
+		}
+	} else {
+		a.branchesList = strings.Split(a.branches, " ")
 	}
-	a.branchesList = strings.Split(a.branches, " ")
 	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
 	a.analysisFile = strings.Replace(a.analysisFile, ".txt", "", -1)
 	return nil
