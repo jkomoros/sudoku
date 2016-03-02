@@ -10,6 +10,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/gosuri/uitable"
@@ -29,38 +30,63 @@ const pathFromWekaTrainer = "../a-b-tester/"
 
 const rowSeparator = "****************"
 
+const uncommittedChangesBranchName = "STASHED"
+const committedChangesBranchName = "COMMITTED"
+
 //TODO: amek this resilient to not being run in the package's directory
 
 type appOptions struct {
-	relativeDifficultiesFile string
-	solvesFile               string
-	analysisFile             string
-	branches                 string
-	branchesList             []string
-	help                     bool
-	flagSet                  *flag.FlagSet
+	relativeDifficultiesFile       string
+	solvesFile                     string
+	analysisFile                   string
+	stashMode                      bool
+	startingWithUncommittedChanges bool
+	branches                       string
+	branchesList                   []string
+	help                           bool
+	flagSet                        *flag.FlagSet
 }
 
 func (a *appOptions) defineFlags() {
 	if a.flagSet == nil {
 		return
 	}
+	a.flagSet.BoolVar(&a.stashMode, "s", false, "If in stash mode, will do the a-b test between uncommitted and committed changes, automatically figuring out which state we're currently in. Cannot be combined with -b")
 	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
 	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties_SAMPLED.csv", "The file to use as relative difficulties input")
-	a.flagSet.StringVar(&a.solvesFile, "s", "solves.csv", "The file to output solves to")
+	a.flagSet.StringVar(&a.solvesFile, "o", "solves.csv", "The file to output solves to")
 	a.flagSet.StringVar(&a.analysisFile, "a", "analysis.txt", "The file to output analysis to")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 }
 
-func (a *appOptions) fixUp() {
-	a.branchesList = strings.Split(a.branches, " ")
+func (a *appOptions) fixUp() error {
+	if a.branches != "" && a.stashMode {
+		return errors.New("-b and -s cannot both be passed")
+	}
+	if a.stashMode {
+		a.startingWithUncommittedChanges = gitUncommittedChanges()
+		if a.startingWithUncommittedChanges {
+			a.branchesList = []string{
+				uncommittedChangesBranchName,
+				committedChangesBranchName,
+			}
+		} else {
+			a.branchesList = []string{
+				committedChangesBranchName,
+				uncommittedChangesBranchName,
+			}
+		}
+	} else {
+		a.branchesList = strings.Split(a.branches, " ")
+	}
 	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
 	a.analysisFile = strings.Replace(a.analysisFile, ".txt", "", -1)
+	return nil
 }
 
-func (a *appOptions) parse(args []string) {
+func (a *appOptions) parse(args []string) error {
 	a.flagSet.Parse(args)
-	a.fixUp()
+	return a.fixUp()
 }
 
 func newAppOptions(flagSet *flag.FlagSet) *appOptions {
@@ -73,18 +99,27 @@ func newAppOptions(flagSet *flag.FlagSet) *appOptions {
 
 func main() {
 	a := newAppOptions(flag.CommandLine)
-	a.parse(os.Args[1:])
+	if err := a.parse(os.Args[1:]); err != nil {
+		log.Println("Invalid options provided:", err.Error())
+		return
+	}
 
 	results := make(map[string]float64)
 
 	startingBranch := gitCurrentBranch()
 
-	for _, branch := range a.branchesList {
+	branchSwitchMessage := "Switching to branch"
+
+	if a.stashMode {
+		branchSwitchMessage = "Calculating on"
+	}
+
+	for i, branch := range a.branchesList {
 
 		if branch == "" {
 			log.Println("Staying on the current branch.")
 		} else {
-			log.Println("Switching to branch", branch)
+			log.Println(branchSwitchMessage, branch)
 		}
 
 		//a.analysisFile and a.solvesFile have had their extension removed, if they had one.
@@ -97,9 +132,28 @@ func main() {
 			effectiveAnalysisFile = a.analysisFile + "_" + strings.ToUpper(branch) + ".txt"
 		}
 
-		if !checkoutGitBranch(branch) {
-			log.Println("Couldn't switch to branch", branch, " (perhaps you have uncommitted changes?). Quitting.")
-			return
+		//Get the repo in the right state for this run.
+		if a.stashMode {
+			// if i == 0
+			switch i {
+			case 0:
+				//do nothing, we already ahve the right changes to start with
+			case 1:
+				//If we have uncommitted changes right now, stash them. Otherwise, stash pop.
+				if !gitStash(a.startingWithUncommittedChanges) {
+					log.Println("We couldn't stash/stash-pop.")
+					return
+				}
+			default:
+				//This should never happen
+				//Note: panicing here will mean we don't do any clean up.
+				panic("Got more than 2 'branches' in stash mode")
+			}
+		} else {
+			if !checkoutGitBranch(branch) {
+				log.Println("Couldn't switch to branch", branch, " (perhaps you have uncommitted changes?). Quitting.")
+				return
+			}
 		}
 
 		runSolves(a.relativeDifficultiesFile, effectiveSolvesFile)
@@ -119,9 +173,27 @@ func main() {
 		printR2Table(results)
 	}
 
-	if gitCurrentBranch() != startingBranch {
-		checkoutGitBranch(startingBranch)
+	//Put the repo back in the state it was when we found it.
+	if a.stashMode {
+		//Reverse the gitStash operation to put it back
+
+		if a.startingWithUncommittedChanges {
+			log.Println("Unstashing changes to put repo back in starting state")
+		} else {
+			log.Println("Stashing changes to put repo back in starting state")
+		}
+
+		if !gitStash(!a.startingWithUncommittedChanges) {
+			log.Println("We couldn't unstash/unpop to put the repo back in the same state.")
+		}
+	} else {
+		//If we aren't in the branch we started in, switch back to that branch
+		if gitCurrentBranch() != startingBranch {
+			log.Println("Checking out", startingBranch, "to put repo back in the starting state.")
+			checkoutGitBranch(startingBranch)
+		}
 	}
+
 }
 
 func printR2Table(results map[string]float64) {
@@ -230,6 +302,80 @@ func extractR2(input string) float64 {
 	result, _ := strconv.ParseFloat(input, 64)
 
 	return result
+
+}
+
+//gitStash will use git stash if true, git stash pop if false.
+func gitStash(stashChanges bool) bool {
+	var stashCmd *exec.Cmd
+
+	if stashChanges {
+		stashCmd = exec.Command("git", "stash")
+		if !gitUncommittedChanges() {
+			//That's weird, there aren't any changes to stash
+			log.Println("Can't stash: no uncommitted changes!")
+			return false
+		}
+	} else {
+		stashCmd = exec.Command("git", "stash", "pop")
+		if gitUncommittedChanges() {
+			//That's weird, there are uncommitted changes that this would overwrite.
+			log.Println("Can't stash pop: uncommitted changes that would be overwritten")
+			return false
+		}
+	}
+
+	err := stashCmd.Run()
+
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	//Verify it worked
+	if stashChanges {
+		//Stashing apaprently didn't work
+		if gitUncommittedChanges() {
+			log.Println("Stashing didn't work; there are still uncommitted changes")
+			return false
+		}
+	} else {
+		//Weird, stash popping didn't do anything.
+		if !gitUncommittedChanges() {
+			log.Println("Stash popping didn't work; there are no uncommitted changes that resulted.	")
+			return false
+		}
+	}
+
+	return true
+}
+
+//Returns true if there are currently uncommitted changes
+func gitUncommittedChanges() bool {
+
+	statusCmd := exec.Command("git", "status", "-s")
+
+	output, err := statusCmd.Output()
+
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	//In git status -s(hort), each line starts with two characters. ?? is hte
+	//only prefix that we should ignore, since it means untracked files.
+
+	for _, line := range strings.Split(string(output), "\n") {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		if !strings.HasPrefix(line, "??") {
+			//Found a non-committed change
+			return true
+		}
+	}
+
+	return false
 
 }
 
