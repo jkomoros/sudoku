@@ -52,15 +52,16 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 }
 
-func (a *appOptions) fixUp() {
+func (a *appOptions) fixUp() bool {
 	a.branchesList = strings.Split(a.branches, " ")
 	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
 	a.analysisFile = strings.Replace(a.analysisFile, ".txt", "", -1)
+	return true
 }
 
-func (a *appOptions) parse(args []string) {
+func (a *appOptions) parse(args []string) bool {
 	a.flagSet.Parse(args)
-	a.fixUp()
+	return a.fixUp()
 }
 
 func newAppOptions(flagSet *flag.FlagSet) *appOptions {
@@ -73,7 +74,10 @@ func newAppOptions(flagSet *flag.FlagSet) *appOptions {
 
 func main() {
 	a := newAppOptions(flag.CommandLine)
-	a.parse(os.Args[1:])
+	if !a.parse(os.Args[1:]) {
+		log.Println("Invalid options provided")
+		return
+	}
 
 	results := make(map[string]float64)
 
