@@ -298,12 +298,14 @@ func gitStash(stashChanges bool) bool {
 		stashCmd = exec.Command("git", "stash")
 		if !gitUncommittedChanges() {
 			//That's weird, there aren't any changes to stash
+			log.Println("Can't stash: no uncommitted changes!")
 			return false
 		}
 	} else {
 		stashCmd = exec.Command("git", "stash", "pop")
 		if gitUncommittedChanges() {
 			//That's weird, there are uncommitted changes that this would overwrite.
+			log.Println("Can't stash pop: uncommitted changes that would be overwritten")
 			return false
 		}
 	}
@@ -319,11 +321,13 @@ func gitStash(stashChanges bool) bool {
 	if stashChanges {
 		//Stashing apaprently didn't work
 		if gitUncommittedChanges() {
+			log.Println("Stashing didn't work; there are still uncommitted changes")
 			return false
 		}
 	} else {
 		//Weird, stash popping didn't do anything.
 		if !gitUncommittedChanges() {
+			log.Println("Stash popping didn't work; there are no uncommitted changes that resulted.")
 			return false
 		}
 	}
