@@ -133,7 +133,10 @@ func main() {
 				//do nothing, we already ahve the right changes.
 			case 1:
 				//If we have uncommitted changes right now, stash them. Otherwise, stash pop.
-				gitStash(a.startingWithUncommittedChanges)
+				if !gitStash(a.startingWithUncommittedChanges) {
+					log.Println("We couldn't stash/stash-pop.")
+					return
+				}
 			default:
 				//This should never happen
 				//Note: panicing here will mean we don't do any clean up.
@@ -166,7 +169,9 @@ func main() {
 	//Put the repo back in the state it was when we found it.
 	if a.stashMode {
 		//Reverse the gitStash operation to put it back
-		gitStash(!a.startingWithUncommittedChanges)
+		if !gitStash(!a.startingWithUncommittedChanges) {
+			log.Println("We couldn't unstash/unpop to put the repo back in the same state.")
+		}
 	} else {
 		//If we aren't in the branch we started in, switch back to that branch
 		if gitCurrentBranch() != startingBranch {
