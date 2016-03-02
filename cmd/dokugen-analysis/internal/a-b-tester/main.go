@@ -132,11 +132,12 @@ func main() {
 			effectiveAnalysisFile = a.analysisFile + "_" + strings.ToUpper(branch) + ".txt"
 		}
 
+		//Get the repo in the right state for this run.
 		if a.stashMode {
 			// if i == 0
 			switch i {
 			case 0:
-				//do nothing, we already ahve the right changes.
+				//do nothing, we already ahve the right changes to start with
 			case 1:
 				//If we have uncommitted changes right now, stash them. Otherwise, stash pop.
 				if !gitStash(a.startingWithUncommittedChanges) {
