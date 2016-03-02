@@ -31,9 +31,17 @@ awk 'NR == 1 || NR % 10 == 0' relativedifficulties.csv > relativedifficulties_SA
 
 ## Quick A/B pattern
 
-To quickkly tell if a change to the library helped r2, create a relativedifficulties.csv in internal/a-b-tester. Then create branches with each configuration (one can just be master if you're doing a/b). Then run:
+To quickly tell if a change to the library helped r2, create a relativedifficulties.csv in internal/a-b-tester with the command above.
 
-go build && ./a-b-tester -r relativedifficulties.csv -b "master branch-name"
+Then configure the changes and either leave them uncommitted or stash them. Then run:
 
-and it will try both branches and output which one is better.
+go build && ./a-b-tester -r relativedifficulties.csv -s
+
+This will run the tester, then either stash or stash pop, then run again, then leave the repo in the state in started in.
+
+If there are multiple configs you want to test, store each on in a named branched, then run:
+
+go build && ./a-b-tester -r relativedifficulties.csv -b "branch-1 branch-2 branch-3"
+
+and it will try all branches and output which one is better.
 
