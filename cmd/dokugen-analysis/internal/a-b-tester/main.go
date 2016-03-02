@@ -169,12 +169,20 @@ func main() {
 	//Put the repo back in the state it was when we found it.
 	if a.stashMode {
 		//Reverse the gitStash operation to put it back
+
+		if a.startingWithUncommittedChanges {
+			log.Println("Unstashing changes to put repo back in starting state")
+		} else {
+			log.Println("Stashing changes to put repo back in starting state")
+		}
+
 		if !gitStash(!a.startingWithUncommittedChanges) {
 			log.Println("We couldn't unstash/unpop to put the repo back in the same state.")
 		}
 	} else {
 		//If we aren't in the branch we started in, switch back to that branch
 		if gitCurrentBranch() != startingBranch {
+			log.Println("Checking out", startingBranch, "to put repo back in the starting state.")
 			checkoutGitBranch(startingBranch)
 		}
 	}
