@@ -347,8 +347,6 @@ func gitUncommittedChanges() bool {
 		return false
 	}
 
-	log.Println(string(output))
-
 	//In git status -s(hort), each line starts with two characters. ?? is hte
 	//only prefix that we should ignore, since it means untracked files.
 
