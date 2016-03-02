@@ -262,6 +262,47 @@ func extractR2(input string) float64 {
 
 }
 
+//gitStash will use git stash if true, git stash pop if false.
+func gitStash(stashChanges bool) bool {
+	var stashCmd *exec.Cmd
+
+	if stashChanges {
+		stashCmd = exec.Command("git", "stash")
+		if !gitUncommittedChanges() {
+			//That's weird, there aren't any changes to stash
+			return false
+		}
+	} else {
+		stashCmd = exec.Command("git", "stash", "pop")
+		if gitUncommittedChanges() {
+			//That's weird, there are uncommitted changes that this would overwrite.
+			return false
+		}
+	}
+
+	err := stashCmd.Run()
+
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	//Verify it worked
+	if stashChanges {
+		//Stashing apaprently didn't work
+		if gitUncommittedChanges() {
+			return false
+		}
+	} else {
+		//Weird, stash popping didn't do anything.
+		if !gitUncommittedChanges() {
+			return false
+		}
+	}
+
+	return true
+}
+
 //Returns true if there are currently uncommitted changes
 func gitUncommittedChanges() bool {
 
