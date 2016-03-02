@@ -243,6 +243,32 @@ func extractR2(input string) float64 {
 
 }
 
+//Returns true if there are currently uncommitted changes
+func gitUncommittedChanges() bool {
+
+	statusCmd := exec.Command("git", "status", "-s")
+
+	output, err := statusCmd.Output()
+
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	//In git status -s(hort), each line starts with two characters. ?? is hte
+	//only prefix that we should ignore, since it means untracked files.
+
+	for _, line := range strings.Split(string(output), "\n") {
+		if !strings.HasPrefix(line, "??") {
+			//Found a non-committed change
+			return true
+		}
+	}
+
+	return false
+
+}
+
 //gitCurrentBranch returns the current branch that the current repo is in.
 func gitCurrentBranch() string {
 	branchCmd := exec.Command("git", "branch")
