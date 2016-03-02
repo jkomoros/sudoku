@@ -10,6 +10,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/gosuri/uitable"
@@ -35,6 +36,7 @@ type appOptions struct {
 	relativeDifficultiesFile string
 	solvesFile               string
 	analysisFile             string
+	stashMode                bool
 	branches                 string
 	branchesList             []string
 	help                     bool
@@ -45,6 +47,7 @@ func (a *appOptions) defineFlags() {
 	if a.flagSet == nil {
 		return
 	}
+	a.flagSet.BoolVar(&a.stashMode, "s", false, "If in stash mode, will do the a-b test between uncommitted and committed changes, automatically figuring out which state we're currently in. Cannot be combined with -b")
 	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
 	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties_SAMPLED.csv", "The file to use as relative difficulties input")
 	a.flagSet.StringVar(&a.solvesFile, "o", "solves.csv", "The file to output solves to")
@@ -53,6 +56,9 @@ func (a *appOptions) defineFlags() {
 }
 
 func (a *appOptions) fixUp() error {
+	if a.branches != "" && a.stashMode {
+		return errors.New("-b and -s cannot both be passed")
+	}
 	a.branchesList = strings.Split(a.branches, " ")
 	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
 	a.analysisFile = strings.Replace(a.analysisFile, ".txt", "", -1)
