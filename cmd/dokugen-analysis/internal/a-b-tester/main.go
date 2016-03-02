@@ -33,14 +33,15 @@ const rowSeparator = "****************"
 //TODO: amek this resilient to not being run in the package's directory
 
 type appOptions struct {
-	relativeDifficultiesFile string
-	solvesFile               string
-	analysisFile             string
-	stashMode                bool
-	branches                 string
-	branchesList             []string
-	help                     bool
-	flagSet                  *flag.FlagSet
+	relativeDifficultiesFile       string
+	solvesFile                     string
+	analysisFile                   string
+	stashMode                      bool
+	startingWithUncommittedChanges bool
+	branches                       string
+	branchesList                   []string
+	help                           bool
+	flagSet                        *flag.FlagSet
 }
 
 func (a *appOptions) defineFlags() {
@@ -58,6 +59,9 @@ func (a *appOptions) defineFlags() {
 func (a *appOptions) fixUp() error {
 	if a.branches != "" && a.stashMode {
 		return errors.New("-b and -s cannot both be passed")
+	}
+	if a.stashMode {
+		a.startingWithUncommittedChanges = gitUncommittedChanges()
 	}
 	a.branchesList = strings.Split(a.branches, " ")
 	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
