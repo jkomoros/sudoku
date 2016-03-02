@@ -327,7 +327,7 @@ func gitStash(stashChanges bool) bool {
 	} else {
 		//Weird, stash popping didn't do anything.
 		if !gitUncommittedChanges() {
-			log.Println("Stash popping didn't work; there are no uncommitted changes that resulted.")
+			log.Println("Stash popping didn't work; there are no uncommitted changes that resulted.	")
 			return false
 		}
 	}
@@ -346,6 +346,8 @@ func gitUncommittedChanges() bool {
 		log.Println(err)
 		return false
 	}
+
+	log.Println(output)
 
 	//In git status -s(hort), each line starts with two characters. ?? is hte
 	//only prefix that we should ignore, since it means untracked files.
