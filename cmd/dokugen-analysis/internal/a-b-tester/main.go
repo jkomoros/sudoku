@@ -108,12 +108,18 @@ func main() {
 
 	startingBranch := gitCurrentBranch()
 
+	branchSwitchMessage := "Switching to branch"
+
+	if a.stashMode {
+		branchSwitchMessage = "Calculating on"
+	}
+
 	for i, branch := range a.branchesList {
 
 		if branch == "" {
 			log.Println("Staying on the current branch.")
 		} else {
-			log.Println("Switching to branch", branch)
+			log.Println(branchSwitchMessage, branch)
 		}
 
 		//a.analysisFile and a.solvesFile have had their extension removed, if they had one.
