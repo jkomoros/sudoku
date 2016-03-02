@@ -108,7 +108,7 @@ func main() {
 
 	startingBranch := gitCurrentBranch()
 
-	for _, branch := range a.branchesList {
+	for i, branch := range a.branchesList {
 
 		if branch == "" {
 			log.Println("Staying on the current branch.")
@@ -126,9 +126,24 @@ func main() {
 			effectiveAnalysisFile = a.analysisFile + "_" + strings.ToUpper(branch) + ".txt"
 		}
 
-		if !checkoutGitBranch(branch) {
-			log.Println("Couldn't switch to branch", branch, " (perhaps you have uncommitted changes?). Quitting.")
-			return
+		if a.stashMode {
+			// if i == 0
+			switch i {
+			case 0:
+				//do nothing, we already ahve the right changes.
+			case 1:
+				//If we have uncommitted changes right now, stash them. Otherwise, stash pop.
+				gitStash(a.startingWithUncommittedChanges)
+			default:
+				//This should never happen
+				//Note: panicing here will mean we don't do any clean up.
+				panic("Got more than 2 'branches' in stash mode")
+			}
+		} else {
+			if !checkoutGitBranch(branch) {
+				log.Println("Couldn't switch to branch", branch, " (perhaps you have uncommitted changes?). Quitting.")
+				return
+			}
 		}
 
 		runSolves(a.relativeDifficultiesFile, effectiveSolvesFile)
@@ -148,9 +163,17 @@ func main() {
 		printR2Table(results)
 	}
 
-	if gitCurrentBranch() != startingBranch {
-		checkoutGitBranch(startingBranch)
+	//Put the repo back in the state it was when we found it.
+	if a.stashMode {
+		//Reverse the gitStash operation to put it back
+		gitStash(!a.startingWithUncommittedChanges)
+	} else {
+		//If we aren't in the branch we started in, switch back to that branch
+		if gitCurrentBranch() != startingBranch {
+			checkoutGitBranch(startingBranch)
+		}
 	}
+
 }
 
 func printR2Table(results map[string]float64) {
