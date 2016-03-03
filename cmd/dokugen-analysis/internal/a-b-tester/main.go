@@ -14,6 +14,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gosuri/uitable"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -39,6 +40,7 @@ type appOptions struct {
 	relativeDifficultiesFile       string
 	solvesFile                     string
 	analysisFile                   string
+	sampleRate                     int
 	stashMode                      bool
 	startingWithUncommittedChanges bool
 	branches                       string
@@ -51,6 +53,7 @@ func (a *appOptions) defineFlags() {
 	if a.flagSet == nil {
 		return
 	}
+	a.flagSet.IntVar(&a.sampleRate, "sample-rate", 0, "An optional sample rate of relative difficulties. Will use 1/n lines in calculation. 0 to use all.")
 	a.flagSet.BoolVar(&a.stashMode, "s", false, "If in stash mode, will do the a-b test between uncommitted and committed changes, automatically figuring out which state we're currently in. Cannot be combined with -b")
 	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
 	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties_SAMPLED.csv", "The file to use as relative difficulties input")
@@ -98,6 +101,7 @@ func newAppOptions(flagSet *flag.FlagSet) *appOptions {
 }
 
 func main() {
+
 	a := newAppOptions(flag.CommandLine)
 	if err := a.parse(os.Args[1:]); err != nil {
 		log.Println("Invalid options provided:", err.Error())
@@ -109,6 +113,21 @@ func main() {
 	startingBranch := gitCurrentBranch()
 
 	branchSwitchMessage := "Switching to branch"
+
+	relativeDifficultiesFile := a.relativeDifficultiesFile
+
+	if a.sampleRate > 0 {
+		relativeDifficultiesFile = strings.Replace(a.relativeDifficultiesFile, ".csv", "", -1)
+		relativeDifficultiesFile += "_SAMPLED_" + strconv.Itoa(a.sampleRate) + ".csv"
+		if !sampledRelativeDifficulties(a.relativeDifficultiesFile, relativeDifficultiesFile, a.sampleRate) {
+			log.Println("Couldn't create sampled relative difficulties file")
+			return
+		}
+	}
+
+	//TODO: clean up the sampled relative difficultesi file when main exits.
+
+	log.Println(strconv.Itoa(numLinesInFile(relativeDifficultiesFile)), "lines in", relativeDifficultiesFile)
 
 	if a.stashMode {
 		branchSwitchMessage = "Calculating on"
@@ -156,7 +175,7 @@ func main() {
 			}
 		}
 
-		runSolves(a.relativeDifficultiesFile, effectiveSolvesFile)
+		runSolves(relativeDifficultiesFile, effectiveSolvesFile)
 
 		branchKey := branch
 
@@ -225,6 +244,16 @@ func printR2Table(results map[string]float64) {
 
 	fmt.Println(table.String())
 	fmt.Println(rowSeparator)
+}
+
+func numLinesInFile(filename string) int {
+	contents, err := ioutil.ReadFile(filename)
+
+	if err != nil {
+		return 0
+	}
+
+	return len(strings.Split(string(contents), "\n"))
 }
 
 func runSolves(difficultiesFile, solvesOutputFile string) {
@@ -303,6 +332,41 @@ func extractR2(input string) float64 {
 
 	return result
 
+}
+
+func sampledRelativeDifficulties(inputFile, sampledFile string, sampleRate int) bool {
+
+	if _, err := os.Stat(inputFile); os.IsNotExist(err) {
+		log.Println(inputFile, "does not exist")
+		return false
+	}
+
+	if sampleRate < 1 {
+		sampleRate = 1
+	}
+
+	awkPattern := `NR % ` + strconv.Itoa(sampleRate) + ` == 0`
+
+	awkCmd := exec.Command("awk", awkPattern, inputFile)
+
+	out, err := os.Create(sampledFile)
+
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	awkCmd.Stdout = out
+	awkCmd.Stderr = os.Stderr
+
+	err = awkCmd.Run()
+
+	if err != nil {
+		log.Println("Awk error", err)
+		return false
+	}
+
+	return true
 }
 
 //gitStash will use git stash if true, git stash pop if false.
