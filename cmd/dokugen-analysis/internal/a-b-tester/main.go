@@ -110,6 +110,9 @@ func main() {
 
 	branchSwitchMessage := "Switching to branch"
 
+	//TODO: create the sample relativeDifficulty file here.
+	//TODO: print out how many lines are in the relativeDificulty file
+
 	if a.stashMode {
 		branchSwitchMessage = "Calculating on"
 	}
@@ -303,6 +306,38 @@ func extractR2(input string) float64 {
 
 	return result
 
+}
+
+func sampledRelativeDifficulties(inputFile, sampledFile string, sampleRate int) bool {
+
+	if _, err := os.Stat(inputFile); os.IsNotExist(err) {
+		log.Println(inputFile, "does not exist")
+		return false
+	}
+
+	if sampleRate < 1 {
+		sampleRate = 1
+	}
+
+	awkCmd := exec.Command("awk", "'NR % "+strconv.Itoa(sampleRate)+" == 0'", inputFile)
+
+	out, err := os.Create(sampledFile)
+
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	awkCmd.Stdout = out
+
+	err = awkCmd.Run()
+
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	return true
 }
 
 //gitStash will use git stash if true, git stash pop if false.
