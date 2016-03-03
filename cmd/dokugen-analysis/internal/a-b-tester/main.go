@@ -125,8 +125,9 @@ func main() {
 		}
 	}
 
-	//TODO: clean up the sampled relative difficultesi file
-	//TODO: print out how many lines are in the relativeDificulty file
+	//TODO: clean up the sampled relative difficultesi file when main exits.
+
+	log.Println(strconv.Itoa(numLinesInFile(relativeDifficultiesFile)), "lines in", relativeDifficultiesFile)
 
 	if a.stashMode {
 		branchSwitchMessage = "Calculating on"
