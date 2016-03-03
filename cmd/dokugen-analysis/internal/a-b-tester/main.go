@@ -332,7 +332,9 @@ func sampledRelativeDifficulties(inputFile, sampledFile string, sampleRate int) 
 		sampleRate = 1
 	}
 
-	awkCmd := exec.Command("awk", `"NR % `+strconv.Itoa(sampleRate)+` == 0"`, inputFile)
+	awkPattern := `NR % ` + strconv.Itoa(sampleRate) + ` == 0`
+
+	awkCmd := exec.Command("awk", awkPattern, inputFile)
 
 	out, err := os.Create(sampledFile)
 
