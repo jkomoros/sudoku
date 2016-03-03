@@ -39,6 +39,7 @@ type appOptions struct {
 	relativeDifficultiesFile       string
 	solvesFile                     string
 	analysisFile                   string
+	sampleRate                     int
 	stashMode                      bool
 	startingWithUncommittedChanges bool
 	branches                       string
@@ -51,6 +52,7 @@ func (a *appOptions) defineFlags() {
 	if a.flagSet == nil {
 		return
 	}
+	a.flagSet.IntVar(&a.sampleRate, "sample-rate", 0, "An optional sample rate of relative difficulties. Will use 1/n lines in calculation. 0 to use all.")
 	a.flagSet.BoolVar(&a.stashMode, "s", false, "If in stash mode, will do the a-b test between uncommitted and committed changes, automatically figuring out which state we're currently in. Cannot be combined with -b")
 	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
 	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties_SAMPLED.csv", "The file to use as relative difficulties input")
@@ -110,7 +112,18 @@ func main() {
 
 	branchSwitchMessage := "Switching to branch"
 
-	//TODO: create the sample relativeDifficulty file here.
+	relativeDifficultiesFile := a.relativeDifficultiesFile
+
+	if a.sampleRate > 0 {
+		relativeDifficultiesFile = strings.Replace(a.relativeDifficultiesFile, ".csv", "", -1)
+		relativeDifficultiesFile += "SAMPLED_" + strconv.Itoa(a.sampleRate) + ".csv"
+		if !sampledRelativeDifficulties(a.relativeDifficultiesFile, relativeDifficultiesFile, a.sampleRate) {
+			log.Println("Couldn't create sampled relative difficulties file")
+			return
+		}
+	}
+
+	//TODO: clean up the sampled relative difficultesi file
 	//TODO: print out how many lines are in the relativeDificulty file
 
 	if a.stashMode {
@@ -159,7 +172,7 @@ func main() {
 			}
 		}
 
-		runSolves(a.relativeDifficultiesFile, effectiveSolvesFile)
+		runSolves(relativeDifficultiesFile, effectiveSolvesFile)
 
 		branchKey := branch
 
