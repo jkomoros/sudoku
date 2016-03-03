@@ -29,9 +29,11 @@ To create a sampled relativedifficulties, build a full relativedifficulties.csv.
 
 awk 'NR == 1 || NR % 10 == 0' relativedifficulties.csv > relativedifficulties_SAMPLED.csv
 
+Although the easiest way to create a sampled relative difficulties is just to use a-b-testers -sample-rate argument.
+
 ## Quick A/B pattern
 
-To quickly tell if a change to the library helped r2, create a relativedifficulties.csv in internal/a-b-tester with the command above.
+To quickly tell if a change to the library helped r2, create a relativedifficulties.csv in internal/a-b-tester with the command above (note that you can use a-b-tester's -sample-rate argument instead of using awk yourself).
 
 Then configure the changes and either leave them uncommitted or stash them. Then run:
 
