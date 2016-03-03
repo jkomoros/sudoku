@@ -14,6 +14,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gosuri/uitable"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -100,6 +101,7 @@ func newAppOptions(flagSet *flag.FlagSet) *appOptions {
 }
 
 func main() {
+
 	a := newAppOptions(flag.CommandLine)
 	if err := a.parse(os.Args[1:]); err != nil {
 		log.Println("Invalid options provided:", err.Error())
@@ -241,6 +243,16 @@ func printR2Table(results map[string]float64) {
 
 	fmt.Println(table.String())
 	fmt.Println(rowSeparator)
+}
+
+func numLinesInFile(filename string) int {
+	contents, err := ioutil.ReadFile(filename)
+
+	if err != nil {
+		return 0
+	}
+
+	return len(strings.Split(string(contents), "\n"))
 }
 
 func runSolves(difficultiesFile, solvesOutputFile string) {
