@@ -346,7 +346,7 @@ func sampledRelativeDifficulties(inputFile, sampledFile string, sampleRate int) 
 	err = awkCmd.Run()
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Awk error", err)
 		return false
 	}
 
