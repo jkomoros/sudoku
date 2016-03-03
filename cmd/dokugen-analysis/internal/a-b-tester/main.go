@@ -116,7 +116,7 @@ func main() {
 
 	if a.sampleRate > 0 {
 		relativeDifficultiesFile = strings.Replace(a.relativeDifficultiesFile, ".csv", "", -1)
-		relativeDifficultiesFile += "SAMPLED_" + strconv.Itoa(a.sampleRate) + ".csv"
+		relativeDifficultiesFile += "_SAMPLED_" + strconv.Itoa(a.sampleRate) + ".csv"
 		if !sampledRelativeDifficulties(a.relativeDifficultiesFile, relativeDifficultiesFile, a.sampleRate) {
 			log.Println("Couldn't create sampled relative difficulties file")
 			return
