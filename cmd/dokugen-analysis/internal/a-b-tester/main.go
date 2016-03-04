@@ -152,8 +152,7 @@ func main() {
 		filesToDelete = append(filesToDelete, relativeDifficultiesFile)
 	}
 
-	//TODO: clean up the sampled relative difficultesi file when main exits.
-
+	//TODO: this is off by one
 	log.Println(strconv.Itoa(numLinesInFile(relativeDifficultiesFile)), "lines in", relativeDifficultiesFile)
 
 	if a.stashMode {
@@ -192,27 +191,48 @@ func main() {
 			}
 		}
 
-		//a.analysisFile and a.solvesFile have had their extension removed, if they had one.
-		effectiveSolvesFile := a.solvesFile + ".csv"
-		effectiveAnalysisFile := a.analysisFile + ".txt"
+		for i := 0; i < a.numRuns; i++ {
 
-		if branch != "" {
+			//TODO: print a message as we start each loop.
 
-			effectiveSolvesFile = a.solvesFile + "_" + strings.ToUpper(branch) + ".csv"
-			effectiveAnalysisFile = a.analysisFile + "_" + strings.ToUpper(branch) + ".txt"
+			//a.analysisFile and a.solvesFile have had their extension removed, if they had one.
+			effectiveSolvesFile := a.solvesFile
+			effectiveAnalysisFile := a.analysisFile
+
+			if branch != "" {
+				effectiveSolvesFile += "_" + strings.ToUpper(branch)
+				effectiveAnalysisFile += "_" + strings.ToUpper(branch)
+			}
+
+			//TODO: this should be 1-indexed
+
+			if a.numRuns > 1 {
+				effectiveSolvesFile += "_" + strconv.Itoa(i)
+				effectiveAnalysisFile += "_" + strconv.Itoa(i)
+			}
+
+			effectiveSolvesFile += ".csv"
+			effectiveAnalysisFile += ".txt"
+
+			runSolves(relativeDifficultiesFile, effectiveSolvesFile)
+
+			branchKey := branch
+
+			if branchKey == "" {
+				branchKey = "<default>"
+			}
+
+			///Accumulate the R2 for each run; we'll divide by numRuns after the loop.
+			results[branchKey] += runWeka(effectiveSolvesFile, effectiveAnalysisFile)
 		}
-
-		runSolves(relativeDifficultiesFile, effectiveSolvesFile)
-
-		branchKey := branch
-
-		if branchKey == "" {
-			branchKey = "<default>"
-		}
-
-		results[branchKey] = runWeka(effectiveSolvesFile, effectiveAnalysisFile)
 	}
 
+	//Take the average of each r2
+	for key, val := range results {
+		results[key] = val / float64(a.numRuns)
+	}
+
+	//Also print a message if only one config but multiple runs.
 	if len(results) > 1 {
 		//We only need to go to the trouble of painting the table if more than
 		//one branch was run
