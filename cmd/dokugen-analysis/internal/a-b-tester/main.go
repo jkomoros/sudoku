@@ -158,16 +158,6 @@ func main() {
 			log.Println(branchSwitchMessage, branch)
 		}
 
-		//a.analysisFile and a.solvesFile have had their extension removed, if they had one.
-		effectiveSolvesFile := a.solvesFile + ".csv"
-		effectiveAnalysisFile := a.analysisFile + ".txt"
-
-		if branch != "" {
-
-			effectiveSolvesFile = a.solvesFile + "_" + strings.ToUpper(branch) + ".csv"
-			effectiveAnalysisFile = a.analysisFile + "_" + strings.ToUpper(branch) + ".txt"
-		}
-
 		//Get the repo in the right state for this run.
 		if a.stashMode {
 			// if i == 0
@@ -190,6 +180,16 @@ func main() {
 				log.Println("Couldn't switch to branch", branch, " (perhaps you have uncommitted changes?). Quitting.")
 				return
 			}
+		}
+
+		//a.analysisFile and a.solvesFile have had their extension removed, if they had one.
+		effectiveSolvesFile := a.solvesFile + ".csv"
+		effectiveAnalysisFile := a.analysisFile + ".txt"
+
+		if branch != "" {
+
+			effectiveSolvesFile = a.solvesFile + "_" + strings.ToUpper(branch) + ".csv"
+			effectiveAnalysisFile = a.analysisFile + "_" + strings.ToUpper(branch) + ".txt"
 		}
 
 		runSolves(relativeDifficultiesFile, effectiveSolvesFile)
