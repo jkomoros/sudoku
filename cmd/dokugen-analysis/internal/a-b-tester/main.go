@@ -131,6 +131,9 @@ func main() {
 		return
 	}
 
+	//TODO: most of this method should be factored into a separate func, so
+	//main is just configuring hte options and passing them in.
+
 	results := make(map[string]float64)
 
 	startingBranch := gitCurrentBranch()
