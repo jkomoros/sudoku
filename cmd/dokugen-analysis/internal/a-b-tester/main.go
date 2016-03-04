@@ -34,6 +34,9 @@ const rowSeparator = "****************"
 const uncommittedChangesBranchName = "STASHED"
 const committedChangesBranchName = "COMMITTED"
 
+//Temp files that should be deleted when the program exits.
+var filesToDelete []string
+
 //TODO: amek this resilient to not being run in the package's directory
 
 type appOptions struct {
@@ -100,7 +103,20 @@ func newAppOptions(flagSet *flag.FlagSet) *appOptions {
 	return a
 }
 
+func cleanUpTempFiles() {
+	for _, filename := range filesToDelete {
+		err := os.Remove(filename)
+		if err != nil {
+			log.Println("Couldn't delete", filename, err)
+		}
+	}
+}
+
 func main() {
+
+	//TODO: make sure that this is cleaned up even when Ctrl-C is pressed
+	//using os/signal
+	defer cleanUpTempFiles()
 
 	a := newAppOptions(flag.CommandLine)
 	if err := a.parse(os.Args[1:]); err != nil {
@@ -123,6 +139,7 @@ func main() {
 			log.Println("Couldn't create sampled relative difficulties file")
 			return
 		}
+		filesToDelete = append(filesToDelete, relativeDifficultiesFile)
 	}
 
 	//TODO: clean up the sampled relative difficultesi file when main exits.
