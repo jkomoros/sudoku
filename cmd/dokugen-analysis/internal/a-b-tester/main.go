@@ -44,6 +44,7 @@ type appOptions struct {
 	solvesFile                     string
 	analysisFile                   string
 	sampleRate                     int
+	numRuns                        int
 	stashMode                      bool
 	startingWithUncommittedChanges bool
 	branches                       string
@@ -62,6 +63,7 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties.csv", "The file to use as relative difficulties input")
 	a.flagSet.StringVar(&a.solvesFile, "o", "solves.csv", "The file to output solves to")
 	a.flagSet.StringVar(&a.analysisFile, "a", "analysis.txt", "The file to output analysis to")
+	a.flagSet.IntVar(&a.numRuns, "n", 1, "The number of runs of each config to do and then average together")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 }
 
@@ -85,6 +87,11 @@ func (a *appOptions) fixUp() error {
 	} else {
 		a.branchesList = strings.Split(a.branches, " ")
 	}
+
+	if a.numRuns < 1 {
+		a.numRuns = 1
+	}
+
 	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
 	a.analysisFile = strings.Replace(a.analysisFile, ".txt", "", -1)
 	return nil
@@ -124,6 +131,9 @@ func main() {
 		return
 	}
 
+	//TODO: most of this method should be factored into a separate func, so
+	//main is just configuring hte options and passing them in.
+
 	results := make(map[string]float64)
 
 	startingBranch := gitCurrentBranch()
@@ -142,8 +152,7 @@ func main() {
 		filesToDelete = append(filesToDelete, relativeDifficultiesFile)
 	}
 
-	//TODO: clean up the sampled relative difficultesi file when main exits.
-
+	//TODO: this is off by one
 	log.Println(strconv.Itoa(numLinesInFile(relativeDifficultiesFile)), "lines in", relativeDifficultiesFile)
 
 	if a.stashMode {
@@ -156,16 +165,6 @@ func main() {
 			log.Println("Staying on the current branch.")
 		} else {
 			log.Println(branchSwitchMessage, branch)
-		}
-
-		//a.analysisFile and a.solvesFile have had their extension removed, if they had one.
-		effectiveSolvesFile := a.solvesFile + ".csv"
-		effectiveAnalysisFile := a.analysisFile + ".txt"
-
-		if branch != "" {
-
-			effectiveSolvesFile = a.solvesFile + "_" + strings.ToUpper(branch) + ".csv"
-			effectiveAnalysisFile = a.analysisFile + "_" + strings.ToUpper(branch) + ".txt"
 		}
 
 		//Get the repo in the right state for this run.
@@ -192,18 +191,51 @@ func main() {
 			}
 		}
 
-		runSolves(relativeDifficultiesFile, effectiveSolvesFile)
+		for i := 0; i < a.numRuns; i++ {
 
-		branchKey := branch
+			//The run number reported to humans will be one indexed
+			oneIndexedRun := strconv.Itoa(i + 1)
 
-		if branchKey == "" {
-			branchKey = "<default>"
+			if a.numRuns > 1 {
+				log.Println("Starting run", oneIndexedRun, "of", strconv.Itoa(a.numRuns))
+			}
+
+			//a.analysisFile and a.solvesFile have had their extension removed, if they had one.
+			effectiveSolvesFile := a.solvesFile
+			effectiveAnalysisFile := a.analysisFile
+
+			if branch != "" {
+				effectiveSolvesFile += "_" + strings.ToUpper(branch)
+				effectiveAnalysisFile += "_" + strings.ToUpper(branch)
+			}
+
+			if a.numRuns > 1 {
+				effectiveSolvesFile += "_" + oneIndexedRun
+				effectiveAnalysisFile += "_" + oneIndexedRun
+			}
+
+			effectiveSolvesFile += ".csv"
+			effectiveAnalysisFile += ".txt"
+
+			runSolves(relativeDifficultiesFile, effectiveSolvesFile)
+
+			branchKey := branch
+
+			if branchKey == "" {
+				branchKey = "<default>"
+			}
+
+			///Accumulate the R2 for each run; we'll divide by numRuns after the loop.
+			results[branchKey] += runWeka(effectiveSolvesFile, effectiveAnalysisFile)
 		}
-
-		results[branchKey] = runWeka(effectiveSolvesFile, effectiveAnalysisFile)
 	}
 
-	if len(results) > 1 {
+	//Take the average of each r2
+	for key, val := range results {
+		results[key] = val / float64(a.numRuns)
+	}
+
+	if len(results) > 1 || a.numRuns > 1 {
 		//We only need to go to the trouble of painting the table if more than
 		//one branch was run
 		printR2Table(results)
@@ -282,6 +314,8 @@ func runSolves(difficultiesFile, solvesOutputFile string) {
 	}()
 
 	//Build the dokugen-analysis executable to make sure we get the freshest version of the sudoku pacakge.
+
+	//TODO: we should only have to do this once, not every time this method is called
 	cmd := exec.Command("go", "build")
 	err := cmd.Run()
 
@@ -316,6 +350,8 @@ func runWeka(solvesFile string, analysisFile string) float64 {
 	}()
 
 	//Build the weka-trainer executable to make sure we get the freshest version of the sudoku pacakge.
+
+	//TODO: we should only have to do this once, not every time this method is called
 	cmd := exec.Command("go", "build")
 	err := cmd.Run()
 
