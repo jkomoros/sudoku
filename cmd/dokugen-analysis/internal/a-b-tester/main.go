@@ -196,7 +196,9 @@ func main() {
 			//The run number reported to humans will be one indexed
 			oneIndexedRun := strconv.Itoa(i + 1)
 
-			log.Println("Starting run", oneIndexedRun, "of", strconv.Itoa(a.numRuns))
+			if a.numRuns > 1 {
+				log.Println("Starting run", oneIndexedRun, "of", strconv.Itoa(a.numRuns))
+			}
 
 			//a.analysisFile and a.solvesFile have had their extension removed, if they had one.
 			effectiveSolvesFile := a.solvesFile
