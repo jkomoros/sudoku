@@ -44,6 +44,7 @@ type appOptions struct {
 	solvesFile                     string
 	analysisFile                   string
 	sampleRate                     int
+	numRuns                        int
 	stashMode                      bool
 	startingWithUncommittedChanges bool
 	branches                       string
@@ -62,6 +63,7 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties.csv", "The file to use as relative difficulties input")
 	a.flagSet.StringVar(&a.solvesFile, "o", "solves.csv", "The file to output solves to")
 	a.flagSet.StringVar(&a.analysisFile, "a", "analysis.txt", "The file to output analysis to")
+	a.flagSet.IntVar(&a.numRuns, "n", 1, "The number of runs of each config to do and then average together")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 }
 
@@ -85,6 +87,11 @@ func (a *appOptions) fixUp() error {
 	} else {
 		a.branchesList = strings.Split(a.branches, " ")
 	}
+
+	if a.numRuns < 1 {
+		a.numRuns = 1
+	}
+
 	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
 	a.analysisFile = strings.Replace(a.analysisFile, ".txt", "", -1)
 	return nil
