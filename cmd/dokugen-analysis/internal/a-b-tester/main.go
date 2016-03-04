@@ -56,7 +56,7 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.IntVar(&a.sampleRate, "sample-rate", 0, "An optional sample rate of relative difficulties. Will use 1/n lines in calculation. 0 to use all.")
 	a.flagSet.BoolVar(&a.stashMode, "s", false, "If in stash mode, will do the a-b test between uncommitted and committed changes, automatically figuring out which state we're currently in. Cannot be combined with -b")
 	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
-	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties_SAMPLED.csv", "The file to use as relative difficulties input")
+	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties.csv", "The file to use as relative difficulties input")
 	a.flagSet.StringVar(&a.solvesFile, "o", "solves.csv", "The file to output solves to")
 	a.flagSet.StringVar(&a.analysisFile, "a", "analysis.txt", "The file to output analysis to")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
