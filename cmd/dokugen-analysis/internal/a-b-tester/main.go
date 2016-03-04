@@ -235,8 +235,7 @@ func main() {
 		results[key] = val / float64(a.numRuns)
 	}
 
-	//Also print a message if only one config but multiple runs.
-	if len(results) > 1 {
+	if len(results) > 1 || a.numRuns > 1 {
 		//We only need to go to the trouble of painting the table if more than
 		//one branch was run
 		printR2Table(results)
@@ -315,6 +314,8 @@ func runSolves(difficultiesFile, solvesOutputFile string) {
 	}()
 
 	//Build the dokugen-analysis executable to make sure we get the freshest version of the sudoku pacakge.
+
+	//TODO: we should only have to do this once, not every time this method is called
 	cmd := exec.Command("go", "build")
 	err := cmd.Run()
 
@@ -349,6 +350,8 @@ func runWeka(solvesFile string, analysisFile string) float64 {
 	}()
 
 	//Build the weka-trainer executable to make sure we get the freshest version of the sudoku pacakge.
+
+	//TODO: we should only have to do this once, not every time this method is called
 	cmd := exec.Command("go", "build")
 	err := cmd.Run()
 
