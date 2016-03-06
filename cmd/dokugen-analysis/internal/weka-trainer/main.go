@@ -93,7 +93,12 @@ func main() {
 	}
 
 	cmd.Stdout = out
-	cmd.Stderr = os.Stderr
+
+	//TODO: really we should pipe the output to stderr, but Weka complains
+	//about some stupid unnecessary database JARs every time, so it's
+	//generally annoying.
+
+	//cmd.Stderr = os.Stderr
 
 	err = cmd.Run()
 
