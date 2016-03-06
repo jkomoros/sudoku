@@ -119,11 +119,28 @@ func cleanUpTempFiles() {
 	}
 }
 
+func buildExecutables() bool {
+	if !buildWeka() {
+		return false
+	}
+
+	if !buildDokugenAnalysis() {
+		return false
+	}
+
+	return true
+}
+
 func main() {
 
 	//TODO: make sure that this is cleaned up even when Ctrl-C is pressed
 	//using os/signal
 	defer cleanUpTempFiles()
+
+	//TODO: if -no-build is passed, skip this
+	if !buildExecutables() {
+		return
+	}
 
 	a := newAppOptions(flag.CommandLine)
 	if err := a.parse(os.Args[1:]); err != nil {
@@ -305,8 +322,7 @@ func numLinesInFile(filename string) int {
 	return len(strings.Split(string(contents), "\n"))
 }
 
-func runSolves(difficultiesFile, solvesOutputFile string) {
-
+func buildDokugenAnalysis() bool {
 	os.Chdir(pathToDokugenAnalysis)
 
 	defer func() {
@@ -315,14 +331,23 @@ func runSolves(difficultiesFile, solvesOutputFile string) {
 
 	//Build the dokugen-analysis executable to make sure we get the freshest version of the sudoku pacakge.
 
-	//TODO: we should only have to do this once, not every time this method is called
 	cmd := exec.Command("go", "build")
 	err := cmd.Run()
 
 	if err != nil {
-		log.Println(err)
-		return
+		log.Println("Couldn't build dokugen-analysis", err)
+		return false
 	}
+	return true
+}
+
+func runSolves(difficultiesFile, solvesOutputFile string) {
+
+	os.Chdir(pathToDokugenAnalysis)
+
+	defer func() {
+		os.Chdir(pathFromDokugenAnalysis)
+	}()
 
 	outFile, err := os.Create(path.Join(pathFromDokugenAnalysis, solvesOutputFile))
 
@@ -341,8 +366,7 @@ func runSolves(difficultiesFile, solvesOutputFile string) {
 	}
 }
 
-func runWeka(solvesFile string, analysisFile string) float64 {
-
+func buildWeka() bool {
 	os.Chdir(pathToWekaTrainer)
 
 	defer func() {
@@ -356,9 +380,20 @@ func runWeka(solvesFile string, analysisFile string) float64 {
 	err := cmd.Run()
 
 	if err != nil {
-		log.Println(err)
-		return 0.0
+		log.Println("Couldn't build weka:", err)
+		return false
 	}
+
+	return true
+}
+
+func runWeka(solvesFile string, analysisFile string) float64 {
+
+	os.Chdir(pathToWekaTrainer)
+
+	defer func() {
+		os.Chdir(pathFromWekaTrainer)
+	}()
 
 	trainCmd := exec.Command("./weka-trainer", "-i", path.Join(pathFromWekaTrainer, solvesFile), "-o", path.Join(pathFromWekaTrainer, analysisFile))
 	trainCmd.Stderr = os.Stderr
