@@ -15,11 +15,37 @@ const temporaryArff = "solves.arff"
 
 const r2RegularExpression = `=== Cross-validation ===\n\nCorrelation coefficient\s*(\d\.\d{1,10})`
 
+var wekaJar string
+
 type appOptions struct {
 	inFile  string
 	outFile string
 	help    bool
 	flagSet *flag.FlagSet
+}
+
+func init() {
+
+	//Check for various installed versions of Weka
+
+	//TODO: make this WAY more resilient to different versions
+	possibleJarLocations := []string{
+		"/Applications/weka-3-6-11-oracle-jvm.app/Contents/Java/weka.jar",
+		"/Applications/weka-3-6-12-oracle-jvm.app/Contents/Java/weka.jar",
+	}
+
+	for _, path := range possibleJarLocations {
+		if _, err := os.Stat(path); !os.IsNotExist(err) {
+			//Found it!
+			wekaJar = path
+			continue
+		}
+	}
+
+	if wekaJar == "" {
+		log.Fatalln("Could not find Weka")
+	}
+
 }
 
 func (a *appOptions) defineFlags() {
@@ -105,7 +131,7 @@ func execJavaCommand(input ...string) *exec.Cmd {
 
 	var args []string
 	args = append(args, "-cp")
-	args = append(args, "/Applications/weka-3-6-11-oracle-jvm.app/Contents/Java/weka.jar")
+	args = append(args, wekaJar)
 	args = append(args, input...)
 
 	return exec.Command("java", args...)
