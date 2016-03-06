@@ -67,6 +67,7 @@ func main() {
 	}
 
 	cmd.Stdout = out
+	cmd.Stderr = os.Stderr
 
 	err = cmd.Run()
 
