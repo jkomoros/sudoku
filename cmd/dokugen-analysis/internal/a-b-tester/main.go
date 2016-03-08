@@ -148,6 +148,11 @@ func main() {
 		return
 	}
 
+	if a.help {
+		a.flagSet.PrintDefaults()
+		return
+	}
+
 	//TODO: most of this method should be factored into a separate func, so
 	//main is just configuring hte options and passing them in.
 
