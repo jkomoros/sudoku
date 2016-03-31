@@ -83,12 +83,18 @@ func randomFileName(prefix, suffix string) string {
 	//Look for a file name that doesn't already exist. At each step make the random part bigger,
 	//but at some point we have to give up.
 	for i := 0; i < 1000; i++ {
-		size := i + 1
+		size := i
 		if size > 5 {
 			size = 5
 		}
 
-		candidate := prefix + randomString(size) + suffix
+		str := randomString(size)
+
+		if len(str) > 0 {
+			str = "_" + str
+		}
+
+		candidate := prefix + str + suffix
 		if _, err := os.Stat(candidate); os.IsNotExist(err) {
 			//found one that doesn't exist!
 			return candidate
@@ -135,7 +141,7 @@ func (a *appOptions) fixUp() error {
 	if a.generateRelativeDifficulties {
 		if a.outputRelativeDifficultiesFile == "" {
 			//They didn't provide a file, so we'll store the relative difficulties in a temporary file.
-			a.outputRelativeDifficultiesFile = randomFileName("relative_difficulties_", ".csv")
+			a.outputRelativeDifficultiesFile = randomFileName("relative_difficulties_TEMP", ".csv")
 
 			//We want to delete this one when we're done
 			a.deleteRelativeDifficultiesFile = true
