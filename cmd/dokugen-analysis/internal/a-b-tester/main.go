@@ -16,11 +16,13 @@ import (
 	"github.com/gosuri/uitable"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const pathToDokugenAnalysis = "../../"
@@ -40,7 +42,10 @@ var filesToDelete []string
 //TODO: amek this resilient to not being run in the package's directory
 
 type appOptions struct {
+	//The actual relative difficulties file to use
 	relativeDifficultiesFile       string
+	outputRelativeDifficultiesFile string
+	deleteRelativeDifficultiesFile bool
 	solvesFile                     string
 	analysisFile                   string
 	sampleRate                     int
@@ -50,6 +55,7 @@ type appOptions struct {
 	branches                       string
 	branchesList                   []string
 	help                           bool
+	generateRelativeDifficulties   bool
 	flagSet                        *flag.FlagSet
 }
 
@@ -60,11 +66,52 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.IntVar(&a.sampleRate, "sample-rate", 0, "An optional sample rate of relative difficulties. Will use 1/n lines in calculation. 0 to use all.")
 	a.flagSet.BoolVar(&a.stashMode, "s", false, "If in stash mode, will do the a-b test between uncommitted and committed changes, automatically figuring out which state we're currently in. Cannot be combined with -b")
 	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
-	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties.csv", "The file to use as relative difficulties input")
+	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties.csv", "The file to use as relative difficulties input.")
+	//TODO: this is a terrible name for this flag. Can we reuse -o? ... no, because then it's not a clear signal to exit if provided.
+	a.flagSet.StringVar(&a.outputRelativeDifficultiesFile, "rd-out", "", "If -g is also provided and this path does not point to an existing file, will save out the generated relative difficulties to that location and then not do any more of the pipeline")
 	a.flagSet.StringVar(&a.solvesFile, "o", "solves.csv", "The file to output solves to")
 	a.flagSet.StringVar(&a.analysisFile, "a", "analysis.txt", "The file to output analysis to")
 	a.flagSet.IntVar(&a.numRuns, "n", 1, "The number of runs of each config to do and then average together")
+	a.flagSet.BoolVar(&a.generateRelativeDifficulties, "g", false, "If true, then will generate relative difficulties file.")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
+}
+
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
+}
+
+func randomFileName(prefix, suffix string) string {
+	//Look for a file name that doesn't already exist. At each step make the random part bigger,
+	//but at some point we have to give up.
+	for i := 0; i < 1000; i++ {
+		size := i
+		if size > 5 {
+			size = 5
+		}
+
+		str := randomString(size)
+
+		if len(str) > 0 {
+			str = "_" + str
+		}
+
+		candidate := prefix + str + suffix
+		if _, err := os.Stat(candidate); os.IsNotExist(err) {
+			//found one that doesn't exist!
+			return candidate
+		}
+	}
+	panic("Couldn't find a non used filename")
+	return ""
+}
+
+func randomString(length int) string {
+	var letters = []rune("0123456789")
+	b := make([]rune, length)
+	for i := 0; i < length; i++ {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
 }
 
 func (a *appOptions) fixUp() error {
@@ -90,6 +137,27 @@ func (a *appOptions) fixUp() error {
 
 	if a.numRuns < 1 {
 		a.numRuns = 1
+	}
+
+	if a.generateRelativeDifficulties {
+		if a.outputRelativeDifficultiesFile == "" {
+			//They didn't provide a file, so we'll store the relative difficulties in a temporary file.
+			a.outputRelativeDifficultiesFile = randomFileName("relative_difficulties_TEMP", ".csv")
+
+			//We want to delete this one when we're done
+			a.deleteRelativeDifficultiesFile = true
+
+		} else {
+			//We'll be outputting the generated relative difficulties to this location. Make sure it's empty
+
+			if _, err := os.Stat(a.outputRelativeDifficultiesFile); !os.IsNotExist(err) {
+				return errors.New("Passed -g and -r pointing to a non-empty file.")
+			}
+		}
+	} else {
+		if a.outputRelativeDifficultiesFile != "" {
+			return errors.New("rd-out passed without g")
+		}
 	}
 
 	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
@@ -155,6 +223,28 @@ func main() {
 
 	//TODO: most of this method should be factored into a separate func, so
 	//main is just configuring hte options and passing them in.
+
+	if a.generateRelativeDifficulties {
+		log.Println("Generating relative difficulties.")
+		//a.fixUp put a valid filename in a.outputRelativeDifficultiesFile
+		generateRelativeDifficulties(a.outputRelativeDifficultiesFile)
+
+		//If we're just using a temp file we should be sure to delete when done.
+		if a.deleteRelativeDifficultiesFile {
+			filesToDelete = append(filesToDelete, a.outputRelativeDifficultiesFile)
+		} else {
+			//We're done, all we wanted to do was generate the file and quit.
+			return
+		}
+
+		//Make sure we're wired up to use the file we're outputting it to.
+		a.relativeDifficultiesFile = a.outputRelativeDifficultiesFile
+	}
+
+	if _, err := os.Stat(a.relativeDifficultiesFile); os.IsNotExist(err) {
+		log.Println("The specified relative difficulties file does not exist:", a.relativeDifficultiesFile)
+		return
+	}
 
 	results := make(map[string]float64)
 
@@ -362,6 +452,30 @@ func runSolves(difficultiesFile, solvesOutputFile string) {
 	}
 
 	analysisCmd := exec.Command("./dokugen-analysis", "-a", "-v", "-w", "-t", "-h", "-no-cache", path.Join(pathFromDokugenAnalysis, difficultiesFile))
+	analysisCmd.Stdout = outFile
+	analysisCmd.Stderr = os.Stderr
+	err = analysisCmd.Run()
+
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func generateRelativeDifficulties(outputFile string) {
+	os.Chdir(pathToDokugenAnalysis)
+
+	defer func() {
+		os.Chdir(pathFromDokugenAnalysis)
+	}()
+
+	outFile, err := os.Create(path.Join(pathFromDokugenAnalysis, outputFile))
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	analysisCmd := exec.Command("./dokugen-analysis", "-a", "-v", "-p")
 	analysisCmd.Stdout = outFile
 	analysisCmd.Stderr = os.Stderr
 	err = analysisCmd.Run()
