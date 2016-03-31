@@ -350,6 +350,8 @@ func main() {
 				branchKey = "<default>"
 			}
 
+			log.Println("Running Weka on solves...")
+
 			///Accumulate the R2 for each run; we'll divide by numRuns after the loop.
 			results[branchKey] += runWeka(effectiveSolvesFile, effectiveAnalysisFile)
 		}
