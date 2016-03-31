@@ -58,7 +58,9 @@ type appOptions struct {
 	branchesList                   []string
 	help                           bool
 	generateRelativeDifficulties   bool
-	flagSet                        *flag.FlagSet
+	//TODO: this is probably named wrong, since currently it's only used to exit if -g passed.
+	exitEarly bool
+	flagSet   *flag.FlagSet
 }
 
 func (a *appOptions) defineFlags() {
@@ -70,12 +72,13 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
 	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties.csv", "The file to use as relative difficulties input.")
 	//TODO: this is a terrible name for this flag. Can we reuse -o? ... no, because then it's not a clear signal to exit if provided.
-	a.flagSet.StringVar(&a.outputRelativeDifficultiesFile, "rd-out", "", "If -g is also provided and this path does not point to an existing file, will save out the generated relative difficulties to that location and then not do any more of the pipeline")
+	a.flagSet.StringVar(&a.outputRelativeDifficultiesFile, "rd-out", "", "If -g is also provided and this path does not point to an existing file, will save out the generated relative difficulties to that location.")
 	a.flagSet.StringVar(&a.solvesFile, "o", "solves.csv", "The file to output solves to")
 	a.flagSet.StringVar(&a.analysisFile, "a", "analysis.txt", "The file to output analysis to")
 	a.flagSet.IntVar(&a.numRuns, "n", 1, "The number of runs of each config to do and then average together")
 	a.flagSet.BoolVar(&a.generateRelativeDifficulties, "g", false, "If true, then will generate relative difficulties file.")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
+	a.flagSet.BoolVar(&a.exitEarly, "exit", false, "If provided with -g and rd-out, will generate relative difficulty file to rd-out and exit.")
 }
 
 func init() {
@@ -160,6 +163,9 @@ func (a *appOptions) fixUp() error {
 		if a.outputRelativeDifficultiesFile != "" {
 			return errors.New("rd-out passed without g")
 		}
+		if a.exitEarly {
+			return errors.New("-exit passed without g")
+		}
 	}
 
 	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
@@ -235,9 +241,10 @@ func main() {
 		if a.deleteRelativeDifficultiesFile {
 			filesToDelete = append(filesToDelete, a.outputRelativeDifficultiesFile)
 		} else {
-
-			//We're done, all we wanted to do was generate the file and quit.
-			return
+			if a.exitEarly {
+				//We're done, all we wanted to do was generate the file and quit.
+				return
+			}
 		}
 
 		//Make sure we're wired up to use the file we're outputting it to.
