@@ -31,13 +31,17 @@ awk 'NR == 1 || NR % 10 == 0' relativedifficulties.csv > relativedifficulties_SA
 
 Although the easiest way to create a sampled relative difficulties is just to use a-b-testers -sample-rate argument.
 
+## Generating Relative Difficulties
+
+Fastest way is to run `a-b-tester -g -rd-out=relativedifficulties.csv -exit`
+
 ## Quick A/B pattern
 
-To quickly tell if a change to the library helped r2, create a relativedifficulties.csv in internal/a-b-tester with the command above (note that you can use a-b-tester's -sample-rate argument instead of using awk yourself).
+To quickly tell if a change to the library helped r2 configure the changes and either leave them uncommitted or stash them. Then run:
 
-Then configure the changes and either leave them uncommitted or stash them. Then run:
+go build && ./a-b-tester -g -s
 
-go build && ./a-b-tester -r relativedifficulties.csv -s
+(If you already have a fresh Relative Difficulties, you can swap -g with -r=RELATIVEDIFFICULTIESFILE . If you don't have a fresh RD but want to save one, add -rd-out=OUTPUTFILE to save it out in the middle of the pipeline)
 
 This will run the tester, then either stash or stash pop, then run again, then leave the repo in the state in started in.
 
