@@ -16,11 +16,13 @@ import (
 	"github.com/gosuri/uitable"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const pathToDokugenAnalysis = "../../"
@@ -72,6 +74,38 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 }
 
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
+}
+
+func randomFileName(prefix, suffix string) string {
+	//Look for a file name that doesn't already exist. At each step make the random part bigger,
+	//but at some point we have to give up.
+	for i := 0; i < 1000; i++ {
+		size := i + 1
+		if size > 5 {
+			size = 5
+		}
+
+		candidate := prefix + randomString(size) + suffix
+		if _, err := os.Stat(candidate); os.IsNotExist(err) {
+			//found one that doesn't exist!
+			return candidate
+		}
+	}
+	panic("Couldn't find a non used filename")
+	return ""
+}
+
+func randomString(length int) string {
+	var letters = []rune("0123456789")
+	b := make([]rune, length)
+	for i := 0; i < length; i++ {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
 func (a *appOptions) fixUp() error {
 	if a.branches != "" && a.stashMode {
 		return errors.New("-b and -s cannot both be passed")
@@ -97,11 +131,19 @@ func (a *appOptions) fixUp() error {
 		a.numRuns = 1
 	}
 
-	if a.outputRelativeDifficultiesFile != "" && a.generateRelativeDifficulties {
-		//We'll be outputting the generated relative difficulties to this location. Make sure it's empty!
+	if a.generateRelativeDifficulties {
+		if a.outputRelativeDifficultiesFile == "" {
+			//They didn't provide a file, so we'll store the relative difficulties in a temporary file.
+			a.outputRelativeDifficultiesFile = randomFileName("relative_difficulties_", ".csv")
 
-		if _, err := os.Stat(a.outputRelativeDifficultiesFile); !os.IsNotExist(err) {
-			return errors.New("Passed -g and -rd-out pointing to a non-empty file.")
+			log.Println("Using", a.outputRelativeDifficultiesFile, "for rd output.")
+
+		} else {
+			//We'll be outputting the generated relative difficulties to this location. Make sure it's empty
+
+			if _, err := os.Stat(a.outputRelativeDifficultiesFile); !os.IsNotExist(err) {
+				return errors.New("Passed -g and -r pointing to a non-empty file.")
+			}
 		}
 	}
 
