@@ -43,8 +43,10 @@ var filesToDelete []string
 
 type appOptions struct {
 	//The actual relative difficulties file to use
-	relativeDifficultiesFile       string
+	relativeDifficultiesFile string
+	//TODO: currently we quit if this is provided with g, but in some cases you want it to export AND keep going.
 	outputRelativeDifficultiesFile string
+	//TODO: deleteRelativeDifficultiesFile is named incorrectly because we use it more specifically than that in main.
 	deleteRelativeDifficultiesFile bool
 	solvesFile                     string
 	analysisFile                   string
@@ -233,6 +235,7 @@ func main() {
 		if a.deleteRelativeDifficultiesFile {
 			filesToDelete = append(filesToDelete, a.outputRelativeDifficultiesFile)
 		} else {
+
 			//We're done, all we wanted to do was generate the file and quit.
 			return
 		}
