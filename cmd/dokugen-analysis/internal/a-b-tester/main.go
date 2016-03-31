@@ -448,7 +448,27 @@ func runSolves(difficultiesFile, solvesOutputFile string) {
 }
 
 func generateRelativeDifficulties(outputFile string) {
-	//TODO: generate and output to proper file.
+	os.Chdir(pathToDokugenAnalysis)
+
+	defer func() {
+		os.Chdir(pathFromDokugenAnalysis)
+	}()
+
+	outFile, err := os.Create(path.Join(pathFromDokugenAnalysis, outputFile))
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	analysisCmd := exec.Command("./dokugen-analysis", "-a", "-v", "-p")
+	analysisCmd.Stdout = outFile
+	analysisCmd.Stderr = os.Stderr
+	err = analysisCmd.Run()
+
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func buildWeka() bool {
