@@ -227,6 +227,11 @@ func main() {
 		a.relativeDifficultiesFile = a.outputRelativeDifficultiesFile
 	}
 
+	if _, err := os.Stat(a.relativeDifficultiesFile); os.IsNotExist(err) {
+		log.Println("The specified relative difficulties file does not exist:", a.relativeDifficultiesFile)
+		return
+	}
+
 	results := make(map[string]float64)
 
 	startingBranch := gitCurrentBranch()
