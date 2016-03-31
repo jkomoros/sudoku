@@ -153,6 +153,10 @@ func (a *appOptions) fixUp() error {
 				return errors.New("Passed -g and -r pointing to a non-empty file.")
 			}
 		}
+	} else {
+		if a.outputRelativeDifficultiesFile != "" {
+			return errors.New("rd-out passed without g")
+		}
 	}
 
 	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
