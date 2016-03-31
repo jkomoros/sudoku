@@ -45,6 +45,7 @@ type appOptions struct {
 	//The actual relative difficulties file to use
 	relativeDifficultiesFile       string
 	outputRelativeDifficultiesFile string
+	deleteRelativeDifficultiesFile bool
 	solvesFile                     string
 	analysisFile                   string
 	sampleRate                     int
@@ -136,7 +137,8 @@ func (a *appOptions) fixUp() error {
 			//They didn't provide a file, so we'll store the relative difficulties in a temporary file.
 			a.outputRelativeDifficultiesFile = randomFileName("relative_difficulties_", ".csv")
 
-			log.Println("Using", a.outputRelativeDifficultiesFile, "for rd output.")
+			//We want to delete this one when we're done
+			a.deleteRelativeDifficultiesFile = true
 
 		} else {
 			//We'll be outputting the generated relative difficulties to this location. Make sure it's empty
@@ -210,6 +212,20 @@ func main() {
 
 	//TODO: most of this method should be factored into a separate func, so
 	//main is just configuring hte options and passing them in.
+
+	if a.generateRelativeDifficulties {
+		log.Println("Generating relative difficulties.")
+		//a.fixUp put a valid filename in a.outputRelativeDifficultiesFile
+		generateRelativeDifficulties(a.outputRelativeDifficultiesFile)
+
+		//If we're just using a temp file we should be sure to delete when done.
+		if a.deleteRelativeDifficultiesFile {
+			filesToDelete = append(filesToDelete, a.outputRelativeDifficultiesFile)
+		}
+
+		//Make sure we're wired up to use the file we're outputting it to.
+		a.relativeDifficultiesFile = a.outputRelativeDifficultiesFile
+	}
 
 	results := make(map[string]float64)
 
@@ -424,6 +440,10 @@ func runSolves(difficultiesFile, solvesOutputFile string) {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func generateRelativeDifficulties(outputFile string) {
+	//TODO: generate and output to proper file.
 }
 
 func buildWeka() bool {
