@@ -53,6 +53,7 @@ type appOptions struct {
 	branches                       string
 	branchesList                   []string
 	help                           bool
+	generateRelativeDifficulties   bool
 	flagSet                        *flag.FlagSet
 }
 
@@ -63,10 +64,11 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.IntVar(&a.sampleRate, "sample-rate", 0, "An optional sample rate of relative difficulties. Will use 1/n lines in calculation. 0 to use all.")
 	a.flagSet.BoolVar(&a.stashMode, "s", false, "If in stash mode, will do the a-b test between uncommitted and committed changes, automatically figuring out which state we're currently in. Cannot be combined with -b")
 	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
-	a.flagSet.StringVar(&a.userRelativeDifficultiesFile, "r", "relativedifficulties.csv", "The file to use as relative difficulties input")
+	a.flagSet.StringVar(&a.userRelativeDifficultiesFile, "r", "relativedifficulties.csv", "The file to use as relative difficulties input. If -g is also provided and this path does not point to an existing file, will save out the generated relative difficulties to that location.")
 	a.flagSet.StringVar(&a.solvesFile, "o", "solves.csv", "The file to output solves to")
 	a.flagSet.StringVar(&a.analysisFile, "a", "analysis.txt", "The file to output analysis to")
 	a.flagSet.IntVar(&a.numRuns, "n", 1, "The number of runs of each config to do and then average together")
+	a.flagSet.BoolVar(&a.generateRelativeDifficulties, "g", false, "If true, then will generate relative difficulties file.")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 }
 
@@ -96,6 +98,14 @@ func (a *appOptions) fixUp() error {
 	}
 
 	a.relativeDifficultiesFile = a.userRelativeDifficultiesFile
+
+	if a.relativeDifficultiesFile != "" && a.generateRelativeDifficulties {
+		//We'll be outputting the generated relative difficulties to this location. Make sure it's empty!
+
+		if _, err := os.Stat(a.relativeDifficultiesFile); !os.IsNotExist(err) {
+			return errors.New("Passed -g and -r pointing to a non-empty file.")
+		}
+	}
 
 	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
 	a.analysisFile = strings.Replace(a.analysisFile, ".txt", "", -1)
