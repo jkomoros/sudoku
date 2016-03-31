@@ -159,6 +159,9 @@ func (a *appOptions) fixUp() error {
 				return errors.New("Passed -g and -r pointing to a non-empty file.")
 			}
 		}
+		if a.exitEarly && a.outputRelativeDifficultiesFile == "" {
+			return errors.New("Exit passed without both g and rd-out")
+		}
 	} else {
 		if a.outputRelativeDifficultiesFile != "" {
 			return errors.New("rd-out passed without g")
