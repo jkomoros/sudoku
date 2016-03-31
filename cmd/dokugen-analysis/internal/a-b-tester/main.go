@@ -97,15 +97,15 @@ func (a *appOptions) fixUp() error {
 		a.numRuns = 1
 	}
 
-	a.relativeDifficultiesFile = a.userRelativeDifficultiesFile
-
-	if a.relativeDifficultiesFile != "" && a.generateRelativeDifficulties {
+	if a.userRelativeDifficultiesFile != "" && a.generateRelativeDifficulties {
 		//We'll be outputting the generated relative difficulties to this location. Make sure it's empty!
 
 		if _, err := os.Stat(a.relativeDifficultiesFile); !os.IsNotExist(err) {
 			return errors.New("Passed -g and -r pointing to a non-empty file.")
 		}
 	}
+
+	a.relativeDifficultiesFile = a.userRelativeDifficultiesFile
 
 	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
 	a.analysisFile = strings.Replace(a.analysisFile, ".txt", "", -1)
