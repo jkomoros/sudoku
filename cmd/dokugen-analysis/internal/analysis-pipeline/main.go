@@ -1,10 +1,10 @@
-/* a-b-tester is a utility program that makes it easy to test and see if a
+/* analysis-pipeline is a utility program that makes it easy to test and see if a
 /* change to the core library is helping us build a better model. Normal usage
 /* is to provide it a relativedifficulties.csv file and then it will output
 /* r2, but you can also compare multiple configs and have it report the best
 /* one. To do that, create different branches with each configuration set.
-/* Then run a-b-tester with -b and a space delimited string of branch names to
-/* try. a-b-tester will run each in turn, save out analysis and solves files
+/* Then run analysis-pipeline with -b and a space delimited string of branch names to
+/* try. analysis-pipeline will run each in turn, save out analysis and solves files
 /* for each, and then report which one has the best r2.*/
 
 package main
@@ -26,10 +26,10 @@ import (
 )
 
 const pathToDokugenAnalysis = "../../"
-const pathFromDokugenAnalysis = "internal/a-b-tester/"
+const pathFromDokugenAnalysis = "internal/analysis-pipeline/"
 
 const pathToWekaTrainer = "../weka-trainer/"
-const pathFromWekaTrainer = "../a-b-tester/"
+const pathFromWekaTrainer = "../analysis-pipeline/"
 
 const rowSeparator = "****************"
 

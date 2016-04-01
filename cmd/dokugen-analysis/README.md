@@ -4,7 +4,7 @@ cd to cmd/dokugen-analysis
 
 (If you don't have a good internet connection and have saved db info in mock_data.secret.csv, then add -m to all of these)
 
-Note: now the preferred way to do this (once you have relativedifficulties generated) is just to use a-b-tester (see below).
+Note: now the preferred way to do this (once you have relativedifficulties generated) is just to use analysis-pipeline (see below).
 
 go run main.go mock_data.go -a -v -p > relativedifficulties.csv
 go run main.go mock_data.go -a -v -w -t -h relativedifficulties.csv > solves.csv
@@ -33,13 +33,13 @@ Although the easiest way to create a sampled relative difficulties is just to us
 
 ## Generating Relative Difficulties
 
-Fastest way is to run `a-b-tester -g -rd-out=relativedifficulties.csv -exit`
+Fastest way is to run `analysis-pipeline -g -rd-out=relativedifficulties.csv -exit`
 
 ## Quick A/B pattern
 
 To quickly tell if a change to the library helped r2 configure the changes and either leave them uncommitted or stash them. Then run:
 
-go build && ./a-b-tester -g -s
+go build && ./analysis-pipeline -g -s
 
 (If you already have a fresh Relative Difficulties, you can swap -g with -r=RELATIVEDIFFICULTIESFILE . If you don't have a fresh RD but want to save one, add -rd-out=OUTPUTFILE to save it out in the middle of the pipeline)
 
@@ -47,7 +47,7 @@ This will run the tester, then either stash or stash pop, then run again, then l
 
 If there are multiple configs you want to test, store each on in a named branched, then run:
 
-go build && ./a-b-tester -r relativedifficulties.csv -b "branch-1 branch-2 branch-3"
+go build && ./analysis-pipeline -r relativedifficulties.csv -b "branch-1 branch-2 branch-3"
 
 and it will try all branches and output which one is better.
 
