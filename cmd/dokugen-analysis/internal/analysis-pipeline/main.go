@@ -237,17 +237,19 @@ func main() {
 
 	if a.generateRelativeDifficulties {
 		log.Println("Generating relative difficulties.")
+
+		//If we're just using a temp file we should be sure to delete when done.
+		//We add this now in case the user exits the program while we're generating the difficulties.
+		if a.deleteRelativeDifficultiesFile {
+			filesToDelete = append(filesToDelete, a.outputRelativeDifficultiesFile)
+		}
+
 		//a.fixUp put a valid filename in a.outputRelativeDifficultiesFile
 		generateRelativeDifficulties(a.outputRelativeDifficultiesFile)
 
-		//If we're just using a temp file we should be sure to delete when done.
-		if a.deleteRelativeDifficultiesFile {
-			filesToDelete = append(filesToDelete, a.outputRelativeDifficultiesFile)
-		} else {
-			if a.exitEarly {
-				//We're done, all we wanted to do was generate the file and quit.
-				return
-			}
+		if !a.deleteRelativeDifficultiesFile && a.exitEarly {
+			//We're done, all we wanted to do was generate the file and quit.
+			return
 		}
 
 		//Make sure we're wired up to use the file we're outputting it to.
