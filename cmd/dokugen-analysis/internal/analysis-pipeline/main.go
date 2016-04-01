@@ -19,9 +19,11 @@ import (
 	"math/rand"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -38,6 +40,8 @@ const committedChangesBranchName = "COMMITTED"
 
 //Temp files that should be deleted when the program exits.
 var filesToDelete []string
+
+var initialPath string
 
 //TODO: amek this resilient to not being run in the package's directory
 
@@ -191,7 +195,7 @@ func newAppOptions(flagSet *flag.FlagSet) *appOptions {
 
 func cleanUpTempFiles() {
 	for _, filename := range filesToDelete {
-		err := os.Remove(filename)
+		err := os.Remove(path.Join(initialPath, filename))
 		if err != nil {
 			log.Println("Couldn't delete", filename, err)
 		}
@@ -212,14 +216,31 @@ func buildExecutables() bool {
 
 func main() {
 
-	//TODO: make sure that this is cleaned up even when Ctrl-C is pressed
-	//using os/signal
 	defer cleanUpTempFiles()
+
+	//Keep track of the working directory so cleanupTempFiles always has it.
+	initialPath, _ = os.Getwd()
+
+	//Make sure that even if we get exited early we still clean up.
+	c := make(chan os.Signal, 1)
+
+	signal.Notify(c, os.Interrupt)
+	signal.Notify(c, syscall.SIGTERM)
+
+	go func() {
+		<-c
+		cleanUpTempFiles()
+		os.Exit(1)
+	}()
+
+	//build the executables
 
 	//TODO: if -no-build is passed, skip this
 	if !buildExecutables() {
 		return
 	}
+
+	//parse the flags
 
 	a := newAppOptions(flag.CommandLine)
 	if err := a.parse(os.Args[1:]); err != nil {
