@@ -319,8 +319,10 @@ func (self *Cell) Invalid() bool {
 	return true
 }
 
-//Lock 'locks' the cell. Locking does not change whether calls to SetNumber or
-//SetMark will fail; it only impacts Diagram().
+//Lock 'locks' the cell. Locking represents the concept of cells that are set
+//at the beginning of the puzzle and that users may not modify. Locking does
+//not change whether calls to SetNumber or SetMark will fail; it only impacts
+//Diagram().
 func (self *Cell) Lock() {
 	self.locked = true
 }
