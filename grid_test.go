@@ -701,10 +701,16 @@ func TestGenerate(t *testing.T) {
 		t.Fail()
 	}
 
-	for i, cell := range grid.Cells() {
+	lockedCellCount := 0
+
+	for _, cell := range grid.Cells() {
 		if cell.Locked() {
-			t.Error("Cell", i, "was locked coming back from Generate, which is unexpected")
+			lockedCellCount++
 		}
+	}
+
+	if lockedCellCount == 0 || lockedCellCount == DIM*DIM {
+		t.Error("Found an unreasonable number of locked cells from generate:", lockedCellCount)
 	}
 }
 

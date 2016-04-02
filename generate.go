@@ -43,13 +43,16 @@ func (self *Grid) Fill() bool {
 	return false
 }
 
-//GenerateGrid returns a new sudoku puzzle with a single unique solution and many of its cells unfilled--a
-//puzzle that is appropriate (and hopefully fun) for humans to solve. GenerateGrid first finds a random
-//full filling of the grid, then iteratively removes cells until just before the grid begins having
-//multiple solutions. The result is a grid that has a single valid solution but many of its cells
-//unfilled. Pass nil for options to use reasonable defaults.
-//GenerateGrid doesn't currently give any way to define the desired difficulty; the best option is to
-//repeatedly generate puzzles until you find one that matches your desired difficulty. cmd/dokugen
+//GenerateGrid returns a new sudoku puzzle with a single unique solution and
+//many of its cells unfilled--a puzzle that is appropriate (and hopefully fun)
+//for humans to solve. Puzzles returned will have filled cells locked (see
+//cell.Lock for more on locking). GenerateGrid first finds a random full
+//filling of the grid, then iteratively removes cells until just before the
+//grid begins having multiple solutions. The result is a grid that has a
+//single valid solution but many of its cells unfilled. Pass nil for options
+//to use reasonable defaults. GenerateGrid doesn't currently give any way to
+//define the desired difficulty; the best option is to repeatedly generate
+//puzzles until you find one that matches your desired difficulty. cmd/dokugen
 //applies this technique.
 func GenerateGrid(options *GenerationOptions) *Grid {
 
@@ -129,6 +132,8 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 			}
 		}
 	}
+
+	grid.LockFilledCells()
 
 	return grid
 }
