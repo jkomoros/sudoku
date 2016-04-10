@@ -343,7 +343,7 @@ func TestPrintStats(t *testing.T) {
 		OUTPUT_DIVIDER_RE +
 		numLineRE("Step count", false) +
 		OUTPUT_DIVIDER_RE +
-		numLineRE("Avg Dissimilarity", true) +
+		numLineRE("Avg Similarity", true) +
 		OUTPUT_DIVIDER_RE +
 		"(" + numLineRE(VARIANT_RE, false) + "){" + strconv.Itoa(len(sudoku.AllTechniqueVariants)) + "}" +
 		OUTPUT_DIVIDER_RE
