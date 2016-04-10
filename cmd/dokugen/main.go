@@ -378,7 +378,7 @@ func storePuzzle(dbName string, grid *sudoku.Grid, difficulty float64, options *
 	}
 
 	err = db.Update(func(tx *bolt.Tx) error {
-		bucket, err := tx.CreateBucketIfNotExists([]byte(sudoku.DIFFICULTY_MODEL))
+		bucket, err := tx.CreateBucketIfNotExists([]byte(sudoku.DifficultyModelHash()))
 		if err != nil {
 			return err
 		}
@@ -427,7 +427,7 @@ func vendPuzzle(dbName string, min float64, max float64, options *sudoku.Generat
 	var finalPuzzle string
 
 	err = db.Update(func(tx *bolt.Tx) error {
-		bucket, err := tx.CreateBucketIfNotExists([]byte(sudoku.DIFFICULTY_MODEL))
+		bucket, err := tx.CreateBucketIfNotExists([]byte(sudoku.DifficultyModelHash()))
 		if err != nil {
 			log.Println(err)
 			return err

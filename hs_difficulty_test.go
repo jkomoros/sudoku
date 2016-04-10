@@ -51,6 +51,33 @@ func init() {
 	}
 }
 
+func TestSetDifficultyModel(t *testing.T) {
+	currentModel := difficultySignalWeights
+	currentModelHash := DifficultyModelHash()
+	newModel := map[string]float64{
+		"a": 0.5,
+		"b": 0.6,
+	}
+	newModelExpectedHash := "2EE69110CFF4112E325A099D3B83DA0F7B2DC737"
+
+	LoadDifficultyModel(newModel)
+	if !reflect.DeepEqual(difficultySignalWeights, newModel) {
+		t.Error("LoadDifficultyModel didn't set model")
+	}
+	if currentModelHash == DifficultyModelHash() {
+		t.Error("Model hash didn't change when setting new model")
+	}
+	if DifficultyModelHash() != newModelExpectedHash {
+		t.Error("Model hash wasn't what was expected. Got", DifficultyModelHash(), "expected", newModelExpectedHash)
+	}
+
+	LoadDifficultyModel(currentModel)
+
+	if DifficultyModelHash() != currentModelHash {
+		t.Error("Setting back to old model didn't set back to old hash")
+	}
+}
+
 func TestHintDirections(t *testing.T) {
 
 	grid := NewGrid()

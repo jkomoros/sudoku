@@ -832,15 +832,15 @@ func (c *solvesCache) verifyFresh(expectedRecLength int) {
 		v := bucket.Get([]byte(_SOLVES_DIFFICULTY_BUCKET))
 		if v == nil {
 			//OK, must be new. Store the current difficulty model
-			bucket.Put([]byte(_SOLVES_DIFFICULTY_BUCKET), []byte(sudoku.DIFFICULTY_MODEL))
+			bucket.Put([]byte(_SOLVES_DIFFICULTY_BUCKET), []byte(sudoku.DifficultyModelHash()))
 			return nil
 		}
 		if verbose {
-			log.Println("Current difficulty model is", sudoku.DIFFICULTY_MODEL)
+			log.Println("Current difficulty model is", sudoku.DifficultyModelHash())
 			log.Println("Cache's difficulty model is", string(v))
 		}
 
-		if string(v) != sudoku.DIFFICULTY_MODEL {
+		if string(v) != sudoku.DifficultyModelHash() {
 			//Stale!
 			shouldDelete = true
 		}
@@ -907,7 +907,7 @@ func (c *solvesCache) deleteSolves() {
 			return nil
 		}
 
-		bucket.Put([]byte(_SOLVES_DIFFICULTY_BUCKET), []byte(sudoku.DIFFICULTY_MODEL))
+		bucket.Put([]byte(_SOLVES_DIFFICULTY_BUCKET), []byte(sudoku.DifficultyModelHash()))
 
 		return nil
 	})

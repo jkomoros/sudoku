@@ -1,8 +1,11 @@
 package sudoku
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"log"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -28,6 +31,10 @@ var difficultySignalGenerators []difficultySignalGenerator
 //go:generate python util/difficulty-convert.py
 var difficultySignalWeights map[string]float64
 
+//difficultyModelHashValue stashes the value of the hash of the model, so we
+//don't have to calculate it too often.
+var difficultyModelHashValue string
+
 func init() {
 	difficultySignalGenerators = []difficultySignalGenerator{
 		signalTechnique,
@@ -37,6 +44,49 @@ func init() {
 		signalNumberUnfilled,
 		signalStepsUntilNonFill,
 	}
+}
+
+//LoadDifficultyModel loads in a new difficulty model to use to score puzzles'
+//difficulties. This will automatically change what DifficultyModelHash will
+//return.
+func LoadDifficultyModel(model map[string]float64) {
+	difficultySignalWeights = model
+	//Reset the stored model hash value so the next call to
+	//DifficultyModelHash will recacluate it.
+	difficultyModelHashValue = ""
+}
+
+//DifficultyModelHash is a unique string representing the exact difficulty
+//model in use. Every time a new model is trained or loaded, this value will change.
+//Therefore, if the value is different than last time you checked, the model has changed.
+//This is useful for throwing out caches that assume the same difficulty model is in use.
+func DifficultyModelHash() string {
+
+	if difficultyModelHashValue == "" {
+
+		//Generate a string with keys, vals in a known sequence, then hash.
+
+		//first, generate a list of all keys
+		var keys []string
+		for k := range difficultySignalWeights {
+			keys = append(keys, k)
+		}
+
+		sort.Strings(keys)
+
+		hash := sha1.New()
+
+		for _, k := range keys {
+			hash.Write([]byte(k + ":" + strconv.FormatFloat(difficultySignalWeights[k], 'f', -1, 64) + "\n"))
+		}
+
+		hashBytes := hash.Sum(nil)
+
+		base32str := strings.ToUpper(hex.EncodeToString(hashBytes))
+
+		difficultyModelHashValue = base32str
+	}
+	return difficultyModelHashValue
 }
 
 //Stats returns a printout of interesting statistics about the
