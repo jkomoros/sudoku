@@ -14,6 +14,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gosuri/uitable"
+	"github.com/jkomoros/sudoku"
+	"github.com/jkomoros/sudoku/cmd/dokugen-analysis/internal/wekaparser"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -21,6 +23,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 	"syscall"
@@ -45,6 +48,8 @@ var initialPath string
 
 //TODO: amek this resilient to not being run in the package's directory
 
+//TODO: make this have a configurable pipeline, where you can start at any step and end at any step
+
 type appOptions struct {
 	//The actual relative difficulties file to use
 	relativeDifficultiesFile string
@@ -62,6 +67,7 @@ type appOptions struct {
 	branchesList                   []string
 	help                           bool
 	generateRelativeDifficulties   bool
+	histogramPuzzleCount           int
 	//TODO: this is probably named wrong, since currently it's only used to exit if -g passed.
 	exitEarly bool
 	flagSet   *flag.FlagSet
@@ -83,6 +89,7 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.BoolVar(&a.generateRelativeDifficulties, "g", false, "If true, then will generate relative difficulties file.")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 	a.flagSet.BoolVar(&a.exitEarly, "exit", false, "If provided with -g and rd-out, will generate relative difficulty file to rd-out and exit.")
+	a.flagSet.IntVar(&a.histogramPuzzleCount, "histogram-count", 0, "If number is 1 or greater, will generate that many puzzles with the new model and print details on their difficulties.")
 }
 
 func init() {
@@ -173,6 +180,10 @@ func (a *appOptions) fixUp() error {
 		if a.exitEarly {
 			return errors.New("-exit passed without g")
 		}
+	}
+
+	if a.histogramPuzzleCount < 0 {
+		return errors.New("-histogram-count must be 0 or greater")
 	}
 
 	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
@@ -307,6 +318,9 @@ func main() {
 		branchSwitchMessage = "Calculating on"
 	}
 
+	//Later parts of the pipeline require an analysis file, so remember at least one.
+	var lastEffectiveAnalysisFile string
+
 	for i, branch := range a.branchesList {
 
 		if branch == "" {
@@ -377,18 +391,9 @@ func main() {
 
 			///Accumulate the R2 for each run; we'll divide by numRuns after the loop.
 			results[branchKey] += runWeka(effectiveSolvesFile, effectiveAnalysisFile)
+
+			lastEffectiveAnalysisFile = effectiveAnalysisFile
 		}
-	}
-
-	//Take the average of each r2
-	for key, val := range results {
-		results[key] = val / float64(a.numRuns)
-	}
-
-	if len(results) > 1 || a.numRuns > 1 {
-		//We only need to go to the trouble of painting the table if more than
-		//one branch was run
-		printR2Table(results)
 	}
 
 	//Put the repo back in the state it was when we found it.
@@ -412,6 +417,64 @@ func main() {
 		}
 	}
 
+	//Take the average of each r2
+	for key, val := range results {
+		results[key] = val / float64(a.numRuns)
+	}
+
+	if len(results) > 1 || a.numRuns > 1 {
+		//We only need to go to the trouble of painting the table if more than
+		//one branch was run
+		printR2Table(results)
+	}
+
+	if a.histogramPuzzleCount > 0 {
+		//Generate a bunch of puzzles and print out their difficutlies.
+
+		data, err := ioutil.ReadFile(lastEffectiveAnalysisFile)
+
+		if err != nil {
+			log.Println("Couldn't read back analysis file:", err)
+			return
+		}
+
+		weights, err := wekaparser.ParseWeights(string(data))
+
+		if err != nil {
+			log.Println("Error parsing weights:", err)
+			return
+		}
+
+		histogramPuzzles(a.histogramPuzzleCount, weights)
+	}
+
+}
+
+func histogramPuzzles(count int, model map[string]float64) {
+	if count < 0 {
+		return
+	}
+
+	//TODO: ideally we'd save the current model, do our thing, and then
+	//restore it later. but we can't because we can't get at the current
+	//model. Maybe a Save/RestoreModel in the main library?
+
+	sudoku.LoadDifficultyModel(model)
+
+	var difficulties []float64
+
+	for i := 0; i < count; i++ {
+		log.Println("Generating puzzle #", i+1)
+		puzzle := sudoku.GenerateGrid(nil)
+		difficulty := puzzle.Difficulty()
+		difficulties = append(difficulties, difficulty)
+	}
+
+	sort.Float64s(difficulties)
+
+	//TODO: print out a histogram here.
+	fmt.Println("Min difficulty:", difficulties[0])
+	fmt.Println("Max difficulty:", difficulties[len(difficulties)-1])
 }
 
 func printR2Table(results map[string]float64) {
