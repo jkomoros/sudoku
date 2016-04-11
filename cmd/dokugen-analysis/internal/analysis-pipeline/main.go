@@ -14,6 +14,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gosuri/uitable"
+	"github.com/jkomoros/sudoku"
+	"github.com/jkomoros/sudoku/cmd/dokugen-analysis/internal/wekaparser"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -21,6 +23,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 	"syscall"
@@ -44,6 +47,8 @@ var filesToDelete []string
 var initialPath string
 
 //TODO: amek this resilient to not being run in the package's directory
+
+//TODO: make this have a configurable pipeline, where you can start at any step and end at any step
 
 type appOptions struct {
 	//The actual relative difficulties file to use
@@ -313,6 +318,9 @@ func main() {
 		branchSwitchMessage = "Calculating on"
 	}
 
+	//Later parts of the pipeline require an analysis file, so remember at least one.
+	var lastEffectiveAnalysisFile string
+
 	for i, branch := range a.branchesList {
 
 		if branch == "" {
@@ -383,6 +391,8 @@ func main() {
 
 			///Accumulate the R2 for each run; we'll divide by numRuns after the loop.
 			results[branchKey] += runWeka(effectiveSolvesFile, effectiveAnalysisFile)
+
+			lastEffectiveAnalysisFile = effectiveAnalysisFile
 		}
 	}
 
@@ -418,6 +428,53 @@ func main() {
 		printR2Table(results)
 	}
 
+	if a.histogramPuzzleCount > 0 {
+		//Generate a bunch of puzzles and print out their difficutlies.
+
+		data, err := ioutil.ReadFile(lastEffectiveAnalysisFile)
+
+		if err != nil {
+			log.Println("Couldn't read back analysis file:", err)
+			return
+		}
+
+		weights, err := wekaparser.ParseWeights(string(data))
+
+		if err != nil {
+			log.Println("Error parsing weights:", err)
+			return
+		}
+
+		histogramPuzzles(a.histogramPuzzleCount, weights)
+	}
+
+}
+
+func histogramPuzzles(count int, model map[string]float64) {
+	if count < 0 {
+		return
+	}
+
+	//TODO: ideally we'd save the current model, do our thing, and then
+	//restore it later. but we can't because we can't get at the current
+	//model. Maybe a Save/RestoreModel in the main library?
+
+	sudoku.LoadDifficultyModel(model)
+
+	var difficulties []float64
+
+	for i := 0; i < count; i++ {
+		log.Println("Generating puzzle #", i+1)
+		puzzle := sudoku.GenerateGrid(nil)
+		difficulty := puzzle.Difficulty()
+		difficulties = append(difficulties, difficulty)
+	}
+
+	sort.Float64s(difficulties)
+
+	//TODO: print out a histogram here.
+	fmt.Println("Min difficulty:", difficulties[0])
+	fmt.Println("Max difficulty:", difficulties[len(difficulties)-1])
 }
 
 func printR2Table(results map[string]float64) {
