@@ -1,3 +1,5 @@
+//gendifficulties is used to take weka output and create the
+//hs_difficulty_weights file in the main package with go generate.
 package main
 
 import (
