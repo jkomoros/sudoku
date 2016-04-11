@@ -8,7 +8,6 @@ import (
 	"strings"
 )
 
-//TODO: implement ParseR2
 //TODO: use ParseR2 in analysis-pipeline
 //TODO: create a tool that takes in the input and outputs hs_difficulties.go
 
@@ -54,5 +53,35 @@ func ParseWeights(input string) (weights map[string]float64, err error) {
 	}
 
 	return weights, nil
+
+}
+
+//ParseR2 takes the output of weka-trainer and returns the R2
+func ParseR2(input string) (r2 float64, err error) {
+
+	inCrossValidationSection := false
+
+	for _, line := range strings.Split(input, "\n") {
+		if strings.Contains(line, "Cross-validation") {
+			inCrossValidationSection = true
+			continue
+		}
+		if !inCrossValidationSection {
+			continue
+		}
+		if !strings.HasPrefix(line, "Correlation coefficient") {
+			continue
+		}
+
+		line = strings.Replace(line, "Correlation coefficient", "", -1)
+		line = strings.TrimSpace(line)
+
+		flt, err := strconv.ParseFloat(line, 64)
+		if err != nil {
+			return 0.0, errors.New("Couldn't parse r2 when found:" + err.Error())
+		}
+		return flt, nil
+	}
+	return 0.0, errors.New("Couldn't find r2 in input")
 
 }

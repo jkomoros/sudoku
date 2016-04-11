@@ -114,3 +114,24 @@ func TestParseWeights(t *testing.T) {
 		t.Error("Didn't get the weights we expected. Got:", weights, "Expected:", expectedWeights)
 	}
 }
+
+func TestParseR2(t *testing.T) {
+
+	expectedR2 := 0.7681
+
+	data, err := ioutil.ReadFile("test_input.txt")
+
+	if err != nil {
+		t.Error("Couldn't read file:", err)
+	}
+
+	r2, err := ParseR2(string(data))
+
+	if err != nil {
+		t.Error("Got error from ParseR2", err)
+	}
+
+	if r2 != expectedR2 {
+		t.Error("Got wrong R2. Got", r2, "expcted", expectedR2)
+	}
+}
