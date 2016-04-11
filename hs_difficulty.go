@@ -28,7 +28,7 @@ var difficultySignalGenerators []difficultySignalGenerator
 //These are the weights that will be used to turn a list of signals into a
 //difficulty. starting weights are set in hs_difficulty_weights.go, which is
 //auto-generated. Generate those now:
-//go:generate python util/difficulty-convert.py
+//go:generate cmd/dokugen-analysis/internal/gendifficulties/gendifficulties
 var difficultySignalWeights map[string]float64
 
 //difficultyModelHashValue stashes the value of the hash of the model, so we
