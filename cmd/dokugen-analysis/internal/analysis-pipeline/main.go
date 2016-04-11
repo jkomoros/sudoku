@@ -92,6 +92,49 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.IntVar(&a.histogramPuzzleCount, "histogram-count", 0, "If number is 1 or greater, will generate that many puzzles with the new model and print details on their difficulties.")
 }
 
+/*
+
+//TODO: implement this pipeline scheme
+
+Pipepline phases:
+
+Difficulties >        Solves              >  Weka               > Histogram     >
+             |                            |                     |               |
+             > relative_difficulties.csv  |                     |               |
+                                          > solves_[branch].csv |               |
+                                                                > analysis.txt  |
+                                                                                > histogram.txt
+Phase identifiers:
+* difficulties
+* solves
+* weka
+* histogram
+
+Arguments:
+* start: {phase-id}
+* end: {phase-id}
+Start phase is where the pipeline starts, expecting the in file provied.
+End phase is the last complete phase that is done. so -start=difficulty -end=difficulty would
+generate relativedifficulties.csv and exit.
+If start is omitted, defaults to solves; if end is omitted, defaults to weka
+
+Each phase has a {phase}-out argument of where to save the output.
+* difficulties-out
+* solves-out (will have a branch ID added if multiple branches)
+* weka-out (will have a branch ID added if multiple branches)
+* histogram-out
+Each -out has a default value. If the special 'none' is provided, will omit.
+
+The "input" to each phase is the output of the phase before. If the phase
+before has its output silenced, the file that is output will be a temp file
+that will be removed upon exit.
+
+*Different phases have different arguments. For example:
+* difficulties-sample-rate
+* histogram-count (if 0, histogram phase will be skipped)
+
+*/
+
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
@@ -427,8 +470,6 @@ func main() {
 		//one branch was run
 		printR2Table(results)
 	}
-
-	//TODO: make it possible to just run this part of the pipeline if -a is passed.
 
 	if a.histogramPuzzleCount > 0 {
 		//Generate a bunch of puzzles and print out their difficutlies.
