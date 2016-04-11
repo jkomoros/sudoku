@@ -10,11 +10,19 @@ import (
 	"strconv"
 )
 
-const INPUT_FILE_NAME = "input.txt"
-const INPUT_SAMPLE_FILE_NAME = "input.SAMPLE.txt"
-const OUTPUT_FILE_NAME = "../../../../hs_difficulty_weights.go"
+var BASE_SUDOKU_DIR string
+var BASE_DIR string
+var INPUT_FILE_NAME string
+var INPUT_SAMPLE_FILE_NAME string
+var OUTPUT_FILE_NAME string
 
-//TODO: get rid of util/difficulty-converter.py and use this instead
+func init() {
+	BASE_SUDOKU_DIR = os.ExpandEnv("$GOPATH/src/github.com/jkomoros/sudoku/")
+	BASE_DIR = BASE_SUDOKU_DIR + "cmd/dokugen-analysis/internal/gendifficulties/"
+	INPUT_FILE_NAME = BASE_DIR + "input.txt"
+	INPUT_SAMPLE_FILE_NAME = BASE_DIR + "input.SAMPLE.txt"
+	OUTPUT_FILE_NAME = BASE_SUDOKU_DIR + "hs_difficulty_weights.go"
+}
 
 func main() {
 
