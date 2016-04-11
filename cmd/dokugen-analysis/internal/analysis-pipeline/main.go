@@ -576,6 +576,9 @@ func runWeka(solvesFile string, analysisFile string) float64 {
 //extractR2 extracts R2 out of the string formatted like "R2 = <float>"
 func extractR2(input string) float64 {
 
+	//Note: we don't use wekaparser.ParseR2 here because we're getting a much
+	//simpler output from weka-trainer.
+
 	input = strings.TrimPrefix(input, "R2 = ")
 	input = strings.TrimSpace(input)
 

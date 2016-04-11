@@ -3,17 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/jkomoros/sudoku/cmd/dokugen-analysis/internal/wekaparser"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
-	"regexp"
-	"strconv"
 )
 
 const temporaryArff = "solves.arff"
-
-const r2RegularExpression = `=== Cross-validation ===\n\nCorrelation coefficient\s*(\d\.\d{1,10})`
 
 var wekaJar string
 
@@ -121,7 +118,7 @@ func main() {
 		return
 	}
 
-	r2 := extractR2(string(output))
+	r2, _ := wekaparser.ParseR2(string(output))
 
 	fmt.Println("R2 =", r2)
 
@@ -140,18 +137,4 @@ func execJavaCommand(input ...string) *exec.Cmd {
 	args = append(args, input...)
 
 	return exec.Command("java", args...)
-}
-
-func extractR2(input string) float64 {
-	re := regexp.MustCompile(r2RegularExpression)
-	result := re.FindStringSubmatch(input)
-
-	if len(result) != 2 {
-		return 0.0
-	}
-
-	//Match 0 is the entire expression, so the float is in match 1
-
-	float, _ := strconv.ParseFloat(result[1], 64)
-	return float
 }

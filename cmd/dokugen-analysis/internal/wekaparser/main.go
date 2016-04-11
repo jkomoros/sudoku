@@ -8,7 +8,6 @@ import (
 	"strings"
 )
 
-//TODO: use ParseR2 in analysis-pipeline
 //TODO: create a tool that takes in the input and outputs hs_difficulties.go
 
 //ParseWeights takes the output of the weka-trainer and returns a map of the weights.
