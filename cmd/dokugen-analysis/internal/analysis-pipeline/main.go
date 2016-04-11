@@ -428,6 +428,8 @@ func main() {
 		printR2Table(results)
 	}
 
+	//TODO: make it possible to just run this part of the pipeline if -a is passed.
+
 	if a.histogramPuzzleCount > 0 {
 		//Generate a bunch of puzzles and print out their difficutlies.
 
