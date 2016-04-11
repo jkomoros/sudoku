@@ -386,17 +386,6 @@ func main() {
 		}
 	}
 
-	//Take the average of each r2
-	for key, val := range results {
-		results[key] = val / float64(a.numRuns)
-	}
-
-	if len(results) > 1 || a.numRuns > 1 {
-		//We only need to go to the trouble of painting the table if more than
-		//one branch was run
-		printR2Table(results)
-	}
-
 	//Put the repo back in the state it was when we found it.
 	if a.stashMode {
 		//Reverse the gitStash operation to put it back
@@ -416,6 +405,17 @@ func main() {
 			log.Println("Checking out", startingBranch, "to put repo back in the starting state.")
 			checkoutGitBranch(startingBranch)
 		}
+	}
+
+	//Take the average of each r2
+	for key, val := range results {
+		results[key] = val / float64(a.numRuns)
+	}
+
+	if len(results) > 1 || a.numRuns > 1 {
+		//We only need to go to the trouble of painting the table if more than
+		//one branch was run
+		printR2Table(results)
 	}
 
 }
