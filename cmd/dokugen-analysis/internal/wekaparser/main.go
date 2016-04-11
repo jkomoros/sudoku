@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-//TODO: create a tool that takes in the input and outputs hs_difficulties.go
-
 //ParseWeights takes the output of the weka-trainer and returns a map of the weights.
 func ParseWeights(input string) (weights map[string]float64, err error) {
 
