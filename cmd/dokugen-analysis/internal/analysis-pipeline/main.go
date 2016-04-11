@@ -95,6 +95,7 @@ func (a *appOptions) defineFlags() {
 /*
 
 //TODO: implement this pipeline scheme
+//TODO: print something similar to this message when -h is passed
 
 Pipepline phases:
 
