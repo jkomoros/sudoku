@@ -62,6 +62,7 @@ type appOptions struct {
 	branchesList                   []string
 	help                           bool
 	generateRelativeDifficulties   bool
+	histogramPuzzleCount           int
 	//TODO: this is probably named wrong, since currently it's only used to exit if -g passed.
 	exitEarly bool
 	flagSet   *flag.FlagSet
@@ -83,6 +84,7 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.BoolVar(&a.generateRelativeDifficulties, "g", false, "If true, then will generate relative difficulties file.")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 	a.flagSet.BoolVar(&a.exitEarly, "exit", false, "If provided with -g and rd-out, will generate relative difficulty file to rd-out and exit.")
+	a.flagSet.IntVar(&a.histogramPuzzleCount, "histogram-count", 0, "If number is 1 or greater, will generate that many puzzles with the new model and print details on their difficulties.")
 }
 
 func init() {
@@ -173,6 +175,10 @@ func (a *appOptions) fixUp() error {
 		if a.exitEarly {
 			return errors.New("-exit passed without g")
 		}
+	}
+
+	if a.histogramPuzzleCount < 0 {
+		return errors.New("-histogram-count must be 0 or greater")
 	}
 
 	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
