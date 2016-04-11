@@ -46,6 +46,16 @@ var filesToDelete []string
 
 var initialPath string
 
+//go:generate stringer -type=Phase
+type Phase int
+
+const (
+	Difficulties Phase = iota
+	Solves
+	Weka
+	Histogram
+)
+
 //TODO: amek this resilient to not being run in the package's directory
 
 //TODO: make this have a configurable pipeline, where you can start at any step and end at any step
