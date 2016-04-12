@@ -469,6 +469,10 @@ func main() {
 
 			if a.end >= Solves {
 
+				if a.files.solves.temp {
+					filesToDelete = append(filesToDelete, effectiveSolvesFile)
+				}
+
 				runSolves(relativeDifficultiesFile, effectiveSolvesFile)
 			}
 
@@ -478,9 +482,14 @@ func main() {
 				branchKey = "<default>"
 			}
 
-			log.Println("Running Weka on solves...")
-
 			if a.end >= Analysis {
+
+				log.Println("Running Weka on solves...")
+
+				if a.files.analysis.temp {
+					filesToDelete = append(filesToDelete, effectiveAnalysisFile)
+				}
+
 				///Accumulate the R2 for each run; we'll divide by numRuns after the loop.
 				results[branchKey] += runWeka(effectiveSolvesFile, effectiveAnalysisFile)
 			}
