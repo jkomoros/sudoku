@@ -39,9 +39,9 @@ Fastest way is to run `analysis-pipeline -g -rd-out=relativedifficulties.csv -ex
 
 To quickly tell if a change to the library helped r2 configure the changes and either leave them uncommitted or stash them. Then run:
 
-go build && ./analysis-pipeline -g -s
+go build && ./analysis-pipeline -start=difficulties -end=analysis
 
-(If you already have a fresh Relative Difficulties, you can swap -g with -r=RELATIVEDIFFICULTIESFILE . If you don't have a fresh RD but want to save one, add -rd-out=OUTPUTFILE to save it out in the middle of the pipeline)
+(If you already have a fresh Relative Difficulties, you can make -start=solves with -r=RELATIVEDIFFICULTIESFILE . If you don't have a fresh RD but want to save one, add -keep to save it out in the middle of the pipeline)
 
 This will run the tester, then either stash or stash pop, then run again, then leave the repo in the state in started in.
 
