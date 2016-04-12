@@ -46,7 +46,6 @@ var filesToDelete []string
 
 var initialPath string
 
-//go:generate stringer -type=Phase
 type Phase int
 
 const (
@@ -55,6 +54,10 @@ const (
 	Weka
 	Histogram
 )
+
+//phaseMap is initalized to the same as the constant enum but in string form
+//in init.
+var phaseMap []string
 
 //TODO: amek this resilient to not being run in the package's directory
 
@@ -148,6 +151,29 @@ that will be removed upon exit.
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
+	phaseMap = []string{
+		"difficulties",
+		"solves",
+		"weka",
+		"histogram",
+	}
+}
+
+func (p Phase) String() string {
+	if int(p) < 0 || int(p) >= len(phaseMap) {
+		return ""
+	}
+	return phaseMap[int(p)]
+}
+
+func StringToPhase(input string) Phase {
+	input = strings.ToLower(input)
+	for i, phaseAsString := range phaseMap {
+		if phaseAsString == input {
+			return Phase(i)
+		}
+	}
+	return -1
 }
 
 func randomFileName(prefix, suffix string) string {
