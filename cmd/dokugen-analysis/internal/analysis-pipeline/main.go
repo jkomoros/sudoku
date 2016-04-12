@@ -85,10 +85,10 @@ type appOptions struct {
 	startingWithUncommittedChanges bool
 	branches                       string
 	branchesList                   []string
-	//TODO: have a no-temp argument, that if true, means we don't delete any temp files.
-	help                 bool
-	histogramPuzzleCount int
-	flagSet              *flag.FlagSet
+	keep                           bool
+	help                           bool
+	histogramPuzzleCount           int
+	flagSet                        *flag.FlagSet
 }
 
 func (a *appOptions) defineFlags() {
@@ -107,6 +107,7 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.IntVar(&a.histogramPuzzleCount, "histogram-count", 0, "If number is 1 or greater, will generate that many puzzles with the new model and print details on their difficulties.")
 	a.flagSet.StringVar(&a.rawStart, "start", "solves", "The phase to start from")
 	a.flagSet.StringVar(&a.rawEnd, "end", "analysis", "The last phase to run")
+	a.flagSet.BoolVar(&a.keep, "keep", false, "If true, will keep all files generated within the pipeline (default is to delete these temp files.")
 
 }
 
@@ -258,26 +259,37 @@ func (a *appOptions) fixUp() error {
 	//TODO: if the phase is starting after the file in question, don't look
 	//for it at TEMP, but the normal location.
 
-	if a.files.difficulties.file == "" {
-		a.files.difficulties.file = randomFileName("relative_difficulties_TEMP", ".csv")
-		a.files.difficulties.temp = true
+	if a.keep {
+		if a.files.difficulties.file == "" {
+			a.files.difficulties.file = randomFileName("relative_difficulties", ".csv")
+		}
+		if a.files.solves.file == "" {
+			a.files.solves.file = randomFileName("solves", ".csv")
+		}
+		if a.files.analysis.file == "" {
+			a.files.analysis.file = randomFileName("analysis", ".txt")
+		}
+		if a.files.histogram.file == "" {
+			a.files.histogram.file = randomFileName("histogram", ".txt")
+		}
+	} else {
+		if a.files.difficulties.file == "" {
+			a.files.difficulties.file = randomFileName("relative_difficulties_TEMP", ".csv")
+			a.files.difficulties.temp = true
+		}
+		if a.files.solves.file == "" {
+			a.files.solves.file = randomFileName("solves_TEMP", ".csv")
+			a.files.solves.temp = true
+		}
+		if a.files.analysis.file == "" {
+			a.files.analysis.file = randomFileName("analysis_TEMP", ".txt")
+			a.files.analysis.temp = true
+		}
+		if a.files.histogram.file == "" {
+			a.files.histogram.file = randomFileName("histogram_TEMP", ".txt")
+			a.files.histogram.temp = true
+		}
 	}
-
-	if a.files.solves.file == "" {
-		a.files.solves.file = randomFileName("solves_TEMP", ".csv")
-		a.files.solves.temp = true
-	}
-
-	if a.files.analysis.file == "" {
-		a.files.analysis.file = randomFileName("analysis_TEMP", ".txt")
-		a.files.analysis.temp = true
-	}
-
-	if a.files.histogram.file == "" {
-		a.files.histogram.file = randomFileName("histogram_TEMP", ".txt")
-		a.files.histogram.temp = true
-	}
-
 	if a.histogramPuzzleCount < 0 {
 		return errors.New("-histogram-count must be 0 or greater")
 	}
