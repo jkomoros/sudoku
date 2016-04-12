@@ -85,9 +85,10 @@ type appOptions struct {
 	startingWithUncommittedChanges bool
 	branches                       string
 	branchesList                   []string
-	help                           bool
-	histogramPuzzleCount           int
-	flagSet                        *flag.FlagSet
+	//TODO: have a no-temp argument, that if true, means we don't delete any temp files.
+	help                 bool
+	histogramPuzzleCount int
+	flagSet              *flag.FlagSet
 }
 
 func (a *appOptions) defineFlags() {
