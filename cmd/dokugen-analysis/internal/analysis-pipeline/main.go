@@ -104,7 +104,7 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.StringVar(&a.files.analysis.file, "a", "", "The file to output analysis to")
 	a.flagSet.IntVar(&a.numRuns, "n", 1, "The number of runs of each config to do and then average together")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
-	a.flagSet.IntVar(&a.histogramPuzzleCount, "histogram-count", 0, "If number is 1 or greater, will generate that many puzzles with the new model and print details on their difficulties.")
+	a.flagSet.IntVar(&a.histogramPuzzleCount, "histogram-count", 10, "If number is 1 or greater and the end phase is Histogram or greater, will generate that many puzzles with the new model and print details on their difficulties.")
 	a.flagSet.StringVar(&a.rawStart, "start", "solves", "The phase to start from")
 	a.flagSet.StringVar(&a.rawEnd, "end", "analysis", "The last phase to run")
 	a.flagSet.BoolVar(&a.keep, "keep", false, "If true, will keep all files generated within the pipeline (default is to delete these temp files.")
