@@ -71,8 +71,6 @@ upon exit.
 *Different phases have different additional arguments. For example:
 * sample-rate=0
 * histogram-count (if 0, histogram phase will be skipped)
-
-If you want to keep the intermediate files, pass -keep
 `
 
 const pathToDokugenAnalysis = "../../"
@@ -142,7 +140,6 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.BoolVar(&a.stashMode, "s", false, "If in stash mode, will do the a-b test between uncommitted and committed changes, automatically figuring out which state we're currently in. Cannot be combined with -b")
 	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
 	a.flagSet.StringVar(&a.files.difficulties.file, "r", "", "The file to use as relative difficulties input.")
-	//TODO: this is a terrible name for this flag. Can we reuse -o? ... no, because then it's not a clear signal to exit if provided.
 	a.flagSet.StringVar(&a.files.solves.file, "o", "", "The file to output solves to")
 	a.flagSet.StringVar(&a.files.analysis.file, "a", "", "The file to output analysis to")
 	a.flagSet.IntVar(&a.numRuns, "n", 1, "The number of runs of each config to do and then average together")
