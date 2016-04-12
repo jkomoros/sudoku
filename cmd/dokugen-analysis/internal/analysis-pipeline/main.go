@@ -388,160 +388,163 @@ func main() {
 		return
 	}
 
-	if _, err := os.Stat(a.files.difficulties.file); os.IsNotExist(err) {
-		log.Println("The specified relative difficulties file does not exist:", a.files.difficulties.file)
-		return
-	}
-
-	results := make(map[string]float64)
-
-	startingBranch := gitCurrentBranch()
-
-	branchSwitchMessage := "Switching to branch"
-
-	relativeDifficultiesFile := a.files.difficulties.file
-
-	if a.sampleRate > 0 {
-		relativeDifficultiesFile = strings.Replace(relativeDifficultiesFile, ".csv", "", -1)
-		relativeDifficultiesFile += "_SAMPLED_" + strconv.Itoa(a.sampleRate) + ".csv"
-		if !sampledRelativeDifficulties(a.files.difficulties.file, relativeDifficultiesFile, a.sampleRate) {
-			log.Println("Couldn't create sampled relative difficulties file")
-			return
-		}
-		filesToDelete = append(filesToDelete, relativeDifficultiesFile)
-	}
-
-	//TODO: this is off by one
-	log.Println(strconv.Itoa(numLinesInFile(relativeDifficultiesFile)), "lines in", relativeDifficultiesFile)
-
-	if a.stashMode {
-		branchSwitchMessage = "Calculating on"
-	}
-
 	//Later parts of the pipeline require an analysis file, so remember at least one.
 	var lastEffectiveAnalysisFile = a.files.analysis.file
 
-	for i, branch := range a.branchesList {
+	if a.start < Histogram {
 
-		if branch == "" {
-			log.Println("Staying on the current branch.")
-		} else {
-			log.Println(branchSwitchMessage, branch)
+		if _, err := os.Stat(a.files.difficulties.file); os.IsNotExist(err) {
+			log.Println("The specified relative difficulties file does not exist:", a.files.difficulties.file)
+			return
 		}
 
-		//Get the repo in the right state for this run.
-		if a.stashMode {
-			// if i == 0
-			switch i {
-			case 0:
-				//do nothing, we already ahve the right changes to start with
-			case 1:
-				//If we have uncommitted changes right now, stash them. Otherwise, stash pop.
-				if !gitStash(a.startingWithUncommittedChanges) {
-					log.Println("We couldn't stash/stash-pop.")
-					return
-				}
-			default:
-				//This should never happen
-				//Note: panicing here will mean we don't do any clean up.
-				panic("Got more than 2 'branches' in stash mode")
-			}
-		} else {
-			if !checkoutGitBranch(branch) {
-				log.Println("Couldn't switch to branch", branch, " (perhaps you have uncommitted changes?). Quitting.")
+		results := make(map[string]float64)
+
+		startingBranch := gitCurrentBranch()
+
+		branchSwitchMessage := "Switching to branch"
+
+		relativeDifficultiesFile := a.files.difficulties.file
+
+		if a.sampleRate > 0 {
+			relativeDifficultiesFile = strings.Replace(relativeDifficultiesFile, ".csv", "", -1)
+			relativeDifficultiesFile += "_SAMPLED_" + strconv.Itoa(a.sampleRate) + ".csv"
+			if !sampledRelativeDifficulties(a.files.difficulties.file, relativeDifficultiesFile, a.sampleRate) {
+				log.Println("Couldn't create sampled relative difficulties file")
 				return
 			}
+			filesToDelete = append(filesToDelete, relativeDifficultiesFile)
 		}
 
-		for i := 0; i < a.numRuns; i++ {
+		//TODO: this is off by one
+		log.Println(strconv.Itoa(numLinesInFile(relativeDifficultiesFile)), "lines in", relativeDifficultiesFile)
 
-			//The run number reported to humans will be one indexed
-			oneIndexedRun := strconv.Itoa(i + 1)
-
-			if a.numRuns > 1 {
-				log.Println("Starting run", oneIndexedRun, "of", strconv.Itoa(a.numRuns))
-			}
-
-			effectiveSolvesFile := a.files.solves.file
-			effectiveAnalysisFile := a.files.analysis.file
-
-			effectiveSolvesFile = strings.Replace(effectiveSolvesFile, ".csv", "", -1)
-			effectiveAnalysisFile = strings.Replace(effectiveAnalysisFile, ".txt", "", -1)
-
-			if branch != "" {
-				effectiveSolvesFile += "_" + strings.ToUpper(branch)
-				effectiveAnalysisFile += "_" + strings.ToUpper(branch)
-			}
-
-			if a.numRuns > 1 {
-				effectiveSolvesFile += "_" + oneIndexedRun
-				effectiveAnalysisFile += "_" + oneIndexedRun
-			}
-
-			effectiveSolvesFile += ".csv"
-			effectiveAnalysisFile += ".txt"
-
-			if a.end >= Solves {
-
-				if a.files.solves.temp {
-					filesToDelete = append(filesToDelete, effectiveSolvesFile)
-				}
-
-				runSolves(relativeDifficultiesFile, effectiveSolvesFile)
-			}
-
-			branchKey := branch
-
-			if branchKey == "" {
-				branchKey = "<default>"
-			}
-
-			if a.end >= Analysis {
-
-				log.Println("Running Weka on solves...")
-
-				if a.files.analysis.temp {
-					filesToDelete = append(filesToDelete, effectiveAnalysisFile)
-				}
-
-				///Accumulate the R2 for each run; we'll divide by numRuns after the loop.
-				results[branchKey] += runWeka(effectiveSolvesFile, effectiveAnalysisFile)
-			}
-
-			lastEffectiveAnalysisFile = effectiveAnalysisFile
+		if a.stashMode {
+			branchSwitchMessage = "Calculating on"
 		}
-	}
 
-	//Put the repo back in the state it was when we found it.
-	if a.stashMode {
-		//Reverse the gitStash operation to put it back
+		for i, branch := range a.branchesList {
 
-		if a.startingWithUncommittedChanges {
-			log.Println("Unstashing changes to put repo back in starting state")
+			if branch == "" {
+				log.Println("Staying on the current branch.")
+			} else {
+				log.Println(branchSwitchMessage, branch)
+			}
+
+			//Get the repo in the right state for this run.
+			if a.stashMode {
+				// if i == 0
+				switch i {
+				case 0:
+					//do nothing, we already ahve the right changes to start with
+				case 1:
+					//If we have uncommitted changes right now, stash them. Otherwise, stash pop.
+					if !gitStash(a.startingWithUncommittedChanges) {
+						log.Println("We couldn't stash/stash-pop.")
+						return
+					}
+				default:
+					//This should never happen
+					//Note: panicing here will mean we don't do any clean up.
+					panic("Got more than 2 'branches' in stash mode")
+				}
+			} else {
+				if !checkoutGitBranch(branch) {
+					log.Println("Couldn't switch to branch", branch, " (perhaps you have uncommitted changes?). Quitting.")
+					return
+				}
+			}
+
+			for i := 0; i < a.numRuns; i++ {
+
+				//The run number reported to humans will be one indexed
+				oneIndexedRun := strconv.Itoa(i + 1)
+
+				if a.numRuns > 1 {
+					log.Println("Starting run", oneIndexedRun, "of", strconv.Itoa(a.numRuns))
+				}
+
+				effectiveSolvesFile := a.files.solves.file
+				effectiveAnalysisFile := a.files.analysis.file
+
+				effectiveSolvesFile = strings.Replace(effectiveSolvesFile, ".csv", "", -1)
+				effectiveAnalysisFile = strings.Replace(effectiveAnalysisFile, ".txt", "", -1)
+
+				if branch != "" {
+					effectiveSolvesFile += "_" + strings.ToUpper(branch)
+					effectiveAnalysisFile += "_" + strings.ToUpper(branch)
+				}
+
+				if a.numRuns > 1 {
+					effectiveSolvesFile += "_" + oneIndexedRun
+					effectiveAnalysisFile += "_" + oneIndexedRun
+				}
+
+				effectiveSolvesFile += ".csv"
+				effectiveAnalysisFile += ".txt"
+
+				if a.end >= Solves {
+
+					if a.files.solves.temp {
+						filesToDelete = append(filesToDelete, effectiveSolvesFile)
+					}
+
+					runSolves(relativeDifficultiesFile, effectiveSolvesFile)
+				}
+
+				branchKey := branch
+
+				if branchKey == "" {
+					branchKey = "<default>"
+				}
+
+				if a.end >= Analysis {
+
+					log.Println("Running Weka on solves...")
+
+					if a.files.analysis.temp {
+						filesToDelete = append(filesToDelete, effectiveAnalysisFile)
+					}
+
+					///Accumulate the R2 for each run; we'll divide by numRuns after the loop.
+					results[branchKey] += runWeka(effectiveSolvesFile, effectiveAnalysisFile)
+				}
+
+				lastEffectiveAnalysisFile = effectiveAnalysisFile
+			}
+		}
+
+		//Put the repo back in the state it was when we found it.
+		if a.stashMode {
+			//Reverse the gitStash operation to put it back
+
+			if a.startingWithUncommittedChanges {
+				log.Println("Unstashing changes to put repo back in starting state")
+			} else {
+				log.Println("Stashing changes to put repo back in starting state")
+			}
+
+			if !gitStash(!a.startingWithUncommittedChanges) {
+				log.Println("We couldn't unstash/unpop to put the repo back in the same state.")
+			}
 		} else {
-			log.Println("Stashing changes to put repo back in starting state")
+			//If we aren't in the branch we started in, switch back to that branch
+			if gitCurrentBranch() != startingBranch {
+				log.Println("Checking out", startingBranch, "to put repo back in the starting state.")
+				checkoutGitBranch(startingBranch)
+			}
 		}
 
-		if !gitStash(!a.startingWithUncommittedChanges) {
-			log.Println("We couldn't unstash/unpop to put the repo back in the same state.")
+		//Take the average of each r2
+		for key, val := range results {
+			results[key] = val / float64(a.numRuns)
 		}
-	} else {
-		//If we aren't in the branch we started in, switch back to that branch
-		if gitCurrentBranch() != startingBranch {
-			log.Println("Checking out", startingBranch, "to put repo back in the starting state.")
-			checkoutGitBranch(startingBranch)
+
+		if len(results) > 1 || a.numRuns > 1 {
+			//We only need to go to the trouble of painting the table if more than
+			//one branch was run
+			printR2Table(results)
 		}
-	}
-
-	//Take the average of each r2
-	for key, val := range results {
-		results[key] = val / float64(a.numRuns)
-	}
-
-	if len(results) > 1 || a.numRuns > 1 {
-		//We only need to go to the trouble of painting the table if more than
-		//one branch was run
-		printR2Table(results)
 	}
 
 	if a.end >= Histogram && a.histogramPuzzleCount > 0 {
