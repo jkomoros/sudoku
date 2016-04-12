@@ -30,6 +30,49 @@ import (
 	"time"
 )
 
+const HELP_MESSAGE = `
+analysis-pipeline does a pipeline of analysis.
+
+Pipeline phases:
+
+difficulties >        solves              >  analysis           > histogram     >
+             |                            |                     |               |
+             > relative_difficulties.csv  |                     |               |
+                                          > solves_[branch].csv |               |
+                                                                > analysis.txt  |
+                                                                                > histogram.txt
+Phase identifiers:
+* difficulties
+* solves
+* analysis
+* histogram
+
+Arguments:
+* start: {phase-id}
+* end: {phase-id}
+Start phase is where the pipeline starts, expecting the in file provied.
+End phase is the last complete phase that is done. so -start=difficulty -end=difficulty would
+generate relativedifficulties.csv and exit.
+If start is omitted, defaults to solves; if end is omitted, defaults to weka
+
+Each phase has a {phase}-out argument of where to save the output.
+* -r
+* -s (will have a branch ID added if multiple branches)
+* -a (will have a branch ID added if multiple branches)
+* (Histogram has no special output yet)
+Each output file has a default filename.
+
+The "input" to each phase is the output of the phase before. If the phase
+before has its output silenced, the file that is output will be a temp file
+that will be removed upon exit.
+
+*Different phases have different arguments. For example:
+* sample-rate=0
+* histogram-count (if 0, histogram phase will be skipped)
+
+If you want to keep the intermediate files, pass -keep
+`
+
 const pathToDokugenAnalysis = "../../"
 const pathFromDokugenAnalysis = "internal/analysis-pipeline/"
 
@@ -108,50 +151,6 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.BoolVar(&a.keep, "keep", false, "If true, will keep all files generated within the pipeline (default is to delete these temp files.")
 
 }
-
-/*
-
-//TODO: implement this pipeline scheme
-//TODO: print something similar to this message when -h is passed
-
-Pipepline phases:
-
-Difficulties >        Solves              >  Weka               > Histogram     >
-             |                            |                     |               |
-             > relative_difficulties.csv  |                     |               |
-                                          > solves_[branch].csv |               |
-                                                                > analysis.txt  |
-                                                                                > histogram.txt
-Phase identifiers:
-* difficulties
-* solves
-* weka
-* histogram
-
-Arguments:
-* start: {phase-id}
-* end: {phase-id}
-Start phase is where the pipeline starts, expecting the in file provied.
-End phase is the last complete phase that is done. so -start=difficulty -end=difficulty would
-generate relativedifficulties.csv and exit.
-If start is omitted, defaults to solves; if end is omitted, defaults to weka
-
-Each phase has a {phase}-out argument of where to save the output.
-* difficulties-out
-* solves-out (will have a branch ID added if multiple branches)
-* weka-out (will have a branch ID added if multiple branches)
-* histogram-out
-Each -out has a default value. If the special 'none' is provided, will omit.
-
-The "input" to each phase is the output of the phase before. If the phase
-before has its output silenced, the file that is output will be a temp file
-that will be removed upon exit.
-
-*Different phases have different arguments. For example:
-* difficulties-sample-rate
-* histogram-count (if 0, histogram phase will be skipped)
-
-*/
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -329,6 +328,11 @@ func buildExecutables() bool {
 	return true
 }
 
+func printHelp(a *appOptions) {
+	a.flagSet.PrintDefaults()
+	fmt.Println(HELP_MESSAGE)
+}
+
 func main() {
 
 	defer cleanUpTempFiles()
@@ -364,7 +368,7 @@ func main() {
 	}
 
 	if a.help {
-		a.flagSet.PrintDefaults()
+		printHelp(a)
 		return
 	}
 
