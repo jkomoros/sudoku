@@ -63,15 +63,18 @@ var phaseMap []string
 
 //TODO: make this have a configurable pipeline, where you can start at any step and end at any step
 
+type outputFile struct {
+	temp bool
+	file string
+}
+
 type appOptions struct {
-	//The actual relative difficulties file to use
-	relativeDifficultiesFile string
-	//TODO: currently we quit if this is provided with g, but in some cases you want it to export AND keep going.
-	outputRelativeDifficultiesFile string
-	//TODO: deleteRelativeDifficultiesFile is named incorrectly because we use it more specifically than that in main.
-	deleteRelativeDifficultiesFile bool
-	solvesFile                     string
-	analysisFile                   string
+	files struct {
+		difficulties outputFile
+		solves       outputFile
+		analysis     outputFile
+		histogram    outputFile
+	}
 	sampleRate                     int
 	numRuns                        int
 	rawStart                       string
@@ -83,11 +86,8 @@ type appOptions struct {
 	branches                       string
 	branchesList                   []string
 	help                           bool
-	generateRelativeDifficulties   bool
 	histogramPuzzleCount           int
-	//TODO: this is probably named wrong, since currently it's only used to exit if -g passed.
-	exitEarly bool
-	flagSet   *flag.FlagSet
+	flagSet                        *flag.FlagSet
 }
 
 func (a *appOptions) defineFlags() {
@@ -97,18 +97,15 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.IntVar(&a.sampleRate, "sample-rate", 0, "An optional sample rate of relative difficulties. Will use 1/n lines in calculation. 0 to use all.")
 	a.flagSet.BoolVar(&a.stashMode, "s", false, "If in stash mode, will do the a-b test between uncommitted and committed changes, automatically figuring out which state we're currently in. Cannot be combined with -b")
 	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
-	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties.csv", "The file to use as relative difficulties input.")
+	a.flagSet.StringVar(&a.files.difficulties.file, "r", "", "The file to use as relative difficulties input.")
 	//TODO: this is a terrible name for this flag. Can we reuse -o? ... no, because then it's not a clear signal to exit if provided.
-	a.flagSet.StringVar(&a.outputRelativeDifficultiesFile, "rd-out", "", "If -g is also provided and this path does not point to an existing file, will save out the generated relative difficulties to that location.")
-	a.flagSet.StringVar(&a.solvesFile, "o", "solves.csv", "The file to output solves to")
-	a.flagSet.StringVar(&a.analysisFile, "a", "analysis.txt", "The file to output analysis to")
+	a.flagSet.StringVar(&a.files.solves.file, "o", "", "The file to output solves to")
+	a.flagSet.StringVar(&a.files.analysis.file, "a", "", "The file to output analysis to")
 	a.flagSet.IntVar(&a.numRuns, "n", 1, "The number of runs of each config to do and then average together")
-	a.flagSet.BoolVar(&a.generateRelativeDifficulties, "g", false, "If true, then will generate relative difficulties file.")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
-	a.flagSet.BoolVar(&a.exitEarly, "exit", false, "If provided with -g and rd-out, will generate relative difficulty file to rd-out and exit.")
 	a.flagSet.IntVar(&a.histogramPuzzleCount, "histogram-count", 0, "If number is 1 or greater, will generate that many puzzles with the new model and print details on their difficulties.")
 	a.flagSet.StringVar(&a.rawStart, "start", "solves", "The phase to start from")
-	a.flagSet.StringVar(&a.rawEnd, "end", "weka", "The last phase to run")
+	a.flagSet.StringVar(&a.rawEnd, "end", "analysis", "The last phase to run")
 
 }
 
@@ -257,39 +254,30 @@ func (a *appOptions) fixUp() error {
 		return errors.New("Start phase is after end phase")
 	}
 
-	if a.generateRelativeDifficulties {
-		if a.outputRelativeDifficultiesFile == "" {
-			//They didn't provide a file, so we'll store the relative difficulties in a temporary file.
-			a.outputRelativeDifficultiesFile = randomFileName("relative_difficulties_TEMP", ".csv")
+	if a.files.analysis.file == "" {
+		a.files.analysis.file = randomFileName("analysis_TEMP", ".txt")
+		a.files.analysis.temp = true
+	}
 
-			//We want to delete this one when we're done
-			a.deleteRelativeDifficultiesFile = true
+	if a.files.difficulties.file == "" {
+		a.files.difficulties.file = randomFileName("relative_difficulties_TEMP", ".csv")
+		a.files.difficulties.temp = true
+	}
 
-		} else {
-			//We'll be outputting the generated relative difficulties to this location. Make sure it's empty
+	if a.files.solves.file == "" {
+		a.files.solves.file = randomFileName("solves_TEMP", ".csv")
+		a.files.solves.temp = true
+	}
 
-			if _, err := os.Stat(a.outputRelativeDifficultiesFile); !os.IsNotExist(err) {
-				return errors.New("Passed -g and -r pointing to a non-empty file.")
-			}
-		}
-		if a.exitEarly && a.outputRelativeDifficultiesFile == "" {
-			return errors.New("Exit passed without both g and rd-out")
-		}
-	} else {
-		if a.outputRelativeDifficultiesFile != "" {
-			return errors.New("rd-out passed without g")
-		}
-		if a.exitEarly {
-			return errors.New("-exit passed without g")
-		}
+	if a.files.histogram.file == "" {
+		a.files.histogram.file = randomFileName("histogram_TEMP", ".txt")
+		a.files.histogram.temp = true
 	}
 
 	if a.histogramPuzzleCount < 0 {
 		return errors.New("-histogram-count must be 0 or greater")
 	}
 
-	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
-	a.analysisFile = strings.Replace(a.analysisFile, ".txt", "", -1)
 	return nil
 }
 
@@ -369,29 +357,25 @@ func main() {
 	//TODO: most of this method should be factored into a separate func, so
 	//main is just configuring hte options and passing them in.
 
-	if a.generateRelativeDifficulties {
+	if a.start <= Difficulties {
 		log.Println("Generating relative difficulties.")
 
 		//If we're just using a temp file we should be sure to delete when done.
 		//We add this now in case the user exits the program while we're generating the difficulties.
-		if a.deleteRelativeDifficultiesFile {
-			filesToDelete = append(filesToDelete, a.outputRelativeDifficultiesFile)
+		if a.files.difficulties.temp == true {
+			filesToDelete = append(filesToDelete, a.files.difficulties.file)
 		}
 
 		//a.fixUp put a valid filename in a.outputRelativeDifficultiesFile
-		generateRelativeDifficulties(a.outputRelativeDifficultiesFile)
-
-		if !a.deleteRelativeDifficultiesFile && a.exitEarly {
-			//We're done, all we wanted to do was generate the file and quit.
-			return
-		}
-
-		//Make sure we're wired up to use the file we're outputting it to.
-		a.relativeDifficultiesFile = a.outputRelativeDifficultiesFile
+		generateRelativeDifficulties(a.files.difficulties.file)
 	}
 
-	if _, err := os.Stat(a.relativeDifficultiesFile); os.IsNotExist(err) {
-		log.Println("The specified relative difficulties file does not exist:", a.relativeDifficultiesFile)
+	if a.end == Difficulties {
+		return
+	}
+
+	if _, err := os.Stat(a.files.difficulties.file); os.IsNotExist(err) {
+		log.Println("The specified relative difficulties file does not exist:", a.files.difficulties.file)
 		return
 	}
 
@@ -401,12 +385,12 @@ func main() {
 
 	branchSwitchMessage := "Switching to branch"
 
-	relativeDifficultiesFile := a.relativeDifficultiesFile
+	relativeDifficultiesFile := a.files.difficulties.file
 
 	if a.sampleRate > 0 {
-		relativeDifficultiesFile = strings.Replace(a.relativeDifficultiesFile, ".csv", "", -1)
+		relativeDifficultiesFile = strings.Replace(relativeDifficultiesFile, ".csv", "", -1)
 		relativeDifficultiesFile += "_SAMPLED_" + strconv.Itoa(a.sampleRate) + ".csv"
-		if !sampledRelativeDifficulties(a.relativeDifficultiesFile, relativeDifficultiesFile, a.sampleRate) {
+		if !sampledRelativeDifficulties(a.files.difficulties.file, relativeDifficultiesFile, a.sampleRate) {
 			log.Println("Couldn't create sampled relative difficulties file")
 			return
 		}
@@ -464,9 +448,11 @@ func main() {
 				log.Println("Starting run", oneIndexedRun, "of", strconv.Itoa(a.numRuns))
 			}
 
-			//a.analysisFile and a.solvesFile have had their extension removed, if they had one.
-			effectiveSolvesFile := a.solvesFile
-			effectiveAnalysisFile := a.analysisFile
+			effectiveSolvesFile := a.files.solves.file
+			effectiveAnalysisFile := a.files.analysis.file
+
+			effectiveSolvesFile = strings.Replace(effectiveSolvesFile, ".csv", "", -1)
+			effectiveAnalysisFile = strings.Replace(effectiveAnalysisFile, ".txt", "", -1)
 
 			if branch != "" {
 				effectiveSolvesFile += "_" + strings.ToUpper(branch)
@@ -481,7 +467,10 @@ func main() {
 			effectiveSolvesFile += ".csv"
 			effectiveAnalysisFile += ".txt"
 
-			runSolves(relativeDifficultiesFile, effectiveSolvesFile)
+			if a.end >= Solves {
+
+				runSolves(relativeDifficultiesFile, effectiveSolvesFile)
+			}
 
 			branchKey := branch
 
@@ -491,8 +480,10 @@ func main() {
 
 			log.Println("Running Weka on solves...")
 
-			///Accumulate the R2 for each run; we'll divide by numRuns after the loop.
-			results[branchKey] += runWeka(effectiveSolvesFile, effectiveAnalysisFile)
+			if a.end >= Analysis {
+				///Accumulate the R2 for each run; we'll divide by numRuns after the loop.
+				results[branchKey] += runWeka(effectiveSolvesFile, effectiveAnalysisFile)
+			}
 
 			lastEffectiveAnalysisFile = effectiveAnalysisFile
 		}
@@ -530,7 +521,7 @@ func main() {
 		printR2Table(results)
 	}
 
-	if a.histogramPuzzleCount > 0 {
+	if a.end >= Histogram && a.histogramPuzzleCount > 0 {
 		//Generate a bunch of puzzles and print out their difficutlies.
 
 		data, err := ioutil.ReadFile(lastEffectiveAnalysisFile)
@@ -574,7 +565,7 @@ func histogramPuzzles(count int, model map[string]float64) {
 
 	sort.Float64s(difficulties)
 
-	//TODO: print out a histogram here.
+	//TODO: print out a histogram here and save to a.files.histogram.file
 	fmt.Println("Min difficulty:", difficulties[0])
 	fmt.Println("Max difficulty:", difficulties[len(difficulties)-1])
 }
