@@ -61,8 +61,6 @@ var phaseMap []string
 
 //TODO: amek this resilient to not being run in the package's directory
 
-//TODO: make this have a configurable pipeline, where you can start at any step and end at any step
-
 type outputFile struct {
 	temp bool
 	file string
