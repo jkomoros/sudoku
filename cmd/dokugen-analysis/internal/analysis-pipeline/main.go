@@ -74,6 +74,10 @@ type appOptions struct {
 	analysisFile                   string
 	sampleRate                     int
 	numRuns                        int
+	rawStart                       string
+	start                          Phase
+	rawEnd                         string
+	end                            Phase
 	stashMode                      bool
 	startingWithUncommittedChanges bool
 	branches                       string
@@ -103,6 +107,9 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 	a.flagSet.BoolVar(&a.exitEarly, "exit", false, "If provided with -g and rd-out, will generate relative difficulty file to rd-out and exit.")
 	a.flagSet.IntVar(&a.histogramPuzzleCount, "histogram-count", 0, "If number is 1 or greater, will generate that many puzzles with the new model and print details on their difficulties.")
+	a.flagSet.StringVar(&a.rawStart, "start", "solves", "The phase to start from")
+	a.flagSet.StringVar(&a.rawEnd, "end", "weka", "The last phase to run")
+
 }
 
 /*
@@ -233,6 +240,21 @@ func (a *appOptions) fixUp() error {
 
 	if a.numRuns < 1 {
 		a.numRuns = 1
+	}
+
+	a.start = StringToPhase(a.rawStart)
+	a.end = StringToPhase(a.rawEnd)
+
+	if a.start == -1 {
+		return errors.New("Invalid option for start.")
+	}
+
+	if a.end == -1 {
+		return errors.New("Invalid option for end.")
+	}
+
+	if a.start > a.end {
+		return errors.New("Start phase is after end phase")
 	}
 
 	if a.generateRelativeDifficulties {
