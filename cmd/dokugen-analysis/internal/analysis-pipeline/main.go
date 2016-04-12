@@ -419,7 +419,7 @@ func main() {
 	}
 
 	//Later parts of the pipeline require an analysis file, so remember at least one.
-	var lastEffectiveAnalysisFile string
+	var lastEffectiveAnalysisFile = a.files.analysis.file
 
 	for i, branch := range a.branchesList {
 
