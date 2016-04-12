@@ -255,7 +255,7 @@ func (a *appOptions) fixUp() error {
 	}
 
 	//TODO: if the phase is starting after the file in question, don't look
-	//for it at TEMP, but the normal location.
+	//for it at TEMP, but the default location (whether or not keep is true)
 
 	if a.keep {
 		if a.files.difficulties.file == "" {
