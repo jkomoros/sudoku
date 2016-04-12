@@ -14,7 +14,7 @@ func TestPhaseToString(t *testing.T) {
 		{"Difficulties", Difficulties},
 		{"Foo", -1},
 		{"solves", Solves},
-		{"weka", Weka},
+		{"analysis", Analysis},
 		{"histogram", Histogram},
 	}
 
@@ -31,7 +31,7 @@ func TestPhaseToString(t *testing.T) {
 	}{
 		{Difficulties, "difficulties"},
 		{Solves, "solves"},
-		{Weka, "weka"},
+		{Analysis, "analysis"},
 		{Histogram, "histogram"},
 		{Phase(len(phaseMap)), ""},
 		{-1, ""},
@@ -48,25 +48,25 @@ func TestPhaseToString(t *testing.T) {
 func TestAppOptionsPhase(t *testing.T) {
 	options := getDefaultOptions()
 
-	options.rawStart = "weka"
+	options.rawStart = "analysis"
 	options.rawEnd = "histogram"
 
 	if err := options.fixUp(); err != nil {
 		t.Error("Got non-nil error on basic options", err)
 	}
 
-	if options.start != Weka {
-		t.Error("Expected options.start to be weka, got", options.start)
+	if options.start != Analysis {
+		t.Error("Expected options.start to be analysis, got", options.start)
 	}
 
 	if options.end != Histogram {
-		t.Error("Expected options.end to be weka, got", options.end)
+		t.Error("Expected options.end to be histogram, got", options.end)
 	}
 
 	options = getDefaultOptions()
 
 	options.rawStart = "histogram"
-	options.rawEnd = "weka"
+	options.rawEnd = "analysis"
 
 	if err := options.fixUp(); err == nil {
 		t.Error("Didn't get error for a start phase that's after an end phase")

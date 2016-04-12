@@ -51,7 +51,7 @@ type Phase int
 const (
 	Difficulties Phase = iota
 	Solves
-	Weka
+	Analysis
 	Histogram
 )
 
@@ -161,7 +161,7 @@ func init() {
 	phaseMap = []string{
 		"difficulties",
 		"solves",
-		"weka",
+		"analysis",
 		"histogram",
 	}
 }
