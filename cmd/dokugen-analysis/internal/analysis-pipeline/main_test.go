@@ -84,10 +84,7 @@ func TestAppOptionsPhase(t *testing.T) {
 
 //Callers should call fixUpOptions after receiving this.
 func getDefaultOptions() *appOptions {
-	options := &appOptions{
-		flagSet: flag.NewFlagSet("main", flag.ExitOnError),
-	}
-	options.defineFlags()
+	options := newAppOptions(flag.NewFlagSet("main", flag.ExitOnError))
 	options.flagSet.Parse([]string{})
 	return options
 }
