@@ -30,6 +30,49 @@ import (
 	"time"
 )
 
+const HELP_MESSAGE = `
+analysis-pipeline does a pipeline of analysis.
+
+Pipeline phases:
+
+difficulties >        solves              >  analysis           > histogram     >
+             |                            |                     |               |
+             > relative_difficulties.csv  |                     |               |
+                                          > solves_[branch].csv |               |
+                                                                > analysis.txt  |
+                                                                                > histogram.txt
+Phase identifiers:
+* difficulties
+* solves
+* analysis
+* histogram
+
+Arguments:
+* start: {phase-id}
+* end: {phase-id}
+Start phase is where the pipeline starts, expecting the in file provied.
+End phase is the last complete phase that is done. so -start=difficulty -end=difficulty would
+generate relativedifficulties.csv and exit.
+If start is omitted, defaults to solves; if end is omitted, defaults to weka
+
+Each phase has a {phase}-out argument of where to save the output.
+* -r
+* -s (will have a branch ID added if multiple branches)
+* -a (will have a branch ID added if multiple branches)
+* (Histogram has no special output yet)
+Each output file has a default filename.
+
+The "input" to each phase is the output of the phase before. If the phase
+before has its output silenced, the file that is output will be a temp file
+that will be removed upon exit.
+
+*Different phases have different arguments. For example:
+* sample-rate=0
+* histogram-count (if 0, histogram phase will be skipped)
+
+If you want to keep the intermediate files, pass -keep
+`
+
 const pathToDokugenAnalysis = "../../"
 const pathFromDokugenAnalysis = "internal/analysis-pipeline/"
 
@@ -46,31 +89,47 @@ var filesToDelete []string
 
 var initialPath string
 
+type Phase int
+
+const (
+	Difficulties Phase = iota
+	Solves
+	Analysis
+	Histogram
+)
+
+//phaseMap is initalized to the same as the constant enum but in string form
+//in init.
+var phaseMap []string
+
 //TODO: amek this resilient to not being run in the package's directory
 
-//TODO: make this have a configurable pipeline, where you can start at any step and end at any step
+type outputFile struct {
+	temp bool
+	file string
+}
 
 type appOptions struct {
-	//The actual relative difficulties file to use
-	relativeDifficultiesFile string
-	//TODO: currently we quit if this is provided with g, but in some cases you want it to export AND keep going.
-	outputRelativeDifficultiesFile string
-	//TODO: deleteRelativeDifficultiesFile is named incorrectly because we use it more specifically than that in main.
-	deleteRelativeDifficultiesFile bool
-	solvesFile                     string
-	analysisFile                   string
+	files struct {
+		difficulties outputFile
+		solves       outputFile
+		analysis     outputFile
+		histogram    outputFile
+	}
 	sampleRate                     int
 	numRuns                        int
+	rawStart                       string
+	start                          Phase
+	rawEnd                         string
+	end                            Phase
 	stashMode                      bool
 	startingWithUncommittedChanges bool
 	branches                       string
 	branchesList                   []string
+	keep                           bool
 	help                           bool
-	generateRelativeDifficulties   bool
 	histogramPuzzleCount           int
-	//TODO: this is probably named wrong, since currently it's only used to exit if -g passed.
-	exitEarly bool
-	flagSet   *flag.FlagSet
+	flagSet                        *flag.FlagSet
 }
 
 func (a *appOptions) defineFlags() {
@@ -80,63 +139,44 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.IntVar(&a.sampleRate, "sample-rate", 0, "An optional sample rate of relative difficulties. Will use 1/n lines in calculation. 0 to use all.")
 	a.flagSet.BoolVar(&a.stashMode, "s", false, "If in stash mode, will do the a-b test between uncommitted and committed changes, automatically figuring out which state we're currently in. Cannot be combined with -b")
 	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
-	a.flagSet.StringVar(&a.relativeDifficultiesFile, "r", "relativedifficulties.csv", "The file to use as relative difficulties input.")
+	a.flagSet.StringVar(&a.files.difficulties.file, "r", "", "The file to use as relative difficulties input.")
 	//TODO: this is a terrible name for this flag. Can we reuse -o? ... no, because then it's not a clear signal to exit if provided.
-	a.flagSet.StringVar(&a.outputRelativeDifficultiesFile, "rd-out", "", "If -g is also provided and this path does not point to an existing file, will save out the generated relative difficulties to that location.")
-	a.flagSet.StringVar(&a.solvesFile, "o", "solves.csv", "The file to output solves to")
-	a.flagSet.StringVar(&a.analysisFile, "a", "analysis.txt", "The file to output analysis to")
+	a.flagSet.StringVar(&a.files.solves.file, "o", "", "The file to output solves to")
+	a.flagSet.StringVar(&a.files.analysis.file, "a", "", "The file to output analysis to")
 	a.flagSet.IntVar(&a.numRuns, "n", 1, "The number of runs of each config to do and then average together")
-	a.flagSet.BoolVar(&a.generateRelativeDifficulties, "g", false, "If true, then will generate relative difficulties file.")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
-	a.flagSet.BoolVar(&a.exitEarly, "exit", false, "If provided with -g and rd-out, will generate relative difficulty file to rd-out and exit.")
-	a.flagSet.IntVar(&a.histogramPuzzleCount, "histogram-count", 0, "If number is 1 or greater, will generate that many puzzles with the new model and print details on their difficulties.")
+	a.flagSet.IntVar(&a.histogramPuzzleCount, "histogram-count", 10, "If number is 1 or greater and the end phase is Histogram or greater, will generate that many puzzles with the new model and print details on their difficulties.")
+	a.flagSet.StringVar(&a.rawStart, "start", "solves", "The phase to start from")
+	a.flagSet.StringVar(&a.rawEnd, "end", "analysis", "The last phase to run")
+	a.flagSet.BoolVar(&a.keep, "keep", false, "If true, will keep all files generated within the pipeline (default is to delete these temp files.")
+
 }
-
-/*
-
-//TODO: implement this pipeline scheme
-
-Pipepline phases:
-
-Difficulties >        Solves              >  Weka               > Histogram     >
-             |                            |                     |               |
-             > relative_difficulties.csv  |                     |               |
-                                          > solves_[branch].csv |               |
-                                                                > analysis.txt  |
-                                                                                > histogram.txt
-Phase identifiers:
-* difficulties
-* solves
-* weka
-* histogram
-
-Arguments:
-* start: {phase-id}
-* end: {phase-id}
-Start phase is where the pipeline starts, expecting the in file provied.
-End phase is the last complete phase that is done. so -start=difficulty -end=difficulty would
-generate relativedifficulties.csv and exit.
-If start is omitted, defaults to solves; if end is omitted, defaults to weka
-
-Each phase has a {phase}-out argument of where to save the output.
-* difficulties-out
-* solves-out (will have a branch ID added if multiple branches)
-* weka-out (will have a branch ID added if multiple branches)
-* histogram-out
-Each -out has a default value. If the special 'none' is provided, will omit.
-
-The "input" to each phase is the output of the phase before. If the phase
-before has its output silenced, the file that is output will be a temp file
-that will be removed upon exit.
-
-*Different phases have different arguments. For example:
-* difficulties-sample-rate
-* histogram-count (if 0, histogram phase will be skipped)
-
-*/
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
+	phaseMap = []string{
+		"difficulties",
+		"solves",
+		"analysis",
+		"histogram",
+	}
+}
+
+func (p Phase) String() string {
+	if int(p) < 0 || int(p) >= len(phaseMap) {
+		return ""
+	}
+	return phaseMap[int(p)]
+}
+
+func StringToPhase(input string) Phase {
+	input = strings.ToLower(input)
+	for i, phaseAsString := range phaseMap {
+		if phaseAsString == input {
+			return Phase(i)
+		}
+	}
+	return -1
 }
 
 func randomFileName(prefix, suffix string) string {
@@ -198,39 +238,59 @@ func (a *appOptions) fixUp() error {
 		a.numRuns = 1
 	}
 
-	if a.generateRelativeDifficulties {
-		if a.outputRelativeDifficultiesFile == "" {
-			//They didn't provide a file, so we'll store the relative difficulties in a temporary file.
-			a.outputRelativeDifficultiesFile = randomFileName("relative_difficulties_TEMP", ".csv")
+	a.start = StringToPhase(a.rawStart)
+	a.end = StringToPhase(a.rawEnd)
 
-			//We want to delete this one when we're done
-			a.deleteRelativeDifficultiesFile = true
-
-		} else {
-			//We'll be outputting the generated relative difficulties to this location. Make sure it's empty
-
-			if _, err := os.Stat(a.outputRelativeDifficultiesFile); !os.IsNotExist(err) {
-				return errors.New("Passed -g and -r pointing to a non-empty file.")
-			}
-		}
-		if a.exitEarly && a.outputRelativeDifficultiesFile == "" {
-			return errors.New("Exit passed without both g and rd-out")
-		}
-	} else {
-		if a.outputRelativeDifficultiesFile != "" {
-			return errors.New("rd-out passed without g")
-		}
-		if a.exitEarly {
-			return errors.New("-exit passed without g")
-		}
+	if a.start == -1 {
+		return errors.New("Invalid option for start.")
 	}
 
+	if a.end == -1 {
+		return errors.New("Invalid option for end.")
+	}
+
+	if a.start > a.end {
+		return errors.New("Start phase is after end phase")
+	}
+
+	//TODO: if the phase is starting after the file in question, don't look
+	//for it at TEMP, but the default location (whether or not keep is true)
+
+	if a.keep {
+		if a.files.difficulties.file == "" {
+			a.files.difficulties.file = randomFileName("relative_difficulties", ".csv")
+		}
+		if a.files.solves.file == "" {
+			a.files.solves.file = randomFileName("solves", ".csv")
+		}
+		if a.files.analysis.file == "" {
+			a.files.analysis.file = randomFileName("analysis", ".txt")
+		}
+		if a.files.histogram.file == "" {
+			a.files.histogram.file = randomFileName("histogram", ".txt")
+		}
+	} else {
+		if a.files.difficulties.file == "" {
+			a.files.difficulties.file = randomFileName("relative_difficulties_TEMP", ".csv")
+			a.files.difficulties.temp = true
+		}
+		if a.files.solves.file == "" {
+			a.files.solves.file = randomFileName("solves_TEMP", ".csv")
+			a.files.solves.temp = true
+		}
+		if a.files.analysis.file == "" {
+			a.files.analysis.file = randomFileName("analysis_TEMP", ".txt")
+			a.files.analysis.temp = true
+		}
+		if a.files.histogram.file == "" {
+			a.files.histogram.file = randomFileName("histogram_TEMP", ".txt")
+			a.files.histogram.temp = true
+		}
+	}
 	if a.histogramPuzzleCount < 0 {
 		return errors.New("-histogram-count must be 0 or greater")
 	}
 
-	a.solvesFile = strings.Replace(a.solvesFile, ".csv", "", -1)
-	a.analysisFile = strings.Replace(a.analysisFile, ".txt", "", -1)
 	return nil
 }
 
@@ -268,6 +328,11 @@ func buildExecutables() bool {
 	return true
 }
 
+func printHelp(a *appOptions) {
+	a.flagSet.PrintDefaults()
+	fmt.Println(HELP_MESSAGE)
+}
+
 func main() {
 
 	defer cleanUpTempFiles()
@@ -303,175 +368,190 @@ func main() {
 	}
 
 	if a.help {
-		a.flagSet.PrintDefaults()
+		printHelp(a)
 		return
 	}
 
 	//TODO: most of this method should be factored into a separate func, so
 	//main is just configuring hte options and passing them in.
 
-	if a.generateRelativeDifficulties {
+	if a.start <= Difficulties {
 		log.Println("Generating relative difficulties.")
 
 		//If we're just using a temp file we should be sure to delete when done.
 		//We add this now in case the user exits the program while we're generating the difficulties.
-		if a.deleteRelativeDifficultiesFile {
-			filesToDelete = append(filesToDelete, a.outputRelativeDifficultiesFile)
+		if a.files.difficulties.temp == true {
+			filesToDelete = append(filesToDelete, a.files.difficulties.file)
 		}
 
 		//a.fixUp put a valid filename in a.outputRelativeDifficultiesFile
-		generateRelativeDifficulties(a.outputRelativeDifficultiesFile)
-
-		if !a.deleteRelativeDifficultiesFile && a.exitEarly {
-			//We're done, all we wanted to do was generate the file and quit.
-			return
-		}
-
-		//Make sure we're wired up to use the file we're outputting it to.
-		a.relativeDifficultiesFile = a.outputRelativeDifficultiesFile
+		generateRelativeDifficulties(a.files.difficulties.file)
 	}
 
-	if _, err := os.Stat(a.relativeDifficultiesFile); os.IsNotExist(err) {
-		log.Println("The specified relative difficulties file does not exist:", a.relativeDifficultiesFile)
+	if a.end == Difficulties {
 		return
 	}
 
-	results := make(map[string]float64)
+	//Later parts of the pipeline require an analysis file, so remember at least one.
+	var lastEffectiveAnalysisFile = a.files.analysis.file
 
-	startingBranch := gitCurrentBranch()
+	if a.start < Histogram {
 
-	branchSwitchMessage := "Switching to branch"
-
-	relativeDifficultiesFile := a.relativeDifficultiesFile
-
-	if a.sampleRate > 0 {
-		relativeDifficultiesFile = strings.Replace(a.relativeDifficultiesFile, ".csv", "", -1)
-		relativeDifficultiesFile += "_SAMPLED_" + strconv.Itoa(a.sampleRate) + ".csv"
-		if !sampledRelativeDifficulties(a.relativeDifficultiesFile, relativeDifficultiesFile, a.sampleRate) {
-			log.Println("Couldn't create sampled relative difficulties file")
+		if _, err := os.Stat(a.files.difficulties.file); os.IsNotExist(err) {
+			log.Println("The specified relative difficulties file does not exist:", a.files.difficulties.file)
 			return
 		}
-		filesToDelete = append(filesToDelete, relativeDifficultiesFile)
-	}
 
-	//TODO: this is off by one
-	log.Println(strconv.Itoa(numLinesInFile(relativeDifficultiesFile)), "lines in", relativeDifficultiesFile)
+		results := make(map[string]float64)
 
-	if a.stashMode {
-		branchSwitchMessage = "Calculating on"
-	}
+		startingBranch := gitCurrentBranch()
 
-	//Later parts of the pipeline require an analysis file, so remember at least one.
-	var lastEffectiveAnalysisFile string
+		branchSwitchMessage := "Switching to branch"
 
-	for i, branch := range a.branchesList {
+		relativeDifficultiesFile := a.files.difficulties.file
 
-		if branch == "" {
-			log.Println("Staying on the current branch.")
-		} else {
-			log.Println(branchSwitchMessage, branch)
-		}
-
-		//Get the repo in the right state for this run.
-		if a.stashMode {
-			// if i == 0
-			switch i {
-			case 0:
-				//do nothing, we already ahve the right changes to start with
-			case 1:
-				//If we have uncommitted changes right now, stash them. Otherwise, stash pop.
-				if !gitStash(a.startingWithUncommittedChanges) {
-					log.Println("We couldn't stash/stash-pop.")
-					return
-				}
-			default:
-				//This should never happen
-				//Note: panicing here will mean we don't do any clean up.
-				panic("Got more than 2 'branches' in stash mode")
-			}
-		} else {
-			if !checkoutGitBranch(branch) {
-				log.Println("Couldn't switch to branch", branch, " (perhaps you have uncommitted changes?). Quitting.")
+		if a.sampleRate > 0 {
+			relativeDifficultiesFile = strings.Replace(relativeDifficultiesFile, ".csv", "", -1)
+			relativeDifficultiesFile += "_SAMPLED_" + strconv.Itoa(a.sampleRate) + ".csv"
+			if !sampledRelativeDifficulties(a.files.difficulties.file, relativeDifficultiesFile, a.sampleRate) {
+				log.Println("Couldn't create sampled relative difficulties file")
 				return
 			}
+			filesToDelete = append(filesToDelete, relativeDifficultiesFile)
 		}
 
-		for i := 0; i < a.numRuns; i++ {
+		//TODO: this is off by one
+		log.Println(strconv.Itoa(numLinesInFile(relativeDifficultiesFile)), "lines in", relativeDifficultiesFile)
 
-			//The run number reported to humans will be one indexed
-			oneIndexedRun := strconv.Itoa(i + 1)
-
-			if a.numRuns > 1 {
-				log.Println("Starting run", oneIndexedRun, "of", strconv.Itoa(a.numRuns))
-			}
-
-			//a.analysisFile and a.solvesFile have had their extension removed, if they had one.
-			effectiveSolvesFile := a.solvesFile
-			effectiveAnalysisFile := a.analysisFile
-
-			if branch != "" {
-				effectiveSolvesFile += "_" + strings.ToUpper(branch)
-				effectiveAnalysisFile += "_" + strings.ToUpper(branch)
-			}
-
-			if a.numRuns > 1 {
-				effectiveSolvesFile += "_" + oneIndexedRun
-				effectiveAnalysisFile += "_" + oneIndexedRun
-			}
-
-			effectiveSolvesFile += ".csv"
-			effectiveAnalysisFile += ".txt"
-
-			runSolves(relativeDifficultiesFile, effectiveSolvesFile)
-
-			branchKey := branch
-
-			if branchKey == "" {
-				branchKey = "<default>"
-			}
-
-			log.Println("Running Weka on solves...")
-
-			///Accumulate the R2 for each run; we'll divide by numRuns after the loop.
-			results[branchKey] += runWeka(effectiveSolvesFile, effectiveAnalysisFile)
-
-			lastEffectiveAnalysisFile = effectiveAnalysisFile
+		if a.stashMode {
+			branchSwitchMessage = "Calculating on"
 		}
-	}
 
-	//Put the repo back in the state it was when we found it.
-	if a.stashMode {
-		//Reverse the gitStash operation to put it back
+		for i, branch := range a.branchesList {
 
-		if a.startingWithUncommittedChanges {
-			log.Println("Unstashing changes to put repo back in starting state")
+			if branch == "" {
+				log.Println("Staying on the current branch.")
+			} else {
+				log.Println(branchSwitchMessage, branch)
+			}
+
+			//Get the repo in the right state for this run.
+			if a.stashMode {
+				// if i == 0
+				switch i {
+				case 0:
+					//do nothing, we already ahve the right changes to start with
+				case 1:
+					//If we have uncommitted changes right now, stash them. Otherwise, stash pop.
+					if !gitStash(a.startingWithUncommittedChanges) {
+						log.Println("We couldn't stash/stash-pop.")
+						return
+					}
+				default:
+					//This should never happen
+					//Note: panicing here will mean we don't do any clean up.
+					panic("Got more than 2 'branches' in stash mode")
+				}
+			} else {
+				if !checkoutGitBranch(branch) {
+					log.Println("Couldn't switch to branch", branch, " (perhaps you have uncommitted changes?). Quitting.")
+					return
+				}
+			}
+
+			for i := 0; i < a.numRuns; i++ {
+
+				//The run number reported to humans will be one indexed
+				oneIndexedRun := strconv.Itoa(i + 1)
+
+				if a.numRuns > 1 {
+					log.Println("Starting run", oneIndexedRun, "of", strconv.Itoa(a.numRuns))
+				}
+
+				effectiveSolvesFile := a.files.solves.file
+				effectiveAnalysisFile := a.files.analysis.file
+
+				effectiveSolvesFile = strings.Replace(effectiveSolvesFile, ".csv", "", -1)
+				effectiveAnalysisFile = strings.Replace(effectiveAnalysisFile, ".txt", "", -1)
+
+				if branch != "" {
+					effectiveSolvesFile += "_" + strings.ToUpper(branch)
+					effectiveAnalysisFile += "_" + strings.ToUpper(branch)
+				}
+
+				if a.numRuns > 1 {
+					effectiveSolvesFile += "_" + oneIndexedRun
+					effectiveAnalysisFile += "_" + oneIndexedRun
+				}
+
+				effectiveSolvesFile += ".csv"
+				effectiveAnalysisFile += ".txt"
+
+				if a.end >= Solves {
+
+					if a.files.solves.temp {
+						filesToDelete = append(filesToDelete, effectiveSolvesFile)
+					}
+
+					runSolves(relativeDifficultiesFile, effectiveSolvesFile)
+				}
+
+				branchKey := branch
+
+				if branchKey == "" {
+					branchKey = "<default>"
+				}
+
+				if a.end >= Analysis {
+
+					log.Println("Running Weka on solves...")
+
+					if a.files.analysis.temp {
+						filesToDelete = append(filesToDelete, effectiveAnalysisFile)
+					}
+
+					///Accumulate the R2 for each run; we'll divide by numRuns after the loop.
+					results[branchKey] += runWeka(effectiveSolvesFile, effectiveAnalysisFile)
+				}
+
+				lastEffectiveAnalysisFile = effectiveAnalysisFile
+			}
+		}
+
+		//Put the repo back in the state it was when we found it.
+		if a.stashMode {
+			//Reverse the gitStash operation to put it back
+
+			if a.startingWithUncommittedChanges {
+				log.Println("Unstashing changes to put repo back in starting state")
+			} else {
+				log.Println("Stashing changes to put repo back in starting state")
+			}
+
+			if !gitStash(!a.startingWithUncommittedChanges) {
+				log.Println("We couldn't unstash/unpop to put the repo back in the same state.")
+			}
 		} else {
-			log.Println("Stashing changes to put repo back in starting state")
+			//If we aren't in the branch we started in, switch back to that branch
+			if gitCurrentBranch() != startingBranch {
+				log.Println("Checking out", startingBranch, "to put repo back in the starting state.")
+				checkoutGitBranch(startingBranch)
+			}
 		}
 
-		if !gitStash(!a.startingWithUncommittedChanges) {
-			log.Println("We couldn't unstash/unpop to put the repo back in the same state.")
+		//Take the average of each r2
+		for key, val := range results {
+			results[key] = val / float64(a.numRuns)
 		}
-	} else {
-		//If we aren't in the branch we started in, switch back to that branch
-		if gitCurrentBranch() != startingBranch {
-			log.Println("Checking out", startingBranch, "to put repo back in the starting state.")
-			checkoutGitBranch(startingBranch)
+
+		if len(results) > 1 || a.numRuns > 1 {
+			//We only need to go to the trouble of painting the table if more than
+			//one branch was run
+			printR2Table(results)
 		}
 	}
 
-	//Take the average of each r2
-	for key, val := range results {
-		results[key] = val / float64(a.numRuns)
-	}
-
-	if len(results) > 1 || a.numRuns > 1 {
-		//We only need to go to the trouble of painting the table if more than
-		//one branch was run
-		printR2Table(results)
-	}
-
-	if a.histogramPuzzleCount > 0 {
+	if a.end >= Histogram && a.histogramPuzzleCount > 0 {
 		//Generate a bunch of puzzles and print out their difficutlies.
 
 		data, err := ioutil.ReadFile(lastEffectiveAnalysisFile)
@@ -515,7 +595,7 @@ func histogramPuzzles(count int, model map[string]float64) {
 
 	sort.Float64s(difficulties)
 
-	//TODO: print out a histogram here.
+	//TODO: print out a histogram here and save to a.files.histogram.file
 	fmt.Println("Min difficulty:", difficulties[0])
 	fmt.Println("Max difficulty:", difficulties[len(difficulties)-1])
 }
