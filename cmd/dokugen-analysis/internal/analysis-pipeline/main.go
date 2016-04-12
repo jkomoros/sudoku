@@ -255,10 +255,8 @@ func (a *appOptions) fixUp() error {
 		return errors.New("Start phase is after end phase")
 	}
 
-	if a.files.analysis.file == "" {
-		a.files.analysis.file = randomFileName("analysis_TEMP", ".txt")
-		a.files.analysis.temp = true
-	}
+	//TODO: if the phase is starting after the file in question, don't look
+	//for it at TEMP, but the normal location.
 
 	if a.files.difficulties.file == "" {
 		a.files.difficulties.file = randomFileName("relative_difficulties_TEMP", ".csv")
@@ -268,6 +266,11 @@ func (a *appOptions) fixUp() error {
 	if a.files.solves.file == "" {
 		a.files.solves.file = randomFileName("solves_TEMP", ".csv")
 		a.files.solves.temp = true
+	}
+
+	if a.files.analysis.file == "" {
+		a.files.analysis.file = randomFileName("analysis_TEMP", ".txt")
+		a.files.analysis.temp = true
 	}
 
 	if a.files.histogram.file == "" {
