@@ -46,7 +46,18 @@ func TestPhaseToString(t *testing.T) {
 }
 
 func TestAppOptionsPhase(t *testing.T) {
+
 	options := getDefaultOptions()
+
+	if err := options.fixUp(); err != nil {
+		t.Error("Got non-nil error on basic options", err)
+	}
+
+	if options.start != Solves || options.end != Analysis {
+		t.Error("Start or end defaulted to wrong things when empty:", options.start, options.end)
+	}
+
+	options = getDefaultOptions()
 
 	options.rawStart = "analysis"
 	options.rawEnd = "histogram"
@@ -78,6 +89,18 @@ func TestAppOptionsPhase(t *testing.T) {
 
 	if err := options.fixUp(); err == nil {
 		t.Error("Didn't get an error for an invalid start phase")
+	}
+
+	options = getDefaultOptions()
+
+	options.rawStart = "histogram"
+
+	if err := options.fixUp(); err != nil {
+		t.Error("Got unexpected error during fixup: ", err)
+	}
+
+	if options.start != Histogram && options.end != Histogram {
+		t.Error("Expected start and end to be histogram")
 	}
 
 }

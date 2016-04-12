@@ -53,7 +53,8 @@ Arguments:
 Start phase is where the pipeline starts, expecting the in file provied.
 End phase is the last complete phase that is done. so -start=difficulty -end=difficulty would
 generate relativedifficulties.csv and exit.
-If start is omitted, defaults to solves; if end is omitted, defaults to weka
+If both start and end are omitted, they default to solves and analysis respectively.
+If only one of start or end are omitted, the other defaults to the same thing as the provided value.
 
 Each phase has a {phase}-out argument of where to save the output.
 * -r
@@ -63,10 +64,11 @@ Each phase has a {phase}-out argument of where to save the output.
 Each output file has a default filename.
 
 The "input" to each phase is the output of the phase before. If the phase
-before has its output silenced, the file that is output will be a temp file
-that will be removed upon exit.
+before has its output silenced (default if -keep is not passed or the files
+are unnamed), the file that is output will be a temp file that will be removed
+upon exit.
 
-*Different phases have different arguments. For example:
+*Different phases have different additional arguments. For example:
 * sample-rate=0
 * histogram-count (if 0, histogram phase will be skipped)
 
@@ -146,8 +148,8 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.IntVar(&a.numRuns, "n", 1, "The number of runs of each config to do and then average together")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 	a.flagSet.IntVar(&a.histogramPuzzleCount, "histogram-count", 10, "If number is 1 or greater and the end phase is Histogram or greater, will generate that many puzzles with the new model and print details on their difficulties.")
-	a.flagSet.StringVar(&a.rawStart, "start", "solves", "The phase to start from")
-	a.flagSet.StringVar(&a.rawEnd, "end", "analysis", "The last phase to run")
+	a.flagSet.StringVar(&a.rawStart, "start", "", "The phase to start from. If both start and end are empty, defaults to 'solves'")
+	a.flagSet.StringVar(&a.rawEnd, "end", "", "The last phase to run. If both start and end are empty, defaults to 'analysis'")
 	a.flagSet.BoolVar(&a.keep, "keep", false, "If true, will keep all files generated within the pipeline (default is to delete these temp files.")
 
 }
@@ -236,6 +238,22 @@ func (a *appOptions) fixUp() error {
 
 	if a.numRuns < 1 {
 		a.numRuns = 1
+	}
+
+	if a.rawStart == "" && a.rawEnd != "" {
+		a.rawStart = a.rawEnd
+	}
+
+	if a.rawEnd == "" && a.rawStart != "" {
+		a.rawEnd = a.rawStart
+	}
+
+	if a.rawStart == "" {
+		a.rawStart = "solves"
+	}
+
+	if a.rawEnd == "" {
+		a.rawEnd = "analysis"
 	}
 
 	a.start = StringToPhase(a.rawStart)
