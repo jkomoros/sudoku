@@ -610,9 +610,60 @@ func histogramPuzzles(count int, model map[string]float64) {
 
 	sort.Float64s(difficulties)
 
-	//TODO: print out a histogram here and save to a.files.histogram.file
-	fmt.Println("Min difficulty:", difficulties[0])
-	fmt.Println("Max difficulty:", difficulties[len(difficulties)-1])
+	for _, line := range makeHistogram(difficulties, 20, 100) {
+		fmt.Println(line)
+	}
+
+}
+
+func makeHistogram(sortedDifficulties []float64, barWidth, numBuckets int) []string {
+
+	//TODO: save the output here to a.files.histogram.file?
+
+	//TODO: should generating the puzzles and showing a histogram from that be
+	//two different phases?
+
+	min := 0.0
+	max := 1.0
+
+	bucketSize := (max - min) / float64(numBuckets)
+
+	buckets := make([]int, numBuckets)
+
+	currentItem := 0
+	currentBucketMax := bucketSize
+
+	for i := 0; i < numBuckets; i++ {
+
+		for currentItem < len(sortedDifficulties) && sortedDifficulties[currentItem] <= currentBucketMax {
+			buckets[i]++
+			currentItem++
+		}
+
+		currentBucketMax += bucketSize
+	}
+
+	//Figure out which bucket is most full.
+	mostFullBucket := 0
+
+	for i, bucket := range buckets {
+		if bucket >= buckets[mostFullBucket] {
+			mostFullBucket = i
+		}
+	}
+
+	longestBar := buckets[mostFullBucket]
+
+	var result []string
+
+	for _, bucket := range buckets {
+		result = append(result, "|"+strings.Repeat("*", int(float64(bucket)/float64(longestBar)*float64(barWidth))))
+	}
+	result = append(result, "Min difficulty:"+strconv.FormatFloat(sortedDifficulties[0], 'f', -1, 64))
+	result = append(result, "Max difficulty:"+strconv.FormatFloat(sortedDifficulties[len(sortedDifficulties)-1], 'f', -1, 64))
+
+	return result
+
 }
 
 func printR2Table(results map[string]float64) {
