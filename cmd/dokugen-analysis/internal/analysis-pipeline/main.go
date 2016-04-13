@@ -610,7 +610,7 @@ func histogramPuzzles(count int, model map[string]float64) {
 
 	sort.Float64s(difficulties)
 
-	for _, line := range makeHistogram(difficulties, 20, 100) {
+	for _, line := range makeHistogram(difficulties, 100, 20) {
 		fmt.Println(line)
 	}
 

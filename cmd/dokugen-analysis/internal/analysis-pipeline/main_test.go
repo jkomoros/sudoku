@@ -610,8 +610,8 @@ func TestPrintHistogram(t *testing.T) {
 		0.8789286343,
 	}
 
-	histogramHeight := 20
 	histogramWidth := 100
+	histogramHeight := 20
 
 	histogram := makeHistogram(goldenData, histogramWidth, histogramHeight)
 
