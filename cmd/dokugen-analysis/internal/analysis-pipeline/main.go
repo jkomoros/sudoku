@@ -57,9 +57,9 @@ If both start and end are omitted, they default to solves and analysis respectiv
 If only one of start or end are omitted, the other defaults to the same thing as the provided value.
 
 Each phase has a {phase}-out argument of where to save the output.
-* -r
-* -s (will have a branch ID added if multiple branches)
-* -a (will have a branch ID added if multiple branches)
+* -difficulties
+* -solves (will have a branch ID added if multiple branches)
+* -analysis (will have a branch ID added if multiple branches)
 * (Histogram has no special output yet)
 Each output file has a default filename.
 
@@ -139,9 +139,9 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.IntVar(&a.sampleRate, "sample-rate", 0, "An optional sample rate of relative difficulties. Will use 1/n lines in calculation. 0 to use all.")
 	a.flagSet.BoolVar(&a.stashMode, "s", false, "If in stash mode, will do the a-b test between uncommitted and committed changes, automatically figuring out which state we're currently in. Cannot be combined with -b")
 	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
-	a.flagSet.StringVar(&a.files.difficulties.file, "r", "", "The file to use as relative difficulties input.")
-	a.flagSet.StringVar(&a.files.solves.file, "o", "", "The file to output solves to")
-	a.flagSet.StringVar(&a.files.analysis.file, "a", "", "The file to output analysis to")
+	a.flagSet.StringVar(&a.files.difficulties.file, "difficulties", "", "The file to use as relative difficulties input.")
+	a.flagSet.StringVar(&a.files.solves.file, "solves", "", "The file to output solves to")
+	a.flagSet.StringVar(&a.files.analysis.file, "analysis", "", "The file to output analysis to")
 	a.flagSet.IntVar(&a.numRuns, "n", 1, "The number of runs of each config to do and then average together")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
 	a.flagSet.IntVar(&a.histogramPuzzleCount, "histogram-count", 10, "If number is 1 or greater and the end phase is Histogram or greater, will generate that many puzzles with the new model and print details on their difficulties.")
