@@ -610,6 +610,7 @@ func histogramPuzzles(count int, model map[string]float64) {
 
 	sort.Float64s(difficulties)
 
+	//TODO: should the size of the histogram get bigger (buckets, to some extent width) if histogram-count is higher?
 	for _, line := range makeHistogram(difficulties, 100, 20) {
 		fmt.Println(line)
 	}
