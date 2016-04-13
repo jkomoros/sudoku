@@ -390,6 +390,9 @@ func main() {
 	//TODO: most of this method should be factored into a separate func, so
 	//main is just configuring hte options and passing them in.
 
+	//TODO: a helper function for phaseEnabled(Difficulties)? All of the
+	//comparing to phase names seems error prone.
+
 	if a.start <= Difficulties {
 		log.Println("Generating relative difficulties.")
 
