@@ -348,6 +348,10 @@ func printHelp(a *appOptions) {
 	fmt.Println(HELP_MESSAGE)
 }
 
+func phaseEnabled(a *appOptions, phase Phase) bool {
+	return phase >= a.start && phase <= a.end
+}
+
 func main() {
 
 	defer cleanUpTempFiles()

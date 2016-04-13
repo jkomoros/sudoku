@@ -6,6 +6,56 @@ import (
 	"testing"
 )
 
+func TestPhaseEnabled(t *testing.T) {
+
+	var tests = []struct {
+		start    Phase
+		end      Phase
+		test     Phase
+		expected bool
+	}{
+		{
+			Difficulties,
+			Analysis,
+			Analysis,
+			true,
+		},
+		{
+			Difficulties,
+			Analysis,
+			Difficulties,
+			true,
+		},
+		{
+			Difficulties,
+			Analysis,
+			Histogram,
+			false,
+		},
+		{
+			Analysis,
+			Histogram,
+			Difficulties,
+			false,
+		},
+	}
+
+	for i, test := range tests {
+		options := getDefaultOptions()
+		options.start = test.start
+		options.end = test.end
+
+		//Don't do fixup, since we're stuffing in properties that wouldn't
+		//have come from the command line anyway
+
+		result := phaseEnabled(options, test.test)
+
+		if result != test.expected {
+			t.Error("Got unexpected result for phaseEnabled on", i, "Got", result, "expected", test.expected, "for", test.start.String(), test.end.String(), test.test.String())
+		}
+	}
+}
+
 func TestPhaseToString(t *testing.T) {
 	var strToPhaseTests = []struct {
 		str      string
