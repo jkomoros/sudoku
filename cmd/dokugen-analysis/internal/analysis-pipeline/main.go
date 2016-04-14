@@ -397,7 +397,7 @@ func main() {
 	//TODO: a helper function for phaseEnabled(Difficulties)? All of the
 	//comparing to phase names seems error prone.
 
-	if a.start <= Difficulties {
+	if phaseEnabled(a, Difficulties) {
 		log.Println("Generating relative difficulties.")
 
 		//If we're just using a temp file we should be sure to delete when done.
@@ -417,7 +417,7 @@ func main() {
 	//Later parts of the pipeline require an analysis file, so remember at least one.
 	var lastEffectiveAnalysisFile = a.files.analysis.file
 
-	if a.start < Histogram {
+	if phaseEnabled(a, Solves) || phaseEnabled(a, Analysis) {
 
 		if _, err := os.Stat(a.files.difficulties.file); os.IsNotExist(err) {
 			log.Println("The specified relative difficulties file does not exist:", a.files.difficulties.file)
@@ -509,7 +509,7 @@ func main() {
 				effectiveSolvesFile += ".csv"
 				effectiveAnalysisFile += ".txt"
 
-				if a.end >= Solves {
+				if phaseEnabled(a, Solves) {
 
 					if a.files.solves.temp {
 						filesToDelete = append(filesToDelete, effectiveSolvesFile)
@@ -524,7 +524,7 @@ func main() {
 					branchKey = "<default>"
 				}
 
-				if a.end >= Analysis {
+				if phaseEnabled(a, Analysis) {
 
 					log.Println("Running Weka on solves...")
 
@@ -573,7 +573,7 @@ func main() {
 		}
 	}
 
-	if a.end >= Histogram && a.histogramPuzzleCount > 0 {
+	if phaseEnabled(a, Histogram) && a.histogramPuzzleCount > 0 {
 		//Generate a bunch of puzzles and print out their difficutlies.
 
 		data, err := ioutil.ReadFile(lastEffectiveAnalysisFile)
