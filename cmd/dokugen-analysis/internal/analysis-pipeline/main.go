@@ -10,6 +10,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"errors"
 	"flag"
 	"fmt"
@@ -69,9 +70,13 @@ are unnamed), the file that is output will be a temp file that will be removed
 upon exit.
 
 *Different phases have different additional arguments. For example:
+* difficulty-histogram -- whether to emit a histogram of the difficulties at the end of the difficulties phase (whether or not that phase was active)
 * sample-rate=0
 * histogram-count (if 0, histogram phase will be skipped)
 `
+
+const HISTOGRAM_WIDTH = 100
+const HISTOGRAM_HEIGHT = 20
 
 const pathToDokugenAnalysis = "../../"
 const pathFromDokugenAnalysis = "internal/analysis-pipeline/"
@@ -118,6 +123,7 @@ type appOptions struct {
 	}
 	sampleRate                     int
 	numRuns                        int
+	difficultiesHistogram          bool
 	rawStart                       string
 	start                          Phase
 	rawEnd                         string
@@ -138,6 +144,7 @@ func (a *appOptions) defineFlags() {
 	}
 	a.flagSet.IntVar(&a.sampleRate, "sample-rate", 0, "An optional sample rate of relative difficulties. Will use 1/n lines in calculation. 0 to use all.")
 	a.flagSet.BoolVar(&a.stashMode, "s", false, "If in stash mode, will do the a-b test between uncommitted and committed changes, automatically figuring out which state we're currently in. Cannot be combined with -b")
+	a.flagSet.BoolVar(&a.difficultiesHistogram, "difficulties-histogram", false, "If provided, will emit a histogram of difficulties at the end of the difficulty phase.")
 	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
 	a.flagSet.StringVar(&a.files.difficulties.file, "difficulties", "", "The file to use as relative difficulties input.")
 	a.flagSet.StringVar(&a.files.solves.file, "solves", "", "The file to output solves to")
@@ -410,6 +417,10 @@ func main() {
 		generateRelativeDifficulties(a.files.difficulties.file)
 	}
 
+	if a.difficultiesHistogram {
+		histogramRelativeDifficulties(a.files.difficulties.file)
+	}
+
 	if a.end == Difficulties {
 		return
 	}
@@ -595,6 +606,51 @@ func main() {
 
 }
 
+func histogramRelativeDifficulties(filename string) {
+	//Read from the CSV file
+
+	file, err := os.Open(filename)
+
+	defer file.Close()
+
+	if err != nil {
+		log.Println("couldn't open relative difficulties file", err)
+		return
+	}
+
+	reader := csv.NewReader(file)
+
+	var numbers []float64
+
+	//TODO: make this resilient to the difficulty not being in the third column.
+
+	lines, err := reader.ReadAll()
+
+	if err != nil {
+		log.Println("Couldnt parse CSV:", err)
+		return
+	}
+
+	for _, line := range lines {
+		if len(line) != 5 {
+			log.Println("Found incorrectly sized line:", len(line))
+			return
+		}
+		flt, err := strconv.ParseFloat(line[2], 64)
+		if err != nil {
+			log.Println("Invalid float", err)
+		}
+		numbers = append(numbers, flt)
+	}
+
+	sort.Float64s(numbers)
+
+	for _, line := range makeHistogram(numbers, HISTOGRAM_WIDTH, HISTOGRAM_HEIGHT) {
+		fmt.Println(line)
+	}
+
+}
+
 func histogramPuzzles(count int, model map[string]float64) {
 	if count < 0 {
 		return
@@ -618,13 +674,13 @@ func histogramPuzzles(count int, model map[string]float64) {
 	sort.Float64s(difficulties)
 
 	//TODO: should the size of the histogram get bigger (buckets, to some extent width) if histogram-count is higher?
-	for _, line := range makeHistogram(difficulties, 100, 20) {
+	for _, line := range makeHistogram(difficulties, HISTOGRAM_WIDTH, HISTOGRAM_HEIGHT) {
 		fmt.Println(line)
 	}
 
 }
 
-func makeHistogram(sortedDifficulties []float64, barWidth, numBuckets int) []string {
+func makeHistogram(sortedNumbers []float64, barWidth, numBuckets int) []string {
 
 	//TODO: save the output here to a.files.histogram.file?
 
@@ -643,7 +699,7 @@ func makeHistogram(sortedDifficulties []float64, barWidth, numBuckets int) []str
 
 	for i := 0; i < numBuckets; i++ {
 
-		for currentItem < len(sortedDifficulties) && sortedDifficulties[currentItem] <= currentBucketMax {
+		for currentItem < len(sortedNumbers) && sortedNumbers[currentItem] <= currentBucketMax {
 			buckets[i]++
 			currentItem++
 		}
@@ -667,8 +723,8 @@ func makeHistogram(sortedDifficulties []float64, barWidth, numBuckets int) []str
 	for _, bucket := range buckets {
 		result = append(result, "|"+strings.Repeat("*", int(float64(bucket)/float64(longestBar)*float64(barWidth))))
 	}
-	result = append(result, "Min difficulty:"+strconv.FormatFloat(sortedDifficulties[0], 'f', -1, 64))
-	result = append(result, "Max difficulty:"+strconv.FormatFloat(sortedDifficulties[len(sortedDifficulties)-1], 'f', -1, 64))
+	result = append(result, "Min"+strconv.FormatFloat(sortedNumbers[0], 'f', -1, 64))
+	result = append(result, "Max:"+strconv.FormatFloat(sortedNumbers[len(sortedNumbers)-1], 'f', -1, 64))
 
 	return result
 
