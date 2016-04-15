@@ -732,8 +732,8 @@ func makeHistogram(sortedNumbers []float64, barWidth, numBuckets int) []string {
 	for _, bucket := range buckets {
 		result = append(result, "|"+strings.Repeat("*", int(float64(bucket)/float64(longestBar)*float64(barWidth))))
 	}
-	result = append(result, "Min"+strconv.FormatFloat(sortedNumbers[0], 'f', -1, 64))
-	result = append(result, "Max:"+strconv.FormatFloat(sortedNumbers[len(sortedNumbers)-1], 'f', -1, 64))
+	result = append(result, "Min: "+strconv.FormatFloat(sortedNumbers[0], 'f', -1, 64))
+	result = append(result, "Max: "+strconv.FormatFloat(sortedNumbers[len(sortedNumbers)-1], 'f', -1, 64))
 
 	return result
 
