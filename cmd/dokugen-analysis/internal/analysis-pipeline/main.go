@@ -434,10 +434,7 @@ func main() {
 		return
 	}
 
-	//Later parts of the pipeline require an analysis file, so remember at least one.
-	var lastEffectiveAnalysisFile = a.files.analysis.file
-
-	if phaseEnabled(a, Solves) || phaseEnabled(a, Analysis) {
+	if phaseEnabled(a, Solves) || phaseEnabled(a, Analysis) || phaseEnabled(a, Histogram) {
 
 		if _, err := os.Stat(a.files.difficulties.file); os.IsNotExist(err) {
 			log.Println("The specified relative difficulties file does not exist:", a.files.difficulties.file)
@@ -556,7 +553,25 @@ func main() {
 					results[branchKey] += runWeka(effectiveSolvesFile, effectiveAnalysisFile)
 				}
 
-				lastEffectiveAnalysisFile = effectiveAnalysisFile
+				if phaseEnabled(a, Histogram) && a.histogramPuzzleCount > 0 {
+					//Generate a bunch of puzzles and print out their difficutlies.
+
+					data, err := ioutil.ReadFile(effectiveAnalysisFile)
+
+					if err != nil {
+						log.Println("Couldn't read back analysis file:", err)
+						return
+					}
+
+					weights, err := wekaparser.ParseWeights(string(data))
+
+					if err != nil {
+						log.Println("Error parsing weights:", err)
+						return
+					}
+
+					histogramPuzzles(a, a.histogramPuzzleCount, weights)
+				}
 			}
 		}
 
@@ -591,26 +606,6 @@ func main() {
 			//one branch was run
 			printR2Table(results)
 		}
-	}
-
-	if phaseEnabled(a, Histogram) && a.histogramPuzzleCount > 0 {
-		//Generate a bunch of puzzles and print out their difficutlies.
-
-		data, err := ioutil.ReadFile(lastEffectiveAnalysisFile)
-
-		if err != nil {
-			log.Println("Couldn't read back analysis file:", err)
-			return
-		}
-
-		weights, err := wekaparser.ParseWeights(string(data))
-
-		if err != nil {
-			log.Println("Error parsing weights:", err)
-			return
-		}
-
-		histogramPuzzles(a, a.histogramPuzzleCount, weights)
 	}
 
 }
