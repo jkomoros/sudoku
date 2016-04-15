@@ -75,9 +75,6 @@ upon exit.
 * histogram-count (if 0, histogram phase will be skipped)
 `
 
-const HISTOGRAM_WIDTH = 100
-const HISTOGRAM_HEIGHT = 20
-
 const pathToDokugenAnalysis = "../../"
 const pathFromDokugenAnalysis = "internal/analysis-pipeline/"
 
@@ -124,6 +121,8 @@ type appOptions struct {
 	sampleRate                     int
 	numRuns                        int
 	difficultiesHistogram          bool
+	histogramWidth                 int
+	histogramHeight                int
 	rawStart                       string
 	start                          Phase
 	rawEnd                         string
@@ -148,6 +147,8 @@ func (a *appOptions) defineFlags() {
 	a.flagSet.StringVar(&a.branches, "b", "", "Git branch to checkout. Can also be a space delimited list of multiple branches to checkout.")
 	a.flagSet.StringVar(&a.files.difficulties.file, "difficulties", "", "The file to use as relative difficulties input.")
 	a.flagSet.StringVar(&a.files.solves.file, "solves", "", "The file to output solves to")
+	a.flagSet.IntVar(&a.histogramHeight, "h-height", 30, "Height of histograms (number of buckets)")
+	a.flagSet.IntVar(&a.histogramWidth, "h-width", 100, "Width of histograms (length of longest bucket)")
 	a.flagSet.StringVar(&a.files.analysis.file, "analysis", "", "The file to output analysis to")
 	a.flagSet.IntVar(&a.numRuns, "n", 1, "The number of runs of each config to do and then average together")
 	a.flagSet.BoolVar(&a.help, "h", false, "If provided, will print help and exit.")
@@ -242,6 +243,14 @@ func (a *appOptions) fixUp() error {
 
 	if a.numRuns < 1 {
 		a.numRuns = 1
+	}
+
+	if a.histogramWidth < 1 {
+		a.histogramWidth = 1
+	}
+
+	if a.histogramHeight < 1 {
+		a.histogramHeight = 1
 	}
 
 	if a.rawStart == "" && a.rawEnd != "" {
@@ -418,7 +427,7 @@ func main() {
 	}
 
 	if a.difficultiesHistogram {
-		histogramRelativeDifficulties(a.files.difficulties.file)
+		histogramRelativeDifficulties(a, a.files.difficulties.file)
 	}
 
 	if a.end == Difficulties {
@@ -601,12 +610,12 @@ func main() {
 			return
 		}
 
-		histogramPuzzles(a.histogramPuzzleCount, weights)
+		histogramPuzzles(a, a.histogramPuzzleCount, weights)
 	}
 
 }
 
-func histogramRelativeDifficulties(filename string) {
+func histogramRelativeDifficulties(a *appOptions, filename string) {
 	//Read from the CSV file
 
 	file, err := os.Open(filename)
@@ -645,13 +654,13 @@ func histogramRelativeDifficulties(filename string) {
 
 	sort.Float64s(numbers)
 
-	for _, line := range makeHistogram(numbers, HISTOGRAM_WIDTH, HISTOGRAM_HEIGHT) {
+	for _, line := range makeHistogram(numbers, a.histogramWidth, a.histogramHeight) {
 		fmt.Println(line)
 	}
 
 }
 
-func histogramPuzzles(count int, model map[string]float64) {
+func histogramPuzzles(a *appOptions, count int, model map[string]float64) {
 	if count < 0 {
 		return
 	}
@@ -674,7 +683,7 @@ func histogramPuzzles(count int, model map[string]float64) {
 	sort.Float64s(difficulties)
 
 	//TODO: should the size of the histogram get bigger (buckets, to some extent width) if histogram-count is higher?
-	for _, line := range makeHistogram(difficulties, HISTOGRAM_WIDTH, HISTOGRAM_HEIGHT) {
+	for _, line := range makeHistogram(difficulties, a.histogramWidth, a.histogramHeight) {
 		fmt.Println(line)
 	}
 
