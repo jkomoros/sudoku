@@ -70,7 +70,7 @@ are unnamed), the file that is output will be a temp file that will be removed
 upon exit.
 
 *Different phases have different additional arguments. For example:
-* difficulty-histogram -- whether to emit a histogram of the difficulties at the end of the difficulties phase (whether or not that phase was active)
+* difficulties-histogram -- whether to emit a histogram of the difficulties at the end of the difficulties phase (whether or not that phase was active)
 * sample-rate=0
 * histogram-count (if 0, histogram phase will be skipped)
 `
