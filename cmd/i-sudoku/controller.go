@@ -568,6 +568,8 @@ func (m *mainController) EnsureGrid() {
 
 func (c *mainController) NewGrid() {
 	c.SetGrid(sudoku.GenerateGrid(nil))
+	c.filename = ""
+	c.fileOKToSave = false
 }
 
 func (c *mainController) ResetGrid() {

@@ -390,6 +390,10 @@ func TestCommandMode(t *testing.T) {
 		t.Error("'n' in command mode didn't go back to default mode when it was done")
 	}
 
+	if model.filename != "" {
+		t.Error("Loading a new puzzle didn't reset filename")
+	}
+
 	model.EnterMode(MODE_COMMAND)
 
 	sendKeyEvent(model, termbox.KeyEsc)
