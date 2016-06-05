@@ -40,8 +40,7 @@ const _SOLVES_CACHE_FILENAME = ".solves_cache.db"
 const _SOLVES_BUCKET = "solves"
 const _SOLVES_DIFFICULTY_BUCKET = "difficulty"
 
-const _NORMALIZED_LOWER_BOUND = 0.0
-const _NORMALIZED_UPPER_BOUND = 0.9
+const _TAIL_TRIM_PERCENTILE = 0.02
 
 //How many solves a user must have to have their relative scale included.
 //A low value gives you far more very low or very high scores than you shoul get.
@@ -760,45 +759,30 @@ func calculateRelativeDifficulty() []*puzzle {
 		thePuzzle.userRelativeDifficulty = markovChain.Get(0, i)
 	}
 
-	//Lineralize the data, where min == 0.1 and max == 0.9
-	min := math.MaxFloat64
-	max := 0.0
-
-	//Linearize data and figure out min and max so we can scale it to 0.1, 0.9 in next pass
-	for i := 0; i < numPuzzles; i++ {
-		//First, linearlize
-		//Add 1 to make sure every input is at least 1, otherwise we'll get negative numbers which gum up later parts.
-		//The larger the multiplicative constant, the closer to linear it gets. WAT?
-		//TODO figure out what's going on with this constant.
-		difficulty := math.Log(100000000*puzzles[i].userRelativeDifficulty + 1)
-
-		if difficulty < min {
-			min = difficulty
-		}
-		if difficulty > max {
-			max = difficulty
-		}
-
-		puzzles[i].userRelativeDifficulty = difficulty
-	}
-
-	for i := 0; i < numPuzzles; i++ {
-		difficulty := puzzles[i].userRelativeDifficulty
-
-		//First, scale it to 0 to 1.0
-		difficulty -= min
-		difficulty /= (max - min)
-
-		//Now, scale it to 0.1 to 0.9
-		difficulty *= (_NORMALIZED_UPPER_BOUND - _NORMALIZED_LOWER_BOUND)
-		difficulty += _NORMALIZED_LOWER_BOUND
-
-		puzzles[i].userRelativeDifficulty = difficulty
-	}
-
-	//Sort the puzzles by relative user difficulty
-	//We actually don't need the wrapper, since it will modify the underlying slice.
+	//Sort the puzzles by relative user difficulty We actually don't need the
+	//wrapper, since it will modify the underlying slice. We do this now
+	//because trimTails needs it, but don't need to do it again later because
+	//all later mathmatical steps will maintain relatively ordering.
 	sort.Sort(byUserRelativeDifficulty{puzzles})
+
+	//Remove the top and bottom numbers since they skew the result
+	trimTails(puzzles, _TAIL_TRIM_PERCENTILE)
+
+	effectivePower := math.Pow(10, bisectPower(puzzles))
+
+	for _, puzz := range puzzles {
+		puzz.userRelativeDifficulty = math.Log(puzz.userRelativeDifficulty*effectivePower + 1)
+	}
+
+	//Squash and stretch to between 0.0 and 1.0. Because puzzles are sorted,
+	//finding min and max is easy.
+	min := puzzles[0].userRelativeDifficulty
+	max := puzzles[len(puzzles)-1].userRelativeDifficulty
+
+	for _, puzz := range puzzles {
+		puzz.userRelativeDifficulty = (puzz.userRelativeDifficulty - min) / (max - min)
+	}
+
 	return puzzles
 }
 
