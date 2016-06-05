@@ -6,6 +6,142 @@ import (
 	"testing"
 )
 
+/*
+type puzzle struct {
+	id                     int
+	userRelativeDifficulty float64
+	difficultyRating       int
+	name                   string
+	puzzle                 string
+}
+
+*/
+
+func defaultPuzzleSet() []*puzzle {
+	return []*puzzle{
+		&puzzle{
+			userRelativeDifficulty: 0.001,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.01,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.1,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.9,
+		},
+	}
+}
+
+func TestSkewAmount(t *testing.T) {
+	puzzles := defaultPuzzleSet()
+	tests := []struct {
+		pow      float64
+		expected float64
+	}{
+		{10.0, -0.04281493061016942},
+		{5.0, -0.039248270833675214},
+		{3.0, 0.2088930756577995},
+	}
+
+	for _, tt := range tests {
+		actual := skewAmount(puzzles, tt.pow)
+		if actual != tt.expected {
+			t.Error("SkewAmount(", tt.pow, "): expected", tt.expected, ", got:", actual)
+		}
+	}
+}
+
+func TestTrimTails(t *testing.T) {
+
+	puzzles := []*puzzle{
+		&puzzle{
+			userRelativeDifficulty: 0.1,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.2,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.3,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.4,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.5,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.6,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.7,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.8,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.9,
+		},
+		&puzzle{
+			userRelativeDifficulty: 1.0,
+		},
+	}
+
+	expected := []*puzzle{
+		&puzzle{
+			userRelativeDifficulty: 0.2,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.2,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.3,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.4,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.5,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.6,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.7,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.8,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.9,
+		},
+		&puzzle{
+			userRelativeDifficulty: 0.9,
+		},
+	}
+
+	trimTails(puzzles, 0.20)
+
+	for i, puzz := range puzzles {
+		diff := puzz.userRelativeDifficulty
+		expectedDiff := expected[i].userRelativeDifficulty
+		if diff != expectedDiff {
+			t.Error("TrimTails discrepancy found at", i, "expected", expectedDiff, "got", diff)
+		}
+	}
+
+}
+
+func TestBisectPower(t *testing.T) {
+	puzzles := defaultPuzzleSet()
+	actual := bisectPower(puzzles)
+	expected := 3.9013671875
+	if actual != expected {
+		t.Error("BisectPower wrong. expected", expected, "got", actual)
+	}
+}
+
 func TestPuzzleConversion(t *testing.T) {
 
 	//TODO: fix up this test now that convertPuzzleString no longer exists.
