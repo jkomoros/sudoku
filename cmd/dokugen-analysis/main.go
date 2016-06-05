@@ -802,6 +802,28 @@ func calculateRelativeDifficulty() []*puzzle {
 	return puzzles
 }
 
+//trimTails will take the top and bottom percentile and set them to low/high.
+//Assumes sortedPuzzles is already sorted by userRelativeDifficulty low to
+//high.
+func trimTails(sortedPuzzles []*puzzle, percentile float64) {
+	//Do the bottom bit
+	length := len(sortedPuzzles)
+	tailLength := int(float64(length) * percentile)
+
+	//TODO: more error checking for unexpected inputs
+
+	low := sortedPuzzles[tailLength-1].userRelativeDifficulty
+	high := sortedPuzzles[length-tailLength].userRelativeDifficulty
+
+	for i, puzz := range sortedPuzzles {
+		if i < tailLength {
+			puzz.userRelativeDifficulty = low
+		} else if i >= length-tailLength {
+			puzz.userRelativeDifficulty = high
+		}
+	}
+}
+
 //bisectPower identifies the power to raise each userRelativeDifficulty by
 //(and then take log of) to minimize skew.
 func bisectPower(puzzles []*puzzle) float64 {
@@ -836,8 +858,6 @@ func bisectPower(puzzles []*puzzle) float64 {
 	return (highPow + lowPow) / 2
 
 }
-
-//TODO: trimTails
 
 //skewAmount returns the skew that you'd get if you were to raise each
 //puzzles' userRelativeDifficulty to power, add 1, and take the log of it.
