@@ -42,6 +42,9 @@ const _SOLVES_DIFFICULTY_BUCKET = "difficulty"
 
 const _TAIL_TRIM_PERCENTILE = 0.02
 
+const _NORMALIZED_UPPER_BOUND = 0.9
+const _NORMALIZED_LOWER_BOUND = 0.1
+
 //How many solves a user must have to have their relative scale included.
 //A low value gives you far more very low or very high scores than you shoul get.
 const _MINIMUM_SOLVES = 10
@@ -59,6 +62,7 @@ var inputIsSolveData bool
 var outputSolveHeader bool
 var numSolvesToAverage int
 var noSolvesCache bool
+var skipAutoSkewCalculation bool
 
 func init() {
 	flag.BoolVar(&noLimitFlag, "a", false, "Specify to execute the solves query with no limit.")
@@ -76,6 +80,7 @@ func init() {
 	flag.BoolVar(&outputSolveHeader, "h", false, "If true and outputting solve data, will include a header row.")
 	flag.IntVar(&numSolvesToAverage, "num-solves", 10, "Number of solves to run and then average together")
 	flag.BoolVar(&noSolvesCache, "no-cache", false, "If provided, will not use the solves cache")
+	flag.BoolVar(&skipAutoSkewCalculation, "skip-auto-skew", false, "If provided, will do the old-style fixed de-skew operation. Temporary flag while the new pipeline quality gets raised")
 
 	//We're going to be doing some heavy-duty matrix multiplication, and the matrix package can take advantage of multiple cores.
 	runtime.GOMAXPROCS(6)
@@ -765,22 +770,62 @@ func calculateRelativeDifficulty() []*puzzle {
 	//all later mathmatical steps will maintain relatively ordering.
 	sort.Sort(byUserRelativeDifficulty{puzzles})
 
-	//Remove the top and bottom numbers since they skew the result
-	trimTails(puzzles, _TAIL_TRIM_PERCENTILE)
+	if skipAutoSkewCalculation {
+		//Lineralize the data, where min == 0.1 and max == 0.9
+		min := math.MaxFloat64
+		max := 0.0
 
-	effectivePower := math.Pow(10, bisectPower(puzzles))
+		//Linearize data and figure out min and max so we can scale it to 0.1, 0.9 in next pass
+		for i := 0; i < numPuzzles; i++ {
+			//First, linearlize
+			//Add 1 to make sure every input is at least 1, otherwise we'll get negative numbers which gum up later parts.
+			//The larger the multiplicative constant, the closer to linear it gets. WAT?
+			//TODO figure out what's going on with this constant.
+			difficulty := math.Log(100000000*puzzles[i].userRelativeDifficulty + 1)
 
-	for _, puzz := range puzzles {
-		puzz.userRelativeDifficulty = math.Log(puzz.userRelativeDifficulty*effectivePower + 1)
-	}
+			if difficulty < min {
+				min = difficulty
+			}
+			if difficulty > max {
+				max = difficulty
+			}
 
-	//Squash and stretch to between 0.0 and 1.0. Because puzzles are sorted,
-	//finding min and max is easy.
-	min := puzzles[0].userRelativeDifficulty
-	max := puzzles[len(puzzles)-1].userRelativeDifficulty
+			puzzles[i].userRelativeDifficulty = difficulty
+		}
 
-	for _, puzz := range puzzles {
-		puzz.userRelativeDifficulty = (puzz.userRelativeDifficulty - min) / (max - min)
+		for i := 0; i < numPuzzles; i++ {
+			difficulty := puzzles[i].userRelativeDifficulty
+
+			//First, scale it to 0 to 1.0
+			difficulty -= min
+			difficulty /= (max - min)
+
+			//Now, scale it to 0.1 to 0.9
+			difficulty *= (_NORMALIZED_UPPER_BOUND - _NORMALIZED_LOWER_BOUND)
+			difficulty += _NORMALIZED_LOWER_BOUND
+
+			puzzles[i].userRelativeDifficulty = difficulty
+		}
+
+	} else {
+
+		//Remove the top and bottom numbers since they skew the result
+		trimTails(puzzles, _TAIL_TRIM_PERCENTILE)
+
+		effectivePower := math.Pow(10, bisectPower(puzzles))
+
+		for _, puzz := range puzzles {
+			puzz.userRelativeDifficulty = math.Log(puzz.userRelativeDifficulty*effectivePower + 1)
+		}
+
+		//Squash and stretch to between 0.0 and 1.0. Because puzzles are sorted,
+		//finding min and max is easy.
+		min := puzzles[0].userRelativeDifficulty
+		max := puzzles[len(puzzles)-1].userRelativeDifficulty
+
+		for _, puzz := range puzzles {
+			puzz.userRelativeDifficulty = (puzz.userRelativeDifficulty - min) / (max - min)
+		}
 	}
 
 	return puzzles
