@@ -13,6 +13,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/boltdb/bolt"
+	"github.com/gonum/stat"
 	"github.com/jkomoros/sudoku"
 	"github.com/jkomoros/sudoku/sdkconverter"
 	"github.com/sajari/regression"
@@ -799,6 +800,57 @@ func calculateRelativeDifficulty() []*puzzle {
 	//We actually don't need the wrapper, since it will modify the underlying slice.
 	sort.Sort(byUserRelativeDifficulty{puzzles})
 	return puzzles
+}
+
+//bisectPower identifies the power to raise each userRelativeDifficulty by
+//(and then take log of) to minimize skew.
+func bisectPower(puzzles []*puzzle) float64 {
+
+	lowPow := 0.0
+	highPow := 10.0
+
+	maxIter := 10
+	tolerance := 0.001
+
+	for iter := 0; iter < maxIter; iter++ {
+		midPow := (lowPow + highPow) / 2
+
+		midSkew := skewAmount(puzzles, midPow)
+
+		if midSkew == 0 || (highPow-lowPow)/2 < tolerance {
+			//Found it!
+			return midPow
+		}
+
+		//TODO: should be able to reuse this from last time through.
+		lowSkew := skewAmount(puzzles, lowPow)
+
+		if math.Signbit(midSkew) == math.Signbit(lowSkew) {
+			lowPow = midPow
+		} else {
+			highPow = midPow
+		}
+	}
+
+	//We didn't converge but whatever just return the average of the two
+	return (highPow + lowPow) / 2
+
+}
+
+//TODO: trimTails
+
+//skewAmount returns the skew that you'd get if you were to raise each
+//puzzles' userRelativeDifficulty to power, add 1, and take the log of it.
+//Used by other functions toiteratively find the right power to minimize skew.
+func skewAmount(puzzles []*puzzle, power float64) float64 {
+
+	effectivePower := math.Pow(10.0, power)
+
+	floats := make([]float64, len(puzzles))
+	for i, puzz := range puzzles {
+		floats[i] = math.Log(puzz.userRelativeDifficulty*effectivePower + 1)
+	}
+	return stat.Skew(floats, nil)
 }
 
 func openSolvesCache() *solvesCache {
