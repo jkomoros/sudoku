@@ -4,3 +4,7 @@ Install Jupyter Notebook with TensorFlow based on the instructions in the Tensor
 # Running 
 
 Run `jupyter notebook` and then find the file and run it.
+
+# Visualizing
+
+Run `tensorboard --logdir=tmp/linear_logs`
