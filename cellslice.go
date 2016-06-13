@@ -112,11 +112,21 @@ func (self CellSlice) AddExclude(exclude int) {
 }
 
 //FilterByUnfilled returns a new CellSlice with only the cells in the list
-//that are filled with any number.
+//that are not filled with any number.
 func (self CellSlice) FilterByUnfilled() CellSlice {
 	//TODO: test this
 	filter := func(cell *Cell) bool {
 		return cell.Number() == 0
+	}
+	return self.Filter(filter)
+}
+
+//FilterByFilled returns a new CellSlice with only the cells that have a
+//number in them.
+func (self CellSlice) FilterByFilled() CellSlice {
+	//TODO: test this
+	filter := func(cell *Cell) bool {
+		return cell.Number() != 0
 	}
 	return self.Filter(filter)
 }
