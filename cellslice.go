@@ -111,6 +111,16 @@ func (self CellSlice) AddExclude(exclude int) {
 	self.Map(mapper)
 }
 
+//FilterByUnfilled returns a new CellSlice with only the cells in the list
+//that are filled with any number.
+func (self CellSlice) FilterByUnfilled() CellSlice {
+	//TODO: test this
+	filter := func(cell *Cell) bool {
+		return cell.Number() == 0
+	}
+	return self.Filter(filter)
+}
+
 //FilterByPossible returns a new CellSlice with only the cells in the list that have the given number
 //as an active possibility.
 func (self CellSlice) FilterByPossible(possible int) CellSlice {
