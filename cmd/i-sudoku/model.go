@@ -5,9 +5,10 @@ import (
 )
 
 type model struct {
-	grid           *sudoku.Grid
-	currentCommand *commandList
-	commands       *commandList
+	grid                   *sudoku.Grid
+	currentCommand         *commandList
+	commands               *commandList
+	inProgressMultiCommand *multiCommand
 }
 
 type commandList struct {
@@ -41,6 +42,10 @@ func (m *multiCommand) ModifiedCells(model *model) sudoku.CellSlice {
 	}
 
 	return result
+}
+
+func (m *multiCommand) AddCommand(c command) {
+	m.commands = append(m.commands, c)
 }
 
 type markCommand struct {
@@ -129,6 +134,28 @@ func (m *model) Redo() bool {
 	return true
 }
 
+func (m *model) StartGroup() {
+	m.inProgressMultiCommand = &multiCommand{
+		nil,
+	}
+}
+
+func (m *model) FinishGroupAndExecute() {
+	if m.inProgressMultiCommand == nil {
+		return
+	}
+	m.executeCommand(m.inProgressMultiCommand)
+	m.inProgressMultiCommand = nil
+}
+
+func (m *model) CancelGroup() {
+	m.inProgressMultiCommand = nil
+}
+
+func (m *model) InGroup() bool {
+	return m.inProgressMultiCommand != nil
+}
+
 func (m *model) SetGrid(grid *sudoku.Grid) {
 	m.commands = nil
 	m.currentCommand = nil
@@ -140,7 +167,11 @@ func (m *model) SetMarks(row, col int, marksToggle map[int]bool) {
 	if command == nil {
 		return
 	}
-	m.executeCommand(command)
+	if m.InGroup() {
+		m.inProgressMultiCommand.AddCommand(command)
+	} else {
+		m.executeCommand(command)
+	}
 }
 
 func (m *model) newMarkCommand(row, col int, marksToggle map[int]bool) *markCommand {
@@ -172,7 +203,11 @@ func (m *model) SetNumber(row, col int, num int) {
 	if command == nil {
 		return
 	}
-	m.executeCommand(command)
+	if m.InGroup() {
+		m.inProgressMultiCommand.AddCommand(command)
+	} else {
+		m.executeCommand(command)
+	}
 }
 
 func (m *model) newNumberCommand(row, col int, num int) *numberCommand {
