@@ -33,6 +33,16 @@ func (b *baseCommand) ModifiedCells(m *model) sudoku.CellSlice {
 	return sudoku.CellSlice{m.grid.Cell(b.row, b.col)}
 }
 
+func (m *multiMarkCommand) ModifiedCells(model *model) sudoku.CellSlice {
+	var result sudoku.CellSlice
+
+	for _, command := range m.commands {
+		result = append(result, command.ModifiedCells(model)...)
+	}
+
+	return result
+}
+
 type markCommand struct {
 	baseCommand
 	marksToggle map[int]bool
@@ -43,6 +53,10 @@ type numberCommand struct {
 	number int
 	//Necessary so we can undo.
 	oldNumber int
+}
+
+type multiMarkCommand struct {
+	commands []command
 }
 
 func (m *model) executeCommand(c command) {
@@ -210,4 +224,16 @@ func (n *numberCommand) Undo(model *model) {
 		return
 	}
 	cell.SetNumber(n.oldNumber)
+}
+
+func (m *multiMarkCommand) Apply(model *model) {
+	for _, command := range m.commands {
+		command.Apply(model)
+	}
+}
+
+func (m *multiMarkCommand) Undo(model *model) {
+	for i := len(m.commands) - 1; i >= 0; i-- {
+		m.commands[i].Undo(model)
+	}
 }
