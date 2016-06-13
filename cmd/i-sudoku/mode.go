@@ -25,8 +25,10 @@ const (
 {c} to enter command mode to do things like quit and load a new puzzle
 {h} to get a hint
 	{Ctrl-h} to get a debug hint print-out
-{+} or {=} to set the selected cell's marks to all legal marks
+{=} to set the selected cell's marks to all legal marks
+	{Shift-=} ({+}) to set all cells' marks to their legal marks
 {-} to remove all invalid marks from the selected cell
+	{Shift--} ({_}) to remove all invalid marks from all cells
 {<enter>} to set a cell to the number that is the only current mark
 {u} to undo a move
 {r} to redo a move
@@ -158,10 +160,14 @@ func (s *defaultMode) handleInput(c *mainController, evt termbox.Event) {
 			c.ToggleFastMode()
 		case evt.Ch == '?', evt.Ch == '/':
 			c.SetConsoleMessage(HELP_MESSAGE, true)
-		case evt.Ch == '+', evt.Ch == '=':
+		case evt.Ch == '=':
 			c.FillSelectedWithLegalMarks()
+		case evt.Ch == '+':
+			c.FillAllLegalMarks()
 		case evt.Ch == '-':
 			c.RemoveInvalidMarksFromSelected()
+		case evt.Ch == '_':
+			c.RemovedInvalidMarksFromAll()
 		case evt.Ch == 'c':
 			c.EnterMode(MODE_COMMAND)
 		case evt.Ch == 'm':

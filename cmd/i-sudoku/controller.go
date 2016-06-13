@@ -712,6 +712,42 @@ func (c *mainController) ToggleSelectedMark(num int) {
 	c.model.SetMarks(c.Selected().Row(), c.Selected().Col(), map[int]bool{num: !c.Selected().Mark(num)})
 }
 
+func (c *mainController) FillAllLegalMarks() {
+	c.model.StartGroup()
+
+	for _, cell := range c.Grid().Cells() {
+		if cell.Number() != 0 {
+			continue
+		}
+		markMap := make(map[int]bool)
+		for _, num := range cell.Possibilities() {
+			markMap[num] = true
+		}
+		c.model.SetMarks(cell.Row(), cell.Col(), markMap)
+	}
+
+	c.model.FinishGroupAndExecute()
+}
+
+func (c *mainController) RemovedInvalidMarksFromAll() {
+	c.model.StartGroup()
+
+	for _, cell := range c.Grid().Cells() {
+		if cell.Number() != 0 {
+			continue
+		}
+		markMap := make(map[int]bool)
+		for _, num := range cell.Marks() {
+			if !cell.Possible(num) {
+				markMap[num] = false
+			}
+		}
+		c.model.SetMarks(cell.Row(), cell.Col(), markMap)
+	}
+
+	c.model.FinishGroupAndExecute()
+}
+
 func (c *mainController) FillSelectedWithLegalMarks() {
 	c.EnsureSelected()
 	c.Selected().ResetMarks()
