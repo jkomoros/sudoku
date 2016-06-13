@@ -418,15 +418,27 @@ func (c *mainController) ShowCount() {
 
 	sort.Sort(nums)
 
+	lowestCount := -1
+
 	msg := "{Counts remaining}:\n"
 	for i := 0; i < sudoku.DIM; i++ {
 		currentNum := nums[i].num
 		count := sudoku.DIM - nums[i].count
 		countString := strconv.Itoa(count)
+		numString := strconv.Itoa(currentNum)
 		if count == 0 {
-			countString = "{done}"
+			numString = "{" + numString + "}"
+			countString = "{0}"
+		} else if lowestCount == -1 || lowestCount == count {
+			//If this is the lowest count that's not zero, highlight it, since
+			//it's most important.
+			numString = "{" + numString + "}"
+			countString = "{" + countString + "}"
+			if lowestCount == -1 {
+				lowestCount = count
+			}
 		}
-		msg += strconv.Itoa(currentNum) + " : " + countString + "\n"
+		msg += "Number " + numString + " : " + countString + " remaining\n"
 	}
 	c.SetConsoleMessage(msg, true)
 }
