@@ -1,9 +1,8 @@
 /*
 i-sudoku is an interactive command-line sudoku tool. Although its main
-puropse is debugging the sudoku package, it's a reasonably full-featured
+purpose is debugging the sudoku package, it's a reasonably full-featured
 command-line sudoku game in its own right.
 */
-
 package main
 
 import (
