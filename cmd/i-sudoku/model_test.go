@@ -71,6 +71,73 @@ func TestNumberMutator(t *testing.T) {
 
 }
 
+func TestGroups(t *testing.T) {
+	model := &model{}
+	model.SetGrid(sudoku.NewGrid())
+
+	model.SetNumber(0, 0, 1)
+
+	if model.grid.Cell(0, 0).Number() != 1 {
+		t.Fatal("Setting number outside group didn't set number")
+	}
+
+	model.SetMarks(0, 1, map[int]bool{3: true})
+
+	if !model.grid.Cell(0, 1).Marks().SameContentAs(sudoku.IntSlice{3}) {
+		t.Fatal("Setting marks outside of group didn't set marks")
+	}
+
+	state := model.grid.Diagram(true)
+
+	if model.InGroup() {
+		t.Error("Model reported being in group even though it wasn't")
+	}
+
+	model.StartGroup()
+
+	if !model.InGroup() {
+		t.Error("Model didn't report being in a group even though it was")
+	}
+
+	model.SetNumber(0, 2, 1)
+	model.SetMarks(0, 3, map[int]bool{3: true})
+
+	if model.grid.Diagram(true) != state {
+		t.Error("Within a group setnumber and setmarks mutated the grid")
+	}
+
+	model.FinishGroupAndExecute()
+
+	if model.InGroup() {
+		t.Error("After finishing a group model still said it was in group")
+	}
+
+	if model.grid.Diagram(true) == state {
+		t.Error("Commiting a group didn't mutate grid")
+	}
+
+	if model.grid.Cell(0, 2).Number() != 1 {
+		t.Error("Commiting a group didn't set the number")
+	}
+
+	if !model.grid.Cell(0, 3).Marks().SameContentAs(sudoku.IntSlice{3}) {
+		t.Error("Commiting a group didn't set the right marks")
+	}
+
+	model.Undo()
+
+	if model.grid.Diagram(true) != state {
+		t.Error("Undoing a group update didn't set the grid back to same state")
+	}
+
+	model.StartGroup()
+	model.CancelGroup()
+
+	if model.InGroup() {
+		t.Error("After canceling a group the model still thought it was in one.")
+	}
+}
+
 func TestUndoRedo(t *testing.T) {
 
 	model := &model{}
