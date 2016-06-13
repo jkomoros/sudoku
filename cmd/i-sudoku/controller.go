@@ -379,6 +379,29 @@ func (n *nextSteps) Swap(i, j int) {
 	n.probabilities[i], n.probabilities[j] = n.probabilities[j], n.probabilities[i]
 }
 
+func (c *mainController) ShowCount() {
+	//TODO: test this
+	counts := make([]int, sudoku.DIM)
+	for _, cell := range c.Grid().Cells() {
+		num := cell.Number()
+		if num <= 0 || num > sudoku.DIM {
+			continue
+		}
+		counts[num-1]++
+	}
+	//TODO: sort this ascending?
+	msg := "{Counts remaining}:\n"
+	for i := 0; i < sudoku.DIM; i++ {
+		count := sudoku.DIM - counts[i]
+		number := strconv.Itoa(count)
+		if count == 0 {
+			number = "{done}"
+		}
+		msg += strconv.Itoa(i+1) + " : " + number + "\n"
+	}
+	c.SetConsoleMessage(msg, true)
+}
+
 func (c *mainController) ShowDebugHint() {
 	options := sudoku.DefaultHumanSolveOptions()
 	options.NumOptionsToCalculate = 100

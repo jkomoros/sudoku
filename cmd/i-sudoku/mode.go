@@ -32,7 +32,8 @@ const (
 {r} to redo a move
 {m} to enter mark mode, so all numbers entered will toggle marks
 {f} to toggle fast move mode, allowing you to skip over filled cells
-{s} to quick-save to the last used filename`
+{s} to quick-save to the last used filename
+{o} to show a count of how many of each number in the grid remain to be filled`
 	STATUS_DEFAULT = "{→,←,↓,↑} to move cells, {0-9} to enter number, {Shift + 0-9} to toggle marks, {?} to list other commands"
 	STATUS_COMMAND = "COMMAND: {n}ew puzzle, {q}uit, {l}oad puzzle..., {s}ave puzzle as..., {r}eset puzzle, {ESC} cancel"
 	STATUS_LOAD    = "Filename? {Enter} to commit, {Esc} to cancel:"
@@ -165,6 +166,8 @@ func (s *defaultMode) handleInput(c *mainController, evt termbox.Event) {
 			c.EnterMode(MODE_COMMAND)
 		case evt.Ch == 'm':
 			c.ToggleMarkMode()
+		case evt.Ch == 'o':
+			c.ShowCount()
 		case evt.Ch == 's':
 			c.SaveCommandIssued()
 		//TODO: test that u/r undo and redo
