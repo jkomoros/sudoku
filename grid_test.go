@@ -985,6 +985,38 @@ func TestResetUnlockedCells(t *testing.T) {
 
 }
 
+func TestNumFilledCells(t *testing.T) {
+	grid := NewGrid()
+
+	if grid.numFilledCells != 0 {
+		t.Error("New grid thought it already had filled cells")
+	}
+
+	grid.Cell(0, 0).SetNumber(1)
+
+	if grid.numFilledCells != 1 {
+		t.Error("Grid with one cell set didn't think it had any filled cells.")
+	}
+
+	grid.Cell(0, 0).SetNumber(2)
+
+	if grid.numFilledCells != 1 {
+		t.Error("Grid with a number set on a cell after another cell didn't notice that it was still just one cell.")
+	}
+
+	grid.Cell(0, 0).SetNumber(0)
+
+	if grid.numFilledCells != 0 {
+		t.Error("Grid with cell unset didn't notice that it was now zero again")
+	}
+
+	grid.Cell(0, 0).SetNumber(0)
+
+	if grid.numFilledCells != 0 {
+		t.Error("Setting a cell to 0 that was already zero got wrong num filled cells.")
+	}
+}
+
 func TestLockFilledCells(t *testing.T) {
 	grid := NewGrid()
 	grid.LoadSDK(TEST_GRID)

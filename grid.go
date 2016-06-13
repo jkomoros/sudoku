@@ -472,24 +472,19 @@ func (self *Grid) cellIsValid(cell *Cell) {
 	delete(self.invalidCells, cell)
 }
 
-func (self *Grid) cellModified(cell *Cell) {
+func (self *Grid) cellModified(cell *Cell, oldNumber int) {
 	self.cachedSolutionsLock.Lock()
 	self.cachedSolutions = nil
 	self.cachedSolutionsRequestedLength = -1
 	self.cachedSolutionsLock.Unlock()
 	self.cachedDifficulty = 0.0
 
-	//TODO: this calculation is seriously wrong--the count is wrong if you put
-	//a number in a cell that is not empty. With this method signature there's
-	//not any good way to calculate it without re-counting the filled cells
-	//every time.
-
-	//TODO: test the failure case when this is fixed.
-	if cell.Number() == 0 {
+	if cell.Number() == 0 && oldNumber != 0 {
 		self.numFilledCells--
-	} else {
+	} else if cell.Number() != 0 && oldNumber == 0 {
 		self.numFilledCells++
 	}
+
 }
 
 func (self *Grid) cellRankChanged(cell *Cell) {
