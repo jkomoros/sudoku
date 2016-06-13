@@ -478,6 +478,13 @@ func (self *Grid) cellModified(cell *Cell) {
 	self.cachedSolutionsRequestedLength = -1
 	self.cachedSolutionsLock.Unlock()
 	self.cachedDifficulty = 0.0
+
+	//TODO: this calculation is seriously wrong--the count is wrong if you put
+	//a number in a cell that is not empty. With this method signature there's
+	//not any good way to calculate it without re-counting the filled cells
+	//every time.
+
+	//TODO: test the failure case when this is fixed.
 	if cell.Number() == 0 {
 		self.numFilledCells--
 	} else {
