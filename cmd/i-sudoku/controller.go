@@ -370,34 +370,63 @@ func (n *nextSteps) Len() int {
 	return len(n.steps)
 }
 
-func (n *nextSteps) Less(i, j int) bool {
+func (n nextSteps) Less(i, j int) bool {
 	return n.probabilities[i] > n.probabilities[j]
 }
 
-func (n *nextSteps) Swap(i, j int) {
+func (n nextSteps) Swap(i, j int) {
 	n.steps[i], n.steps[j] = n.steps[j], n.steps[i]
 	n.probabilities[i], n.probabilities[j] = n.probabilities[j], n.probabilities[i]
 }
 
+//countedNums is used in ShowCount
+type countedNums struct {
+	num   int
+	count int
+}
+
+type countedNumsSlice []countedNums
+
+func (s countedNumsSlice) Len() int {
+	return len(s)
+}
+
+func (s countedNumsSlice) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func (s countedNumsSlice) Less(i, j int) bool {
+	//This number is the reverse of the order we'll print it out (DIM - num)
+	return s[i].count > s[j].count
+}
+
 func (c *mainController) ShowCount() {
 	//TODO: test this
-	counts := make([]int, sudoku.DIM)
+
+	nums := make(countedNumsSlice, sudoku.DIM)
+	for i := 0; i < sudoku.DIM; i++ {
+		nums[i] = countedNums{i + 1, 0}
+	}
+
 	for _, cell := range c.Grid().Cells() {
 		num := cell.Number()
 		if num <= 0 || num > sudoku.DIM {
 			continue
 		}
-		counts[num-1]++
+		nums[num-1].count++
 	}
-	//TODO: sort this ascending?
+
+	sort.Sort(nums)
+
 	msg := "{Counts remaining}:\n"
 	for i := 0; i < sudoku.DIM; i++ {
-		count := sudoku.DIM - counts[i]
-		number := strconv.Itoa(count)
+		currentNum := nums[i].num
+		count := sudoku.DIM - nums[i].count
+		countString := strconv.Itoa(count)
 		if count == 0 {
-			number = "{done}"
+			countString = "{done}"
 		}
-		msg += strconv.Itoa(i+1) + " : " + number + "\n"
+		msg += strconv.Itoa(currentNum) + " : " + countString + "\n"
 	}
 	c.SetConsoleMessage(msg, true)
 }
