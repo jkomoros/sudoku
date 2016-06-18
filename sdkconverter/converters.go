@@ -495,6 +495,7 @@ func (c *sdkConverter) Valid(puzzle string) bool {
 	puzzle = strings.Replace(puzzle, sudoku.COL_SEP, "", -1)
 	puzzle = strings.Replace(puzzle, sudoku.ALT_COL_SEP, "", -1)
 	puzzle = strings.Replace(puzzle, "\n", "", -1)
+	puzzle = strings.Replace(puzzle, "\r", "", -1)
 
 	if len(puzzle) != sudoku.DIM*sudoku.DIM {
 		//Wrong length!
