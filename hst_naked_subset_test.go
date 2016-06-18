@@ -30,7 +30,7 @@ func TestSubsetCellsWithNPossibilities(t *testing.T) {
 func TestNakedPairCol(t *testing.T) {
 
 	options := solveTechniqueTestHelperOptions{
-		targetCells:  []cellRef{{0, 8}, {1, 8}, {2, 8}, {3, 8}, {4, 8}, {5, 8}, {8, 8}},
+		targetCells:  []cellRef{{2, 8}, {3, 8}, {4, 8}},
 		pointerCells: []cellRef{{6, 8}, {7, 8}},
 		targetSame:   _GROUP_COL,
 		targetGroup:  8,
@@ -46,7 +46,7 @@ func TestNakedPairRow(t *testing.T) {
 
 	options := solveTechniqueTestHelperOptions{
 		transpose:    true,
-		targetCells:  []cellRef{{8, 0}, {8, 1}, {8, 2}, {8, 3}, {8, 4}, {8, 5}, {8, 8}},
+		targetCells:  []cellRef{{8, 2}, {8, 3}, {8, 4}},
 		pointerCells: []cellRef{{8, 6}, {8, 7}},
 		targetSame:   _GROUP_ROW,
 		targetGroup:  8,
@@ -61,7 +61,7 @@ func TestNakedPairRow(t *testing.T) {
 func TestNakedPairBlock(t *testing.T) {
 
 	options := solveTechniqueTestHelperOptions{
-		targetCells:  []cellRef{{0, 2}, {1, 0}, {1, 1}, {1, 2}, {2, 0}, {2, 1}, {2, 2}},
+		targetCells:  []cellRef{{2, 0}, {2, 1}, {2, 2}},
 		pointerCells: []cellRef{{0, 0}, {0, 1}},
 		targetSame:   _GROUP_BLOCK,
 		targetGroup:  0,
@@ -77,7 +77,7 @@ func TestNakedTriple(t *testing.T) {
 	//TODO: test for col and block as well
 
 	options := solveTechniqueTestHelperOptions{
-		targetCells:  []cellRef{{4, 0}, {4, 1}, {4, 2}, {4, 6}, {4, 7}, {4, 8}},
+		targetCells:  []cellRef{{4, 1}, {4, 2}, {4, 6}, {4, 7}},
 		pointerCells: []cellRef{{4, 3}, {4, 4}, {4, 5}},
 		targetSame:   _GROUP_ROW,
 		targetGroup:  4,
