@@ -482,13 +482,26 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 //potentialNextStep keeps track of the next step we may want to return for
 //HumanSolve.
 type potentialNextStep struct {
-	Steps []*SolveStep
-	//A LOWER Goodness is better. There's not enough precision between 0.0 and
-	//1.0 if we try to cram all values in there and they get very small.
-	Goodness  float64
+	//All potentialNextSteps, except the initial in a frontier, must have a parent.
+	Parent    *potentialNextStep
+	Steps     []*SolveStep
+	Twiddles  map[string]float64
 	HeapIndex int
 	Frontier  *nextStepFrontier
-	//TODO: keep track of individual twiddles for long-term sake.
+}
+
+//Goodness is how good the next step chain is in total. A LOWER Goodness is better. There's not enough precision between 0.0 and
+//1.0 if we try to cram all values in there and they get very small.
+func (p *potentialNextStep) Goodness() float64 {
+	if p.Parent == nil {
+		return 1.0
+	}
+	//TODO: as an optimization we could cache this; each step is immutable basically.
+	ownMultiplicationFactor := 1.0
+	for _, twiddle := range p.Twiddles {
+		ownMultiplicationFactor *= twiddle
+	}
+	return p.Parent.Goodness() * ownMultiplicationFactor
 }
 
 //AddStep adds a new step to the end of Steps and twiddles the goodness by the
@@ -503,8 +516,7 @@ func (p *potentialNextStep) AddStep(step *SolveStep) {
 //Twiddle modifies goodness by the given amount and keeps track of the reason
 //for debugging purposes.
 func (p *potentialNextStep) Twiddle(amount float64, description string) {
-	//TODO: store string somewhere.
-	p.Goodness *= amount
+	p.Twiddles[description] = amount
 	heap.Fix(p.Frontier, p.HeapIndex)
 }
 
@@ -542,7 +554,7 @@ func (n nextStepFrontier) Len() int {
 
 func (n nextStepFrontier) Less(i, j int) bool {
 	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
-	return n[i].Goodness > n[j].Goodness
+	return n[i].Goodness() > n[j].Goodness()
 }
 
 func (n nextStepFrontier) Swap(i, j int) {
@@ -570,7 +582,7 @@ func (n *nextStepFrontier) Pop() interface{} {
 func (n *nextStepFrontier) AddItem(steps []*SolveStep) *potentialNextStep {
 	result := &potentialNextStep{
 		Steps:     nil,
-		Goodness:  1.0,
+		Twiddles:  make(map[string]float64),
 		HeapIndex: -1,
 		Frontier:  n,
 	}

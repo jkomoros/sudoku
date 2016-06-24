@@ -430,8 +430,8 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Fatal("Adding first item to frontier didn't have 0 index")
 	}
 
-	if simpleFillStepItem.Goodness != nInRowTechnique.humanLikelihood(simpleFillStep) {
-		t.Error("Goodness of simple fill step was wrong. Execpted", nInRowTechnique.humanLikelihood(simpleFillStep), "got", simpleFillStepItem.Goodness)
+	if simpleFillStepItem.Goodness() != nInRowTechnique.humanLikelihood(simpleFillStep) {
+		t.Error("Goodness of simple fill step was wrong. Execpted", nInRowTechnique.humanLikelihood(simpleFillStep), "got", simpleFillStepItem.Goodness())
 	}
 
 	nonFillStepItem := frontier.AddItem([]*SolveStep{
@@ -450,11 +450,11 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Error("We though that simpleFillStep should be at the end of the queue but it wasn't.")
 	}
 
-	currentGoodness := nonFillStepItem.Goodness
+	currentGoodness := nonFillStepItem.Goodness()
 
 	nonFillStepItem.AddStep(simpleFillStep)
 
-	if nonFillStepItem.Goodness == currentGoodness {
+	if nonFillStepItem.Goodness() == currentGoodness {
 		t.Error("Adding a step to end of nonfill step didn't change goodness.")
 	}
 
