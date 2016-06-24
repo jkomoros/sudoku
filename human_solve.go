@@ -459,12 +459,6 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 //possibilites exist at each step. cmd/i-sudoku is one user of this method.
 func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifiedCells CellSlice) (steps []*SolveStep, distribution ProbabilityDistribution) {
 
-	if self.Invalid() {
-		//We must have been in a branch and found an invalidity.
-		//Bail immediately.
-		return nil, nil
-	}
-
 	//TODO: hoist this special guess logic out if we decide to commit this.
 
 	stepsToActuallyUse := options.TechniquesToUse
