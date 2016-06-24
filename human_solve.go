@@ -265,6 +265,10 @@ func (self *Grid) HumanSolution(options *HumanSolveOptions) *SolveDirections {
 }
 
 /*
+ *
+ * NOTE: THIS ENTIRE BLOCK NEEDS TO BE UPDATED NOW THAT WE JUST GUESS BY "CHEATING"
+ * TODO: update this comment block
+ *
  * The HumanSolve method is very complex due to guessing logic.
  *
  * Without guessing, the approach is very straightforward. Every move either fills a cell
@@ -461,7 +465,15 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifi
 		return nil, nil
 	}
 
-	steps = runTechniques(options.TechniquesToUse, self, options.NumOptionsToCalculate)
+	//TODO: hoist this special guess logic out if we decide to commit this.
+
+	stepsToActuallyUse := options.TechniquesToUse
+
+	if !options.NoGuess {
+		stepsToActuallyUse = append(stepsToActuallyUse, GuessTechnique)
+	}
+
+	steps = runTechniques(stepsToActuallyUse, self, options.NumOptionsToCalculate)
 
 	//Now pick one to apply.
 	if len(steps) == 0 {
@@ -523,107 +535,7 @@ func humanSolveNonGuessSearcher(grid *Grid, options *HumanSolveOptions, endCondi
 		step.Apply(grid)
 
 	}
-	if (endConditionSolved && !grid.Solved()) || (!endConditionSolved && (lastStep == nil || !lastStep.Technique.IsFill())) {
-		//We couldn't solve the puzzle.
-		//But let's do one last ditch effort and try guessing.
-		//But first... are we allowed to guess?
-		if options.NoGuess {
-			//guess not... :-)
-			return nil
-		}
-		guessSteps := humanSolveGuessSearcher(grid, options, endConditionSolved)
-		if len(guessSteps) == 0 {
-			//Okay, we just totally failed.
-			return nil
-		}
-		return append(results, guessSteps...)
-	}
 	return results
-}
-
-//Called when we have run out of options at a given state and need to guess.
-func humanSolveGuessSearcher(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) []*SolveStep {
-
-	//Yes, using DIM*DIM is a gross hack... I really should be calling Find inside a goroutine...
-	results := make(chan *SolveStep, DIM*DIM)
-	done := make(chan bool)
-
-	if options.techniquesToUseAfterGuess != nil {
-		options.TechniquesToUse = options.techniquesToUseAfterGuess
-	}
-
-	//TODO: consider doing a normal solve forward from here to figure out what the right branch is and just do that.
-
-	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
-	GuessTechnique.Find(grid, results, done)
-	close(done)
-
-	var guess *SolveStep
-
-	//TODO: test cases where we expectmultipel results...
-	select {
-	case guess = <-results:
-	default:
-		//Coludn't find a guess step, oddly enough.
-		return nil
-	}
-
-	//We'll just take the first guess step and forget about the other ones.
-
-	//The guess technique passes back the other nums as PointerNums, which is a hack.
-	//Unpack them and then nil it out to prevent confusing other people in the future with them.
-	otherNums := guess.PointerNums
-	guess.PointerNums = nil
-
-	var gridCopy *Grid
-
-	for {
-		gridCopy = grid.Copy()
-
-		guess.Apply(gridCopy)
-
-		//Even if endConditionSolved is true, this guess we will return will be an IsFill,
-		//thus terminating the search. From here on out all we're doing is verifying that
-		//we picked the right branch at the guess if endConditionSolved is not true.
-		solveSteps := humanSolveNonGuessSearcher(gridCopy, options, true)
-
-		if len(solveSteps) != 0 {
-			//Success!
-			//Make ourselves look like that grid (to pass back the state of what the solution was) and return.
-			grid.replace(gridCopy)
-			gridCopy.Done()
-			if endConditionSolved {
-				return append([]*SolveStep{guess}, solveSteps...)
-			} else {
-				//Since we're trying to find a hint that terminates in an IsFill step,
-				//and this guess IS the IsFill step, and we've verified that this
-				//guess we chose is correct, just return the guess step back up.
-				return []*SolveStep{guess}
-			}
-
-		}
-		//We need to try the next solution.
-
-		if len(otherNums) == 0 {
-			//No more numbers to try. We failed!
-			break
-		}
-
-		nextNum := otherNums[0]
-		otherNums = otherNums[1:]
-
-		//Stuff it into the TargetNums for the branch step.
-		guess.TargetNums = IntSlice{nextNum}
-
-		gridCopy.Done()
-
-	}
-
-	gridCopy.Done()
-
-	//We failed to find anything (which should never happen...)
-	return nil
-
 }
 
 func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps int) []*SolveStep {

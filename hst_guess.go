@@ -2,7 +2,6 @@ package sudoku
 
 import (
 	"fmt"
-	"math/rand"
 )
 
 type guessTechnique struct {
@@ -10,7 +9,7 @@ type guessTechnique struct {
 }
 
 func (self *guessTechnique) humanLikelihood(step *SolveStep) float64 {
-	return self.difficultyHelper(100000000000.0)
+	return self.difficultyHelper(1000000000000000000000.0)
 }
 
 func (self *guessTechnique) Description(step *SolveStep) string {
@@ -18,6 +17,22 @@ func (self *guessTechnique) Description(step *SolveStep) string {
 }
 
 func (self *guessTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
+
+	//We used to have a very elaborate aparatus for guess logic where we'd
+	//earnestly guess and then HumanSolve forward until we discovered a
+	//solution or an inconsistency. But that was dumb because we never
+	//returned a result down a wrong guess (or otherwise proved that we had
+	//done the 'real' work). And it massively complicated the flow. So... just
+	//cheat. Brute force solve the grid, pick a cell with small number of
+	//possibilities, and then just immediately return the correct value for
+	//it. Done!
+
+	solvedGrid := grid.Copy()
+	solvedGrid.Solve()
+
+	if !solvedGrid.Solved() {
+		return
+	}
 
 	getter := grid.queue().NewGetter()
 
@@ -42,18 +57,12 @@ func (self *guessTechnique) Find(grid *Grid, results chan *SolveStep, done chan 
 
 		//Convert RankedObject to a cell
 		cell := obj.(*Cell)
-		possibilities := cell.Possibilities()
 
-		if len(possibilities) == 0 {
-			//Not entirely sure why this would happen, but it can...
-			continue
-		}
+		cellInSolvedGrid := cell.InGrid(solvedGrid)
 
-		num := possibilities[rand.Intn(len(possibilities))]
+		num := cellInSolvedGrid.Number()
 		step := newFillSolveStep(cell, num, self)
 
-		//We're going to abuse pointerNums and use it to point out the other numbers we COULD have used.
-		step.PointerNums = IntSlice(possibilities).Difference(IntSlice{num})
 		if step.IsUseful(grid) {
 			select {
 			case results <- step:
