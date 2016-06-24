@@ -452,7 +452,9 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 //potentialNextStep keeps track of the next step we may want to return for
 //HumanSolve.
 type potentialNextStep struct {
-	Steps     []*SolveStep
+	Steps []*SolveStep
+	//A LOWER Goodness is better. There's not enough precision between 0.0 and
+	//1.0 if we try to cram all values in there and they get very small.
 	Goodness  float64
 	HeapIndex int
 	Frontier  *nextStepFrontier
