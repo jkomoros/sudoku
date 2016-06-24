@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"container/heap"
 	"fmt"
 	"log"
 	"math"
@@ -451,17 +452,11 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 //potentialNextStep keeps track of the next step we may want to return for
 //HumanSolve.
 type potentialNextStep struct {
-	Steps    []*SolveStep
-	Goodness float64
+	Steps     []*SolveStep
+	Goodness  float64
+	HeapIndex int
+	Frontier  *nextStepFrontier
 	//TODO: keep track of individual twiddles for long-term sake.
-}
-
-//newPotentialNextStep returns a new initalized potential next step.
-func newPotentialNextStep() *potentialNextStep {
-	return &potentialNextStep{
-		nil,
-		1.0,
-	}
 }
 
 //Twiddle modifies goodness by the given amount and keeps track of the reason
@@ -469,6 +464,7 @@ func newPotentialNextStep() *potentialNextStep {
 func (p *potentialNextStep) Twiddle(amount float64, description string) {
 	//TODO: store string somewhere.
 	p.Goodness *= amount
+	heap.Fix(p.Frontier, p.HeapIndex)
 }
 
 func (p *potentialNextStep) IsComplete() bool {
@@ -476,6 +472,58 @@ func (p *potentialNextStep) IsComplete() bool {
 		return false
 	}
 	return p.Steps[len(p.Steps)-1].Technique.IsFill()
+}
+
+type nextStepFrontier []*potentialNextStep
+
+func newNextStepFrontier() *nextStepFrontier {
+	frontier := &nextStepFrontier{
+		nil,
+	}
+	heap.Init(frontier)
+	return frontier
+}
+
+func (n nextStepFrontier) Len() int {
+	return len(n)
+}
+
+func (n nextStepFrontier) Less(i, j int) bool {
+	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
+	return n[i].Goodness > n[j].Goodness
+}
+
+func (n nextStepFrontier) Swap(i, j int) {
+	n[i], n[j] = n[j], n[i]
+	n[i].HeapIndex = i
+	n[j].HeapIndex = j
+}
+
+func (n *nextStepFrontier) Push(x interface{}) {
+	length := len(*n)
+	item := x.(*potentialNextStep)
+	item.HeapIndex = length
+	*n = append(*n, item)
+}
+
+func (n *nextStepFrontier) Pop() interface{} {
+	old := *n
+	length := len(old)
+	item := old[length-1]
+	item.HeapIndex = -1 // for safety
+	*n = old[0 : length-1]
+	return item
+}
+
+func (n *nextStepFrontier) AddItem(steps []*SolveStep) *potentialNextStep {
+	result := &potentialNextStep{
+		Steps:     steps,
+		Goodness:  1.0,
+		HeapIndex: -1,
+		Frontier:  n,
+	}
+	n.Push(result)
+	return result
 }
 
 //newHumanSolveSearcher is a new implementation of the core implementation of
