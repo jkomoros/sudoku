@@ -449,17 +449,6 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	return &SolveDirections{snapshot, steps, false}
 }
 
-/*
-
-	Next steps planning
-
-	At each search step, we Pop the lowest item off the heap and explore it.
-	Exploring searches for all techniques rooted here (stopping early if the
-	pool is ever big enough, of course). That item that was popped is never
-	added back into the frontier; it exists only in the parent chain.
-
-*/
-
 //potentialNextStep keeps track of the next step we may want to return for
 //HumanSolve.
 type potentialNextStep struct {
@@ -639,7 +628,11 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 	//this that asserts in the type system that the chain of solve steps has
 	//precisely one fill step and it's at the end of the chain.
 
-	//TODO: implement this.
+	//At each search step, we Pop the lowest item off the heap and explore it.
+	//Exploring searches for all techniques rooted here (stopping early if the
+	//pool is ever big enough, of course). That item that was popped is never
+	//added back into the frontier; it exists only in the parent chain.
+
 	return nil
 
 }
