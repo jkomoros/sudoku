@@ -644,6 +644,8 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 		//As soon as an item is added to the frontier that is completed, it is
 		//removed from the frontier and added to possibleCompleteStepsPool.
 
+		//TODO: implement the logic from the paragraph above into frontier itself.
+
 		//Once possibleCompleteStepsPool is at least
 		//options.NumOptionsToCalculate we can bail out of looking for more
 		//steps, shut down other threads, and break out of this loop.
