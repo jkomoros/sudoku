@@ -524,12 +524,17 @@ func (n *nextStepFrontier) Pop() interface{} {
 
 func (n *nextStepFrontier) AddItem(steps []*SolveStep) *potentialNextStep {
 	result := &potentialNextStep{
-		Steps:     steps,
+		Steps:     nil,
 		Goodness:  1.0,
 		HeapIndex: -1,
 		Frontier:  n,
 	}
 	n.Push(result)
+	//Add each step one at a time to get all of the twiddles.
+	for _, step := range steps {
+		result.AddStep(step)
+	}
+
 	return result
 }
 
