@@ -459,6 +459,13 @@ type potentialNextStep struct {
 	//TODO: keep track of individual twiddles for long-term sake.
 }
 
+//AddStep adds a new step to the end of Steps and twiddles the goodness by the
+//humanlikelihood of the new step.
+func (p *potentialNextStep) AddStep(step *SolveStep) {
+	p.Steps = append(p.Steps, step)
+	p.Twiddle(step.Technique.humanLikelihood(step), "Human Likelihood for "+step.TechniqueVariant())
+}
+
 //Twiddle modifies goodness by the given amount and keeps track of the reason
 //for debugging purposes.
 func (p *potentialNextStep) Twiddle(amount float64, description string) {
