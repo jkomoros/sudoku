@@ -448,6 +448,36 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	return &SolveDirections{snapshot, steps, false}
 }
 
+//potentialNextStep keeps track of the next step we may want to return for
+//HumanSolve.
+type potentialNextStep struct {
+	Steps    []*SolveStep
+	Goodness float64
+	//TODO: keep track of individual twiddles for long-term sake.
+}
+
+//newPotentialNextStep returns a new initalized potential next step.
+func newPotentialNextStep() *potentialNextStep {
+	return &potentialNextStep{
+		nil,
+		1.0,
+	}
+}
+
+//Twiddle modifies goodness by the given amount and keeps track of the reason
+//for debugging purposes.
+func (p *potentialNextStep) Twiddle(amount float64, description string) {
+	//TODO: store string somewhere.
+	p.Goodness *= amount
+}
+
+func (p *potentialNextStep) IsComplete() bool {
+	if len(p.Steps) == 0 {
+		return false
+	}
+	return p.Steps[len(p.Steps)-1].Technique.IsFill()
+}
+
 //HumanSolvePossibleSteps returns a list of SolveSteps that could apply at
 //this state, along with the probability distribution that a human would pick
 //each one. The optional lastModifiedCells argument is the list of cells that
