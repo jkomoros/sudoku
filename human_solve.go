@@ -476,6 +476,10 @@ func (p *potentialNextStep) Twiddle(amount float64, description string) {
 	heap.Fix(p.Frontier, p.HeapIndex)
 }
 
+func (p *potentialNextStep) String() string {
+	return fmt.Sprintf("%v %f %d", p.Steps, p.Goodness, p.HeapIndex)
+}
+
 func (p *potentialNextStep) IsComplete() bool {
 	if len(p.Steps) == 0 {
 		return false
@@ -489,6 +493,15 @@ func newNextStepFrontier() *nextStepFrontier {
 	frontier := &nextStepFrontier{}
 	heap.Init(frontier)
 	return frontier
+}
+
+func (n *nextStepFrontier) String() string {
+	result := "[\n"
+	for _, item := range *n {
+		result += item.String() + "\n"
+	}
+	result += "]\n"
+	return result
 }
 
 func (n nextStepFrontier) Len() int {
