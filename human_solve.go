@@ -628,12 +628,52 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 	//this that asserts in the type system that the chain of solve steps has
 	//precisely one fill step and it's at the end of the chain.
 
-	//At each search step, we Pop the lowest item off the heap and explore it.
-	//Exploring searches for all techniques rooted here (stopping early if the
-	//pool is ever big enough, of course). That item that was popped is never
-	//added back into the frontier; it exists only in the parent chain.
+	//The pool of possible complete steps to choose from. Once this gets to at
+	//least options.NumOptionsToCalculate we can bail early and just pick the
+	//best one.
+	var possibleCompleteStepsPool []*potentialNextStep
 
-	return nil
+	frontier := newNextStepFrontier(grid)
+
+	step := frontier.NextPossibleStep()
+
+	for step != nil {
+		//Explore step, finding all possible steps that apply from here and
+		//adding to the frontier.
+
+		//As soon as an item is added to the frontier that is completed, it is
+		//removed from the frontier and added to possibleCompleteStepsPool.
+
+		//Once possibleCompleteStepsPool is at least
+		//options.NumOptionsToCalculate we can bail out of looking for more
+		//steps, shut down other threads, and break out of this loop.
+
+		//We do NOT add the explored item back into the frontier.
+
+		//TODO: actually implement this loop.
+
+		step = frontier.NextPossibleStep()
+	}
+
+	//Go through possibleCompleteStepsPool and pick the lowest valued one.
+
+	//But first check if we don't have any.
+	if len(possibleCompleteStepsPool) == 0 {
+		return nil
+	}
+
+	min := math.MaxFloat64
+	var minItem *potentialNextStep
+
+	for _, item := range possibleCompleteStepsPool {
+		if item.Goodness() > min {
+			continue
+		}
+		min = item.Goodness()
+		minItem = item
+	}
+
+	return minItem.Steps()
 
 }
 
