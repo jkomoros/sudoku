@@ -484,9 +484,7 @@ func (p *potentialNextStep) IsComplete() bool {
 type nextStepFrontier []*potentialNextStep
 
 func newNextStepFrontier() *nextStepFrontier {
-	frontier := &nextStepFrontier{
-		nil,
-	}
+	frontier := &nextStepFrontier{}
 	heap.Init(frontier)
 	return frontier
 }

@@ -392,3 +392,45 @@ func puzzleDifficultyHelper(filename string, t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestNextStepFrontier(t *testing.T) {
+
+	frontier := newNextStepFrontier()
+
+	grid := NewGrid()
+	grid.LoadSDK(TEST_GRID)
+
+	simpleFillStep := &SolveStep{
+		Technique: techniquesByName["Necessary In Row"],
+	}
+
+	if simpleFillStep.Technique == nil {
+		t.Fatal("couldn't find necessary in row technique")
+	}
+
+	nonFillStep := &SolveStep{
+		Technique: techniquesByName["Pointing Pair Row"],
+	}
+
+	if nonFillStep.Technique == nil {
+		t.Fatal("Couldn't find pointing pair row techhnique")
+	}
+
+	simpleFillStepItem := frontier.AddItem([]*SolveStep{
+		simpleFillStep,
+	})
+
+	if simpleFillStepItem == nil {
+		t.Fatal("Adding fill step didn't return anything")
+	}
+
+	if simpleFillStepItem.HeapIndex != 0 {
+		t.Fatal("Adding first item to frontier didn't have 0 index")
+	}
+
+	//TODO: test that adding nonFillStep that fillStep comes out first.
+
+	//TODO: test that adding a fillStep to the end of the nonFillStep thing
+	//updates the goodness.
+
+}
