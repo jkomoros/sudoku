@@ -454,28 +454,14 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	Next steps planning
 
 
-	potentialNextStep grows a Grid, which is a snapshot of the grid will all of the steps applied
-
-	potentialNextStep grows a parent, a pointer to the potentialNextStep from which it was cloned
-
-	Goodness becomes a derived field, which is the parent's goodness * all of
-	the twiddlers at this level. Base case if no parent: 1.0.
-
-	The only way to create a new potentialNextStep in a frontier is to find
-	one and ForkWithStep. This creates a new potentialNextStep with its parent
-	as the current step. It keeps a list of its twiddles that it applies to
-	its parent, as well as a new Grid snapshot based on its parent. (Potential
-	optimziation: grid is derived and can be thrown away)
+	potentialNextStep grows a Grid, which is a snapshot of the grid will all
+	of the steps applied. Potential optmization: grid is derived, since many
+	of the steps won't actually ever be explored.
 
 	At each search step, we Pop the lowest item off the heap and explore it.
 	Exploring searches for all techniques rooted here (stopping early if the
 	pool is ever big enough, of course). That item that was popped is never
 	added back into the frontier; it exists only in the parent chain.
-
-	When you create a frontier, we add a special potentialNextStep that has no
-	steps in it. This is the base case. We then explore from there and that's
-	it.
-
 
 */
 
@@ -484,7 +470,7 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 type potentialNextStep struct {
 	//All potentialNextSteps, except the initial in a frontier, must have a parent.
 	Parent    *potentialNextStep
-	Steps     []*SolveStep
+	step      *SolveStep
 	Twiddles  map[string]float64
 	HeapIndex int
 	Frontier  *nextStepFrontier
@@ -504,13 +490,25 @@ func (p *potentialNextStep) Goodness() float64 {
 	return p.Parent.Goodness() * ownMultiplicationFactor
 }
 
-//AddStep adds a new step to the end of Steps and twiddles the goodness by the
-//humanlikelihood of the new step.
-func (p *potentialNextStep) AddStep(step *SolveStep) {
-	p.Steps = append(p.Steps, step)
-	//TODO: humanLikelihood is actually a bigger number the more unlikely.
-	//Should small Goodness be better, or big goodness?
-	p.Twiddle(step.Technique.humanLikelihood(step), "Human Likelihood for "+step.TechniqueVariant())
+func (p *potentialNextStep) Steps() []*SolveStep {
+	//TODO: can memoize this since it will never change
+	if p.Parent == nil {
+		return nil
+	}
+	return append(p.Parent.Steps(), p.step)
+}
+
+func (p *potentialNextStep) AddStep(step *SolveStep) *potentialNextStep {
+	result := &potentialNextStep{
+		Parent:    p,
+		step:      step,
+		Twiddles:  make(map[string]float64),
+		HeapIndex: -1,
+		Frontier:  p.Frontier,
+	}
+	p.Frontier.Push(result)
+	result.Twiddle(step.Technique.humanLikelihood(step), "Human Likelihood for "+step.TechniqueVariant())
+	return result
 }
 
 //Twiddle modifies goodness by the given amount and keeps track of the reason
@@ -525,10 +523,11 @@ func (p *potentialNextStep) String() string {
 }
 
 func (p *potentialNextStep) IsComplete() bool {
-	if len(p.Steps) == 0 {
+	steps := p.Steps()
+	if len(steps) == 0 {
 		return false
 	}
-	return p.Steps[len(p.Steps)-1].Technique.IsFill()
+	return steps[len(steps)-1].Technique.IsFill()
 }
 
 type nextStepFrontier []*potentialNextStep
@@ -536,6 +535,11 @@ type nextStepFrontier []*potentialNextStep
 func newNextStepFrontier() *nextStepFrontier {
 	frontier := &nextStepFrontier{}
 	heap.Init(frontier)
+	initialItem := &potentialNextStep{
+		Frontier:  frontier,
+		HeapIndex: -1,
+	}
+	heap.Push(frontier, initialItem)
 	return frontier
 }
 
@@ -579,20 +583,12 @@ func (n *nextStepFrontier) Pop() interface{} {
 	return item
 }
 
-func (n *nextStepFrontier) AddItem(steps []*SolveStep) *potentialNextStep {
-	result := &potentialNextStep{
-		Steps:     nil,
-		Twiddles:  make(map[string]float64),
-		HeapIndex: -1,
-		Frontier:  n,
+//NextPossibleStep pops the best step and returns it.
+func (n *nextStepFrontier) NextPossibleStep() *potentialNextStep {
+	if n.Len() == 0 {
+		return nil
 	}
-	n.Push(result)
-	//Add each step one at a time to get all of the twiddles.
-	for _, step := range steps {
-		result.AddStep(step)
-	}
-
-	return result
+	return n.Pop().(*potentialNextStep)
 }
 
 //newHumanSolveSearcher is a new implementation of the core implementation of

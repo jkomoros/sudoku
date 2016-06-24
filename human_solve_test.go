@@ -397,6 +397,20 @@ func TestNextStepFrontier(t *testing.T) {
 
 	frontier := newNextStepFrontier()
 
+	if frontier.Len() != 1 {
+		t.Error("Expected new frontier to have exactly one item in it, but got", frontier.Len())
+	}
+
+	basePotentialNextStep := frontier.NextPossibleStep()
+
+	if basePotentialNextStep == nil {
+		t.Error("Didn'get base potential next step")
+	}
+
+	if frontier.Len() != 0 {
+		t.Error("Getting the base potential next step should have emptied it, but len is", frontier.Len())
+	}
+
 	grid := NewGrid()
 	grid.LoadSDK(TEST_GRID)
 
@@ -418,9 +432,7 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Fatal("Couldn't find pointing pair row techhnique")
 	}
 
-	simpleFillStepItem := frontier.AddItem([]*SolveStep{
-		simpleFillStep,
-	})
+	simpleFillStepItem := basePotentialNextStep.AddStep(simpleFillStep)
 
 	if simpleFillStepItem == nil {
 		t.Fatal("Adding fill step didn't return anything")
@@ -434,9 +446,7 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Error("Goodness of simple fill step was wrong. Execpted", nInRowTechnique.humanLikelihood(simpleFillStep), "got", simpleFillStepItem.Goodness())
 	}
 
-	nonFillStepItem := frontier.AddItem([]*SolveStep{
-		nonFillStep,
-	})
+	nonFillStepItem := basePotentialNextStep.AddStep(nonFillStep)
 
 	if nonFillStepItem == nil {
 		t.Fatal("Adding non fill step didn't return a frontier object")
@@ -450,21 +460,13 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Error("We though that simpleFillStep should be at the end of the queue but it wasn't.")
 	}
 
-	currentGoodness := nonFillStepItem.Goodness()
-
-	nonFillStepItem.AddStep(simpleFillStep)
-
-	if nonFillStepItem.Goodness() == currentGoodness {
-		t.Error("Adding a step to end of nonfill step didn't change goodness.")
-	}
-
-	nonFillStepItem.Twiddle(0.000001, "Very small amount")
+	nonFillStepItem.Twiddle(0.000001, "Very small amount to make this #1")
 
 	if (*frontier)[1] != nonFillStepItem {
 		t.Error("Even after twiddling up non fill step by a lot it still wasn't in the top position in frontier", (*frontier)[0], (*frontier)[1])
 	}
 
-	poppedItem := frontier.Pop().(*potentialNextStep)
+	poppedItem := frontier.NextPossibleStep()
 
 	if poppedItem != nonFillStepItem {
 		t.Error("Expected popped item to be the non-fill step now that its goodness is higher, but got", poppedItem)
@@ -472,6 +474,28 @@ func TestNextStepFrontier(t *testing.T) {
 
 	if frontier.Len() != 1 {
 		t.Error("Wrong frontier length after popping item. Got", frontier.Len(), "expected 1")
+	}
+
+	currentGoodness := nonFillStepItem.Goodness()
+
+	completedNonFillStemItem := nonFillStepItem.AddStep(simpleFillStep)
+
+	if completedNonFillStemItem.Goodness() == currentGoodness {
+		t.Error("Adding a step to end of nonfill step didn't change goodness.")
+	}
+
+	if frontier.Len() != 2 {
+		t.Error("Adding an item gave wrong len. Got", frontier.Len(), "wanted 2")
+	}
+
+	steps := completedNonFillStemItem.Steps()
+
+	if len(steps) != 2 {
+		t.Error("Expected two steps back, got", len(steps))
+	}
+
+	if steps[0] != nonFillStepItem.step {
+		t.Error("Expected first step to be the step of nonFillStepItem. Got", steps[0])
 	}
 
 }
