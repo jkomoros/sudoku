@@ -115,11 +115,16 @@ func (d ProbabilityDistribution) invert() ProbabilityDistribution {
 
 	//Invert
 	for i, weight := range invertedWeights {
-		weights[i] = 1 / math.Exp(weight/20)
+		weights[i] = invertWeight(weight)
 	}
 
 	//But now you need to renormalize since they won't sum to 1.
 	return weights.normalize()
+}
+
+//invertWeight is the primary logic used to invert a positive weight.
+func invertWeight(inverted float64) float64 {
+	return 1 / math.Exp(inverted/20)
 }
 
 //RandomIndex returns a random index based on the probability distribution.
