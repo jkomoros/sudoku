@@ -530,7 +530,10 @@ func (p *potentialNextStep) IsComplete() bool {
 	return steps[len(steps)-1].Technique.IsFill()
 }
 
-type nextStepFrontier []*potentialNextStep
+type nextStepFrontier struct {
+	items []*potentialNextStep
+	grid  *Grid
+}
 
 func newNextStepFrontier() *nextStepFrontier {
 	frontier := &nextStepFrontier{}
@@ -545,7 +548,7 @@ func newNextStepFrontier() *nextStepFrontier {
 
 func (n *nextStepFrontier) String() string {
 	result := "[\n"
-	for _, item := range *n {
+	for _, item := range n.items {
 		result += item.String() + "\n"
 	}
 	result += "]\n"
@@ -553,33 +556,33 @@ func (n *nextStepFrontier) String() string {
 }
 
 func (n nextStepFrontier) Len() int {
-	return len(n)
+	return len(n.items)
 }
 
 func (n nextStepFrontier) Less(i, j int) bool {
 	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
-	return n[i].Goodness() > n[j].Goodness()
+	return n.items[i].Goodness() > n.items[j].Goodness()
 }
 
 func (n nextStepFrontier) Swap(i, j int) {
-	n[i], n[j] = n[j], n[i]
-	n[i].heapIndex = i
-	n[j].heapIndex = j
+	n.items[i], n.items[j] = n.items[j], n.items[i]
+	n.items[i].heapIndex = i
+	n.items[j].heapIndex = j
 }
 
 func (n *nextStepFrontier) Push(x interface{}) {
-	length := len(*n)
+	length := len(n.items)
 	item := x.(*potentialNextStep)
 	item.heapIndex = length
-	*n = append(*n, item)
+	n.items = append(n.items, item)
 }
 
 func (n *nextStepFrontier) Pop() interface{} {
-	old := *n
+	old := n.items
 	length := len(old)
 	item := old[length-1]
 	item.heapIndex = -1 // for safety
-	*n = old[0 : length-1]
+	n.items = old[0 : length-1]
 	return item
 }
 

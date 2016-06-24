@@ -456,14 +456,14 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Error("Frontier had wrong length after adding two items. Got", frontier.Len(), "expected 2")
 	}
 
-	if (*frontier)[1] != simpleFillStepItem {
+	if frontier.items[1] != simpleFillStepItem {
 		t.Error("We though that simpleFillStep should be at the end of the queue but it wasn't.")
 	}
 
 	nonFillStepItem.Twiddle(0.000001, "Very small amount to make this #1")
 
-	if (*frontier)[1] != nonFillStepItem {
-		t.Error("Even after twiddling up non fill step by a lot it still wasn't in the top position in frontier", (*frontier)[0], (*frontier)[1])
+	if frontier.items[1] != nonFillStepItem {
+		t.Error("Even after twiddling up non fill step by a lot it still wasn't in the top position in frontier", frontier.items[0], frontier.items[1])
 	}
 
 	poppedItem := frontier.NextPossibleStep()
