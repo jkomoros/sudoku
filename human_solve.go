@@ -478,6 +478,41 @@ func (p *potentialNextStep) IsComplete() bool {
 	return p.Steps[len(p.Steps)-1].Technique.IsFill()
 }
 
+//newHumanSolveSearcher is a new implementation of the core implementation of
+//HumanSolve.
+func newHumanSolveSearcher(grid *Grid, options *HumanSolveOptions) []*SolveStep {
+	//TODO: drop the 'new' from the name.
+	var result []*SolveStep
+
+	gridCopy := grid.Copy()
+
+	for !gridCopy.Solved() {
+		newStep := newHumanSolveSearcherSingleStep(gridCopy, options, result)
+		result = append(result, newStep...)
+	}
+
+	//TODO: if we broke out and we didn't manage to solve the puzzle handle
+	//that return value correctly
+
+	return result
+}
+
+//newHumanSolveSearcherSingleStep is the workhorse of the new HumanSolve. It
+//searches for the next FillStepChain on the puzzle: a series of steps that
+//contains exactly one fill step at its end.
+func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, previousSteps []*SolveStep) []*SolveStep {
+
+	//TODO: drop the 'new' from the name
+
+	//TODO: consider making a special FillStepChain type to use for all of
+	//this that asserts in the type system that the chain of solve steps has
+	//precisely one fill step and it's at the end of the chain.
+
+	//TODO: implement this.
+	return nil
+
+}
+
 //HumanSolvePossibleSteps returns a list of SolveSteps that could apply at
 //this state, along with the probability distribution that a human would pick
 //each one. The optional lastModifiedCells argument is the list of cells that
