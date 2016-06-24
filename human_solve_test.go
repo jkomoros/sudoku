@@ -400,8 +400,10 @@ func TestNextStepFrontier(t *testing.T) {
 	grid := NewGrid()
 	grid.LoadSDK(TEST_GRID)
 
+	nInRowTechnique := techniquesByName["Necessary In Row"]
+
 	simpleFillStep := &SolveStep{
-		Technique: techniquesByName["Necessary In Row"],
+		Technique: nInRowTechnique,
 	}
 
 	if simpleFillStep.Technique == nil {
@@ -428,9 +430,48 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Fatal("Adding first item to frontier didn't have 0 index")
 	}
 
-	//TODO: test that adding nonFillStep that fillStep comes out first.
+	if simpleFillStepItem.Goodness != nInRowTechnique.humanLikelihood(simpleFillStep) {
+		t.Error("Goodness of simple fill step was wrong. Execpted", nInRowTechnique.humanLikelihood(simpleFillStep), "got", simpleFillStepItem.Goodness)
+	}
 
-	//TODO: test that adding a fillStep to the end of the nonFillStep thing
-	//updates the goodness.
+	nonFillStepItem := frontier.AddItem([]*SolveStep{
+		nonFillStep,
+	})
+
+	if nonFillStepItem == nil {
+		t.Fatal("Adding non fill step didn't return a frontier object")
+	}
+
+	if frontier.Len() != 2 {
+		t.Error("Frontier had wrong length after adding two items. Got", frontier.Len(), "expected 2")
+	}
+
+	if (*frontier)[1] != simpleFillStepItem {
+		t.Error("We though that simpleFillStep should be at the end of the queue but it wasn't.")
+	}
+
+	currentGoodness := nonFillStepItem.Goodness
+
+	nonFillStepItem.AddStep(simpleFillStep)
+
+	if nonFillStepItem.Goodness == currentGoodness {
+		t.Error("Adding a step to end of nonfill step didn't change goodness.")
+	}
+
+	nonFillStepItem.Twiddle(0.000001, "Very small amount")
+
+	if (*frontier)[1] != nonFillStepItem {
+		t.Error("Even after twiddling up non fill step by a lot it still wasn't in the top position in frontier", (*frontier)[0], (*frontier)[1])
+	}
+
+	poppedItem := frontier.Pop().(*potentialNextStep)
+
+	if poppedItem != nonFillStepItem {
+		t.Error("Expected popped item to be the non-fill step now that its goodness is higher, but got", poppedItem)
+	}
+
+	if frontier.Len() != 1 {
+		t.Error("Wrong frontier length after popping item. Got", frontier.Len(), "expected 1")
+	}
 
 }

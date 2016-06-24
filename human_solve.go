@@ -463,6 +463,8 @@ type potentialNextStep struct {
 //humanlikelihood of the new step.
 func (p *potentialNextStep) AddStep(step *SolveStep) {
 	p.Steps = append(p.Steps, step)
+	//TODO: humanLikelihood is actually a bigger number the more unlikely.
+	//Should small Goodness be better, or big goodness?
 	p.Twiddle(step.Technique.humanLikelihood(step), "Human Likelihood for "+step.TechniqueVariant())
 }
 
