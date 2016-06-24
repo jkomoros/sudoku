@@ -449,6 +449,36 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	return &SolveDirections{snapshot, steps, false}
 }
 
+/*
+
+	Next steps planning
+
+
+	potentialNextStep grows a Grid, which is a snapshot of the grid will all of the steps applied
+
+	potentialNextStep grows a parent, a pointer to the potentialNextStep from which it was cloned
+
+	Goodness becomes a derived field, which is the parent's goodness * all of
+	the twiddlers at this level. Base case if no parent: 1.0.
+
+	The only way to create a new potentialNextStep in a frontier is to find
+	one and ForkWithStep. This creates a new potentialNextStep with its parent
+	as the current step. It keeps a list of its twiddles that it applies to
+	its parent, as well as a new Grid snapshot based on its parent. (Potential
+	optimziation: grid is derived and can be thrown away)
+
+	At each search step, we Pop the lowest item off the heap and explore it.
+	Exploring searches for all techniques rooted here (stopping early if the
+	pool is ever big enough, of course). That item that was popped is never
+	added back into the frontier; it exists only in the parent chain.
+
+	When you create a frontier, we add a special potentialNextStep that has no
+	steps in it. This is the base case. We then explore from there and that's
+	it.
+
+
+*/
+
 //potentialNextStep keeps track of the next step we may want to return for
 //HumanSolve.
 type potentialNextStep struct {
