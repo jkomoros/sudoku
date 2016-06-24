@@ -469,44 +469,44 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 //HumanSolve.
 type potentialNextStep struct {
 	//All potentialNextSteps, except the initial in a frontier, must have a parent.
-	Parent    *potentialNextStep
+	parent    *potentialNextStep
 	step      *SolveStep
-	Twiddles  map[string]float64
-	HeapIndex int
-	Frontier  *nextStepFrontier
+	twiddles  map[string]float64
+	heapIndex int
+	frontier  *nextStepFrontier
 }
 
 //Goodness is how good the next step chain is in total. A LOWER Goodness is better. There's not enough precision between 0.0 and
 //1.0 if we try to cram all values in there and they get very small.
 func (p *potentialNextStep) Goodness() float64 {
-	if p.Parent == nil {
+	if p.parent == nil {
 		return 1.0
 	}
 	//TODO: as an optimization we could cache this; each step is immutable basically.
 	ownMultiplicationFactor := 1.0
-	for _, twiddle := range p.Twiddles {
+	for _, twiddle := range p.twiddles {
 		ownMultiplicationFactor *= twiddle
 	}
-	return p.Parent.Goodness() * ownMultiplicationFactor
+	return p.parent.Goodness() * ownMultiplicationFactor
 }
 
 func (p *potentialNextStep) Steps() []*SolveStep {
 	//TODO: can memoize this since it will never change
-	if p.Parent == nil {
+	if p.parent == nil {
 		return nil
 	}
-	return append(p.Parent.Steps(), p.step)
+	return append(p.parent.Steps(), p.step)
 }
 
 func (p *potentialNextStep) AddStep(step *SolveStep) *potentialNextStep {
 	result := &potentialNextStep{
-		Parent:    p,
+		parent:    p,
 		step:      step,
-		Twiddles:  make(map[string]float64),
-		HeapIndex: -1,
-		Frontier:  p.Frontier,
+		twiddles:  make(map[string]float64),
+		heapIndex: -1,
+		frontier:  p.frontier,
 	}
-	p.Frontier.Push(result)
+	p.frontier.Push(result)
 	result.Twiddle(step.Technique.humanLikelihood(step), "Human Likelihood for "+step.TechniqueVariant())
 	return result
 }
@@ -514,12 +514,12 @@ func (p *potentialNextStep) AddStep(step *SolveStep) *potentialNextStep {
 //Twiddle modifies goodness by the given amount and keeps track of the reason
 //for debugging purposes.
 func (p *potentialNextStep) Twiddle(amount float64, description string) {
-	p.Twiddles[description] = amount
-	heap.Fix(p.Frontier, p.HeapIndex)
+	p.twiddles[description] = amount
+	heap.Fix(p.frontier, p.heapIndex)
 }
 
 func (p *potentialNextStep) String() string {
-	return fmt.Sprintf("%v %f %d", p.Steps, p.Goodness, p.HeapIndex)
+	return fmt.Sprintf("%v %f %d", p.Steps(), p.Goodness(), p.heapIndex)
 }
 
 func (p *potentialNextStep) IsComplete() bool {
@@ -536,8 +536,8 @@ func newNextStepFrontier() *nextStepFrontier {
 	frontier := &nextStepFrontier{}
 	heap.Init(frontier)
 	initialItem := &potentialNextStep{
-		Frontier:  frontier,
-		HeapIndex: -1,
+		frontier:  frontier,
+		heapIndex: -1,
 	}
 	heap.Push(frontier, initialItem)
 	return frontier
@@ -563,14 +563,14 @@ func (n nextStepFrontier) Less(i, j int) bool {
 
 func (n nextStepFrontier) Swap(i, j int) {
 	n[i], n[j] = n[j], n[i]
-	n[i].HeapIndex = i
-	n[j].HeapIndex = j
+	n[i].heapIndex = i
+	n[j].heapIndex = j
 }
 
 func (n *nextStepFrontier) Push(x interface{}) {
 	length := len(*n)
 	item := x.(*potentialNextStep)
-	item.HeapIndex = length
+	item.heapIndex = length
 	*n = append(*n, item)
 }
 
@@ -578,7 +578,7 @@ func (n *nextStepFrontier) Pop() interface{} {
 	old := *n
 	length := len(old)
 	item := old[length-1]
-	item.HeapIndex = -1 // for safety
+	item.heapIndex = -1 // for safety
 	*n = old[0 : length-1]
 	return item
 }

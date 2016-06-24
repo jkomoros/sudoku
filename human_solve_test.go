@@ -438,7 +438,7 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Fatal("Adding fill step didn't return anything")
 	}
 
-	if simpleFillStepItem.HeapIndex != 0 {
+	if simpleFillStepItem.heapIndex != 0 {
 		t.Fatal("Adding first item to frontier didn't have 0 index")
 	}
 
