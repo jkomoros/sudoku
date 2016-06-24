@@ -453,11 +453,6 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 
 	Next steps planning
 
-
-	potentialNextStep grows a Grid, which is a snapshot of the grid will all
-	of the steps applied. Potential optmization: grid is derived, since many
-	of the steps won't actually ever be explored.
-
 	At each search step, we Pop the lowest item off the heap and explore it.
 	Exploring searches for all techniques rooted here (stopping early if the
 	pool is ever big enough, of course). That item that was popped is never
@@ -474,6 +469,24 @@ type potentialNextStep struct {
 	twiddles  map[string]float64
 	heapIndex int
 	frontier  *nextStepFrontier
+}
+
+//Grid returns a grid with all of this item's steps applied
+func (p *potentialNextStep) Grid() *Grid {
+	//TODO: it's conceivable that it might be best to memoize this... It's
+	//unlikely thoguh, since grid will only be accessed once and many items
+	//will never have their grids accessed.
+	if p.frontier.grid == nil {
+		return nil
+	}
+
+	result := p.frontier.grid.Copy()
+
+	for _, step := range p.Steps() {
+		step.Apply(result)
+	}
+
+	return result
 }
 
 //Goodness is how good the next step chain is in total. A LOWER Goodness is better. There's not enough precision between 0.0 and
@@ -535,8 +548,10 @@ type nextStepFrontier struct {
 	grid  *Grid
 }
 
-func newNextStepFrontier() *nextStepFrontier {
-	frontier := &nextStepFrontier{}
+func newNextStepFrontier(grid *Grid) *nextStepFrontier {
+	frontier := &nextStepFrontier{
+		grid: grid,
+	}
 	heap.Init(frontier)
 	initialItem := &potentialNextStep{
 		frontier:  frontier,

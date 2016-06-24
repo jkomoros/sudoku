@@ -395,10 +395,17 @@ func puzzleDifficultyHelper(filename string, t *testing.T) {
 
 func TestNextStepFrontier(t *testing.T) {
 
-	frontier := newNextStepFrontier()
+	grid := NewGrid()
+	grid.LoadSDK(TEST_GRID)
+
+	frontier := newNextStepFrontier(grid)
 
 	if frontier.Len() != 1 {
 		t.Error("Expected new frontier to have exactly one item in it, but got", frontier.Len())
+	}
+
+	if frontier.grid == nil {
+		t.Error("No grid in frontier")
 	}
 
 	basePotentialNextStep := frontier.NextPossibleStep()
@@ -407,17 +414,24 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Error("Didn'get base potential next step")
 	}
 
+	baseGrid := basePotentialNextStep.Grid()
+
+	if baseGrid.DataString() != grid.DataString() {
+		t.Error("the grid in the base item in the frontier was not right. Got", baseGrid.DataString(), "wanted", grid.DataString())
+	}
+
 	if frontier.Len() != 0 {
 		t.Error("Getting the base potential next step should have emptied it, but len is", frontier.Len())
 	}
-
-	grid := NewGrid()
-	grid.LoadSDK(TEST_GRID)
 
 	nInRowTechnique := techniquesByName["Necessary In Row"]
 
 	simpleFillStep := &SolveStep{
 		Technique: nInRowTechnique,
+		TargetCells: CellSlice{
+			grid.Cell(0, 0),
+		},
+		TargetNums: IntSlice{1},
 	}
 
 	if simpleFillStep.Technique == nil {
@@ -444,6 +458,12 @@ func TestNextStepFrontier(t *testing.T) {
 
 	if simpleFillStepItem.Goodness() != nInRowTechnique.humanLikelihood(simpleFillStep) {
 		t.Error("Goodness of simple fill step was wrong. Execpted", nInRowTechnique.humanLikelihood(simpleFillStep), "got", simpleFillStepItem.Goodness())
+	}
+
+	cell := simpleFillStepItem.Grid().Cell(0, 0)
+
+	if cell.Number() != 1 {
+		t.Error("Cell in grid was not set correctly. Got", cell.Number(), "wanted 1")
 	}
 
 	nonFillStepItem := basePotentialNextStep.AddStep(nonFillStep)
