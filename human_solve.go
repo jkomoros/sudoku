@@ -160,6 +160,17 @@ func (self *HumanSolveOptions) validate() *HumanSolveOptions {
 
 }
 
+//effectiveTechniquesToUse returns the effective list of techniques to use.
+//Basically just o.TechniquesToUse + Guess if NoGuess is not provided.
+func (o *HumanSolveOptions) effectiveTechniquesToUse() []SolveTechnique {
+	//TODO: now that we don't treat guess that specially in solving, shouldn't
+	//we just get rid of all of the special casing in options?
+	if o.NoGuess {
+		return o.TechniquesToUse
+	}
+	return append(o.TechniquesToUse, GuessTechnique)
+}
+
 //IsUseful returns true if this SolveStep, when applied to the given grid, would do useful work--that is, it would
 //either fill a previously unfilled number, or cull previously un-culled possibilities. This is useful to ensure
 //HumanSolve doesn't get in a loop of applying the same useless steps.
@@ -583,8 +594,7 @@ func (p *potentialNextStep) Explore() {
 	//TODO: make this configurable, and figure out what the optimal values are
 	numTechniquesToStartByDefault := 10
 
-	//TODO: include guess?
-	techniques := p.frontier.options.TechniquesToUse
+	techniques := p.frontier.options.effectiveTechniquesToUse()
 
 	//Handle the case where we were given a short list of techniques.
 	if len(techniques) < numTechniquesToStartByDefault {
