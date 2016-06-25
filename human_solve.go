@@ -502,14 +502,19 @@ func (p *potentialNextStep) Steps() []*SolveStep {
 
 func (p *potentialNextStep) AddStep(step *SolveStep) *potentialNextStep {
 	result := &potentialNextStep{
-		parent:    p,
-		step:      step,
-		twiddles:  make(map[string]float64),
+		parent: p,
+		step:   step,
+		twiddles: map[string]float64{
+			"Human Likelihood for " + step.TechniqueVariant(): step.Technique.humanLikelihood(step),
+		},
 		heapIndex: -1,
 		frontier:  p.frontier,
 	}
-	p.frontier.Push(result)
-	result.Twiddle(step.Technique.humanLikelihood(step), "Human Likelihood for "+step.TechniqueVariant())
+	if result.IsComplete() {
+		p.frontier.CompletedItems = append(p.frontier.CompletedItems, result)
+	} else {
+		heap.Push(p.frontier, result)
+	}
 	return result
 }
 
@@ -532,9 +537,12 @@ func (p *potentialNextStep) IsComplete() bool {
 	return steps[len(steps)-1].Technique.IsFill()
 }
 
+//TODO: rename this whole thing because it now does much more than frontier.
 type nextStepFrontier struct {
-	items []*potentialNextStep
-	grid  *Grid
+	//TODO: rename this field itemsToExplore, or 'frontier'
+	items          []*potentialNextStep
+	grid           *Grid
+	CompletedItems []*potentialNextStep
 }
 
 func newNextStepFrontier(grid *Grid) *nextStepFrontier {
@@ -628,11 +636,6 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 	//this that asserts in the type system that the chain of solve steps has
 	//precisely one fill step and it's at the end of the chain.
 
-	//The pool of possible complete steps to choose from. Once this gets to at
-	//least options.NumOptionsToCalculate we can bail early and just pick the
-	//best one.
-	var possibleCompleteStepsPool []*potentialNextStep
-
 	frontier := newNextStepFrontier(grid)
 
 	step := frontier.NextPossibleStep()
@@ -641,12 +644,10 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 		//Explore step, finding all possible steps that apply from here and
 		//adding to the frontier.
 
-		//As soon as an item is added to the frontier that is completed, it is
-		//removed from the frontier and added to possibleCompleteStepsPool.
+		//When adding a step, frontier notes if it's completed (thus going in
+		//CompletedItems) or not (thus going in the itemsToExplore)
 
-		//TODO: implement the logic from the paragraph above into frontier itself.
-
-		//Once possibleCompleteStepsPool is at least
+		//Once frontier.CompletedItems is at least
 		//options.NumOptionsToCalculate we can bail out of looking for more
 		//steps, shut down other threads, and break out of this loop.
 
@@ -660,14 +661,14 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 	//Go through possibleCompleteStepsPool and pick the lowest valued one.
 
 	//But first check if we don't have any.
-	if len(possibleCompleteStepsPool) == 0 {
+	if len(frontier.CompletedItems) == 0 {
 		return nil
 	}
 
 	min := math.MaxFloat64
 	var minItem *potentialNextStep
 
-	for _, item := range possibleCompleteStepsPool {
+	for _, item := range frontier.CompletedItems {
 		if item.Goodness() > min {
 			continue
 		}

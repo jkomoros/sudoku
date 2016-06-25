@@ -438,22 +438,22 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Fatal("couldn't find necessary in row technique")
 	}
 
-	nonFillStep := &SolveStep{
-		Technique: techniquesByName["Pointing Pair Row"],
-	}
-
-	if nonFillStep.Technique == nil {
-		t.Fatal("Couldn't find pointing pair row techhnique")
-	}
-
 	simpleFillStepItem := basePotentialNextStep.AddStep(simpleFillStep)
 
 	if simpleFillStepItem == nil {
 		t.Fatal("Adding fill step didn't return anything")
 	}
 
-	if simpleFillStepItem.heapIndex != 0 {
-		t.Fatal("Adding first item to frontier didn't have 0 index")
+	if simpleFillStepItem.heapIndex != -1 {
+		t.Fatal("Adding completed item to frontier didn't have -1 index")
+	}
+
+	if len(frontier.CompletedItems) != 1 {
+		t.Error("Expected the completed item to go into CompletedItems,but it's empty")
+	}
+
+	if len(frontier.items) != 0 {
+		t.Error("Expected the completed item to go into COmpletedItems, but it apparently went into items.")
 	}
 
 	if simpleFillStepItem.Goodness() != nInRowTechnique.humanLikelihood(simpleFillStep) {
@@ -466,35 +466,64 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Error("Cell in grid was not set correctly. Got", cell.Number(), "wanted 1")
 	}
 
+	nonFillStep := &SolveStep{
+		Technique: techniquesByName["Pointing Pair Row"],
+	}
+
+	if nonFillStep.Technique == nil {
+		t.Fatal("Couldn't find pointing pair row techhnique")
+	}
+
 	nonFillStepItem := basePotentialNextStep.AddStep(nonFillStep)
 
 	if nonFillStepItem == nil {
 		t.Fatal("Adding non fill step didn't return a frontier object")
 	}
 
-	if frontier.Len() != 2 {
-		t.Error("Frontier had wrong length after adding two items. Got", frontier.Len(), "expected 2")
+	//TODO: now that we only have one item on the actual frontier, we should
+	//extend the test to add another non-fill step so we can test twiddling
+	//moving the order.
+
+	if frontier.Len() != 1 {
+		t.Error("Frontier had wrong length after adding one complete and one incomplete items. Got", frontier.Len(), "expected 1")
 	}
 
-	if frontier.items[1] != simpleFillStepItem {
+	if frontier.items[0] != nonFillStepItem {
 		t.Error("We though that simpleFillStep should be at the end of the queue but it wasn't.")
 	}
 
-	nonFillStepItem.Twiddle(0.000001, "Very small amount to make this #1")
+	expensiveStep := &SolveStep{
+		Technique: techniquesByName["Hidden Quad Block"],
+	}
+
+	expensiveStepItem := basePotentialNextStep.AddStep(expensiveStep)
+
+	if frontier.Len() != 2 {
+		t.Error("Wrong length after adding two items to frontier. Got", frontier.Len(), "expected 2")
+	}
 
 	if frontier.items[1] != nonFillStepItem {
-		t.Error("Even after twiddling up non fill step by a lot it still wasn't in the top position in frontier", frontier.items[0], frontier.items[1])
+		t.Error("We expected the expensive step to be worse", frontier.String())
+	}
+
+	expensiveStepItem.Twiddle(0.00000000000000001, "Very small amount to make this #1")
+
+	if frontier.items[1] != expensiveStepItem {
+		t.Error("Even after twiddling up guess step by a lot it still wasn't in the top position in frontier", frontier.items[0], frontier.items[1])
 	}
 
 	poppedItem := frontier.NextPossibleStep()
 
-	if poppedItem != nonFillStepItem {
+	if poppedItem != expensiveStepItem {
 		t.Error("Expected popped item to be the non-fill step now that its goodness is higher, but got", poppedItem)
 	}
 
 	if frontier.Len() != 1 {
 		t.Error("Wrong frontier length after popping item. Got", frontier.Len(), "expected 1")
 	}
+
+	poppedItem = frontier.NextPossibleStep()
+	//Should be nonFillStepItem
 
 	currentGoodness := nonFillStepItem.Goodness()
 
@@ -504,8 +533,12 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Error("Adding a step to end of nonfill step didn't change goodness.")
 	}
 
-	if frontier.Len() != 2 {
-		t.Error("Adding an item gave wrong len. Got", frontier.Len(), "wanted 2")
+	if frontier.Len() != 0 {
+		t.Error("Adding an item gave wrong len. Got", frontier.Len(), "wanted 0")
+	}
+
+	if len(frontier.CompletedItems) != 2 {
+		t.Error("Got wrong number of completed items. Got", len(frontier.CompletedItems), "expected 2")
 	}
 
 	steps := completedNonFillStemItem.Steps()
