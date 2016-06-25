@@ -808,7 +808,9 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 
 	frontier := newNextStepFrontier(grid, options)
 
-	for step := frontier.NextPossibleStep(); step != nil && !frontier.DoneSearching(); {
+	step := frontier.NextPossibleStep()
+
+	for step != nil && !frontier.DoneSearching() {
 		//Explore step, finding all possible steps that apply from here and
 		//adding to the frontier.
 
@@ -822,6 +824,8 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 		step.Explore()
 
 		//We do NOT add the explored item back into the frontier.
+
+		step = frontier.NextPossibleStep()
 
 	}
 
