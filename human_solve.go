@@ -773,22 +773,20 @@ func (n *nextStepFrontier) NextPossibleStep() *potentialNextStep {
 }
 
 //newHumanSolveSearcher is a new implementation of the core implementation of
-//HumanSolve.
+//HumanSolve. Mutates the grid.
 func newHumanSolveSearcher(grid *Grid, options *HumanSolveOptions) []*SolveStep {
 	//TODO: drop the 'new' from the name.
 	var result []*SolveStep
 
-	gridCopy := grid.Copy()
-
-	for !gridCopy.Solved() {
-		newStep := newHumanSolveSearcherSingleStep(gridCopy, options, result)
+	for !grid.Solved() {
+		newStep := newHumanSolveSearcherSingleStep(grid, options, result)
 		if newStep == nil {
 			//Sad, guess we failed to solve the puzzle. :-(
 			return nil
 		}
 		result = append(result, newStep...)
 		for _, step := range newStep {
-			step.Apply(gridCopy)
+			step.Apply(grid)
 		}
 	}
 
