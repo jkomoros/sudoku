@@ -799,9 +799,7 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 
 	frontier := newNextStepFrontier(grid, options)
 
-	step := frontier.NextPossibleStep()
-
-	for step != nil {
+	for step := frontier.NextPossibleStep(); step != nil; {
 		//Explore step, finding all possible steps that apply from here and
 		//adding to the frontier.
 
@@ -816,9 +814,6 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 
 		//We do NOT add the explored item back into the frontier.
 
-		//TODO: actually implement this loop.
-
-		step = frontier.NextPossibleStep()
 	}
 
 	//Go through possibleCompleteStepsPool and pick the lowest valued one.
