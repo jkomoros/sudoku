@@ -278,6 +278,23 @@ func (self *SolveStep) normalize() {
 	self.Technique.normalizeStep(self)
 }
 
+//valid returns true iff there are 0 or more cull-steps in PrecursorSteps and
+//a non-nill Fill step.
+func (c *CompoundSolveStep) valid() bool {
+	if c.FillStep == nil {
+		return false
+	}
+	if !c.FillStep.Technique.IsFill() {
+		return false
+	}
+	for _, step := range c.PrecursorSteps {
+		if step.Technique.IsFill() {
+			return false
+		}
+	}
+	return true
+}
+
 //HumanSolution returns the SolveDirections that represent how a human would
 //solve this puzzle. It does not mutate the grid. If options is nil, will use
 //reasonable defaults.

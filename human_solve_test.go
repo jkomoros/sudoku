@@ -16,6 +16,59 @@ func BenchmarkHumanSolve(b *testing.B) {
 	}
 }
 
+func TestCompoundSolveStep(t *testing.T) {
+
+	nInRowTechnique := techniquesByName["Necessary In Row"]
+
+	if nInRowTechnique == nil {
+		t.Fatal("Couldn't find necessary in row technique")
+	}
+
+	simpleFillStep := &SolveStep{
+		Technique: nInRowTechnique,
+	}
+
+	cullTechnique := techniquesByName["Hidden Quad Block"]
+
+	if cullTechnique == nil {
+		t.Fatal("Couldn't find hidden quad block technique")
+	}
+
+	cullStep := &SolveStep{
+		Technique: cullTechnique,
+	}
+
+	compound := &CompoundSolveStep{
+		PrecursorSteps: []*SolveStep{
+			cullStep,
+			cullStep,
+		},
+		FillStep: simpleFillStep,
+	}
+
+	if !compound.valid() {
+		t.Error("A valid compound was not thought valid")
+	}
+
+	compound.PrecursorSteps[0] = simpleFillStep
+
+	if compound.valid() {
+		t.Error("A compound tep with a fill precursor step was thought valid")
+	}
+
+	compound.PrecursorSteps = nil
+
+	if !compound.valid() {
+		t.Error("A compound step with no precursor steps was not thought valid")
+	}
+
+	compound.FillStep = nil
+
+	if compound.valid() {
+		t.Error("A compound step with no fill step was thought valid.")
+	}
+}
+
 func TestHumanSolve(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
