@@ -846,26 +846,29 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 
 	}
 
-	//Go through possibleCompleteStepsPool and pick the lowest valued one.
-	//TODO: we should sample from the probability distribution here like we used to.
+	//Go through possibleCompleteStepsPool and pick one, preferring the lowest valued ones.
 
 	//But first check if we don't have any.
 	if len(frontier.CompletedItems) == 0 {
 		return nil
 	}
 
-	min := math.MaxFloat64
-	var minItem *potentialNextStep
+	distribution := make(ProbabilityDistribution, len(frontier.CompletedItems))
 
-	for _, item := range frontier.CompletedItems {
-		if item.Goodness() > min {
-			continue
-		}
-		min = item.Goodness()
-		minItem = item
+	for i, item := range frontier.CompletedItems {
+		distribution[i] = item.Goodness()
 	}
 
-	return minItem.Steps()
+	//TODO: if there are very high valued numbers in the original distribution
+	//(e.g. from Guess) then it pushes everything else to 0 and the guesses to
+	//NaN. Selection still works OK, but that's obviously broken. Perhaps have
+	//something that clears out really high outliers or forces them to
+	//effectively 0?
+	invertedDistribution := distribution.invert()
+
+	randomIndex := invertedDistribution.RandomIndex()
+
+	return frontier.CompletedItems[randomIndex].Steps()
 
 }
 
