@@ -456,7 +456,13 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 
 	snapshot := grid.Copy()
 
-	steps := humanSolveNonGuessSearcher(grid, options, endConditionSolved)
+	var steps []*SolveStep
+
+	if endConditionSolved {
+		steps = newHumanSolveSearcher(grid, options)
+	} else {
+		steps = newHumanSolveSearcherSingleStep(grid, options, nil)
+	}
 
 	return &SolveDirections{snapshot, steps, false}
 }
