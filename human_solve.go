@@ -278,6 +278,29 @@ func (self *SolveStep) normalize() {
 	self.Technique.normalizeStep(self)
 }
 
+//newCompoundSolveStep will create a CompoundSolveStep from a series of
+//SolveSteps, along as that series is a valid CompoundSolveStep.
+func newCompoundSolveStep(steps []*SolveStep) *CompoundSolveStep {
+	var result *CompoundSolveStep
+
+	if len(steps) < 1 {
+		return nil
+	} else if len(steps) == 1 {
+		result = &CompoundSolveStep{
+			FillStep: steps[0],
+		}
+	} else {
+		result = &CompoundSolveStep{
+			PrecursorSteps: steps[0 : len(steps)-2],
+			FillStep:       steps[len(steps)-1],
+		}
+	}
+	if result.valid() {
+		return result
+	}
+	return nil
+}
+
 //valid returns true iff there are 0 or more cull-steps in PrecursorSteps and
 //a non-nill Fill step.
 func (c *CompoundSolveStep) valid() bool {

@@ -67,6 +67,20 @@ func TestCompoundSolveStep(t *testing.T) {
 	if compound.valid() {
 		t.Error("A compound step with no fill step was thought valid.")
 	}
+
+	createdCompound := newCompoundSolveStep([]*SolveStep{
+		cullStep,
+		cullStep,
+		simpleFillStep,
+	})
+
+	if createdCompound == nil {
+		t.Error("newCompoundSolveStep failed to create compound step")
+	}
+
+	if !createdCompound.valid() {
+		t.Error("newCompoundSolveStep created invalid compound step")
+	}
 }
 
 func TestHumanSolve(t *testing.T) {
