@@ -872,6 +872,8 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifi
 
 	//TODO: figure out how to expose this meaningfully with the new human solve techniques.
 
+	//TODO: make sure that dokugen, i-sudoku's integration into HumanSolve still works.
+
 	//TODO: hoist this special guess logic out if we decide to commit this.
 
 	/*
