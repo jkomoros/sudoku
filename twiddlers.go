@@ -18,9 +18,20 @@ var twiddlers []probabilityTwiddler
 
 func init() {
 	twiddlers = []probabilityTwiddler{
+		twiddleHumanLikelihood,
 		twiddleChainedSteps,
 		twiddleCommonNumbers,
 	}
+}
+
+//twiddleTechniqueWeight is a fundamental twiddler based on the
+//HumanLikeliehood of the current technique. In fact, it's so fundamental that
+//it's arguably not even a twiddler at all.
+func twiddleHumanLikelihood(currentStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, grid *Grid) probabilityTweak {
+	if currentStep == nil {
+		return 1.0
+	}
+	return probabilityTweak(currentStep.HumanLikelihood())
 }
 
 //twiddleCommonNumbers will twiddle up steps whose TargetNumbers are over-

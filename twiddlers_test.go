@@ -5,6 +5,26 @@ import (
 	"testing"
 )
 
+func TestTwiddleHumanLikelihood(t *testing.T) {
+	possibilities := []*SolveStep{
+		{
+			Technique: techniquesByName["Only Legal Number"],
+		},
+		{
+			Technique: techniquesByName["Guess"],
+		},
+	}
+
+	for i, step := range possibilities {
+		result := twiddleHumanLikelihood(step, nil, nil, nil)
+		expected := probabilityTweak(step.HumanLikelihood())
+
+		if result != expected {
+			t.Error("Got wrong twiddle for human likelihood at index", i, "got", result, "expected", expected)
+		}
+	}
+}
+
 func TestTwiddleCommonNumbers(t *testing.T) {
 
 	grid := NewGrid()
