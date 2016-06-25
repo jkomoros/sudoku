@@ -295,6 +295,19 @@ func (c *CompoundSolveStep) valid() bool {
 	return true
 }
 
+//Apply applies all of the steps in the compound step to the grid in order:
+//first each of the PrecursorSteps in order, then the fill step.
+func (c *CompoundSolveStep) Apply(grid *Grid) {
+	//TODO: test this
+	if !c.valid() {
+		return
+	}
+	for _, step := range c.PrecursorSteps {
+		step.Apply(grid)
+	}
+	c.FillStep.Apply(grid)
+}
+
 //HumanSolution returns the SolveDirections that represent how a human would
 //solve this puzzle. It does not mutate the grid. If options is nil, will use
 //reasonable defaults.
