@@ -529,8 +529,12 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Error("Expected the completed item to go into COmpletedItems, but it apparently went into items.")
 	}
 
-	if simpleFillStepItem.Goodness() != nInRowTechnique.humanLikelihood(simpleFillStep) {
-		t.Error("Goodness of simple fill step was wrong. Execpted", nInRowTechnique.humanLikelihood(simpleFillStep), "got", simpleFillStepItem.Goodness())
+	//TODO: this is a fragile test. Whenever we change twiddlers it will change.
+	//Curerntly 5 for common numbers, 22.5 for Human Likelihood, and 1 for chained steps.
+	expectedGoodness := 112.5
+
+	if simpleFillStepItem.Goodness() != expectedGoodness {
+		t.Error("Goodness of simple fill step was wrong. Execpted", expectedGoodness, "got", simpleFillStepItem.Goodness(), simpleFillStepItem.explainGoodness(0))
 	}
 
 	cell := simpleFillStepItem.Grid().Cell(0, 0)
@@ -541,6 +545,10 @@ func TestNextStepFrontier(t *testing.T) {
 
 	nonFillStep := &SolveStep{
 		Technique: techniquesByName["Pointing Pair Row"],
+		TargetCells: CellSlice{
+			grid.Cell(0, 1),
+		},
+		TargetNums: IntSlice{2},
 	}
 
 	if nonFillStep.Technique == nil {
@@ -567,6 +575,10 @@ func TestNextStepFrontier(t *testing.T) {
 
 	expensiveStep := &SolveStep{
 		Technique: techniquesByName["Hidden Quad Block"],
+		TargetCells: CellSlice{
+			grid.Cell(0, 2),
+		},
+		TargetNums: IntSlice{3},
 	}
 
 	expensiveStepItem := basePotentialNextStep.AddStep(expensiveStep)

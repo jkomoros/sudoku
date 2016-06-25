@@ -467,7 +467,7 @@ type potentialNextStep struct {
 	//All potentialNextSteps, except the initial in a frontier, must have a parent.
 	parent    *potentialNextStep
 	step      *SolveStep
-	twiddles  map[string]float64
+	twiddles  map[string]probabilityTweak
 	heapIndex int
 	frontier  *nextStepFrontier
 }
@@ -497,11 +497,11 @@ func (p *potentialNextStep) Goodness() float64 {
 		return 1.0
 	}
 	//TODO: as an optimization we could cache this; each step is immutable basically.
-	ownMultiplicationFactor := 1.0
+	ownMultiplicationFactor := probabilityTweak(1.0)
 	for _, twiddle := range p.twiddles {
 		ownMultiplicationFactor *= twiddle
 	}
-	return p.parent.Goodness() * ownMultiplicationFactor
+	return p.parent.Goodness() * float64(ownMultiplicationFactor)
 }
 
 //explainGoodness returns a string explaining why this item has the goodness
@@ -512,7 +512,7 @@ func (p *potentialNextStep) explainGoodness(startCount int) string {
 	}
 	var resultSections []string
 	for name, value := range p.twiddles {
-		resultSections = append(resultSections, strconv.Itoa(startCount)+":"+name+":"+strconv.FormatFloat(value, 'f', -1, 64))
+		resultSections = append(resultSections, strconv.Itoa(startCount)+":"+name+":"+strconv.FormatFloat(float64(value), 'f', -1, 64))
 	}
 
 	return p.parent.explainGoodness(startCount+1) + "\n" + strings.Join(resultSections, "\n")
@@ -528,16 +528,20 @@ func (p *potentialNextStep) Steps() []*SolveStep {
 }
 
 func (p *potentialNextStep) AddStep(step *SolveStep) *potentialNextStep {
-	//TODO: Run the rest of the twiddlers!
 	//TODO: add the twiddler for PointingCells/TargetCells overlap.
 	result := &potentialNextStep{
-		parent: p,
-		step:   step,
-		twiddles: map[string]float64{
-			"Human Likelihood for " + step.TechniqueVariant(): step.Technique.humanLikelihood(step),
-		},
+		parent:    p,
+		step:      step,
+		twiddles:  map[string]probabilityTweak{},
 		heapIndex: -1,
 		frontier:  p.frontier,
+	}
+	inProgressCompoundStep := p.Steps()
+	grid := result.Grid()
+	for name, twiddler := range twiddlers {
+		//TODO: figure out how to pass in pastCompoundSteps (where to wire that through?)
+		tweak := twiddler(step, inProgressCompoundStep, nil, grid)
+		result.Twiddle(tweak, name)
 	}
 	if result.IsComplete() {
 		p.frontier.CompletedItems = append(p.frontier.CompletedItems, result)
@@ -551,12 +555,14 @@ func (p *potentialNextStep) AddStep(step *SolveStep) *potentialNextStep {
 //for debugging purposes. A twiddle of 1.0 has no effect. A twiddle between
 //0.0 and 1.0 increases the goodness. A twiddle of 1.0 or greater decreases
 //goodness.
-func (p *potentialNextStep) Twiddle(amount float64, description string) {
+func (p *potentialNextStep) Twiddle(amount probabilityTweak, description string) {
 	if amount < 0.0 {
 		return
 	}
 	p.twiddles[description] = amount
-	heap.Fix(p.frontier, p.heapIndex)
+	if p.heapIndex >= 0 {
+		heap.Fix(p.frontier, p.heapIndex)
+	}
 }
 
 func (p *potentialNextStep) String() string {
