@@ -816,6 +816,8 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 
 	//TODO: drop the 'new' from the name
 
+	//TODO: with the new approach, we're getting a lot more extreme negative difficulty values. Train a new model!
+
 	//TODO: consider making a special FillStepChain type to use for all of
 	//this that asserts in the type system that the chain of solve steps has
 	//precisely one fill step and it's at the end of the chain.
@@ -877,6 +879,8 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 //possibilites exist at each step. cmd/i-sudoku is one user of this method.
 func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifiedCells CellSlice) (steps []*SolveStep, distribution ProbabilityDistribution) {
 
+	//TODO: figure out how to expose this meaningfully with the new human solve techniques.
+
 	//TODO: hoist this special guess logic out if we decide to commit this.
 
 	stepsToActuallyUse := options.TechniquesToUse
@@ -907,196 +911,6 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifi
 	}
 
 	return steps, d
-}
-
-//Do we even need a helper here? Can't we just make HumanSolve actually humanSolveHelper?
-//The core worker of human solve, it does all of the solving between branch points.
-func humanSolveNonGuessSearcher(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) []*SolveStep {
-
-	var results []*SolveStep
-
-	//Note: trying these all in parallel is much slower (~15x) than doing them in sequence.
-	//The reason is that in sequence we bailed early as soon as we found one step; now we try them all.
-
-	var lastStep *SolveStep
-
-	//Is this the first time through the loop?
-	firstRun := true
-
-	for firstRun || (endConditionSolved && !grid.Solved()) || (!endConditionSolved && lastStep != nil && !lastStep.Technique.IsFill()) {
-
-		firstRun = false
-
-		var cells CellSlice
-
-		if lastStep != nil {
-			cells = lastStep.TargetCells
-		}
-
-		possibilities, probabilityDistribution := grid.HumanSolvePossibleSteps(options, cells)
-
-		if len(possibilities) == 0 {
-			//Hmm, we failed to find anything :-/
-			break
-		}
-
-		step := possibilities[probabilityDistribution.RandomIndex()]
-
-		results = append(results, step)
-		lastStep = step
-		step.Apply(grid)
-
-	}
-	return results
-}
-
-func runTechniques(techniques []SolveTechnique, grid *Grid, numRequestedSteps int) []*SolveStep {
-
-	/*
-		This function went from being a mere convenience function to
-		being a complex piece of multi-threaded code.
-
-		The basic idea is to parellelize all of the technique's.Find
-		work.
-
-		Each technique is designed so it will bail early if we tell it
-		(via closing the done channel) we've already got enough steps
-		found.
-
-		We only want to spin up numTechniquesToStartByDefault # of
-		techniques at a time, because likely we'll find enough steps
-		before getting to the harder (and generally more expensive to
-		calculate) techniques if earlier ones fail.
-
-		There is one thread for each currently running technique's
-		Find. The main thread collects results and figures out when it
-		has enough that all of the other threads can stop searching
-		(or, when it hears that no more results will be coming in and
-		it should just stop). There are two other threads. One waits
-		until the waitgroup is all done and then signals that back to
-		the main thread by closing resultsChan. The other thread is
-		notified every time a technique thread is done, and decides
-		whether or not it should start a new technique thread now. The
-		interplay of those last two threads is very timing sensitive;
-		if wg.Done were called before we'd started up the new
-		technique, we could return from the whole endeavor before
-		getting enough steps collected.
-
-	*/
-
-	if numRequestedSteps < 1 {
-		numRequestedSteps = 1
-	}
-
-	//We make a copy of the grid to search on to avoid race conditions where
-	// main thread has already returned up to humanSolveHelper, but not all of the techinques have gotten
-	//the message and freak out a bit because the grid starts changing under them.
-	gridCopy := grid.Copy()
-
-	//TODO: make this configurable, and figure out what the optimal values are
-	numTechniquesToStartByDefault := 10
-
-	//Handle the case where we were given a short list of techniques.
-	if len(techniques) < numTechniquesToStartByDefault {
-		numTechniquesToStartByDefault = len(techniques)
-	}
-
-	//Leave some room in resultsChan so all of the techniques don't have to block as often
-	//waiting for the mainthread to clear resultsChan. Leads to a 20% reduction in time compared
-	//to unbuffered.
-	//We'll close this channel to signal the collector that no more results are coming.
-	resultsChan := make(chan *SolveStep, len(techniques))
-	done := make(chan bool)
-
-	//Deliberately unbuffered; we want it to run sync inside of startTechnique
-	//the thread that's waiting on it will pass its own chan that it should send to when it's done
-	techniqueFinished := make(chan chan bool)
-
-	var wg sync.WaitGroup
-
-	//The next technique to spin up
-	nextTechniqueIndex := 0
-
-	//We'll be kicking off this routine from multiple places so just define it once
-	startTechnique := func(theTechnique SolveTechnique) {
-		theTechnique.Find(gridCopy, resultsChan, done)
-		//This is where a new technique should be kicked off, if one's going to be, before we tell the waitgroup that we're done.
-		//We need to communicate synchronously with that thread
-		comms := make(chan bool)
-		techniqueFinished <- comms
-		//Wait to hear back that a new technique is started, if one is going to be.
-		<-comms
-
-		//Okay, now the other thread has either started a new technique going, or hasn't.
-		wg.Done()
-	}
-
-	var results []*SolveStep
-
-	//Get the first batch of techniques going
-	wg.Add(numTechniquesToStartByDefault)
-
-	//Since Techniques is in sorted order, we're starting off with the easiest techniques.
-	for nextTechniqueIndex = 0; nextTechniqueIndex < numTechniquesToStartByDefault; nextTechniqueIndex++ {
-		go startTechnique(techniques[nextTechniqueIndex])
-	}
-
-	//Listen for when all items are done and signal the collector to stop collecting
-	go func() {
-		wg.Wait()
-		//All of the techniques must be done here; no one can send on resultsChan at this point.
-		//Signal to the collector that it should break out.
-		close(resultsChan)
-		close(techniqueFinished)
-	}()
-
-	//The thread that will kick off new techinques
-	go func() {
-		for {
-			returnChan, ok := <-techniqueFinished
-			if !ok {
-				//If channel is closed, that's our cue to die.
-				return
-			}
-			//Start a technique here, if we're going to.
-			//First, check if the collector has signaled that we're all done
-			select {
-			case <-done:
-				//Don't start a new one
-			default:
-				//Potentially start a new technique going as things aren't shutting down yet.
-				//Is there another technique?
-				if nextTechniqueIndex < len(techniques) {
-					wg.Add(1)
-					go startTechnique(techniques[nextTechniqueIndex])
-					//Next time we're considering starting a new technique, start the next one
-					nextTechniqueIndex++
-				}
-			}
-
-			//Tell our caller that we're done
-			returnChan <- true
-		}
-	}()
-
-	//Collect the results as long as more are coming
-OuterLoop:
-	for {
-		result, ok := <-resultsChan
-		if !ok {
-			//resultsChan was closed, which is our signal that no more results are coming and we should break
-			break OuterLoop
-		}
-		results = append(results, result)
-		//Do we have enough steps accumulate?
-		if len(results) > numRequestedSteps {
-			//Communicate to all still-running routines that they can stop
-			close(done)
-			break OuterLoop
-		}
-	}
-
-	return results
 }
 
 //Difficulty returns a value between 0.0 and 1.0, representing how hard the puzzle would be
