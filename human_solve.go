@@ -884,34 +884,41 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifi
 
 	//TODO: hoist this special guess logic out if we decide to commit this.
 
-	stepsToActuallyUse := options.TechniquesToUse
+	/*
 
-	if !options.NoGuess {
-		stepsToActuallyUse = append(stepsToActuallyUse, GuessTechnique)
-	}
 
-	steps = runTechniques(stepsToActuallyUse, self, options.NumOptionsToCalculate)
+		stepsToActuallyUse := options.TechniquesToUse
 
-	//Now pick one to apply.
-	if len(steps) == 0 {
-		return nil, nil
-	}
+		if !options.NoGuess {
+			stepsToActuallyUse = append(stepsToActuallyUse, GuessTechnique)
+		}
 
-	//TODO: consider if we should stop picking techniques based on their weight here.
-	//Now that Find returns a slice instead of a single, we're already much more likely to select an "easy" technique. ... Right?
+		steps = runTechniques(stepsToActuallyUse, self, options.NumOptionsToCalculate)
 
-	invertedProbabilities := make(ProbabilityDistribution, len(steps))
-	for i, possibility := range steps {
-		invertedProbabilities[i] = possibility.HumanLikelihood()
-	}
+		//Now pick one to apply.
+		if len(steps) == 0 {
+			return nil, nil
+		}
 
-	d := invertedProbabilities.invert()
+		//TODO: consider if we should stop picking techniques based on their weight here.
+		//Now that Find returns a slice instead of a single, we're already much more likely to select an "easy" technique. ... Right?
 
-	for _, twiddler := range twiddlers {
-		d = d.tweak(twiddler(steps, self, lastModifiedCells))
-	}
+		invertedProbabilities := make(ProbabilityDistribution, len(steps))
+		for i, possibility := range steps {
+			invertedProbabilities[i] = possibility.HumanLikelihood()
+		}
 
-	return steps, d
+		d := invertedProbabilities.invert()
+
+		for _, twiddler := range twiddlers {
+			d = d.tweak(twiddler(steps, self, lastModifiedCells))
+		}
+
+		return steps, d
+
+	*/
+
+	return nil, nil
 }
 
 //Difficulty returns a value between 0.0 and 1.0, representing how hard the puzzle would be
