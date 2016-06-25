@@ -543,11 +543,13 @@ type nextStepFrontier struct {
 	items          []*potentialNextStep
 	grid           *Grid
 	CompletedItems []*potentialNextStep
+	options        *HumanSolveOptions
 }
 
-func newNextStepFrontier(grid *Grid) *nextStepFrontier {
+func newNextStepFrontier(grid *Grid, options *HumanSolveOptions) *nextStepFrontier {
 	frontier := &nextStepFrontier{
-		grid: grid,
+		grid:    grid,
+		options: options,
 	}
 	heap.Init(frontier)
 	initialItem := &potentialNextStep{
@@ -636,7 +638,7 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 	//this that asserts in the type system that the chain of solve steps has
 	//precisely one fill step and it's at the end of the chain.
 
-	frontier := newNextStepFrontier(grid)
+	frontier := newNextStepFrontier(grid, options)
 
 	step := frontier.NextPossibleStep()
 
