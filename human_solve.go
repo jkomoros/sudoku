@@ -504,6 +504,21 @@ func (p *potentialNextStep) Goodness() float64 {
 	return p.parent.Goodness() * ownMultiplicationFactor
 }
 
+//explainGoodness returns a string explaining why this item has the goodness
+//it does. Primarily useful for debugging.
+func (p *potentialNextStep) explainGoodness(startCount int) string {
+	if p.parent == nil {
+		return ""
+	}
+	var resultSections []string
+	for name, value := range p.twiddles {
+		resultSections = append(resultSections, strconv.Itoa(startCount)+":"+name+":"+strconv.FormatFloat(value, 'f', -1, 64))
+	}
+
+	return p.parent.explainGoodness(startCount+1) + "\n" + strings.Join(resultSections, "\n")
+
+}
+
 func (p *potentialNextStep) Steps() []*SolveStep {
 	//TODO: can memoize this since it will never change
 	if p.parent == nil {
