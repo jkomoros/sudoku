@@ -3,6 +3,7 @@ package sudoku
 import (
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
@@ -388,14 +389,17 @@ func TestStepsDescription(t *testing.T) {
 	descriptions := steps.Description()
 
 	GOLDEN_DESCRIPTIONS := []string{
-		"First, we put 1 in cell (0,0) because 1 is the only remaining valid number for that cell.",
-		"Next, we remove the possibilities 1 and 2 from cells (1,0) and (1,1) because 1 is only possible in column 0 of block 1, which means it can't be in any other cell in that column not in that block.",
-		"Finally, we put 2 in cell (2,0) because 2 is the only remaining valid number for that cell.",
+		"First, based on the other numbers you've entered, (0,0) can only be a 1. How do we know that? We put 1 in cell (0,0) because 1 is the only remaining valid number for that cell.",
+		"Finally, based on the other numbers you've entered, (2,0) can only be a 2. How do we know that? We can't fill any cells right away so first we need to cull some possibilities. First, we remove the possibilities 1 and 2 from cells (1,0) and (1,1) because 1 is only possible in column 0 of block 1, which means it can't be in any other cell in that column not in that block. Finally, we put 2 in cell (2,0) because 2 is the only remaining valid number for that cell.",
+	}
+
+	if len(descriptions) != len(GOLDEN_DESCRIPTIONS) {
+		t.Fatal("Descriptions had too few items. Got\n", strings.Join(descriptions, "***"), "\nwanted\n", strings.Join(GOLDEN_DESCRIPTIONS, "***"))
 	}
 
 	for i := 0; i < len(GOLDEN_DESCRIPTIONS); i++ {
 		if descriptions[i] != GOLDEN_DESCRIPTIONS[i] {
-			t.Log("Got wrong human solve description: ", descriptions[i])
+			t.Log("Got wrong human solve description: ", descriptions[i], "wanted", GOLDEN_DESCRIPTIONS[i])
 			t.Fail()
 		}
 	}

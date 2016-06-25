@@ -151,7 +151,7 @@ func (self SolveDirections) Description() []string {
 		intro := ""
 		description := compound.Description()
 		if len(self.CompoundSteps) > 1 {
-			description = strings.ToLower(description)
+			description = strings.ToLower(string(description[0])) + description[1:]
 			switch i {
 			case 0:
 				intro = "First, "
