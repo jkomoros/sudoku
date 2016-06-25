@@ -838,6 +838,7 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 	}
 
 	//Go through possibleCompleteStepsPool and pick the lowest valued one.
+	//TODO: we should sample from the probability distribution here like we used to.
 
 	//But first check if we don't have any.
 	if len(frontier.CompletedItems) == 0 {
