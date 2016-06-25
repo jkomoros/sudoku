@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -35,24 +36,23 @@ const _MAX_DIFFICULTY_ITERATIONS = 50
 //How close we have to get to the average to feel comfortable our difficulty is converging.
 const _DIFFICULTY_CONVERGENCE = 0.005
 
-//SolveDirections is a list of SolveSteps that, when applied in order to its
-//Grid, would cause it to be solved (except if IsHint is true).
+//SolveDirections is a list of CompoundSolveSteps that, when applied in order
+//to its Grid, would cause it to be solved (or, for a hint, would cause it to
+//have precisely one more fill step filled).
 type SolveDirections struct {
 	//A copy of the Grid when the SolveDirections was generated. Grab a
 	//reference from SolveDirections.Grid().
 	gridSnapshot *Grid
-	//The list of steps that, when applied in order, would cause the
-	//SolveDirection's Grid() to be solved.
-	Steps []*SolveStep
-	//IsHint is whether the SolveDirections tells how to solve the given grid
-	//or just what the next set of steps leading to a fill step is. If true,
-	//the last step in Steps will be IsFill().
-	IsHint bool
+	//The list of CompoundSolveSteps that, when applied in order, would cause
+	//the SolveDirection's Grid() to be solved.
+	CompoundSteps []*CompoundSolveStep
 }
 
-//SolveStep is a step to fill in a number in a cell or narrow down the possibilities in a cell to
-//get it closer to being solved. SolveSteps model techniques that humans would use to solve a
-//puzzle.
+//SolveStep is a step to fill in a number in a cell or narrow down the
+//possibilities in a cell to get it closer to being solved. SolveSteps model
+//techniques that humans would use to solve a puzzle. Most HumanSolve related
+//methods return CompoundSolveSteps, which are higher-level collections of the
+//base SolveSteps.
 type SolveStep struct {
 	//The technique that was used to identify that this step is logically valid at this point in the solution.
 	Technique SolveTechnique
@@ -69,6 +69,18 @@ type SolveStep struct {
 	//extra is a private place that information relevant to only specific techniques
 	//can be stashed.
 	extra interface{}
+}
+
+//CompoundSolveStep is a special type of meta SolveStep that has 0 to n
+//precursor steps that cull possibilities (instead of filling in a number),
+//followed by precisely one fill step. It reflects the notion that logically
+//only fill steps actually advance the grid towards being solved, and all cull
+//steps are in service of getting the grid to a state where a Fill step can be
+//found. CompoundSolveSteps are the primary units returned from
+//HumanSolutions.
+type CompoundSolveStep struct {
+	PrecursorSteps []*SolveStep
+	FillStep       *SolveStep
 }
 
 //TODO: consider passing a non-pointer humanSolveOptions so that mutations
@@ -129,6 +141,16 @@ func DefaultHumanSolveOptions() *HumanSolveOptions {
 func (self SolveDirections) Grid() *Grid {
 	//TODO: this is the only pointer receiver method on SolveDirections.
 	return self.gridSnapshot.Copy()
+}
+
+//Steps returns the list of all CompoundSolveSteps flattened into one stream
+//of SolveSteps.
+func (s SolveDirections) Steps() []*SolveStep {
+	var result []*SolveStep
+	for _, compound := range s.CompoundSteps {
+		result = append(result, compound.Steps()...)
+	}
+	return result
 }
 
 //Modifies the options object to make sure all of the options are set
@@ -226,8 +248,9 @@ func (self *SolveStep) Apply(grid *Grid) {
 	}
 }
 
-//Description returns a human-readable sentence describing what the SolveStep instructs the user to do, and what reasoning
-//it used to decide that this step was logically valid to apply.
+//Description returns a human-readable sentence describing what the SolveStep
+//instructs the user to do, and what reasoning it used to decide that this
+//step was logically valid to apply.
 func (self *SolveStep) Description() string {
 	result := ""
 	if self.Technique.IsFill() {
@@ -268,6 +291,98 @@ func (self *SolveStep) normalize() {
 	self.Technique.normalizeStep(self)
 }
 
+//newCompoundSolveStep will create a CompoundSolveStep from a series of
+//SolveSteps, along as that series is a valid CompoundSolveStep.
+func newCompoundSolveStep(steps []*SolveStep) *CompoundSolveStep {
+	var result *CompoundSolveStep
+
+	if len(steps) < 1 {
+		return nil
+	} else if len(steps) == 1 {
+		result = &CompoundSolveStep{
+			FillStep: steps[0],
+		}
+	} else {
+		result = &CompoundSolveStep{
+			PrecursorSteps: steps[0 : len(steps)-2],
+			FillStep:       steps[len(steps)-1],
+		}
+	}
+	if result.valid() {
+		return result
+	}
+	return nil
+}
+
+//valid returns true iff there are 0 or more cull-steps in PrecursorSteps and
+//a non-nill Fill step.
+func (c *CompoundSolveStep) valid() bool {
+	if c.FillStep == nil {
+		return false
+	}
+	if !c.FillStep.Technique.IsFill() {
+		return false
+	}
+	for _, step := range c.PrecursorSteps {
+		if step.Technique.IsFill() {
+			return false
+		}
+	}
+	return true
+}
+
+//Apply applies all of the steps in the CompoundSolveStep to the grid in
+//order: first each of the PrecursorSteps in order, then the fill step. It is
+//equivalent to calling Apply() on every step returned by Steps().
+func (c *CompoundSolveStep) Apply(grid *Grid) {
+	//TODO: test this
+	if !c.valid() {
+		return
+	}
+	for _, step := range c.PrecursorSteps {
+		step.Apply(grid)
+	}
+	c.FillStep.Apply(grid)
+}
+
+//Description returns a human-readable sentence describing what the CompoundSolveStep
+//instructs the user to do, and what reasoning it used to decide that this
+//step was logically valid to apply.
+func (c *CompoundSolveStep) Description() string {
+	//TODO: this terminology is too tuned for the Online Sudoku use case.
+	//it practice it should probably name the cell in text.
+	var result []string
+	result = append(result, "Based on the other numbers you've entered, "+c.FillStep.TargetCells[0].ref().String()+" can only be a "+strconv.Itoa(c.FillStep.TargetNums[0])+".")
+	result = append(result, "How do we know that?")
+	if len(c.PrecursorSteps) > 0 {
+		result = append(result, "We can't fill any cells right away so first we need to cull some possibilities.")
+	}
+	steps := c.Steps()
+	for i, step := range steps {
+		intro := ""
+		description := step.Description()
+		if len(steps) > 1 {
+			description = strings.ToLower(description)
+			switch i {
+			case 0:
+				intro = "First, "
+			case len(steps) - 1:
+				intro = "Finally, "
+			default:
+				//TODO: switch between "then" and "next" randomly.
+				intro = "Next, "
+			}
+		}
+		result = append(result, intro+description)
+	}
+	return strings.Join(result, " ")
+}
+
+//Steps returns the simple list of SolveSteps that this CompoundSolveStep represents.
+func (c *CompoundSolveStep) Steps() []*SolveStep {
+	return append(c.PrecursorSteps, c.FillStep)
+}
+
 //HumanSolution returns the SolveDirections that represent how a human would
 //solve this puzzle. It does not mutate the grid. If options is nil, will use
 //reasonable defaults.
@@ -298,13 +413,12 @@ func (self *Grid) HumanSolve(options *HumanSolveOptions) *SolveDirections {
 	return humanSolveHelper(self, options, true)
 }
 
-//SolveDirections returns a chain of SolveDirections, containing exactly one
-//IsFill step at the end, that is a reasonable next step to move the puzzle
-//towards being completed. It is effectively a hint to the user about what
-//Fill step to do next, and why it's logically implied; the truncated return
-//value of HumanSolve. Returns nil if the puzzle has multiple solutions or is
-//otherwise invalid. If options is nil, will use reasonable defaults. Does not
-//mutate the grid.
+//Hint returns a SolveDirections with precisely one CompoundSolveStep that is
+//a reasonable next step to move the puzzle towards being completed. It is
+//effectively a hint to the user about what Fill step to do next, and why it's
+//logically implied; the truncated return value of HumanSolve. Returns nil if
+//the puzzle has multiple solutions or is otherwise invalid. If options is
+//nil, will use reasonable defaults. Does not mutate the grid.
 func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 
 	//TODO: return HintDirections instead of SolveDirections
@@ -316,7 +430,6 @@ func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 	defer clone.Done()
 
 	result := humanSolveHelper(clone, options, false)
-	result.IsHint = true
 
 	return result
 
@@ -337,15 +450,15 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 
 	snapshot := grid.Copy()
 
-	var steps []*SolveStep
+	var steps []*CompoundSolveStep
 
 	if endConditionSolved {
 		steps = newHumanSolveSearcher(grid, options)
 	} else {
-		steps = newHumanSolveSearcherSingleStep(grid, options, nil)
+		steps = []*CompoundSolveStep{newHumanSolveSearcherSingleStep(grid, options, nil)}
 	}
 
-	return &SolveDirections{snapshot, steps, false}
+	return &SolveDirections{snapshot, steps}
 }
 
 //potentialNextStep keeps track of the next step we may want to return for
@@ -671,9 +784,9 @@ func (n *nextStepFrontier) NextPossibleStep() *potentialNextStep {
 
 //newHumanSolveSearcher is a new implementation of the core implementation of
 //HumanSolve. Mutates the grid.
-func newHumanSolveSearcher(grid *Grid, options *HumanSolveOptions) []*SolveStep {
+func newHumanSolveSearcher(grid *Grid, options *HumanSolveOptions) []*CompoundSolveStep {
 	//TODO: drop the 'new' from the name.
-	var result []*SolveStep
+	var result []*CompoundSolveStep
 
 	for !grid.Solved() {
 		newStep := newHumanSolveSearcherSingleStep(grid, options, result)
@@ -681,10 +794,8 @@ func newHumanSolveSearcher(grid *Grid, options *HumanSolveOptions) []*SolveStep 
 			//Sad, guess we failed to solve the puzzle. :-(
 			return nil
 		}
-		result = append(result, newStep...)
-		for _, step := range newStep {
-			step.Apply(grid)
-		}
+		result = append(result, newStep)
+		newStep.Apply(grid)
 	}
 
 	return result
@@ -693,7 +804,7 @@ func newHumanSolveSearcher(grid *Grid, options *HumanSolveOptions) []*SolveStep 
 //newHumanSolveSearcherSingleStep is the workhorse of the new HumanSolve. It
 //searches for the next FillStepChain on the puzzle: a series of steps that
 //contains exactly one fill step at its end.
-func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, previousSteps []*SolveStep) []*SolveStep {
+func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep) *CompoundSolveStep {
 
 	//TODO: drop the 'new' from the name
 
@@ -744,7 +855,7 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 
 	randomIndex := invertedDistribution.RandomIndex()
 
-	return frontier.CompletedItems[randomIndex].Steps()
+	return newCompoundSolveStep(frontier.CompletedItems[randomIndex].Steps())
 
 }
 
