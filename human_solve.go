@@ -538,6 +538,8 @@ func (p *potentialNextStep) IsComplete() bool {
 }
 
 //TODO: rename this whole thing because it now does much more than frontier.
+//TODO: rename basically every single thing I'm adding in this branch once it
+//becomes clear exactly how they will end up.
 type nextStepFrontier struct {
 	//TODO: rename this field itemsToExplore, or 'frontier'
 	items          []*potentialNextStep
