@@ -36,20 +36,23 @@ const _MAX_DIFFICULTY_ITERATIONS = 50
 //How close we have to get to the average to feel comfortable our difficulty is converging.
 const _DIFFICULTY_CONVERGENCE = 0.005
 
-//SolveDirections is a list of SolveSteps that, when applied in order to its
-//Grid, would cause it to be solved (except if IsHint is true).
+//SolveDirections is a list of CompoundSolveSteps that, when applied in order
+//to its Grid, would cause it to be solved (or, for a hint, would cause it to
+//have precisely one more fill step filled).
 type SolveDirections struct {
 	//A copy of the Grid when the SolveDirections was generated. Grab a
 	//reference from SolveDirections.Grid().
 	gridSnapshot *Grid
-	//The list of steps that, when applied in order, would cause the
-	//SolveDirection's Grid() to be solved.
+	//The list of CompoundSolveSteps that, when applied in order, would cause
+	//the SolveDirection's Grid() to be solved.
 	CompoundSteps []*CompoundSolveStep
 }
 
-//SolveStep is a step to fill in a number in a cell or narrow down the possibilities in a cell to
-//get it closer to being solved. SolveSteps model techniques that humans would use to solve a
-//puzzle.
+//SolveStep is a step to fill in a number in a cell or narrow down the
+//possibilities in a cell to get it closer to being solved. SolveSteps model
+//techniques that humans would use to solve a puzzle. Most HumanSolve related
+//methods return CompoundSolveSteps, which are higher-level collections of the
+//base SolveSteps.
 type SolveStep struct {
 	//The technique that was used to identify that this step is logically valid at this point in the solution.
 	Technique SolveTechnique
@@ -68,11 +71,13 @@ type SolveStep struct {
 	extra interface{}
 }
 
-//CompoundSolveStep is a special type of step that has 0 to n precursor cull
-//(non-fill) steps, followed by precisely one fill step. It reflects the
-//notion that logically only fill steps actually advance the grid towards
-//being solved, and all cull steps are in service of getting the grid to a
-//state where a Fill step can be found.
+//CompoundSolveStep is a special type of meta SolveStep that has 0 to n
+//precursor steps that cull possibilities (instead of filling in a number),
+//followed by precisely one fill step. It reflects the notion that logically
+//only fill steps actually advance the grid towards being solved, and all cull
+//steps are in service of getting the grid to a state where a Fill step can be
+//found. CompoundSolveSteps are the primary units returned from
+//HumanSolutions.
 type CompoundSolveStep struct {
 	PrecursorSteps []*SolveStep
 	FillStep       *SolveStep
@@ -326,8 +331,9 @@ func (c *CompoundSolveStep) valid() bool {
 	return true
 }
 
-//Apply applies all of the steps in the compound step to the grid in order:
-//first each of the PrecursorSteps in order, then the fill step.
+//Apply applies all of the steps in the CompoundSolveStep to the grid in
+//order: first each of the PrecursorSteps in order, then the fill step. It is
+//equivalent to calling Apply() on every step returned by Steps().
 func (c *CompoundSolveStep) Apply(grid *Grid) {
 	//TODO: test this
 	if !c.valid() {
@@ -339,7 +345,7 @@ func (c *CompoundSolveStep) Apply(grid *Grid) {
 	c.FillStep.Apply(grid)
 }
 
-//Description returns a human-readable sentence describing what the SolveStep
+//Description returns a human-readable sentence describing what the CompoundSolveStep
 //instructs the user to do, and what reasoning it used to decide that this
 //step was logically valid to apply.
 func (c *CompoundSolveStep) Description() string {
@@ -407,13 +413,12 @@ func (self *Grid) HumanSolve(options *HumanSolveOptions) *SolveDirections {
 	return humanSolveHelper(self, options, true)
 }
 
-//SolveDirections returns a chain of SolveDirections, containing exactly one
-//IsFill step at the end, that is a reasonable next step to move the puzzle
-//towards being completed. It is effectively a hint to the user about what
-//Fill step to do next, and why it's logically implied; the truncated return
-//value of HumanSolve. Returns nil if the puzzle has multiple solutions or is
-//otherwise invalid. If options is nil, will use reasonable defaults. Does not
-//mutate the grid.
+//Hint returns a SolveDirections with precisely one CompoundSolveStep that is
+//a reasonable next step to move the puzzle towards being completed. It is
+//effectively a hint to the user about what Fill step to do next, and why it's
+//logically implied; the truncated return value of HumanSolve. Returns nil if
+//the puzzle has multiple solutions or is otherwise invalid. If options is
+//nil, will use reasonable defaults. Does not mutate the grid.
 func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 
 	//TODO: return HintDirections instead of SolveDirections
