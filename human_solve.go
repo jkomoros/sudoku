@@ -71,6 +71,16 @@ type SolveStep struct {
 	extra interface{}
 }
 
+//CompoundSolveStep is a special type of step that has 0 to n precursor cull
+//(non-fill) steps, followed by precisely one fill step. It reflects the
+//notion that logically only fill steps actually advance the grid towards
+//being solved, and all cull steps are in service of getting the grid to a
+//state where a Fill step can be found.
+type CompoundSolveStep struct {
+	PrecursorSteps []*SolveStep
+	FillStep       *SolveStep
+}
+
 //TODO: consider passing a non-pointer humanSolveOptions so that mutations
 //deeper  in the solve stack don' tmatter.
 
