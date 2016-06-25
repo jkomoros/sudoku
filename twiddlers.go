@@ -14,13 +14,13 @@ type probabilityTwiddler func(*SolveStep, []*SolveStep, []*CompoundSolveStep, *G
 //that humans have about which cells to focus on (which is separate from
 //Technique.humanLikelihood, since that is about how common a technique in
 //general, not in a specific context.)
-var twiddlers []probabilityTwiddler
+var twiddlers map[string]probabilityTwiddler
 
 func init() {
-	twiddlers = []probabilityTwiddler{
-		twiddleHumanLikelihood,
-		twiddleChainedSteps,
-		twiddleCommonNumbers,
+	twiddlers = map[string]probabilityTwiddler{
+		"Human Likelihood": twiddleHumanLikelihood,
+		"Chained Steps":    twiddleChainedSteps,
+		"Common Numbers":   twiddleCommonNumbers,
 	}
 }
 
