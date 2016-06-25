@@ -345,31 +345,31 @@ func (c *CompoundSolveStep) Apply(grid *Grid) {
 func (c *CompoundSolveStep) Description() string {
 	//TODO: this terminology is too tuned for the Online Sudoku use case.
 	//it practice it should probably name the cell in text.
-	var result string
-	result += "Based on the other numbers you've entered, " + c.FillStep.TargetCells[0].ref().String() + " can only be a " + strconv.Itoa(c.FillStep.TargetNums[0]) + "."
-	result += "How do we know that?"
+	var result []string
+	result = append(result, "Based on the other numbers you've entered, "+c.FillStep.TargetCells[0].ref().String()+" can only be a "+strconv.Itoa(c.FillStep.TargetNums[0])+".")
+	result = append(result, "How do we know that?")
 	if len(c.PrecursorSteps) > 0 {
-		result += "We can't fill any cells right away so first we need to cull some possibilities."
+		result = append(result, "We can't fill any cells right away so first we need to cull some possibilities.")
 	}
-	for i, step := range c.PrecursorSteps {
+	steps := c.Steps()
+	for i, step := range steps {
 		intro := ""
 		description := step.Description()
-		if len(c.PrecursorSteps) > 1 {
+		if len(steps) > 1 {
 			description = strings.ToLower(description)
 			switch i {
 			case 0:
 				intro = "First, "
-			case len(c.PrecursorSteps) - 1:
+			case len(steps) - 1:
 				intro = "Finally, "
 			default:
 				//TODO: switch between "then" and "next" randomly.
 				intro = "Next, "
 			}
 		}
-
-		result += intro + description
+		result = append(result, intro+description)
 	}
-	return result
+	return strings.Join(result, " ")
 }
 
 //Steps returns the simple list of SolveSteps that this CompoundSolveStep represents.
