@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -43,11 +44,7 @@ type SolveDirections struct {
 	gridSnapshot *Grid
 	//The list of steps that, when applied in order, would cause the
 	//SolveDirection's Grid() to be solved.
-	Steps []*SolveStep
-	//IsHint is whether the SolveDirections tells how to solve the given grid
-	//or just what the next set of steps leading to a fill step is. If true,
-	//the last step in Steps will be IsFill().
-	IsHint bool
+	CompoundSteps []*CompoundSolveStep
 }
 
 //SolveStep is a step to fill in a number in a cell or narrow down the possibilities in a cell to
@@ -139,6 +136,16 @@ func DefaultHumanSolveOptions() *HumanSolveOptions {
 func (self SolveDirections) Grid() *Grid {
 	//TODO: this is the only pointer receiver method on SolveDirections.
 	return self.gridSnapshot.Copy()
+}
+
+//Steps returns the list of all CompoundSolveSteps flattened into one stream
+//of SolveSteps.
+func (s SolveDirections) Steps() []*SolveStep {
+	var result []*SolveStep
+	for _, compound := range s.CompoundSteps {
+		result = append(result, compound.Steps()...)
+	}
+	return result
 }
 
 //Modifies the options object to make sure all of the options are set
@@ -236,8 +243,9 @@ func (self *SolveStep) Apply(grid *Grid) {
 	}
 }
 
-//Description returns a human-readable sentence describing what the SolveStep instructs the user to do, and what reasoning
-//it used to decide that this step was logically valid to apply.
+//Description returns a human-readable sentence describing what the SolveStep
+//instructs the user to do, and what reasoning it used to decide that this
+//step was logically valid to apply.
 func (self *SolveStep) Description() string {
 	result := ""
 	if self.Technique.IsFill() {
@@ -331,6 +339,39 @@ func (c *CompoundSolveStep) Apply(grid *Grid) {
 	c.FillStep.Apply(grid)
 }
 
+//Description returns a human-readable sentence describing what the SolveStep
+//instructs the user to do, and what reasoning it used to decide that this
+//step was logically valid to apply.
+func (c *CompoundSolveStep) Description() string {
+	//TODO: this terminology is too tuned for the Online Sudoku use case.
+	//it practice it should probably name the cell in text.
+	var result string
+	result += "Based on the other numbers you've entered, " + c.FillStep.TargetCells[0].ref().String() + " can only be a " + strconv.Itoa(c.FillStep.TargetNums[0]) + "."
+	result += "How do we know that?"
+	if len(c.PrecursorSteps) > 0 {
+		result += "We can't fill any cells right away so first we need to cull some possibilities."
+	}
+	for i, step := range c.PrecursorSteps {
+		intro := ""
+		description := step.Description()
+		if len(c.PrecursorSteps) > 1 {
+			description = strings.ToLower(description)
+			switch i {
+			case 0:
+				intro = "First, "
+			case len(c.PrecursorSteps) - 1:
+				intro = "Finally, "
+			default:
+				//TODO: switch between "then" and "next" randomly.
+				intro = "Next, "
+			}
+		}
+
+		result += intro + description
+	}
+	return result
+}
+
 //Steps returns the simple list of SolveSteps that this CompoundSolveStep represents.
 func (c *CompoundSolveStep) Steps() []*SolveStep {
 	return append(c.PrecursorSteps, c.FillStep)
@@ -384,7 +425,6 @@ func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 	defer clone.Done()
 
 	result := humanSolveHelper(clone, options, false)
-	result.IsHint = true
 
 	return result
 
@@ -405,15 +445,15 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 
 	snapshot := grid.Copy()
 
-	var steps []*SolveStep
+	var steps []*CompoundSolveStep
 
 	if endConditionSolved {
 		steps = newHumanSolveSearcher(grid, options)
 	} else {
-		steps = newHumanSolveSearcherSingleStep(grid, options, nil)
+		steps = []*CompoundSolveStep{newHumanSolveSearcherSingleStep(grid, options, nil)}
 	}
 
-	return &SolveDirections{snapshot, steps, false}
+	return &SolveDirections{snapshot, steps}
 }
 
 //potentialNextStep keeps track of the next step we may want to return for
@@ -739,9 +779,9 @@ func (n *nextStepFrontier) NextPossibleStep() *potentialNextStep {
 
 //newHumanSolveSearcher is a new implementation of the core implementation of
 //HumanSolve. Mutates the grid.
-func newHumanSolveSearcher(grid *Grid, options *HumanSolveOptions) []*SolveStep {
+func newHumanSolveSearcher(grid *Grid, options *HumanSolveOptions) []*CompoundSolveStep {
 	//TODO: drop the 'new' from the name.
-	var result []*SolveStep
+	var result []*CompoundSolveStep
 
 	for !grid.Solved() {
 		newStep := newHumanSolveSearcherSingleStep(grid, options, result)
@@ -749,10 +789,8 @@ func newHumanSolveSearcher(grid *Grid, options *HumanSolveOptions) []*SolveStep 
 			//Sad, guess we failed to solve the puzzle. :-(
 			return nil
 		}
-		result = append(result, newStep...)
-		for _, step := range newStep {
-			step.Apply(grid)
-		}
+		result = append(result, newStep)
+		newStep.Apply(grid)
 	}
 
 	return result
@@ -761,7 +799,7 @@ func newHumanSolveSearcher(grid *Grid, options *HumanSolveOptions) []*SolveStep 
 //newHumanSolveSearcherSingleStep is the workhorse of the new HumanSolve. It
 //searches for the next FillStepChain on the puzzle: a series of steps that
 //contains exactly one fill step at its end.
-func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, previousSteps []*SolveStep) []*SolveStep {
+func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep) *CompoundSolveStep {
 
 	//TODO: drop the 'new' from the name
 
@@ -812,7 +850,7 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 
 	randomIndex := invertedDistribution.RandomIndex()
 
-	return frontier.CompletedItems[randomIndex].Steps()
+	return newCompoundSolveStep(frontier.CompletedItems[randomIndex].Steps())
 
 }
 

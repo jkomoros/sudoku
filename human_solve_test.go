@@ -105,10 +105,6 @@ func TestHumanSolve(t *testing.T) {
 		t.Fatal("Human solution returned 0 techniques.")
 	}
 
-	if steps.IsHint {
-		t.Error("Steps came back as a hint, not a full solution.")
-	}
-
 	if grid.Solved() {
 		t.Log("Human Solutions mutated the grid.")
 		t.Fail()
@@ -137,7 +133,7 @@ func TestHumanSolveOptionsNoGuess(t *testing.T) {
 
 	solution := grid.HumanSolution(options)
 
-	if len(solution.Steps) != 0 {
+	if len(solution.CompoundSteps) != 0 {
 		t.Error("A human solve with very limited techniques and no allowed guesses was still solved: ", solution)
 	}
 }
@@ -230,7 +226,7 @@ func TestTechniquesToUseAfterGuessHumanSolveOptions(t *testing.T) {
 
 	solution := grid.HumanSolution(options)
 
-	steps := solution.Steps
+	steps := solution.Steps()
 
 	if len(steps) == 0 {
 		t.Fatal("Options with techniques to use after guess returned nil")
@@ -285,28 +281,18 @@ func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string
 		t.Error("Hint mutated the grid but it wasn't supposed to.")
 	}
 
-	steps := hint.Steps
+	steps := hint.CompoundSteps
 
 	if steps == nil || len(steps) == 0 {
 		t.Error("No steps returned from Hint", description)
 	}
 
-	if !hint.IsHint {
-		t.Error("Steps was not a hint, but a full solution.")
+	if len(steps) != 1 {
+		t.Error("Hint was wrong length")
 	}
 
-	for count, step := range steps {
-		if count == len(steps)-1 {
-			//Last one
-			if !step.Technique.IsFill() {
-				t.Error("Non-fill step as last step in Hint: ", step.Technique.Name(), description)
-			}
-		} else {
-			//Not last one
-			if step.Technique.IsFill() {
-				t.Error("Fill step as non-last step in Hint: ", count, step.Technique.Name(), description)
-			}
-		}
+	if !steps[0].valid() {
+		t.Error("Hint compound step was invalid")
 	}
 }
 
@@ -320,7 +306,7 @@ func TestHumanSolveWithGuess(t *testing.T) {
 	}
 
 	solution := grid.HumanSolution(nil)
-	steps := solution.Steps
+	steps := solution.Steps()
 
 	if steps == nil {
 		t.Fatal("Didn't find a solution to a grid that should have needed a guess")
@@ -355,43 +341,48 @@ func TestStepsDescription(t *testing.T) {
 	//It's really brittle that we load techniques in this way... it changes every time we add a new early technique!
 	steps := SolveDirections{
 		grid,
-		[]*SolveStep{
-			&SolveStep{
-				techniquesByName["Only Legal Number"],
-				CellSlice{
-					grid.Cell(0, 0),
+		[]*CompoundSolveStep{
+			{
+				FillStep: &SolveStep{
+					techniquesByName["Only Legal Number"],
+					CellSlice{
+						grid.Cell(0, 0),
+					},
+					IntSlice{1},
+					nil,
+					nil,
+					nil,
 				},
-				IntSlice{1},
-				nil,
-				nil,
-				nil,
 			},
-			&SolveStep{
-				techniquesByName["Pointing Pair Col"],
-				CellSlice{
-					grid.Cell(1, 0),
-					grid.Cell(1, 1),
+			{
+				PrecursorSteps: []*SolveStep{
+					{
+						techniquesByName["Pointing Pair Col"],
+						CellSlice{
+							grid.Cell(1, 0),
+							grid.Cell(1, 1),
+						},
+						IntSlice{1, 2},
+						CellSlice{
+							grid.Cell(1, 3),
+							grid.Cell(1, 4),
+						},
+						nil,
+						nil,
+					},
 				},
-				IntSlice{1, 2},
-				CellSlice{
-					grid.Cell(1, 3),
-					grid.Cell(1, 4),
+				FillStep: &SolveStep{
+					techniquesByName["Only Legal Number"],
+					CellSlice{
+						grid.Cell(2, 0),
+					},
+					IntSlice{2},
+					nil,
+					nil,
+					nil,
 				},
-				nil,
-				nil,
-			},
-			&SolveStep{
-				techniquesByName["Only Legal Number"],
-				CellSlice{
-					grid.Cell(2, 0),
-				},
-				IntSlice{2},
-				nil,
-				nil,
-				nil,
 			},
 		},
-		false,
 	}
 
 	descriptions := steps.Description()

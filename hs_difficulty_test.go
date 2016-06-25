@@ -12,42 +12,48 @@ var sampleSolveDirections SolveDirections
 func init() {
 	sampleSolveDirections = SolveDirections{
 		nil,
-		[]*SolveStep{
-			&SolveStep{
-				techniquesByName["Necessary In Row"],
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
+		[]*CompoundSolveStep{
+			&CompoundSolveStep{
+				FillStep: &SolveStep{
+					techniquesByName["Necessary In Row"],
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+				},
 			},
-			&SolveStep{
-				techniquesByName["Guess"],
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
+			&CompoundSolveStep{
+				FillStep: &SolveStep{
+					techniquesByName["Guess"],
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+				},
 			},
-
-			&SolveStep{
-				techniquesByName["Naked Pair Block"],
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-			},
-			&SolveStep{
-				techniquesByName["Guess"],
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
+			&CompoundSolveStep{
+				PrecursorSteps: []*SolveStep{
+					&SolveStep{
+						techniquesByName["Naked Pair Block"],
+						nil,
+						nil,
+						nil,
+						nil,
+						nil,
+					},
+				},
+				FillStep: &SolveStep{
+					techniquesByName["Guess"],
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+				},
 			},
 		},
-		false,
 	}
 }
 
@@ -84,19 +90,20 @@ func TestHintDirections(t *testing.T) {
 
 	shortSolveDirections := SolveDirections{
 		grid,
-		[]*SolveStep{
+		[]*CompoundSolveStep{
 			{
-				techniquesByName["Necessary In Row"],
-				[]*Cell{
-					grid.Cell(2, 3),
+				FillStep: &SolveStep{
+					techniquesByName["Necessary In Row"],
+					[]*Cell{
+						grid.Cell(2, 3),
+					},
+					IntSlice{4},
+					nil,
+					nil,
+					nil,
 				},
-				IntSlice{4},
-				nil,
-				nil,
-				nil,
 			},
 		},
-		true,
 	}
 
 	descriptions := strings.Join(shortSolveDirections.Description(), " ")
@@ -109,47 +116,50 @@ func TestHintDirections(t *testing.T) {
 
 	multiStepSolveDirections := SolveDirections{
 		grid,
-		[]*SolveStep{
+		[]*CompoundSolveStep{
 			{
-				techniquesByName["Naked Pair Block"],
-				[]*Cell{
-					grid.Cell(2, 3),
-					grid.Cell(2, 3),
+				PrecursorSteps: []*SolveStep{
+					{
+						techniquesByName["Naked Pair Block"],
+						[]*Cell{
+							grid.Cell(2, 3),
+							grid.Cell(2, 3),
+						},
+						IntSlice{4, 5},
+						[]*Cell{
+							grid.Cell(3, 4),
+							grid.Cell(4, 5),
+						},
+						IntSlice{2, 3},
+						nil,
+					},
+					{
+						techniquesByName["Naked Pair Block"],
+						[]*Cell{
+							grid.Cell(3, 2),
+							grid.Cell(3, 2),
+						},
+						IntSlice{4, 5},
+						[]*Cell{
+							grid.Cell(5, 5),
+							grid.Cell(4, 6),
+						},
+						IntSlice{2, 3},
+						nil,
+					},
 				},
-				IntSlice{4, 5},
-				[]*Cell{
-					grid.Cell(3, 4),
-					grid.Cell(4, 5),
+				FillStep: &SolveStep{
+					techniquesByName["Necessary In Row"],
+					[]*Cell{
+						grid.Cell(2, 3),
+					},
+					IntSlice{4},
+					nil,
+					nil,
+					nil,
 				},
-				IntSlice{2, 3},
-				nil,
-			},
-			{
-				techniquesByName["Naked Pair Block"],
-				[]*Cell{
-					grid.Cell(3, 2),
-					grid.Cell(3, 2),
-				},
-				IntSlice{4, 5},
-				[]*Cell{
-					grid.Cell(5, 5),
-					grid.Cell(4, 6),
-				},
-				IntSlice{2, 3},
-				nil,
-			},
-			{
-				techniquesByName["Necessary In Row"],
-				[]*Cell{
-					grid.Cell(2, 3),
-				},
-				IntSlice{4},
-				nil,
-				nil,
-				nil,
 			},
 		},
-		true,
 	}
 
 	descriptions = strings.Join(multiStepSolveDirections.Description(), " ")
