@@ -6,6 +6,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"strconv"
 	"sync"
 )
 
@@ -720,7 +721,9 @@ func (n *nextStepFrontier) DoneSearching() bool {
 }
 
 func (n *nextStepFrontier) String() string {
-	result := "[\n"
+	result := "Items:" + strconv.Itoa(len(n.items)) + "\n"
+	result += "Completed:" + strconv.Itoa(len(n.CompletedItems)) + "\n"
+	result += "[\n"
 	for _, item := range n.items {
 		result += item.String() + "\n"
 	}
