@@ -820,7 +820,8 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 
 	//TODO: consider making a special FillStepChain type to use for all of
 	//this that asserts in the type system that the chain of solve steps has
-	//precisely one fill step and it's at the end of the chain.
+	//precisely one fill step and it's at the end of the chain. Conceivably it
+	//should have two fields: FillStep and CullSteps.
 
 	frontier := newNextStepFrontier(grid, options)
 
