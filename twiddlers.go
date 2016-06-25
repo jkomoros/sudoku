@@ -29,35 +29,23 @@ func init() {
 //represented more in the grid, since they're more likely to be constrained by
 //neighorbors with the same number.
 func twiddleCommonNumbers(currentStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, grid *Grid) probabilityTweak {
-	//Calculate which numbers are most represented in the grid.
-	numCounts := make(map[int]int)
-
-	for _, cell := range grid.Cells() {
-		if cell.Number() == 0 {
-			continue
-		}
-		numCounts[cell.Number()]++
-	}
-
-	//Remove counts for targetNums that are already filled in every block.
-	//This shouldn't matter, since no steps should suggest filling it, but
-	//just as a sanity check.
-	for key, val := range numCounts {
-		if val == DIM {
-			delete(numCounts, key)
-		}
-	}
-
-	//TODO: we can optimize this by moving the early bail up to the front, and
-	//by only calculating count for the targetnum of us.
 
 	//Skip steps that aren't fill or fill multiple
 	if !currentStep.Technique.IsFill() || len(currentStep.TargetNums) > 1 {
 		return 1.0
 	}
 
-	count := numCounts[currentStep.TargetNums[0]]
-	if count == 0 {
+	keyNum := currentStep.TargetNums[0]
+
+	count := 0
+
+	for _, cell := range grid.Cells() {
+		if cell.Number() == keyNum {
+			count++
+		}
+	}
+
+	if count == 0 || count == DIM {
 		count = 1
 	}
 
