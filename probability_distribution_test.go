@@ -19,6 +19,29 @@ func TestTweakProbabilityDistribution(t *testing.T) {
 	}
 }
 
+func TestInvertingReallyReallyBigDistribution(t *testing.T) {
+	//In practical use, Guess technique's non-inverted value is like absurdly
+	//large and leads to NaN. We want to make sure that we handle that case
+	//reasonably and that all of those huge numbers go to O, not NaN--but only
+	//if there are some "normal" valued things int he distribution.
+
+	crazyDistribution := ProbabilityDistribution{
+		1.0,
+		10.0,
+		100.0,
+		1000.0,
+		1000000000000000000000.0,
+	}
+
+	invertedDistribution := crazyDistribution.invert()
+
+	for i, probabability := range invertedDistribution {
+		if math.IsNaN(probabability) {
+			t.Error("Index", i, "was NaN")
+		}
+	}
+}
+
 func TestRandomWeightedIndex(t *testing.T) {
 
 	result := ProbabilityDistribution{1.0, 0.0}.RandomIndex()

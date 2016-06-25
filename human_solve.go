@@ -859,11 +859,6 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 		distribution[i] = item.Goodness()
 	}
 
-	//TODO: if there are very high valued numbers in the original distribution
-	//(e.g. from Guess) then it pushes everything else to 0 and the guesses to
-	//NaN. Selection still works OK, but that's obviously broken. Perhaps have
-	//something that clears out really high outliers or forces them to
-	//effectively 0?
 	invertedDistribution := distribution.invert()
 
 	randomIndex := invertedDistribution.RandomIndex()

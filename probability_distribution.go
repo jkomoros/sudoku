@@ -124,7 +124,18 @@ func (d ProbabilityDistribution) invert() ProbabilityDistribution {
 
 //invertWeight is the primary logic used to invert a positive weight.
 func invertWeight(inverted float64) float64 {
-	return 1 / math.Exp(inverted/20)
+
+	result := 1 / math.Exp(inverted/20)
+
+	if math.IsInf(result, 0) {
+		//This would have only happened if the denominator was really big. Set it to
+		//the closest value to 0 so that in most cases it will be effectively
+		//zero but that in cases where it's only guesses, we'll still get a
+		//good distribution.
+		result = math.SmallestNonzeroFloat64
+	}
+
+	return result
 }
 
 //RandomIndex returns a random index based on the probability distribution.
