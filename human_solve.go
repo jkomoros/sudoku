@@ -782,14 +782,15 @@ func newHumanSolveSearcher(grid *Grid, options *HumanSolveOptions) []*SolveStep 
 
 	for !gridCopy.Solved() {
 		newStep := newHumanSolveSearcherSingleStep(gridCopy, options, result)
+		if newStep == nil {
+			//Sad, guess we failed to solve the puzzle. :-(
+			return nil
+		}
 		result = append(result, newStep...)
 		for _, step := range newStep {
 			step.Apply(gridCopy)
 		}
 	}
-
-	//TODO: if we broke out and we didn't manage to solve the puzzle handle
-	//that return value correctly
 
 	return result
 }
