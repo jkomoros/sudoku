@@ -533,8 +533,13 @@ func (p *potentialNextStep) AddStep(step *SolveStep) *potentialNextStep {
 }
 
 //Twiddle modifies goodness by the given amount and keeps track of the reason
-//for debugging purposes.
+//for debugging purposes. A twiddle of 1.0 has no effect. A twiddle between
+//0.0 and 1.0 increases the goodness. A twiddle of 1.0 or greater decreases
+//goodness.
 func (p *potentialNextStep) Twiddle(amount float64, description string) {
+	if amount < 0.0 {
+		return
+	}
 	p.twiddles[description] = amount
 	heap.Fix(p.frontier, p.heapIndex)
 }
