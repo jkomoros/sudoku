@@ -2,23 +2,8 @@ package sudoku
 
 import (
 	"math"
-	"reflect"
 	"testing"
 )
-
-func TestDefaultProbabilityDistributionTweak(t *testing.T) {
-	result := defaultProbabilityDistributionTweak(3)
-	expected := probabilityDistributionTweak{
-		1.0,
-		1.0,
-		1.0,
-	}
-
-	if !reflect.DeepEqual(result, expected) {
-		t.Error("Got wrong result from defaultProbabilityDistributionTweak. Got", result, "expected", expected)
-	}
-
-}
 
 func TestTwiddleCommonNumbers(t *testing.T) {
 
@@ -75,16 +60,18 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 		},
 	}
 
-	expected := probabilityDistributionTweak{
+	expected := []probabilityTweak{
 		2.0,
 		1.0,
 		5.0,
 		1.0,
 	}
-	result := twiddleCommonNumbers(possibilities, grid, nil)
 
-	if !reflect.DeepEqual(result, expected) {
-		t.Error("Got wrong result. Wanted:", expected, "got", result)
+	for i, step := range possibilities {
+		result := twiddleCommonNumbers(step, nil, nil, grid)
+		if result != expected[i] {
+			t.Error("Twiddle Common Numbers wrong for", i, "got", result, "expected", expected[i])
+		}
 	}
 
 }
@@ -92,16 +79,19 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 func TestTwiddleChainedSteps(t *testing.T) {
 	//TODO: test other, harder cases as well.
 	grid := NewGrid()
-	lastStep := &SolveStep{
-		nil,
-		cellRefsToCells([]cellRef{
-			{0, 0},
-		}, grid),
-		nil,
-		nil,
-		nil,
-		nil,
+	lastStep := []*SolveStep{
+		{
+			nil,
+			cellRefsToCells([]cellRef{
+				{0, 0},
+			}, grid),
+			nil,
+			nil,
+			nil,
+			nil,
+		},
 	}
+
 	possibilities := []*SolveStep{
 		{
 			nil,
@@ -135,25 +125,27 @@ func TestTwiddleChainedSteps(t *testing.T) {
 		},
 	}
 
-	expected := []float64{
+	expected := []probabilityTweak{
 		3.727593720314952e+08,
 		517947.4679231202,
 		1.0,
 	}
 
-	results := twiddleChainedSteps(possibilities, grid, lastStep.TargetCells)
+	lastResult := probabilityTweak(math.MaxFloat64)
 
-	lastWeight := math.MaxFloat64
-	for i, weight := range results {
-		if weight >= lastWeight {
-			t.Error("Tweak Chained Steps Weights didn't tweak things in the right direction: ", results, "at", i)
+	for i, step := range possibilities {
+		result := twiddleChainedSteps(step, lastStep, nil, grid)
+		expectedResult := expected[i]
+
+		if result >= lastResult {
+			t.Error("Tweak Chained Steps Weights didn't tweak things in the right direction: ", result, "at", i)
 		}
-		lastWeight = weight
+		lastResult = result
+
+		if math.Abs(float64(expectedResult-result)) > 0.00001 {
+			t.Error("Twiddle chained steps at", i, "got", result, "expected", expectedResult)
+		}
+
 	}
 
-	for i, weight := range results {
-		if math.Abs(expected[i]-weight) > 0.00001 {
-			t.Error("Index", i, "was different than expected. Got", weight, "wanted", expected[i])
-		}
-	}
 }
