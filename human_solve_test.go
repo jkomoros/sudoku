@@ -50,6 +50,17 @@ func TestCompoundSolveStep(t *testing.T) {
 		t.Error("A valid compound was not thought valid")
 	}
 
+	steps := compound.Steps()
+	expected := []*SolveStep{
+		cullStep,
+		cullStep,
+		simpleFillStep,
+	}
+
+	if !reflect.DeepEqual(steps, expected) {
+		t.Error("compound.steps gave wrong result. Got", steps, "expected", expected)
+	}
+
 	compound.PrecursorSteps[0] = simpleFillStep
 
 	if compound.valid() {

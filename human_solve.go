@@ -331,6 +331,11 @@ func (c *CompoundSolveStep) Apply(grid *Grid) {
 	c.FillStep.Apply(grid)
 }
 
+//Steps returns the simple list of SolveSteps that this CompoundSolveStep represents.
+func (c *CompoundSolveStep) Steps() []*SolveStep {
+	return append(c.PrecursorSteps, c.FillStep)
+}
+
 //HumanSolution returns the SolveDirections that represent how a human would
 //solve this puzzle. It does not mutate the grid. If options is nil, will use
 //reasonable defaults.
