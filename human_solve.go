@@ -802,18 +802,13 @@ func newHumanSolveSearcher(grid *Grid, options *HumanSolveOptions) []*CompoundSo
 }
 
 //newHumanSolveSearcherSingleStep is the workhorse of the new HumanSolve. It
-//searches for the next FillStepChain on the puzzle: a series of steps that
+//searches for the next CompoundSolveStep on the puzzle: a series of steps that
 //contains exactly one fill step at its end.
 func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep) *CompoundSolveStep {
 
 	//TODO: drop the 'new' from the name
 
 	//TODO: with the new approach, we're getting a lot more extreme negative difficulty values. Train a new model!
-
-	//TODO: consider making a special FillStepChain type to use for all of
-	//this that asserts in the type system that the chain of solve steps has
-	//precisely one fill step and it's at the end of the chain. Conceivably it
-	//should have two fields: FillStep and CullSteps.
 
 	frontier := newNextStepFrontier(grid, options)
 
