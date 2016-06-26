@@ -875,8 +875,6 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 //possibilites exist at each step. cmd/i-sudoku is one user of this method.
 func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
 
-	//TODO: make sure that dokugen, i-sudoku's integration into HumanSolve still works.
-
 	//TODO: with the new approach, we're getting a lot more extreme negative difficulty values. Train a new model!
 
 	frontier := newNextStepFrontier(self, previousSteps, options)
