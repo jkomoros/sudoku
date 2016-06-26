@@ -438,6 +438,27 @@ func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 
 }
 
+type humanSolveSearcher struct {
+	itemsToExplore []*humanSolveItem
+	completedItems []*humanSolveItem
+	//Various options frozen in at creation time that various methods need
+	//access to.
+	grid                  *Grid
+	options               *HumanSolveOptions
+	previousCompoundSteps []*CompoundSolveStep
+}
+
+//humanSolveItem keeps track of the next step we may want to return for
+//HumanSolve.
+type humanSolveItem struct {
+	//All potentialNextSteps, except the initial in a searcher, must have a parent.
+	parent    *humanSolveItem
+	step      *SolveStep
+	twiddles  map[string]probabilityTweak
+	heapIndex int
+	searcher  *humanSolveSearcher
+}
+
 //humanSolveHelper does most of the set up for both HumanSolve and Hint.
 func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) *SolveDirections {
 	//Short circuit solving if it has multiple solutions.
@@ -473,17 +494,6 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	}
 
 	return &SolveDirections{snapshot, steps}
-}
-
-//humanSolveItem keeps track of the next step we may want to return for
-//HumanSolve.
-type humanSolveItem struct {
-	//All potentialNextSteps, except the initial in a searcher, must have a parent.
-	parent    *humanSolveItem
-	step      *SolveStep
-	twiddles  map[string]probabilityTweak
-	heapIndex int
-	searcher  *humanSolveSearcher
 }
 
 //Grid returns a grid with all of this item's steps applied
@@ -741,16 +751,6 @@ OuterLoop:
 	}
 }
 
-type humanSolveSearcher struct {
-	itemsToExplore []*humanSolveItem
-	completedItems []*humanSolveItem
-	//Various options frozen in at creation time that various methods need
-	//access to.
-	grid                  *Grid
-	options               *HumanSolveOptions
-	previousCompoundSteps []*CompoundSolveStep
-}
-
 func newHumanSolveSearcher(grid *Grid, previousCompoundSteps []*CompoundSolveStep, options *HumanSolveOptions) *humanSolveSearcher {
 	searcher := &humanSolveSearcher{
 		grid:                  grid,
@@ -775,6 +775,15 @@ func (n *humanSolveSearcher) DoneSearching() bool {
 	return n.options.NumOptionsToCalculate <= len(n.completedItems)
 }
 
+//NextPossibleStep pops the best step and returns it.
+func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
+	if n.Len() == 0 {
+		return nil
+	}
+	return n.Pop().(*humanSolveItem)
+}
+
+//String prints out a useful debug output for the searcher's state.
 func (n *humanSolveSearcher) String() string {
 	result := "Items:" + strconv.Itoa(len(n.itemsToExplore)) + "\n"
 	result += "Completed:" + strconv.Itoa(len(n.completedItems)) + "\n"
@@ -786,21 +795,26 @@ func (n *humanSolveSearcher) String() string {
 	return result
 }
 
+//Len is necessary to implement heap.Interface
 func (n humanSolveSearcher) Len() int {
 	return len(n.itemsToExplore)
 }
 
+//Less is necessary to implement heap.Interface
 func (n humanSolveSearcher) Less(i, j int) bool {
 	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
 	return n.itemsToExplore[i].Goodness() > n.itemsToExplore[j].Goodness()
 }
 
+//Swap is necessary to implement heap.Interface
 func (n humanSolveSearcher) Swap(i, j int) {
 	n.itemsToExplore[i], n.itemsToExplore[j] = n.itemsToExplore[j], n.itemsToExplore[i]
 	n.itemsToExplore[i].heapIndex = i
 	n.itemsToExplore[j].heapIndex = j
 }
 
+//Push is necessary to implement heap.Interface. It should not be used
+//direclty; instead, use heap.Push()
 func (n *humanSolveSearcher) Push(x interface{}) {
 	length := len(n.itemsToExplore)
 	item := x.(*humanSolveItem)
@@ -808,6 +822,8 @@ func (n *humanSolveSearcher) Push(x interface{}) {
 	n.itemsToExplore = append(n.itemsToExplore, item)
 }
 
+//Pop is necessary to implement heap.Interface. It should not be used
+//directly; instead use heap.Pop()
 func (n *humanSolveSearcher) Pop() interface{} {
 	old := n.itemsToExplore
 	length := len(old)
@@ -815,14 +831,6 @@ func (n *humanSolveSearcher) Pop() interface{} {
 	item.heapIndex = -1 // for safety
 	n.itemsToExplore = old[0 : length-1]
 	return item
-}
-
-//NextPossibleStep pops the best step and returns it.
-func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
-	if n.Len() == 0 {
-		return nil
-	}
-	return n.Pop().(*humanSolveItem)
 }
 
 //humanSolveSearch is a new implementation of the core implementation of
