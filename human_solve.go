@@ -558,7 +558,7 @@ func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
 		result.Twiddle(tweak, name)
 	}
 	if result.IsComplete() {
-		p.frontier.CompletedItems = append(p.frontier.CompletedItems, result)
+		p.frontier.completedItems = append(p.frontier.completedItems, result)
 	} else {
 		heap.Push(p.frontier, result)
 	}
@@ -744,9 +744,11 @@ OuterLoop:
 }
 
 type humanSolveSearcher struct {
-	itemsToExplore        []*humanSolveItem
+	itemsToExplore []*humanSolveItem
+	completedItems []*humanSolveItem
+	//Various options frozen in at creation time that various methods need
+	//access to.
 	grid                  *Grid
-	CompletedItems        []*humanSolveItem
 	options               *HumanSolveOptions
 	previousCompoundSteps []*CompoundSolveStep
 }
@@ -773,12 +775,12 @@ func (n *humanSolveSearcher) DoneSearching() bool {
 		return true
 	}
 	//TODO: is this the proper use of NumOptionsToCalculate?
-	return n.options.NumOptionsToCalculate <= len(n.CompletedItems)
+	return n.options.NumOptionsToCalculate <= len(n.completedItems)
 }
 
 func (n *humanSolveSearcher) String() string {
 	result := "Items:" + strconv.Itoa(len(n.itemsToExplore)) + "\n"
-	result += "Completed:" + strconv.Itoa(len(n.CompletedItems)) + "\n"
+	result += "Completed:" + strconv.Itoa(len(n.completedItems)) + "\n"
 	result += "[\n"
 	for _, item := range n.itemsToExplore {
 		result += item.String() + "\n"
@@ -902,14 +904,14 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSt
 	//Prepare the distribution and list of steps
 
 	//But first check if we don't have any.
-	if len(frontier.CompletedItems) == 0 {
+	if len(frontier.completedItems) == 0 {
 		return nil, nil
 	}
 
-	distri := make(ProbabilityDistribution, len(frontier.CompletedItems))
+	distri := make(ProbabilityDistribution, len(frontier.completedItems))
 	var resultSteps []*CompoundSolveStep
 
-	for i, item := range frontier.CompletedItems {
+	for i, item := range frontier.completedItems {
 		distri[i] = item.Goodness()
 		resultSteps = append(resultSteps, newCompoundSolveStep(item.Steps()))
 	}

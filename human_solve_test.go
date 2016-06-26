@@ -521,7 +521,7 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Fatal("Adding completed item to frontier didn't have -1 index")
 	}
 
-	if len(frontier.CompletedItems) != 1 {
+	if len(frontier.completedItems) != 1 {
 		t.Error("Expected the completed item to go into CompletedItems,but it's empty")
 	}
 
@@ -622,8 +622,8 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Error("Adding an item gave wrong len. Got", frontier.Len(), "wanted 0")
 	}
 
-	if len(frontier.CompletedItems) != 2 {
-		t.Error("Got wrong number of completed items. Got", len(frontier.CompletedItems), "expected 2")
+	if len(frontier.completedItems) != 2 {
+		t.Error("Got wrong number of completed items. Got", len(frontier.completedItems), "expected 2")
 	}
 
 	steps := completedNonFillStemItem.Steps()
