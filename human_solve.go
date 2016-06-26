@@ -462,9 +462,9 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	var steps []*CompoundSolveStep
 
 	if endConditionSolved {
-		steps = newHumanSolveSearcher(grid, options)
+		steps = humanSolveSearch(grid, options)
 	} else {
-		result := newHumanSolveSearcherSingleStep(grid, options, nil)
+		result := humanSolveSearchSingleStep(grid, options, nil)
 		if result != nil {
 			steps = []*CompoundSolveStep{result}
 		}
@@ -477,19 +477,19 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	return &SolveDirections{snapshot, steps}
 }
 
-//potentialNextStep keeps track of the next step we may want to return for
+//humanSolveItem keeps track of the next step we may want to return for
 //HumanSolve.
-type potentialNextStep struct {
+type humanSolveItem struct {
 	//All potentialNextSteps, except the initial in a frontier, must have a parent.
-	parent    *potentialNextStep
+	parent    *humanSolveItem
 	step      *SolveStep
 	twiddles  map[string]probabilityTweak
 	heapIndex int
-	frontier  *nextStepFrontier
+	frontier  *humanSolveSearcher
 }
 
 //Grid returns a grid with all of this item's steps applied
-func (p *potentialNextStep) Grid() *Grid {
+func (p *humanSolveItem) Grid() *Grid {
 	//TODO: it's conceivable that it might be best to memoize this... It's
 	//unlikely thoguh, since grid will only be accessed once and many items
 	//will never have their grids accessed.
@@ -508,7 +508,7 @@ func (p *potentialNextStep) Grid() *Grid {
 
 //Goodness is how good the next step chain is in total. A LOWER Goodness is better. There's not enough precision between 0.0 and
 //1.0 if we try to cram all values in there and they get very small.
-func (p *potentialNextStep) Goodness() float64 {
+func (p *humanSolveItem) Goodness() float64 {
 	if p.parent == nil {
 		return 1.0
 	}
@@ -522,7 +522,7 @@ func (p *potentialNextStep) Goodness() float64 {
 
 //explainGoodness returns a string explaining why this item has the goodness
 //it does. Primarily useful for debugging.
-func (p *potentialNextStep) explainGoodness(startCount int) string {
+func (p *humanSolveItem) explainGoodness(startCount int) string {
 	if p.parent == nil {
 		return ""
 	}
@@ -535,7 +535,7 @@ func (p *potentialNextStep) explainGoodness(startCount int) string {
 
 }
 
-func (p *potentialNextStep) Steps() []*SolveStep {
+func (p *humanSolveItem) Steps() []*SolveStep {
 	//TODO: can memoize this since it will never change
 	if p.parent == nil {
 		return nil
@@ -543,8 +543,8 @@ func (p *potentialNextStep) Steps() []*SolveStep {
 	return append(p.parent.Steps(), p.step)
 }
 
-func (p *potentialNextStep) AddStep(step *SolveStep) *potentialNextStep {
-	result := &potentialNextStep{
+func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
+	result := &humanSolveItem{
 		parent:    p,
 		step:      step,
 		twiddles:  map[string]probabilityTweak{},
@@ -569,7 +569,7 @@ func (p *potentialNextStep) AddStep(step *SolveStep) *potentialNextStep {
 //for debugging purposes. A twiddle of 1.0 has no effect.q A twiddle between
 //0.0 and 1.0 increases the goodness. A twiddle of 1.0 or greater decreases
 //goodness.
-func (p *potentialNextStep) Twiddle(amount probabilityTweak, description string) {
+func (p *humanSolveItem) Twiddle(amount probabilityTweak, description string) {
 	if amount < 0.0 {
 		return
 	}
@@ -579,11 +579,11 @@ func (p *potentialNextStep) Twiddle(amount probabilityTweak, description string)
 	}
 }
 
-func (p *potentialNextStep) String() string {
+func (p *humanSolveItem) String() string {
 	return fmt.Sprintf("%v %f %d", p.Steps(), p.Goodness(), p.heapIndex)
 }
 
-func (p *potentialNextStep) IsComplete() bool {
+func (p *humanSolveItem) IsComplete() bool {
 	steps := p.Steps()
 	if len(steps) == 0 {
 		return false
@@ -594,7 +594,7 @@ func (p *potentialNextStep) IsComplete() bool {
 //Explore is the workhorse of HumanSolve; it's the thing that identifies all
 //of the new steps rooted from here in parallel (and bails early if we've
 //found enough results)
-func (p *potentialNextStep) Explore() {
+func (p *humanSolveItem) Explore() {
 
 	/*
 
@@ -743,26 +743,23 @@ OuterLoop:
 	}
 }
 
-//TODO: rename this whole thing because it now does much more than frontier.
-//TODO: rename basically every single thing I'm adding in this branch once it
-//becomes clear exactly how they will end up.
-type nextStepFrontier struct {
+type humanSolveSearcher struct {
 	//TODO: rename this field itemsToExplore, or 'frontier'
-	items                 []*potentialNextStep
+	items                 []*humanSolveItem
 	grid                  *Grid
-	CompletedItems        []*potentialNextStep
+	CompletedItems        []*humanSolveItem
 	options               *HumanSolveOptions
 	previousCompoundSteps []*CompoundSolveStep
 }
 
-func newNextStepFrontier(grid *Grid, previousCompoundSteps []*CompoundSolveStep, options *HumanSolveOptions) *nextStepFrontier {
-	frontier := &nextStepFrontier{
+func newHumanSolveSearcher(grid *Grid, previousCompoundSteps []*CompoundSolveStep, options *HumanSolveOptions) *humanSolveSearcher {
+	frontier := &humanSolveSearcher{
 		grid:                  grid,
 		options:               options,
 		previousCompoundSteps: previousCompoundSteps,
 	}
 	heap.Init(frontier)
-	initialItem := &potentialNextStep{
+	initialItem := &humanSolveItem{
 		frontier:  frontier,
 		heapIndex: -1,
 	}
@@ -772,7 +769,7 @@ func newNextStepFrontier(grid *Grid, previousCompoundSteps []*CompoundSolveStep,
 
 //DoneSearching will return true when no more items need to be explored
 //because we have enough CompletedItems.
-func (n *nextStepFrontier) DoneSearching() bool {
+func (n *humanSolveSearcher) DoneSearching() bool {
 	if n.options == nil {
 		return true
 	}
@@ -780,7 +777,7 @@ func (n *nextStepFrontier) DoneSearching() bool {
 	return n.options.NumOptionsToCalculate <= len(n.CompletedItems)
 }
 
-func (n *nextStepFrontier) String() string {
+func (n *humanSolveSearcher) String() string {
 	result := "Items:" + strconv.Itoa(len(n.items)) + "\n"
 	result += "Completed:" + strconv.Itoa(len(n.CompletedItems)) + "\n"
 	result += "[\n"
@@ -791,29 +788,29 @@ func (n *nextStepFrontier) String() string {
 	return result
 }
 
-func (n nextStepFrontier) Len() int {
+func (n humanSolveSearcher) Len() int {
 	return len(n.items)
 }
 
-func (n nextStepFrontier) Less(i, j int) bool {
+func (n humanSolveSearcher) Less(i, j int) bool {
 	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
 	return n.items[i].Goodness() > n.items[j].Goodness()
 }
 
-func (n nextStepFrontier) Swap(i, j int) {
+func (n humanSolveSearcher) Swap(i, j int) {
 	n.items[i], n.items[j] = n.items[j], n.items[i]
 	n.items[i].heapIndex = i
 	n.items[j].heapIndex = j
 }
 
-func (n *nextStepFrontier) Push(x interface{}) {
+func (n *humanSolveSearcher) Push(x interface{}) {
 	length := len(n.items)
-	item := x.(*potentialNextStep)
+	item := x.(*humanSolveItem)
 	item.heapIndex = length
 	n.items = append(n.items, item)
 }
 
-func (n *nextStepFrontier) Pop() interface{} {
+func (n *humanSolveSearcher) Pop() interface{} {
 	old := n.items
 	length := len(old)
 	item := old[length-1]
@@ -823,21 +820,21 @@ func (n *nextStepFrontier) Pop() interface{} {
 }
 
 //NextPossibleStep pops the best step and returns it.
-func (n *nextStepFrontier) NextPossibleStep() *potentialNextStep {
+func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
 	if n.Len() == 0 {
 		return nil
 	}
-	return n.Pop().(*potentialNextStep)
+	return n.Pop().(*humanSolveItem)
 }
 
-//newHumanSolveSearcher is a new implementation of the core implementation of
+//humanSolveSearch is a new implementation of the core implementation of
 //HumanSolve. Mutates the grid.
-func newHumanSolveSearcher(grid *Grid, options *HumanSolveOptions) []*CompoundSolveStep {
+func humanSolveSearch(grid *Grid, options *HumanSolveOptions) []*CompoundSolveStep {
 	//TODO: drop the 'new' from the name.
 	var result []*CompoundSolveStep
 
 	for !grid.Solved() {
-		newStep := newHumanSolveSearcherSingleStep(grid, options, result)
+		newStep := humanSolveSearchSingleStep(grid, options, result)
 		if newStep == nil {
 			//Sad, guess we failed to solve the puzzle. :-(
 			return nil
@@ -849,12 +846,10 @@ func newHumanSolveSearcher(grid *Grid, options *HumanSolveOptions) []*CompoundSo
 	return result
 }
 
-//newHumanSolveSearcherSingleStep is the workhorse of the new HumanSolve. It
+//humanSolveSearchSingleStep is the workhorse of the new HumanSolve. It
 //searches for the next CompoundSolveStep on the puzzle: a series of steps that
 //contains exactly one fill step at its end.
-func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep) *CompoundSolveStep {
-
-	//TODO: drop the 'new' from the name
+func humanSolveSearchSingleStep(grid *Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep) *CompoundSolveStep {
 
 	//TODO: does it even make sense to have this method? It doesn't do very much anymore...
 
@@ -882,7 +877,7 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSt
 
 	//TODO: with the new approach, we're getting a lot more extreme negative difficulty values. Train a new model!
 
-	frontier := newNextStepFrontier(self, previousSteps, options)
+	frontier := newHumanSolveSearcher(self, previousSteps, options)
 
 	step := frontier.NextPossibleStep()
 
