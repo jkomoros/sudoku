@@ -539,8 +539,7 @@ func (p *potentialNextStep) AddStep(step *SolveStep) *potentialNextStep {
 	inProgressCompoundStep := p.Steps()
 	grid := result.Grid()
 	for name, twiddler := range twiddlers {
-		//TODO: figure out how to pass in pastCompoundSteps (where to wire that through?)
-		tweak := twiddler(step, inProgressCompoundStep, nil, grid)
+		tweak := twiddler(step, inProgressCompoundStep, p.frontier.previousCompoundSteps, grid)
 		result.Twiddle(tweak, name)
 	}
 	if result.IsComplete() {
@@ -728,16 +727,18 @@ OuterLoop:
 //becomes clear exactly how they will end up.
 type nextStepFrontier struct {
 	//TODO: rename this field itemsToExplore, or 'frontier'
-	items          []*potentialNextStep
-	grid           *Grid
-	CompletedItems []*potentialNextStep
-	options        *HumanSolveOptions
+	items                 []*potentialNextStep
+	grid                  *Grid
+	CompletedItems        []*potentialNextStep
+	options               *HumanSolveOptions
+	previousCompoundSteps []*CompoundSolveStep
 }
 
-func newNextStepFrontier(grid *Grid, options *HumanSolveOptions) *nextStepFrontier {
+func newNextStepFrontier(grid *Grid, previousCompoundSteps []*CompoundSolveStep, options *HumanSolveOptions) *nextStepFrontier {
 	frontier := &nextStepFrontier{
-		grid:    grid,
-		options: options,
+		grid:                  grid,
+		options:               options,
+		previousCompoundSteps: previousCompoundSteps,
 	}
 	heap.Init(frontier)
 	initialItem := &potentialNextStep{
@@ -836,7 +837,7 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 
 	//TODO: with the new approach, we're getting a lot more extreme negative difficulty values. Train a new model!
 
-	frontier := newNextStepFrontier(grid, options)
+	frontier := newNextStepFrontier(grid, previousSteps, options)
 
 	step := frontier.NextPossibleStep()
 

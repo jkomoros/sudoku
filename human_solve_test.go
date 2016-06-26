@@ -471,7 +471,7 @@ func TestNextStepFrontier(t *testing.T) {
 	grid := NewGrid()
 	grid.LoadSDK(TEST_GRID)
 
-	frontier := newNextStepFrontier(grid, DefaultHumanSolveOptions())
+	frontier := newNextStepFrontier(grid, nil, DefaultHumanSolveOptions())
 
 	if frontier.Len() != 1 {
 		t.Error("Expected new frontier to have exactly one item in it, but got", frontier.Len())
