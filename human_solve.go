@@ -451,6 +451,10 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 		options = DefaultHumanSolveOptions()
 	}
 
+	//TODO: we could also do a test for if it's already solved here.
+	//(newHumanSolveSearcher implicitly does in the loop, but no harm in
+	//checking here once too.
+
 	options.validate()
 
 	snapshot := grid.Copy()
@@ -460,7 +464,10 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	if endConditionSolved {
 		steps = newHumanSolveSearcher(grid, options)
 	} else {
-		steps = []*CompoundSolveStep{newHumanSolveSearcherSingleStep(grid, options, nil)}
+		result := newHumanSolveSearcherSingleStep(grid, options, nil)
+		if result != nil {
+			steps = []*CompoundSolveStep{result}
+		}
 	}
 
 	if len(steps) == 0 {
