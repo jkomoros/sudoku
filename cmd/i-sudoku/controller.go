@@ -469,9 +469,15 @@ func (c *mainController) ShowDebugHint() {
 
 	for i, step := range steps {
 		cumulative += probabilities[i] * 100
-		//TODO: figure out how to print out CompoundSolveSteps better (maybe just a len(step.PrecursorSteps?)
 		fillStep := step.FillStep
-		table.AddRow(strconv.Itoa(i), fmt.Sprintf("%4.2f", probabilities[i]*100)+"%", fmt.Sprintf("%4.2f", cumulative)+"%", fillStep.TechniqueVariant(), fillStep.TargetCells.Description(), fillStep.TargetNums.Description())
+
+		var precusorStepsDescription []string
+
+		for _, step := range step.PrecursorSteps {
+			precusorStepsDescription = append(precusorStepsDescription, step.TechniqueVariant())
+		}
+
+		table.AddRow(strconv.Itoa(i), fmt.Sprintf("%4.2f", probabilities[i]*100)+"%", fmt.Sprintf("%4.2f", cumulative)+"%", fillStep.TechniqueVariant(), fillStep.TargetCells.Description(), fillStep.TargetNums.Description(), len(step.PrecursorSteps), strings.Join(precusorStepsDescription, ","))
 	}
 
 	c.SetConsoleMessage(msg+table.String(), true)

@@ -635,6 +635,12 @@ func (p *potentialNextStep) Explore() {
 	//TODO: make this configurable, and figure out what the optimal values are
 	numTechniquesToStartByDefault := 10
 
+	//TODO: play around with debug hints in i-sudoku ahile to develop an
+	//intuition of what's happening in practice.
+
+	//TODO: this in practice fills out Guesses ALL of the time, which causes
+	//the probability distributions to go really wonky. Maybe only fall back
+	//on Guess if no other things come out?
 	techniques := p.frontier.options.effectiveTechniquesToUse()
 
 	//Handle the case where we were given a short list of techniques.
