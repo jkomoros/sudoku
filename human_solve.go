@@ -544,7 +544,6 @@ func (p *potentialNextStep) Steps() []*SolveStep {
 }
 
 func (p *potentialNextStep) AddStep(step *SolveStep) *potentialNextStep {
-	//TODO: add the twiddler for PointingCells/TargetCells overlap.
 	result := &potentialNextStep{
 		parent:    p,
 		step:      step,

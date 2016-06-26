@@ -17,11 +17,78 @@ type probabilityTwiddler func(*SolveStep, []*SolveStep, []*CompoundSolveStep, *G
 var twiddlers map[string]probabilityTwiddler
 
 func init() {
+	//TODO: also have a way to quickly tweak the strength of the twiddlers.
 	twiddlers = map[string]probabilityTwiddler{
-		"Human Likelihood": twiddleHumanLikelihood,
-		"Chained Steps":    twiddleChainedSteps,
-		"Common Numbers":   twiddleCommonNumbers,
+		"Human Likelihood":        twiddleHumanLikelihood,
+		"Chained Steps":           twiddleChainedSteps,
+		"Common Numbers":          twiddleCommonNumbers,
+		"Pointing Target Overlap": twiddlePointingTargetOverlap,
 	}
+}
+
+//twiddlePointingTargetOverlap twiddles based on how much the targetcells
+//overlap with the pointingcells of the proposed step. This tries to capture
+//the fact that for cull steps in particular, we want to heavily incentivize
+//steps that directly reduce possibilities in the next round of steps. This is
+//conceptually similar to ChainSimilarity, but more targeted.
+func twiddlePointingTargetOverlap(currentStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, grid *Grid) probabilityTweak {
+	if len(inProgressCompoundStep) == 0 {
+		return 1.0
+	}
+	lastStep := inProgressCompoundStep[len(inProgressCompoundStep)-1]
+
+	if currentStep == nil {
+		return 1.0
+	}
+
+	//We're going to look for two kinds of overlap: targetCell to targetCell,
+	//and targetCell to PointerCell, because some techniques want one or the
+	//other (do any want both?). We'll use the higher overlap.
+
+	//TODO: currently none of the FillSteps have PointerCells, which means
+	//this twiddle won't be as effective as it should be.
+
+	//Compute Target --> Pointer overlap
+
+	targetPointerUnion := currentStep.PointerCells.Union(lastStep.TargetCells)
+	targetPointerIntersection := currentStep.PointerCells.Intersection(lastStep.TargetCells)
+
+	targetPointerOverlap := float64(len(targetPointerIntersection)) / float64(len(targetPointerUnion))
+
+	if math.IsNaN(targetPointerOverlap) {
+		targetPointerOverlap = 0.0
+	}
+
+	//Compute Target --> Target overlap
+
+	targetTargetUnion := currentStep.TargetCells.Union(lastStep.TargetCells)
+	targetTargetIntersection := currentStep.TargetCells.Intersection(lastStep.TargetCells)
+
+	targetTargetOverlap := float64(len(targetTargetIntersection)) / float64(len(targetTargetUnion))
+
+	if math.IsNaN(targetTargetOverlap) {
+		targetTargetOverlap = 0.0
+	}
+
+	overlap := targetPointerOverlap
+
+	if targetTargetOverlap > targetPointerOverlap {
+		overlap = targetTargetOverlap
+	}
+
+	//The more overlap, the better, at an increasing rate. And the smaller the
+	//output, the better the twiddle is.
+
+	flippedOverlap := 1.0 - overlap
+
+	//A value of 0--if there's perfect overlap--is nonsense. It's too strong!
+	if flippedOverlap == 0.0 {
+		flippedOverlap = 0.001
+	}
+
+	//Squaring the flipped overlap will accelerate small ones.
+	return probabilityTweak(flippedOverlap * flippedOverlap)
+
 }
 
 //twiddleTechniqueWeight is a fundamental twiddler based on the

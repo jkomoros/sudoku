@@ -25,6 +25,127 @@ func TestTwiddleHumanLikelihood(t *testing.T) {
 	}
 }
 
+func TestTwiddlePointingTargetOverlap(t *testing.T) {
+	grid := NewGrid()
+	tests := []struct {
+		lastStep    *SolveStep
+		currentStep *SolveStep
+		expected    probabilityTweak
+		description string
+	}{
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0),
+			},
+			&SolveStep{
+				PointerCells: grid.Row(0),
+			},
+			0.000001,
+			"Full pointer/cell overlap",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0),
+			},
+			&SolveStep{
+				TargetCells: grid.Row(0),
+			},
+			0.000001,
+			"Full target/target overlap",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0),
+			},
+			&SolveStep{
+				TargetCells: CellSlice{grid.Cell(0, 0)},
+			},
+			0.7901234567,
+			"Single cell out of 9",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0).Intersection(grid.Block(0)),
+			},
+			&SolveStep{
+				TargetCells: CellSlice{grid.Cell(0, 0)},
+			},
+			0.4444444444444,
+			"Single cell out of three",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0),
+			},
+			&SolveStep{
+				TargetCells: grid.Row(7),
+			},
+			1.0,
+			"Two rows no overlap",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0).Intersection(grid.Block(0)),
+			},
+			&SolveStep{
+				TargetCells: grid.Row(DIM - 1).Intersection(grid.Block(DIM - 1)),
+			},
+			1.0,
+			"Two three-cell rows no overlap",
+		},
+		{
+			&SolveStep{
+				TargetCells: CellSlice{grid.Cell(0, 0)},
+			},
+			&SolveStep{
+				TargetCells: CellSlice{grid.Cell(0, 0)},
+			},
+			0.000001,
+			"Two individual cells overlapping",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0),
+			},
+			&SolveStep{
+				TargetCells: grid.Col(0),
+			},
+			0.8858131487889274,
+			"Row and col intersecting at one point",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0),
+			},
+			&SolveStep{
+				TargetCells: grid.Block(0),
+			},
+			0.6400000000000001,
+			"First row and first block overlapping",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0).Intersection(grid.Block(0)),
+			},
+			&SolveStep{
+				TargetCells: grid.Block(0),
+			},
+			0.44444444444444453,
+			"First three cells and first block overlapping",
+		},
+	}
+
+	for i, test := range tests {
+		result := twiddlePointingTargetOverlap(test.currentStep, []*SolveStep{test.lastStep}, nil, grid)
+		if math.IsNaN(float64(result)) {
+			t.Error("Got NaN on test", i, test.description)
+		}
+		if math.Abs(float64(result-test.expected)) > 0.000001 {
+			t.Error("Test", i, "got wrong result. Got", result, "expected", test.expected, test.description)
+		}
+	}
+}
+
 func TestTwiddleCommonNumbers(t *testing.T) {
 
 	grid := NewGrid()
