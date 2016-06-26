@@ -525,7 +525,7 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Error("Expected the completed item to go into CompletedItems,but it's empty")
 	}
 
-	if len(frontier.items) != 0 {
+	if len(frontier.itemsToExplore) != 0 {
 		t.Error("Expected the completed item to go into COmpletedItems, but it apparently went into items.")
 	}
 
@@ -569,7 +569,7 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Error("Frontier had wrong length after adding one complete and one incomplete items. Got", frontier.Len(), "expected 1")
 	}
 
-	if frontier.items[0] != nonFillStepItem {
+	if frontier.itemsToExplore[0] != nonFillStepItem {
 		t.Error("We though that simpleFillStep should be at the end of the queue but it wasn't.")
 	}
 
@@ -587,14 +587,14 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Error("Wrong length after adding two items to frontier. Got", frontier.Len(), "expected 2")
 	}
 
-	if frontier.items[1] != nonFillStepItem {
+	if frontier.itemsToExplore[1] != nonFillStepItem {
 		t.Error("We expected the expensive step to be worse", frontier.String())
 	}
 
 	expensiveStepItem.Twiddle(0.00000000000000001, "Very small amount to make this #1")
 
-	if frontier.items[1] != expensiveStepItem {
-		t.Error("Even after twiddling up guess step by a lot it still wasn't in the top position in frontier", frontier.items[0], frontier.items[1])
+	if frontier.itemsToExplore[1] != expensiveStepItem {
+		t.Error("Even after twiddling up guess step by a lot it still wasn't in the top position in frontier", frontier.itemsToExplore[0], frontier.itemsToExplore[1])
 	}
 
 	poppedItem := frontier.NextPossibleStep()

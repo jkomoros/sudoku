@@ -744,8 +744,7 @@ OuterLoop:
 }
 
 type humanSolveSearcher struct {
-	//TODO: rename this field itemsToExplore, or 'frontier'
-	items                 []*humanSolveItem
+	itemsToExplore        []*humanSolveItem
 	grid                  *Grid
 	CompletedItems        []*humanSolveItem
 	options               *HumanSolveOptions
@@ -778,10 +777,10 @@ func (n *humanSolveSearcher) DoneSearching() bool {
 }
 
 func (n *humanSolveSearcher) String() string {
-	result := "Items:" + strconv.Itoa(len(n.items)) + "\n"
+	result := "Items:" + strconv.Itoa(len(n.itemsToExplore)) + "\n"
 	result += "Completed:" + strconv.Itoa(len(n.CompletedItems)) + "\n"
 	result += "[\n"
-	for _, item := range n.items {
+	for _, item := range n.itemsToExplore {
 		result += item.String() + "\n"
 	}
 	result += "]\n"
@@ -789,33 +788,33 @@ func (n *humanSolveSearcher) String() string {
 }
 
 func (n humanSolveSearcher) Len() int {
-	return len(n.items)
+	return len(n.itemsToExplore)
 }
 
 func (n humanSolveSearcher) Less(i, j int) bool {
 	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
-	return n.items[i].Goodness() > n.items[j].Goodness()
+	return n.itemsToExplore[i].Goodness() > n.itemsToExplore[j].Goodness()
 }
 
 func (n humanSolveSearcher) Swap(i, j int) {
-	n.items[i], n.items[j] = n.items[j], n.items[i]
-	n.items[i].heapIndex = i
-	n.items[j].heapIndex = j
+	n.itemsToExplore[i], n.itemsToExplore[j] = n.itemsToExplore[j], n.itemsToExplore[i]
+	n.itemsToExplore[i].heapIndex = i
+	n.itemsToExplore[j].heapIndex = j
 }
 
 func (n *humanSolveSearcher) Push(x interface{}) {
-	length := len(n.items)
+	length := len(n.itemsToExplore)
 	item := x.(*humanSolveItem)
 	item.heapIndex = length
-	n.items = append(n.items, item)
+	n.itemsToExplore = append(n.itemsToExplore, item)
 }
 
 func (n *humanSolveSearcher) Pop() interface{} {
-	old := n.items
+	old := n.itemsToExplore
 	length := len(old)
 	item := old[length-1]
 	item.heapIndex = -1 // for safety
-	n.items = old[0 : length-1]
+	n.itemsToExplore = old[0 : length-1]
 	return item
 }
 
