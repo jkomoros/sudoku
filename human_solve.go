@@ -351,6 +351,11 @@ func (c *CompoundSolveStep) Apply(grid *Grid) {
 func (c *CompoundSolveStep) Description() string {
 	//TODO: this terminology is too tuned for the Online Sudoku use case.
 	//it practice it should probably name the cell in text.
+
+	if c.FillStep == nil || c.FillStep.TargetCells == nil {
+		return ""
+	}
+
 	var result []string
 	result = append(result, "Based on the other numbers you've entered, "+c.FillStep.TargetCells[0].ref().String()+" can only be a "+strconv.Itoa(c.FillStep.TargetNums[0])+".")
 	result = append(result, "How do we know that?")
