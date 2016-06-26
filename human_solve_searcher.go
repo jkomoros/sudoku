@@ -21,7 +21,7 @@ type humanSolveSearcher struct {
 //humanSolveItem keeps track of the next step we may want to return for
 //HumanSolve.
 type humanSolveItem struct {
-	//All potentialNextSteps, except the initial in a searcher, must have a parent.
+	//All humanSolveItem, except the initial in a searcher, must have a parent.
 	parent    *humanSolveItem
 	step      *SolveStep
 	twiddles  map[string]probabilityTweak
