@@ -551,7 +551,7 @@ func (p *potentialNextStep) AddStep(step *SolveStep) *potentialNextStep {
 }
 
 //Twiddle modifies goodness by the given amount and keeps track of the reason
-//for debugging purposes. A twiddle of 1.0 has no effect. A twiddle between
+//for debugging purposes. A twiddle of 1.0 has no effect.q A twiddle between
 //0.0 and 1.0 increases the goodness. A twiddle of 1.0 or greater decreases
 //goodness.
 func (p *potentialNextStep) Twiddle(amount probabilityTweak, description string) {
@@ -835,9 +835,35 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 
 	//TODO: drop the 'new' from the name
 
+	//TODO: does it even make sense to have this method? It doesn't do very much anymore...
+
+	steps, distribution := grid.HumanSolvePossibleSteps(options, previousSteps)
+
+	if len(steps) == 0 || len(distribution) == 0 {
+		return nil
+	}
+
+	randomIndex := distribution.RandomIndex()
+
+	return steps[randomIndex]
+}
+
+//HumanSolvePossibleSteps returns a list of CompoundSolveSteps that could
+//apply at this state, along with the probability distribution that a human
+//would pick each one. The optional previousSteps argument is the list of
+//CompoundSolveSteps that have been applied to the grid so far, and is used
+//primarily to tweak the probability distribution and make, for example, it
+//more likely to pick cells in the same block as the cell that was just
+//filled. This method is the workhorse at the core of HumanSolve() and is
+//exposed here primarily so users of this library can get a peek at which
+//possibilites exist at each step. cmd/i-sudoku is one user of this method.
+func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
+
+	//TODO: make sure that dokugen, i-sudoku's integration into HumanSolve still works.
+
 	//TODO: with the new approach, we're getting a lot more extreme negative difficulty values. Train a new model!
 
-	frontier := newNextStepFrontier(grid, previousSteps, options)
+	frontier := newNextStepFrontier(self, previousSteps, options)
 
 	step := frontier.NextPossibleStep()
 
@@ -860,79 +886,24 @@ func newHumanSolveSearcherSingleStep(grid *Grid, options *HumanSolveOptions, pre
 
 	}
 
-	//Go through possibleCompleteStepsPool and pick one, preferring the lowest valued ones.
+	//Prepare the distribution and list of steps
 
 	//But first check if we don't have any.
 	if len(frontier.CompletedItems) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	distribution := make(ProbabilityDistribution, len(frontier.CompletedItems))
+	distri := make(ProbabilityDistribution, len(frontier.CompletedItems))
+	var resultSteps []*CompoundSolveStep
 
 	for i, item := range frontier.CompletedItems {
-		distribution[i] = item.Goodness()
+		distri[i] = item.Goodness()
+		resultSteps = append(resultSteps, newCompoundSolveStep(item.Steps()))
 	}
 
-	invertedDistribution := distribution.invert()
+	invertedDistribution := distri.invert()
 
-	randomIndex := invertedDistribution.RandomIndex()
-
-	return newCompoundSolveStep(frontier.CompletedItems[randomIndex].Steps())
-
-}
-
-//HumanSolvePossibleSteps returns a list of SolveSteps that could apply at
-//this state, along with the probability distribution that a human would pick
-//each one. The optional lastModifiedCells argument is the list of cells that
-//were touched in the last action that was performed on the grid, and is used
-//primarily to tweak the probability distribution and make, for example, it
-//more likely to pick cells in the same block as the cell that was just
-//filled. This method is the workhorse at the core of HumanSolve() and is
-//exposed here primarily so users of this library can get a peek at which
-//possibilites exist at each step. cmd/i-sudoku is one user of this method.
-func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, lastModifiedCells CellSlice) (steps []*SolveStep, distribution ProbabilityDistribution) {
-
-	//TODO: figure out how to expose this meaningfully with the new human solve techniques.
-
-	//TODO: make sure that dokugen, i-sudoku's integration into HumanSolve still works.
-
-	//TODO: hoist this special guess logic out if we decide to commit this.
-
-	/*
-
-
-		stepsToActuallyUse := options.TechniquesToUse
-
-		if !options.NoGuess {
-			stepsToActuallyUse = append(stepsToActuallyUse, GuessTechnique)
-		}
-
-		steps = runTechniques(stepsToActuallyUse, self, options.NumOptionsToCalculate)
-
-		//Now pick one to apply.
-		if len(steps) == 0 {
-			return nil, nil
-		}
-
-		//TODO: consider if we should stop picking techniques based on their weight here.
-		//Now that Find returns a slice instead of a single, we're already much more likely to select an "easy" technique. ... Right?
-
-		invertedProbabilities := make(ProbabilityDistribution, len(steps))
-		for i, possibility := range steps {
-			invertedProbabilities[i] = possibility.HumanLikelihood()
-		}
-
-		d := invertedProbabilities.invert()
-
-		for _, twiddler := range twiddlers {
-			d = d.tweak(twiddler(steps, self, lastModifiedCells))
-		}
-
-		return steps, d
-
-	*/
-
-	return nil, nil
+	return resultSteps, invertedDistribution
 }
 
 //Difficulty returns a value between 0.0 and 1.0, representing how hard the puzzle would be
