@@ -463,6 +463,10 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 		steps = []*CompoundSolveStep{newHumanSolveSearcherSingleStep(grid, options, nil)}
 	}
 
+	if len(steps) == 0 {
+		return nil
+	}
+
 	return &SolveDirections{snapshot, steps}
 }
 

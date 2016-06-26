@@ -134,7 +134,7 @@ func TestHumanSolveOptionsNoGuess(t *testing.T) {
 
 	solution := grid.HumanSolution(options)
 
-	if len(solution.CompoundSteps) != 0 {
+	if solution != nil && len(solution.CompoundSteps) != 0 {
 		t.Error("A human solve with very limited techniques and no allowed guesses was still solved: ", solution)
 	}
 }
