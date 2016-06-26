@@ -72,11 +72,16 @@ func twiddleCommonNumbers(currentStep *SolveStep, inProgressCompoundStep []*Solv
 //will have 'chains' of steps that are all related.
 func twiddleChainedSteps(currentStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, grid *Grid) probabilityTweak {
 
-	if len(inProgressCompoundStep) == 0 {
-		return 1.0
-	}
+	var lastModifiedCells CellSlice
 
-	lastModifiedCells := inProgressCompoundStep[len(inProgressCompoundStep)-1].TargetCells
+	if len(inProgressCompoundStep) > 0 {
+		lastModifiedCells = inProgressCompoundStep[len(inProgressCompoundStep)-1].TargetCells
+	} else if len(pastSteps) > 0 {
+		lastCompoundStep := pastSteps[len(pastSteps)-1]
+		if lastCompoundStep.FillStep != nil {
+			lastModifiedCells = lastCompoundStep.FillStep.TargetCells
+		}
+	}
 
 	if lastModifiedCells == nil {
 		return 1.0
