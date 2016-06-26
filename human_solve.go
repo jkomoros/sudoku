@@ -480,12 +480,12 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 //humanSolveItem keeps track of the next step we may want to return for
 //HumanSolve.
 type humanSolveItem struct {
-	//All potentialNextSteps, except the initial in a frontier, must have a parent.
+	//All potentialNextSteps, except the initial in a searcher, must have a parent.
 	parent    *humanSolveItem
 	step      *SolveStep
 	twiddles  map[string]probabilityTweak
 	heapIndex int
-	frontier  *humanSolveSearcher
+	searcher  *humanSolveSearcher
 }
 
 //Grid returns a grid with all of this item's steps applied
@@ -493,11 +493,11 @@ func (p *humanSolveItem) Grid() *Grid {
 	//TODO: it's conceivable that it might be best to memoize this... It's
 	//unlikely thoguh, since grid will only be accessed once and many items
 	//will never have their grids accessed.
-	if p.frontier.grid == nil {
+	if p.searcher.grid == nil {
 		return nil
 	}
 
-	result := p.frontier.grid.Copy()
+	result := p.searcher.grid.Copy()
 
 	for _, step := range p.Steps() {
 		step.Apply(result)
@@ -549,18 +549,18 @@ func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
 		step:      step,
 		twiddles:  map[string]probabilityTweak{},
 		heapIndex: -1,
-		frontier:  p.frontier,
+		searcher:  p.searcher,
 	}
 	inProgressCompoundStep := p.Steps()
 	grid := result.Grid()
 	for name, twiddler := range twiddlers {
-		tweak := twiddler(step, inProgressCompoundStep, p.frontier.previousCompoundSteps, grid)
+		tweak := twiddler(step, inProgressCompoundStep, p.searcher.previousCompoundSteps, grid)
 		result.Twiddle(tweak, name)
 	}
 	if result.IsComplete() {
-		p.frontier.completedItems = append(p.frontier.completedItems, result)
+		p.searcher.completedItems = append(p.searcher.completedItems, result)
 	} else {
-		heap.Push(p.frontier, result)
+		heap.Push(p.searcher, result)
 	}
 	return result
 }
@@ -575,7 +575,7 @@ func (p *humanSolveItem) Twiddle(amount probabilityTweak, description string) {
 	}
 	p.twiddles[description] = amount
 	if p.heapIndex >= 0 {
-		heap.Fix(p.frontier, p.heapIndex)
+		heap.Fix(p.searcher, p.heapIndex)
 	}
 }
 
@@ -640,7 +640,7 @@ func (p *humanSolveItem) Explore() {
 	//TODO: this in practice fills out Guesses ALL of the time, which causes
 	//the probability distributions to go really wonky. Maybe only fall back
 	//on Guess if no other things come out?
-	techniques := p.frontier.options.effectiveTechniquesToUse()
+	techniques := p.searcher.options.effectiveTechniquesToUse()
 
 	//Handle the case where we were given a short list of techniques.
 	if len(techniques) < numTechniquesToStartByDefault {
@@ -735,7 +735,7 @@ OuterLoop:
 		}
 		p.AddStep(result)
 		//Do we have enough steps accumulate?
-		if p.frontier.DoneSearching() {
+		if p.searcher.DoneSearching() {
 			//Communicate to all still-running routines that they can stop
 			close(done)
 			break OuterLoop
@@ -754,18 +754,18 @@ type humanSolveSearcher struct {
 }
 
 func newHumanSolveSearcher(grid *Grid, previousCompoundSteps []*CompoundSolveStep, options *HumanSolveOptions) *humanSolveSearcher {
-	frontier := &humanSolveSearcher{
+	searcher := &humanSolveSearcher{
 		grid:                  grid,
 		options:               options,
 		previousCompoundSteps: previousCompoundSteps,
 	}
-	heap.Init(frontier)
+	heap.Init(searcher)
 	initialItem := &humanSolveItem{
-		frontier:  frontier,
+		searcher:  searcher,
 		heapIndex: -1,
 	}
-	heap.Push(frontier, initialItem)
-	return frontier
+	heap.Push(searcher, initialItem)
+	return searcher
 }
 
 //DoneSearching will return true when no more items need to be explored
@@ -878,18 +878,18 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSt
 
 	//TODO: with the new approach, we're getting a lot more extreme negative difficulty values. Train a new model!
 
-	frontier := newHumanSolveSearcher(self, previousSteps, options)
+	searcher := newHumanSolveSearcher(self, previousSteps, options)
 
-	step := frontier.NextPossibleStep()
+	step := searcher.NextPossibleStep()
 
-	for step != nil && !frontier.DoneSearching() {
+	for step != nil && !searcher.DoneSearching() {
 		//Explore step, finding all possible steps that apply from here and
-		//adding to the frontier.
+		//adding to the frontier of itemsToExplore.
 
-		//When adding a step, frontier notes if it's completed (thus going in
+		//When adding a step, searcher notes if it's completed (thus going in
 		//CompletedItems) or not (thus going in the itemsToExplore)
 
-		//Once frontier.CompletedItems is at least
+		//Once searcher.CompletedItems is at least
 		//options.NumOptionsToCalculate we can bail out of looking for more
 		//steps, shut down other threads, and break out of this loop.
 
@@ -897,21 +897,21 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSt
 
 		//We do NOT add the explored item back into the frontier.
 
-		step = frontier.NextPossibleStep()
+		step = searcher.NextPossibleStep()
 
 	}
 
 	//Prepare the distribution and list of steps
 
 	//But first check if we don't have any.
-	if len(frontier.completedItems) == 0 {
+	if len(searcher.completedItems) == 0 {
 		return nil, nil
 	}
 
-	distri := make(ProbabilityDistribution, len(frontier.completedItems))
+	distri := make(ProbabilityDistribution, len(searcher.completedItems))
 	var resultSteps []*CompoundSolveStep
 
-	for i, item := range frontier.completedItems {
+	for i, item := range searcher.completedItems {
 		distri[i] = item.Goodness()
 		resultSteps = append(resultSteps, newCompoundSolveStep(item.Steps()))
 	}

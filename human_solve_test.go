@@ -466,22 +466,22 @@ func puzzleDifficultyHelper(filename string, t *testing.T) {
 	}
 }
 
-func TestNextStepFrontier(t *testing.T) {
+func TestHumanSolveSearcher(t *testing.T) {
 
 	grid := NewGrid()
 	grid.LoadSDK(TEST_GRID)
 
-	frontier := newHumanSolveSearcher(grid, nil, DefaultHumanSolveOptions())
+	searcher := newHumanSolveSearcher(grid, nil, DefaultHumanSolveOptions())
 
-	if frontier.Len() != 1 {
-		t.Error("Expected new frontier to have exactly one item in it, but got", frontier.Len())
+	if searcher.Len() != 1 {
+		t.Error("Expected new frontier to have exactly one item in it, but got", searcher.Len())
 	}
 
-	if frontier.grid == nil {
+	if searcher.grid == nil {
 		t.Error("No grid in frontier")
 	}
 
-	basePotentialNextStep := frontier.NextPossibleStep()
+	basePotentialNextStep := searcher.NextPossibleStep()
 
 	if basePotentialNextStep == nil {
 		t.Error("Didn'get base potential next step")
@@ -493,8 +493,8 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Error("the grid in the base item in the frontier was not right. Got", baseGrid.DataString(), "wanted", grid.DataString())
 	}
 
-	if frontier.Len() != 0 {
-		t.Error("Getting the base potential next step should have emptied it, but len is", frontier.Len())
+	if searcher.Len() != 0 {
+		t.Error("Getting the base potential next step should have emptied it, but len is", searcher.Len())
 	}
 
 	nInRowTechnique := techniquesByName["Necessary In Row"]
@@ -521,11 +521,11 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Fatal("Adding completed item to frontier didn't have -1 index")
 	}
 
-	if len(frontier.completedItems) != 1 {
+	if len(searcher.completedItems) != 1 {
 		t.Error("Expected the completed item to go into CompletedItems,but it's empty")
 	}
 
-	if len(frontier.itemsToExplore) != 0 {
+	if len(searcher.itemsToExplore) != 0 {
 		t.Error("Expected the completed item to go into COmpletedItems, but it apparently went into items.")
 	}
 
@@ -565,11 +565,11 @@ func TestNextStepFrontier(t *testing.T) {
 	//extend the test to add another non-fill step so we can test twiddling
 	//moving the order.
 
-	if frontier.Len() != 1 {
-		t.Error("Frontier had wrong length after adding one complete and one incomplete items. Got", frontier.Len(), "expected 1")
+	if searcher.Len() != 1 {
+		t.Error("Frontier had wrong length after adding one complete and one incomplete items. Got", searcher.Len(), "expected 1")
 	}
 
-	if frontier.itemsToExplore[0] != nonFillStepItem {
+	if searcher.itemsToExplore[0] != nonFillStepItem {
 		t.Error("We though that simpleFillStep should be at the end of the queue but it wasn't.")
 	}
 
@@ -583,31 +583,31 @@ func TestNextStepFrontier(t *testing.T) {
 
 	expensiveStepItem := basePotentialNextStep.AddStep(expensiveStep)
 
-	if frontier.Len() != 2 {
-		t.Error("Wrong length after adding two items to frontier. Got", frontier.Len(), "expected 2")
+	if searcher.Len() != 2 {
+		t.Error("Wrong length after adding two items to frontier. Got", searcher.Len(), "expected 2")
 	}
 
-	if frontier.itemsToExplore[1] != nonFillStepItem {
-		t.Error("We expected the expensive step to be worse", frontier.String())
+	if searcher.itemsToExplore[1] != nonFillStepItem {
+		t.Error("We expected the expensive step to be worse", searcher.String())
 	}
 
 	expensiveStepItem.Twiddle(0.00000000000000001, "Very small amount to make this #1")
 
-	if frontier.itemsToExplore[1] != expensiveStepItem {
-		t.Error("Even after twiddling up guess step by a lot it still wasn't in the top position in frontier", frontier.itemsToExplore[0], frontier.itemsToExplore[1])
+	if searcher.itemsToExplore[1] != expensiveStepItem {
+		t.Error("Even after twiddling up guess step by a lot it still wasn't in the top position in frontier", searcher.itemsToExplore[0], searcher.itemsToExplore[1])
 	}
 
-	poppedItem := frontier.NextPossibleStep()
+	poppedItem := searcher.NextPossibleStep()
 
 	if poppedItem != expensiveStepItem {
 		t.Error("Expected popped item to be the non-fill step now that its goodness is higher, but got", poppedItem)
 	}
 
-	if frontier.Len() != 1 {
-		t.Error("Wrong frontier length after popping item. Got", frontier.Len(), "expected 1")
+	if searcher.Len() != 1 {
+		t.Error("Wrong frontier length after popping item. Got", searcher.Len(), "expected 1")
 	}
 
-	poppedItem = frontier.NextPossibleStep()
+	poppedItem = searcher.NextPossibleStep()
 	//Should be nonFillStepItem
 
 	currentGoodness := nonFillStepItem.Goodness()
@@ -618,12 +618,12 @@ func TestNextStepFrontier(t *testing.T) {
 		t.Error("Adding a step to end of nonfill step didn't change goodness.")
 	}
 
-	if frontier.Len() != 0 {
-		t.Error("Adding an item gave wrong len. Got", frontier.Len(), "wanted 0")
+	if searcher.Len() != 0 {
+		t.Error("Adding an item gave wrong len. Got", searcher.Len(), "wanted 0")
 	}
 
-	if len(frontier.completedItems) != 2 {
-		t.Error("Got wrong number of completed items. Got", len(frontier.completedItems), "expected 2")
+	if len(searcher.completedItems) != 2 {
+		t.Error("Got wrong number of completed items. Got", len(searcher.completedItems), "expected 2")
 	}
 
 	steps := completedNonFillStemItem.Steps()
