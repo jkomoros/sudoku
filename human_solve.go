@@ -774,7 +774,6 @@ func (n *humanSolveSearcher) DoneSearching() bool {
 	if n.options == nil {
 		return true
 	}
-	//TODO: is this the proper use of NumOptionsToCalculate?
 	return n.options.NumOptionsToCalculate <= len(n.completedItems)
 }
 
