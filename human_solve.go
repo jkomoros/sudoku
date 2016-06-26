@@ -426,8 +426,6 @@ func (self *Grid) HumanSolve(options *HumanSolveOptions) *SolveDirections {
 //nil, will use reasonable defaults. Does not mutate the grid.
 func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 
-	//TODO: return HintDirections instead of SolveDirections
-
 	//TODO: test that non-fill steps before the last one are necessary to unlock
 	//the fill step at the end (cull them if not), and test that.
 
