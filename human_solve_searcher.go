@@ -8,6 +8,10 @@ import (
 	"sync"
 )
 
+//humanSolveSearcher keeps track of the search for a single new
+//CompoundSolveStep. It keeps track of the humanSolveItems that are in-
+//progress (itemsToExplore) and the items that are fully complete (that is,
+//that are terminated by a FillStep and valid to return as an option).
 type humanSolveSearcher struct {
 	itemsToExplore []*humanSolveItem
 	completedItems []*humanSolveItem
@@ -18,8 +22,11 @@ type humanSolveSearcher struct {
 	previousCompoundSteps []*CompoundSolveStep
 }
 
-//humanSolveItem keeps track of the next step we may want to return for
-//HumanSolve.
+//humanSolveItem keeps track of in-progress CompoundSolveSteps that we're
+//currently building and considering. It also maintains various metadata about
+//how this item fits in the searcher. Many things about the item are frozen at
+//the time of creation; many of the properties of the humanSolveItem are
+//derived recursively from the parents.
 type humanSolveItem struct {
 	//All humanSolveItem, except the initial in a searcher, must have a parent.
 	parent    *humanSolveItem
@@ -29,7 +36,7 @@ type humanSolveItem struct {
 	searcher  *humanSolveSearcher
 }
 
-//humanSolveHelper does most of the set up for both HumanSolve and Hint.
+//humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
 func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) *SolveDirections {
 	//Short circuit solving if it has multiple solutions.
 	if grid.HasMultipleSolutions() {
