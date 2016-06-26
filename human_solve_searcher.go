@@ -66,6 +66,49 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	return &SolveDirections{snapshot, steps}
 }
 
+//humanSolveSearch is a new implementation of the core implementation of
+//HumanSolve. Mutates the grid.
+func humanSolveSearch(grid *Grid, options *HumanSolveOptions) []*CompoundSolveStep {
+	//TODO: drop the 'new' from the name.
+	var result []*CompoundSolveStep
+
+	for !grid.Solved() {
+		newStep := humanSolveSearchSingleStep(grid, options, result)
+		if newStep == nil {
+			//Sad, guess we failed to solve the puzzle. :-(
+			return nil
+		}
+		result = append(result, newStep)
+		newStep.Apply(grid)
+	}
+
+	return result
+}
+
+//humanSolveSearchSingleStep is the workhorse of the new HumanSolve. It
+//searches for the next CompoundSolveStep on the puzzle: a series of steps that
+//contains exactly one fill step at its end.
+func humanSolveSearchSingleStep(grid *Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep) *CompoundSolveStep {
+
+	//TODO: does it even make sense to have this method? It doesn't do very much anymore...
+
+	steps, distribution := grid.HumanSolvePossibleSteps(options, previousSteps)
+
+	if len(steps) == 0 || len(distribution) == 0 {
+		return nil
+	}
+
+	randomIndex := distribution.RandomIndex()
+
+	return steps[randomIndex]
+}
+
+/************************************************************
+ *
+ * humanSolveItem implementation
+ *
+ ************************************************************/
+
 //Grid returns a grid with all of this item's steps applied
 func (p *humanSolveItem) Grid() *Grid {
 	//TODO: it's conceivable that it might be best to memoize this... It's
@@ -321,6 +364,12 @@ OuterLoop:
 	}
 }
 
+/************************************************************
+ *
+ * humanSolveSearcher implementation
+ *
+ ************************************************************/
+
 func newHumanSolveSearcher(grid *Grid, previousCompoundSteps []*CompoundSolveStep, options *HumanSolveOptions) *humanSolveSearcher {
 	searcher := &humanSolveSearcher{
 		grid:                  grid,
@@ -401,43 +450,6 @@ func (n *humanSolveSearcher) Pop() interface{} {
 	item.heapIndex = -1 // for safety
 	n.itemsToExplore = old[0 : length-1]
 	return item
-}
-
-//humanSolveSearch is a new implementation of the core implementation of
-//HumanSolve. Mutates the grid.
-func humanSolveSearch(grid *Grid, options *HumanSolveOptions) []*CompoundSolveStep {
-	//TODO: drop the 'new' from the name.
-	var result []*CompoundSolveStep
-
-	for !grid.Solved() {
-		newStep := humanSolveSearchSingleStep(grid, options, result)
-		if newStep == nil {
-			//Sad, guess we failed to solve the puzzle. :-(
-			return nil
-		}
-		result = append(result, newStep)
-		newStep.Apply(grid)
-	}
-
-	return result
-}
-
-//humanSolveSearchSingleStep is the workhorse of the new HumanSolve. It
-//searches for the next CompoundSolveStep on the puzzle: a series of steps that
-//contains exactly one fill step at its end.
-func humanSolveSearchSingleStep(grid *Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep) *CompoundSolveStep {
-
-	//TODO: does it even make sense to have this method? It doesn't do very much anymore...
-
-	steps, distribution := grid.HumanSolvePossibleSteps(options, previousSteps)
-
-	if len(steps) == 0 || len(distribution) == 0 {
-		return nil
-	}
-
-	randomIndex := distribution.RandomIndex()
-
-	return steps[randomIndex]
 }
 
 //HumanSolvePossibleSteps returns a list of CompoundSolveSteps that could
