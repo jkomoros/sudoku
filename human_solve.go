@@ -304,7 +304,7 @@ func newCompoundSolveStep(steps []*SolveStep) *CompoundSolveStep {
 		}
 	} else {
 		result = &CompoundSolveStep{
-			PrecursorSteps: steps[0 : len(steps)-2],
+			PrecursorSteps: steps[0 : len(steps)-1],
 			FillStep:       steps[len(steps)-1],
 		}
 	}

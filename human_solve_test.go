@@ -95,6 +95,83 @@ func TestCompoundSolveStep(t *testing.T) {
 	}
 }
 
+func TestNewCompoundSolveStep(t *testing.T) {
+
+	fillTechnique := techniquesByName["Necessary In Row"]
+	cullTechnique := techniquesByName["Pointing Pair Row"]
+
+	if fillTechnique == nil || cullTechnique == nil {
+		t.Fatal("couldn't find the fill or cull steps")
+	}
+
+	fillStep := &SolveStep{
+		Technique: fillTechnique,
+	}
+
+	cullStep := &SolveStep{
+		Technique: cullTechnique,
+	}
+
+	tests := []struct {
+		steps       []*SolveStep
+		expected    *CompoundSolveStep
+		description string
+	}{
+		{
+			[]*SolveStep{
+				fillStep,
+			},
+			&CompoundSolveStep{
+				FillStep: fillStep,
+			},
+			"Single fill step",
+		},
+		{
+			[]*SolveStep{
+				cullStep,
+				fillStep,
+			},
+			&CompoundSolveStep{
+				FillStep: fillStep,
+				PrecursorSteps: []*SolveStep{
+					cullStep,
+				},
+			},
+			"Single cull then single fill",
+		},
+		{
+			[]*SolveStep{
+				cullStep,
+				cullStep,
+				fillStep,
+			},
+			&CompoundSolveStep{
+				FillStep: fillStep,
+				PrecursorSteps: []*SolveStep{
+					cullStep,
+					cullStep,
+				},
+			},
+			"Double cull then single fill",
+		},
+		{
+			[]*SolveStep{
+				cullStep,
+				cullStep,
+			},
+			nil,
+			"Only cull steps",
+		},
+	}
+
+	for i, test := range tests {
+		result := newCompoundSolveStep(test.steps)
+		if !reflect.DeepEqual(result, test.expected) {
+			t.Error("Test", i, test.description, "Got", result, "Expected", test.expected)
+		}
+	}
+}
+
 func TestHumanSolve(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()

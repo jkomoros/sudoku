@@ -318,10 +318,6 @@ func (p *humanSolveItem) Explore() {
 	//TODO: play around with debug hints in i-sudoku ahile to develop an
 	//intuition of what's happening in practice.
 
-	//TODO: playing around in i-sudoku shows that sometimes in debug hint we
-	//get duplicate Fill Steps (with no PrecursorSteps). How could that
-	//happen?
-
 	//TODO: forcing chains seems to be getting a big boost because it's a fill
 	//step. It's way too common.
 
