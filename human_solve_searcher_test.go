@@ -99,10 +99,6 @@ func TestHumanSolveSearcher(t *testing.T) {
 		t.Fatal("Adding non fill step didn't return a frontier object")
 	}
 
-	//TODO: now that we only have one item on the actual frontier, we should
-	//extend the test to add another non-fill step so we can test twiddling
-	//moving the order.
-
 	if searcher.Len() != 1 {
 		t.Error("Frontier had wrong length after adding one complete and one incomplete items. Got", searcher.Len(), "expected 1")
 	}
