@@ -154,7 +154,8 @@ func humanSolveSearch(grid *Grid, options *HumanSolveOptions) []*CompoundSolveSt
 //contains exactly one fill step at its end.
 func humanSolveSearchSingleStep(grid *Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep) *CompoundSolveStep {
 
-	//TODO: does it even make sense to have this method? It doesn't do very much anymore...
+	//This function doesn't do much on top of HumanSolvePossibleSteps, but
+	//it's worth it to mirror humanSolveSearch
 
 	steps, distribution := grid.HumanSolvePossibleSteps(options, previousSteps)
 
