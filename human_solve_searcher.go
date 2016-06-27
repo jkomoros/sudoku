@@ -72,6 +72,9 @@ import (
 type humanSolveSearcher struct {
 	itemsToExplore []*humanSolveItem
 	completedItems []*humanSolveItem
+	//TODO: keep track of stats: how big the frontier was at the end of each
+	//CompoundSolveStep. Then provide max/mean/median.
+
 	//Various options frozen in at creation time that various methods need
 	//access to.
 	grid                  *Grid

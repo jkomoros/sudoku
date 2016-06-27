@@ -116,6 +116,7 @@ type HumanSolveOptions struct {
 func DefaultHumanSolveOptions() *HumanSolveOptions {
 	result := &HumanSolveOptions{}
 
+	//TODO: see if making this smaller makes a big difference in solve speed.
 	result.NumOptionsToCalculate = 15
 	result.TechniquesToUse = Techniques
 	result.NoGuess = false
