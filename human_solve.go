@@ -176,8 +176,6 @@ func (self *HumanSolveOptions) validate() *HumanSolveOptions {
 //effectiveTechniquesToUse returns the effective list of techniques to use.
 //Basically just o.TechniquesToUse + Guess if NoGuess is not provided.
 func (o *HumanSolveOptions) effectiveTechniquesToUse() []SolveTechnique {
-	//TODO: now that we don't treat guess that specially in solving, shouldn't
-	//we just get rid of all of the special casing in options?
 	if o.NoGuess {
 		return o.TechniquesToUse
 	}
