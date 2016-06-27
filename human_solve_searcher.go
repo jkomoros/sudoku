@@ -8,6 +8,64 @@ import (
 	"sync"
 )
 
+/*
+ * A CompoundSolveStep is a series of 0 or more PrecursorSteps that are cull
+ * steps (as opposed to fill steps), terminated with a single, non-optional
+ * fill step. This organization reflects the observation that cull steps are
+ * only useful if they help advance the grid to a state where a FillStep is
+ * obvious in the short-term.
+ *
+ * The process of finding a HumanSolution to a puzzle reduces down to an
+ * iterative search for a series of CompoundSolveSteps that, when applied in
+ * order, will cause the puzzle to be solved. Hint is effectively the same,
+ * except only searching for one CompoundSolveStep.
+ *
+ * When trying to discover which CompoundSolveStep to return, we need to
+ * generate a number of options and pick the best one. humanSolveSearcher is
+ * the struct that contains the information about the search for the current
+ * CompoundSolveStep. In keeps track of the valid CompoundSolveSteps that have
+ * already been found, and the in-progress CompoundSolveSteps that are not yet
+ * complete (that is, that have not yet found their terminating fill step).
+ *
+ * Each possible CompoundSolveStep that is being considered (both incomplete
+ * and complete ones) is represented by a humanSolveItem. Each humanSolveItem
+ * has a parent humanSolveItem, except for the special initial item. Most
+ * properties about a humanSolveItem are fixed at creation time. Each
+ * humanSolveItem has one SolveStep representing the last SolveStep in their
+ * chain.
+ *
+ * Each humanSolveItem has a Goodness() score, reflecting how good of an option
+ * it is. Lower scores are better. This score is a function of the Twiddles
+ * applied to this item and the twiddles applied up through its ancestor chain.
+ * Twiddles between 0.0 and 1.0 make a humanSolveItem more good; values between
+ * 1.0 and Infinity make it less good. Normally, the longer the chain of Steps,
+ * the higher (worse) the Goodness score.
+ *
+ * humanSolveSearcher maintains a list of completedItems that it has found--
+ * that is, humanSolveItems whose chain of steps represents a valid
+ * CompoundSolveStep (0 or more cull steps followed by a single fill step). As
+ * soon as a humanSolveItem is found, if it is a valid CompoundSolveStep, it is
+ * added to the completedItems list. As soon as the completedItems list is
+ * greater than options.NumOptionsToCalculate, we cease looking for more items
+ * and move onto step selection phase.
+ *
+ * humanSolveSearcher maintains a heap of humanSolveItems sorted by their
+ * Goodness. It will explore each item in order. When it explores each item, it
+ * derives a grid representing the current grid state mutated by all of the
+ * steps so far in this humanSolveItem's ancestor chain. It then searches for
+ * all SolveSteps that can be found at this grid state and creates
+ * humanSolveItems for each one, with this humanSolveItem as their parent. As
+ * these items are created they are either put in completedItems or
+ * itemsToExplore, depending on if they are complete or not. Once a
+ * humanSolveItem is explored it is not put back in the itemsToExplore heap.
+ * Goodness inverted and picked.
+ *
+ * Once humanSolveSearcher has found options.NumOptionsToCalculate
+ * completedItems, it goes into selection phase. It creates a
+ * ProbabilityDistribution with each item's Goodness() score. Then it inverts
+ * that distribution and uses it to pick which CompoundSolveStep to return.
+ */
+
 //humanSolveSearcher keeps track of the search for a single new
 //CompoundSolveStep. It keeps track of the humanSolveItems that are in-
 //progress (itemsToExplore) and the items that are fully complete (that is,

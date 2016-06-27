@@ -395,12 +395,6 @@ func (self *Grid) HumanSolution(options *HumanSolveOptions) *SolveDirections {
 	return clone.HumanSolve(options)
 }
 
-/*
- *
- * TODO: write a package-level comment about how the new solver works
- *
- */
-
 //HumanSolve is the workhorse of the package. It solves the puzzle much like a
 //human would, applying complex logic techniques iteratively to find a
 //sequence of steps that a reasonable human might apply to solve the puzzle.
