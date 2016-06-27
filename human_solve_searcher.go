@@ -79,6 +79,13 @@ type humanSolveSearcher struct {
 	previousCompoundSteps []*CompoundSolveStep
 }
 
+//twiddleRecord is a key/value pair in twiddles. We want to preserve ordering,
+//so we can't use a map.
+type twiddleRecord struct {
+	name  string
+	value probabilityTweak
+}
+
 //humanSolveItem keeps track of in-progress CompoundSolveSteps that we're
 //currently building and considering. It also maintains various metadata about
 //how this item fits in the searcher. Many things about the item are frozen at
@@ -88,7 +95,7 @@ type humanSolveItem struct {
 	//All humanSolveItem, except the initial in a searcher, must have a parent.
 	parent    *humanSolveItem
 	step      *SolveStep
-	twiddles  map[string]probabilityTweak
+	twiddles  []twiddleRecord
 	heapIndex int
 	searcher  *humanSolveSearcher
 }
@@ -200,7 +207,7 @@ func (p *humanSolveItem) Goodness() float64 {
 	//TODO: as an optimization we could cache this; each step is immutable basically.
 	ownMultiplicationFactor := probabilityTweak(1.0)
 	for _, twiddle := range p.twiddles {
-		ownMultiplicationFactor *= twiddle
+		ownMultiplicationFactor *= twiddle.value
 	}
 	return p.parent.Goodness() * float64(ownMultiplicationFactor)
 }
@@ -216,12 +223,12 @@ func (p *humanSolveItem) explainGoodnessRecursive(startCount int) []string {
 		return nil
 	}
 	var resultSections []string
-	for name, value := range p.twiddles {
+	for _, twiddle := range p.twiddles {
 		//1.0 values are boring, so skip them.
-		if value == 1.0 {
+		if twiddle.value == 1.0 {
 			continue
 		}
-		resultSections = append(resultSections, strconv.Itoa(startCount)+":"+name+":"+strconv.FormatFloat(float64(value), 'f', 4, 64))
+		resultSections = append(resultSections, strconv.Itoa(startCount)+":"+twiddle.name+":"+strconv.FormatFloat(float64(twiddle.value), 'f', 4, 64))
 	}
 	parents := p.parent.explainGoodnessRecursive(startCount + 1)
 	if parents == nil {
@@ -246,7 +253,7 @@ func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
 	result := &humanSolveItem{
 		parent:    p,
 		step:      step,
-		twiddles:  map[string]probabilityTweak{},
+		twiddles:  nil,
 		heapIndex: -1,
 		searcher:  p.searcher,
 	}
@@ -272,7 +279,7 @@ func (p *humanSolveItem) Twiddle(amount probabilityTweak, description string) {
 	if amount < 0.0 {
 		return
 	}
-	p.twiddles[description] = amount
+	p.twiddles = append(p.twiddles, twiddleRecord{description, amount})
 	if p.heapIndex >= 0 {
 		heap.Fix(p.searcher, p.heapIndex)
 	}
