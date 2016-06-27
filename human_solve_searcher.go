@@ -259,9 +259,9 @@ func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
 	}
 	inProgressCompoundStep := p.Steps()
 	grid := result.Grid()
-	for name, twiddler := range twiddlers {
-		tweak := twiddler(step, inProgressCompoundStep, p.searcher.previousCompoundSteps, grid)
-		result.Twiddle(tweak, name)
+	for _, twiddler := range twiddlers {
+		tweak := twiddler.f(step, inProgressCompoundStep, p.searcher.previousCompoundSteps, grid)
+		result.Twiddle(tweak, twiddler.name)
 	}
 	if result.IsComplete() {
 		p.searcher.completedItems = append(p.searcher.completedItems, result)

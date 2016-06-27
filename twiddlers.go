@@ -9,20 +9,39 @@ type probabilityTweak float64
 
 type probabilityTwiddler func(*SolveStep, []*SolveStep, []*CompoundSolveStep, *Grid) probabilityTweak
 
+type probabilityTwiddlerItem struct {
+	f    probabilityTwiddler
+	name string
+	//TODO: add a strength field here.
+}
+
 //twiddlers is the list of all of the twiddlers we should apply to change the
 //probability distribution of possibilities at each step. They capture biases
 //that humans have about which cells to focus on (which is separate from
 //Technique.humanLikelihood, since that is about how common a technique in
 //general, not in a specific context.)
-var twiddlers map[string]probabilityTwiddler
+var twiddlers []probabilityTwiddlerItem
 
 func init() {
-	//TODO: also have a way to quickly tweak the strength of the twiddlers.
-	twiddlers = map[string]probabilityTwiddler{
-		"Human Likelihood":        twiddleHumanLikelihood,
-		"Chained Steps":           twiddleChainedSteps,
-		"Common Numbers":          twiddleCommonNumbers,
-		"Pointing Target Overlap": twiddlePointingTargetOverlap,
+	//twiddlers is not a map because a) we need to attach more info anyway,
+	//and b) we want a stable ordering.
+	twiddlers = []probabilityTwiddlerItem{
+		{
+			f:    twiddleHumanLikelihood,
+			name: "Human Likelihood",
+		},
+		{
+			f:    twiddleChainedSteps,
+			name: "Chained Steps",
+		},
+		{
+			f:    twiddleCommonNumbers,
+			name: "Common Numbers",
+		},
+		{
+			f:    twiddlePointingTargetOverlap,
+			name: "Pointing Target Overlap",
+		},
 	}
 }
 
