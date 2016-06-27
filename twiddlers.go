@@ -12,7 +12,14 @@ type probabilityTwiddler func(*SolveStep, []*SolveStep, []*CompoundSolveStep, *G
 type probabilityTwiddlerItem struct {
 	f    probabilityTwiddler
 	name string
-	//TODO: add a strength field here.
+	//TODO: add a strength field here. ... This is actually not obvious how to
+	//do. If it was just a multiplication, then that would effectively be a
+	//constant for any CompoundSolveStep with the same number of Steps(). But
+	//if we switch twiddlers to be addition then adjusting down requires a
+	//negative number, and there it would be possible to get very negative.
+	//Alternatively, could have it be where all twiddlers have to be added
+	//together, and just set the expectation that they must be between 0 and
+	//positive infininty. Hmmm...
 }
 
 //twiddlers is the list of all of the twiddlers we should apply to change the
