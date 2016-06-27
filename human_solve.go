@@ -110,6 +110,8 @@ type HumanSolveOptions struct {
 
 	//The following are flags only used for testing.
 
+	//TODO: do we still need to use techniquesToUseAfterGuess?
+
 	//When we reenter back into humanSolveHelper after making a guess, should
 	//we keep the provided TechniquesToUse, or revert back to this set of
 	//techniques? (If nil, don't change them) Mainly useful for the case where
