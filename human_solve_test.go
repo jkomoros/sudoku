@@ -217,6 +217,10 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 }
 
 func TestTechniquesToUseAfterGuessHumanSolveOptions(t *testing.T) {
+
+	//TODO: if we don't treat Guess that specially now, is it worth having
+	//this be a separate item?
+
 	grid := NewGrid()
 	defer grid.Done()
 	grid.LoadSDK(TEST_GRID)
