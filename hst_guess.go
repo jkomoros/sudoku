@@ -61,7 +61,11 @@ func (self *guessTechnique) Find(grid *Grid, results chan *SolveStep, done chan 
 		cellInSolvedGrid := cell.InGrid(solvedGrid)
 
 		num := cellInSolvedGrid.Number()
-		step := newFillSolveStep(cell, num, self)
+		step := &SolveStep{
+			Technique:   self,
+			TargetCells: CellSlice{cell},
+			TargetNums:  IntSlice{num},
+		}
 
 		if step.IsUseful(grid) {
 			select {

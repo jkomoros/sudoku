@@ -45,9 +45,6 @@ func twiddlePointingTargetOverlap(currentStep *SolveStep, inProgressCompoundStep
 	//and targetCell to PointerCell, because some techniques want one or the
 	//other (do any want both?). We'll use the higher overlap.
 
-	//TODO: currently none of the FillSteps have PointerCells, which means
-	//this twiddle won't be as effective as it should be.
-
 	//Compute Target --> Pointer overlap
 
 	targetPointerUnion := currentStep.PointerCells.Union(lastStep.TargetCells)

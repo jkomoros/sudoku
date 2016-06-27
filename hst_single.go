@@ -18,12 +18,6 @@ type obviousInCollectionTechnique struct {
 	*basicSolveTechnique
 }
 
-func newFillSolveStep(cell *Cell, num int, technique SolveTechnique) *SolveStep {
-	cellArr := []*Cell{cell}
-	numArr := []int{num}
-	return &SolveStep{technique, cellArr, numArr, nil, nil, nil}
-}
-
 func (self *obviousInCollectionTechnique) humanLikelihood(step *SolveStep) float64 {
 	return self.difficultyHelper(1.0)
 }
@@ -73,7 +67,12 @@ func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter 
 			//len(possibiltiies) SHOULD be 1, but check just in case.
 			if len(possibilities) == 1 {
 				possibility := possibilities[0]
-				step := newFillSolveStep(cell, possibility, technique)
+				step := &SolveStep{
+					Technique:    technique,
+					TargetCells:  CellSlice{cell},
+					TargetNums:   IntSlice{possibility},
+					PointerCells: collection.RemoveCells(CellSlice{cell}),
+				}
 				if step.IsUseful(grid) {
 					select {
 					case results <- step:
@@ -116,7 +115,12 @@ func (self *nakedSingleTechnique) Find(grid *Grid, results chan *SolveStep, done
 			return
 		}
 		cell := obj.(*Cell)
-		step := newFillSolveStep(cell, cell.implicitNumber(), self)
+		step := &SolveStep{
+			Technique:    self,
+			TargetCells:  CellSlice{cell},
+			TargetNums:   IntSlice{cell.implicitNumber()},
+			PointerCells: cell.Neighbors().FilterByFilled(),
+		}
 		if step.IsUseful(grid) {
 			select {
 			case results <- step:
@@ -201,7 +205,12 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 				for _, cell := range collection {
 					if cell.Possible(index + 1) {
 						//Found it... just make sure it's useful (it would be rare for it to not be).
-						step := newFillSolveStep(cell, index+1, technique)
+						step := &SolveStep{
+							Technique:    technique,
+							TargetCells:  CellSlice{cell},
+							TargetNums:   IntSlice{index + 1},
+							PointerCells: collection.FilterByUnfilled().RemoveCells(CellSlice{cell}),
+						}
 						if step.IsUseful(grid) {
 							select {
 							case results <- step:
