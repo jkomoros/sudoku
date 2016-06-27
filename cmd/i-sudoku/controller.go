@@ -477,7 +477,7 @@ func (c *mainController) ShowDebugHint() {
 			precusorStepsDescription = append(precusorStepsDescription, step.TechniqueVariant())
 		}
 
-		table.AddRow(strconv.Itoa(i), fmt.Sprintf("%4.2f", probabilities[i]*100)+"%", fmt.Sprintf("%4.2f", cumulative)+"%", fillStep.TechniqueVariant(), fillStep.TargetCells.Description(), fillStep.TargetNums.Description(), len(step.PrecursorSteps), strings.Join(precusorStepsDescription, ","))
+		table.AddRow(strconv.Itoa(i), fmt.Sprintf("%4.2f", probabilities[i]*100)+"%", fmt.Sprintf("%4.2f", cumulative)+"%", fillStep.TechniqueVariant(), fillStep.TargetCells.Description(), fillStep.TargetNums.Description(), len(step.PrecursorSteps), strings.Join(precusorStepsDescription, ", "))
 	}
 
 	c.SetConsoleMessage(msg+table.String(), true)
