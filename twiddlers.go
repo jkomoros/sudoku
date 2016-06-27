@@ -147,7 +147,6 @@ func twiddleCommonNumbers(currentStep *SolveStep, inProgressCompoundStep []*Solv
 		count = 1
 	}
 
-	//TODO: figure out if this should be on a curve.
 	return probabilityTweak(count)
 
 }
@@ -177,8 +176,6 @@ func twiddleChainedSteps(currentStep *SolveStep, inProgressCompoundStep []*Solve
 	//Tweak every weight by how related they are.
 	//Remember: these are INVERTED weights, so tweaking them down is BETTER.
 
-	//TODO: consider attentuating the effect of this; chaining is nice but shouldn't totally change the calculation for hard techniques.
-	//It turns out that we probably want to STRENGTHEN the effect.
 	//Logically we should be attenuating Dissimilarity here, but for some reason the math.Pow(dissimilairty, 10) doesn't actually
 	//appear to work here, which is maddening.
 
