@@ -4,7 +4,6 @@ import (
 	"container/heap"
 	"fmt"
 	"strconv"
-	"strings"
 	"sync"
 )
 
@@ -208,16 +207,30 @@ func (p *humanSolveItem) Goodness() float64 {
 
 //explainGoodness returns a string explaining why this item has the goodness
 //it does. Primarily useful for debugging.
-func (p *humanSolveItem) explainGoodness(startCount int) string {
+func (p *humanSolveItem) explainGoodness() []string {
+	return p.explainGoodnessRecursive(0)
+}
+
+func (p *humanSolveItem) explainGoodnessRecursive(startCount int) []string {
 	if p.parent == nil {
-		return ""
+		return nil
 	}
 	var resultSections []string
 	for name, value := range p.twiddles {
-		resultSections = append(resultSections, strconv.Itoa(startCount)+":"+name+":"+strconv.FormatFloat(float64(value), 'f', -1, 64))
+		//1.0 values are boring, so skip them.
+		if value == 1.0 {
+			continue
+		}
+		resultSections = append(resultSections, strconv.Itoa(startCount)+":"+name+":"+strconv.FormatFloat(float64(value), 'f', 4, 64))
 	}
-
-	return p.parent.explainGoodness(startCount+1) + "\n" + strings.Join(resultSections, "\n")
+	parents := p.parent.explainGoodnessRecursive(startCount + 1)
+	if parents == nil {
+		return resultSections
+	}
+	if resultSections == nil {
+		return parents
+	}
+	return append(parents, resultSections...)
 
 }
 
@@ -563,7 +576,9 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSt
 
 	for i, item := range searcher.completedItems {
 		distri[i] = item.Goodness()
-		resultSteps = append(resultSteps, newCompoundSolveStep(item.Steps()))
+		compoundStep := newCompoundSolveStep(item.Steps())
+		compoundStep.explanation = item.explainGoodness()
+		resultSteps = append(resultSteps, compoundStep)
 	}
 
 	invertedDistribution := distri.invert()

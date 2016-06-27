@@ -79,6 +79,8 @@ type SolveStep struct {
 type CompoundSolveStep struct {
 	PrecursorSteps []*SolveStep
 	FillStep       *SolveStep
+	//explanation is an optional string describing extra stuff about the reasoning.
+	explanation []string
 }
 
 //TODO: consider passing a non-pointer humanSolveOptions so that mutations
@@ -381,6 +383,14 @@ func (c *CompoundSolveStep) Description() string {
 		result = append(result, intro+description)
 	}
 	return strings.Join(result, " ")
+}
+
+//ScoreExplanation returns a in-depth descriptive string about why this
+//compound step was scored the way it was. Intended for debugging purposes;
+//its primary use is in i-sudoku.
+func (c *CompoundSolveStep) ScoreExplanation() []string {
+	//TODO: think real hard if I want to export this in master. If I don't, rip it out of i-sudoku too.
+	return c.explanation
 }
 
 //Steps returns the simple list of SolveSteps that this CompoundSolveStep represents.
