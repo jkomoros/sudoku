@@ -109,16 +109,6 @@ type HumanSolveOptions struct {
 	//TODO: figure out how to test that we do indeed use different values of
 	//numOptionsToCalculate.
 	//TODO: add a TwiddleChainDissimilarity bool.
-
-	//The following are flags only used for testing.
-
-	//TODO: do we still need to use techniquesToUseAfterGuess?
-
-	//When we reenter back into humanSolveHelper after making a guess, should
-	//we keep the provided TechniquesToUse, or revert back to this set of
-	//techniques? (If nil, don't change them) Mainly useful for the case where
-	//we want to test that Hint works well when it returns a guess.
-	techniquesToUseAfterGuess []SolveTechnique
 }
 
 //DefaultHumanSolveOptions returns a HumanSolveOptions object configured to
@@ -132,7 +122,6 @@ func DefaultHumanSolveOptions() *HumanSolveOptions {
 
 	//Have to set even zero valued properties, because the Options isn't
 	//necessarily default initalized.
-	result.techniquesToUseAfterGuess = nil
 
 	return result
 

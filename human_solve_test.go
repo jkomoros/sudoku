@@ -238,7 +238,6 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 		15,
 		Techniques,
 		false,
-		nil,
 	}
 
 	options := DefaultHumanSolveOptions()
@@ -263,14 +262,12 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 		-3,
 		nil,
 		false,
-		nil,
 	}
 
 	validatedOptions := &HumanSolveOptions{
 		1,
 		Techniques,
 		false,
-		nil,
 	}
 
 	weirdOptions.validate()
@@ -293,48 +290,6 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 
 }
 
-func TestTechniquesToUseAfterGuessHumanSolveOptions(t *testing.T) {
-
-	//TODO: if we don't treat Guess that specially now, is it worth having
-	//this be a separate item?
-
-	grid := NewGrid()
-	defer grid.Done()
-	grid.LoadSDK(TEST_GRID)
-
-	options := DefaultHumanSolveOptions()
-	options.TechniquesToUse = []SolveTechnique{}
-	options.techniquesToUseAfterGuess = Techniques[0:5]
-
-	solution := grid.HumanSolution(options)
-
-	steps := solution.Steps()
-
-	if len(steps) == 0 {
-		t.Fatal("Options with techniques to use after guess returned nil")
-	}
-
-	if steps[0].Technique != GuessTechnique {
-		t.Error("First technqiu with techniques to use after guess wasn't guess")
-	}
-
-	allowedTechniques := make(map[SolveTechnique]bool)
-
-	for _, technique := range Techniques[0:5] {
-		allowedTechniques[technique] = true
-	}
-
-	//Guess is also allowed to be used later, although we don't expect that.
-	allowedTechniques[GuessTechnique] = true
-
-	for i, step := range steps[1:len(steps)] {
-		if _, ok := allowedTechniques[step.Technique]; !ok {
-			t.Error("Step number", i, "was not in set of allowed techniques", step.Technique)
-		}
-	}
-
-}
-
 func TestHint(t *testing.T) {
 
 	//This is still flaky, but at least it's a little more likely to catch problems. :-/
@@ -344,7 +299,6 @@ func TestHint(t *testing.T) {
 
 	options := DefaultHumanSolveOptions()
 	options.TechniquesToUse = []SolveTechnique{}
-	options.techniquesToUseAfterGuess = Techniques
 
 	hintTestHelper(t, options, "guess")
 }
