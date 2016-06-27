@@ -324,9 +324,6 @@ func (p *humanSolveItem) Explore() {
 	//TODO: Obvious in collection is never showing up, even when it should be
 	//far and away the number 1.
 
-	//TODO: this in practice fills out Guesses ALL of the time, which causes
-	//the probability distributions to go really wonky. Maybe only fall back
-	//on Guess if no other things come out?
 	techniques := p.searcher.options.effectiveTechniquesToUse()
 
 	//Handle the case where we were given a short list of techniques.
