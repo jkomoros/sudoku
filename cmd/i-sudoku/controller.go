@@ -447,7 +447,7 @@ func (c *mainController) ShowDebugHint() {
 	options := sudoku.DefaultHumanSolveOptions()
 	options.NumOptionsToCalculate = 100
 
-	//TODO: this feels like a HORRENDOUS hack, and very brittle. :-(
+	//This is a HORRENDOUS hack, and very brittle. :-(
 	fakeLastFillSteps := []*sudoku.CompoundSolveStep{
 		{
 			FillStep: &sudoku.SolveStep{
