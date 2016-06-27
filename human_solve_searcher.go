@@ -335,15 +335,6 @@ func (p *humanSolveItem) Explore() {
 	//TODO: make this configurable, and figure out what the optimal values are
 	numTechniquesToStartByDefault := 10
 
-	//TODO: play around with debug hints in i-sudoku ahile to develop an
-	//intuition of what's happening in practice.
-
-	//TODO: hidden/naked triple row is WAY too cheap as a cull step. It's the first
-	//one that shows up often!
-
-	//TODO: Obvious in collection is never showing up, even when it should be
-	//far and away the number 1.
-
 	techniques := p.searcher.options.effectiveTechniquesToUse()
 
 	//Handle the case where we were given a short list of techniques.
