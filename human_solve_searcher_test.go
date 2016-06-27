@@ -72,7 +72,7 @@ func TestHumanSolveSearcher(t *testing.T) {
 	expectedGoodness := 112.5
 
 	if simpleFillStepItem.Goodness() != expectedGoodness {
-		t.Error("Goodness of simple fill step was wrong. Execpted", expectedGoodness, "got", simpleFillStepItem.Goodness(), simpleFillStepItem.explainGoodness(0))
+		t.Error("Goodness of simple fill step was wrong. Execpted", expectedGoodness, "got", simpleFillStepItem.Goodness(), simpleFillStepItem.explainGoodness())
 	}
 
 	cell := simpleFillStepItem.Grid().Cell(0, 0)
