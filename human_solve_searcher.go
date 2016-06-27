@@ -325,8 +325,6 @@ func (p *humanSolveItem) Explore() {
 	//TODO: forcing chains seems to be getting a big boost because it's a fill
 	//step. It's way too common.
 
-	//TODO: in i-sudoku, allow picking a hint from the list to apply.
-
 	//TODO: this in practice fills out Guesses ALL of the time, which causes
 	//the probability distributions to go really wonky. Maybe only fall back
 	//on Guess if no other things come out?
