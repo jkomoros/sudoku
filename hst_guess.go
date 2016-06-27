@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"fmt"
+	"math"
 )
 
 type guessTechnique struct {
@@ -9,7 +10,10 @@ type guessTechnique struct {
 }
 
 func (self *guessTechnique) humanLikelihood(step *SolveStep) float64 {
-	return self.difficultyHelper(1000000000000000000000.0)
+	//Guess is so horribly terrible that we want it to NEVER come in lower
+	//than even a chain of cullSteps. Making it postive infinity means that no
+	//twiddles will ever make it less impossibly bad.
+	return self.difficultyHelper(math.Inf(1))
 }
 
 func (self *guessTechnique) Description(step *SolveStep) string {

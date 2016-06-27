@@ -322,8 +322,8 @@ func (p *humanSolveItem) Explore() {
 	//get duplicate Fill Steps (with no PrecursorSteps). How could that
 	//happen?
 
-	//TODO: in practice guesses overwhelm all cull steps, which is just
-	//obviously fundamentally wrong.
+	//TODO: forcing chains seems to be getting a big boost because it's a fill
+	//step. It's way too common.
 
 	//TODO: this in practice fills out Guesses ALL of the time, which causes
 	//the probability distributions to go really wonky. Maybe only fall back
