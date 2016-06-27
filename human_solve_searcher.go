@@ -284,11 +284,6 @@ func (p *humanSolveItem) Explore() {
 
 	/*
 
-		//TODO: update this documentation
-
-		This function went from being a mere convenience function to
-		being a complex piece of multi-threaded code.
-
 		The basic idea is to parellelize all of the technique's.Find
 		work.
 
