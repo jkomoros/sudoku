@@ -65,6 +65,9 @@ import (
  * that distribution and uses it to pick which CompoundSolveStep to return.
  */
 
+//TODO: See if there are any obvious performance wins to get before
+//committing. We're roughly 6.5x longer-running compared to master. :-(
+
 //humanSolveSearcher keeps track of the search for a single new
 //CompoundSolveStep. It keeps track of the humanSolveItems that are in-
 //progress (itemsToExplore) and the items that are fully complete (that is,
