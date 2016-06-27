@@ -95,13 +95,13 @@ func twiddlePointingTargetOverlap(currentStep *SolveStep, inProgressCompoundStep
 
 	//Pick the larger overlap to go with.
 
-	//TODO: conceptually isn't target -> target worth more than target ->
-	//pointer?
-
 	overlap := targetPointerOverlap
 
 	if targetTargetOverlap > targetPointerOverlap {
 		overlap = targetTargetOverlap
+		//TargetTargetOverlap is slightly better than targetPointer overlap.
+		//This number will be flipped in the next step, so bigger is better.
+		overlap *= 1.1
 	}
 
 	//The more overlap, the better, at an increasing rate. And the smaller the

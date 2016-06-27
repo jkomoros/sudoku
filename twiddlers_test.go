@@ -50,7 +50,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: grid.Row(0),
 			},
-			0.000001,
+			0.010000000000000018,
 			"Full target/target overlap",
 		},
 		{
@@ -60,7 +60,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: CellSlice{grid.Cell(0, 0)},
 			},
-			0.7901234567,
+			0.7704938271604939,
 			"Single cell out of 9",
 		},
 		{
@@ -70,7 +70,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: CellSlice{grid.Cell(0, 0)},
 			},
-			0.4444444444444,
+			0.4011111111111111,
 			"Single cell out of three",
 		},
 		{
@@ -100,7 +100,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: CellSlice{grid.Cell(0, 0)},
 			},
-			0.000001,
+			0.010000000000000018,
 			"Two individual cells overlapping",
 		},
 		{
@@ -110,7 +110,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: grid.Col(0),
 			},
-			0.8858131487889274,
+			0.8747750865051903,
 			"Row and col intersecting at one point",
 		},
 		{
@@ -120,7 +120,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: grid.Block(0),
 			},
-			0.6400000000000001,
+			0.6084,
 			"First row and first block overlapping",
 		},
 		{
@@ -130,7 +130,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: grid.Block(0),
 			},
-			0.44444444444444453,
+			0.4011111111111111,
 			"First three cells and first block overlapping",
 		},
 	}
