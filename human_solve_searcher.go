@@ -318,8 +318,11 @@ func (p *humanSolveItem) Explore() {
 	//TODO: play around with debug hints in i-sudoku ahile to develop an
 	//intuition of what's happening in practice.
 
-	//TODO: forcing chains seems to be getting a big boost because it's a fill
-	//step. It's way too common.
+	//TODO: hidden/naked triple row is WAY too cheap as a cull step. It's the first
+	//one that shows up often!
+
+	//TODO: Obvious in collection is never showing up, even when it should be
+	//far and away the number 1.
 
 	//TODO: this in practice fills out Guesses ALL of the time, which causes
 	//the probability distributions to go really wonky. Maybe only fall back
