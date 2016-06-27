@@ -172,4 +172,3 @@ func TestHumanSolveSearcher(t *testing.T) {
 	}
 
 }
-/
