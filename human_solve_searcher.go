@@ -134,7 +134,6 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 //humanSolveSearch is a new implementation of the core implementation of
 //HumanSolve. Mutates the grid.
 func humanSolveSearch(grid *Grid, options *HumanSolveOptions) []*CompoundSolveStep {
-	//TODO: drop the 'new' from the name.
 	var result []*CompoundSolveStep
 
 	for !grid.Solved() {
