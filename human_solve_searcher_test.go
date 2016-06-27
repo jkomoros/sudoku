@@ -67,8 +67,9 @@ func TestHumanSolveSearcher(t *testing.T) {
 		t.Error("Expected the completed item to go into COmpletedItems, but it apparently went into items.")
 	}
 
-	//TODO: this is a fragile test. Whenever we change twiddlers it will change.
-	//Curerntly 5 for common numbers, 22.5 for Human Likelihood, and 1 for chained steps.
+	//This is a fragile way to test this; it will need to be updated every
+	//time we change the twiddlers. :-( Currently 5 for common numbers, 22.5
+	//for Human Likelihood, and 1 for chained steps.
 	expectedGoodness := 112.5
 
 	if simpleFillStepItem.Goodness() != expectedGoodness {
@@ -171,3 +172,4 @@ func TestHumanSolveSearcher(t *testing.T) {
 	}
 
 }
+/
