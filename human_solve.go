@@ -389,7 +389,6 @@ func (c *CompoundSolveStep) Description() string {
 //compound step was scored the way it was. Intended for debugging purposes;
 //its primary use is in i-sudoku.
 func (c *CompoundSolveStep) ScoreExplanation() []string {
-	//TODO: think real hard if I want to export this in master. If I don't, rip it out of i-sudoku too.
 	return c.explanation
 }
 
