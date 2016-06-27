@@ -182,8 +182,6 @@ func twiddleChainedSteps(currentStep *SolveStep, inProgressCompoundStep []*Solve
 		return 1.0
 	}
 
-	//TODO: I'm pretty sure this is pushing numbers in the wrong direction.
-
 	//Tweak every weight by how related they are.
 	//Remember: these are INVERTED weights, so tweaking them down is BETTER.
 
