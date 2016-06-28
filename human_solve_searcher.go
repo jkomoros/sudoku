@@ -255,7 +255,8 @@ func (p *humanSolveItem) explainGoodnessRecursive(startCount int) []string {
 }
 
 func (p *humanSolveItem) Steps() []*SolveStep {
-	//TODO: can memoize this since it will never change
+	//Memoizing this seems like it makes sense, but it actually leads to a ~1%
+	//INCREASE in HumanSolve.
 	if p.parent == nil {
 		return nil
 	}
