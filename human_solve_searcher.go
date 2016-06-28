@@ -329,6 +329,14 @@ func (p *humanSolveItem) Explore() {
 	//a generator-like pattern that feeds in the next grid/technique pairs as
 	//more on needed.
 
+	//A new struct that has pairs of {humanSolveItem, Technique} (note: since
+	//gridToUse is implicitly derived, that will likely mean that memoizing
+	//grid makes sense?). have workLoop take a workItems() generator that
+	//returns those pairs. It keeps track of which item we're on, and once
+	//it's fed in all of the work, it pops the next one off the heap and
+	//starts chewing through that. (Doesn't that mean that we have to protect
+	//the heap with a mutex?)
+
 	/*
 
 		The basic idea is to parellelize all of the technique's.Find
