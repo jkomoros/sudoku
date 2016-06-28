@@ -65,8 +65,11 @@ func twiddlePointingTargetOverlap(currentStep *SolveStep, inProgressCompoundStep
 
 	//Compute Target --> Pointer overlap
 
-	targetPointerUnion := currentStep.PointerCells.Union(lastStep.TargetCells)
-	targetPointerIntersection := currentStep.PointerCells.Intersection(lastStep.TargetCells)
+	currentStepPointerSet := currentStep.PointerCells.toCellSet()
+	lastStepTargetSet := lastStep.TargetCells.toCellSet()
+
+	targetPointerUnion := currentStepPointerSet.union(lastStepTargetSet)
+	targetPointerIntersection := currentStepPointerSet.intersection(lastStepTargetSet)
 
 	targetPointerOverlap := float64(len(targetPointerIntersection)) / float64(len(targetPointerUnion))
 
@@ -76,8 +79,10 @@ func twiddlePointingTargetOverlap(currentStep *SolveStep, inProgressCompoundStep
 
 	//Compute Target --> Target overlap
 
-	targetTargetUnion := currentStep.TargetCells.Union(lastStep.TargetCells)
-	targetTargetIntersection := currentStep.TargetCells.Intersection(lastStep.TargetCells)
+	currentStepTargetSet := currentStep.TargetCells.toCellSet()
+
+	targetTargetUnion := currentStepTargetSet.union(lastStepTargetSet)
+	targetTargetIntersection := currentStepTargetSet.intersection(lastStepTargetSet)
 
 	targetTargetOverlap := float64(len(targetTargetIntersection)) / float64(len(targetTargetUnion))
 
