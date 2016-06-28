@@ -67,6 +67,13 @@ import (
 
 //TODO: See if there are any obvious performance wins to get before
 //committing. We're roughly 6.5x longer-running compared to master. :-(
+// The way to figure out where to dive in more is to run:
+// `go test -run=XXX -bench=BenchmarkHumanSolve -cpuprofile=test.out`
+// then `go tool pprof --text sudoku.text test.out`
+//
+// looks like we're spending a ton of time in semaphores. I wonder if that's
+// locks in grids? One option would be: what if just greedily created all of
+// the caches and cellslices in a grid so we can get rid of many of the locks?
 
 //humanSolveSearcher keeps track of the search for a single new
 //CompoundSolveStep. It keeps track of the humanSolveItems that are in-
