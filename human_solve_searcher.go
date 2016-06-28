@@ -86,7 +86,8 @@ type humanSolveSearcher struct {
 	//CompoundSolveStep. Then provide max/mean/median.
 
 	//TODO: use github.com/oleiade/lane.PQueue to make it thread safe? Or just
-	//(eep) roll my own?
+	//(eep) roll my own? That other one doesn't allow modifying values, so
+	//we'll have to do our own. :-(
 
 	//Various options frozen in at creation time that various methods need
 	//access to.
