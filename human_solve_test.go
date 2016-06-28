@@ -235,7 +235,7 @@ func TestShortTechniquesToUseHumanSolveOptions(t *testing.T) {
 func TestHumanSolveOptionsMethods(t *testing.T) {
 
 	defaultOptions := &HumanSolveOptions{
-		15,
+		10,
 		Techniques,
 		false,
 	}
