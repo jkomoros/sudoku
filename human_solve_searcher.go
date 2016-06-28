@@ -316,6 +316,19 @@ func (p *humanSolveItem) IsComplete() bool {
 //found enough results)
 func (p *humanSolveItem) Explore() {
 
+	//TODO: this must be the source of the extraordinary slowdown with this
+	//approach. It used to be that we spun up all of these threads and book-
+	//keeping once per step in the solution. But now, if we look for ten
+	//solutions for each CompoundSolveStep we return which means we on average
+	//explore, say, 15 possibilities, and the Steps() len of each
+	//CompoundSolveStep is, say, 1.2 on average, then we're netting 12.5x the
+	//bookkeeping overhead which, given that that's only, say, half of the
+	//cost of the finds, would give us roughly 6x slowdown, which is what we
+	//see.  A better approach is to spin up this searching machinery only once
+	//per humanSolveSingleStep. Ideally we spin up the machinery and then have
+	//a generator-like pattern that feeds in the next grid/technique pairs as
+	//more on needed.
+
 	/*
 
 		The basic idea is to parellelize all of the technique's.Find
