@@ -85,6 +85,9 @@ type humanSolveSearcher struct {
 	//TODO: keep track of stats: how big the frontier was at the end of each
 	//CompoundSolveStep. Then provide max/mean/median.
 
+	//TODO: use github.com/oleiade/lane.PQueue to make it thread safe? Or just
+	//(eep) roll my own?
+
 	//Various options frozen in at creation time that various methods need
 	//access to.
 	grid                  *Grid
