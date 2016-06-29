@@ -512,9 +512,7 @@ func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
 	if n.Len() == 0 {
 		return nil
 	}
-	//TODO: we're supposed to use heap.Pop, not our own pop directly (this is
-	//so confusing!) But switching it causes an (incorrect?) test to fail.
-	return n.Pop().(*humanSolveItem)
+	return heap.Pop(n).(*humanSolveItem)
 }
 
 //String prints out a useful debug output for the searcher's state.
@@ -536,8 +534,7 @@ func (n humanSolveSearcher) Len() int {
 
 //Less is necessary to implement heap.Interface
 func (n humanSolveSearcher) Less(i, j int) bool {
-	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
-	return n.itemsToExplore[i].Goodness() > n.itemsToExplore[j].Goodness()
+	return n.itemsToExplore[i].Goodness() < n.itemsToExplore[j].Goodness()
 }
 
 //Swap is necessary to implement heap.Interface

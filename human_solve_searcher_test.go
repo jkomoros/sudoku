@@ -122,13 +122,13 @@ func TestHumanSolveSearcher(t *testing.T) {
 		t.Error("Wrong length after adding two items to frontier. Got", searcher.Len(), "expected 2")
 	}
 
-	if searcher.itemsToExplore[1] != nonFillStepItem {
+	if searcher.itemsToExplore[0] != nonFillStepItem {
 		t.Error("We expected the expensive step to be worse", searcher.String())
 	}
 
 	expensiveStepItem.Twiddle(0.00000000000000001, "Very small amount to make this #1")
 
-	if searcher.itemsToExplore[1] != expensiveStepItem {
+	if searcher.itemsToExplore[0] != expensiveStepItem {
 		t.Error("Even after twiddling up guess step by a lot it still wasn't in the top position in frontier", searcher.itemsToExplore[0], searcher.itemsToExplore[1])
 	}
 
