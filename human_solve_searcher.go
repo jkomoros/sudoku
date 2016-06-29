@@ -512,6 +512,8 @@ func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
 	if n.Len() == 0 {
 		return nil
 	}
+	//TODO: we're supposed to use heap.Pop, not our own pop directly (this is
+	//so confusing!) But switching it causes an (incorrect?) test to fail.
 	return n.Pop().(*humanSolveItem)
 }
 
