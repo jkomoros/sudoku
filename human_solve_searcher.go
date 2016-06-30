@@ -534,6 +534,12 @@ func (n *humanSolveSearcher) String() string {
 	return result
 }
 
+/************************************************************
+ *
+ * humanSolveSearcherHeap implementation
+ *
+ ************************************************************/
+
 //Len is necessary to implement heap.Interface
 func (n humanSolveSearcherHeap) Len() int {
 	return len(n)
