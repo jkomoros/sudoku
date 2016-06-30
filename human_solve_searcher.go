@@ -291,7 +291,7 @@ func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
 	if result.IsComplete() {
 		p.searcher.completedItems = append(p.searcher.completedItems, result)
 	} else {
-		heap.Push(&p.searcher.itemsToExplore, result)
+		p.searcher.AddItemToExplore(result)
 	}
 	return result
 }
@@ -305,9 +305,7 @@ func (p *humanSolveItem) Twiddle(amount probabilityTweak, description string) {
 		return
 	}
 	p.twiddles = append(p.twiddles, twiddleRecord{description, amount})
-	if p.heapIndex >= 0 {
-		heap.Fix(&p.searcher.itemsToExplore, p.heapIndex)
-	}
+	p.searcher.ItemValueChanged(p)
 }
 
 func (p *humanSolveItem) String() string {
@@ -503,6 +501,17 @@ func newHumanSolveSearcher(grid *Grid, previousCompoundSteps []*CompoundSolveSte
 	}
 	heap.Push(&searcher.itemsToExplore, initialItem)
 	return searcher
+}
+
+func (n *humanSolveSearcher) AddItemToExplore(item *humanSolveItem) {
+	heap.Push(&n.itemsToExplore, item)
+}
+
+func (n *humanSolveSearcher) ItemValueChanged(item *humanSolveItem) {
+	if item.heapIndex < 0 {
+		return
+	}
+	heap.Fix(&n.itemsToExplore, item.heapIndex)
 }
 
 //DoneSearching will return true when no more items need to be explored
