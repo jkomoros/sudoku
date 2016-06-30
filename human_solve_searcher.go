@@ -575,6 +575,33 @@ func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
 	return result
 }
 
+//Search is the main workhorse of HumanSolve Search, which explores all of the
+//itemsToExplore (potentially bailing early if enough completed items are
+//found). When Search is done, searcher.completedItems will contain the
+//possibilities to choose from.
+func (n *humanSolveSearcher) Search() {
+	step := n.NextPossibleStep()
+
+	for step != nil && !n.DoneSearching() {
+		//Explore step, finding all possible steps that apply from here and
+		//adding to the frontier of itemsToExplore.
+
+		//When adding a step, searcher notes if it's completed (thus going in
+		//CompletedItems) or not (thus going in the itemsToExplore)
+
+		//Once searcher.CompletedItems is at least
+		//options.NumOptionsToCalculate we can bail out of looking for more
+		//steps, shut down other threads, and break out of this loop.
+
+		step.Explore()
+
+		//We do NOT add the explored item back into the frontier.
+
+		step = n.NextPossibleStep()
+
+	}
+}
+
 //String prints out a useful debug output for the searcher's state.
 func (n *humanSolveSearcher) String() string {
 	result := "Items:" + strconv.Itoa(len(n.itemsToExplore)) + "\n"
@@ -645,26 +672,7 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSt
 
 	searcher := newHumanSolveSearcher(self, previousSteps, options)
 
-	step := searcher.NextPossibleStep()
-
-	for step != nil && !searcher.DoneSearching() {
-		//Explore step, finding all possible steps that apply from here and
-		//adding to the frontier of itemsToExplore.
-
-		//When adding a step, searcher notes if it's completed (thus going in
-		//CompletedItems) or not (thus going in the itemsToExplore)
-
-		//Once searcher.CompletedItems is at least
-		//options.NumOptionsToCalculate we can bail out of looking for more
-		//steps, shut down other threads, and break out of this loop.
-
-		step.Explore()
-
-		//We do NOT add the explored item back into the frontier.
-
-		step = searcher.NextPossibleStep()
-
-	}
+	searcher.Search()
 
 	//Prepare the distribution and list of steps
 
