@@ -638,7 +638,11 @@ func (n *humanSolveSearcher) Search() {
 			extra pipeline that reads these and then just creates a new
 			humanSolveItem and passes taht down the pipeline.
 
-			TODO: how do we know when to kill each of these threads?
+			TODO: how do we know when to kill each of these threads? (It may
+			not be necessary)
+
+			TODO: Make sure that in exit condition #1 that the cascading
+			closing of channels makes it through #3 to #4.
 
 		    4) THe collector goRoutine, which takes the new humanSolveItems
 			and puts them either into itemsToExpore or into completedItems.
