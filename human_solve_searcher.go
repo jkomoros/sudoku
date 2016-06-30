@@ -121,6 +121,15 @@ type humanSolveItem struct {
 	heapIndex  int
 	searcher   *humanSolveSearcher
 	cachedGrid *Grid
+	//The index of the next techinque to return
+	techniqueIndex int
+}
+
+//humanSolveWorkItem represents a unit of work that should be done during the
+//search.
+type humanSolveWorkItem struct {
+	grid      *Grid
+	technique SolveTechnique
 }
 
 //humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
@@ -322,6 +331,28 @@ func (p *humanSolveItem) IsComplete() bool {
 		return false
 	}
 	return steps[len(steps)-1].Technique.IsFill()
+}
+
+//NextSearchWorkItem returns the next humanSolveWorkItem in this item to do:
+//the techinque to run on a given grid. If no more work is left to be done,
+//returns nil.
+func (p *humanSolveItem) NextSearchWorkItem() *humanSolveWorkItem {
+	//TODO: the use of effectiveTechniquesToUse here is another nail in the
+	//coffin for treaing guess specially.
+
+	techniquesToUse := p.searcher.options.effectiveTechniquesToUse()
+
+	if p.techniqueIndex >= len(techniquesToUse) {
+		return nil
+	}
+
+	result := &humanSolveWorkItem{
+		grid:      p.Grid(),
+		technique: techniquesToUse[p.techniqueIndex],
+	}
+	p.techniqueIndex++
+	return result
+
 }
 
 //Explore is the workhorse of HumanSolve; it's the thing that identifies all
