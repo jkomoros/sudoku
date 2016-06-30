@@ -115,11 +115,12 @@ type twiddleRecord struct {
 //derived recursively from the parents.
 type humanSolveItem struct {
 	//All humanSolveItem, except the initial in a searcher, must have a parent.
-	parent    *humanSolveItem
-	step      *SolveStep
-	twiddles  []twiddleRecord
-	heapIndex int
-	searcher  *humanSolveSearcher
+	parent     *humanSolveItem
+	step       *SolveStep
+	twiddles   []twiddleRecord
+	heapIndex  int
+	searcher   *humanSolveSearcher
+	cachedGrid *Grid
 }
 
 //humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
@@ -204,20 +205,25 @@ func humanSolveSearchSingleStep(grid *Grid, options *HumanSolveOptions, previous
 
 //Grid returns a grid with all of this item's steps applied
 func (p *humanSolveItem) Grid() *Grid {
-	//TODO: it's conceivable that it might be best to memoize this... It's
-	//unlikely thoguh, since grid will only be accessed once and many items
-	//will never have their grids accessed.
-	if p.searcher.grid == nil {
-		return nil
+
+	if p.cachedGrid == nil {
+
+		var result *Grid
+
+		if p.searcher.grid == nil {
+			result = nil
+		} else if p.parent == nil {
+			result = p.searcher.grid.Copy()
+		} else {
+			result = p.parent.Grid().Copy()
+			p.step.Apply(result)
+		}
+
+		p.cachedGrid = result
 	}
 
-	result := p.searcher.grid.Copy()
+	return p.cachedGrid
 
-	for _, step := range p.Steps() {
-		step.Apply(result)
-	}
-
-	return result
 }
 
 //Goodness is how good the next step chain is in total. A LOWER Goodness is better. There's not enough precision between 0.0 and
