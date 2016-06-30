@@ -75,12 +75,19 @@ import (
 // locks in grids? One option would be: what if just greedily created all of
 // the caches and cellslices in a grid so we can get rid of many of the locks?
 
+//humanSolveSearcherHeap is what we will use for the heap implementation in
+//searcher. We put it as a seaprate time to avoid having to have
+//heap.Interface methods on searcher itself, since for proper use you're not
+//supposed to call those directly. So putting them on a sub-struct helps hide
+//them a bit.
+type humanSolveSearcherHeap []*humanSolveItem
+
 //humanSolveSearcher keeps track of the search for a single new
 //CompoundSolveStep. It keeps track of the humanSolveItems that are in-
 //progress (itemsToExplore) and the items that are fully complete (that is,
 //that are terminated by a FillStep and valid to return as an option).
 type humanSolveSearcher struct {
-	itemsToExplore []*humanSolveItem
+	itemsToExplore humanSolveSearcherHeap
 	completedItems []*humanSolveItem
 	//TODO: keep track of stats: how big the frontier was at the end of each
 	//CompoundSolveStep. Then provide max/mean/median.
@@ -284,7 +291,7 @@ func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
 	if result.IsComplete() {
 		p.searcher.completedItems = append(p.searcher.completedItems, result)
 	} else {
-		heap.Push(p.searcher, result)
+		heap.Push(&p.searcher.itemsToExplore, result)
 	}
 	return result
 }
@@ -299,7 +306,7 @@ func (p *humanSolveItem) Twiddle(amount probabilityTweak, description string) {
 	}
 	p.twiddles = append(p.twiddles, twiddleRecord{description, amount})
 	if p.heapIndex >= 0 {
-		heap.Fix(p.searcher, p.heapIndex)
+		heap.Fix(&p.searcher.itemsToExplore, p.heapIndex)
 	}
 }
 
@@ -489,12 +496,12 @@ func newHumanSolveSearcher(grid *Grid, previousCompoundSteps []*CompoundSolveSte
 		options:               options,
 		previousCompoundSteps: previousCompoundSteps,
 	}
-	heap.Init(searcher)
+	heap.Init(&searcher.itemsToExplore)
 	initialItem := &humanSolveItem{
 		searcher:  searcher,
 		heapIndex: -1,
 	}
-	heap.Push(searcher, initialItem)
+	heap.Push(&searcher.itemsToExplore, initialItem)
 	return searcher
 }
 
@@ -509,10 +516,10 @@ func (n *humanSolveSearcher) DoneSearching() bool {
 
 //NextPossibleStep pops the best step and returns it.
 func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
-	if n.Len() == 0 {
+	if n.itemsToExplore.Len() == 0 {
 		return nil
 	}
-	return heap.Pop(n).(*humanSolveItem)
+	return heap.Pop(&n.itemsToExplore).(*humanSolveItem)
 }
 
 //String prints out a useful debug output for the searcher's state.
@@ -528,39 +535,39 @@ func (n *humanSolveSearcher) String() string {
 }
 
 //Len is necessary to implement heap.Interface
-func (n humanSolveSearcher) Len() int {
-	return len(n.itemsToExplore)
+func (n humanSolveSearcherHeap) Len() int {
+	return len(n)
 }
 
 //Less is necessary to implement heap.Interface
-func (n humanSolveSearcher) Less(i, j int) bool {
-	return n.itemsToExplore[i].Goodness() < n.itemsToExplore[j].Goodness()
+func (n humanSolveSearcherHeap) Less(i, j int) bool {
+	return n[i].Goodness() < n[j].Goodness()
 }
 
 //Swap is necessary to implement heap.Interface
-func (n humanSolveSearcher) Swap(i, j int) {
-	n.itemsToExplore[i], n.itemsToExplore[j] = n.itemsToExplore[j], n.itemsToExplore[i]
-	n.itemsToExplore[i].heapIndex = i
-	n.itemsToExplore[j].heapIndex = j
+func (n humanSolveSearcherHeap) Swap(i, j int) {
+	n[i], n[j] = n[j], n[i]
+	n[i].heapIndex = i
+	n[j].heapIndex = j
 }
 
 //Push is necessary to implement heap.Interface. It should not be used
 //direclty; instead, use heap.Push()
-func (n *humanSolveSearcher) Push(x interface{}) {
-	length := len(n.itemsToExplore)
+func (n *humanSolveSearcherHeap) Push(x interface{}) {
+	length := len(*n)
 	item := x.(*humanSolveItem)
 	item.heapIndex = length
-	n.itemsToExplore = append(n.itemsToExplore, item)
+	*n = append(*n, item)
 }
 
 //Pop is necessary to implement heap.Interface. It should not be used
 //directly; instead use heap.Pop()
-func (n *humanSolveSearcher) Pop() interface{} {
-	old := n.itemsToExplore
+func (n *humanSolveSearcherHeap) Pop() interface{} {
+	old := *n
 	length := len(old)
 	item := old[length-1]
 	item.heapIndex = -1 // for safety
-	n.itemsToExplore = old[0 : length-1]
+	*n = old[0 : length-1]
 	return item
 }
 
