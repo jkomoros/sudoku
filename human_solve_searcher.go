@@ -650,6 +650,10 @@ func (n *humanSolveSearcher) Search() {
 
 	//TODO: implement the pipeline described in the above comment.
 
+	//TODO: before commiting this back to master, panic() after a number of
+	//solves and make sure that for example the #3 goroutines aren't hanging
+	//around.
+
 	step := n.NextPossibleStep()
 
 	for step != nil && !n.DoneSearching() {
