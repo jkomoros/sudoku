@@ -612,6 +612,9 @@ func (n *humanSolveSearcher) Search() {
 			channel, that means that Exit Condition #2 is met and it should
 			begin an early shutdown and close its output channel.
 
+			//TODO: ideally we don't want to pick the next step to explore
+			//until we have as many as possible, so we can pick the best one.
+
 			Especially at the first work item, it's possible for this thread
 			to think that it's exhausted all work tiems that will come in
 			(because the work items that will come in from processing future
