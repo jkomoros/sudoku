@@ -92,9 +92,7 @@ type humanSolveSearcher struct {
 	//TODO: keep track of stats: how big the frontier was at the end of each
 	//CompoundSolveStep. Then provide max/mean/median.
 
-	//TODO: use github.com/oleiade/lane.PQueue to make it thread safe? Or just
-	//(eep) roll my own? That other one doesn't allow modifying values, so
-	//we'll have to do our own. :-(
+	itemsToExploreLock sync.Mutex
 
 	//Various options frozen in at creation time that various methods need
 	//access to.
@@ -504,14 +502,18 @@ func newHumanSolveSearcher(grid *Grid, previousCompoundSteps []*CompoundSolveSte
 }
 
 func (n *humanSolveSearcher) AddItemToExplore(item *humanSolveItem) {
+	n.itemsToExploreLock.Lock()
 	heap.Push(&n.itemsToExplore, item)
+	n.itemsToExploreLock.Unlock()
 }
 
 func (n *humanSolveSearcher) ItemValueChanged(item *humanSolveItem) {
 	if item.heapIndex < 0 {
 		return
 	}
+	n.itemsToExploreLock.Lock()
 	heap.Fix(&n.itemsToExplore, item.heapIndex)
+	n.itemsToExploreLock.Unlock()
 }
 
 //DoneSearching will return true when no more items need to be explored
@@ -528,7 +530,12 @@ func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
 	if n.itemsToExplore.Len() == 0 {
 		return nil
 	}
-	return heap.Pop(&n.itemsToExplore).(*humanSolveItem)
+
+	n.itemsToExploreLock.Lock()
+	result := heap.Pop(&n.itemsToExplore).(*humanSolveItem)
+	n.itemsToExploreLock.Unlock()
+
+	return result
 }
 
 //String prints out a useful debug output for the searcher's state.
