@@ -78,6 +78,9 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 
 		//TODO: figure out a way to kill all of these threads when necessary.
 
+		//TODO: don't use a constant here, use someting around the lines of
+		//numCPU
+
 		for i := 0; i < _NUM_SOLVER_THREADS; i++ {
 			go func() {
 				//Sovler thread.
