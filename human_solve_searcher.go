@@ -427,8 +427,15 @@ func (n *humanSolveSearcher) DoneSearching() bool {
 	if n.options == nil {
 		return true
 	}
-	if n.options.NumStraightforwardOptionsToEarlyExit <= n.straightforwardItemsCount {
-		return true
+
+	n.itemsToExploreLock.Lock()
+	lenItemsToExplore := len(n.itemsToExplore)
+	n.itemsToExploreLock.Unlock()
+
+	if float64(lenItemsToExplore) > float64(len(Techniques))*0.5 {
+		if n.options.NumStraightforwardOptionsToEarlyExit <= n.straightforwardItemsCount {
+			return true
+		}
 	}
 	return n.options.NumOptionsToCalculate <= len(n.completedItems)
 }
