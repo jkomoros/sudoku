@@ -555,11 +555,13 @@ func (n *humanSolveSearcher) Search() {
 	//Make sure that no matter how we exit we close done.
 	defer close(done)
 
-	workItems := make(chan *humanSolveWorkItem)
-	items := make(chan *humanSolveItem)
-
 	//TODO: make this configurable
-	numFindThreads := 10
+	numFindThreads := 2
+
+	//TODO: it's not clear if making these buffered to numFindThreads actually
+	//makes a difference.
+	workItems := make(chan *humanSolveWorkItem, numFindThreads)
+	items := make(chan *humanSolveItem, numFindThreads)
 
 	//The thread to generate work items
 	go humanSolveSearcherWorkItemGenerator(n, workItems, items, done)
