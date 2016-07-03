@@ -683,7 +683,10 @@ func (n *humanSolveSearcher) Search() {
 
 	//TODO: make sure that Guess will return at least one guess item in all
 	//cases, but never will go above the normal rank of 2 unless there are
-	//none of size 2. This will require a new test.
+	//none of size 2. This will require a new test. Note that all guesses are
+	//infinitely bad, which means that guess on a cell of rank 2 and guess on
+	//a cell of rank 3 will be equally bad, making it more important to only
+	//return cells of the lowest rank.
 
 	//TODO: before commiting this back to master, panic() after a number of
 	//solves and make sure that for example the #3 goroutines aren't hanging
