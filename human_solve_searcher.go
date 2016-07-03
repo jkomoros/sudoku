@@ -804,17 +804,17 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 
 			stepsChanWaitGroup.Add(1)
 
+			select {
+			case workItems <- workItem:
+			case <-done:
+				return
+			}
+
 			if firstWorkItem {
 				//We have to wait until we've added one item to the wait group
 				//to spin up its closer.
 				go humanSolveSearcherItemStepsCloser(&stepsChanWaitGroup, stepsChan)
 				firstWorkItem = false
-			}
-
-			select {
-			case workItems <- workItem:
-			case <-done:
-				return
 			}
 
 			workItem = item.NextSearchWorkItem()
