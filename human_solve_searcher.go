@@ -709,22 +709,6 @@ func (n *humanSolveSearcher) NewSearch() {
 	var findThreadWaitGroup sync.WaitGroup
 	var itemCreatorsWaitGroup sync.WaitGroup
 
-	//The thread that is spun up per humanSolveItem and receives solveSteps
-	itemCreatorFunc := func(steps chan *SolveStep, item *humanSolveItem) {
-		defer itemCreatorsWaitGroup.Done()
-		//TODO: steps will never be closed because no Technique knows it's the
-		//last one. Need to have all techniques get their own solveStep thread
-		//that they're expected to close.
-		for step := range steps {
-			newItem := item.CreateNewItem(step)
-			select {
-			case newItems <- newItem:
-			case <-done:
-				return
-			}
-		}
-	}
-
 	//This is the fan-in closer for newItems. We can't start running it until
 	//at least one inbound-thread has been created (which happens inside of
 	//the work item generator thread)
@@ -754,7 +738,7 @@ func (n *humanSolveSearcher) NewSearch() {
 			stepsChan := make(chan *SolveStep)
 
 			itemCreatorsWaitGroup.Add(1)
-			go itemCreatorFunc(stepsChan, item)
+			go humanSolveSearcherItemCreator(stepsChan, newItems, item, done, itemCreatorsWaitGroup)
 
 			if firstRun {
 				//We want to run the fan-in closer for newItems, but only
@@ -813,6 +797,21 @@ func (n *humanSolveSearcher) NewSearch() {
 		}
 	}
 
+}
+
+func humanSolveSearcherItemCreator(steps chan *SolveStep, results chan *humanSolveItem, item *humanSolveItem, done chan bool, wg sync.WaitGroup) {
+	defer wg.Done()
+	//TODO: steps will never be closed because no Technique knows it's the
+	//last one. Need to have all techniques get their own solveStep thread
+	//that they're expected to close.
+	for step := range steps {
+		newItem := item.CreateNewItem(step)
+		select {
+		case results <- newItem:
+		case <-done:
+			return
+		}
+	}
 }
 
 //Search is the old version that relies on humanSolveItem.Explore()
