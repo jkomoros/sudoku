@@ -35,8 +35,6 @@ func (self *pointingPairTechnique) Find(grid *Grid, results chan *SolveStep, don
 	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
 	//TODO: test this returns multiple if they exist.
 
-	defer close(results)
-
 	for _, i := range rand.Perm(DIM) {
 		block := grid.Block(i)
 

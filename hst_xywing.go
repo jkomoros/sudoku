@@ -48,8 +48,6 @@ func (self *xywingTechnique) variant(step *SolveStep) string {
 
 func (self *xywingTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 
-	defer close(results)
-
 	getter := grid.queue().NewGetter()
 
 	for {

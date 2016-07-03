@@ -16,8 +16,6 @@ func (self *blockBlockInteractionTechnique) humanLikelihood(step *SolveStep) flo
 
 func (self *blockBlockInteractionTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 
-	defer close(results)
-
 	pairs := pairwiseBlocks(grid)
 
 	//We're going to be looking at a lot of blocks again and again, so might as well cache this.
