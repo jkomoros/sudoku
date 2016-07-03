@@ -131,6 +131,7 @@ type humanSolveItem struct {
 type humanSolveWorkItem struct {
 	grid      *Grid
 	technique SolveTechnique
+	results   chan *SolveStep
 }
 
 //humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
@@ -700,11 +701,37 @@ func (n *humanSolveSearcher) NewSearch() {
 
 	workItems := make(chan *humanSolveWorkItem)
 	foundStep := make(chan *SolveStep)
+	newItems := make(chan *humanSolveItem)
 
 	//TODO: make this configurable
 	numFindThreads := 10
 
 	var findThreadWaitGroup sync.WaitGroup
+	var itemCreatorsWaitGroup sync.WaitGroup
+
+	//The thread that is spun up per humanSolveItem and receives solveSteps
+	itemCreatorFunc := func(steps chan *SolveStep, item *humanSolveItem) {
+		defer itemCreatorsWaitGroup.Done()
+		//TODO: steps will never be closed because no Technique knows it's the
+		//last one. Need to have all techniques get their own solveStep thread
+		//that they're expected to close.
+		for step := range steps {
+			newItem := item.CreateNewItem(step)
+			select {
+			case newItems <- newItem:
+			case <-done:
+				return
+			}
+		}
+	}
+
+	//This is the fan-in closer for newItems. We can't start running it until
+	//at least one inbound-thread has been created (which happens inside of
+	//the work item generator thread)
+	newItemsCloser := func() {
+		itemCreatorsWaitGroup.Wait()
+		close(newItems)
+	}
 
 	//The thread to generate work items
 	go func() {
@@ -717,16 +744,31 @@ func (n *humanSolveSearcher) NewSearch() {
 
 		item := n.NextPossibleStep()
 
+		firstRun := true
+
 		//TODO: test that if len(techniques) is less than len(threads) that we
 		//don't end early here because we loop back up and find step == nil
 		//and exit, even though more work will come.
 		for item != nil {
 
+			stepsChan := make(chan *SolveStep)
+
+			itemCreatorsWaitGroup.Add(1)
+			go itemCreatorFunc(stepsChan, item)
+
+			if firstRun {
+				//We want to run the fan-in closer for newItems, but only
+				//after at least one item has been added to the waitGroup already
+				go newItemsCloser()
+				firstRun = false
+			}
+
 			workItem := item.NextSearchWorkItem()
 
 			for workItem != nil {
 
-				//TODO: put in the resultsChan for this work item
+				//Tell each workItem where to send its results
+				workItem.results = stepsChan
 
 				select {
 				case workItems <- workItem:
@@ -746,8 +788,7 @@ func (n *humanSolveSearcher) NewSearch() {
 		//When we return, tell the watcher thread we're done
 		defer findThreadWaitGroup.Done()
 		for workItem := range workItems {
-			//TODO: use the proper foundStep results chan
-			workItem.technique.Find(workItem.grid, foundStep, done)
+			workItem.technique.Find(workItem.grid, workItem.results, done)
 		}
 	}
 
@@ -761,9 +802,6 @@ func (n *humanSolveSearcher) NewSearch() {
 		findThreadWaitGroup.Wait()
 		close(foundStep)
 	}()
-
-	//TODO: a func per humanSolveItem we're working on that takes the found
-	//solvesteps and creates a stream of un-added humanSolveItems
 
 	//TODO: the collector thread (on main thread) that reads from
 	//humanSolveItems and insterts them into n. If n.DoneSearching() then
