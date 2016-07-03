@@ -794,8 +794,6 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 
 		workItem := item.NextSearchWorkItem()
 
-		firstWorkItem := true
-
 		for workItem != nil {
 
 			//Tell each workItem where to send its results
@@ -810,15 +808,16 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 				return
 			}
 
-			if firstWorkItem {
-				//We have to wait until we've added one item to the wait group
-				//to spin up its closer.
-				go humanSolveSearcherItemStepsCloser(&stepsChanWaitGroup, stepsChan)
-				firstWorkItem = false
-			}
-
 			workItem = item.NextSearchWorkItem()
 		}
+
+		//We wait until all of the workItems for this step have been sent
+		//before spinning up the closer. Otherwise we could get in a weird
+		//condition where we generate a work item, send it to the queue, and
+		//it's fully processed before we send the next one. If we spun up the
+		//closer after adding the first one, it could have already closed the
+		//channel by the time we want to put in the next one!
+		go humanSolveSearcherItemStepsCloser(&stepsChanWaitGroup, stepsChan)
 
 		item = searcher.NextPossibleStep()
 
