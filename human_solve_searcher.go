@@ -756,12 +756,12 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 		stepsChan := make(chan *SolveStep)
 
 		itemCreatorsWaitGroup.Add(1)
-		go humanSolveSearcherItemCreator(stepsChan, items, item, done, itemCreatorsWaitGroup)
+		go humanSolveSearcherItemCreator(stepsChan, items, item, done, &itemCreatorsWaitGroup)
 
 		if firstRun {
 			//We want to run the fan-in closer for newItems, but only
 			//after at least one item has been added to the waitGroup already
-			go humanSolveSearcherItemCreatorCloser(itemCreatorsWaitGroup, items)
+			go humanSolveSearcherItemCreatorCloser(&itemCreatorsWaitGroup, items)
 			firstRun = false
 		}
 
@@ -788,7 +788,7 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 
 //humanSolveSearcherItemCreatorCloser is the thing that waits for all of the
 //ItemCreator threads to be done and then closes the downstream channel.
-func humanSolveSearcherItemCreatorCloser(wg sync.WaitGroup, newItems chan *humanSolveItem) {
+func humanSolveSearcherItemCreatorCloser(wg *sync.WaitGroup, newItems chan *humanSolveItem) {
 	wg.Wait()
 	close(newItems)
 }
@@ -796,7 +796,7 @@ func humanSolveSearcherItemCreatorCloser(wg sync.WaitGroup, newItems chan *human
 //humanSolveSearcherItemCreator is used in searcher.Search. It takes a stream
 //of SolveSteps provided by techniques, and then creates new humanSolveItems
 //to pass down the pipeline.
-func humanSolveSearcherItemCreator(steps chan *SolveStep, results chan *humanSolveItem, item *humanSolveItem, done chan bool, wg sync.WaitGroup) {
+func humanSolveSearcherItemCreator(steps chan *SolveStep, results chan *humanSolveItem, item *humanSolveItem, done chan bool, wg *sync.WaitGroup) {
 	defer wg.Done()
 	//TODO: steps will never be closed because no Technique knows it's the
 	//last one. Need to have all techniques get their own solveStep thread
