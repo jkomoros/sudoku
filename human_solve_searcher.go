@@ -803,9 +803,15 @@ func (n *humanSolveSearcher) NewSearch() {
 		close(foundStep)
 	}()
 
-	//TODO: the collector thread (on main thread) that reads from
-	//humanSolveItems and insterts them into n. If n.DoneSearching() then
-	//returns, which triggers an early clean-up.
+	//On the main thread we'll collect all of the humanSolveItems from
+	//newItems and add them to searcher.
+
+	for item := range newItems {
+		item.Add()
+		if n.DoneSearching() {
+			return
+		}
+	}
 
 }
 
