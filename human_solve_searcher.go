@@ -618,7 +618,8 @@ func (n *humanSolveSearcher) Search() {
 			2) We have enough at least NumItemsToCompute items in
 			searcher.completedItems and thus can exit early. When this happens
 			the pipeline is roaring through all of the work and needs to
-			signal all pieces to shut down.
+			signal all pieces to shut down. We handle this by defering a close
+			to allDone in this method and then just returning.
 
 			The pipeline consists of the following go Routines:
 
@@ -669,8 +670,9 @@ func (n *humanSolveSearcher) Search() {
 		    4) THe collector goRoutine, which takes the new humanSolveItems
 			and puts them either into itemsToExpore or into completedItems.
 			(This is the only goRoutine ever touching completedItems so no
-			mutex is necessary). As soon as completedItems is greater than the target, we
-			close allDone, which tells all pipeline stages to die, and return.
+			mutex is necessary). As soon as completedItems is greater than
+			the target, we return, which automatically closes allDone and
+			initiates a shutdown of the rest of the pipeline.
 
 	*/
 
