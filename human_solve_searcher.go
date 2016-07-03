@@ -711,17 +711,9 @@ func (n *humanSolveSearcher) NewSearch() {
 	//The thread to generate work items
 	go humanSolveSearcherWorkItemGenerator(n, workItems, items, done)
 
-	findThreadFunc := func() {
-		//When we return, tell the watcher thread we're done
-		defer findThreadWaitGroup.Done()
-		for workItem := range workItems {
-			workItem.technique.Find(workItem.grid, workItem.results, done)
-		}
-	}
-
 	findThreadWaitGroup.Add(numFindThreads)
 	for i := 0; i < numFindThreads; i++ {
-		go findThreadFunc()
+		go humanSolveSearcherFindThread(findThreadWaitGroup, workItems, done)
 	}
 
 	//Close the fan-in once all finder threads are done.
@@ -740,6 +732,16 @@ func (n *humanSolveSearcher) NewSearch() {
 		}
 	}
 
+}
+
+//humanSolveSearcherFindThread is a thread that takes in workItems and runs
+//the specified technique on the specified grid.
+func humanSolveSearcherFindThread(findThreadWaitGroup sync.WaitGroup, workItems chan *humanSolveWorkItem, done chan bool) {
+	//When we return, tell the watcher thread we're done
+	defer findThreadWaitGroup.Done()
+	for workItem := range workItems {
+		workItem.technique.Find(workItem.grid, workItem.results, done)
+	}
 }
 
 //humanSolveSearcherWorkItemGenerator is used in searcher.Search to generate
