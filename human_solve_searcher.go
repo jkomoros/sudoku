@@ -681,6 +681,10 @@ func (n *humanSolveSearcher) Search() {
 
 	//TODO: implement exit condition #1.
 
+	//TODO: make sure that Guess will return at least one guess item in all
+	//cases, but never will go above the normal rank of 2 unless there are
+	//none of size 2. This will require a new test.
+
 	//TODO: before commiting this back to master, panic() after a number of
 	//solves and make sure that for example the #3 goroutines aren't hanging
 	//around.
