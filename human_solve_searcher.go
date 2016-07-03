@@ -129,9 +129,10 @@ type humanSolveItem struct {
 //humanSolveWorkItem represents a unit of work that should be done during the
 //search.
 type humanSolveWorkItem struct {
-	grid      *Grid
-	technique SolveTechnique
-	results   chan *SolveStep
+	grid             *Grid
+	technique        SolveTechnique
+	results          chan *SolveStep
+	resultsWaitGroup *sync.WaitGroup
 }
 
 //humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
@@ -738,7 +739,18 @@ func (n *humanSolveSearcher) NewSearch() {
 //the specified technique on the specified grid.
 func humanSolveSearcherFindThread(workItems chan *humanSolveWorkItem, done chan bool) {
 	for workItem := range workItems {
-		workItem.technique.Find(workItem.grid, workItem.results, done)
+		resultsChan := make(chan *SolveStep)
+		go func() {
+			defer workItem.resultsWaitGroup.Done()
+			for step := range resultsChan {
+				select {
+				case workItem.results <- step:
+				case <-done:
+					return
+				}
+			}
+		}()
+		workItem.technique.Find(workItem.grid, resultsChan, done)
 	}
 }
 
@@ -764,6 +776,7 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 	for item != nil {
 
 		stepsChan := make(chan *SolveStep)
+		var stepsChanWaitGroup sync.WaitGroup
 
 		itemCreatorsWaitGroup.Add(1)
 		go humanSolveSearcherItemCreator(stepsChan, items, item, done, &itemCreatorsWaitGroup)
@@ -777,10 +790,25 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 
 		workItem := item.NextSearchWorkItem()
 
+		firstWorkItem := true
+
 		for workItem != nil {
 
 			//Tell each workItem where to send its results
 			workItem.results = stepsChan
+			workItem.resultsWaitGroup = &stepsChanWaitGroup
+
+			stepsChanWaitGroup.Add(1)
+
+			if firstWorkItem {
+				//We have to wait until we've added one item to the wait group
+				//to spin up its closer.
+				go func() {
+					stepsChanWaitGroup.Wait()
+					close(stepsChan)
+				}()
+				firstWorkItem = false
+			}
 
 			select {
 			case workItems <- workItem:
