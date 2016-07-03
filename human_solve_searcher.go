@@ -123,6 +123,7 @@ type humanSolveItem struct {
 	cachedGrid *Grid
 	//The index of the next techinque to return
 	techniqueIndex int
+	added          bool
 }
 
 //humanSolveWorkItem represents a unit of work that should be done during the
@@ -287,7 +288,9 @@ func (p *humanSolveItem) Steps() []*SolveStep {
 	return append(p.parent.Steps(), p.step)
 }
 
-func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
+//createNewItem creates a new humanSolveItem based on this step, but NOT YET
+//ADDED to searcher. call item.Add() to do that.
+func (p *humanSolveItem) CreateNewItem(step *SolveStep) *humanSolveItem {
 	result := &humanSolveItem{
 		parent:    p,
 		step:      step,
@@ -301,11 +304,27 @@ func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
 		tweak := twiddler.f(step, inProgressCompoundStep, p.searcher.previousCompoundSteps, grid)
 		result.Twiddle(tweak, twiddler.name)
 	}
-	if result.IsComplete() {
-		p.searcher.completedItems = append(p.searcher.completedItems, result)
-	} else {
-		p.searcher.AddItemToExplore(result)
+	return result
+}
+
+//Injects this item into to the searcher.
+func (p *humanSolveItem) Add() {
+	//make sure we only add items once.
+	if p.added {
+		return
 	}
+	p.added = true
+	if p.IsComplete() {
+		p.searcher.completedItems = append(p.searcher.completedItems, p)
+	} else {
+		p.searcher.AddItemToExplore(p)
+	}
+}
+
+//AddStep basically just does p.CreateNewItem, then item.Add()
+func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
+	result := p.CreateNewItem(step)
+	result.Add()
 	return result
 }
 
