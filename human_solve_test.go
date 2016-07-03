@@ -267,6 +267,7 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 		10,
 		Techniques,
 		false,
+		nil,
 	}
 
 	options := DefaultHumanSolveOptions()
@@ -291,12 +292,14 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 		-3,
 		nil,
 		false,
+		nil,
 	}
 
 	validatedOptions := &HumanSolveOptions{
 		1,
 		Techniques,
 		false,
+		nil,
 	}
 
 	weirdOptions.validate()

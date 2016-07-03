@@ -109,6 +109,7 @@ type HumanSolveOptions struct {
 	//TODO: figure out how to test that we do indeed use different values of
 	//numOptionsToCalculate.
 	//TODO: add a TwiddleChainDissimilarity bool.
+	cachedEffectiveTechniques []SolveTechnique
 }
 
 //DefaultHumanSolveOptions returns a HumanSolveOptions object configured to
@@ -176,10 +177,13 @@ func (self *HumanSolveOptions) validate() *HumanSolveOptions {
 //effectiveTechniquesToUse returns the effective list of techniques to use.
 //Basically just o.TechniquesToUse + Guess if NoGuess is not provided.
 func (o *HumanSolveOptions) effectiveTechniquesToUse() []SolveTechnique {
-	if o.NoGuess {
-		return o.TechniquesToUse
+	if o.cachedEffectiveTechniques == nil {
+		if o.NoGuess {
+			return o.TechniquesToUse
+		}
+		o.cachedEffectiveTechniques = append(o.TechniquesToUse, GuessTechnique)
 	}
-	return append(o.TechniquesToUse, GuessTechnique)
+	return o.cachedEffectiveTechniques
 }
 
 //IsUseful returns true if this SolveStep, when applied to the given grid, would do useful work--that is, it would
