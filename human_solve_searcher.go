@@ -582,8 +582,6 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 
 	item := searcher.NextPossibleStep()
 
-	firstRun := true
-
 	//TODO: test that if len(techniques) is less than len(threads) that we
 	//don't end early here because we loop back up and find step == nil
 	//and exit, even though more work will come.
@@ -594,13 +592,6 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 
 		itemCreatorsWaitGroup.Add(1)
 		go humanSolveSearcherItemCreator(stepsChan, items, item, done, &itemCreatorsWaitGroup)
-
-		if firstRun {
-			//We want to run the fan-in closer for newItems, but only
-			//after at least one item has been added to the waitGroup already
-			go humanSolveSearcherItemCreatorCloser(&itemCreatorsWaitGroup, items)
-			firstRun = false
-		}
 
 		workItem := item.NextSearchWorkItem()
 
@@ -632,6 +623,15 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 		item = searcher.NextPossibleStep()
 
 	}
+
+	//TODO: what happens if we have an early exit? Does waiting to do this
+	//here (as opposed to on the first loop through the main for loop) make
+	//for a messier close?
+
+	//We want to run the fan-in closer for newItems. We wait to do it here
+	//because we know we want to put in all items and we can avoid a bit of
+	//busy-waiting.
+	go humanSolveSearcherItemCreatorCloser(&itemCreatorsWaitGroup, items)
 }
 
 //humanSolveSearcherItemStepsCloser closes the results chan that is craeated
