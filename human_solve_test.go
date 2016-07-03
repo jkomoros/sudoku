@@ -17,6 +17,35 @@ func BenchmarkHumanSolve(b *testing.B) {
 	}
 }
 
+func TestHumanSolveAlmostSolvedGrid(t *testing.T) {
+	//Tests human solve on a grid with only one cell left to solve. This is an
+	//interesting case in HumanSolve because it triggers ExitCondition #1.
+
+	grid := NewGrid()
+	grid.LoadSDK(SOLVED_TEST_GRID)
+
+	cell := grid.Cell(0, 0)
+
+	solvedNumber := cell.Number()
+
+	//Unfill this cell only
+	cell.SetNumber(0)
+
+	directions := grid.HumanSolve(nil)
+
+	if directions == nil {
+		t.Error("Didn't get directions")
+	}
+
+	if !grid.Solved() {
+		t.Error("HumanSolve didn't solve the grid")
+	}
+
+	if cell.Number() != solvedNumber {
+		t.Error("Got wrong number in cell. Got", cell.Number(), "expected", solvedNumber)
+	}
+}
+
 func TestCompoundSolveStep(t *testing.T) {
 
 	nInRowTechnique := techniquesByName["Necessary In Row"]
