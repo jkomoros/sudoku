@@ -600,7 +600,7 @@ func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
 //itemsToExplore (potentially bailing early if enough completed items are
 //found). When Search is done, searcher.completedItems will contain the
 //possibilities to choose from.
-func (n *humanSolveSearcher) Search() {
+func (n *humanSolveSearcher) NewSearch() {
 
 	/*
 			The pipeline starts by generating humanSolveWorkItems, and at the
@@ -691,6 +691,91 @@ func (n *humanSolveSearcher) Search() {
 	//TODO: before commiting this back to master, panic() after a number of
 	//solves and make sure that for example the #3 goroutines aren't hanging
 	//around.
+
+	//done will be closed when this main function returns, signaling to all
+	//created goroutines that they should return.
+	done := make(chan bool)
+	//Make sure that no matter how we exit we close done.
+	defer close(done)
+
+	workItems := make(chan *humanSolveWorkItem)
+	foundStep := make(chan *SolveStep)
+
+	//TODO: make this configurable
+	numFindThreads := 10
+
+	var findThreadWaitGroup sync.WaitGroup
+
+	//The thread to generate work items
+	go func() {
+		//When we return close down workItems to signal downstream things to
+		//close.
+		defer close(workItems)
+
+		//We'll loop through each step in searcher, and then for each step
+		//generate a work item per technique.
+
+		item := n.NextPossibleStep()
+
+		//TODO: test that if len(techniques) is less than len(threads) that we
+		//don't end early here because we loop back up and find step == nil
+		//and exit, even though more work will come.
+		for item != nil {
+
+			workItem := item.NextSearchWorkItem()
+
+			for workItem != nil {
+
+				//TODO: put in the resultsChan for this work item
+
+				select {
+				case workItems <- workItem:
+				case <-done:
+					return
+				}
+
+				workItem = item.NextSearchWorkItem()
+			}
+
+			item = n.NextPossibleStep()
+
+		}
+	}()
+
+	findThreadFunc := func() {
+		//When we return, tell the watcher thread we're done
+		defer findThreadWaitGroup.Done()
+		for workItem := range workItems {
+			//TODO: use the proper foundStep results chan
+			workItem.technique.Find(workItem.grid, foundStep, done)
+		}
+	}
+
+	findThreadWaitGroup.Add(numFindThreads)
+	for i := 0; i < numFindThreads; i++ {
+		go findThreadFunc()
+	}
+
+	//Close the fan-in once all finder threads are done.
+	go func() {
+		findThreadWaitGroup.Wait()
+		close(foundStep)
+	}()
+
+	//TODO: a func per humanSolveItem we're working on that takes the found
+	//solvesteps and creates a stream of un-added humanSolveItems
+
+	//TODO: the collector thread (on main thread) that reads from
+	//humanSolveItems and insterts them into n. If n.DoneSearching() then
+	//returns, which triggers an early clean-up.
+
+}
+
+//Search is the old version that relies on humanSolveItem.Explore()
+func (n *humanSolveSearcher) Search() {
+
+	//TODO: once NewSearch is ready, kill this and hSI.Explore() and rename
+	//NewSearch to Search.
 
 	step := n.NextPossibleStep()
 
