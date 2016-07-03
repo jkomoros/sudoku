@@ -673,10 +673,13 @@ func (n *humanSolveSearcher) Search() {
 			mutex is necessary). As soon as completedItems is greater than
 			the target, we return, which automatically closes allDone and
 			initiates a shutdown of the rest of the pipeline.
-
 	*/
 
-	//TODO: implement the pipeline described in the above comment.
+	//TODO: implement the pipeline described in the above comment. We can skip
+	//exit condition #1 at first since it's basically impossible to hit unless
+	//GuessTechnique is not included.
+
+	//TODO: implement exit condition #1.
 
 	//TODO: before commiting this back to master, panic() after a number of
 	//solves and make sure that for example the #3 goroutines aren't hanging
