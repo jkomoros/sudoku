@@ -461,9 +461,21 @@ func (p *humanSolveItem) Explore() {
 	//The next technique to spin up
 	nextTechniqueIndex := 0
 
+	var resultsChanWaitGroup sync.WaitGroup
+
 	//We'll be kicking off this routine from multiple places so just define it once
 	startTechnique := func(theTechnique SolveTechnique) {
-		theTechnique.Find(gridToUse, resultsChan, done)
+
+		localResultsChan := make(chan *SolveStep)
+		resultsChanWaitGroup.Add(1)
+		go func() {
+			defer resultsChanWaitGroup.Done()
+			for step := range localResultsChan {
+				resultsChan <- step
+			}
+		}()
+
+		theTechnique.Find(gridToUse, localResultsChan, done)
 		//This is where a new technique should be kicked off, if one's going to be, before we tell the waitgroup that we're done.
 		//We need to communicate synchronously with that thread
 		comms := make(chan bool)
@@ -486,8 +498,8 @@ func (p *humanSolveItem) Explore() {
 	//Listen for when all items are done and signal the collector to stop collecting
 	go func() {
 		wg.Wait()
-		//All of the techniques must be done here; no one can send on resultsChan at this point.
-		//Signal to the collector that it should break out.
+		//Wait for all of the fan-in results chan to exit, but only after all techniques are also done
+		resultsChanWaitGroup.Wait()
 		close(resultsChan)
 		close(techniqueFinished)
 	}()

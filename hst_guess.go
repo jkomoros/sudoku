@@ -31,6 +31,8 @@ func (self *guessTechnique) Find(grid *Grid, results chan *SolveStep, done chan 
 	//possibilities, and then just immediately return the correct value for
 	//it. Done!
 
+	defer close(results)
+
 	solvedGrid := grid.Copy()
 	solvedGrid.Solve()
 

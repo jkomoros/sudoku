@@ -32,11 +32,16 @@ type SolveTechnique interface {
 	Description(*SolveStep) string
 	//IMPORTANT: a step should return a step IFF that step is valid AND the step would cause useful work to be done if applied.
 
-	//Find returns as many steps as it can find in the grid for that technique, in a random order.
-	//HumanSolve repeatedly applies technique.Find() to identify candidates for the next step in the solution.
-	//A technique's Find method will send results as it finds them to results, and will periodically see if it
-	//can receive any value from done--if it can, it will stop searching. Find will block and not return if it can't send
-	//to results or receive from done; either use sufficiently buffered channels or run Find in a goroutine.
+	//Find returns as many steps as it can find in the grid for that
+	//technique, in a random order. HumanSolve repeatedly applies
+	//technique.Find() to identify candidates for the next step in the
+	//solution. A technique's Find method will send results as it finds them
+	//to results, and will periodically see if it can receive any value from
+	//done--if it can, it will stop searching. Find will block and not return
+	//if it can't send to results or receive from done; either use
+	//sufficiently buffered channels or run Find in a goroutine. When Find is
+	//done, it should close its resultsChan to signal no more results will be
+	//coming.
 	Find(grid *Grid, results chan *SolveStep, done chan bool)
 	//TODO: if we keep this signature, we should consider having each find method actually wrap its internals in a goRoutine
 	//to make it safer to use--although that would probably require a new signature.

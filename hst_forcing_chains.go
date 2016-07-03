@@ -79,6 +79,8 @@ func (self *forcingChainsTechnique) Find(grid *Grid, results chan *SolveStep, do
 	 *
 	 */
 
+	defer close(results)
+
 	getter := grid.queue().NewGetter()
 
 	for {

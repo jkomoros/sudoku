@@ -250,11 +250,10 @@ func getStepsForTechnique(technique SolveTechnique, grid *Grid, fetchAll bool) [
 	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
 	go func() {
 		technique.Find(grid, results, done)
-		//Since we're the only technique running, as soon as this one returns, we can
-		//signal up that no more results are coming.
-		close(results)
+		//technique.Find is supposed to close the results channel when it's done.
 	}()
 
+	//IF WE DEADLOCK HERE, a technique is not calling close(results) like it should!
 	for step := range results {
 		steps = append(steps, step)
 		if !fetchAll {

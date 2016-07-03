@@ -49,6 +49,8 @@ func (self *xwingTechnique) Description(step *SolveStep) string {
 
 func (self *xwingTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 
+	defer close(results)
+
 	getter := self.getter(grid)
 
 	//For each number

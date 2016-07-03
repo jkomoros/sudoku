@@ -46,6 +46,7 @@ func (self *obviousInCollectionTechnique) Description(step *SolveStep) string {
 
 func (self *obviousInCollectionTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 	obviousInCollection(grid, self, self.getter(grid), results, done)
+	close(results)
 }
 
 func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice, results chan *SolveStep, done chan bool) {
@@ -99,6 +100,8 @@ func (self *nakedSingleTechnique) Description(step *SolveStep) string {
 }
 
 func (self *nakedSingleTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
+
+	defer close(results)
 	//TODO: test that this will find multiple if they exist.
 	getter := grid.queue().NewGetter()
 	for {
@@ -176,6 +179,7 @@ func (self *hiddenSingleTechnique) Description(step *SolveStep) string {
 func (self *hiddenSingleTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 	//TODO: test that if there are multiple we find them both.
 	necessaryInCollection(grid, self, self.getter(grid), results, done)
+	close(results)
 }
 
 func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice, results chan *SolveStep, done chan bool) {

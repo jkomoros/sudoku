@@ -41,6 +41,8 @@ func (self *swordfishTechnique) Description(step *SolveStep) string {
 
 func (self *swordfishTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
 
+	defer close(results)
+
 	getter := self.getter(grid)
 
 	//For this technique, the primary access is the first type of group we look at to find
