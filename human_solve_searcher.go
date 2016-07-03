@@ -432,7 +432,9 @@ func (n *humanSolveSearcher) DoneSearching() bool {
 	lenItemsToExplore := len(n.itemsToExplore)
 	n.itemsToExploreLock.Unlock()
 
-	if float64(lenItemsToExplore) > float64(len(Techniques))*0.5 {
+	//TODO: this percentage of Techniques len is totaly arbitrary. Either set
+	//it in a way that seems more principled, or allow it to be configured.
+	if float64(lenItemsToExplore) > float64(len(Techniques))*0.25 {
 		if n.options.NumStraightforwardOptionsToEarlyExit <= n.straightforwardItemsCount {
 			return true
 		}
