@@ -701,72 +701,15 @@ func (n *humanSolveSearcher) NewSearch() {
 
 	workItems := make(chan *humanSolveWorkItem)
 	foundStep := make(chan *SolveStep)
-	newItems := make(chan *humanSolveItem)
+	items := make(chan *humanSolveItem)
 
 	//TODO: make this configurable
 	numFindThreads := 10
 
 	var findThreadWaitGroup sync.WaitGroup
-	var itemCreatorsWaitGroup sync.WaitGroup
-
-	//This is the fan-in closer for newItems. We can't start running it until
-	//at least one inbound-thread has been created (which happens inside of
-	//the work item generator thread)
-	newItemsCloser := func() {
-		itemCreatorsWaitGroup.Wait()
-		close(newItems)
-	}
 
 	//The thread to generate work items
-	go func() {
-		//When we return close down workItems to signal downstream things to
-		//close.
-		defer close(workItems)
-
-		//We'll loop through each step in searcher, and then for each step
-		//generate a work item per technique.
-
-		item := n.NextPossibleStep()
-
-		firstRun := true
-
-		//TODO: test that if len(techniques) is less than len(threads) that we
-		//don't end early here because we loop back up and find step == nil
-		//and exit, even though more work will come.
-		for item != nil {
-
-			stepsChan := make(chan *SolveStep)
-
-			itemCreatorsWaitGroup.Add(1)
-			go humanSolveSearcherItemCreator(stepsChan, newItems, item, done, itemCreatorsWaitGroup)
-
-			if firstRun {
-				//We want to run the fan-in closer for newItems, but only
-				//after at least one item has been added to the waitGroup already
-				go newItemsCloser()
-				firstRun = false
-			}
-
-			workItem := item.NextSearchWorkItem()
-
-			for workItem != nil {
-
-				//Tell each workItem where to send its results
-				workItem.results = stepsChan
-
-				select {
-				case workItems <- workItem:
-				case <-done:
-					return
-				}
-
-				workItem = item.NextSearchWorkItem()
-			}
-
-			item = n.NextPossibleStep()
-
-		}
-	}()
+	go humanSolveSearcherWorkItemGenerator(n, workItems, items, done)
 
 	findThreadFunc := func() {
 		//When we return, tell the watcher thread we're done
@@ -790,7 +733,7 @@ func (n *humanSolveSearcher) NewSearch() {
 	//On the main thread we'll collect all of the humanSolveItems from
 	//newItems and add them to searcher.
 
-	for item := range newItems {
+	for item := range items {
 		item.Add()
 		if n.DoneSearching() {
 			return
@@ -799,6 +742,70 @@ func (n *humanSolveSearcher) NewSearch() {
 
 }
 
+//humanSolveSearcherWorkItemGenerator is used in searcher.Search to generate
+//the stream of WorkItems.
+func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems chan *humanSolveWorkItem, items chan *humanSolveItem, done chan bool) {
+	//When we return close down workItems to signal downstream things to
+	//close.
+	defer close(workItems)
+
+	var itemCreatorsWaitGroup sync.WaitGroup
+
+	//We'll loop through each step in searcher, and then for each step
+	//generate a work item per technique.
+
+	item := searcher.NextPossibleStep()
+
+	firstRun := true
+
+	//TODO: test that if len(techniques) is less than len(threads) that we
+	//don't end early here because we loop back up and find step == nil
+	//and exit, even though more work will come.
+	for item != nil {
+
+		stepsChan := make(chan *SolveStep)
+
+		itemCreatorsWaitGroup.Add(1)
+		go humanSolveSearcherItemCreator(stepsChan, items, item, done, itemCreatorsWaitGroup)
+
+		if firstRun {
+			//We want to run the fan-in closer for newItems, but only
+			//after at least one item has been added to the waitGroup already
+			go humanSolveSearcherItemCreatorCloser(itemCreatorsWaitGroup, items)
+			firstRun = false
+		}
+
+		workItem := item.NextSearchWorkItem()
+
+		for workItem != nil {
+
+			//Tell each workItem where to send its results
+			workItem.results = stepsChan
+
+			select {
+			case workItems <- workItem:
+			case <-done:
+				return
+			}
+
+			workItem = item.NextSearchWorkItem()
+		}
+
+		item = searcher.NextPossibleStep()
+
+	}
+}
+
+//humanSolveSearcherItemCreatorCloser is the thing that waits for all of the
+//ItemCreator threads to be done and then closes the downstream channel.
+func humanSolveSearcherItemCreatorCloser(wg sync.WaitGroup, newItems chan *humanSolveItem) {
+	wg.Wait()
+	close(newItems)
+}
+
+//humanSolveSearcherItemCreator is used in searcher.Search. It takes a stream
+//of SolveSteps provided by techniques, and then creates new humanSolveItems
+//to pass down the pipeline.
 func humanSolveSearcherItemCreator(steps chan *SolveStep, results chan *humanSolveItem, item *humanSolveItem, done chan bool, wg sync.WaitGroup) {
 	defer wg.Done()
 	//TODO: steps will never be closed because no Technique knows it's the
