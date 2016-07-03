@@ -559,26 +559,12 @@ func (n *humanSolveSearcher) Search() {
 
 }
 
-//humanSolveSearcherFindThreadCloser takes care of shuttling the solveSteps
-//from the temporary resultsChan to the long-term one.
-func humanSolveSearcherFindThreadSolveStepShuttler(tempResultsChan chan *SolveStep, resultsChan chan *SolveStep, wg *sync.WaitGroup, done chan bool) {
-	defer wg.Done()
-	for step := range tempResultsChan {
-		select {
-		case resultsChan <- step:
-		case <-done:
-			return
-		}
-	}
-}
-
 //humanSolveSearcherFindThread is a thread that takes in workItems and runs
 //the specified technique on the specified grid.
 func humanSolveSearcherFindThread(workItems chan *humanSolveWorkItem, done chan bool) {
 	for workItem := range workItems {
-		resultsChan := make(chan *SolveStep)
-		go humanSolveSearcherFindThreadSolveStepShuttler(resultsChan, workItem.results, workItem.resultsWaitGroup, done)
-		workItem.technique.Find(workItem.grid, resultsChan, done)
+		workItem.technique.Find(workItem.grid, workItem.results, done)
+		workItem.resultsWaitGroup.Done()
 	}
 }
 
