@@ -807,10 +807,7 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 			if firstWorkItem {
 				//We have to wait until we've added one item to the wait group
 				//to spin up its closer.
-				go func() {
-					stepsChanWaitGroup.Wait()
-					close(stepsChan)
-				}()
+				go humanSolveSearcherItemStepsCloser(&stepsChanWaitGroup, stepsChan)
 				firstWorkItem = false
 			}
 
@@ -826,6 +823,14 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 		item = searcher.NextPossibleStep()
 
 	}
+}
+
+//humanSolveSearcherItemStepsCloser closes the results chan that is craeated
+//per item we're processing once all workItems related to it have finished
+//shuttling solveSteps through it.
+func humanSolveSearcherItemStepsCloser(wg *sync.WaitGroup, stepsChan chan *SolveStep) {
+	wg.Wait()
+	close(stepsChan)
 }
 
 //humanSolveSearcherItemCreatorCloser is the thing that waits for all of the
