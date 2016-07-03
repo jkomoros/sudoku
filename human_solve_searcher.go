@@ -767,6 +767,9 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSt
 		return nil, nil
 	}
 
+	//TODO: in cases where only guesses are available (e.g. i-sudoku/only-
+	//guesses.doku), percentage becomes NaN.
+
 	distri := make(ProbabilityDistribution, len(searcher.completedItems))
 	var resultSteps []*CompoundSolveStep
 
