@@ -610,11 +610,13 @@ func (n *humanSolveSearcher) NewSearch() {
 
 			The pipeline continues until one of the following things are true:
 
-			1) No more work items will be generated. This is quite rare in
-			practice, because as long as Guess is in the set of
+			1) No more work items will be generated. This is reasonably rare
+			in practice, because as long as Guess is in the set of
 			TechniquesToUse there will almost always be SOME item. When this
 			shuts down the pipeline is already mostly idle anyway so it's just
-			a matter of tidying up.
+			a matter of tidying up. However, this will always happen in the
+			last few steps of solving a puzzle when there's only one move to
+			make anyway.
 
 			2) We have enough at least NumItemsToCompute items in
 			searcher.completedItems and thus can exit early. When this happens
@@ -675,10 +677,6 @@ func (n *humanSolveSearcher) NewSearch() {
 			the target, we return, which automatically closes allDone and
 			initiates a shutdown of the rest of the pipeline.
 	*/
-
-	//TODO: implement the pipeline described in the above comment. We can skip
-	//exit condition #1 at first since it's basically impossible to hit unless
-	//GuessTechnique is not included.
 
 	//TODO: implement exit condition #1.
 
