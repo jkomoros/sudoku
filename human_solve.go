@@ -105,6 +105,11 @@ type HumanSolveOptions struct {
 	//NoGuess specifies that even if no other techniques work, the HumanSolve
 	//should not fall back on guessing, and instead just return failure.
 	NoGuess bool
+	//How many simple CompoundSolveSteps (e.g. with no PrecursorSteps, and
+	//non-Guess) do we need before we can exit early?
+	NumStraightforwardOptionsToEarlyExit int
+	//TODO: Rename this ^ to something better and move to the right point in
+	//the config.
 
 	//TODO: figure out how to test that we do indeed use different values of
 	//numOptionsToCalculate.
@@ -120,6 +125,7 @@ func DefaultHumanSolveOptions() *HumanSolveOptions {
 	result.NumOptionsToCalculate = 10
 	result.TechniquesToUse = Techniques
 	result.NoGuess = false
+	result.NumStraightforwardOptionsToEarlyExit = 3
 
 	//Have to set even zero valued properties, because the Options isn't
 	//necessarily default initalized.
@@ -155,6 +161,10 @@ func (self *HumanSolveOptions) validate() *HumanSolveOptions {
 
 	if self.NumOptionsToCalculate < 1 {
 		self.NumOptionsToCalculate = 1
+	}
+
+	if self.NumStraightforwardOptionsToEarlyExit < 1 {
+		self.NumStraightforwardOptionsToEarlyExit = 1
 	}
 
 	//Remove any GuessTechniques that might be in there because

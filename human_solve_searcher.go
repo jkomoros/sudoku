@@ -89,6 +89,11 @@ type humanSolveSearcherHeap []*humanSolveItem
 type humanSolveSearcher struct {
 	itemsToExplore humanSolveSearcherHeap
 	completedItems []*humanSolveItem
+	//The number of straightforward completed items. That is,
+	//CompoundSolveSteps with no precursorSteps that are not Guesses. We keep
+	//track of this to figure out when we can early bail if we have enough of
+	//them.
+	straightforwardItemsCount int
 	//TODO: keep track of stats: how big the frontier was at the end of each
 	//CompoundSolveStep. Then provide max/mean/median.
 
@@ -315,9 +320,13 @@ func (p *humanSolveItem) Add() {
 	if p.added {
 		return
 	}
+	//TODO: this logic really should be in searcher, not item.
 	p.added = true
 	if p.IsComplete() {
 		p.searcher.completedItems = append(p.searcher.completedItems, p)
+		if p.step.Technique != GuessTechnique {
+			p.searcher.straightforwardItemsCount++
+		}
 	} else {
 		p.searcher.AddItemToExplore(p)
 	}
@@ -416,6 +425,9 @@ func (n *humanSolveSearcher) ItemValueChanged(item *humanSolveItem) {
 //because we have enough CompletedItems.
 func (n *humanSolveSearcher) DoneSearching() bool {
 	if n.options == nil {
+		return true
+	}
+	if n.options.NumStraightforwardOptionsToEarlyExit <= n.straightforwardItemsCount {
 		return true
 	}
 	return n.options.NumOptionsToCalculate <= len(n.completedItems)
