@@ -700,27 +700,17 @@ func (n *humanSolveSearcher) NewSearch() {
 	defer close(done)
 
 	workItems := make(chan *humanSolveWorkItem)
-	foundStep := make(chan *SolveStep)
 	items := make(chan *humanSolveItem)
 
 	//TODO: make this configurable
 	numFindThreads := 10
 
-	var findThreadWaitGroup sync.WaitGroup
-
 	//The thread to generate work items
 	go humanSolveSearcherWorkItemGenerator(n, workItems, items, done)
 
-	findThreadWaitGroup.Add(numFindThreads)
 	for i := 0; i < numFindThreads; i++ {
-		go humanSolveSearcherFindThread(findThreadWaitGroup, workItems, done)
+		go humanSolveSearcherFindThread(workItems, done)
 	}
-
-	//Close the fan-in once all finder threads are done.
-	go func() {
-		findThreadWaitGroup.Wait()
-		close(foundStep)
-	}()
 
 	//On the main thread we'll collect all of the humanSolveItems from
 	//newItems and add them to searcher.
@@ -736,9 +726,7 @@ func (n *humanSolveSearcher) NewSearch() {
 
 //humanSolveSearcherFindThread is a thread that takes in workItems and runs
 //the specified technique on the specified grid.
-func humanSolveSearcherFindThread(findThreadWaitGroup sync.WaitGroup, workItems chan *humanSolveWorkItem, done chan bool) {
-	//When we return, tell the watcher thread we're done
-	defer findThreadWaitGroup.Done()
+func humanSolveSearcherFindThread(workItems chan *humanSolveWorkItem, done chan bool) {
 	for workItem := range workItems {
 		workItem.technique.Find(workItem.grid, workItem.results, done)
 	}
