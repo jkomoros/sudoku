@@ -267,18 +267,18 @@ func TestTwiddleChainedSteps(t *testing.T) {
 	}
 
 	expected := []probabilityTweak{
-		3.727593720314952e+08,
-		517947.4679231202,
-		1.0,
+		1.3894954943731375,
+		2.6826957952797263,
+		10.0,
 	}
 
-	lastResult := probabilityTweak(math.MaxFloat64)
+	lastResult := probabilityTweak(math.SmallestNonzeroFloat64)
 
 	for i, step := range possibilities {
 		result := twiddleChainedSteps(step, lastStep, nil, grid)
 		expectedResult := expected[i]
 
-		if result >= lastResult {
+		if result <= lastResult {
 			t.Error("Tweak Chained Steps Weights didn't tweak things in the right direction: ", result, "at", i)
 		}
 		lastResult = result

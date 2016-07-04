@@ -205,7 +205,8 @@ func TestChainDissimilarity(t *testing.T) {
 
 	equivalenceGroup := -1
 
-	for _, test := range tests {
+	for i := len(tests) - 1; i >= 0; i-- {
+		test := tests[i]
 		if !test.equivalentToPrevious {
 			equivalenceGroup++
 		}
