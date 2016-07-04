@@ -75,6 +75,13 @@ import (
 // locks in grids? One option would be: what if just greedily created all of
 // the caches and cellslices in a grid so we can get rid of many of the locks?
 
+//_USE_NEW_SEARCH makes it one line to swap between new and old search as the
+//default searh method. Purely for testing convenience.
+const _USE_NEW_SEARCH = false
+
+//TODO: Remove _USE_NEW_SEARCH once we figure out which of New or Old search
+//we'll rely on.
+
 //humanSolveSearcherHeap is what we will use for the heap implementation in
 //searcher. We put it as a seaprate time to avoid having to have
 //heap.Interface methods on searcher itself, since for proper use you're not
@@ -618,10 +625,12 @@ func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
 	return result
 }
 
-//Search is the main workhorse of HumanSolve Search, which explores all of the
-//itemsToExplore (potentially bailing early if enough completed items are
+//NewSearch is the main workhorse of HumanSolve Search, which explores all of
+//the itemsToExplore (potentially bailing early if enough completed items are
 //found). When Search is done, searcher.completedItems will contain the
-//possibilities to choose from.
+//possibilities to choose from. Although it's a cleaner architecture than
+//OldSearch, it's quite a bit slower (roughly 30%) which is why you have to
+//choose to use it.
 func (n *humanSolveSearcher) NewSearch() {
 
 	/*
@@ -864,11 +873,21 @@ func humanSolveSearcherItemCreator(steps chan *SolveStep, results chan *humanSol
 	}
 }
 
-//Search is the old version that relies on humanSolveItem.Explore()
+//Search picks between either NewSearch or OldSearch based on the n.options.
 func (n *humanSolveSearcher) Search() {
+	//TODO: rip out NewSearch if we aren't going to go with it.
 
-	//TODO: add something that flips to Search or NewSearch based on a
-	//humanSolveOptions flag.
+	if n.options.useNewSearch {
+		n.NewSearch()
+	} else {
+		n.OldSearch()
+	}
+}
+
+//OldSearch is the old version that relies on humanSolveItem.Explore().
+//Although it's architechturally worse, it still beats so-called NewSearch by
+//30%.
+func (n *humanSolveSearcher) OldSearch() {
 
 	//TODO: once NewSearch is ready, kill this and hSI.Explore() and rename
 	//NewSearch to Search.

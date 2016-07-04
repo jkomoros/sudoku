@@ -268,6 +268,7 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 		Techniques,
 		false,
 		3,
+		_USE_NEW_SEARCH,
 		nil,
 	}
 
@@ -294,6 +295,7 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 		nil,
 		false,
 		-1,
+		false,
 		nil,
 	}
 
@@ -302,6 +304,7 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 		Techniques,
 		false,
 		1,
+		false,
 		nil,
 	}
 
