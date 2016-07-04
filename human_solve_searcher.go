@@ -712,6 +712,14 @@ func (n *humanSolveSearcher) NewSearch() {
 	//solves and make sure that for example the #3 goroutines aren't hanging
 	//around.
 
+	//TODO: consider changing the signature of technique.Find() to take a
+	//findHelper object that has a foundResult() bool shouldExitEarly and
+	//shouldEarlyExit() method. That will make it easier to re-architect away
+	//from channel pipelines _much_ easier. For example, we might be able to
+	//make it so all techniques do synchronous work when finding a technique,
+	//so we really do reduce down to a handful of synchronous threads just
+	//contending on the searcher with the AddStep lock.
+
 	//done will be closed when this main function returns, signaling to all
 	//created goroutines that they should return.
 	done := make(chan bool)
@@ -782,6 +790,9 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 		workItem := item.NextSearchWorkItem()
 
 		for workItem != nil {
+
+			//TODO: consider calling searcher.DoneSearching() here, too, to
+			//avoid pumping workItems through earlier.
 
 			//Tell each workItem where to send its results
 			workItem.results = stepsChan
@@ -855,6 +866,9 @@ func humanSolveSearcherItemCreator(steps chan *SolveStep, results chan *humanSol
 
 //Search is the old version that relies on humanSolveItem.Explore()
 func (n *humanSolveSearcher) Search() {
+
+	//TODO: add something that flips to Search or NewSearch based on a
+	//humanSolveOptions flag.
 
 	//TODO: once NewSearch is ready, kill this and hSI.Explore() and rename
 	//NewSearch to Search.
