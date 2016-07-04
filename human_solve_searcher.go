@@ -385,6 +385,169 @@ func (p *humanSolveItem) NextSearchWorkItem() *humanSolveWorkItem {
 
 }
 
+//Explore is the workhorse of HumanSolve; it's the thing that identifies all
+//of the new steps rooted from here in parallel (and bails early if we've
+//found enough results)
+func (p *humanSolveItem) Explore() {
+
+	//TODO: this must be the source of the extraordinary slowdown with this
+	//approach. It used to be that we spun up all of these threads and book-
+	//keeping once per step in the solution. But now, if we look for ten
+	//solutions for each CompoundSolveStep we return which means we on average
+	//explore, say, 15 possibilities, and the Steps() len of each
+	//CompoundSolveStep is, say, 1.2 on average, then we're netting 12.5x the
+	//bookkeeping overhead which, given that that's only, say, half of the
+	//cost of the finds, would give us roughly 6x slowdown, which is what we
+	//see.  A better approach is to spin up this searching machinery only once
+	//per humanSolveSingleStep. Ideally we spin up the machinery and then have
+	//a generator-like pattern that feeds in the next grid/technique pairs as
+	//more on needed.
+
+	//A new struct that has pairs of {humanSolveItem, Technique} (note: since
+	//gridToUse is implicitly derived, that will likely mean that memoizing
+	//grid makes sense?). have workLoop take a workItems() generator that
+	//returns those pairs. It keeps track of which item we're on, and once
+	//it's fed in all of the work, it pops the next one off the heap and
+	//starts chewing through that. (Doesn't that mean that we have to protect
+	//the heap with a mutex?)
+
+	//TODO: remove this method once searcher.Search() is full implemented.
+
+	/*
+
+		The basic idea is to parellelize all of the technique's.Find
+		work.
+
+		Each technique is designed so it will bail early if we tell it
+		(via closing the done channel) we've already got enough steps
+		found.
+
+		We only want to spin up numTechniquesToStartByDefault # of
+		techniques at a time, because likely we'll find enough steps
+		before getting to the harder (and generally more expensive to
+		calculate) techniques if earlier ones fail.
+
+		There is one thread for each currently running technique's
+		Find. The main thread collects results and figures out when it
+		has enough that all of the other threads can stop searching
+		(or, when it hears that no more results will be coming in and
+		it should just stop). There are two other threads. One waits
+		until the waitgroup is all done and then signals that back to
+		the main thread by closing resultsChan. The other thread is
+		notified every time a technique thread is done, and decides
+		whether or not it should start a new technique thread now. The
+		interplay of those last two threads is very timing sensitive;
+		if wg.Done were called before we'd started up the new
+		technique, we could return from the whole endeavor before
+		getting enough steps collected.
+
+	*/
+
+	//TODO: make this configurable, and figure out what the optimal values are
+	numTechniquesToStartByDefault := 10
+
+	techniques := p.searcher.options.effectiveTechniquesToUse()
+
+	//Handle the case where we were given a short list of techniques.
+	if len(techniques) < numTechniquesToStartByDefault {
+		numTechniquesToStartByDefault = len(techniques)
+	}
+
+	//Leave some room in resultsChan so all of the techniques don't have to block as often
+	//waiting for the mainthread to clear resultsChan. Leads to a 20% reduction in time compared
+	//to unbuffered.
+	//We'll close this channel to signal the collector that no more results are coming.
+	resultsChan := make(chan *SolveStep, len(techniques))
+	done := make(chan bool)
+
+	//Deliberately unbuffered; we want it to run sync inside of startTechnique
+	//the thread that's waiting on it will pass its own chan that it should send to when it's done
+	techniqueFinished := make(chan chan bool)
+
+	gridToUse := p.Grid()
+
+	var wg sync.WaitGroup
+
+	//The next technique to spin up
+	nextTechniqueIndex := 0
+
+	//We'll be kicking off this routine from multiple places so just define it once
+	startTechnique := func(theTechnique SolveTechnique) {
+
+		theTechnique.Find(gridToUse, resultsChan, done)
+		//This is where a new technique should be kicked off, if one's going to be, before we tell the waitgroup that we're done.
+		//We need to communicate synchronously with that thread
+		comms := make(chan bool)
+		techniqueFinished <- comms
+		//Wait to hear back that a new technique is started, if one is going to be.
+		<-comms
+
+		//Okay, now the other thread has either started a new technique going, or hasn't.
+		wg.Done()
+	}
+
+	//Get the first batch of techniques going
+	wg.Add(numTechniquesToStartByDefault)
+
+	//Since Techniques is in sorted order, we're starting off with the easiest techniques.
+	for nextTechniqueIndex = 0; nextTechniqueIndex < numTechniquesToStartByDefault; nextTechniqueIndex++ {
+		go startTechnique(techniques[nextTechniqueIndex])
+	}
+
+	//Listen for when all items are done and signal the collector to stop collecting
+	go func() {
+		wg.Wait()
+		close(resultsChan)
+		close(techniqueFinished)
+	}()
+
+	//The thread that will kick off new techinques
+	go func() {
+		for {
+			returnChan, ok := <-techniqueFinished
+			if !ok {
+				//If channel is closed, that's our cue to die.
+				return
+			}
+			//Start a technique here, if we're going to.
+			//First, check if the collector has signaled that we're all done
+			select {
+			case <-done:
+				//Don't start a new one
+			default:
+				//Potentially start a new technique going as things aren't shutting down yet.
+				//Is there another technique?
+				if nextTechniqueIndex < len(techniques) {
+					wg.Add(1)
+					go startTechnique(techniques[nextTechniqueIndex])
+					//Next time we're considering starting a new technique, start the next one
+					nextTechniqueIndex++
+				}
+			}
+
+			//Tell our caller that we're done
+			returnChan <- true
+		}
+	}()
+
+	//Collect the results as long as more are coming
+OuterLoop:
+	for {
+		result, ok := <-resultsChan
+		if !ok {
+			//resultsChan was closed, which is our signal that no more results are coming and we should break
+			break OuterLoop
+		}
+		p.AddStep(result)
+		//Do we have enough steps accumulate?
+		if p.searcher.DoneSearching() {
+			//Communicate to all still-running routines that they can stop
+			close(done)
+			break OuterLoop
+		}
+	}
+}
+
 /************************************************************
  *
  * humanSolveSearcher implementation
@@ -459,7 +622,7 @@ func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
 //itemsToExplore (potentially bailing early if enough completed items are
 //found). When Search is done, searcher.completedItems will contain the
 //possibilities to choose from.
-func (n *humanSolveSearcher) Search() {
+func (n *humanSolveSearcher) NewSearch() {
 
 	/*
 			The pipeline starts by generating humanSolveWorkItems, and at the
@@ -687,6 +850,34 @@ func humanSolveSearcherItemCreator(steps chan *SolveStep, results chan *humanSol
 		case <-done:
 			return
 		}
+	}
+}
+
+//Search is the old version that relies on humanSolveItem.Explore()
+func (n *humanSolveSearcher) Search() {
+
+	//TODO: once NewSearch is ready, kill this and hSI.Explore() and rename
+	//NewSearch to Search.
+
+	step := n.NextPossibleStep()
+
+	for step != nil && !n.DoneSearching() {
+		//Explore step, finding all possible steps that apply from here and
+		//adding to the frontier of itemsToExplore.
+
+		//When adding a step, searcher notes if it's completed (thus going in
+		//CompletedItems) or not (thus going in the itemsToExplore)
+
+		//Once searcher.CompletedItems is at least
+		//options.NumOptionsToCalculate we can bail out of looking for more
+		//steps, shut down other threads, and break out of this loop.
+
+		step.Explore()
+
+		//We do NOT add the explored item back into the frontier.
+
+		step = n.NextPossibleStep()
+
 	}
 }
 
