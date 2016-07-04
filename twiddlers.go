@@ -188,6 +188,9 @@ func twiddleChainedSteps(currentStep *SolveStep, inProgressCompoundStep []*Solve
 
 	similarity := currentStep.TargetCells.chainSimilarity(lastModifiedCells)
 
-	return probabilityTweak(math.Pow(10, similarity))
+	//We want it to be dissimilar is larger; flip it.
+	dissimilarity := 1.0 - similarity
+
+	return probabilityTweak(math.Pow(10, dissimilarity))
 
 }

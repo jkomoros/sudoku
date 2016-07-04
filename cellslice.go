@@ -397,7 +397,7 @@ func (self CellSlice) chainSimilarity(other CellSlice) float64 {
 	result = result / 2.0
 
 	//Currently similar things are 0 and dissimilar things are 1.0; flip it.
-	return result
+	return 1.0 - result
 
 }
 
