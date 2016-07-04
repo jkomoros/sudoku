@@ -75,15 +75,36 @@ import (
 // locks in grids? One option would be: what if just greedily created all of
 // the caches and cellslices in a grid so we can get rid of many of the locks?
 
+//_USE_NEW_SEARCH makes it one line to swap between new and old search as the
+//default searh method. Purely for testing convenience.
+const _USE_NEW_SEARCH = false
+
+//TODO: Remove _USE_NEW_SEARCH once we figure out which of New or Old search
+//we'll rely on.
+
+//humanSolveSearcherHeap is what we will use for the heap implementation in
+//searcher. We put it as a seaprate time to avoid having to have
+//heap.Interface methods on searcher itself, since for proper use you're not
+//supposed to call those directly. So putting them on a sub-struct helps hide
+//them a bit.
+type humanSolveSearcherHeap []*humanSolveItem
+
 //humanSolveSearcher keeps track of the search for a single new
 //CompoundSolveStep. It keeps track of the humanSolveItems that are in-
 //progress (itemsToExplore) and the items that are fully complete (that is,
 //that are terminated by a FillStep and valid to return as an option).
 type humanSolveSearcher struct {
-	itemsToExplore []*humanSolveItem
+	itemsToExplore humanSolveSearcherHeap
 	completedItems []*humanSolveItem
+	//The number of straightforward completed items. That is,
+	//CompoundSolveSteps with no precursorSteps that are not Guesses. We keep
+	//track of this to figure out when we can early bail if we have enough of
+	//them.
+	straightforwardItemsCount int
 	//TODO: keep track of stats: how big the frontier was at the end of each
 	//CompoundSolveStep. Then provide max/mean/median.
+
+	itemsToExploreLock sync.Mutex
 
 	//Various options frozen in at creation time that various methods need
 	//access to.
@@ -106,11 +127,24 @@ type twiddleRecord struct {
 //derived recursively from the parents.
 type humanSolveItem struct {
 	//All humanSolveItem, except the initial in a searcher, must have a parent.
-	parent    *humanSolveItem
-	step      *SolveStep
-	twiddles  []twiddleRecord
-	heapIndex int
-	searcher  *humanSolveSearcher
+	parent     *humanSolveItem
+	step       *SolveStep
+	twiddles   []twiddleRecord
+	heapIndex  int
+	searcher   *humanSolveSearcher
+	cachedGrid *Grid
+	//The index of the next techinque to return
+	techniqueIndex int
+	added          bool
+}
+
+//humanSolveWorkItem represents a unit of work that should be done during the
+//search.
+type humanSolveWorkItem struct {
+	grid             *Grid
+	technique        SolveTechnique
+	results          chan *SolveStep
+	resultsWaitGroup *sync.WaitGroup
 }
 
 //humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
@@ -195,20 +229,25 @@ func humanSolveSearchSingleStep(grid *Grid, options *HumanSolveOptions, previous
 
 //Grid returns a grid with all of this item's steps applied
 func (p *humanSolveItem) Grid() *Grid {
-	//TODO: it's conceivable that it might be best to memoize this... It's
-	//unlikely thoguh, since grid will only be accessed once and many items
-	//will never have their grids accessed.
-	if p.searcher.grid == nil {
-		return nil
+
+	if p.cachedGrid == nil {
+
+		var result *Grid
+
+		if p.searcher.grid == nil {
+			result = nil
+		} else if p.parent == nil {
+			result = p.searcher.grid.Copy()
+		} else {
+			result = p.parent.Grid().Copy()
+			p.step.Apply(result)
+		}
+
+		p.cachedGrid = result
 	}
 
-	result := p.searcher.grid.Copy()
+	return p.cachedGrid
 
-	for _, step := range p.Steps() {
-		step.Apply(result)
-	}
-
-	return result
 }
 
 //Goodness is how good the next step chain is in total. A LOWER Goodness is better. There's not enough precision between 0.0 and
@@ -263,7 +302,9 @@ func (p *humanSolveItem) Steps() []*SolveStep {
 	return append(p.parent.Steps(), p.step)
 }
 
-func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
+//createNewItem creates a new humanSolveItem based on this step, but NOT YET
+//ADDED to searcher. call item.Add() to do that.
+func (p *humanSolveItem) CreateNewItem(step *SolveStep) *humanSolveItem {
 	result := &humanSolveItem{
 		parent:    p,
 		step:      step,
@@ -277,11 +318,31 @@ func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
 		tweak := twiddler.f(step, inProgressCompoundStep, p.searcher.previousCompoundSteps, grid)
 		result.Twiddle(tweak, twiddler.name)
 	}
-	if result.IsComplete() {
-		p.searcher.completedItems = append(p.searcher.completedItems, result)
-	} else {
-		heap.Push(p.searcher, result)
+	return result
+}
+
+//Injects this item into to the searcher.
+func (p *humanSolveItem) Add() {
+	//make sure we only add items once.
+	if p.added {
+		return
 	}
+	//TODO: this logic really should be in searcher, not item.
+	p.added = true
+	if p.IsComplete() {
+		p.searcher.completedItems = append(p.searcher.completedItems, p)
+		if p.step.Technique != GuessTechnique {
+			p.searcher.straightforwardItemsCount++
+		}
+	} else {
+		p.searcher.AddItemToExplore(p)
+	}
+}
+
+//AddStep basically just does p.CreateNewItem, then item.Add()
+func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
+	result := p.CreateNewItem(step)
+	result.Add()
 	return result
 }
 
@@ -294,9 +355,7 @@ func (p *humanSolveItem) Twiddle(amount probabilityTweak, description string) {
 		return
 	}
 	p.twiddles = append(p.twiddles, twiddleRecord{description, amount})
-	if p.heapIndex >= 0 {
-		heap.Fix(p.searcher, p.heapIndex)
-	}
+	p.searcher.ItemValueChanged(p)
 }
 
 func (p *humanSolveItem) String() string {
@@ -309,6 +368,28 @@ func (p *humanSolveItem) IsComplete() bool {
 		return false
 	}
 	return steps[len(steps)-1].Technique.IsFill()
+}
+
+//NextSearchWorkItem returns the next humanSolveWorkItem in this item to do:
+//the techinque to run on a given grid. If no more work is left to be done,
+//returns nil.
+func (p *humanSolveItem) NextSearchWorkItem() *humanSolveWorkItem {
+	//TODO: the use of effectiveTechniquesToUse here is another nail in the
+	//coffin for treaing guess specially.
+
+	techniquesToUse := p.searcher.options.effectiveTechniquesToUse()
+
+	if p.techniqueIndex >= len(techniquesToUse) {
+		return nil
+	}
+
+	result := &humanSolveWorkItem{
+		grid:      p.Grid(),
+		technique: techniquesToUse[p.techniqueIndex],
+	}
+	p.techniqueIndex++
+	return result
+
 }
 
 //Explore is the workhorse of HumanSolve; it's the thing that identifies all
@@ -336,6 +417,8 @@ func (p *humanSolveItem) Explore() {
 	//it's fed in all of the work, it pops the next one off the heap and
 	//starts chewing through that. (Doesn't that mean that we have to protect
 	//the heap with a mutex?)
+
+	//TODO: remove this method once searcher.Search() is full implemented.
 
 	/*
 
@@ -397,6 +480,7 @@ func (p *humanSolveItem) Explore() {
 
 	//We'll be kicking off this routine from multiple places so just define it once
 	startTechnique := func(theTechnique SolveTechnique) {
+
 		theTechnique.Find(gridToUse, resultsChan, done)
 		//This is where a new technique should be kicked off, if one's going to be, before we tell the waitgroup that we're done.
 		//We need to communicate synchronously with that thread
@@ -420,8 +504,6 @@ func (p *humanSolveItem) Explore() {
 	//Listen for when all items are done and signal the collector to stop collecting
 	go func() {
 		wg.Wait()
-		//All of the techniques must be done here; no one can send on resultsChan at this point.
-		//Signal to the collector that it should break out.
 		close(resultsChan)
 		close(techniqueFinished)
 	}()
@@ -485,13 +567,28 @@ func newHumanSolveSearcher(grid *Grid, previousCompoundSteps []*CompoundSolveSte
 		options:               options,
 		previousCompoundSteps: previousCompoundSteps,
 	}
-	heap.Init(searcher)
+	heap.Init(&searcher.itemsToExplore)
 	initialItem := &humanSolveItem{
 		searcher:  searcher,
 		heapIndex: -1,
 	}
-	heap.Push(searcher, initialItem)
+	heap.Push(&searcher.itemsToExplore, initialItem)
 	return searcher
+}
+
+func (n *humanSolveSearcher) AddItemToExplore(item *humanSolveItem) {
+	n.itemsToExploreLock.Lock()
+	heap.Push(&n.itemsToExplore, item)
+	n.itemsToExploreLock.Unlock()
+}
+
+func (n *humanSolveSearcher) ItemValueChanged(item *humanSolveItem) {
+	if item.heapIndex < 0 {
+		return
+	}
+	n.itemsToExploreLock.Lock()
+	heap.Fix(&n.itemsToExplore, item.heapIndex)
+	n.itemsToExploreLock.Unlock()
 }
 
 //DoneSearching will return true when no more items need to be explored
@@ -500,15 +597,321 @@ func (n *humanSolveSearcher) DoneSearching() bool {
 	if n.options == nil {
 		return true
 	}
+
+	n.itemsToExploreLock.Lock()
+	lenItemsToExplore := len(n.itemsToExplore)
+	n.itemsToExploreLock.Unlock()
+
+	//TODO: this percentage of Techniques len is totaly arbitrary. Either set
+	//it in a way that seems more principled, or allow it to be configured.
+	if float64(lenItemsToExplore) > float64(len(Techniques))*0.25 {
+		if n.options.NumStraightforwardOptionsToEarlyExit <= n.straightforwardItemsCount {
+			return true
+		}
+	}
 	return n.options.NumOptionsToCalculate <= len(n.completedItems)
 }
 
 //NextPossibleStep pops the best step and returns it.
 func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
-	if n.Len() == 0 {
+	if n.itemsToExplore.Len() == 0 {
 		return nil
 	}
-	return n.Pop().(*humanSolveItem)
+
+	n.itemsToExploreLock.Lock()
+	result := heap.Pop(&n.itemsToExplore).(*humanSolveItem)
+	n.itemsToExploreLock.Unlock()
+
+	return result
+}
+
+//NewSearch is the main workhorse of HumanSolve Search, which explores all of
+//the itemsToExplore (potentially bailing early if enough completed items are
+//found). When Search is done, searcher.completedItems will contain the
+//possibilities to choose from. Although it's a cleaner architecture than
+//OldSearch, it's quite a bit slower (roughly 30%) which is why you have to
+//choose to use it.
+func (n *humanSolveSearcher) NewSearch() {
+
+	/*
+			The pipeline starts by generating humanSolveWorkItems, and at the
+			end collects generated CompoundSolveSteps and puts them in
+			searcher.completedItems.
+
+			The pipeline continues until one of the following things are true:
+
+			1) No more work items will be generated. This is reasonably rare
+			in practice, because as long as Guess is in the set of
+			TechniquesToUse there will almost always be SOME item. When this
+			shuts down the pipeline is already mostly idle anyway so it's just
+			a matter of tidying up. However, this will always happen in the
+			last few steps of solving a puzzle when there's only one move to
+			make anyway.
+
+			2) We have enough at least NumItemsToCompute items in
+			searcher.completedItems and thus can exit early. When this happens
+			the pipeline is roaring through all of the work and needs to
+			signal all pieces to shut down. We handle this by defering a close
+			to allDone in this method and then just returning.
+
+			The pipeline consists of the following go Routines:
+
+			1) A routine to generate humanSolveWorkItems. It loops through
+			searcher.NextPossibleStep, and for each one of those loops through
+			NextWorkItem until none are left. It sends workItems down the
+			channel to the next stage. Once there are no more steps it closes
+			the outbound channel, signalling to the rest of the pipeline to
+			exit in Exit Condition #1. If it can receive from the allDone
+			channel, that means that Exit Condition #2 is met and it should
+			begin an early shutdown and close its output channel.
+
+			//TODO: ideally we don't want to pick the next step to explore
+			//until we have as many as possible, so we can pick the best one.
+
+			Especially at the first work item, it's possible for this thread
+			to think that it's exhausted all work tiems that will come in
+			(because the work items that will come in from processing future
+			items have not yet been added to the heap). For that reason every
+			time we add an item to the workItems queue we first increment a
+			counter, which the workers will decrement (or wait, doesn't
+			another thread need to, after more work is added to
+			itemsToExplore?). If that isn't 0 we won't kill this thread.
+
+			Each work item contains the grid to operate on, the technique, the
+			allDone channel, and a special resultsChan for this
+			humanSolveItem.
+
+			2) A series of N worker threads that take an item off of
+			workItems, run the technique, and then run another one. If
+			workItems is closed they immediately exit. The Technique.Find()
+			methods will handle earlyExit if allDone is closed automatically.
+
+			3) A goRoutine per techinque that collects from its resultsChan.
+			These are the steps generated by our Technique.Finds(), but we
+			need to take those SolveSteps and combine them with our
+			humanSolveItem to create other humanSolveItems. Instead of
+			teaching Technique.Find() about humanSolveItems, we just have this
+			extra pipeline that reads these and then just creates a new
+			humanSolveItem and passes taht down the pipeline.
+
+			TODO: how do we know when to kill each of these threads? (It may
+			not be necessary)
+
+			TODO: Make sure that in exit condition #1 that the cascading
+			closing of channels makes it through #3 to #4.
+
+		    4) THe collector goRoutine, which takes the new humanSolveItems
+			and puts them either into itemsToExpore or into completedItems.
+			(This is the only goRoutine ever touching completedItems so no
+			mutex is necessary). As soon as completedItems is greater than
+			the target, we return, which automatically closes allDone and
+			initiates a shutdown of the rest of the pipeline.
+	*/
+
+	//TODO: implement exit condition #1.
+
+	//TODO: make sure that Guess will return at least one guess item in all
+	//cases, but never will go above the normal rank of 2 unless there are
+	//none of size 2. This will require a new test. Note that all guesses are
+	//infinitely bad, which means that guess on a cell of rank 2 and guess on
+	//a cell of rank 3 will be equally bad, making it more important to only
+	//return cells of the lowest rank.
+
+	//TODO: before commiting this back to master, panic() after a number of
+	//solves and make sure that for example the #3 goroutines aren't hanging
+	//around.
+
+	//TODO: consider changing the signature of technique.Find() to take a
+	//findHelper object that has a foundResult() bool shouldExitEarly and
+	//shouldEarlyExit() method. That will make it easier to re-architect away
+	//from channel pipelines _much_ easier. For example, we might be able to
+	//make it so all techniques do synchronous work when finding a technique,
+	//so we really do reduce down to a handful of synchronous threads just
+	//contending on the searcher with the AddStep lock.
+
+	//done will be closed when this main function returns, signaling to all
+	//created goroutines that they should return.
+	done := make(chan bool)
+	//Make sure that no matter how we exit we close done.
+	defer close(done)
+
+	//TODO: make this configurable
+	numFindThreads := 2
+
+	//TODO: it's not clear if making these buffered to numFindThreads actually
+	//makes a difference.
+	workItems := make(chan *humanSolveWorkItem, numFindThreads)
+	items := make(chan *humanSolveItem, numFindThreads)
+
+	//The thread to generate work items
+	go humanSolveSearcherWorkItemGenerator(n, workItems, items, done)
+
+	for i := 0; i < numFindThreads; i++ {
+		go humanSolveSearcherFindThread(workItems, done)
+	}
+
+	//On the main thread we'll collect all of the humanSolveItems from
+	//newItems and add them to searcher.
+
+	for item := range items {
+		item.Add()
+		if n.DoneSearching() {
+			return
+		}
+	}
+
+}
+
+//humanSolveSearcherFindThread is a thread that takes in workItems and runs
+//the specified technique on the specified grid.
+func humanSolveSearcherFindThread(workItems chan *humanSolveWorkItem, done chan bool) {
+	for workItem := range workItems {
+		workItem.technique.Find(workItem.grid, workItem.results, done)
+		workItem.resultsWaitGroup.Done()
+	}
+}
+
+//humanSolveSearcherWorkItemGenerator is used in searcher.Search to generate
+//the stream of WorkItems.
+func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems chan *humanSolveWorkItem, items chan *humanSolveItem, done chan bool) {
+	//When we return close down workItems to signal downstream things to
+	//close.
+	defer close(workItems)
+
+	var itemCreatorsWaitGroup sync.WaitGroup
+
+	//We'll loop through each step in searcher, and then for each step
+	//generate a work item per technique.
+
+	item := searcher.NextPossibleStep()
+
+	//TODO: test that if len(techniques) is less than len(threads) that we
+	//don't end early here because we loop back up and find step == nil
+	//and exit, even though more work will come.
+	for item != nil {
+
+		stepsChan := make(chan *SolveStep)
+		var stepsChanWaitGroup sync.WaitGroup
+
+		itemCreatorsWaitGroup.Add(1)
+		go humanSolveSearcherItemCreator(stepsChan, items, item, done, &itemCreatorsWaitGroup)
+
+		workItem := item.NextSearchWorkItem()
+
+		for workItem != nil {
+
+			//TODO: consider calling searcher.DoneSearching() here, too, to
+			//avoid pumping workItems through earlier.
+
+			//Tell each workItem where to send its results
+			workItem.results = stepsChan
+			workItem.resultsWaitGroup = &stepsChanWaitGroup
+
+			stepsChanWaitGroup.Add(1)
+
+			select {
+			case workItems <- workItem:
+			case <-done:
+				return
+			}
+
+			workItem = item.NextSearchWorkItem()
+		}
+
+		//We wait until all of the workItems for this step have been sent
+		//before spinning up the closer. Otherwise we could get in a weird
+		//condition where we generate a work item, send it to the queue, and
+		//it's fully processed before we send the next one. If we spun up the
+		//closer after adding the first one, it could have already closed the
+		//channel by the time we want to put in the next one!
+		go humanSolveSearcherItemStepsCloser(&stepsChanWaitGroup, stepsChan)
+
+		item = searcher.NextPossibleStep()
+
+	}
+
+	//TODO: what happens if we have an early exit? Does waiting to do this
+	//here (as opposed to on the first loop through the main for loop) make
+	//for a messier close?
+
+	//We want to run the fan-in closer for newItems. We wait to do it here
+	//because we know we want to put in all items and we can avoid a bit of
+	//busy-waiting.
+	go humanSolveSearcherItemCreatorCloser(&itemCreatorsWaitGroup, items)
+}
+
+//humanSolveSearcherItemStepsCloser closes the results chan that is craeated
+//per item we're processing once all workItems related to it have finished
+//shuttling solveSteps through it.
+func humanSolveSearcherItemStepsCloser(wg *sync.WaitGroup, stepsChan chan *SolveStep) {
+	wg.Wait()
+	close(stepsChan)
+}
+
+//humanSolveSearcherItemCreatorCloser is the thing that waits for all of the
+//ItemCreator threads to be done and then closes the downstream channel.
+func humanSolveSearcherItemCreatorCloser(wg *sync.WaitGroup, newItems chan *humanSolveItem) {
+	wg.Wait()
+	close(newItems)
+}
+
+//humanSolveSearcherItemCreator is used in searcher.Search. It takes a stream
+//of SolveSteps provided by techniques, and then creates new humanSolveItems
+//to pass down the pipeline.
+func humanSolveSearcherItemCreator(steps chan *SolveStep, results chan *humanSolveItem, item *humanSolveItem, done chan bool, wg *sync.WaitGroup) {
+	defer wg.Done()
+	//TODO: steps will never be closed because no Technique knows it's the
+	//last one. Need to have all techniques get their own solveStep thread
+	//that they're expected to close.
+	for step := range steps {
+		newItem := item.CreateNewItem(step)
+		select {
+		case results <- newItem:
+		case <-done:
+			return
+		}
+	}
+}
+
+//Search picks between either NewSearch or OldSearch based on the n.options.
+func (n *humanSolveSearcher) Search() {
+	//TODO: rip out NewSearch if we aren't going to go with it.
+
+	if n.options.useNewSearch {
+		n.NewSearch()
+	} else {
+		n.OldSearch()
+	}
+}
+
+//OldSearch is the old version that relies on humanSolveItem.Explore().
+//Although it's architechturally worse, it still beats so-called NewSearch by
+//30%.
+func (n *humanSolveSearcher) OldSearch() {
+
+	//TODO: once NewSearch is ready, kill this and hSI.Explore() and rename
+	//NewSearch to Search.
+
+	step := n.NextPossibleStep()
+
+	for step != nil && !n.DoneSearching() {
+		//Explore step, finding all possible steps that apply from here and
+		//adding to the frontier of itemsToExplore.
+
+		//When adding a step, searcher notes if it's completed (thus going in
+		//CompletedItems) or not (thus going in the itemsToExplore)
+
+		//Once searcher.CompletedItems is at least
+		//options.NumOptionsToCalculate we can bail out of looking for more
+		//steps, shut down other threads, and break out of this loop.
+
+		step.Explore()
+
+		//We do NOT add the explored item back into the frontier.
+
+		step = n.NextPossibleStep()
+
+	}
 }
 
 //String prints out a useful debug output for the searcher's state.
@@ -523,41 +926,46 @@ func (n *humanSolveSearcher) String() string {
 	return result
 }
 
+/************************************************************
+ *
+ * humanSolveSearcherHeap implementation
+ *
+ ************************************************************/
+
 //Len is necessary to implement heap.Interface
-func (n humanSolveSearcher) Len() int {
-	return len(n.itemsToExplore)
+func (n humanSolveSearcherHeap) Len() int {
+	return len(n)
 }
 
 //Less is necessary to implement heap.Interface
-func (n humanSolveSearcher) Less(i, j int) bool {
-	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
-	return n.itemsToExplore[i].Goodness() > n.itemsToExplore[j].Goodness()
+func (n humanSolveSearcherHeap) Less(i, j int) bool {
+	return n[i].Goodness() < n[j].Goodness()
 }
 
 //Swap is necessary to implement heap.Interface
-func (n humanSolveSearcher) Swap(i, j int) {
-	n.itemsToExplore[i], n.itemsToExplore[j] = n.itemsToExplore[j], n.itemsToExplore[i]
-	n.itemsToExplore[i].heapIndex = i
-	n.itemsToExplore[j].heapIndex = j
+func (n humanSolveSearcherHeap) Swap(i, j int) {
+	n[i], n[j] = n[j], n[i]
+	n[i].heapIndex = i
+	n[j].heapIndex = j
 }
 
 //Push is necessary to implement heap.Interface. It should not be used
 //direclty; instead, use heap.Push()
-func (n *humanSolveSearcher) Push(x interface{}) {
-	length := len(n.itemsToExplore)
+func (n *humanSolveSearcherHeap) Push(x interface{}) {
+	length := len(*n)
 	item := x.(*humanSolveItem)
 	item.heapIndex = length
-	n.itemsToExplore = append(n.itemsToExplore, item)
+	*n = append(*n, item)
 }
 
 //Pop is necessary to implement heap.Interface. It should not be used
 //directly; instead use heap.Pop()
-func (n *humanSolveSearcher) Pop() interface{} {
-	old := n.itemsToExplore
+func (n *humanSolveSearcherHeap) Pop() interface{} {
+	old := *n
 	length := len(old)
 	item := old[length-1]
 	item.heapIndex = -1 // for safety
-	n.itemsToExplore = old[0 : length-1]
+	*n = old[0 : length-1]
 	return item
 }
 
@@ -576,26 +984,7 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSt
 
 	searcher := newHumanSolveSearcher(self, previousSteps, options)
 
-	step := searcher.NextPossibleStep()
-
-	for step != nil && !searcher.DoneSearching() {
-		//Explore step, finding all possible steps that apply from here and
-		//adding to the frontier of itemsToExplore.
-
-		//When adding a step, searcher notes if it's completed (thus going in
-		//CompletedItems) or not (thus going in the itemsToExplore)
-
-		//Once searcher.CompletedItems is at least
-		//options.NumOptionsToCalculate we can bail out of looking for more
-		//steps, shut down other threads, and break out of this loop.
-
-		step.Explore()
-
-		//We do NOT add the explored item back into the frontier.
-
-		step = searcher.NextPossibleStep()
-
-	}
+	searcher.Search()
 
 	//Prepare the distribution and list of steps
 
@@ -603,6 +992,9 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSt
 	if len(searcher.completedItems) == 0 {
 		return nil, nil
 	}
+
+	//TODO: in cases where only guesses are available (e.g. i-sudoku/only-
+	//guesses.doku), percentage becomes NaN.
 
 	distri := make(ProbabilityDistribution, len(searcher.completedItems))
 	var resultSteps []*CompoundSolveStep

@@ -105,10 +105,19 @@ type HumanSolveOptions struct {
 	//NoGuess specifies that even if no other techniques work, the HumanSolve
 	//should not fall back on guessing, and instead just return failure.
 	NoGuess bool
+	//How many simple CompoundSolveSteps (e.g. with no PrecursorSteps, and
+	//non-Guess) do we need before we can exit early?
+	NumStraightforwardOptionsToEarlyExit int
+	//TODO: Rename this ^ to something better and move to the right point in
+	//the config.
+
+	//Wehtehr or not to use new Search
+	useNewSearch bool
 
 	//TODO: figure out how to test that we do indeed use different values of
 	//numOptionsToCalculate.
 	//TODO: add a TwiddleChainDissimilarity bool.
+	cachedEffectiveTechniques []SolveTechnique
 }
 
 //DefaultHumanSolveOptions returns a HumanSolveOptions object configured to
@@ -119,6 +128,9 @@ func DefaultHumanSolveOptions() *HumanSolveOptions {
 	result.NumOptionsToCalculate = 10
 	result.TechniquesToUse = Techniques
 	result.NoGuess = false
+	result.NumStraightforwardOptionsToEarlyExit = 3
+
+	result.useNewSearch = _USE_NEW_SEARCH
 
 	//Have to set even zero valued properties, because the Options isn't
 	//necessarily default initalized.
@@ -156,6 +168,10 @@ func (self *HumanSolveOptions) validate() *HumanSolveOptions {
 		self.NumOptionsToCalculate = 1
 	}
 
+	if self.NumStraightforwardOptionsToEarlyExit < 1 {
+		self.NumStraightforwardOptionsToEarlyExit = 1
+	}
+
 	//Remove any GuessTechniques that might be in there because
 	//the are invalid.
 	var techniques []SolveTechnique
@@ -176,10 +192,13 @@ func (self *HumanSolveOptions) validate() *HumanSolveOptions {
 //effectiveTechniquesToUse returns the effective list of techniques to use.
 //Basically just o.TechniquesToUse + Guess if NoGuess is not provided.
 func (o *HumanSolveOptions) effectiveTechniquesToUse() []SolveTechnique {
-	if o.NoGuess {
-		return o.TechniquesToUse
+	if o.cachedEffectiveTechniques == nil {
+		if o.NoGuess {
+			return o.TechniquesToUse
+		}
+		o.cachedEffectiveTechniques = append(o.TechniquesToUse, GuessTechnique)
 	}
-	return append(o.TechniquesToUse, GuessTechnique)
+	return o.cachedEffectiveTechniques
 }
 
 //IsUseful returns true if this SolveStep, when applied to the given grid, would do useful work--that is, it would

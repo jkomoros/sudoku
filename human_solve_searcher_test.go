@@ -11,8 +11,8 @@ func TestHumanSolveSearcher(t *testing.T) {
 
 	searcher := newHumanSolveSearcher(grid, nil, DefaultHumanSolveOptions())
 
-	if searcher.Len() != 1 {
-		t.Error("Expected new frontier to have exactly one item in it, but got", searcher.Len())
+	if searcher.itemsToExplore.Len() != 1 {
+		t.Error("Expected new frontier to have exactly one item in it, but got", searcher.itemsToExplore.Len())
 	}
 
 	if searcher.grid == nil {
@@ -31,8 +31,8 @@ func TestHumanSolveSearcher(t *testing.T) {
 		t.Error("the grid in the base item in the frontier was not right. Got", baseGrid.DataString(), "wanted", grid.DataString())
 	}
 
-	if searcher.Len() != 0 {
-		t.Error("Getting the base potential next step should have emptied it, but len is", searcher.Len())
+	if searcher.itemsToExplore.Len() != 0 {
+		t.Error("Getting the base potential next step should have emptied it, but len is", searcher.itemsToExplore.Len())
 	}
 
 	nInRowTechnique := techniquesByName["Necessary In Row"]
@@ -100,8 +100,8 @@ func TestHumanSolveSearcher(t *testing.T) {
 		t.Fatal("Adding non fill step didn't return a frontier object")
 	}
 
-	if searcher.Len() != 1 {
-		t.Error("Frontier had wrong length after adding one complete and one incomplete items. Got", searcher.Len(), "expected 1")
+	if searcher.itemsToExplore.Len() != 1 {
+		t.Error("Frontier had wrong length after adding one complete and one incomplete items. Got", searcher.itemsToExplore.Len(), "expected 1")
 	}
 
 	if searcher.itemsToExplore[0] != nonFillStepItem {
@@ -118,17 +118,17 @@ func TestHumanSolveSearcher(t *testing.T) {
 
 	expensiveStepItem := basePotentialNextStep.AddStep(expensiveStep)
 
-	if searcher.Len() != 2 {
-		t.Error("Wrong length after adding two items to frontier. Got", searcher.Len(), "expected 2")
+	if searcher.itemsToExplore.Len() != 2 {
+		t.Error("Wrong length after adding two items to frontier. Got", searcher.itemsToExplore.Len(), "expected 2")
 	}
 
-	if searcher.itemsToExplore[1] != nonFillStepItem {
+	if searcher.itemsToExplore[0] != nonFillStepItem {
 		t.Error("We expected the expensive step to be worse", searcher.String())
 	}
 
 	expensiveStepItem.Twiddle(0.00000000000000001, "Very small amount to make this #1")
 
-	if searcher.itemsToExplore[1] != expensiveStepItem {
+	if searcher.itemsToExplore[0] != expensiveStepItem {
 		t.Error("Even after twiddling up guess step by a lot it still wasn't in the top position in frontier", searcher.itemsToExplore[0], searcher.itemsToExplore[1])
 	}
 
@@ -138,8 +138,8 @@ func TestHumanSolveSearcher(t *testing.T) {
 		t.Error("Expected popped item to be the non-fill step now that its goodness is higher, but got", poppedItem)
 	}
 
-	if searcher.Len() != 1 {
-		t.Error("Wrong frontier length after popping item. Got", searcher.Len(), "expected 1")
+	if searcher.itemsToExplore.Len() != 1 {
+		t.Error("Wrong frontier length after popping item. Got", searcher.itemsToExplore.Len(), "expected 1")
 	}
 
 	poppedItem = searcher.NextPossibleStep()
@@ -153,8 +153,8 @@ func TestHumanSolveSearcher(t *testing.T) {
 		t.Error("Adding a step to end of nonfill step didn't change goodness.")
 	}
 
-	if searcher.Len() != 0 {
-		t.Error("Adding an item gave wrong len. Got", searcher.Len(), "wanted 0")
+	if searcher.itemsToExplore.Len() != 0 {
+		t.Error("Adding an item gave wrong len. Got", searcher.itemsToExplore.Len(), "wanted 0")
 	}
 
 	if len(searcher.completedItems) != 2 {

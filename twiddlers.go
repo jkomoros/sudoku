@@ -174,6 +174,8 @@ func twiddleChainedSteps(currentStep *SolveStep, inProgressCompoundStep []*Solve
 		}
 	}
 
+	//TODO: this twiddler appears to be operating in the wrong direction!
+
 	if lastModifiedCells == nil {
 		return 1.0
 	}
