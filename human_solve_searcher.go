@@ -163,6 +163,7 @@ type channelFindCoordinator struct {
 type synchronousFindCoordinator struct {
 	searcher *humanSolveSearcher
 	baseItem *humanSolveItem
+	done     chan bool
 }
 
 //humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
@@ -269,8 +270,23 @@ func (c *channelFindCoordinator) foundResult(step *SolveStep) bool {
  *
  ************************************************************/
 
+func newSynchronousFindCoodinator(searcher *humanSolveSearcher, baseItem *humanSolveItem) *synchronousFindCoordinator {
+	//Make sure we will always be able to send without buffering.
+	doneChan := make(chan bool, 1)
+	return &synchronousFindCoordinator{
+		searcher: searcher,
+		baseItem: baseItem,
+		done:     doneChan,
+	}
+}
+
 func (s *synchronousFindCoordinator) shouldExitEarly() bool {
-	return s.searcher.DoneSearching()
+	result := s.searcher.DoneSearching()
+	if result {
+		//Signal that we're done searching
+		s.done <- true
+	}
+	return result
 }
 
 func (s *synchronousFindCoordinator) foundResult(step *SolveStep) bool {
