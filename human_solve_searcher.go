@@ -147,6 +147,13 @@ type humanSolveWorkItem struct {
 	resultsWaitGroup *sync.WaitGroup
 }
 
+//channelFindCoordinator implements the findCoordinator interface. It's a
+//simple wrapper around the basic channel logic currently used.
+type channelFindCoordinator struct {
+	results chan *SolveStep
+	done    chan bool
+}
+
 //humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
 func humanSolveHelper(grid *Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep, endConditionSolved bool) *SolveDirections {
 	//Short circuit solving if it has multiple solutions.
@@ -219,6 +226,30 @@ func humanSolveSearchSingleStep(grid *Grid, options *HumanSolveOptions, previous
 	randomIndex := distribution.RandomIndex()
 
 	return steps[randomIndex]
+}
+
+/************************************************************
+ *
+ * channelFindCoordinator implementation
+ *
+ ************************************************************/
+
+func (c *channelFindCoordinator) shouldExitEarly() bool {
+	select {
+	case <-c.done:
+		return true
+	default:
+		return false
+	}
+}
+
+func (c *channelFindCoordinator) foundResult(step *SolveStep) bool {
+	select {
+	case c.results <- step:
+		return false
+	case <-c.done:
+		return true
+	}
 }
 
 /************************************************************
