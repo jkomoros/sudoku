@@ -446,7 +446,7 @@ func (self *basicSolveTechnique) candidatesHelper(technique SolveTechnique, grid
 	var steps []*SolveStep
 
 	results := make(chan *SolveStep, DIM*DIM)
-	done := make(chan bool)
+	done := make(chan bool, 1)
 
 	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
 	go func() {
@@ -460,7 +460,7 @@ func (self *basicSolveTechnique) candidatesHelper(technique SolveTechnique, grid
 		steps = append(steps, step)
 		if maxResults > 0 {
 			if len(steps) >= maxResults {
-				done <- true
+				close(done)
 				break
 			}
 		}
