@@ -111,9 +111,6 @@ type HumanSolveOptions struct {
 	//TODO: Rename this ^ to something better and move to the right point in
 	//the config.
 
-	//Wehtehr or not to use new Search
-	useNewSearch bool
-
 	//TODO: figure out how to test that we do indeed use different values of
 	//numOptionsToCalculate.
 	//TODO: add a TwiddleChainDissimilarity bool.
@@ -129,8 +126,6 @@ func DefaultHumanSolveOptions() *HumanSolveOptions {
 	result.TechniquesToUse = Techniques
 	result.NoGuess = false
 	result.NumStraightforwardOptionsToEarlyExit = 3
-
-	result.useNewSearch = _USE_NEW_SEARCH
 
 	//Have to set even zero valued properties, because the Options isn't
 	//necessarily default initalized.
