@@ -352,28 +352,10 @@ func (p *humanSolveItem) CreateNewItem(step *SolveStep) *humanSolveItem {
 	return result
 }
 
-//Injects this item into to the searcher.
-func (p *humanSolveItem) Add() {
-	//make sure we only add items once.
-	if p.added {
-		return
-	}
-	//TODO: this logic really should be in searcher, not item.
-	p.added = true
-	if p.IsComplete() {
-		p.searcher.completedItems = append(p.searcher.completedItems, p)
-		if p.step.Technique != GuessTechnique {
-			p.searcher.straightforwardItemsCount++
-		}
-	} else {
-		p.searcher.AddItemToExplore(p)
-	}
-}
-
 //AddStep basically just does p.CreateNewItem, then item.Add()
 func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
 	result := p.CreateNewItem(step)
-	result.Add()
+	p.searcher.AddItem(result)
 	return result
 }
 
@@ -612,7 +594,24 @@ func newHumanSolveSearcher(grid *Grid, previousCompoundSteps []*CompoundSolveSte
 	return searcher
 }
 
-func (n *humanSolveSearcher) AddItemToExplore(item *humanSolveItem) {
+//Injects this item into to the searcher.
+func (n *humanSolveSearcher) AddItem(item *humanSolveItem) {
+	//make sure we only add items once.
+	if item.added {
+		return
+	}
+	item.added = true
+	if item.IsComplete() {
+		n.completedItems = append(n.completedItems, item)
+		if item.step.Technique != GuessTechnique {
+			n.straightforwardItemsCount++
+		}
+	} else {
+		n.addItemToExplore(item)
+	}
+}
+
+func (n *humanSolveSearcher) addItemToExplore(item *humanSolveItem) {
 	n.itemsToExploreLock.Lock()
 	heap.Push(&n.itemsToExplore, item)
 	n.itemsToExploreLock.Unlock()
@@ -793,7 +792,7 @@ func (n *humanSolveSearcher) NewSearch() {
 	//newItems and add them to searcher.
 
 	for item := range items {
-		item.Add()
+		n.AddItem(item)
 		if n.DoneSearching() {
 			return
 		}
