@@ -3,6 +3,7 @@ package sudoku
 import (
 	"container/heap"
 	"fmt"
+	"runtime"
 	"strconv"
 	"sync"
 )
@@ -104,7 +105,16 @@ type humanSolveSearcher struct {
 	//TODO: keep track of stats: how big the frontier was at the end of each
 	//CompoundSolveStep. Then provide max/mean/median.
 
-	itemsToExploreLock sync.Mutex
+	//done will be closed when DoneSearching will return true. A convenient
+	//way for people to check DoneSearching without checking in a tight loop.
+	done chan bool
+	//... The hacky way to make sure we don't close an already-closed channel.
+	channelClosed bool
+
+	//itemsLock controls access to itemsToExplore, completedItems,
+	//straightforwardItemsCount, etc.
+	//TODO: consider having more fine-grained locks for performance.
+	itemsLock sync.Mutex
 
 	//Various options frozen in at creation time that various methods need
 	//access to.
@@ -141,10 +151,9 @@ type humanSolveItem struct {
 //humanSolveWorkItem represents a unit of work that should be done during the
 //search.
 type humanSolveWorkItem struct {
-	grid             *Grid
-	technique        SolveTechnique
-	coordinator      findCoordinator
-	resultsWaitGroup *sync.WaitGroup
+	grid        *Grid
+	technique   SolveTechnique
+	coordinator findCoordinator
 }
 
 //channelFindCoordinator implements the findCoordinator interface. It's a
@@ -152,6 +161,14 @@ type humanSolveWorkItem struct {
 type channelFindCoordinator struct {
 	results chan *SolveStep
 	done    chan bool
+}
+
+//synchronousFindCoordinator implements the findCoordinator interface. It's
+//basically just a thin wrapper around humanSolveSearcher. Desigend for use in
+//NewSearch.
+type synchronousFindCoordinator struct {
+	searcher *humanSolveSearcher
+	baseItem *humanSolveItem
 }
 
 //humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
@@ -254,6 +271,21 @@ func (c *channelFindCoordinator) foundResult(step *SolveStep) bool {
 
 /************************************************************
  *
+ * synchronousFindCoordinator implementation
+ *
+ ************************************************************/
+
+func (s *synchronousFindCoordinator) shouldExitEarly() bool {
+	return s.searcher.DoneSearching()
+}
+
+func (s *synchronousFindCoordinator) foundResult(step *SolveStep) bool {
+	s.baseItem.AddStep(step)
+	return s.shouldExitEarly()
+}
+
+/************************************************************
+ *
  * humanSolveItem implementation
  *
  ************************************************************/
@@ -352,28 +384,10 @@ func (p *humanSolveItem) CreateNewItem(step *SolveStep) *humanSolveItem {
 	return result
 }
 
-//Injects this item into to the searcher.
-func (p *humanSolveItem) Add() {
-	//make sure we only add items once.
-	if p.added {
-		return
-	}
-	//TODO: this logic really should be in searcher, not item.
-	p.added = true
-	if p.IsComplete() {
-		p.searcher.completedItems = append(p.searcher.completedItems, p)
-		if p.step.Technique != GuessTechnique {
-			p.searcher.straightforwardItemsCount++
-		}
-	} else {
-		p.searcher.AddItemToExplore(p)
-	}
-}
-
 //AddStep basically just does p.CreateNewItem, then item.Add()
 func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
 	result := p.CreateNewItem(step)
-	result.Add()
+	p.searcher.AddItem(result)
 	return result
 }
 
@@ -602,6 +616,7 @@ func newHumanSolveSearcher(grid *Grid, previousCompoundSteps []*CompoundSolveSte
 		grid:                  grid,
 		options:               options,
 		previousCompoundSteps: previousCompoundSteps,
+		done: make(chan bool),
 	}
 	heap.Init(&searcher.itemsToExplore)
 	initialItem := &humanSolveItem{
@@ -612,40 +627,71 @@ func newHumanSolveSearcher(grid *Grid, previousCompoundSteps []*CompoundSolveSte
 	return searcher
 }
 
-func (n *humanSolveSearcher) AddItemToExplore(item *humanSolveItem) {
-	n.itemsToExploreLock.Lock()
-	heap.Push(&n.itemsToExplore, item)
-	n.itemsToExploreLock.Unlock()
+//Injects this item into to the searcher.
+func (n *humanSolveSearcher) AddItem(item *humanSolveItem) {
+	//make sure we only add items once.
+	if item.added {
+		return
+	}
+	item.added = true
+	n.itemsLock.Lock()
+
+	if item.IsComplete() {
+		n.completedItems = append(n.completedItems, item)
+		if item.step.Technique != GuessTechnique {
+			n.straightforwardItemsCount++
+		}
+	} else {
+		heap.Push(&n.itemsToExplore, item)
+	}
+	n.itemsLock.Unlock()
 }
 
 func (n *humanSolveSearcher) ItemValueChanged(item *humanSolveItem) {
 	if item.heapIndex < 0 {
 		return
 	}
-	n.itemsToExploreLock.Lock()
+	n.itemsLock.Lock()
 	heap.Fix(&n.itemsToExplore, item.heapIndex)
-	n.itemsToExploreLock.Unlock()
+	n.itemsLock.Unlock()
 }
 
 //DoneSearching will return true when no more items need to be explored
 //because we have enough CompletedItems.
 func (n *humanSolveSearcher) DoneSearching() bool {
 	if n.options == nil {
+		close(n.done)
 		return true
 	}
 
-	n.itemsToExploreLock.Lock()
+	n.itemsLock.Lock()
 	lenItemsToExplore := len(n.itemsToExplore)
-	n.itemsToExploreLock.Unlock()
+	lenCompletedItems := len(n.completedItems)
+	n.itemsLock.Unlock()
 
 	//TODO: this percentage of Techniques len is totaly arbitrary. Either set
 	//it in a way that seems more principled, or allow it to be configured.
 	if float64(lenItemsToExplore) > float64(len(Techniques))*0.25 {
 		if n.options.NumStraightforwardOptionsToEarlyExit <= n.straightforwardItemsCount {
+			n.signalDone()
 			return true
 		}
 	}
-	return n.options.NumOptionsToCalculate <= len(n.completedItems)
+
+	result := n.options.NumOptionsToCalculate <= lenCompletedItems
+	if result {
+		n.signalDone()
+	}
+	return result
+}
+
+func (n *humanSolveSearcher) signalDone() {
+	n.itemsLock.Lock()
+	if !n.channelClosed {
+		close(n.done)
+		n.channelClosed = true
+	}
+	n.itemsLock.Unlock()
 }
 
 //NextPossibleStep pops the best step and returns it.
@@ -654,9 +700,9 @@ func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
 		return nil
 	}
 
-	n.itemsToExploreLock.Lock()
+	n.itemsLock.Lock()
 	result := heap.Pop(&n.itemsToExplore).(*humanSolveItem)
-	n.itemsToExploreLock.Unlock()
+	n.itemsLock.Unlock()
 
 	return result
 }
@@ -744,8 +790,6 @@ func (n *humanSolveSearcher) NewSearch() {
 			initiates a shutdown of the rest of the pipeline.
 	*/
 
-	//TODO: implement exit condition #1.
-
 	//TODO: make sure that Guess will return at least one guess item in all
 	//cases, but never will go above the normal rank of 2 unless there are
 	//none of size 2. This will require a new test. Note that all guesses are
@@ -757,67 +801,69 @@ func (n *humanSolveSearcher) NewSearch() {
 	//solves and make sure that for example the #3 goroutines aren't hanging
 	//around.
 
-	//TODO: consider changing the signature of technique.Find() to take a
-	//findHelper object that has a foundResult() bool shouldExitEarly and
-	//shouldEarlyExit() method. That will make it easier to re-architect away
-	//from channel pipelines _much_ easier. For example, we might be able to
-	//make it so all techniques do synchronous work when finding a technique,
-	//so we really do reduce down to a handful of synchronous threads just
-	//contending on the searcher with the AddStep lock.
+	//TODO: Make sure this big comment in this method is up-to-date.
 
 	//TODO: for each thing that tests HumanSolve, run it with
 	//options.useNewSearch true and false
 
-	//done will be closed when this main function returns, signaling to all
-	//created goroutines that they should return.
-	done := make(chan bool)
-	//Make sure that no matter how we exit we close done.
-	defer close(done)
+	//TODO: make this configurable TODO: test if this is faster on devices
+	//with other numbers of cores or if it's just tuned to the Mac Pro.
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	numFindThreads := runtime.GOMAXPROCS(0)/2 - 1
 
-	//TODO: make this configurable
-	numFindThreads := 2
+	if numFindThreads < 2 {
+		numFindThreads = 2
+	}
 
 	//TODO: it's not clear if making these buffered to numFindThreads actually
 	//makes a difference.
 	workItems := make(chan *humanSolveWorkItem, numFindThreads)
-	items := make(chan *humanSolveItem, numFindThreads)
 
 	//The thread to generate work items
-	go humanSolveSearcherWorkItemGenerator(n, workItems, items, done)
+	go humanSolveSearcherWorkItemGenerator(n, workItems)
+
+	var solveThreadsDone sync.WaitGroup
+
+	solveThreadsDone.Add(numFindThreads)
 
 	for i := 0; i < numFindThreads; i++ {
-		go humanSolveSearcherFindThread(workItems)
+		go humanSolveSearcherFindThread(workItems, &solveThreadsDone)
 	}
 
-	//On the main thread we'll collect all of the humanSolveItems from
-	//newItems and add them to searcher.
+	allSolveThreadsDone := make(chan bool)
 
-	for item := range items {
-		item.Add()
-		if n.DoneSearching() {
-			return
-		}
+	//Convert the wait group into a channel send for convenience of using
+	//select{} below.
+	go func() {
+		solveThreadsDone.Wait()
+		allSolveThreadsDone <- true
+	}()
+
+	//Wait for either all solve threads to have finished (meaning they have
+	//found everything they're going to find) or for ourselves to have
+	//signaled that we reached DoneSearching().
+	select {
+	case <-allSolveThreadsDone:
+	case <-n.done:
 	}
 
 }
 
 //humanSolveSearcherFindThread is a thread that takes in workItems and runs
 //the specified technique on the specified grid.
-func humanSolveSearcherFindThread(workItems chan *humanSolveWorkItem) {
+func humanSolveSearcherFindThread(workItems chan *humanSolveWorkItem, wg *sync.WaitGroup) {
 	for workItem := range workItems {
 		workItem.technique.find(workItem.grid, workItem.coordinator)
-		workItem.resultsWaitGroup.Done()
 	}
+	wg.Done()
 }
 
 //humanSolveSearcherWorkItemGenerator is used in searcher.Search to generate
 //the stream of WorkItems.
-func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems chan *humanSolveWorkItem, items chan *humanSolveItem, done chan bool) {
+func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems chan *humanSolveWorkItem) {
 	//When we return close down workItems to signal downstream things to
 	//close.
 	defer close(workItems)
-
-	var itemCreatorsWaitGroup sync.WaitGroup
 
 	//We'll loop through each step in searcher, and then for each step
 	//generate a work item per technique.
@@ -829,46 +875,26 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 	//and exit, even though more work will come.
 	for item != nil {
 
-		stepsChan := make(chan *SolveStep)
-		var stepsChanWaitGroup sync.WaitGroup
-
-		coordinator := &channelFindCoordinator{
-			results: stepsChan,
-			done:    done,
+		coordinator := &synchronousFindCoordinator{
+			searcher: searcher,
+			baseItem: item,
 		}
-
-		itemCreatorsWaitGroup.Add(1)
-		go humanSolveSearcherItemCreator(stepsChan, items, item, done, &itemCreatorsWaitGroup)
 
 		workItem := item.NextSearchWorkItem()
 
 		for workItem != nil {
 
-			//TODO: consider calling searcher.DoneSearching() here, too, to
-			//avoid pumping workItems through earlier.
-
 			//Tell each workItem where to send its results
 			workItem.coordinator = coordinator
-			workItem.resultsWaitGroup = &stepsChanWaitGroup
-
-			stepsChanWaitGroup.Add(1)
 
 			select {
 			case workItems <- workItem:
-			case <-done:
+			case <-searcher.done:
 				return
 			}
 
 			workItem = item.NextSearchWorkItem()
 		}
-
-		//We wait until all of the workItems for this step have been sent
-		//before spinning up the closer. Otherwise we could get in a weird
-		//condition where we generate a work item, send it to the queue, and
-		//it's fully processed before we send the next one. If we spun up the
-		//closer after adding the first one, it could have already closed the
-		//channel by the time we want to put in the next one!
-		go humanSolveSearcherItemStepsCloser(&stepsChanWaitGroup, stepsChan)
 
 		item = searcher.NextPossibleStep()
 
@@ -878,43 +904,6 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 	//here (as opposed to on the first loop through the main for loop) make
 	//for a messier close?
 
-	//We want to run the fan-in closer for newItems. We wait to do it here
-	//because we know we want to put in all items and we can avoid a bit of
-	//busy-waiting.
-	go humanSolveSearcherItemCreatorCloser(&itemCreatorsWaitGroup, items)
-}
-
-//humanSolveSearcherItemStepsCloser closes the results chan that is craeated
-//per item we're processing once all workItems related to it have finished
-//shuttling solveSteps through it.
-func humanSolveSearcherItemStepsCloser(wg *sync.WaitGroup, stepsChan chan *SolveStep) {
-	wg.Wait()
-	close(stepsChan)
-}
-
-//humanSolveSearcherItemCreatorCloser is the thing that waits for all of the
-//ItemCreator threads to be done and then closes the downstream channel.
-func humanSolveSearcherItemCreatorCloser(wg *sync.WaitGroup, newItems chan *humanSolveItem) {
-	wg.Wait()
-	close(newItems)
-}
-
-//humanSolveSearcherItemCreator is used in searcher.Search. It takes a stream
-//of SolveSteps provided by techniques, and then creates new humanSolveItems
-//to pass down the pipeline.
-func humanSolveSearcherItemCreator(steps chan *SolveStep, results chan *humanSolveItem, item *humanSolveItem, done chan bool, wg *sync.WaitGroup) {
-	defer wg.Done()
-	//TODO: steps will never be closed because no Technique knows it's the
-	//last one. Need to have all techniques get their own solveStep thread
-	//that they're expected to close.
-	for step := range steps {
-		newItem := item.CreateNewItem(step)
-		select {
-		case results <- newItem:
-		case <-done:
-			return
-		}
-	}
 }
 
 //Search picks between either NewSearch or OldSearch based on the n.options.
@@ -1040,10 +1029,13 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSt
 	//TODO: in cases where only guesses are available (e.g. i-sudoku/only-
 	//guesses.doku), percentage becomes NaN.
 
-	distri := make(ProbabilityDistribution, len(searcher.completedItems))
+	//Get a consistent snapshot of completedItems; its length might change.
+	completedItems := searcher.completedItems
+
+	distri := make(ProbabilityDistribution, len(completedItems))
 	var resultSteps []*CompoundSolveStep
 
-	for i, item := range searcher.completedItems {
+	for i, item := range completedItems {
 		distri[i] = item.Goodness()
 		compoundStep := newCompoundSolveStep(item.Steps())
 		compoundStep.explanation = item.explainGoodness()
