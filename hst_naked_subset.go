@@ -43,20 +43,18 @@ func (self *nakedSubsetTechnique) Candidates(grid *Grid, maxResults int) []*Solv
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *nakedSubsetTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *nakedSubsetTechnique) find(grid *Grid, coordinator findCoordinator) {
 	//TODO: test that this will find multiple if they exist.
-	nakedSubset(grid, self, self.k, self.getter(grid), results, done)
+	nakedSubset(grid, self, self.k, self.getter(grid), coordinator)
 }
 
-func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellSlice, results chan *SolveStep, done chan bool) {
+func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellSlice, coordinator findCoordinator) {
 	//NOTE: very similar implemenation in hiddenSubset.
 	//TODO: randomize order we visit things.
 	for _, i := range rand.Perm(DIM) {
 
-		select {
-		case <-done:
+		if coordinator.shouldExitEarly() {
 			return
-		default:
 		}
 
 		groups := subsetCellsWithNPossibilities(k, collectionGetter(i))
@@ -69,9 +67,7 @@ func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter f
 
 				step := &SolveStep{technique, collectionGetter(i).RemoveCells(group).FilterByUnfilled(), group.PossibilitiesUnion(), group, nil, nil}
 				if step.IsUseful(grid) {
-					select {
-					case results <- step:
-					case <-done:
+					if coordinator.foundResult(step) {
 						return
 					}
 				}

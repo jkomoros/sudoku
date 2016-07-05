@@ -50,17 +50,15 @@ func (self *xywingTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *xywingTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *xywingTechnique) find(grid *Grid, coordinator findCoordinator) {
 
 	getter := grid.queue().NewGetter()
 
 	for {
 
 		//Check if it's time to stop.
-		select {
-		case <-done:
+		if coordinator.shouldExitEarly() {
 			return
-		default:
 		}
 
 		pivot := getter.GetSmallerThan(3)
@@ -161,9 +159,7 @@ func (self *xywingTechnique) find(grid *Grid, results chan *SolveStep, done chan
 							}
 
 							if step.IsUseful(grid) {
-								select {
-								case results <- step:
-								case <-done:
+								if coordinator.foundResult(step) {
 									return
 								}
 							}
@@ -181,9 +177,7 @@ func (self *xywingTechnique) find(grid *Grid, results chan *SolveStep, done chan
 					}
 
 					if step.IsUseful(grid) {
-						select {
-						case results <- step:
-						case <-done:
+						if coordinator.foundResult(step) {
 							return
 						}
 					}

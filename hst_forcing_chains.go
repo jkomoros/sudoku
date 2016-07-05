@@ -56,7 +56,7 @@ func (self *forcingChainsTechnique) Candidates(grid *Grid, maxResults int) []*So
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *forcingChainsTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *forcingChainsTechnique) find(grid *Grid, coordinator findCoordinator) {
 	//TODO: test that this will find multiple if they exist.
 
 	/*
@@ -88,10 +88,8 @@ func (self *forcingChainsTechnique) find(grid *Grid, results chan *SolveStep, do
 	for {
 
 		//Check if it's time to stop.
-		select {
-		case <-done:
+		if coordinator.shouldExitEarly() {
 			return
-		default:
 		}
 
 		candidate := getter.GetSmallerThan(3)
@@ -163,9 +161,7 @@ func (self *forcingChainsTechnique) find(grid *Grid, results chan *SolveStep, do
 				}
 
 				if step.IsUseful(grid) {
-					select {
-					case results <- step:
-					case <-done:
+					if coordinator.foundResult(step) {
 						return
 					}
 				}

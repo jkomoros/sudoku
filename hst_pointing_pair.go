@@ -35,7 +35,7 @@ func (self *pointingPairTechnique) Candidates(grid *Grid, maxResults int) []*Sol
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *pointingPairTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *pointingPairTechnique) find(grid *Grid, coordinator findCoordinator) {
 	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
 	//TODO: test this returns multiple if they exist.
 
@@ -44,10 +44,8 @@ func (self *pointingPairTechnique) find(grid *Grid, results chan *SolveStep, don
 
 		for _, num := range rand.Perm(DIM) {
 
-			select {
-			case <-done:
+			if coordinator.shouldExitEarly() {
 				return
-			default:
 			}
 
 			cells := block.FilterByPossible(num + 1)
@@ -66,9 +64,7 @@ func (self *pointingPairTechnique) find(grid *Grid, results chan *SolveStep, don
 					step = &SolveStep{self, grid.Col(cells.Col()).RemoveCells(block), []int{num + 1}, cells, nil, nil}
 				}
 				if step.IsUseful(grid) {
-					select {
-					case results <- step:
-					case <-done:
+					if coordinator.foundResult(step) {
 						return
 					}
 				}

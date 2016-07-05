@@ -18,7 +18,7 @@ func (self *blockBlockInteractionTechnique) Candidates(grid *Grid, maxResults in
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *blockBlockInteractionTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *blockBlockInteractionTechnique) find(grid *Grid, coordinator findCoordinator) {
 
 	pairs := pairwiseBlocks(grid)
 
@@ -38,10 +38,8 @@ func (self *blockBlockInteractionTechnique) find(grid *Grid, results chan *Solve
 		for _, i := range rand.Perm(DIM) {
 
 			//See if we should stop doing work
-			select {
-			case <-done:
+			if coordinator.shouldExitEarly() {
 				return
-			default:
 			}
 
 			//Skip numbers entirely where either of the blocks has a cell with it set, since there obviously
@@ -110,9 +108,7 @@ func (self *blockBlockInteractionTechnique) find(grid *Grid, results chan *Solve
 			}
 
 			if step.IsUseful(grid) {
-				select {
-				case results <- step:
-				case <-done:
+				if coordinator.foundResult(step) {
 					return
 				}
 			}

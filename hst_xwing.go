@@ -51,7 +51,7 @@ func (self *xwingTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep 
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *xwingTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *xwingTechnique) find(grid *Grid, coordinator findCoordinator) {
 
 	getter := self.getter(grid)
 
@@ -60,10 +60,8 @@ func (self *xwingTechnique) find(grid *Grid, results chan *SolveStep, done chan 
 		//In comments we'll say "Row" for the major group type, and "col" for minor group type, just for easier comprehension.
 		//Look for each row that has that number possible in only two cells.
 
-		select {
-		case <-done:
+		if coordinator.shouldExitEarly() {
 			return
-		default:
 		}
 
 		//i is zero indexed right now
@@ -89,10 +87,8 @@ func (self *xwingTechnique) find(grid *Grid, results chan *SolveStep, done chan 
 		//Now look at each pair of rows and see if their numbers line up.
 		for _, subsets := range subsetIndexes(len(majorGroups), 2) {
 
-			select {
-			case <-done:
+			if coordinator.shouldExitEarly() {
 				return
-			default:
 			}
 
 			var targetCells CellSlice
@@ -130,9 +126,7 @@ func (self *xwingTechnique) find(grid *Grid, results chan *SolveStep, done chan 
 			//Okay, we found a pair that works. Create a step for it (if it's useful)
 			step := &SolveStep{self, targetCells, IntSlice{i}, append(currentGroups[0], currentGroups[1]...), nil, nil}
 			if step.IsUseful(grid) {
-				select {
-				case results <- step:
-				case <-done:
+				if coordinator.foundResult(step) {
 					return
 				}
 			}

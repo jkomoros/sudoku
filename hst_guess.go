@@ -24,7 +24,7 @@ func (self *guessTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep 
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *guessTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *guessTechnique) find(grid *Grid, coordinator findCoordinator) {
 
 	//We used to have a very elaborate aparatus for guess logic where we'd
 	//earnestly guess and then HumanSolve forward until we discovered a
@@ -46,10 +46,8 @@ func (self *guessTechnique) find(grid *Grid, results chan *SolveStep, done chan 
 
 	for {
 
-		select {
-		case <-done:
+		if coordinator.shouldExitEarly() {
 			return
-		default:
 		}
 
 		obj := getter.Get()
@@ -76,9 +74,7 @@ func (self *guessTechnique) find(grid *Grid, results chan *SolveStep, done chan 
 		}
 
 		if step.IsUseful(grid) {
-			select {
-			case results <- step:
-			case <-done:
+			if coordinator.foundResult(step) {
 				return
 			}
 		}

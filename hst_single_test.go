@@ -68,8 +68,13 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 	results := make(chan *SolveStep, DIM*DIM)
 	done := make(chan bool)
 
+	coordinator := &channelFindCoordinator{
+		results: results,
+		done:    done,
+	}
+
 	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
-	solver.find(grid, results, done)
+	solver.find(grid, coordinator)
 
 	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
 	close(done)
@@ -148,8 +153,13 @@ func TestNecessaryInRow(t *testing.T) {
 	results := make(chan *SolveStep, DIM*DIM)
 	done := make(chan bool)
 
+	coordinator := &channelFindCoordinator{
+		results: results,
+		done:    done,
+	}
+
 	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
-	solver.find(grid, results, done)
+	solver.find(grid, coordinator)
 
 	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
 	close(done)
@@ -229,8 +239,13 @@ func TestNecessaryInCol(t *testing.T) {
 	results := make(chan *SolveStep, DIM*DIM)
 	done := make(chan bool)
 
+	coordinator := &channelFindCoordinator{
+		results: results,
+		done:    done,
+	}
+
 	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
-	solver.find(grid, results, done)
+	solver.find(grid, coordinator)
 
 	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
 	close(done)
@@ -310,8 +325,13 @@ func TestNecessaryInBlock(t *testing.T) {
 	results := make(chan *SolveStep, DIM*DIM)
 	done := make(chan bool)
 
+	coordinator := &channelFindCoordinator{
+		results: results,
+		done:    done,
+	}
+
 	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
-	solver.find(grid, results, done)
+	solver.find(grid, coordinator)
 
 	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
 	close(done)

@@ -48,18 +48,16 @@ func (self *obviousInCollectionTechnique) Candidates(grid *Grid, maxResults int)
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *obviousInCollectionTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
-	obviousInCollection(grid, self, self.getter(grid), results, done)
+func (self *obviousInCollectionTechnique) find(grid *Grid, coordinator findCoordinator) {
+	obviousInCollection(grid, self, self.getter(grid), coordinator)
 }
 
-func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice, results chan *SolveStep, done chan bool) {
+func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice, coordinator findCoordinator) {
 	indexes := rand.Perm(DIM)
 	for _, index := range indexes {
 
-		select {
-		case <-done:
+		if coordinator.shouldExitEarly() {
 			return
-		default:
 		}
 
 		collection := collectionGetter(index)
@@ -78,9 +76,7 @@ func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter 
 					PointerCells: collection.RemoveCells(CellSlice{cell}),
 				}
 				if step.IsUseful(grid) {
-					select {
-					case results <- step:
-					case <-done:
+					if coordinator.foundResult(step) {
 						return
 					}
 				}
@@ -106,15 +102,13 @@ func (self *nakedSingleTechnique) Candidates(grid *Grid, maxResults int) []*Solv
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *nakedSingleTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *nakedSingleTechnique) find(grid *Grid, coordinator findCoordinator) {
 	//TODO: test that this will find multiple if they exist.
 	getter := grid.queue().NewGetter()
 	for {
 
-		select {
-		case <-done:
+		if coordinator.shouldExitEarly() {
 			return
-		default:
 		}
 		obj := getter.GetSmallerThan(2)
 		if obj == nil {
@@ -130,9 +124,7 @@ func (self *nakedSingleTechnique) find(grid *Grid, results chan *SolveStep, done
 			PointerCells: cell.Neighbors().FilterByFilled(),
 		}
 		if step.IsUseful(grid) {
-			select {
-			case results <- step:
-			case <-done:
+			if coordinator.foundResult(step) {
 				return
 			}
 		}
@@ -185,21 +177,19 @@ func (self *hiddenSingleTechnique) Candidates(grid *Grid, maxResults int) []*Sol
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *hiddenSingleTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *hiddenSingleTechnique) find(grid *Grid, coordinator findCoordinator) {
 	//TODO: test that if there are multiple we find them both.
-	necessaryInCollection(grid, self, self.getter(grid), results, done)
+	necessaryInCollection(grid, self, self.getter(grid), coordinator)
 }
 
-func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice, results chan *SolveStep, done chan bool) {
+func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice, coordinator findCoordinator) {
 	//This will be a random item
 	indexes := rand.Perm(DIM)
 
 	for _, i := range indexes {
 
-		select {
-		case <-done:
+		if coordinator.shouldExitEarly() {
 			return
-		default:
 		}
 
 		seenInCollection := make([]int, DIM)
@@ -224,12 +214,9 @@ func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGette
 							PointerCells: collection.FilterByUnfilled().RemoveCells(CellSlice{cell}),
 						}
 						if step.IsUseful(grid) {
-							select {
-							case results <- step:
-							case <-done:
+							if coordinator.foundResult(step) {
 								return
 							}
-							break
 						}
 						//Hmm, wasn't useful. Keep trying...
 					}

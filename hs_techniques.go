@@ -38,12 +38,13 @@ type SolveTechnique interface {
 	//0.
 	Candidates(grid *Grid, maxResults int) []*SolveStep
 
-	//Find returns as many steps as it can find in the grid for that technique, in a random order.
-	//HumanSolve repeatedly applies technique.Find() to identify candidates for the next step in the solution.
-	//A technique's Find method will send results as it finds them to results, and will periodically see if it
-	//can receive any value from done--if it can, it will stop searching. Find will block and not return if it can't send
-	//to results or receive from done; either use sufficiently buffered channels or run Find in a goroutine.
-	find(grid *Grid, results chan *SolveStep, done chan bool)
+	//Find returns as many steps as it can find in the grid for that
+	//technique, in a random order. HumanSolve repeatedly applies
+	//technique.Find() to identify candidates for the next step in the
+	//solution. A technique's Find method will send results as it finds them
+	//to coordinator.foundResult, and will periodically see if
+	//coordinator.shouldEarlyExit--if it should, it will stop searching.
+	find(grid *Grid, coordinator findCoordinator)
 	//TODO: if we keep this signature, we should consider having each find method actually wrap its internals in a goRoutine
 	//to make it safer to use--although that would probably require a new signature.
 
@@ -463,9 +464,14 @@ func (self *basicSolveTechnique) candidatesHelper(technique SolveTechnique, grid
 	results := make(chan *SolveStep, DIM*DIM)
 	done := make(chan bool, 1)
 
+	coordinator := &channelFindCoordinator{
+		results: results,
+		done:    done,
+	}
+
 	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
 	go func() {
-		technique.find(grid, results, done)
+		technique.find(grid, coordinator)
 		//Since we're the only technique running, as soon as this one returns, we can
 		//signal up that no more results are coming.
 		close(results)
