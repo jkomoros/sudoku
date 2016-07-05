@@ -784,9 +784,6 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSt
 		return nil, nil
 	}
 
-	//TODO: in cases where only guesses are available (e.g. i-sudoku/only-
-	//guesses.doku), percentage becomes NaN.
-
 	//Get a consistent snapshot of completedItems; its length might change.
 	completedItems := searcher.completedItems
 

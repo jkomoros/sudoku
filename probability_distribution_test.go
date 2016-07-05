@@ -32,6 +32,25 @@ func TestInvertingReallyReallyBigDistribution(t *testing.T) {
 	}
 }
 
+func TestAllInfDistribution(t *testing.T) {
+	crazyDistribution := ProbabilityDistribution{
+		math.Inf(1),
+		math.Inf(1),
+		math.Inf(1),
+	}
+
+	invertedDistribution := crazyDistribution.invert()
+
+	for i, probability := range invertedDistribution {
+		if math.IsNaN(probability) {
+			t.Error("Index", i, "was NaN")
+		}
+		if probability != 0.3333333333333333 {
+			t.Error("Got wrong value for index", i, "got", probability, "expected 0.333333")
+		}
+	}
+}
+
 func TestRandomWeightedIndex(t *testing.T) {
 
 	result := ProbabilityDistribution{1.0, 0.0}.RandomIndex()
