@@ -146,6 +146,16 @@ func init() {
 	runtime.GOMAXPROCS(_NUM_SOLVER_THREADS)
 }
 
+func BenchmarkGridCopy(b *testing.B) {
+	grid := NewGrid()
+	grid.LoadSDK(ADVANCED_TEST_GRID)
+	for i := 0; i < b.N; i++ {
+		gridCopy := grid.Copy()
+		defer gridCopy.Done()
+	}
+	grid.Done()
+}
+
 func TestGridCopy(t *testing.T) {
 	grid := NewGrid()
 	grid.LoadSDK(ADVANCED_TEST_GRID)
