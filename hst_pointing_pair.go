@@ -31,7 +31,11 @@ func (self *pointingPairTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is only possible in %s %d of block %d, which means it can't be in any other cell in that %s not in that block", step.TargetNums[0], groupName, groupNum, step.PointerCells.Block(), groupName)
 }
 
-func (self *pointingPairTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *pointingPairTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+	return self.candidatesHelper(self, grid, maxResults)
+}
+
+func (self *pointingPairTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
 	//Within each block, for each number, see if all items that allow it are aligned in a row or column.
 	//TODO: test this returns multiple if they exist.
 

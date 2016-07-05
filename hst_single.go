@@ -44,7 +44,11 @@ func (self *obviousInCollectionTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%s is the only cell in %s %d that is unfilled, and it must be %d", step.TargetCells.Description(), groupName, groupNumber, num)
 }
 
-func (self *obviousInCollectionTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *obviousInCollectionTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+	return self.candidatesHelper(self, grid, maxResults)
+}
+
+func (self *obviousInCollectionTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
 	obviousInCollection(grid, self, self.getter(grid), results, done)
 }
 
@@ -98,7 +102,11 @@ func (self *nakedSingleTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is the only remaining valid number for that cell", num)
 }
 
-func (self *nakedSingleTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *nakedSingleTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+	return self.candidatesHelper(self, grid, maxResults)
+}
+
+func (self *nakedSingleTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
 	//TODO: test that this will find multiple if they exist.
 	getter := grid.queue().NewGetter()
 	for {
@@ -173,7 +181,11 @@ func (self *hiddenSingleTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is required in the %d %s, and %s is the only %s it fits", num, groupNum, groupName, otherGroupNum, otherGroupName)
 }
 
-func (self *hiddenSingleTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *hiddenSingleTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+	return self.candidatesHelper(self, grid, maxResults)
+}
+
+func (self *hiddenSingleTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
 	//TODO: test that if there are multiple we find them both.
 	necessaryInCollection(grid, self, self.getter(grid), results, done)
 }

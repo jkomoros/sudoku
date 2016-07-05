@@ -32,12 +32,18 @@ type SolveTechnique interface {
 	Description(*SolveStep) string
 	//IMPORTANT: a step should return a step IFF that step is valid AND the step would cause useful work to be done if applied.
 
+	//Candidates returns all of the SolveSteps that this Technique sees at the
+	//current state of Grid. All of the returned steps are valid and useful to
+	//apply. Will return early once maxResults have been found if maxResults >
+	//0.
+	Candidates(grid *Grid, maxResults int) []*SolveStep
+
 	//Find returns as many steps as it can find in the grid for that technique, in a random order.
 	//HumanSolve repeatedly applies technique.Find() to identify candidates for the next step in the solution.
 	//A technique's Find method will send results as it finds them to results, and will periodically see if it
 	//can receive any value from done--if it can, it will stop searching. Find will block and not return if it can't send
 	//to results or receive from done; either use sufficiently buffered channels or run Find in a goroutine.
-	Find(grid *Grid, results chan *SolveStep, done chan bool)
+	find(grid *Grid, results chan *SolveStep, done chan bool)
 	//TODO: if we keep this signature, we should consider having each find method actually wrap its internals in a goRoutine
 	//to make it safer to use--although that would probably require a new signature.
 
@@ -433,6 +439,35 @@ func (self *basicSolveTechnique) normalizeStep(step *SolveStep) {
 	step.TargetCells.Sort()
 	step.TargetNums.Sort()
 	step.PointerNums.Sort()
+}
+
+//A helper func making it easier for derived classes to implement Candidates()
+func (self *basicSolveTechnique) candidatesHelper(technique SolveTechnique, grid *Grid, maxResults int) []*SolveStep {
+	var steps []*SolveStep
+
+	results := make(chan *SolveStep, DIM*DIM)
+	done := make(chan bool)
+
+	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
+	go func() {
+		technique.find(grid, results, done)
+		//Since we're the only technique running, as soon as this one returns, we can
+		//signal up that no more results are coming.
+		close(results)
+	}()
+
+	for step := range results {
+		steps = append(steps, step)
+		if maxResults > 0 {
+			if len(steps) >= maxResults {
+				done <- true
+				break
+			}
+		}
+	}
+
+	return steps
+
 }
 
 //TOOD: this is now named incorrectly. (It should be likelihoodHelper)

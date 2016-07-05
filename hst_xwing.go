@@ -47,7 +47,11 @@ func (self *xwingTechnique) Description(step *SolveStep) string {
 	)
 }
 
-func (self *xwingTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *xwingTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+	return self.candidatesHelper(self, grid, maxResults)
+}
+
+func (self *xwingTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
 
 	getter := self.getter(grid)
 

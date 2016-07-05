@@ -481,7 +481,7 @@ func (p *humanSolveItem) Explore() {
 	//We'll be kicking off this routine from multiple places so just define it once
 	startTechnique := func(theTechnique SolveTechnique) {
 
-		theTechnique.Find(gridToUse, resultsChan, done)
+		theTechnique.find(gridToUse, resultsChan, done)
 		//This is where a new technique should be kicked off, if one's going to be, before we tell the waitgroup that we're done.
 		//We need to communicate synchronously with that thread
 		comms := make(chan bool)
@@ -766,7 +766,7 @@ func (n *humanSolveSearcher) NewSearch() {
 //the specified technique on the specified grid.
 func humanSolveSearcherFindThread(workItems chan *humanSolveWorkItem, done chan bool) {
 	for workItem := range workItems {
-		workItem.technique.Find(workItem.grid, workItem.results, done)
+		workItem.technique.find(workItem.grid, workItem.results, done)
 		workItem.resultsWaitGroup.Done()
 	}
 }

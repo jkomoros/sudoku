@@ -39,7 +39,11 @@ func (self hiddenSubsetTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%s are only possible in %s within %s %d, which means that only those numbers could be in those cells", step.PointerNums.Description(), step.PointerCells.Description(), groupName, groupNum)
 }
 
-func (self *hiddenSubsetTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *hiddenSubsetTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+	return self.candidatesHelper(self, grid, maxResults)
+}
+
+func (self *hiddenSubsetTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
 	//TODO: test that this will find multiple if they exist.
 	hiddenSubset(grid, self, self.k, self.getter(grid), results, done)
 }

@@ -20,7 +20,11 @@ func (self *guessTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("we have no other moves to make, so we randomly pick a cell with the smallest number of possibilities, %s, and pick one of its possibilities", step.TargetCells.Description())
 }
 
-func (self *guessTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *guessTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+	return self.candidatesHelper(self, grid, maxResults)
+}
+
+func (self *guessTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
 
 	//We used to have a very elaborate aparatus for guess logic where we'd
 	//earnestly guess and then HumanSolve forward until we discovered a

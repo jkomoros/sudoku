@@ -69,7 +69,7 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 	done := make(chan bool)
 
 	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
-	solver.Find(grid, results, done)
+	solver.find(grid, results, done)
 
 	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
 	close(done)
@@ -149,7 +149,7 @@ func TestNecessaryInRow(t *testing.T) {
 	done := make(chan bool)
 
 	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
-	solver.Find(grid, results, done)
+	solver.find(grid, results, done)
 
 	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
 	close(done)
@@ -230,7 +230,7 @@ func TestNecessaryInCol(t *testing.T) {
 	done := make(chan bool)
 
 	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
-	solver.Find(grid, results, done)
+	solver.find(grid, results, done)
 
 	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
 	close(done)
@@ -311,7 +311,7 @@ func TestNecessaryInBlock(t *testing.T) {
 	done := make(chan bool)
 
 	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
-	solver.Find(grid, results, done)
+	solver.find(grid, results, done)
 
 	//TODO: test that Find exits early when done is closed. (or maybe just doesn't send after done is closed)
 	close(done)

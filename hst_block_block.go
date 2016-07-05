@@ -14,7 +14,11 @@ func (self *blockBlockInteractionTechnique) humanLikelihood(step *SolveStep) flo
 	return self.difficultyHelper(60.0)
 }
 
-func (self *blockBlockInteractionTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *blockBlockInteractionTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+	return self.candidatesHelper(self, grid, maxResults)
+}
+
+func (self *blockBlockInteractionTechnique) find(grid *Grid, results chan *SolveStep, done chan bool) {
 
 	pairs := pairwiseBlocks(grid)
 
