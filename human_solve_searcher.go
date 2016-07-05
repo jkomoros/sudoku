@@ -635,9 +635,7 @@ func (n *humanSolveSearcher) Search() {
 		numFindThreads = 2
 	}
 
-	//TODO: it's not clear if making these buffered to numFindThreads actually
-	//makes a difference.
-	workItems := make(chan *humanSolveWorkItem, numFindThreads)
+	workItems := make(chan *humanSolveWorkItem)
 
 	//The thread to generate work items
 	go humanSolveSearcherWorkItemGenerator(n, workItems)
