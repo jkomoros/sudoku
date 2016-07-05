@@ -126,6 +126,10 @@ func TestHumanSolveSearcher(t *testing.T) {
 		t.Error("We expected the expensive step to be worse", searcher.String())
 	}
 
+	//Horrendous hack to allow us to twiddle again
+	expensiveStepItem.doneTwiddling = false
+	expensiveStepItem.cachedGoodness = 0.0
+
 	expensiveStepItem.Twiddle(0.00000000000000001, "Very small amount to make this #1")
 
 	if searcher.itemsToExplore[0] != expensiveStepItem {
