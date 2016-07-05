@@ -594,10 +594,6 @@ func (n *humanSolveSearcher) Search() {
 	//a cell of rank 3 will be equally bad, making it more important to only
 	//return cells of the lowest rank.
 
-	//TODO: before commiting this back to master, panic() after a number of
-	//solves and make sure that for example the #3 goroutines aren't hanging
-	//around.
-
 	//TODO: make this configurable
 
 	//TODO: test if this is faster on devices with other numbers of cores or
