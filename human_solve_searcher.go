@@ -506,18 +506,8 @@ func (n *humanSolveSearcher) DoneSearching() bool {
 	}
 
 	n.itemsLock.Lock()
-	lenItemsToExplore := len(n.itemsToExplore)
 	lenCompletedItems := len(n.completedItems)
 	n.itemsLock.Unlock()
-
-	//TODO: this percentage of Techniques len is totaly arbitrary. Either set
-	//it in a way that seems more principled, or allow it to be configured.
-	if float64(lenItemsToExplore) > float64(len(Techniques))*0.25 {
-		if n.options.NumStraightforwardOptionsToEarlyExit <= n.straightforwardItemsCount {
-			n.signalDone()
-			return true
-		}
-	}
 
 	result := n.options.NumOptionsToCalculate <= lenCompletedItems
 	if result {
