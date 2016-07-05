@@ -626,9 +626,6 @@ func (n *humanSolveSearcher) Search() {
 
 	//TODO: Make sure this big comment in this method is up-to-date.
 
-	//TODO: for each thing that tests HumanSolve, run it with
-	//options.useNewSearch true and false
-
 	//TODO: make this configurable TODO: test if this is faster on devices
 	//with other numbers of cores or if it's just tuned to the Mac Pro.
 	runtime.GOMAXPROCS(runtime.NumCPU())
