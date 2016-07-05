@@ -424,7 +424,7 @@ func (self *Grid) HumanSolution(options *HumanSolveOptions) *SolveDirections {
 //nil if the puzzle does not have a single valid solution. If options is nil,
 //will use reasonable defaults. Mutates the grid.
 func (self *Grid) HumanSolve(options *HumanSolveOptions) *SolveDirections {
-	return humanSolveHelper(self, options, true)
+	return humanSolveHelper(self, options, nil, true)
 }
 
 //Hint returns a SolveDirections with precisely one CompoundSolveStep that is
@@ -432,8 +432,10 @@ func (self *Grid) HumanSolve(options *HumanSolveOptions) *SolveDirections {
 //effectively a hint to the user about what Fill step to do next, and why it's
 //logically implied; the truncated return value of HumanSolve. Returns nil if
 //the puzzle has multiple solutions or is otherwise invalid. If options is
-//nil, will use reasonable defaults. Does not mutate the grid.
-func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
+//nil, will use reasonable defaults. optionalPreviousSteps, if provided,
+//serves to help the algorithm pick the most realistic next steps. Does not
+//mutate the grid.
+func (self *Grid) Hint(options *HumanSolveOptions, optionalPreviousSteps []*CompoundSolveStep) *SolveDirections {
 
 	//TODO: test that non-fill steps before the last one are necessary to unlock
 	//the fill step at the end (cull them if not), and test that.
@@ -441,7 +443,7 @@ func (self *Grid) Hint(options *HumanSolveOptions) *SolveDirections {
 	clone := self.Copy()
 	defer clone.Done()
 
-	result := humanSolveHelper(clone, options, false)
+	result := humanSolveHelper(clone, options, optionalPreviousSteps, false)
 
 	return result
 

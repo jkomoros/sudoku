@@ -148,7 +148,7 @@ type humanSolveWorkItem struct {
 }
 
 //humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
-func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved bool) *SolveDirections {
+func humanSolveHelper(grid *Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep, endConditionSolved bool) *SolveDirections {
 	//Short circuit solving if it has multiple solutions.
 	if grid.HasMultipleSolutions() {
 		return nil
@@ -171,7 +171,7 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, endConditionSolved
 	if endConditionSolved {
 		steps = humanSolveSearch(grid, options)
 	} else {
-		result := humanSolveSearchSingleStep(grid, options, nil)
+		result := humanSolveSearchSingleStep(grid, options, previousSteps)
 		if result != nil {
 			steps = []*CompoundSolveStep{result}
 		}

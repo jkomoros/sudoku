@@ -501,7 +501,19 @@ func (c *mainController) ShowDebugHint() {
 func (c *mainController) ShowHint() {
 	options := sudoku.DefaultHumanSolveOptions()
 	options.NumOptionsToCalculate = 100
-	hint := c.Grid().Hint(options)
+
+	//This is a HORRENDOUS hack, and very brittle. :-(
+	//It's also recreated exactly in ShowDebugHint
+	fakeLastFillSteps := []*sudoku.CompoundSolveStep{
+		{
+			FillStep: &sudoku.SolveStep{
+				Technique:   sudoku.Techniques[0],
+				TargetCells: c.model.LastModifiedCells(),
+			},
+		},
+	}
+
+	hint := c.Grid().Hint(options, fakeLastFillSteps)
 
 	if hint == nil || len(hint.CompoundSteps) == 0 {
 		c.SetConsoleMessage("No hint to give.", true)
