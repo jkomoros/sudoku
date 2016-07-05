@@ -104,7 +104,10 @@ type humanSolveSearcher struct {
 	//TODO: keep track of stats: how big the frontier was at the end of each
 	//CompoundSolveStep. Then provide max/mean/median.
 
-	itemsToExploreLock sync.Mutex
+	//itemsLock controls access to itemsToExplore, completedItems,
+	//straightforwardItemsCount, etc.
+	//TODO: consider having more fine-grained locks for performance.
+	itemsLock sync.Mutex
 
 	//Various options frozen in at creation time that various methods need
 	//access to.
@@ -601,29 +604,25 @@ func (n *humanSolveSearcher) AddItem(item *humanSolveItem) {
 		return
 	}
 	item.added = true
+	n.itemsLock.Lock()
 	if item.IsComplete() {
 		n.completedItems = append(n.completedItems, item)
 		if item.step.Technique != GuessTechnique {
 			n.straightforwardItemsCount++
 		}
 	} else {
-		n.addItemToExplore(item)
+		heap.Push(&n.itemsToExplore, item)
 	}
-}
-
-func (n *humanSolveSearcher) addItemToExplore(item *humanSolveItem) {
-	n.itemsToExploreLock.Lock()
-	heap.Push(&n.itemsToExplore, item)
-	n.itemsToExploreLock.Unlock()
+	n.itemsLock.Unlock()
 }
 
 func (n *humanSolveSearcher) ItemValueChanged(item *humanSolveItem) {
 	if item.heapIndex < 0 {
 		return
 	}
-	n.itemsToExploreLock.Lock()
+	n.itemsLock.Lock()
 	heap.Fix(&n.itemsToExplore, item.heapIndex)
-	n.itemsToExploreLock.Unlock()
+	n.itemsLock.Unlock()
 }
 
 //DoneSearching will return true when no more items need to be explored
@@ -633,9 +632,10 @@ func (n *humanSolveSearcher) DoneSearching() bool {
 		return true
 	}
 
-	n.itemsToExploreLock.Lock()
+	n.itemsLock.Lock()
 	lenItemsToExplore := len(n.itemsToExplore)
-	n.itemsToExploreLock.Unlock()
+	lenCompletedItems := len(n.completedItems)
+	n.itemsLock.Unlock()
 
 	//TODO: this percentage of Techniques len is totaly arbitrary. Either set
 	//it in a way that seems more principled, or allow it to be configured.
@@ -644,7 +644,7 @@ func (n *humanSolveSearcher) DoneSearching() bool {
 			return true
 		}
 	}
-	return n.options.NumOptionsToCalculate <= len(n.completedItems)
+	return n.options.NumOptionsToCalculate <= lenCompletedItems
 }
 
 //NextPossibleStep pops the best step and returns it.
@@ -653,9 +653,9 @@ func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
 		return nil
 	}
 
-	n.itemsToExploreLock.Lock()
+	n.itemsLock.Lock()
 	result := heap.Pop(&n.itemsToExplore).(*humanSolveItem)
-	n.itemsToExploreLock.Unlock()
+	n.itemsLock.Unlock()
 
 	return result
 }
