@@ -703,11 +703,6 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 		item = searcher.NextPossibleStep()
 
 	}
-
-	//TODO: what happens if we have an early exit? Does waiting to do this
-	//here (as opposed to on the first loop through the main for loop) make
-	//for a messier close?
-
 }
 
 //String prints out a useful debug output for the searcher's state.
