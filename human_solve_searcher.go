@@ -173,9 +173,11 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, previousSteps []*C
 		options = DefaultHumanSolveOptions()
 	}
 
-	//TODO: we could also do a test for if it's already solved here.
-	//(newHumanSolveSearcher implicitly does in the loop, but no harm in
-	//checking here once too.
+	//To shave off a bit more performance, quickly check if the grid is
+	//already solved.
+	if grid.Solved() {
+		return nil
+	}
 
 	options.validate()
 
