@@ -126,15 +126,17 @@ type twiddleRecord struct {
 //derived recursively from the parents.
 type humanSolveItem struct {
 	//All humanSolveItem, except the initial in a searcher, must have a parent.
-	parent     *humanSolveItem
-	step       *SolveStep
-	twiddles   []twiddleRecord
-	heapIndex  int
-	searcher   *humanSolveSearcher
-	cachedGrid *Grid
+	parent         *humanSolveItem
+	step           *SolveStep
+	twiddles       []twiddleRecord
+	heapIndex      int
+	searcher       *humanSolveSearcher
+	cachedGrid     *Grid
+	cachedGoodness float64
 	//The index of the next techinque to return
 	techniqueIndex int
 	added          bool
+	doneTwiddling  bool
 }
 
 //humanSolveWorkItem represents a unit of work that should be done during the
@@ -308,12 +310,17 @@ func (p *humanSolveItem) Goodness() float64 {
 	if p.parent == nil {
 		return 1.0
 	}
-	//TODO: as an optimization we could cache this; each step is immutable basically.
+	if p.doneTwiddling && p.cachedGoodness != 0 {
+		return p.cachedGoodness
+	}
 	ownMultiplicationFactor := probabilityTweak(1.0)
 	for _, twiddle := range p.twiddles {
 		ownMultiplicationFactor *= twiddle.value
 	}
-	return p.parent.Goodness() * float64(ownMultiplicationFactor)
+	//p.cachedGoodness will be overwritten in the future if doneTwiddling is
+	//not yet true.
+	p.cachedGoodness = p.parent.Goodness() * float64(ownMultiplicationFactor)
+	return p.cachedGoodness
 }
 
 //explainGoodness returns a string explaining why this item has the goodness
@@ -370,6 +377,7 @@ func (p *humanSolveItem) CreateNewItem(step *SolveStep) *humanSolveItem {
 		tweak := twiddler.f(step, inProgressCompoundStep, p.searcher.previousCompoundSteps, grid)
 		result.Twiddle(tweak, twiddler.name)
 	}
+	result.DoneTwiddling()
 	return result
 }
 
@@ -380,12 +388,22 @@ func (p *humanSolveItem) AddStep(step *SolveStep) *humanSolveItem {
 	return result
 }
 
+//DoneTwiddling should be called once no more twiddles are expected. That's
+//the signal that it's OK for us to cache twiddles.
+func (p *humanSolveItem) DoneTwiddling() {
+	p.doneTwiddling = true
+}
+
 //Twiddle modifies goodness by the given amount and keeps track of the reason
 //for debugging purposes. A twiddle of 1.0 has no effect.q A twiddle between
 //0.0 and 1.0 increases the goodness. A twiddle of 1.0 or greater decreases
 //goodness.
 func (p *humanSolveItem) Twiddle(amount probabilityTweak, description string) {
 	if amount < 0.0 {
+		return
+	}
+	//Ignore twiddles once we've been told to not expect any more.
+	if p.doneTwiddling {
 		return
 	}
 	p.twiddles = append(p.twiddles, twiddleRecord{description, amount})
