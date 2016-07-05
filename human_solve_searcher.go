@@ -674,9 +674,6 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 
 	item := searcher.NextPossibleStep()
 
-	//TODO: test that if len(techniques) is less than len(threads) that we
-	//don't end early here because we loop back up and find step == nil
-	//and exit, even though more work will come.
 	for item != nil {
 
 		coordinator := &synchronousFindCoordinator{

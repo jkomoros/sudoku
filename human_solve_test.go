@@ -252,7 +252,7 @@ func TestShortTechniquesToUseHumanSolveOptions(t *testing.T) {
 	grid.LoadSDK(TEST_GRID)
 
 	shortTechniqueOptions := DefaultHumanSolveOptions()
-	shortTechniqueOptions.TechniquesToUse = Techniques[0:5]
+	shortTechniqueOptions.TechniquesToUse = Techniques[0:2]
 
 	steps := grid.HumanSolution(shortTechniqueOptions)
 
