@@ -760,6 +760,9 @@ func (n *humanSolveSearcher) NewSearch() {
 	//so we really do reduce down to a handful of synchronous threads just
 	//contending on the searcher with the AddStep lock.
 
+	//TODO: for each thing that tests HumanSolve, run it with
+	//options.useNewSearch true and false
+
 	//done will be closed when this main function returns, signaling to all
 	//created goroutines that they should return.
 	done := make(chan bool)
