@@ -539,78 +539,52 @@ func (n *humanSolveSearcher) NextPossibleStep() *humanSolveItem {
 func (n *humanSolveSearcher) Search() {
 
 	/*
-			The pipeline starts by generating humanSolveWorkItems, and at the
-			end collects generated CompoundSolveSteps and puts them in
-			searcher.completedItems.
+		The pipeline starts by generating humanSolveWorkItems, and at the
+		end collects generated CompoundSolveSteps and puts them in
+		searcher.completedItems.
 
-			The pipeline continues until one of the following things are true:
+		The pipeline continues until one of the following things are true:
 
-			1) No more work items will be generated. This is reasonably rare
-			in practice, because as long as Guess is in the set of
-			TechniquesToUse there will almost always be SOME item. When this
-			shuts down the pipeline is already mostly idle anyway so it's just
-			a matter of tidying up. However, this will always happen in the
-			last few steps of solving a puzzle when there's only one move to
-			make anyway.
+		1) No more work items will be generated. This is reasonably rare
+		in practice, because as long as Guess is in the set of
+		TechniquesToUse there will almost always be SOME item. When this
+		shuts down the pipeline is already mostly idle anyway so it's just
+		a matter of tidying up. However, this will always happen in the
+		last few steps of solving a puzzle when there's only one move to
+		make anyway.
 
-			2) We have enough at least NumItemsToCompute items in
-			searcher.completedItems and thus can exit early. When this happens
-			the pipeline is roaring through all of the work and needs to
-			signal all pieces to shut down. We handle this by defering a close
-			to allDone in this method and then just returning.
+		2) We have at least NumItemsToCompute items in
+		searcher.completedItems (or some other more complex early exit
+		logic is true) and thus can exit early. When this happens the
+		pipeline is roaring through all of the work and needs to signal
+		all pieces to shut down. We handle this by defering a close to
+		allDone in this method and then just returning.
 
-			The pipeline consists of the following go Routines:
+		The pipeline consists of the following go Routines:
 
-			1) A routine to generate humanSolveWorkItems. It loops through
-			searcher.NextPossibleStep, and for each one of those loops through
-			NextWorkItem until none are left. It sends workItems down the
-			channel to the next stage. Once there are no more steps it closes
-			the outbound channel, signalling to the rest of the pipeline to
-			exit in Exit Condition #1. If it can receive from the allDone
-			channel, that means that Exit Condition #2 is met and it should
-			begin an early shutdown and close its output channel.
+		1) A routine to generate humanSolveWorkItems. It loops through
+		searcher.NextPossibleStep, and for each one of those loops through
+		NextWorkItem until none are left. It sends workItems down the
+		channel to the next stage. Once there are no more steps it closes
+		the outbound channel, signalling to the rest of the pipeline to
+		exit in Exit Condition #1. If it can receive from the allDone
+		channel, that means that Exit Condition #2 is met and it should
+		begin an early shutdown and close its output channel.
 
-			//TODO: ideally we don't want to pick the next step to explore
-			//until we have as many as possible, so we can pick the best one.
+		Each work item contains the grid to operate on, the technique, and
+		a coordinator that is specific to this baseItem.
 
-			Especially at the first work item, it's possible for this thread
-			to think that it's exhausted all work tiems that will come in
-			(because the work items that will come in from processing future
-			items have not yet been added to the heap). For that reason every
-			time we add an item to the workItems queue we first increment a
-			counter, which the workers will decrement (or wait, doesn't
-			another thread need to, after more work is added to
-			itemsToExplore?). If that isn't 0 we won't kill this thread.
+		2) A series of N worker threads that take an item off of
+		workItems, run the technique, and then run another one. The
+		coordinator in the work item synchronously adds the result to the
+		searcher . If workItems is closed they immediately exit. The
+		Technique.Find() methods will early exit if the coordinator tells
+		them to (and it will do so faster given its synchronous nature)
 
-			Each work item contains the grid to operate on, the technique, the
-			allDone channel, and a special resultsChan for this
-			humanSolveItem.
-
-			2) A series of N worker threads that take an item off of
-			workItems, run the technique, and then run another one. If
-			workItems is closed they immediately exit. The Technique.Find()
-			methods will handle earlyExit if allDone is closed automatically.
-
-			3) A goRoutine per techinque that collects from its resultsChan.
-			These are the steps generated by our Technique.Finds(), but we
-			need to take those SolveSteps and combine them with our
-			humanSolveItem to create other humanSolveItems. Instead of
-			teaching Technique.Find() about humanSolveItems, we just have this
-			extra pipeline that reads these and then just creates a new
-			humanSolveItem and passes taht down the pipeline.
-
-			TODO: how do we know when to kill each of these threads? (It may
-			not be necessary)
-
-			TODO: Make sure that in exit condition #1 that the cascading
-			closing of channels makes it through #3 to #4.
-
-		    4) THe collector goRoutine, which takes the new humanSolveItems
-			and puts them either into itemsToExpore or into completedItems.
-			(This is the only goRoutine ever touching completedItems so no
-			mutex is necessary). As soon as completedItems is greater than
-			the target, we return, which automatically closes allDone and
-			initiates a shutdown of the rest of the pipeline.
+		On the main thread we watch for either the searcher to signal that
+		DoneSearching is called (by closing its done channel), or for all
+		of the solver threads to have quit, signaling that all of the
+		techniques have been exhausted.
 	*/
 
 	//TODO: make sure that Guess will return at least one guess item in all
@@ -624,10 +598,10 @@ func (n *humanSolveSearcher) Search() {
 	//solves and make sure that for example the #3 goroutines aren't hanging
 	//around.
 
-	//TODO: Make sure this big comment in this method is up-to-date.
+	//TODO: make this configurable
 
-	//TODO: make this configurable TODO: test if this is faster on devices
-	//with other numbers of cores or if it's just tuned to the Mac Pro.
+	//TODO: test if this is faster on devices with other numbers of cores or
+	//if it's just tuned to the Mac Pro.
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	numFindThreads := runtime.GOMAXPROCS(0)/2 - 1
 
