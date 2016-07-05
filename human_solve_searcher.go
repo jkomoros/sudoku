@@ -157,6 +157,14 @@ type channelFindCoordinator struct {
 	done    chan bool
 }
 
+//synchronousFindCoordinator implements the findCoordinator interface. It's
+//basically just a thin wrapper around humanSolveSearcher. Desigend for use in
+//NewSearch.
+type synchronousFindCoordinator struct {
+	searcher *humanSolveSearcher
+	baseItem *humanSolveItem
+}
+
 //humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
 func humanSolveHelper(grid *Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep, endConditionSolved bool) *SolveDirections {
 	//Short circuit solving if it has multiple solutions.
@@ -253,6 +261,21 @@ func (c *channelFindCoordinator) foundResult(step *SolveStep) bool {
 	case <-c.done:
 		return true
 	}
+}
+
+/************************************************************
+ *
+ * synchronousFindCoordinator implementation
+ *
+ ************************************************************/
+
+func (s *synchronousFindCoordinator) shouldExitEarly() bool {
+	return s.searcher.DoneSearching()
+}
+
+func (s *synchronousFindCoordinator) foundResult(step *SolveStep) bool {
+	s.baseItem.AddStep(step)
+	return s.shouldExitEarly()
 }
 
 /************************************************************
