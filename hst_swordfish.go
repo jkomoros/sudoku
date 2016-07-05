@@ -39,7 +39,11 @@ func (self *swordfishTechnique) Description(step *SolveStep) string {
 
 }
 
-func (self *swordfishTechnique) Find(grid *Grid, results chan *SolveStep, done chan bool) {
+func (self *swordfishTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+	return self.candidatesHelper(self, grid, maxResults)
+}
+
+func (self *swordfishTechnique) find(grid *Grid, coordinator findCoordinator) {
 
 	getter := self.getter(grid)
 
@@ -56,10 +60,8 @@ func (self *swordfishTechnique) Find(grid *Grid, results chan *SolveStep, done c
 		//The candidate we're considering
 
 		//Check if it's time to stop.
-		select {
-		case <-done:
+		if coordinator.shouldExitEarly() {
 			return
-		default:
 		}
 
 		//Consider each of the major-axis groups to see if more than three have
@@ -150,9 +152,7 @@ func (self *swordfishTechnique) Find(grid *Grid, results chan *SolveStep, done c
 			}
 
 			if step.IsUseful(grid) {
-				select {
-				case results <- step:
-				case <-done:
+				if coordinator.foundResult(step) {
 					return
 				}
 			}

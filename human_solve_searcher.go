@@ -143,8 +143,15 @@ type humanSolveItem struct {
 type humanSolveWorkItem struct {
 	grid             *Grid
 	technique        SolveTechnique
-	results          chan *SolveStep
+	coordinator      findCoordinator
 	resultsWaitGroup *sync.WaitGroup
+}
+
+//channelFindCoordinator implements the findCoordinator interface. It's a
+//simple wrapper around the basic channel logic currently used.
+type channelFindCoordinator struct {
+	results chan *SolveStep
+	done    chan bool
 }
 
 //humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
@@ -219,6 +226,30 @@ func humanSolveSearchSingleStep(grid *Grid, options *HumanSolveOptions, previous
 	randomIndex := distribution.RandomIndex()
 
 	return steps[randomIndex]
+}
+
+/************************************************************
+ *
+ * channelFindCoordinator implementation
+ *
+ ************************************************************/
+
+func (c *channelFindCoordinator) shouldExitEarly() bool {
+	select {
+	case <-c.done:
+		return true
+	default:
+		return false
+	}
+}
+
+func (c *channelFindCoordinator) foundResult(step *SolveStep) bool {
+	select {
+	case c.results <- step:
+		return false
+	case <-c.done:
+		return true
+	}
 }
 
 /************************************************************
@@ -467,6 +498,11 @@ func (p *humanSolveItem) Explore() {
 	resultsChan := make(chan *SolveStep, len(techniques))
 	done := make(chan bool)
 
+	coordinator := &channelFindCoordinator{
+		results: resultsChan,
+		done:    done,
+	}
+
 	//Deliberately unbuffered; we want it to run sync inside of startTechnique
 	//the thread that's waiting on it will pass its own chan that it should send to when it's done
 	techniqueFinished := make(chan chan bool)
@@ -481,7 +517,7 @@ func (p *humanSolveItem) Explore() {
 	//We'll be kicking off this routine from multiple places so just define it once
 	startTechnique := func(theTechnique SolveTechnique) {
 
-		theTechnique.Find(gridToUse, resultsChan, done)
+		theTechnique.find(gridToUse, coordinator)
 		//This is where a new technique should be kicked off, if one's going to be, before we tell the waitgroup that we're done.
 		//We need to communicate synchronously with that thread
 		comms := make(chan bool)
@@ -729,6 +765,9 @@ func (n *humanSolveSearcher) NewSearch() {
 	//so we really do reduce down to a handful of synchronous threads just
 	//contending on the searcher with the AddStep lock.
 
+	//TODO: for each thing that tests HumanSolve, run it with
+	//options.useNewSearch true and false
+
 	//done will be closed when this main function returns, signaling to all
 	//created goroutines that they should return.
 	done := make(chan bool)
@@ -747,7 +786,7 @@ func (n *humanSolveSearcher) NewSearch() {
 	go humanSolveSearcherWorkItemGenerator(n, workItems, items, done)
 
 	for i := 0; i < numFindThreads; i++ {
-		go humanSolveSearcherFindThread(workItems, done)
+		go humanSolveSearcherFindThread(workItems)
 	}
 
 	//On the main thread we'll collect all of the humanSolveItems from
@@ -764,9 +803,9 @@ func (n *humanSolveSearcher) NewSearch() {
 
 //humanSolveSearcherFindThread is a thread that takes in workItems and runs
 //the specified technique on the specified grid.
-func humanSolveSearcherFindThread(workItems chan *humanSolveWorkItem, done chan bool) {
+func humanSolveSearcherFindThread(workItems chan *humanSolveWorkItem) {
 	for workItem := range workItems {
-		workItem.technique.Find(workItem.grid, workItem.results, done)
+		workItem.technique.find(workItem.grid, workItem.coordinator)
 		workItem.resultsWaitGroup.Done()
 	}
 }
@@ -793,6 +832,11 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 		stepsChan := make(chan *SolveStep)
 		var stepsChanWaitGroup sync.WaitGroup
 
+		coordinator := &channelFindCoordinator{
+			results: stepsChan,
+			done:    done,
+		}
+
 		itemCreatorsWaitGroup.Add(1)
 		go humanSolveSearcherItemCreator(stepsChan, items, item, done, &itemCreatorsWaitGroup)
 
@@ -804,7 +848,7 @@ func humanSolveSearcherWorkItemGenerator(searcher *humanSolveSearcher, workItems
 			//avoid pumping workItems through earlier.
 
 			//Tell each workItem where to send its results
-			workItem.results = stepsChan
+			workItem.coordinator = coordinator
 			workItem.resultsWaitGroup = &stepsChanWaitGroup
 
 			stepsChanWaitGroup.Add(1)
