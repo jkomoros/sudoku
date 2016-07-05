@@ -78,7 +78,7 @@ import (
 
 //_USE_NEW_SEARCH makes it one line to swap between new and old search as the
 //default searh method. Purely for testing convenience.
-const _USE_NEW_SEARCH = false
+const _USE_NEW_SEARCH = true
 
 //TODO: Remove _USE_NEW_SEARCH once we figure out which of New or Old search
 //we'll rely on.
