@@ -790,8 +790,6 @@ func (n *humanSolveSearcher) NewSearch() {
 			initiates a shutdown of the rest of the pipeline.
 	*/
 
-	//TODO: implement exit condition #1.
-
 	//TODO: make sure that Guess will return at least one guess item in all
 	//cases, but never will go above the normal rank of 2 unless there are
 	//none of size 2. This will require a new test. Note that all guesses are
@@ -803,13 +801,7 @@ func (n *humanSolveSearcher) NewSearch() {
 	//solves and make sure that for example the #3 goroutines aren't hanging
 	//around.
 
-	//TODO: consider changing the signature of technique.Find() to take a
-	//findHelper object that has a foundResult() bool shouldExitEarly and
-	//shouldEarlyExit() method. That will make it easier to re-architect away
-	//from channel pipelines _much_ easier. For example, we might be able to
-	//make it so all techniques do synchronous work when finding a technique,
-	//so we really do reduce down to a handful of synchronous threads just
-	//contending on the searcher with the AddStep lock.
+	//TODO: Make sure this big comment in this method is up-to-date.
 
 	//TODO: for each thing that tests HumanSolve, run it with
 	//options.useNewSearch true and false
