@@ -3,6 +3,7 @@ package sudoku
 import (
 	"container/heap"
 	"fmt"
+	"runtime"
 	"strconv"
 	"sync"
 )
@@ -813,8 +814,14 @@ func (n *humanSolveSearcher) NewSearch() {
 	//TODO: for each thing that tests HumanSolve, run it with
 	//options.useNewSearch true and false
 
-	//TODO: make this configurable
-	numFindThreads := 2
+	//TODO: make this configurable TODO: test if this is faster on devices
+	//with other numbers of cores or if it's just tuned to the Mac Pro.
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	numFindThreads := runtime.GOMAXPROCS(0)/2 - 1
+
+	if numFindThreads < 2 {
+		numFindThreads = 2
+	}
 
 	//TODO: it's not clear if making these buffered to numFindThreads actually
 	//makes a difference.
