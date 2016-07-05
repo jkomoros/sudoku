@@ -279,6 +279,9 @@ func (self *Cell) Possible(number int) bool {
 //Possibilities returns a list of all current possibilities for this cell: all
 //numbers for which cell.Possible returns true.
 func (self *Cell) Possibilities() (result IntSlice) {
+	//TODO: performance improvement would be to not need to grab the lock DIM
+	//times in Possible and lift it out into a PossibleImpl that has assumes
+	//the lock is already grabbed.
 	if self.number != 0 {
 		return nil
 	}
