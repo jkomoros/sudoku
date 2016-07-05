@@ -7,6 +7,11 @@ import (
 //1.0 is a no op. 0.0 to 1.0 is increase goodness; 1.0 and above is decraase good
 type probabilityTweak float64
 
+//TODO: performance idea: the grid in this interface should be previousGrid:
+//the grid BEFORE the proposed step is applied. That would allow us to not
+//have to calculate grid when we create a humanSolveItem, but only when we
+//explore it. That could potentially have a big impact. Instrument number of
+//times Grid is reified in humanSolveItem.
 type probabilityTwiddler func(*SolveStep, []*SolveStep, []*CompoundSolveStep, *Grid) probabilityTweak
 
 type probabilityTwiddlerItem struct {
