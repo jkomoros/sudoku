@@ -74,6 +74,21 @@ type SolveTechnique interface {
 	normalizeStep(step *SolveStep)
 }
 
+//findCoordinator is an object passed into technique.find that helps collect
+//results and also tell the technique if it should early exit or not. It
+//serves to abstract away how its implemented, allowing us to switch between
+//an asynchronous channel-based model and a synchronous model easily.
+type findCoordinator interface {
+	//shouldExitEarly will return true when it's OK for the technique to exit
+	//even if not all of the SolveSteps have been returned.
+	shouldExitEarly() bool
+
+	//foundResult should be called whenever a result has been found. Only pass
+	//steps that are valid and useful. The return result is equivalent to
+	//shouldExitEarly(); if it is true, the technique should finish up.
+	foundResult(*SolveStep) bool
+}
+
 type cellGroupType int
 
 const (
