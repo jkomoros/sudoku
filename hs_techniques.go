@@ -129,6 +129,30 @@ func init() {
 	//TODO: calculate more realistic weights.
 
 	Techniques = []SolveTechnique{
+		&obviousInCollectionTechnique{
+			&basicSolveTechnique{
+				"Obvious In Row",
+				true,
+				_GROUP_ROW,
+				1,
+			},
+		},
+		&obviousInCollectionTechnique{
+			&basicSolveTechnique{
+				"Obvious In Col",
+				true,
+				_GROUP_COL,
+				1,
+			},
+		},
+		&obviousInCollectionTechnique{
+			&basicSolveTechnique{
+				"Obvious In Block",
+				true,
+				_GROUP_BLOCK,
+				1,
+			},
+		},
 		&hiddenSingleTechnique{
 			&basicSolveTechnique{
 				//TODO: shouldn't this be "Hidden Single Row" (and likewise for others)
@@ -160,30 +184,6 @@ func init() {
 				"Only Legal Number",
 				true,
 				_GROUP_NONE,
-				1,
-			},
-		},
-		&obviousInCollectionTechnique{
-			&basicSolveTechnique{
-				"Obvious In Row",
-				true,
-				_GROUP_ROW,
-				1,
-			},
-		},
-		&obviousInCollectionTechnique{
-			&basicSolveTechnique{
-				"Obvious In Col",
-				true,
-				_GROUP_COL,
-				1,
-			},
-		},
-		&obviousInCollectionTechnique{
-			&basicSolveTechnique{
-				"Obvious In Block",
-				true,
-				_GROUP_BLOCK,
 				1,
 			},
 		},
