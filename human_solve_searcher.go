@@ -293,7 +293,7 @@ func (p *humanSolveItem) Grid() *Grid {
 		if p.searcher.grid == nil {
 			result = nil
 		} else if p.parent == nil {
-			result = p.searcher.grid.Copy()
+			result = p.searcher.grid
 		} else {
 			result = p.parent.Grid().Copy()
 			p.step.Apply(result)
@@ -760,7 +760,10 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSt
 
 	//TODO: with the new approach, we're getting a lot more extreme negative difficulty values. Train a new model!
 
-	searcher := newHumanSolveSearcher(self, previousSteps, options)
+	//We send a copy here because our own selves will likely be modified soon
+	//after returning from this, and if the other threads haven't gotten the
+	//signal yet to shut down they might get in a weird state.
+	searcher := newHumanSolveSearcher(self.Copy(), previousSteps, options)
 
 	searcher.Search()
 
