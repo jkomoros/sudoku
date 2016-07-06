@@ -331,7 +331,10 @@ func (p *humanSolveItem) Goodness() float64 {
 //explainGoodness returns a string explaining why this item has the goodness
 //it does. Primarily useful for debugging.
 func (p *humanSolveItem) explainGoodness() []string {
-	return p.explainGoodnessRecursive(0)
+	result := []string{
+		fmt.Sprintf("G:%f", p.Goodness()),
+	}
+	return append(result, p.explainGoodnessRecursive(0)...)
 }
 
 func (p *humanSolveItem) explainGoodnessRecursive(startCount int) []string {
