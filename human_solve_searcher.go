@@ -66,12 +66,6 @@ import (
  * that distribution and uses it to pick which CompoundSolveStep to return.
  */
 
-//TODO: See if there are any obvious performance wins to get before
-//committing. We're roughly 2.25x longer-running compared to master. :-(
-// The way to figure out where to dive in more is to run:
-// `go test -run=XXX -bench=BenchmarkHumanSolve -cpuprofile=test.out`
-// then `go tool pprof --text sudoku.text test.out`
-
 //humanSolveSearcherHeap is what we will use for the heap implementation in
 //searcher. We put it as a seaprate time to avoid having to have
 //heap.Interface methods on searcher itself, since for proper use you're not
