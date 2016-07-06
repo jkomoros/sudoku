@@ -366,10 +366,36 @@ func signalNumberUnfilled(directions SolveDirections) DifficultySignals {
 	}
 }
 
+//signalPrecursorStepsLength returns the length of the longest run of
+//non-fill steps, and the average length of any run.
+func signalPrecursorStepsLength(directions SolveDirections) DifficultySignals {
+
+	longestRun := 0
+	averageRunAccum := 0
+
+	for _, compoundStep := range directions.CompoundSteps {
+		length := len(compoundStep.PrecursorSteps)
+		if length > longestRun {
+			longestRun = length
+		}
+		averageRunAccum += length
+	}
+
+	averageRun := float64(averageRunAccum) / float64(len(directions.CompoundSteps))
+
+	return DifficultySignals{
+		"Average PrecursorSteps Length": averageRun,
+		"Longest PrecursorSteps Length": float64(longestRun),
+	}
+
+}
+
 //This signal is how many steps into the solve directions before you encounter
 //your first non-fill step. Non-fill steps are harder, so this signal captures
 //how easy the start of the puzzle is.
 func signalStepsUntilNonFill(directions SolveDirections) DifficultySignals {
+	//TODO: should we get rid of this now that we have
+	//signalPrecursorStepsLength?
 	count := 0.0
 	for _, step := range directions.Steps() {
 		if !step.Technique.IsFill() {

@@ -331,3 +331,14 @@ func TestSignalStepsUntilNonFill(t *testing.T) {
 		t.Error("Steps until nonfill didn't work as expected. Got ", result, "expected", golden)
 	}
 }
+
+func TestSignalPrecursorStepsLength(t *testing.T) {
+	result := signalPrecursorStepsLength(sampleSolveDirections)
+	golden := DifficultySignals{
+		"Average PrecursorSteps Length": 0.3333333333333333,
+		"Longest PrecursorSteps Length": 1.0,
+	}
+	if !reflect.DeepEqual(result, golden) {
+		t.Error("PresursorSteps length didn't work as expected. Got", result, "expected", golden)
+	}
+}
