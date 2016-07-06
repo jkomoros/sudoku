@@ -283,6 +283,15 @@ func (s *synchronousFindCoordinator) foundResult(step *SolveStep) bool {
  *
  ************************************************************/
 
+//PreviousGrid returns a grid with all of the steps applied up to BUT NOT
+//INCLUDING this items' step.
+func (p *humanSolveItem) PreviousGrid() *Grid {
+	if p.parent == nil {
+		return p.searcher.grid
+	}
+	return p.parent.Grid()
+}
+
 //Grid returns a grid with all of this item's steps applied
 func (p *humanSolveItem) Grid() *Grid {
 
@@ -374,9 +383,9 @@ func (p *humanSolveItem) CreateNewItem(step *SolveStep) *humanSolveItem {
 		searcher:  p.searcher,
 	}
 	inProgressCompoundStep := p.Steps()
-	grid := result.Grid()
+	previousGrid := result.PreviousGrid()
 	for _, twiddler := range twiddlers {
-		tweak := twiddler.f(step, inProgressCompoundStep, p.searcher.previousCompoundSteps, grid)
+		tweak := twiddler.f(step, inProgressCompoundStep, p.searcher.previousCompoundSteps, previousGrid)
 		result.Twiddle(tweak, twiddler.name)
 	}
 	result.DoneTwiddling()
