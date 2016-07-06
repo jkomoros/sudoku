@@ -113,8 +113,9 @@ func twiddlePointingTargetOverlap(proposedStep *SolveStep, inProgressCompoundSte
 		flippedOverlap = 0.001
 	}
 
-	//Squaring the flipped overlap will accelerate small ones.
-	return probabilityTweak(flippedOverlap * flippedOverlap)
+	//Squaring the flipped overlap will accelerate small ones. Adding to 1.0
+	//makes sure that all non-zero ones push things UP.
+	return probabilityTweak(flippedOverlap*flippedOverlap + 1.0)
 
 }
 
