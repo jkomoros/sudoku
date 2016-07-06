@@ -137,6 +137,7 @@ func twiddleCommonNumbers(proposedStep *SolveStep, inProgressCompoundStep []*Sol
 
 	//Skip steps that aren't fill or fill multiple
 	if !proposedStep.Technique.IsFill() || len(proposedStep.TargetNums) > 1 {
+		//Wait, isn't this privileging steps that aren't filled unnecessarily?
 		return 1.0
 	}
 
@@ -150,9 +151,15 @@ func twiddleCommonNumbers(proposedStep *SolveStep, inProgressCompoundStep []*Sol
 		}
 	}
 
-	if count == 0 || count == DIM {
-		count = 1
+	if count == DIM {
+		//This shouldn't happen; this only occurs when something is fully
+		//filled.
+		return probabilityTweak(1.0)
 	}
+
+	//More filled is good, so flip this count to get # of unfilled for that
+	//number in the grid.
+	count = DIM - count
 
 	return probabilityTweak(count)
 

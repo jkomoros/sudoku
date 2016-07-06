@@ -202,9 +202,9 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 	}
 
 	expected := []probabilityTweak{
-		2.0,
+		7.0,
 		1.0,
-		5.0,
+		4.0,
 		1.0,
 	}
 
