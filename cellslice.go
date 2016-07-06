@@ -674,3 +674,33 @@ func (self IntSlice) Intersection(other IntSlice) IntSlice {
 func (self IntSlice) Difference(other IntSlice) IntSlice {
 	return self.toIntSet().difference(other.toIntSet()).toSlice()
 }
+
+//Intersection returns a new CellSlice that represents the intersection of the
+//two CellSlices; that is, the cells that appear in both slices.
+func (self CellSlice) Intersection(other CellSlice) CellSlice {
+	if len(self) == 0 {
+		return nil
+	}
+	grid := self[0].grid
+	return self.toCellSet().intersection(other.toCellSet()).toSlice(grid)
+}
+
+//Difference returns a new CellSlice that contains all of the cells in the
+//receiver that are not also in the other.
+func (self CellSlice) Difference(other CellSlice) CellSlice {
+	if len(self) == 0 {
+		return nil
+	}
+	grid := self[0].grid
+	return self.toCellSet().difference(other.toCellSet()).toSlice(grid)
+}
+
+//Union returns a new CellSlice that contains all of the cells that are in
+//either the receiver or the other CellSlice.
+func (self CellSlice) Union(other CellSlice) CellSlice {
+	if len(self) == 0 {
+		return nil
+	}
+	grid := self[0].grid
+	return self.toCellSet().union(other.toCellSet()).toSlice(grid)
+}

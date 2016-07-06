@@ -304,7 +304,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 
 		if options.WALKTHROUGH || options.PRINT_STATS {
 			directions = grid.HumanSolution(nil)
-			if len(directions.Steps) == 0 {
+			if directions == nil || len(directions.CompoundSteps) == 0 {
 				//We couldn't solve it. Let's check and see if the puzzle is well formed.
 				if grid.HasMultipleSolutions() {
 					//TODO: figure out why guesses wouldn't be used here effectively.

@@ -362,7 +362,7 @@ func (c *mainController) SetFilename(filename string) {
 
 //Just used for sorting the steps by probabilities
 type nextSteps struct {
-	steps         []*sudoku.SolveStep
+	steps         []*sudoku.CompoundSolveStep
 	probabilities []float64
 }
 
@@ -447,7 +447,17 @@ func (c *mainController) ShowDebugHint() {
 	options := sudoku.DefaultHumanSolveOptions()
 	options.NumOptionsToCalculate = 100
 
-	steps, probabilities := c.Grid().HumanSolvePossibleSteps(options, c.model.LastModifiedCells())
+	//This is a HORRENDOUS hack, and very brittle. :-(
+	fakeLastFillSteps := []*sudoku.CompoundSolveStep{
+		{
+			FillStep: &sudoku.SolveStep{
+				Technique:   sudoku.Techniques[0],
+				TargetCells: c.model.LastModifiedCells(),
+			},
+		},
+	}
+
+	steps, probabilities := c.Grid().HumanSolvePossibleSteps(options, fakeLastFillSteps)
 
 	sort.Sort(&nextSteps{steps, probabilities})
 
@@ -459,7 +469,30 @@ func (c *mainController) ShowDebugHint() {
 
 	for i, step := range steps {
 		cumulative += probabilities[i] * 100
-		table.AddRow(strconv.Itoa(i), fmt.Sprintf("%4.2f", probabilities[i]*100)+"%", fmt.Sprintf("%4.2f", cumulative)+"%", step.TechniqueVariant(), step.TargetCells.Description(), step.TargetNums.Description())
+		fillStep := step.FillStep
+
+		var precusorStepsDescription []string
+
+		for _, step := range step.PrecursorSteps {
+			precusorStepsDescription = append(precusorStepsDescription, step.TechniqueVariant())
+		}
+
+		rowData := []interface{}{
+			strconv.Itoa(i),
+			fmt.Sprintf("%4.2f", probabilities[i]*100) + "%",
+			fmt.Sprintf("%4.2f", cumulative) + "%",
+			fillStep.TechniqueVariant(),
+			fillStep.TargetCells.Description(),
+			fillStep.TargetNums.Description(),
+			len(step.PrecursorSteps),
+			strings.Join(precusorStepsDescription, ", "),
+		}
+
+		for _, item := range step.ScoreExplanation() {
+			rowData = append(rowData, item)
+		}
+
+		table.AddRow(rowData...)
 	}
 
 	c.SetConsoleMessage(msg+table.String(), true)
@@ -468,16 +501,28 @@ func (c *mainController) ShowDebugHint() {
 func (c *mainController) ShowHint() {
 	options := sudoku.DefaultHumanSolveOptions()
 	options.NumOptionsToCalculate = 100
-	hint := c.Grid().Hint(options)
 
-	if len(hint.Steps) == 0 {
+	//This is a HORRENDOUS hack, and very brittle. :-(
+	//It's also recreated exactly in ShowDebugHint
+	fakeLastFillSteps := []*sudoku.CompoundSolveStep{
+		{
+			FillStep: &sudoku.SolveStep{
+				Technique:   sudoku.Techniques[0],
+				TargetCells: c.model.LastModifiedCells(),
+			},
+		},
+	}
+
+	hint := c.Grid().Hint(options, fakeLastFillSteps)
+
+	if hint == nil || len(hint.CompoundSteps) == 0 {
 		c.SetConsoleMessage("No hint to give.", true)
 		return
 	}
 	c.SetConsoleMessage("{Hint}\n"+strings.Join(hint.Description(), "\n")+"\n\n"+"{ENTER} to accept, {ESC} to ignore", false)
 	//This hast to be after setting console message, since SetConsoleMessage clears the last hint.
 	c.lastShownHint = hint
-	lastStep := hint.Steps[len(hint.Steps)-1]
+	lastStep := hint.CompoundSteps[0].FillStep
 	c.SetSelected(lastStep.TargetCells[0].InGrid(c.Grid()))
 }
 
@@ -485,7 +530,7 @@ func (c *mainController) EnterHint() {
 	if c.lastShownHint == nil {
 		return
 	}
-	lastStep := c.lastShownHint.Steps[len(c.lastShownHint.Steps)-1]
+	lastStep := c.lastShownHint.CompoundSteps[0].FillStep
 	cell := lastStep.TargetCells[0]
 	num := lastStep.TargetNums[0]
 
@@ -691,7 +736,7 @@ func (c *mainController) checkHintDone() {
 	if c.lastShownHint == nil {
 		return
 	}
-	lastStep := c.lastShownHint.Steps[len(c.lastShownHint.Steps)-1]
+	lastStep := c.lastShownHint.CompoundSteps[0].FillStep
 	num := lastStep.TargetNums[0]
 	cell := lastStep.TargetCells[0]
 	if cell.InGrid(c.Grid()).Number() == num {

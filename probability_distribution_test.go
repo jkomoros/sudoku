@@ -3,19 +3,51 @@ package sudoku
 import (
 	"math"
 	"math/rand"
-	"reflect"
 	"testing"
 )
 
 const _NUM_RUNS_TEST_WEIGHTED_DISTRIBUTION = 10000
 const _ALLOWABLE_DIFF_WEIGHTED_DISTRIBUTION = 0.01
 
-func TestTweakProbabilityDistribution(t *testing.T) {
-	amountToTweak := []float64{1.0, 2.0, 0.5}
-	result := ProbabilityDistribution{0.5, 0.25, 0.25}.tweak(amountToTweak)
+func TestInvertingReallyReallyBigDistribution(t *testing.T) {
+	//In practical use, Guess technique's non-inverted value is like absurdly
+	//large and leads to NaN. We want to make sure that we handle that case
+	//reasonably and that all of those huge numbers go to O, not NaN--but only
+	//if there are some "normal" valued things int he distribution.
 
-	if !reflect.DeepEqual(result, ProbabilityDistribution{0.4444444444444444, 0.4444444444444444, 0.1111111111111111}) {
-		t.Error("Got wrong result. Got", result)
+	crazyDistribution := ProbabilityDistribution{
+		1.0,
+		10.0,
+		100.0,
+		1000.0,
+		1000000000000000000000.0,
+	}
+
+	invertedDistribution := crazyDistribution.invert()
+
+	for i, probabability := range invertedDistribution {
+		if math.IsNaN(probabability) {
+			t.Error("Index", i, "was NaN")
+		}
+	}
+}
+
+func TestAllInfDistribution(t *testing.T) {
+	crazyDistribution := ProbabilityDistribution{
+		math.Inf(1),
+		math.Inf(1),
+		math.Inf(1),
+	}
+
+	invertedDistribution := crazyDistribution.invert()
+
+	for i, probability := range invertedDistribution {
+		if math.IsNaN(probability) {
+			t.Error("Index", i, "was NaN")
+		}
+		if probability != 0.3333333333333333 {
+			t.Error("Got wrong value for index", i, "got", probability, "expected 0.333333")
+		}
 	}
 }
 

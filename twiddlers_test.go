@@ -2,22 +2,148 @@ package sudoku
 
 import (
 	"math"
-	"reflect"
 	"testing"
 )
 
-func TestDefaultProbabilityDistributionTweak(t *testing.T) {
-	result := defaultProbabilityDistributionTweak(3)
-	expected := probabilityDistributionTweak{
-		1.0,
-		1.0,
-		1.0,
+func TestTwiddleHumanLikelihood(t *testing.T) {
+	possibilities := []*SolveStep{
+		{
+			Technique: techniquesByName["Only Legal Number"],
+		},
+		{
+			Technique: techniquesByName["Guess"],
+		},
 	}
 
-	if !reflect.DeepEqual(result, expected) {
-		t.Error("Got wrong result from defaultProbabilityDistributionTweak. Got", result, "expected", expected)
+	for i, step := range possibilities {
+		result := twiddleHumanLikelihood(step, nil, nil, nil)
+		expected := probabilityTweak(step.HumanLikelihood())
+
+		if result != expected {
+			t.Error("Got wrong twiddle for human likelihood at index", i, "got", result, "expected", expected)
+		}
+	}
+}
+
+func TestTwiddlePointingTargetOverlap(t *testing.T) {
+	grid := NewGrid()
+	tests := []struct {
+		lastStep    *SolveStep
+		currentStep *SolveStep
+		expected    probabilityTweak
+		description string
+	}{
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0),
+			},
+			&SolveStep{
+				PointerCells: grid.Row(0),
+			},
+			0.000001,
+			"Full pointer/cell overlap",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0),
+			},
+			&SolveStep{
+				TargetCells: grid.Row(0),
+			},
+			0.010000000000000018,
+			"Full target/target overlap",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0),
+			},
+			&SolveStep{
+				TargetCells: CellSlice{grid.Cell(0, 0)},
+			},
+			0.7704938271604939,
+			"Single cell out of 9",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0).Intersection(grid.Block(0)),
+			},
+			&SolveStep{
+				TargetCells: CellSlice{grid.Cell(0, 0)},
+			},
+			0.4011111111111111,
+			"Single cell out of three",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0),
+			},
+			&SolveStep{
+				TargetCells: grid.Row(7),
+			},
+			1.0,
+			"Two rows no overlap",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0).Intersection(grid.Block(0)),
+			},
+			&SolveStep{
+				TargetCells: grid.Row(DIM - 1).Intersection(grid.Block(DIM - 1)),
+			},
+			1.0,
+			"Two three-cell rows no overlap",
+		},
+		{
+			&SolveStep{
+				TargetCells: CellSlice{grid.Cell(0, 0)},
+			},
+			&SolveStep{
+				TargetCells: CellSlice{grid.Cell(0, 0)},
+			},
+			0.010000000000000018,
+			"Two individual cells overlapping",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0),
+			},
+			&SolveStep{
+				TargetCells: grid.Col(0),
+			},
+			0.8747750865051903,
+			"Row and col intersecting at one point",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0),
+			},
+			&SolveStep{
+				TargetCells: grid.Block(0),
+			},
+			0.6084,
+			"First row and first block overlapping",
+		},
+		{
+			&SolveStep{
+				TargetCells: grid.Row(0).Intersection(grid.Block(0)),
+			},
+			&SolveStep{
+				TargetCells: grid.Block(0),
+			},
+			0.4011111111111111,
+			"First three cells and first block overlapping",
+		},
 	}
 
+	for i, test := range tests {
+		result := twiddlePointingTargetOverlap(test.currentStep, []*SolveStep{test.lastStep}, nil, grid)
+		if math.IsNaN(float64(result)) {
+			t.Error("Got NaN on test", i, test.description)
+		}
+		if math.Abs(float64(result-test.expected)) > 0.000001 {
+			t.Error("Test", i, "got wrong result. Got", result, "expected", test.expected, test.description)
+		}
+	}
 }
 
 func TestTwiddleCommonNumbers(t *testing.T) {
@@ -75,16 +201,18 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 		},
 	}
 
-	expected := probabilityDistributionTweak{
+	expected := []probabilityTweak{
 		2.0,
 		1.0,
 		5.0,
 		1.0,
 	}
-	result := twiddleCommonNumbers(possibilities, grid, nil)
 
-	if !reflect.DeepEqual(result, expected) {
-		t.Error("Got wrong result. Wanted:", expected, "got", result)
+	for i, step := range possibilities {
+		result := twiddleCommonNumbers(step, nil, nil, grid)
+		if result != expected[i] {
+			t.Error("Twiddle Common Numbers wrong for", i, "got", result, "expected", expected[i])
+		}
 	}
 
 }
@@ -92,16 +220,19 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 func TestTwiddleChainedSteps(t *testing.T) {
 	//TODO: test other, harder cases as well.
 	grid := NewGrid()
-	lastStep := &SolveStep{
-		nil,
-		cellRefsToCells([]cellRef{
-			{0, 0},
-		}, grid),
-		nil,
-		nil,
-		nil,
-		nil,
+	lastStep := []*SolveStep{
+		{
+			nil,
+			cellRefsToCells([]cellRef{
+				{0, 0},
+			}, grid),
+			nil,
+			nil,
+			nil,
+			nil,
+		},
 	}
+
 	possibilities := []*SolveStep{
 		{
 			nil,
@@ -135,25 +266,27 @@ func TestTwiddleChainedSteps(t *testing.T) {
 		},
 	}
 
-	expected := []float64{
-		3.727593720314952e+08,
-		517947.4679231202,
-		1.0,
+	expected := []probabilityTweak{
+		1.3894954943731375,
+		2.6826957952797263,
+		10.0,
 	}
 
-	results := twiddleChainedSteps(possibilities, grid, lastStep.TargetCells)
+	lastResult := probabilityTweak(math.SmallestNonzeroFloat64)
 
-	lastWeight := math.MaxFloat64
-	for i, weight := range results {
-		if weight >= lastWeight {
-			t.Error("Tweak Chained Steps Weights didn't tweak things in the right direction: ", results, "at", i)
+	for i, step := range possibilities {
+		result := twiddleChainedSteps(step, lastStep, nil, grid)
+		expectedResult := expected[i]
+
+		if result <= lastResult {
+			t.Error("Tweak Chained Steps Weights didn't tweak things in the right direction: ", result, "at", i)
 		}
-		lastWeight = weight
+		lastResult = result
+
+		if math.Abs(float64(expectedResult-result)) > 0.00001 {
+			t.Error("Twiddle chained steps at", i, "got", result, "expected", expectedResult)
+		}
+
 	}
 
-	for i, weight := range results {
-		if math.Abs(expected[i]-weight) > 0.00001 {
-			t.Error("Index", i, "was different than expected. Got", weight, "wanted", expected[i])
-		}
-	}
 }

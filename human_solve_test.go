@@ -3,6 +3,7 @@ package sudoku
 import (
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
@@ -16,6 +17,190 @@ func BenchmarkHumanSolve(b *testing.B) {
 	}
 }
 
+func TestHumanSolveAlmostSolvedGrid(t *testing.T) {
+	//Tests human solve on a grid with only one cell left to solve. This is an
+	//interesting case in HumanSolve because it triggers ExitCondition #1.
+
+	grid := NewGrid()
+	grid.LoadSDK(SOLVED_TEST_GRID)
+
+	cell := grid.Cell(0, 0)
+
+	solvedNumber := cell.Number()
+
+	//Unfill this cell only
+	cell.SetNumber(0)
+
+	directions := grid.HumanSolve(nil)
+
+	if directions == nil {
+		t.Error("Didn't get directions")
+	}
+
+	if !grid.Solved() {
+		t.Error("HumanSolve didn't solve the grid")
+	}
+
+	if cell.Number() != solvedNumber {
+		t.Error("Got wrong number in cell. Got", cell.Number(), "expected", solvedNumber)
+	}
+}
+
+func TestCompoundSolveStep(t *testing.T) {
+
+	nInRowTechnique := techniquesByName["Necessary In Row"]
+
+	if nInRowTechnique == nil {
+		t.Fatal("Couldn't find necessary in row technique")
+	}
+
+	simpleFillStep := &SolveStep{
+		Technique: nInRowTechnique,
+	}
+
+	cullTechnique := techniquesByName["Hidden Quad Block"]
+
+	if cullTechnique == nil {
+		t.Fatal("Couldn't find hidden quad block technique")
+	}
+
+	cullStep := &SolveStep{
+		Technique: cullTechnique,
+	}
+
+	compound := &CompoundSolveStep{
+		PrecursorSteps: []*SolveStep{
+			cullStep,
+			cullStep,
+		},
+		FillStep: simpleFillStep,
+	}
+
+	if !compound.valid() {
+		t.Error("A valid compound was not thought valid")
+	}
+
+	steps := compound.Steps()
+	expected := []*SolveStep{
+		cullStep,
+		cullStep,
+		simpleFillStep,
+	}
+
+	if !reflect.DeepEqual(steps, expected) {
+		t.Error("compound.steps gave wrong result. Got", steps, "expected", expected)
+	}
+
+	compound.PrecursorSteps[0] = simpleFillStep
+
+	if compound.valid() {
+		t.Error("A compound tep with a fill precursor step was thought valid")
+	}
+
+	compound.PrecursorSteps = nil
+
+	if !compound.valid() {
+		t.Error("A compound step with no precursor steps was not thought valid")
+	}
+
+	compound.FillStep = nil
+
+	if compound.valid() {
+		t.Error("A compound step with no fill step was thought valid.")
+	}
+
+	createdCompound := newCompoundSolveStep([]*SolveStep{
+		cullStep,
+		cullStep,
+		simpleFillStep,
+	})
+
+	if createdCompound == nil {
+		t.Error("newCompoundSolveStep failed to create compound step")
+	}
+
+	if !createdCompound.valid() {
+		t.Error("newCompoundSolveStep created invalid compound step")
+	}
+}
+
+func TestNewCompoundSolveStep(t *testing.T) {
+
+	fillTechnique := techniquesByName["Necessary In Row"]
+	cullTechnique := techniquesByName["Pointing Pair Row"]
+
+	if fillTechnique == nil || cullTechnique == nil {
+		t.Fatal("couldn't find the fill or cull steps")
+	}
+
+	fillStep := &SolveStep{
+		Technique: fillTechnique,
+	}
+
+	cullStep := &SolveStep{
+		Technique: cullTechnique,
+	}
+
+	tests := []struct {
+		steps       []*SolveStep
+		expected    *CompoundSolveStep
+		description string
+	}{
+		{
+			[]*SolveStep{
+				fillStep,
+			},
+			&CompoundSolveStep{
+				FillStep: fillStep,
+			},
+			"Single fill step",
+		},
+		{
+			[]*SolveStep{
+				cullStep,
+				fillStep,
+			},
+			&CompoundSolveStep{
+				FillStep: fillStep,
+				PrecursorSteps: []*SolveStep{
+					cullStep,
+				},
+			},
+			"Single cull then single fill",
+		},
+		{
+			[]*SolveStep{
+				cullStep,
+				cullStep,
+				fillStep,
+			},
+			&CompoundSolveStep{
+				FillStep: fillStep,
+				PrecursorSteps: []*SolveStep{
+					cullStep,
+					cullStep,
+				},
+			},
+			"Double cull then single fill",
+		},
+		{
+			[]*SolveStep{
+				cullStep,
+				cullStep,
+			},
+			nil,
+			"Only cull steps",
+		},
+	}
+
+	for i, test := range tests {
+		result := newCompoundSolveStep(test.steps)
+		if !reflect.DeepEqual(result, test.expected) {
+			t.Error("Test", i, test.description, "Got", result, "Expected", test.expected)
+		}
+	}
+}
+
 func TestHumanSolve(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
@@ -25,10 +210,6 @@ func TestHumanSolve(t *testing.T) {
 
 	if steps == nil {
 		t.Fatal("Human solution returned 0 techniques.")
-	}
-
-	if steps.IsHint {
-		t.Error("Steps came back as a hint, not a full solution.")
 	}
 
 	if grid.Solved() {
@@ -59,7 +240,7 @@ func TestHumanSolveOptionsNoGuess(t *testing.T) {
 
 	solution := grid.HumanSolution(options)
 
-	if len(solution.Steps) != 0 {
+	if solution != nil && len(solution.CompoundSteps) != 0 {
 		t.Error("A human solve with very limited techniques and no allowed guesses was still solved: ", solution)
 	}
 }
@@ -71,7 +252,7 @@ func TestShortTechniquesToUseHumanSolveOptions(t *testing.T) {
 	grid.LoadSDK(TEST_GRID)
 
 	shortTechniqueOptions := DefaultHumanSolveOptions()
-	shortTechniqueOptions.TechniquesToUse = Techniques[0:5]
+	shortTechniqueOptions.TechniquesToUse = Techniques[0:2]
 
 	steps := grid.HumanSolution(shortTechniqueOptions)
 
@@ -83,7 +264,7 @@ func TestShortTechniquesToUseHumanSolveOptions(t *testing.T) {
 func TestHumanSolveOptionsMethods(t *testing.T) {
 
 	defaultOptions := &HumanSolveOptions{
-		15,
+		10,
 		Techniques,
 		false,
 		nil,
@@ -141,44 +322,6 @@ func TestHumanSolveOptionsMethods(t *testing.T) {
 
 }
 
-func TestTechniquesToUseAfterGuessHumanSolveOptions(t *testing.T) {
-	grid := NewGrid()
-	defer grid.Done()
-	grid.LoadSDK(TEST_GRID)
-
-	options := DefaultHumanSolveOptions()
-	options.TechniquesToUse = []SolveTechnique{}
-	options.techniquesToUseAfterGuess = Techniques[0:5]
-
-	solution := grid.HumanSolution(options)
-
-	steps := solution.Steps
-
-	if len(steps) == 0 {
-		t.Fatal("Options with techniques to use after guess returned nil")
-	}
-
-	if steps[0].Technique != GuessTechnique {
-		t.Error("First technqiu with techniques to use after guess wasn't guess")
-	}
-
-	allowedTechniques := make(map[SolveTechnique]bool)
-
-	for _, technique := range Techniques[0:5] {
-		allowedTechniques[technique] = true
-	}
-
-	//Guess is also allowed to be used later, although we don't expect that.
-	allowedTechniques[GuessTechnique] = true
-
-	for i, step := range steps[1:len(steps)] {
-		if _, ok := allowedTechniques[step.Technique]; !ok {
-			t.Error("Step number", i, "was not in set of allowed techniques", step.Technique)
-		}
-	}
-
-}
-
 func TestHint(t *testing.T) {
 
 	//This is still flaky, but at least it's a little more likely to catch problems. :-/
@@ -188,7 +331,6 @@ func TestHint(t *testing.T) {
 
 	options := DefaultHumanSolveOptions()
 	options.TechniquesToUse = []SolveTechnique{}
-	options.techniquesToUseAfterGuess = Techniques
 
 	hintTestHelper(t, options, "guess")
 }
@@ -201,34 +343,24 @@ func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string
 
 	diagram := grid.Diagram(false)
 
-	hint := grid.Hint(options)
+	hint := grid.Hint(options, nil)
 
 	if grid.Diagram(false) != diagram {
 		t.Error("Hint mutated the grid but it wasn't supposed to.")
 	}
 
-	steps := hint.Steps
+	steps := hint.CompoundSteps
 
 	if steps == nil || len(steps) == 0 {
 		t.Error("No steps returned from Hint", description)
 	}
 
-	if !hint.IsHint {
-		t.Error("Steps was not a hint, but a full solution.")
+	if len(steps) != 1 {
+		t.Error("Hint was wrong length")
 	}
 
-	for count, step := range steps {
-		if count == len(steps)-1 {
-			//Last one
-			if !step.Technique.IsFill() {
-				t.Error("Non-fill step as last step in Hint: ", step.Technique.Name(), description)
-			}
-		} else {
-			//Not last one
-			if step.Technique.IsFill() {
-				t.Error("Fill step as non-last step in Hint: ", count, step.Technique.Name(), description)
-			}
-		}
+	if !steps[0].valid() {
+		t.Error("Hint compound step was invalid")
 	}
 }
 
@@ -242,7 +374,7 @@ func TestHumanSolveWithGuess(t *testing.T) {
 	}
 
 	solution := grid.HumanSolution(nil)
-	steps := solution.Steps
+	steps := solution.Steps()
 
 	if steps == nil {
 		t.Fatal("Didn't find a solution to a grid that should have needed a guess")
@@ -277,56 +409,64 @@ func TestStepsDescription(t *testing.T) {
 	//It's really brittle that we load techniques in this way... it changes every time we add a new early technique!
 	steps := SolveDirections{
 		grid,
-		[]*SolveStep{
-			&SolveStep{
-				techniquesByName["Only Legal Number"],
-				CellSlice{
-					grid.Cell(0, 0),
+		[]*CompoundSolveStep{
+			{
+				FillStep: &SolveStep{
+					techniquesByName["Only Legal Number"],
+					CellSlice{
+						grid.Cell(0, 0),
+					},
+					IntSlice{1},
+					nil,
+					nil,
+					nil,
 				},
-				IntSlice{1},
-				nil,
-				nil,
-				nil,
 			},
-			&SolveStep{
-				techniquesByName["Pointing Pair Col"],
-				CellSlice{
-					grid.Cell(1, 0),
-					grid.Cell(1, 1),
+			{
+				PrecursorSteps: []*SolveStep{
+					{
+						techniquesByName["Pointing Pair Col"],
+						CellSlice{
+							grid.Cell(1, 0),
+							grid.Cell(1, 1),
+						},
+						IntSlice{1, 2},
+						CellSlice{
+							grid.Cell(1, 3),
+							grid.Cell(1, 4),
+						},
+						nil,
+						nil,
+					},
 				},
-				IntSlice{1, 2},
-				CellSlice{
-					grid.Cell(1, 3),
-					grid.Cell(1, 4),
+				FillStep: &SolveStep{
+					techniquesByName["Only Legal Number"],
+					CellSlice{
+						grid.Cell(2, 0),
+					},
+					IntSlice{2},
+					nil,
+					nil,
+					nil,
 				},
-				nil,
-				nil,
-			},
-			&SolveStep{
-				techniquesByName["Only Legal Number"],
-				CellSlice{
-					grid.Cell(2, 0),
-				},
-				IntSlice{2},
-				nil,
-				nil,
-				nil,
 			},
 		},
-		false,
 	}
 
 	descriptions := steps.Description()
 
 	GOLDEN_DESCRIPTIONS := []string{
-		"First, we put 1 in cell (0,0) because 1 is the only remaining valid number for that cell.",
-		"Next, we remove the possibilities 1 and 2 from cells (1,0) and (1,1) because 1 is only possible in column 0 of block 1, which means it can't be in any other cell in that column not in that block.",
-		"Finally, we put 2 in cell (2,0) because 2 is the only remaining valid number for that cell.",
+		"First, based on the other numbers you've entered, (0,0) can only be a 1. How do we know that? We put 1 in cell (0,0) because 1 is the only remaining valid number for that cell.",
+		"Finally, based on the other numbers you've entered, (2,0) can only be a 2. How do we know that? We can't fill any cells right away so first we need to cull some possibilities. First, we remove the possibilities 1 and 2 from cells (1,0) and (1,1) because 1 is only possible in column 0 of block 1, which means it can't be in any other cell in that column not in that block. Finally, we put 2 in cell (2,0) because 2 is the only remaining valid number for that cell.",
+	}
+
+	if len(descriptions) != len(GOLDEN_DESCRIPTIONS) {
+		t.Fatal("Descriptions had too few items. Got\n", strings.Join(descriptions, "***"), "\nwanted\n", strings.Join(GOLDEN_DESCRIPTIONS, "***"))
 	}
 
 	for i := 0; i < len(GOLDEN_DESCRIPTIONS); i++ {
 		if descriptions[i] != GOLDEN_DESCRIPTIONS[i] {
-			t.Log("Got wrong human solve description: ", descriptions[i])
+			t.Log("Got wrong human solve description: ", descriptions[i], "wanted", GOLDEN_DESCRIPTIONS[i])
 			t.Fail()
 		}
 	}

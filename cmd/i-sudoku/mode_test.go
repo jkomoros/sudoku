@@ -103,7 +103,7 @@ func TestDefaultMode(t *testing.T) {
 		t.Error("Hint didn't automatically select the cell specified by the hint.")
 	}
 
-	lastStep := model.lastShownHint.Steps[len(model.lastShownHint.Steps)-1]
+	lastStep := model.lastShownHint.CompoundSteps[0].FillStep
 	correctNum := lastStep.TargetNums[0]
 	wrongNum := correctNum + 1
 	if wrongNum > sudoku.DIM {
@@ -257,7 +257,7 @@ func TestSingleMarkEnter(t *testing.T) {
 
 	sendCharEvent(model, 'h')
 
-	lastStep := model.lastShownHint.Steps[len(model.lastShownHint.Steps)-1]
+	lastStep := model.lastShownHint.CompoundSteps[0].FillStep
 	num := lastStep.TargetNums[0]
 
 	markNum := num + 1

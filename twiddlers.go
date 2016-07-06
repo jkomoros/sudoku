@@ -4,32 +4,128 @@ import (
 	"math"
 )
 
-type probabilityTwiddler func([]*SolveStep, *Grid, CellSlice) probabilityDistributionTweak
+//1.0 is a no op. 0.0 to 1.0 is increase goodness; 1.0 and above is decraase good
+type probabilityTweak float64
+
+//probabilityTwiddler is the interface that twiddlers should adhere to. Note
+//that previousGrid is the grid state BEFORE the proposedStep is applied.
+type probabilityTwiddler func(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak
+
+type probabilityTwiddlerItem struct {
+	f    probabilityTwiddler
+	name string
+}
 
 //twiddlers is the list of all of the twiddlers we should apply to change the
 //probability distribution of possibilities at each step. They capture biases
 //that humans have about which cells to focus on (which is separate from
 //Technique.humanLikelihood, since that is about how common a technique in
 //general, not in a specific context.)
-var twiddlers []probabilityTwiddler
+var twiddlers []probabilityTwiddlerItem
 
 func init() {
-	twiddlers = []probabilityTwiddler{
-		twiddleChainedSteps,
-		twiddleCommonNumbers,
+	//twiddlers is not a map because a) we need to attach more info anyway,
+	//and b) we want a stable ordering.
+	twiddlers = []probabilityTwiddlerItem{
+		{
+			f:    twiddleHumanLikelihood,
+			name: "Human Likelihood",
+		},
+		{
+			f:    twiddleChainedSteps,
+			name: "Chained Steps",
+		},
+		{
+			f:    twiddleCommonNumbers,
+			name: "Common Numbers",
+		},
+		{
+			f:    twiddlePointingTargetOverlap,
+			name: "Pointing Target Overlap",
+		},
 	}
 }
 
-//Returns a no-op (all 1.0) probabilityDistributionTweak of the given length.
-func defaultProbabilityDistributionTweak(length int) probabilityDistributionTweak {
-	result := make(probabilityDistributionTweak, length)
+//twiddlePointingTargetOverlap twiddles based on how much the targetcells
+//overlap with the pointingcells of the proposed step. This tries to capture
+//the fact that for cull steps in particular, we want to heavily incentivize
+//steps that directly reduce possibilities in the next round of steps. This is
+//conceptually similar to ChainSimilarity, but more targeted.
+func twiddlePointingTargetOverlap(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
+	if len(inProgressCompoundStep) == 0 {
+		return 1.0
+	}
+	lastStep := inProgressCompoundStep[len(inProgressCompoundStep)-1]
 
-	//Initialize result to a no op tweaks
-	for i := 0; i < length; i++ {
-		result[i] = 1.0
+	if proposedStep == nil {
+		return 1.0
 	}
 
-	return result
+	//We're going to look for two kinds of overlap: targetCell to targetCell,
+	//and targetCell to PointerCell, because some techniques want one or the
+	//other (do any want both?). We'll use the higher overlap.
+
+	//Compute Target --> Pointer overlap
+
+	currentStepPointerSet := proposedStep.PointerCells.toCellSet()
+	lastStepTargetSet := lastStep.TargetCells.toCellSet()
+
+	targetPointerUnion := currentStepPointerSet.union(lastStepTargetSet)
+	targetPointerIntersection := currentStepPointerSet.intersection(lastStepTargetSet)
+
+	targetPointerOverlap := float64(len(targetPointerIntersection)) / float64(len(targetPointerUnion))
+
+	if math.IsNaN(targetPointerOverlap) {
+		targetPointerOverlap = 0.0
+	}
+
+	//Compute Target --> Target overlap
+
+	currentStepTargetSet := proposedStep.TargetCells.toCellSet()
+
+	targetTargetUnion := currentStepTargetSet.union(lastStepTargetSet)
+	targetTargetIntersection := currentStepTargetSet.intersection(lastStepTargetSet)
+
+	targetTargetOverlap := float64(len(targetTargetIntersection)) / float64(len(targetTargetUnion))
+
+	if math.IsNaN(targetTargetOverlap) {
+		targetTargetOverlap = 0.0
+	}
+
+	//Pick the larger overlap to go with.
+
+	overlap := targetPointerOverlap
+
+	if targetTargetOverlap > targetPointerOverlap {
+		overlap = targetTargetOverlap
+		//TargetTargetOverlap is slightly better than targetPointer overlap.
+		//This number will be flipped in the next step, so bigger is better.
+		overlap *= 1.1
+	}
+
+	//The more overlap, the better, at an increasing rate. And the smaller the
+	//output, the better the twiddle is.
+
+	flippedOverlap := 1.0 - overlap
+
+	//A value of 0--if there's perfect overlap--is nonsense. It's too strong!
+	if flippedOverlap == 0.0 {
+		flippedOverlap = 0.001
+	}
+
+	//Squaring the flipped overlap will accelerate small ones.
+	return probabilityTweak(flippedOverlap * flippedOverlap)
+
+}
+
+//twiddleTechniqueWeight is a fundamental twiddler based on the
+//HumanLikeliehood of the current technique. In fact, it's so fundamental that
+//it's arguably not even a twiddler at all.
+func twiddleHumanLikelihood(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
+	if proposedStep == nil {
+		return 1.0
+	}
+	return probabilityTweak(proposedStep.HumanLikelihood())
 }
 
 //twiddleCommonNumbers will twiddle up steps whose TargetNumbers are over-
@@ -37,43 +133,28 @@ func defaultProbabilityDistributionTweak(length int) probabilityDistributionTwea
 //practice, will often choose to look for cells to fill for a number that is
 //represented more in the grid, since they're more likely to be constrained by
 //neighorbors with the same number.
-func twiddleCommonNumbers(possibilities []*SolveStep, grid *Grid, lastModififedCells CellSlice) (tweaks probabilityDistributionTweak) {
-	//Calculate which numbers are most represented in the grid.
-	numCounts := make(map[int]int)
+func twiddleCommonNumbers(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
 
-	for _, cell := range grid.Cells() {
-		if cell.Number() == 0 {
-			continue
-		}
-		numCounts[cell.Number()]++
+	//Skip steps that aren't fill or fill multiple
+	if !proposedStep.Technique.IsFill() || len(proposedStep.TargetNums) > 1 {
+		return 1.0
 	}
 
-	//Remove counts for targetNums that are already filled in every block.
-	//This shouldn't matter, since no steps should suggest filling it, but
-	//just as a sanity check.
-	for key, val := range numCounts {
-		if val == DIM {
-			delete(numCounts, key)
+	keyNum := proposedStep.TargetNums[0]
+
+	count := 0
+
+	for _, cell := range previousGrid.Cells() {
+		if cell.Number() == keyNum {
+			count++
 		}
 	}
 
-	result := defaultProbabilityDistributionTweak(len(possibilities))
-
-	for i, possibility := range possibilities {
-		//Skip steps that aren't fill or fill multiple
-		if !possibility.Technique.IsFill() || len(possibility.TargetNums) > 1 {
-			continue
-		}
-
-		count := numCounts[possibility.TargetNums[0]]
-		if count == 0 {
-			count = 1
-		}
-		//TODO: figure out the curve/amount to tweak by.
-		result[i] *= float64(count)
+	if count == 0 || count == DIM {
+		count = 1
 	}
 
-	return result
+	return probabilityTweak(count)
 
 }
 
@@ -82,30 +163,34 @@ func twiddleCommonNumbers(possibilities []*SolveStep, grid *Grid, lastModififedC
 // last step had targetCells that shared a row, then a step with
 //target cells in that same row will be more likely this step. This captures the fact that humans, in practice,
 //will have 'chains' of steps that are all related.
-func twiddleChainedSteps(possibilities []*SolveStep, grid *Grid, lastModififedCells CellSlice) (tweaks probabilityDistributionTweak) {
+func twiddleChainedSteps(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
 
-	result := defaultProbabilityDistributionTweak(len(possibilities))
+	var lastModifiedCells CellSlice
 
-	if lastModififedCells == nil || len(possibilities) == 0 {
-		return result
+	if len(inProgressCompoundStep) > 0 {
+		lastModifiedCells = inProgressCompoundStep[len(inProgressCompoundStep)-1].TargetCells
+	} else if len(pastSteps) > 0 {
+		lastCompoundStep := pastSteps[len(pastSteps)-1]
+		if lastCompoundStep.FillStep != nil {
+			lastModifiedCells = lastCompoundStep.FillStep.TargetCells
+		}
 	}
 
-	for i := 0; i < len(possibilities); i++ {
-		possibility := possibilities[i]
-		//Tweak every weight by how related they are.
-		//Remember: these are INVERTED weights, so tweaking them down is BETTER.
-
-		//TODO: consider attentuating the effect of this; chaining is nice but shouldn't totally change the calculation for hard techniques.
-		//It turns out that we probably want to STRENGTHEN the effect.
-		//Logically we should be attenuating Dissimilarity here, but for some reason the math.Pow(dissimilairty, 10) doesn't actually
-		//appear to work here, which is maddening.
-
-		similarity := possibility.TargetCells.chainSimilarity(lastModififedCells)
-		//Make sure that similarity is higher than 1 so raising 2 to this power will make it go up.
-		similarity *= 10
-
-		result[i] = math.Pow(10, similarity)
+	if lastModifiedCells == nil {
+		return 1.0
 	}
 
-	return result
+	//Tweak every weight by how related they are.
+	//Remember: these are INVERTED weights, so tweaking them down is BETTER.
+
+	//Logically we should be attenuating Dissimilarity here, but for some reason the math.Pow(dissimilairty, 10) doesn't actually
+	//appear to work here, which is maddening.
+
+	similarity := proposedStep.TargetCells.chainSimilarity(lastModifiedCells)
+
+	//We want it to be dissimilar is larger; flip it.
+	dissimilarity := 1.0 - similarity
+
+	return probabilityTweak(math.Pow(10, dissimilarity))
+
 }

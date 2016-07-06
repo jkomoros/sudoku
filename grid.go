@@ -201,11 +201,12 @@ func (self *Grid) Copy() *Grid {
 
 //Copies the state of the other grid into self, so they look the same.
 func (self *Grid) replace(other *Grid) {
-	self.LoadSDK(other.DataString())
 	//Also set excludes
 	for index := range other.cells {
 		otherCell := &other.cells[index]
 		selfCell := otherCell.InGrid(self)
+
+		selfCell.SetNumber(otherCell.Number())
 		//TODO: the fact that I'm reaching into Cell's excludeLock outside of Cell is a Smell.
 		selfCell.excludedLock.Lock()
 		otherCell.excludedLock.RLock()

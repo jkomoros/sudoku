@@ -9,10 +9,6 @@ import (
 //indexes.
 type ProbabilityDistribution []float64
 
-//probabiliyDistributionTweak represents tweaks to make to a
-//ProbabilityDistribution via tweak(). 1.0 is no effect.
-type probabilityDistributionTweak []float64
-
 //Normalized returns true if the distribution is normalized: that is, the
 //distribution sums to 1.0
 func (d ProbabilityDistribution) normalized() bool {
@@ -77,24 +73,6 @@ func (d ProbabilityDistribution) denegativize() ProbabilityDistribution {
 	return fixedWeights
 }
 
-//tweak takes an amount to tweak each probability and returns a new
-//ProbabilityDistribution where each probability is multiplied by tweak and
-//the entire distribution is normalized. Useful for strengthening some
-//probabilities and reducing others.
-func (d ProbabilityDistribution) tweak(tweak probabilityDistributionTweak) ProbabilityDistribution {
-	//sanity check that the tweak amounts are same length
-	if len(d) != len(tweak) {
-		return d
-	}
-	result := make(ProbabilityDistribution, len(d))
-
-	for i, num := range d {
-		result[i] = num * tweak[i]
-	}
-
-	return result.normalize()
-}
-
 //invert returns a new probability distribution like this one, but "flipped"
 //so low values have a high chance of occurring and high values have a low
 //chance. The curve used to invert is expoential.
@@ -115,11 +93,30 @@ func (d ProbabilityDistribution) invert() ProbabilityDistribution {
 
 	//Invert
 	for i, weight := range invertedWeights {
-		weights[i] = 1 / math.Exp(weight/20)
+		weights[i] = invertWeight(weight)
 	}
 
 	//But now you need to renormalize since they won't sum to 1.
 	return weights.normalize()
+}
+
+//invertWeight is the primary logic used to invert a positive weight.
+func invertWeight(inverted float64) float64 {
+
+	//This would have only happened if the denominator was really big. Set it to
+	//the closest value to 0 so that in most cases it will be effectively
+	//zero but that in cases where it's only guesses, we'll still get a
+	//good distribution.
+	if math.IsInf(inverted, 0) {
+		return math.SmallestNonzeroFloat64
+	}
+
+	result := 1 / math.Exp(inverted/20)
+
+	if math.IsInf(result, 0) {
+		result = math.SmallestNonzeroFloat64
+	}
+	return result
 }
 
 //RandomIndex returns a random index based on the probability distribution.

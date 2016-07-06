@@ -32,12 +32,19 @@ type SolveTechnique interface {
 	Description(*SolveStep) string
 	//IMPORTANT: a step should return a step IFF that step is valid AND the step would cause useful work to be done if applied.
 
-	//Find returns as many steps as it can find in the grid for that technique, in a random order.
-	//HumanSolve repeatedly applies technique.Find() to identify candidates for the next step in the solution.
-	//A technique's Find method will send results as it finds them to results, and will periodically see if it
-	//can receive any value from done--if it can, it will stop searching. Find will block and not return if it can't send
-	//to results or receive from done; either use sufficiently buffered channels or run Find in a goroutine.
-	Find(grid *Grid, results chan *SolveStep, done chan bool)
+	//Candidates returns all of the SolveSteps that this Technique sees at the
+	//current state of Grid. All of the returned steps are valid and useful to
+	//apply. Will return early once maxResults have been found if maxResults >
+	//0.
+	Candidates(grid *Grid, maxResults int) []*SolveStep
+
+	//Find returns as many steps as it can find in the grid for that
+	//technique, in a random order. HumanSolve repeatedly applies
+	//technique.Find() to identify candidates for the next step in the
+	//solution. A technique's Find method will send results as it finds them
+	//to coordinator.foundResult, and will periodically see if
+	//coordinator.shouldEarlyExit--if it should, it will stop searching.
+	find(grid *Grid, coordinator findCoordinator)
 	//TODO: if we keep this signature, we should consider having each find method actually wrap its internals in a goRoutine
 	//to make it safer to use--although that would probably require a new signature.
 
@@ -66,6 +73,21 @@ type SolveTechnique interface {
 	//techniques just sort all of the slices, but some techniques encode meaningful information
 	//in the order of the slices so don't want to do it.
 	normalizeStep(step *SolveStep)
+}
+
+//findCoordinator is an object passed into technique.find that helps collect
+//results and also tell the technique if it should early exit or not. It
+//serves to abstract away how its implemented, allowing us to switch between
+//an asynchronous channel-based model and a synchronous model easily.
+type findCoordinator interface {
+	//shouldExitEarly will return true when it's OK for the technique to exit
+	//even if not all of the SolveSteps have been returned.
+	shouldExitEarly() bool
+
+	//foundResult should be called whenever a result has been found. Only pass
+	//steps that are valid and useful. The return result is equivalent to
+	//shouldExitEarly(); if it is true, the technique should finish up.
+	foundResult(*SolveStep) bool
 }
 
 type cellGroupType int
@@ -433,6 +455,40 @@ func (self *basicSolveTechnique) normalizeStep(step *SolveStep) {
 	step.TargetCells.Sort()
 	step.TargetNums.Sort()
 	step.PointerNums.Sort()
+}
+
+//A helper func making it easier for derived classes to implement Candidates()
+func (self *basicSolveTechnique) candidatesHelper(technique SolveTechnique, grid *Grid, maxResults int) []*SolveStep {
+	var steps []*SolveStep
+
+	results := make(chan *SolveStep, DIM*DIM)
+	done := make(chan bool, 1)
+
+	coordinator := &channelFindCoordinator{
+		results: results,
+		done:    done,
+	}
+
+	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
+	go func() {
+		technique.find(grid, coordinator)
+		//Since we're the only technique running, as soon as this one returns, we can
+		//signal up that no more results are coming.
+		close(results)
+	}()
+
+	for step := range results {
+		steps = append(steps, step)
+		if maxResults > 0 {
+			if len(steps) >= maxResults {
+				close(done)
+				break
+			}
+		}
+	}
+
+	return steps
+
 }
 
 //TOOD: this is now named incorrectly. (It should be likelihoodHelper)

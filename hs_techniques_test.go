@@ -242,32 +242,12 @@ type solveTechniqueTestHelperOptions struct {
 //at least for forcing chains technique.
 func getStepsForTechnique(technique SolveTechnique, grid *Grid, fetchAll bool) []*SolveStep {
 
-	var steps []*SolveStep
-
-	results := make(chan *SolveStep, DIM*DIM)
-	done := make(chan bool)
-
-	//Find is meant to be run in a goroutine; it won't complete until it's searched everything.
-	go func() {
-		technique.Find(grid, results, done)
-		//Since we're the only technique running, as soon as this one returns, we can
-		//signal up that no more results are coming.
-		close(results)
-	}()
-
-	for step := range results {
-		steps = append(steps, step)
-		if !fetchAll {
-			//Signal to done if we can.
-			select {
-			case done <- true:
-			default:
-			}
-			break
-		}
+	maxResults := 0
+	if !fetchAll {
+		maxResults = 1
 	}
 
-	return steps
+	return technique.Candidates(grid, maxResults)
 
 }
 
