@@ -225,6 +225,8 @@ func TestSolveDirectionsSignals(t *testing.T) {
 	golden["Guess Percentage"] = 0.5
 	golden["Necessary In Row Percentage"] = 0.25
 	golden["Naked Pair Block Percentage"] = 0.25
+	golden["Average PrecursorSteps Length"] = 0.3333333333333333
+	golden["Longest PrecursorSteps Length"] = 1.0
 
 	if !reflect.DeepEqual(result, golden) {
 		t.Error("SolveDirections.Signals on sampleSolveDirections didn't return right value. Got: ", result, " expected: ", golden)
