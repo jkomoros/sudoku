@@ -39,6 +39,7 @@ type mainController struct {
 	toggles []toggle
 	//Whether or not to handle inputs.
 	doNotProcessEvents bool
+	cachedDifficulty   float64
 }
 
 const (
@@ -231,6 +232,7 @@ func (c *mainController) SetGrid(grid *sudoku.Grid) {
 			c.model.grid.LockFilledCells()
 		}
 	}
+	c.cachedDifficulty = 0.0
 	c.snapshot = ""
 }
 
@@ -463,8 +465,12 @@ func (c *mainController) ShowDifficulty() {
 	//Calculating difficulty will take a long time, so run it async. If we
 	//didn't, the message about calculating difficulty wouldn't show up.
 	go func() {
-		difficulty := unfilledGrid.Difficulty()
-		msg := "Grid Difficulty: {" + strconv.FormatFloat(difficulty, 'f', -1, 64) + "}"
+		if c.cachedDifficulty == 0.0 {
+			//Grid has its own cached difficulty, but unfortunately it won't
+			//work for us because we're passing in a new grid :-(
+			c.cachedDifficulty = unfilledGrid.Difficulty()
+		}
+		msg := "Grid Difficulty: {" + strconv.FormatFloat(c.cachedDifficulty, 'f', -1, 64) + "}"
 		c.SetConsoleMessage(msg, true)
 		//Clear the event loop to pump.
 		c.doNotProcessEvents = false
