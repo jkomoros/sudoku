@@ -5,6 +5,53 @@ import (
 	"testing"
 )
 
+func TestTwiddleTwiddle(t *testing.T) {
+
+	twiddlerFMaker := func(returnValue float64) probabilityTwiddler {
+		return func(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
+			return probabilityTweak(returnValue)
+		}
+	}
+
+	tests := []struct {
+		item        *probabilityTwiddlerItem
+		expected    probabilityTweak
+		description string
+	}{
+		{
+			&probabilityTwiddlerItem{
+				f:      twiddlerFMaker(10.0),
+				weight: -1.0,
+			},
+			10.0,
+			"Large value negative weight",
+		},
+		{
+			&probabilityTwiddlerItem{
+				f:      twiddlerFMaker(0.0),
+				weight: 4.0,
+			},
+			0.0,
+			"Normal with 0 return and normal weight",
+		},
+		{
+			&probabilityTwiddlerItem{
+				f:      twiddlerFMaker(0.5),
+				weight: 4.0,
+			},
+			2.0,
+			"Normal with 0.5 return 4.0 weight",
+		},
+	}
+
+	for i, test := range tests {
+		result := test.item.Twiddle(nil, nil, nil, nil)
+		if result != test.expected {
+			t.Error("Got wrong result for item", i, test.description, "Got", result, "Expected", test.expected)
+		}
+	}
+}
+
 func TestTwiddleHumanLikelihood(t *testing.T) {
 	possibilities := []*SolveStep{
 		{
@@ -40,7 +87,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				PointerCells: grid.Row(0),
 			},
-			1.000001,
+			0.000001,
 			"Full pointer/cell overlap",
 		},
 		{
@@ -50,7 +97,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: grid.Row(0),
 			},
-			1.01,
+			0.010000000000000018,
 			"Full target/target overlap",
 		},
 		{
@@ -60,7 +107,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: CellSlice{grid.Cell(0, 0)},
 			},
-			1.770493827160494,
+			0.7704938271604939,
 			"Single cell out of 9",
 		},
 		{
@@ -70,7 +117,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: CellSlice{grid.Cell(0, 0)},
 			},
-			1.4011111111111112,
+			0.4011111111111111,
 			"Single cell out of three",
 		},
 		{
@@ -80,7 +127,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: grid.Row(7),
 			},
-			2.0,
+			1.0,
 			"Two rows no overlap",
 		},
 		{
@@ -90,7 +137,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: grid.Row(DIM - 1).Intersection(grid.Block(DIM - 1)),
 			},
-			2.0,
+			1.0,
 			"Two three-cell rows no overlap",
 		},
 		{
@@ -100,7 +147,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: CellSlice{grid.Cell(0, 0)},
 			},
-			1.01,
+			0.010000000000000018,
 			"Two individual cells overlapping",
 		},
 		{
@@ -110,7 +157,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: grid.Col(0),
 			},
-			1.8747750865051902,
+			0.8747750865051903,
 			"Row and col intersecting at one point",
 		},
 		{
@@ -120,7 +167,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: grid.Block(0),
 			},
-			1.6084,
+			0.6084,
 			"First row and first block overlapping",
 		},
 		{
@@ -130,7 +177,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			&SolveStep{
 				TargetCells: grid.Block(0),
 			},
-			1.4011111111111112,
+			0.4011111111111111,
 			"First three cells and first block overlapping",
 		},
 	}
@@ -202,10 +249,10 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 	}
 
 	expected := []probabilityTweak{
-		7.0,
-		1.0,
-		4.0,
-		1.0,
+		0.7777777777777778,
+		0.0,
+		0.4444444444444444,
+		0.0,
 	}
 
 	for i, step := range possibilities {
@@ -267,9 +314,9 @@ func TestTwiddleChainedSteps(t *testing.T) {
 	}
 
 	expected := []probabilityTweak{
-		1.3894954943731375,
-		2.6826957952797263,
-		10.0,
+		0.13894954943731375,
+		0.26826957952797265,
+		1.0,
 	}
 
 	lastResult := probabilityTweak(math.SmallestNonzeroFloat64)
@@ -315,21 +362,21 @@ func TestTwiddlePreferFilledGroups(t *testing.T) {
 		}
 	}
 
-	testHelper(3.8173913043478254, "Completely empty grid")
+	testHelper(0.7043478260869563, "Completely empty grid")
 
 	//Fill the rest of the block
 	for _, cell := range grid.Block(0).RemoveCells(CellSlice{keyCell}) {
 		cell.SetNumber(1)
 	}
 
-	testHelper(2.1478260869565218, "Full block, empty everything else")
+	testHelper(0.28695652173913044, "Full block, empty everything else")
 
 	//Fill the rest of the row, too
 	for _, cell := range grid.Row(0).RemoveCells(CellSlice{keyCell}) {
 		cell.SetNumber(1)
 	}
 
-	testHelper(1.4434782608695653, "Full block and row, otherwise empty col")
+	testHelper(0.11086956521739132, "Full block and row, otherwise empty col")
 
 	//Fill the rest of the col, too.
 
@@ -337,5 +384,5 @@ func TestTwiddlePreferFilledGroups(t *testing.T) {
 		cell.SetNumber(1)
 	}
 
-	testHelper(1.3130434782608695, "Full block, row, col")
+	testHelper(0.0782608695652174, "Full block, row, col")
 }

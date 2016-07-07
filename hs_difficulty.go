@@ -43,6 +43,7 @@ func init() {
 		signalPercentageFilledSteps,
 		signalNumberUnfilled,
 		signalStepsUntilNonFill,
+		signalPrecursorStepsLength,
 	}
 }
 
