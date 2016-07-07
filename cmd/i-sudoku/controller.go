@@ -445,7 +445,7 @@ func (c *mainController) ShowCount() {
 
 func (c *mainController) ShowDebugHint() {
 	options := sudoku.DefaultHumanSolveOptions()
-	options.NumOptionsToCalculate = 100
+	options.NumOptionsToCalculate = 20
 
 	//This is a HORRENDOUS hack, and very brittle. :-(
 	fakeLastFillSteps := []*sudoku.CompoundSolveStep{
@@ -500,7 +500,7 @@ func (c *mainController) ShowDebugHint() {
 
 func (c *mainController) ShowHint() {
 	options := sudoku.DefaultHumanSolveOptions()
-	options.NumOptionsToCalculate = 100
+	options.NumOptionsToCalculate = 20
 
 	//This is a HORRENDOUS hack, and very brittle. :-(
 	//It's also recreated exactly in ShowDebugHint
