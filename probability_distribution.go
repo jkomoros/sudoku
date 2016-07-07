@@ -111,7 +111,7 @@ func invertWeight(inverted float64) float64 {
 		return math.SmallestNonzeroFloat64
 	}
 
-	result := 1 / math.Exp(inverted/20)
+	result := 1 / math.Exp(inverted/10)
 
 	if math.IsInf(result, 0) {
 		result = math.SmallestNonzeroFloat64
