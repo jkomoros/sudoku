@@ -3,11 +3,11 @@
 package main
 
 import (
-	"fmt"
 	"github.com/jkomoros/sudoku/cmd/dokugen-analysis/internal/wekaparser"
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"sort"
 	"strconv"
 )
@@ -16,6 +16,7 @@ var BASE_SUDOKU_DIR string
 var BASE_DIR string
 var INPUT_FILE_NAME string
 var INPUT_SAMPLE_FILE_NAME string
+var WEIGHTS_FILE_NAME string
 var OUTPUT_FILE_NAME string
 
 func init() {
@@ -23,7 +24,8 @@ func init() {
 	BASE_DIR = BASE_SUDOKU_DIR + "cmd/dokugen-analysis/internal/gendifficulties/"
 	INPUT_FILE_NAME = BASE_DIR + "input.txt"
 	INPUT_SAMPLE_FILE_NAME = BASE_DIR + "input.SAMPLE.txt"
-	OUTPUT_FILE_NAME = BASE_SUDOKU_DIR + "hs_difficulty_weights.go"
+	WEIGHTS_FILE_NAME = "hs_difficulty_weights.go"
+	OUTPUT_FILE_NAME = BASE_SUDOKU_DIR + WEIGHTS_FILE_NAME
 }
 
 func main() {
@@ -83,5 +85,18 @@ func main() {
 		log.Fatalln("Writing file didn't work:", err)
 	}
 
-	fmt.Println("Don't forget to run gofmt on hs_difficulty_weights.go")
+	//Gofmt the new output
+
+	cmd := exec.Command("go", "fmt", OUTPUT_FILE_NAME)
+
+	goFmtOutput, err := cmd.Output()
+
+	if err != nil {
+		log.Println("Running go format failed. You should run go fmt yourself on", WEIGHTS_FILE_NAME)
+		return
+	}
+
+	if string(goFmtOutput) != WEIGHTS_FILE_NAME+"\n" {
+		log.Println("Go fmt did not give expected output:", string(goFmtOutput))
+	}
 }
