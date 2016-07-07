@@ -38,8 +38,8 @@ type mainController struct {
 	exitNow bool
 	toggles []toggle
 	//Whether or not to handle inputs.
-	doNotProcessEvents bool
-	cachedDifficulty   float64
+	calculatingDifficulty bool
+	cachedDifficulty      float64
 }
 
 const (
@@ -140,6 +140,19 @@ func (c *mainController) setUpToggles() {
 			"  SAVED  ",
 			termbox.ColorMagenta,
 			false,
+		},
+		//Calculating difficulty
+		{
+			func() bool {
+				return c.calculatingDifficulty
+			},
+			func() {
+				//Read only
+			},
+			" CALCULATING DIFFICULTY ",
+			"                        ",
+			termbox.ColorRed,
+			true,
 		},
 	}
 }
@@ -460,7 +473,7 @@ func (c *mainController) ShowDifficulty() {
 	unfilledGrid.ResetUnlockedCells()
 
 	//Tell the main loop to not process anything yet.
-	c.doNotProcessEvents = true
+	c.calculatingDifficulty = true
 
 	//Calculating difficulty will take a long time, so run it async. If we
 	//didn't, the message about calculating difficulty wouldn't show up.
@@ -473,7 +486,7 @@ func (c *mainController) ShowDifficulty() {
 		msg := "Grid Difficulty: {" + strconv.FormatFloat(c.cachedDifficulty, 'f', -1, 64) + "}"
 		c.SetConsoleMessage(msg, true)
 		//Clear the event loop to pump.
-		c.doNotProcessEvents = false
+		c.calculatingDifficulty = false
 	}()
 
 }

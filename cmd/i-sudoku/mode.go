@@ -133,7 +133,7 @@ func (s *defaultMode) handleInput(c *mainController, evt termbox.Event) {
 	switch evt.Type {
 	case termbox.EventKey:
 		//Wait until we've been told to resume processing events.
-		if c.doNotProcessEvents {
+		if c.calculatingDifficulty {
 			//Drop the event on the floor!
 			return
 		}
