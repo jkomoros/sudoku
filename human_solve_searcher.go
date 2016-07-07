@@ -318,13 +318,13 @@ func (p *humanSolveItem) Goodness() float64 {
 	if p.doneTwiddling && p.cachedGoodness != 0 {
 		return p.cachedGoodness
 	}
-	ownMultiplicationFactor := probabilityTweak(1.0)
+	ownAdditionFactor := probabilityTweak(0.0)
 	for _, twiddle := range p.twiddles {
-		ownMultiplicationFactor *= twiddle.value
+		ownAdditionFactor += twiddle.value
 	}
 	//p.cachedGoodness will be overwritten in the future if doneTwiddling is
 	//not yet true.
-	p.cachedGoodness = p.parent.Goodness() * float64(ownMultiplicationFactor)
+	p.cachedGoodness = p.parent.Goodness() + float64(ownAdditionFactor)
 	return p.cachedGoodness
 }
 
@@ -343,8 +343,8 @@ func (p *humanSolveItem) explainGoodnessRecursive(startCount int) []string {
 	}
 	var resultSections []string
 	for _, twiddle := range p.twiddles {
-		//1.0 values are boring, so skip them.
-		if twiddle.value == 1.0 {
+		//0.0 values are boring, so skip them.
+		if twiddle.value == 0.0 {
 			continue
 		}
 		resultSections = append(resultSections, strconv.Itoa(startCount)+":"+twiddle.name+":"+strconv.FormatFloat(float64(twiddle.value), 'f', 4, 64))
@@ -382,7 +382,7 @@ func (p *humanSolveItem) CreateNewItem(step *SolveStep) *humanSolveItem {
 	inProgressCompoundStep := p.Steps()
 	previousGrid := result.PreviousGrid()
 	for _, twiddler := range twiddlers {
-		tweak := twiddler.f(step, inProgressCompoundStep, p.searcher.previousCompoundSteps, previousGrid)
+		tweak := twiddler.Twiddle(step, inProgressCompoundStep, p.searcher.previousCompoundSteps, previousGrid)
 		result.Twiddle(tweak, twiddler.name)
 	}
 	result.DoneTwiddling()

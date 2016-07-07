@@ -69,9 +69,9 @@ func TestHumanSolveSearcher(t *testing.T) {
 
 	//This is a fragile way to test this; it will need to be updated every
 	//time we change the twiddlers. :-( Currently 5 for common numbers, 22.5
-	//for Human Likelihood, and 1 for chained steps, and 2.2739 for prefer
-	//filled groups
-	expectedGoodness := 255.8152173913044
+	//for Human Likelihood, and 1 for chained steps, and 1.2739 for prefer
+	//filled groups, all added together.
+	expectedGoodness := 29.77391304347826
 
 	if simpleFillStepItem.Goodness() != expectedGoodness {
 		t.Error("Goodness of simple fill step was wrong. Execpted", expectedGoodness, "got", simpleFillStepItem.Goodness(), simpleFillStepItem.explainGoodness())
@@ -127,11 +127,19 @@ func TestHumanSolveSearcher(t *testing.T) {
 		t.Error("We expected the expensive step to be worse", searcher.String())
 	}
 
+	//We'll have to twiddle down by the goodness...
+
+	goodness := expensiveStepItem.Goodness()
+
+	//I apologize to the programming gods for the next 5 lines of unbelievable
+	//hackiness...
+
 	//Horrendous hack to allow us to twiddle again
 	expensiveStepItem.doneTwiddling = false
 	expensiveStepItem.cachedGoodness = 0.0
-
-	expensiveStepItem.Twiddle(0.00000000000000001, "Very small amount to make this #1")
+	//Twiddle will reject negative amounts, so we have to (ugh) do most of the item.Twiddle ourselves...
+	expensiveStepItem.twiddles = append(expensiveStepItem.twiddles, twiddleRecord{"Very small amount to make this #1", (probabilityTweak(goodness) - 0.00001) * -1.0})
+	expensiveStepItem.searcher.ItemValueChanged(expensiveStepItem)
 
 	if searcher.itemsToExplore[0] != expensiveStepItem {
 		t.Error("Even after twiddling up guess step by a lot it still wasn't in the top position in frontier", searcher.itemsToExplore[0], searcher.itemsToExplore[1])

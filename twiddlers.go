@@ -8,13 +8,17 @@ import (
 //1.0 is a no op. 0.0 to 1.0 is increase goodness; 1.0 and above is decraase good
 type probabilityTweak float64
 
-//probabilityTwiddler is the interface that twiddlers should adhere to. Note
-//that previousGrid is the grid state BEFORE the proposedStep is applied.
+//probabilityTwiddler is the interface that twiddlers should adhere to. They
+//should return a value between 0.0 (no change; good) and 1.0 (maximal change;
+//bad). If a twiddler's weight is a negative number (e.g. -1.0) it means do
+//not modify the twiddler.Note that previousGrid is the grid state BEFORE the
+//proposedStep is applied.
 type probabilityTwiddler func(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak
 
 type probabilityTwiddlerItem struct {
-	f    probabilityTwiddler
-	name string
+	f      probabilityTwiddler
+	name   string
+	weight probabilityTweak
 }
 
 //twiddlers is the list of all of the twiddlers we should apply to change the
@@ -29,26 +33,48 @@ func init() {
 	//and b) we want a stable ordering.
 	twiddlers = []probabilityTwiddlerItem{
 		{
-			f:    twiddleHumanLikelihood,
-			name: "Human Likelihood",
+			f:      twiddleHumanLikelihood,
+			name:   "Human Likelihood",
+			weight: -1.0,
 		},
 		{
 			f:    twiddleChainedSteps,
 			name: "Chained Steps",
+			//TODO: this is likely too strong. It's set to be a no-op from
+			//previous approach right now.
+			weight: 10.0,
 		},
 		{
 			f:    twiddleCommonNumbers,
 			name: "Common Numbers",
+			//TODO: set this differently. It's set to be a no-op from previous
+			//approach right now.
+			weight: probabilityTweak(DIM),
 		},
 		{
-			f:    twiddlePointingTargetOverlap,
-			name: "Pointing Target Overlap",
+			f:      twiddlePointingTargetOverlap,
+			name:   "Pointing Target Overlap",
+			weight: 1.0,
 		},
 		{
-			f:    twiddlePreferFilledGroups,
-			name: "Prefer Filled Groups",
+			f:      twiddlePreferFilledGroups,
+			name:   "Prefer Filled Groups",
+			weight: 4.0,
 		},
 	}
+}
+
+func (p *probabilityTwiddlerItem) Twiddle(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
+
+	result := p.f(proposedStep, inProgressCompoundStep, pastSteps, previousGrid)
+
+	if p.weight >= 0.0 {
+		//result is a number between 0.0 and 1.0
+		result = result * p.weight
+	}
+
+	return result
+
 }
 
 //twiddlePointingTargetOverlap twiddles based on how much the targetcells
@@ -58,12 +84,12 @@ func init() {
 //conceptually similar to ChainSimilarity, but more targeted.
 func twiddlePointingTargetOverlap(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
 	if len(inProgressCompoundStep) == 0 {
-		return 1.0
+		return 0.0
 	}
 	lastStep := inProgressCompoundStep[len(inProgressCompoundStep)-1]
 
 	if proposedStep == nil {
-		return 1.0
+		return 0.0
 	}
 
 	//We're going to look for two kinds of overlap: targetCell to targetCell,
@@ -120,7 +146,7 @@ func twiddlePointingTargetOverlap(proposedStep *SolveStep, inProgressCompoundSte
 
 	//Squaring the flipped overlap will accelerate small ones. Adding to 1.0
 	//makes sure that all non-zero ones push things UP.
-	return probabilityTweak(flippedOverlap*flippedOverlap + 1.0)
+	return probabilityTweak(flippedOverlap * flippedOverlap)
 
 }
 
@@ -144,7 +170,9 @@ func twiddleCommonNumbers(proposedStep *SolveStep, inProgressCompoundStep []*Sol
 	//Skip steps that aren't fill or fill multiple
 	if !proposedStep.Technique.IsFill() || len(proposedStep.TargetNums) > 1 {
 		//Wait, isn't this privileging steps that aren't filled unnecessarily?
-		return 1.0
+		//No, basically there are some twiddlers that only apply to FillSteps
+		//and are worth nothing after that.
+		return 0.0
 	}
 
 	keyNum := proposedStep.TargetNums[0]
@@ -160,7 +188,7 @@ func twiddleCommonNumbers(proposedStep *SolveStep, inProgressCompoundStep []*Sol
 	if count == DIM {
 		//This shouldn't happen; this only occurs when something is fully
 		//filled.
-		return probabilityTweak(1.0)
+		return probabilityTweak(0.0)
 	}
 
 	//More filled is good, so flip this count to get # of unfilled for that
@@ -170,7 +198,9 @@ func twiddleCommonNumbers(proposedStep *SolveStep, inProgressCompoundStep []*Sol
 	//CommonNumbers is way too strong. Do a percentage of DIM, multiplied by
 	//say 2, plus 1.
 
-	return probabilityTweak(count)
+	percentage := float64(count) / float64(DIM)
+
+	return probabilityTweak(percentage)
 
 }
 
@@ -193,7 +223,7 @@ func twiddleChainedSteps(proposedStep *SolveStep, inProgressCompoundStep []*Solv
 	}
 
 	if lastModifiedCells == nil {
-		return 1.0
+		return 0.0
 	}
 
 	//Tweak every weight by how related they are.
@@ -207,7 +237,13 @@ func twiddleChainedSteps(proposedStep *SolveStep, inProgressCompoundStep []*Solv
 	//We want it to be dissimilar is larger; flip it.
 	dissimilarity := 1.0 - similarity
 
-	return probabilityTweak(math.Pow(10, dissimilarity))
+	//Get the exponetntial shape
+	dissimilarity = math.Pow(10, dissimilarity)
+
+	//Convert to a percentage between 0 and 1
+	dissimilarity /= 10.0
+
+	return probabilityTweak(dissimilarity)
 
 }
 
@@ -218,7 +254,7 @@ func twiddlePreferFilledGroups(proposedStep *SolveStep, inProgressCompoundStep [
 
 	//Sanity check
 	if !proposedStep.Technique.IsFill() || len(proposedStep.TargetCells) > 1 {
-		return 1.0
+		return 0.0
 	}
 
 	cell := proposedStep.TargetCells[0]
@@ -276,8 +312,6 @@ func twiddlePreferFilledGroups(proposedStep *SolveStep, inProgressCompoundStep [
 	//Divide by the number of samples we fed in to get the weighted average
 	accum /= divisor
 
-	//The result should be 1.0+, and spread out over a larger range.
-
-	return probabilityTweak(1.0 + accum*4.0)
+	return probabilityTweak(accum)
 
 }
