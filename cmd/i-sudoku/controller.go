@@ -37,6 +37,8 @@ type mainController struct {
 	//If exitNow is flipped to true, we will quit at next turn of event loop.
 	exitNow bool
 	toggles []toggle
+	//Whether or not to handle inputs.
+	doNotProcessEvents bool
 }
 
 const (
@@ -441,6 +443,33 @@ func (c *mainController) ShowCount() {
 		msg += "Number " + numString + " : " + countString + " remaining\n"
 	}
 	c.SetConsoleMessage(msg, true)
+}
+
+func (c *mainController) ShowDifficulty() {
+	//TODO: test this.
+
+	msg := "{Calculating difficulty} This can take a long time, during which key presses will be ignored."
+
+	//It's a long-lived message because we want it to persist even when
+	//handleEvents is dropping keypress events on the floor.
+	c.SetConsoleMessage(msg, false)
+
+	unfilledGrid := c.Grid().Copy()
+	unfilledGrid.ResetUnlockedCells()
+
+	//Tell the main loop to not process anything yet.
+	c.doNotProcessEvents = true
+
+	//Calculating difficulty will take a long time, so run it async. If we
+	//didn't, the message about calculating difficulty wouldn't show up.
+	go func() {
+		difficulty := unfilledGrid.Difficulty()
+		msg := "Grid Difficulty: {" + strconv.FormatFloat(difficulty, 'f', -1, 64) + "}"
+		c.SetConsoleMessage(msg, true)
+		//Clear the event loop to pump.
+		c.doNotProcessEvents = false
+	}()
+
 }
 
 func (c *mainController) ShowDebugHint() {
