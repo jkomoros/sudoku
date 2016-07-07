@@ -290,3 +290,52 @@ func TestTwiddleChainedSteps(t *testing.T) {
 	}
 
 }
+
+func TestTwiddlePreferFilledGroups(t *testing.T) {
+	grid := NewGrid()
+
+	keyCell := grid.Cell(0, 0)
+
+	step := &SolveStep{
+		TargetCells: CellSlice{
+			keyCell,
+		},
+		Technique: techniquesByName["Only Legal Number"],
+	}
+
+	//TODO: instead of testing for the exact values, just make sure that every
+	//value is lower than the one before it.
+
+	//TODO: more exhaustive tests
+
+	testHelper := func(expected probabilityTweak, description string) {
+		result := twiddlePreferFilledGroups(step, nil, nil, grid)
+		if result != expected {
+			t.Error("Got wrong result for", description, "Got", result, "Expected", expected)
+		}
+	}
+
+	testHelper(3.8173913043478254, "Completely empty grid")
+
+	//Fill the rest of the block
+	for _, cell := range grid.Block(0).RemoveCells(CellSlice{keyCell}) {
+		cell.SetNumber(1)
+	}
+
+	testHelper(2.1478260869565218, "Full block, empty everything else")
+
+	//Fill the rest of the row, too
+	for _, cell := range grid.Row(0).RemoveCells(CellSlice{keyCell}) {
+		cell.SetNumber(1)
+	}
+
+	testHelper(1.4434782608695653, "Full block and row, otherwise empty col")
+
+	//Fill the rest of the col, too.
+
+	for _, cell := range grid.Col(0).RemoveCells(CellSlice{keyCell}) {
+		cell.SetNumber(1)
+	}
+
+	testHelper(1.3130434782608695, "Full block, row, col")
+}

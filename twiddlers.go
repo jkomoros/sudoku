@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"math"
+	"sort"
 )
 
 //1.0 is a no op. 0.0 to 1.0 is increase goodness; 1.0 and above is decraase good
@@ -42,6 +43,10 @@ func init() {
 		{
 			f:    twiddlePointingTargetOverlap,
 			name: "Pointing Target Overlap",
+		},
+		{
+			f:    twiddlePreferFilledGroups,
+			name: "Prefer Filled Groups",
 		},
 	}
 }
@@ -162,6 +167,9 @@ func twiddleCommonNumbers(proposedStep *SolveStep, inProgressCompoundStep []*Sol
 	//number in the grid.
 	count = DIM - count
 
+	//CommonNumbers is way too strong. Do a percentage of DIM, multiplied by
+	//say 2, plus 1.
+
 	return probabilityTweak(count)
 
 }
@@ -200,5 +208,76 @@ func twiddleChainedSteps(proposedStep *SolveStep, inProgressCompoundStep []*Solv
 	dissimilarity := 1.0 - similarity
 
 	return probabilityTweak(math.Pow(10, dissimilarity))
+
+}
+
+//twiddlePreferFilledGroups benefits steps that fill cells in groups that are
+//more filled than others. This reflects that humans tend to focus on groups
+//that are more constrained when picking a cell to focus on.
+func twiddlePreferFilledGroups(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
+
+	//Sanity check
+	if !proposedStep.Technique.IsFill() || len(proposedStep.TargetCells) > 1 {
+		return 1.0
+	}
+
+	cell := proposedStep.TargetCells[0]
+
+	//We want unfilled, because lower is better.
+
+	blockUnfilledCount := len(previousGrid.Block(cell.Block()).FilterByUnfilled())
+	rowUnfilledCount := len(previousGrid.Row(cell.Row()).FilterByUnfilled())
+	colUnfilledCount := len(previousGrid.Col(cell.Col()).FilterByUnfilled())
+
+	//Use DIM-1 because of course one item in that collection is unfilled--the
+	//Target Cell for this step!
+	blockUnfilledPercentage := float64(blockUnfilledCount) / float64(DIM-1)
+	rowUnfilledPercentage := float64(rowUnfilledCount) / float64(DIM-1)
+	colUnfilledPercentage := float64(colUnfilledCount) / float64(DIM-1)
+
+	//Normalize the values for the fact that blocks are way easier for humans
+	//to see than rows, which are slightly better than cols. (Remember, lower
+	//is better)
+	blockValue := 0.5 * blockUnfilledPercentage
+	rowValue := 0.9 * rowUnfilledPercentage
+	colValue := 1.0 * colUnfilledPercentage
+
+	//Accumulate the whole value together, with the strongest percentage
+	//accounting for most of the cumulative effect. This reflects the
+	//perception that it's great to have high filled values for all, but even
+	//just having one group is great.
+
+	//Similar code is in CellSlice.chainSimilarity
+
+	values := []float64{
+		blockValue,
+		rowValue,
+		colValue,
+	}
+
+	sort.Float64s(values)
+
+	weights := []int{
+		16,
+		6,
+		1,
+	}
+
+	accum := 0.0
+	divisor := 0.0
+
+	for index, value := range values {
+		for i := 0; i < weights[index]; i++ {
+			accum += value
+			divisor += 1.0
+		}
+	}
+
+	//Divide by the number of samples we fed in to get the weighted average
+	accum /= divisor
+
+	//The result should be 1.0+, and spread out over a larger range.
+
+	return probabilityTweak(1.0 + accum*4.0)
 
 }
