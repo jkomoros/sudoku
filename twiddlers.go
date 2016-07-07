@@ -38,18 +38,14 @@ func init() {
 			weight: -1.0,
 		},
 		{
-			f:    twiddleChainedSteps,
-			name: "Chained Steps",
-			//TODO: this is likely too strong. It's set to be a no-op from
-			//previous approach right now.
-			weight: 10.0,
+			f:      twiddleChainedSteps,
+			name:   "Chained Steps",
+			weight: 50.0,
 		},
 		{
-			f:    twiddleCommonNumbers,
-			name: "Common Numbers",
-			//TODO: set this differently. It's set to be a no-op from previous
-			//approach right now.
-			weight: probabilityTweak(DIM),
+			f:      twiddleCommonNumbers,
+			name:   "Common Numbers",
+			weight: 4.0,
 		},
 		{
 			f:      twiddlePointingTargetOverlap,
@@ -59,7 +55,7 @@ func init() {
 		{
 			f:      twiddlePreferFilledGroups,
 			name:   "Prefer Filled Groups",
-			weight: 4.0,
+			weight: 10.0,
 		},
 	}
 }

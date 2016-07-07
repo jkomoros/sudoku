@@ -68,10 +68,8 @@ func TestHumanSolveSearcher(t *testing.T) {
 	}
 
 	//This is a fragile way to test this; it will need to be updated every
-	//time we change the twiddlers. :-( Currently 5 for common numbers, 22.5
-	//for Human Likelihood, and 1 for chained steps, and 1.2739 for prefer
-	//filled groups, all added together.
-	expectedGoodness := 29.77391304347826
+	//time we change the twiddlers. :-(
+	expectedGoodness := 28.907004830917874
 
 	if simpleFillStepItem.Goodness() != expectedGoodness {
 		t.Error("Goodness of simple fill step was wrong. Execpted", expectedGoodness, "got", simpleFillStepItem.Goodness(), simpleFillStepItem.explainGoodness())
