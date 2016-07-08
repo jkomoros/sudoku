@@ -52,7 +52,7 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 	defer grid.Done()
 	//Load up a solved grid
 	grid.LoadSDK(SOLVED_TEST_GRID)
-	cell := grid.Cell(3, 3)
+	cell := grid.MutableCell(3, 3)
 	num := cell.Number()
 	cell.SetNumber(0)
 
@@ -131,12 +131,12 @@ func TestNecessaryInRow(t *testing.T) {
 
 	//SetNumber will affect the other cells in row, so do it first.
 	for _, cell := range grid.Row(3) {
-		cellI := cell.impl()
+		cellI := cell.Mutable().impl()
 		cellI.number = 0
 		copy(cellI.impossibles[:], impossibles)
 	}
 
-	cell := grid.Cell(3, 3)
+	cell := grid.MutableCell(3, 3)
 	cellI := cell.impl()
 	//This is the only cell where DIM will be allowed.
 	cellI.impossibles[DIM-1] = 0
@@ -219,12 +219,12 @@ func TestNecessaryInCol(t *testing.T) {
 
 	//SetNumber will affect the other cells in row, so do it first.
 	for _, cell := range grid.Col(3) {
-		cellI := cell.impl()
+		cellI := cell.Mutable().impl()
 		cellI.number = 0
 		copy(cellI.impossibles[:], impossibles)
 	}
 
-	cell := grid.Cell(3, 3)
+	cell := grid.MutableCell(3, 3)
 	cellI := cell.impl()
 	//This is the only cell where DIM will be allowed.
 	cellI.impossibles[DIM-1] = 0
@@ -307,12 +307,12 @@ func TestNecessaryInBlock(t *testing.T) {
 
 	//SetNumber will affect the other cells in row, so do it first.
 	for _, cell := range grid.Block(4) {
-		cellI := cell.impl()
+		cellI := cell.Mutable().impl()
 		cellI.number = 0
 		copy(cellI.impossibles[:], impossibles)
 	}
 
-	cell := grid.Cell(3, 3)
+	cell := grid.MutableCell(3, 3)
 	cellI := cell.impl()
 	//This is the only cell where DIM will be allowed.
 	cellI.impossibles[DIM-1] = 0

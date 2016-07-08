@@ -248,7 +248,7 @@ func TestDiagramExtents(t *testing.T) {
 
 func TestMarks(t *testing.T) {
 	grid := NewGrid()
-	cell := grid.Cell(0, 0)
+	cell := grid.Cell(0, 0).Mutable()
 	for i := 1; i < DIM+1; i++ {
 		if cell.Mark(i) {
 			t.Error("Zero cell had a mark:", i)
@@ -288,7 +288,7 @@ func TestCellLock(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
 
-	cell := grid.Cell(3, 3)
+	cell := grid.Cell(3, 3).Mutable()
 
 	if cell.Locked() {
 		t.Error("New cell was already locked")

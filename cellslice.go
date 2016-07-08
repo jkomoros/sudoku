@@ -105,8 +105,10 @@ func (self CellSlice) AllBlocks() IntSlice {
 
 //AddExclude sets the given number to excluded on all cells in the set.
 func (self CellSlice) AddExclude(exclude int) {
+	//TODO: get rid of this; it's the only CellSlice method that mutates cells
+	//directly.
 	mapper := func(cell Cell) {
-		cell.SetExcluded(exclude, true)
+		cell.Mutable().SetExcluded(exclude, true)
 	}
 	self.Map(mapper)
 }
@@ -505,6 +507,13 @@ func (self CellSlice) sameAsRefs(refs []cellRef) bool {
 	}
 
 	return true
+}
+
+func (self cellRef) MutableCell(grid *Grid) MutableCell {
+	if grid == nil {
+		return nil
+	}
+	return grid.MutableCell(self.row, self.col)
 }
 
 func (self cellRef) Cell(grid *Grid) Cell {

@@ -9,7 +9,7 @@ func TestDokugen(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
 	row, col, num := 3, 3, 3
-	target := grid.Cell(row, col)
+	target := grid.Cell(row, col).Mutable()
 	target.SetNumber(num)
 	for _, cell := range grid.Col(col) {
 		if cell == target {

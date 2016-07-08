@@ -160,11 +160,11 @@ func TestGridCopy(t *testing.T) {
 	grid := NewGrid()
 	grid.LoadSDK(ADVANCED_TEST_GRID)
 
-	cell := grid.Cell(0, 0)
+	cell := grid.Cell(0, 0).Mutable()
 	cell.SetMark(3, true)
 	cell.SetMark(4, true)
 
-	cell = grid.Cell(0, 2)
+	cell = grid.Cell(0, 2).Mutable()
 	cell.SetExcluded(3, true)
 	cell.SetExcluded(4, true)
 
@@ -335,7 +335,7 @@ func TestGridCells(t *testing.T) {
 	}
 
 	//make sure mutating a cell from the celllist mutates the grid.
-	cell := cells[3]
+	cell := cells[3].Mutable()
 
 	if cell.Number() != 0 {
 		t.Fatal("We expected cell #3 to be empty, but had", cell.Number())
@@ -352,14 +352,14 @@ func TestGridLoad(t *testing.T) {
 	defer grid.Done()
 	grid.LoadSDK(TEST_GRID)
 
-	cell := grid.Cell(0, 0)
+	cell := grid.MutableCell(0, 0)
 
 	if cell.Number() != 6 {
 		t.Log("The loaded grid did not have a 6 in the upper left corner")
 		t.Fail()
 	}
 
-	cell = grid.Cell(DIM-1, DIM-1)
+	cell = grid.MutableCell(DIM-1, DIM-1)
 
 	if cell.Number() != 7 {
 		t.Log("The loaded grid did not have a 7 in the bottom right corner")
@@ -377,7 +377,8 @@ func TestGridLoad(t *testing.T) {
 	}
 
 	//Twiddle an exclude to make sure it copies over correctly.
-	grid.Cell(2, 0).SetExcluded(4, true)
+	//TODO: switch over all grid.Cell(a,b).Mutable() to grid.MutableCell(a,b)
+	grid.Cell(2, 0).Mutable().SetExcluded(4, true)
 
 	if grid.Diagram(false) != TEST_GRID_EXCLUDED_DIAGRAM {
 		t.Error("Diagram did not reflect the manually excluded item: \n", grid.Diagram(false))
@@ -395,8 +396,8 @@ func TestGridLoad(t *testing.T) {
 
 	for c, cell := range grid.Cells() {
 		copyCell := cell.InGrid(copy)
-		cellI := cell.impl()
-		copyCellI := copyCell.impl()
+		cellI := cell.Mutable().impl()
+		copyCellI := copyCell.Mutable().impl()
 		if !IntSlice(cellI.impossibles[:]).SameAs(IntSlice(copyCellI.impossibles[:])) {
 			t.Error("Cells at position", c, "had different impossibles:\n", cellI.impossibles, "\n", copyCellI.impossibles)
 		}
@@ -407,7 +408,7 @@ func TestGridLoad(t *testing.T) {
 		}
 	}
 
-	copy.Cell(0, 0).SetNumber(5)
+	copy.MutableCell(0, 0).SetNumber(5)
 
 	if copy.Cell(0, 0).Number() == grid.Cell(0, 0).Number() {
 		t.Log("When we modified the copy's cell, it also affected the original.")
@@ -742,7 +743,7 @@ func TestGridEmpty(t *testing.T) {
 	//Reset the grid
 	for r := 0; r < DIM; r++ {
 		for c := 0; c < DIM; c++ {
-			grid.Cell(r, c).SetNumber(0)
+			grid.MutableCell(r, c).SetNumber(0)
 		}
 	}
 
@@ -946,7 +947,7 @@ func TestUnlockCells(t *testing.T) {
 	defer grid.Done()
 
 	for i := 0; i < DIM; i++ {
-		grid.Cell(i, i).Lock()
+		grid.MutableCell(i, i).Lock()
 	}
 
 	someCellsLocked := false
@@ -981,9 +982,9 @@ func TestResetUnlockedCells(t *testing.T) {
 	beforeExcludesDiagram := grid.Diagram(false)
 	beforeMarksDiagram := grid.Diagram(true)
 
-	grid.Cell(0, 4).SetNumber(3)
-	grid.Cell(0, 5).SetMark(1, true)
-	grid.Cell(0, 6).SetExcluded(1, true)
+	grid.MutableCell(0, 4).SetNumber(3)
+	grid.MutableCell(0, 5).SetMark(1, true)
+	grid.MutableCell(0, 6).SetExcluded(1, true)
 
 	grid.ResetUnlockedCells()
 
@@ -1004,25 +1005,25 @@ func TestNumFilledCells(t *testing.T) {
 		t.Error("New grid thought it already had filled cells")
 	}
 
-	grid.Cell(0, 0).SetNumber(1)
+	grid.MutableCell(0, 0).SetNumber(1)
 
 	if grid.numFilledCells != 1 {
 		t.Error("Grid with one cell set didn't think it had any filled cells.")
 	}
 
-	grid.Cell(0, 0).SetNumber(2)
+	grid.MutableCell(0, 0).SetNumber(2)
 
 	if grid.numFilledCells != 1 {
 		t.Error("Grid with a number set on a cell after another cell didn't notice that it was still just one cell.")
 	}
 
-	grid.Cell(0, 0).SetNumber(0)
+	grid.MutableCell(0, 0).SetNumber(0)
 
 	if grid.numFilledCells != 0 {
 		t.Error("Grid with cell unset didn't notice that it was now zero again")
 	}
 
-	grid.Cell(0, 0).SetNumber(0)
+	grid.MutableCell(0, 0).SetNumber(0)
 
 	if grid.numFilledCells != 0 {
 		t.Error("Setting a cell to 0 that was already zero got wrong num filled cells.")

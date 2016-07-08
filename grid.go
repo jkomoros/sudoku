@@ -204,7 +204,7 @@ func (self *Grid) replace(other *Grid) {
 	//Also set excludes
 	for index := range other.cells {
 		otherCell := &other.cells[index]
-		selfCell := otherCell.InGrid(self)
+		selfCell := otherCell.InGrid(self).Mutable()
 
 		selfCell.SetNumber(otherCell.Number())
 		//TODO: the fact that I'm reaching into Cell's excludeLock outside of Cell is a Smell.
@@ -237,8 +237,8 @@ func (self *Grid) transpose() *Grid {
 	result := NewGrid()
 	for r := 0; r < DIM; r++ {
 		for c := 0; c < DIM; c++ {
-			original := self.Cell(r, c)
-			copy := result.Cell(c, r)
+			original := self.Cell(r, c).Mutable()
+			copy := result.Cell(c, r).Mutable()
 			copy.SetNumber(original.Number())
 			//TODO: shouldn't we have a lock here or something?
 			copy.setExcludedBulk(original.excludedBulk())
@@ -373,6 +373,13 @@ func (self *Grid) cellImpl(row int, col int) *cellImpl {
 		return nil
 	}
 	return &self.cells[index]
+}
+
+//MutableCell returns a mutable cell. This is a safer operation than
+//grid.Cell(a,b).Mutable() because if you call it on a read-only grid it will
+//fail at compile time as opposed to run time.
+func (self *Grid) MutableCell(row int, col int) MutableCell {
+	return self.cellImpl(row, col)
 }
 
 //Cell returns a reference to a specific cell (zero-indexed) in the grid.

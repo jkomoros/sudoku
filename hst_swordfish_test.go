@@ -35,7 +35,7 @@ func swordfishExampleGrid(t *testing.T) *Grid {
 	}
 
 	for ref, ints := range excludedConfig {
-		cell := ref.Cell(grid)
+		cell := ref.MutableCell(grid)
 		for _, exclude := range ints {
 			cell.SetExcluded(exclude, true)
 		}

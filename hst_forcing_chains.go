@@ -117,11 +117,11 @@ func (self *forcingChainsTechnique) find(grid *Grid, coordinator findCoordinator
 		secondAccumulator := &chainSearcherAccumulator{make(map[cellRef]IntSlice), make(map[cellRef]IntSlice)}
 
 		chainSearcher(0, _MAX_IMPLICATION_STEPS,
-			candidateCell.InGrid(firstGrid),
+			candidateCell.InGrid(firstGrid).Mutable(),
 			firstPossibilityNum, firstAccumulator)
 
 		chainSearcher(0, _MAX_IMPLICATION_STEPS,
-			candidateCell.InGrid(secondGrid),
+			candidateCell.InGrid(secondGrid).Mutable(),
 			secondPossibilityNum, secondAccumulator)
 
 		firstAccumulator.reduce()
@@ -224,7 +224,7 @@ func (c *chainSearcherAccumulator) reduce() {
 	}
 }
 
-func chainSearcher(generation int, maxGeneration int, cell Cell, numToApply int, accum *chainSearcherAccumulator) {
+func chainSearcher(generation int, maxGeneration int, cell MutableCell, numToApply int, accum *chainSearcherAccumulator) {
 
 	/*
 	 * chainSearcher implements a DFS to search forward through implication chains to
@@ -267,7 +267,7 @@ func chainSearcher(generation int, maxGeneration int, cell Cell, numToApply int,
 		forcedNum := possibilities[0]
 
 		//recurse
-		chainSearcher(generation+1, maxGeneration, cellToVisit, forcedNum, accum)
+		chainSearcher(generation+1, maxGeneration, cellToVisit.Mutable(), forcedNum, accum)
 	}
 
 	//Undo this number and return

@@ -204,7 +204,7 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 
 	for _, cell := range solvedGrid.Cells() {
 		if cell.Number() == 4 {
-			otherCell := cell.InGrid(grid)
+			otherCell := cell.MutableInGrid(grid)
 			otherCell.SetNumber(4)
 		}
 	}
@@ -366,14 +366,14 @@ func TestTwiddlePreferFilledGroups(t *testing.T) {
 
 	//Fill the rest of the block
 	for _, cell := range grid.Block(0).RemoveCells(CellSlice{keyCell}) {
-		cell.SetNumber(1)
+		cell.Mutable().SetNumber(1)
 	}
 
 	testHelper(0.28695652173913044, "Full block, empty everything else")
 
 	//Fill the rest of the row, too
 	for _, cell := range grid.Row(0).RemoveCells(CellSlice{keyCell}) {
-		cell.SetNumber(1)
+		cell.Mutable().SetNumber(1)
 	}
 
 	testHelper(0.11086956521739132, "Full block and row, otherwise empty col")
@@ -381,7 +381,7 @@ func TestTwiddlePreferFilledGroups(t *testing.T) {
 	//Fill the rest of the col, too.
 
 	for _, cell := range grid.Col(0).RemoveCells(CellSlice{keyCell}) {
-		cell.SetNumber(1)
+		cell.Mutable().SetNumber(1)
 	}
 
 	testHelper(0.0782608695652174, "Full block, row, col")

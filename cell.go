@@ -44,8 +44,64 @@ type Cell interface {
 	//row/column as this cell. Effectively, this cell's analogue in the other
 	//grid.
 	InGrid(grid *Grid) Cell
+	//MutableInGrid is like InGrid, but will only work on grids that are mutable.
+	MutableInGrid(grid *Grid) MutableCell
 	//Number returns the number the cell is currently set to.
 	Number() int
+
+	//Mark reads out whether the given mark has been set for this cell. See
+	//SetMark for a description of what marks represent.
+	Mark(number int) bool
+	//Marks returns an IntSlice with each mark, in ascending order.
+	Marks() IntSlice
+
+	//Possible returns whether or not a given number is legal to fill via
+	//SetNumber, given the state of the grid (specifically, the cell's neighbors)
+	//and the numbers the cell was told to explicitly exclude via SetExclude. If
+	//the cell is already filled with a number, it will return false for all
+	//numbers.
+	Possible(number int) bool
+	//Possibilities returns a list of all current possibilities for this cell: all
+	//numbers for which cell.Possible returns true.
+	Possibilities() IntSlice
+	//Invalid returns true if the cell has no valid possibilities to fill in,
+	//implying that the grid is in an invalid state because this cell cannot be
+	//filled with a number without violating a constraint.
+	Invalid() bool
+
+	//Locked returns whether or not the cell is locked. See Lock for more
+	//information on the concept of locking.
+	Locked() bool
+	//SymmetricalPartner returns the cell's partner in the grid, based on the type
+	//of symmetry requested.
+	SymmetricalPartner(symmetry SymmetryType) Cell
+	//Neighbors returns a CellSlice of all of the cell's neighbors--the other
+	//cells in its row, column, and block. The set of neighbors is the set of
+	//cells that this cell's number must not conflict with.
+	Neighbors() CellSlice
+	//String returns a debug-friendly summary of the Cell.
+	String() string
+	//DiagramExtents returns the top, left, height, and width coordinate in
+	//grid.Diagram's output that  corresponds to the contents of this cell. The
+	//top left corner is 0,0
+	DiagramExtents() (top, left, height, width int)
+	//Mutable will return a MutableCell underlying this one, or nil if that's
+	//not possible. This should succeed if you're calling it from a method
+	//that was called on a MutableGrid, but otherwise expect it to fail.
+	Mutable() MutableCell
+
+	//The following are methods that are only internal. Some of them are
+	//nasty.
+	ref() cellRef
+	grid() *Grid
+	diagramRows(showMarks bool) []string
+	rank() int
+	implicitNumber() int
+}
+
+//MutableCell is a Cell that also has methods that allow mutation of the cell.
+type MutableCell interface {
+	Cell
 	//SetNumber explicitly sets the number of the cell. This operation could cause
 	//the grid to become invalid if it conflicts with its neighbors' numbers. This
 	//operation will affect the Possiblities() of its neighbor cells.
@@ -65,27 +121,9 @@ type Cell interface {
 	//marks proactively added to a cell by a user. They have no effect on the
 	//solver or human solver; they only are visible when Diagram(true) is called.
 	SetMark(number int, mark bool)
-	//Mark reads out whether the given mark has been set for this cell. See
-	//SetMark for a description of what marks represent.
-	Mark(number int) bool
-	//Marks returns an IntSlice with each mark, in ascending order.
-	Marks() IntSlice
 	//ResetMarks removes all marks. See SetMark for a description of what marks
 	//represent.
 	ResetMarks()
-	//Possible returns whether or not a given number is legal to fill via
-	//SetNumber, given the state of the grid (specifically, the cell's neighbors)
-	//and the numbers the cell was told to explicitly exclude via SetExclude. If
-	//the cell is already filled with a number, it will return false for all
-	//numbers.
-	Possible(number int) bool
-	//Possibilities returns a list of all current possibilities for this cell: all
-	//numbers for which cell.Possible returns true.
-	Possibilities() IntSlice
-	//Invalid returns true if the cell has no valid possibilities to fill in,
-	//implying that the grid is in an invalid state because this cell cannot be
-	//filled with a number without violating a constraint.
-	Invalid() bool
 	//Lock 'locks' the cell. Locking represents the concept of cells that are set
 	//at the beginning of the puzzle and that users may not modify. Locking does
 	//not change whether calls to SetNumber or SetMark will fail; it only impacts
@@ -94,37 +132,15 @@ type Cell interface {
 	//Unlock 'unlocks' the cell. See Lock for more information on the concept of
 	//locking.
 	Unlock()
-	//Locked returns whether or not the cell is locked. See Lock for more
-	//information on the concept of locking.
-	Locked() bool
-	//SymmetricalPartner returns the cell's partner in the grid, based on the type
-	//of symmetry requested.
-	SymmetricalPartner(symmetry SymmetryType) Cell
-	//Neighbors returns a CellSlice of all of the cell's neighbors--the other
-	//cells in its row, column, and block. The set of neighbors is the set of
-	//cells that this cell's number must not conflict with.
-	Neighbors() CellSlice
-	//String returns a debug-friendly summary of the Cell.
-	String() string
-	//DiagramExtents returns the top, left, height, and width coordinate in
-	//grid.Diagram's output that  corresponds to the contents of this cell. The
-	//top left corner is 0,0
-	DiagramExtents() (top, left, height, width int)
 
-	//The following are methods that are only internal. Some of them are
-	//nasty.
+	//The following are private methods
 	setPossible(number int)
 	setImpossible(number int)
-	ref() cellRef
-	grid() *Grid
 	excludedLock() *sync.RWMutex
 	setExcludedBulk(other [DIM]bool)
 	excludedBulk() [DIM]bool
 	setMarksBulk(other [DIM]bool)
 	marksBulk() [DIM]bool
-	diagramRows(showMarks bool) []string
-	rank() int
-	implicitNumber() int
 	//To be used only for testing!!!!
 	impl() *cellImpl
 }
@@ -187,6 +203,10 @@ func (self *cellImpl) marksBulk() [DIM]bool {
 	return self.marks
 }
 
+func (self *cellImpl) Mutable() MutableCell {
+	return self
+}
+
 func (self *cellImpl) Row() int {
 	return self.row
 }
@@ -197,6 +217,13 @@ func (self *cellImpl) Col() int {
 
 func (self *cellImpl) Block() int {
 	return self.block
+}
+
+func (self *cellImpl) MutableInGrid(grid *Grid) MutableCell {
+	if grid == nil {
+		return nil
+	}
+	return grid.MutableCell(self.Row(), self.Col())
 }
 
 func (self *cellImpl) InGrid(grid *Grid) Cell {
@@ -258,9 +285,9 @@ func (self *cellImpl) SetNumber(number int) {
 func (self *cellImpl) alertNeighbors(number int, possible bool) {
 	for _, cell := range self.Neighbors() {
 		if possible {
-			cell.setPossible(number)
+			cell.Mutable().setPossible(number)
 		} else {
-			cell.setImpossible(number)
+			cell.Mutable().setImpossible(number)
 		}
 	}
 }

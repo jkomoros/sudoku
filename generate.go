@@ -81,7 +81,9 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 		cells[i] = &grid.cells[j]
 	}
 
-	for _, cell := range cells {
+	for _, roCell := range cells {
+
+		cell := roCell.Mutable()
 
 		num := cell.Number()
 		if num == 0 {
@@ -122,13 +124,13 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 		//Unfill it.
 		cell.SetNumber(0)
 		if otherCell != nil {
-			otherCell.SetNumber(0)
+			otherCell.Mutable().SetNumber(0)
 		}
 		if grid.HasMultipleSolutions() {
 			//Put it back in.
 			cell.SetNumber(num)
 			if otherCell != nil {
-				otherCell.SetNumber(otherNum)
+				otherCell.Mutable().SetNumber(otherNum)
 			}
 		}
 	}

@@ -24,7 +24,7 @@ func TestHumanSolveAlmostSolvedGrid(t *testing.T) {
 	grid := NewGrid()
 	grid.LoadSDK(SOLVED_TEST_GRID)
 
-	cell := grid.Cell(0, 0)
+	cell := grid.MutableCell(0, 0)
 
 	solvedNumber := cell.Number()
 
