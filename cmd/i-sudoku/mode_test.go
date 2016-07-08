@@ -161,11 +161,11 @@ func TestReset(t *testing.T) {
 	var cell sudoku.MutableCell
 
 	//find an unfilled cell.
-	for _, candidateCell := range m.Grid().Cells() {
+	for _, candidateCell := range m.Grid().MutableCells() {
 		if candidateCell.Locked() {
 			continue
 		}
-		cell = candidateCell.Mutable()
+		cell = candidateCell
 		break
 	}
 	//Enter command mode

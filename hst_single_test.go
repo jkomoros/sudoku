@@ -130,8 +130,8 @@ func TestNecessaryInRow(t *testing.T) {
 	impossibles[DIM-1] = 1
 
 	//SetNumber will affect the other cells in row, so do it first.
-	for _, cell := range grid.Row(3) {
-		cellI := cell.Mutable().impl()
+	for _, cell := range grid.MutableRow(3) {
+		cellI := cell.impl()
 		cellI.number = 0
 		copy(cellI.impossibles[:], impossibles)
 	}
@@ -218,8 +218,8 @@ func TestNecessaryInCol(t *testing.T) {
 	impossibles[DIM-1] = 1
 
 	//SetNumber will affect the other cells in row, so do it first.
-	for _, cell := range grid.Col(3) {
-		cellI := cell.Mutable().impl()
+	for _, cell := range grid.MutableCol(3) {
+		cellI := cell.impl()
 		cellI.number = 0
 		copy(cellI.impossibles[:], impossibles)
 	}
@@ -306,8 +306,8 @@ func TestNecessaryInBlock(t *testing.T) {
 	impossibles[DIM-1] = 1
 
 	//SetNumber will affect the other cells in row, so do it first.
-	for _, cell := range grid.Block(4) {
-		cellI := cell.Mutable().impl()
+	for _, cell := range grid.MutableBlock(4) {
+		cellI := cell.impl()
 		cellI.number = 0
 		copy(cellI.impossibles[:], impossibles)
 	}

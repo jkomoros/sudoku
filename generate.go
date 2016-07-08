@@ -75,15 +75,13 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 		symmetryPercentage = 1.0
 	}
 
-	cells := make(CellSlice, len(grid.cells[:]))
+	cells := make(MutableCellSlice, len(grid.cells[:]))
 
 	for i, j := range rand.Perm(len(grid.cells[:])) {
 		cells[i] = &grid.cells[j]
 	}
 
-	for _, roCell := range cells {
-
-		cell := roCell.Mutable()
+	for _, cell := range cells {
 
 		num := cell.Number()
 		if num == 0 {
@@ -91,12 +89,12 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 		}
 
 		var otherNum int
-		var otherCell Cell
+		var otherCell MutableCell
 
 		if rand.Float64() < symmetryPercentage {
 
 			//Pick a symmetrical partner for symmetryPercentage number of cells.
-			otherCell = cell.SymmetricalPartner(options.Symmetry)
+			otherCell = cell.MutableSymmetricalPartner(options.Symmetry)
 
 			if otherCell != nil {
 				if otherCell.Number() == 0 {
@@ -124,13 +122,13 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 		//Unfill it.
 		cell.SetNumber(0)
 		if otherCell != nil {
-			otherCell.Mutable().SetNumber(0)
+			otherCell.SetNumber(0)
 		}
 		if grid.HasMultipleSolutions() {
 			//Put it back in.
 			cell.SetNumber(num)
 			if otherCell != nil {
-				otherCell.Mutable().SetNumber(otherNum)
+				otherCell.SetNumber(otherNum)
 			}
 		}
 	}

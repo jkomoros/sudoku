@@ -318,7 +318,7 @@ func TestGridCells(t *testing.T) {
 
 	grid.LoadSDK(TEST_GRID)
 
-	cells := grid.Cells()
+	cells := grid.MutableCells()
 
 	if len(cells) != DIM*DIM {
 		t.Fatal("Grid.cells gave back a cellslice with wrong number of cells", len(cells))
@@ -335,7 +335,7 @@ func TestGridCells(t *testing.T) {
 	}
 
 	//make sure mutating a cell from the celllist mutates the grid.
-	cell := cells[3].Mutable()
+	cell := cells[3]
 
 	if cell.Number() != 0 {
 		t.Fatal("We expected cell #3 to be empty, but had", cell.Number())
@@ -393,10 +393,10 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
-	for c, cell := range grid.Cells() {
-		copyCell := cell.InGrid(copy)
-		cellI := cell.Mutable().impl()
-		copyCellI := copyCell.Mutable().impl()
+	for c, cell := range grid.MutableCells() {
+		copyCell := cell.MutableInGrid(copy)
+		cellI := cell.impl()
+		copyCellI := copyCell.impl()
 		if !IntSlice(cellI.impossibles[:]).SameAs(IntSlice(copyCellI.impossibles[:])) {
 			t.Error("Cells at position", c, "had different impossibles:\n", cellI.impossibles, "\n", copyCellI.impossibles)
 		}

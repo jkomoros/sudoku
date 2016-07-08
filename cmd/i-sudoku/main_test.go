@@ -358,8 +358,7 @@ func TestSetSelectionNumber(t *testing.T) {
 	var unlockedCell sudoku.MutableCell
 
 	//Set an unlocked cell
-	for _, roCell := range model.Grid().Cells() {
-		cell := roCell.Mutable()
+	for _, cell := range model.Grid().MutableCells() {
 		if cell.Locked() {
 			if lockedCell == nil {
 				lockedCell = cell
@@ -429,8 +428,7 @@ func TestToggleSelectedMark(t *testing.T) {
 	var unlockedCell sudoku.MutableCell
 
 	//Set an unlocked cell
-	for _, roCell := range model.Grid().Cells() {
-		cell := roCell.Mutable()
+	for _, cell := range model.Grid().MutableCells() {
 		if cell.Locked() {
 			if lockedCell == nil {
 				lockedCell = cell

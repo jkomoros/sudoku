@@ -365,23 +365,23 @@ func TestTwiddlePreferFilledGroups(t *testing.T) {
 	testHelper(0.7043478260869563, "Completely empty grid")
 
 	//Fill the rest of the block
-	for _, cell := range grid.Block(0).RemoveCells(CellSlice{keyCell}) {
-		cell.Mutable().SetNumber(1)
+	for _, cell := range grid.MutableBlock(0).RemoveCells(CellSlice{keyCell}) {
+		cell.SetNumber(1)
 	}
 
 	testHelper(0.28695652173913044, "Full block, empty everything else")
 
 	//Fill the rest of the row, too
-	for _, cell := range grid.Row(0).RemoveCells(CellSlice{keyCell}) {
-		cell.Mutable().SetNumber(1)
+	for _, cell := range grid.MutableRow(0).RemoveCells(CellSlice{keyCell}) {
+		cell.SetNumber(1)
 	}
 
 	testHelper(0.11086956521739132, "Full block and row, otherwise empty col")
 
 	//Fill the rest of the col, too.
 
-	for _, cell := range grid.Col(0).RemoveCells(CellSlice{keyCell}) {
-		cell.Mutable().SetNumber(1)
+	for _, cell := range grid.MutableCol(0).RemoveCells(CellSlice{keyCell}) {
+		cell.SetNumber(1)
 	}
 
 	testHelper(0.0782608695652174, "Full block, row, col")

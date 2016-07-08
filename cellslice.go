@@ -466,6 +466,26 @@ func (self MutableCellSlice) Map(mapper func(MutableCell)) {
 	}
 }
 
+//cellSlice returns a CellSlice of the same cells
+func (self MutableCellSlice) cellSlice() CellSlice {
+	result := make(CellSlice, len(self))
+	for i, item := range self {
+		result[i] = item
+	}
+	return result
+}
+
+//mutableCellSlice returns a MutableCellSlice with the same underlying cells.
+//Careful: only use it in cases you know that will have a mutable cell
+//backing!
+func (self CellSlice) mutableCellSlice() MutableCellSlice {
+	result := make(MutableCellSlice, len(self))
+	for i, item := range self {
+		result[i] = item.Mutable()
+	}
+	return result
+}
+
 //chainSimilarity returns a value between 0.0 and 1.0 depending on how
 //'similar' the CellSlices are. For example, two cells that are in the same
 //row within the same block are very similar; cells that are in different

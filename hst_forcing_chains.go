@@ -249,7 +249,7 @@ func chainSearcher(generation int, maxGeneration int, cell MutableCell, numToApp
 		return
 	}
 
-	cellsToVisit := cell.Neighbors().FilterByPossible(numToApply).FilterByNumPossibilities(2)
+	cellsToVisit := cell.MutableNeighbors().FilterByPossible(numToApply).FilterByNumPossibilities(2)
 
 	cell.SetNumber(numToApply)
 
@@ -267,7 +267,7 @@ func chainSearcher(generation int, maxGeneration int, cell MutableCell, numToApp
 		forcedNum := possibilities[0]
 
 		//recurse
-		chainSearcher(generation+1, maxGeneration, cellToVisit.Mutable(), forcedNum, accum)
+		chainSearcher(generation+1, maxGeneration, cellToVisit, forcedNum, accum)
 	}
 
 	//Undo this number and return

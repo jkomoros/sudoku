@@ -121,6 +121,16 @@ type MutableCell interface {
 	//MutableCell contains all of Cell's (read-only) methods.
 	Cell
 
+	//MutableNeighbors returns a MutableCellSlice of all of the cell's
+	//neighbors--the other cells in its row, column, and block. The set of
+	//neighbors is the set of cells that this cell's number must not conflict
+	//with.
+	MutableNeighbors() MutableCellSlice
+
+	//MutableSymmetricalPartner returns the cell's mutable partner in the
+	//grid, based on the type of symmetry requested.
+	MutableSymmetricalPartner(symmetry SymmetryType) MutableCell
+
 	//SetNumber explicitly sets the number of the cell. This operation could cause
 	//the grid to become invalid if it conflicts with its neighbors' numbers. This
 	//operation will affect the Possiblities() of its neighbor cells.
@@ -308,11 +318,11 @@ func (self *cellImpl) SetNumber(number int) {
 }
 
 func (self *cellImpl) alertNeighbors(number int, possible bool) {
-	for _, cell := range self.Neighbors() {
+	for _, cell := range self.MutableNeighbors() {
 		if possible {
-			cell.Mutable().setPossible(number)
+			cell.setPossible(number)
 		} else {
-			cell.Mutable().setImpossible(number)
+			cell.setImpossible(number)
 		}
 	}
 }
@@ -522,6 +532,16 @@ func (self *cellImpl) implicitNumber() int {
 	return result + 1
 }
 
+func (self *cellImpl) MutableSymmetricalPartner(symmetry SymmetryType) MutableCell {
+	result := self.SymmetricalPartner(symmetry)
+
+	if result == nil {
+		return nil
+	}
+
+	return result.Mutable()
+}
+
 func (self *cellImpl) SymmetricalPartner(symmetry SymmetryType) Cell {
 
 	if symmetry == SYMMETRY_ANY {
@@ -547,6 +567,14 @@ func (self *cellImpl) SymmetricalPartner(symmetry SymmetryType) Cell {
 
 	//If the cell was the same as self, or SYMMETRY_NONE
 	return nil
+}
+
+func (self *cellImpl) MutableNeighbors() MutableCellSlice {
+	result := self.Neighbors()
+	if result == nil {
+		return nil
+	}
+	return result.mutableCellSlice()
 }
 
 func (self *cellImpl) Neighbors() CellSlice {

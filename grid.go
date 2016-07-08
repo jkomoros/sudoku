@@ -299,8 +299,14 @@ func (self *Grid) LockFilledCells() {
 //Cells returns a CellSlice with pointers to every cell in the grid,
 //from left to right and top to bottom.
 func (self *Grid) Cells() CellSlice {
+	return self.MutableCells().cellSlice()
+}
+
+//MutableCells returns a MutableCellSlice with pointers to every cell in the
+//grid, from left to right and top to bottom.
+func (self *Grid) MutableCells() MutableCellSlice {
 	//Returns a CellSlice of all of the cells in order.
-	result := make(CellSlice, len(self.cells))
+	result := make(MutableCellSlice, len(self.cells))
 	for i := range self.cells {
 		//We don't use the second argument of range because that would be a copy of the cell, not the real one.
 		result[i] = &self.cells[i]
@@ -318,6 +324,16 @@ func (self *Grid) Row(index int) CellSlice {
 	return self.rows[index]
 }
 
+//MutableRow returns a MutableCellSlice containing all of the cells in the
+//girven row (0 indexed), in order from left to right.
+func (self *Grid) MutableRow(index int) MutableCellSlice {
+	result := self.Row(index)
+	if result == nil {
+		return nil
+	}
+	return result.mutableCellSlice()
+}
+
 //Col returns a CellSlice containing all of the cells in the given column (0 indexed), in order from top to bottom.
 func (self *Grid) Col(index int) CellSlice {
 	if index < 0 || index >= DIM {
@@ -327,6 +343,16 @@ func (self *Grid) Col(index int) CellSlice {
 	return self.cols[index]
 }
 
+//MutableCol returns a MutableCellSlice containing all of the cells in the
+//given column (0 indexed), in order from top to bottom.
+func (self *Grid) MutableCol(index int) MutableCellSlice {
+	result := self.Col(index)
+	if result == nil {
+		return nil
+	}
+	return result.mutableCellSlice()
+}
+
 //Block returns a CellSlice containing all of the cells in the given block (0 indexed), in order from left to right, top to bottom.
 func (self *Grid) Block(index int) CellSlice {
 	if index < 0 || index >= DIM {
@@ -334,6 +360,16 @@ func (self *Grid) Block(index int) CellSlice {
 		return nil
 	}
 	return self.blocks[index]
+}
+
+//MutableBlock returns a MutableCellSlice containing all of the cells in the
+//given block (0 indexed), in order from left to right, top to bottom.
+func (self *Grid) MutableBlock(index int) MutableCellSlice {
+	result := self.Block(index)
+	if result == nil {
+		return nil
+	}
+	return result.mutableCellSlice()
 }
 
 func (self *Grid) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
