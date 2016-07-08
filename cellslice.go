@@ -115,16 +115,6 @@ func (self CellSlice) AllBlocks() IntSlice {
 	return self.CollectNums(getBlock).Unique()
 }
 
-//AddExclude sets the given number to excluded on all cells in the set.
-func (self MutableCellSlice) AddExclude(exclude int) {
-	//TODO: get rid of this; it's the only CellSlice method that mutates cells
-	//directly.
-	mapper := func(cell MutableCell) {
-		cell.SetExcluded(exclude, true)
-	}
-	self.Map(mapper)
-}
-
 //FilterByUnfilled returns a new CellSlice with only the cells in the list
 //that are not filled with any number.
 func (self CellSlice) FilterByUnfilled() CellSlice {
