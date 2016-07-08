@@ -129,10 +129,10 @@ func DefaultHumanSolveOptions() *HumanSolveOptions {
 }
 
 //Grid returns a snapshot of the grid at the time this SolveDirections was
-//generated. Returns a fresh copy every time.
+//generated.
 func (self SolveDirections) Grid() Grid {
 	//TODO: this is the only pointer receiver method on SolveDirections.
-	return self.gridSnapshot.Copy()
+	return self.gridSnapshot
 }
 
 //Steps returns the list of all CompoundSolveSteps flattened into one stream
@@ -223,7 +223,7 @@ func (self *SolveStep) IsUseful(grid Grid) bool {
 
 //Apply does the solve operation to the Grid that is defined by the configuration of the SolveStep, mutating the
 //grid and bringing it one step closer to being solved.
-func (self *SolveStep) Apply(grid Grid) {
+func (self *SolveStep) Apply(grid MutableGrid) {
 	//All of this logic is substantially recreated in IsUseful.
 	if self.Technique.IsFill() {
 		if len(self.TargetCells) == 0 || len(self.TargetNums) == 0 {
@@ -327,7 +327,7 @@ func (c *CompoundSolveStep) valid() bool {
 //Apply applies all of the steps in the CompoundSolveStep to the grid in
 //order: first each of the PrecursorSteps in order, then the fill step. It is
 //equivalent to calling Apply() on every step returned by Steps().
-func (c *CompoundSolveStep) Apply(grid Grid) {
+func (c *CompoundSolveStep) Apply(grid MutableGrid) {
 	//TODO: test this
 	if !c.valid() {
 		return

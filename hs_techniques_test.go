@@ -258,15 +258,15 @@ func humanSolveTechniqueTestHelperStepGenerator(t *testing.T, puzzleName string,
 	if options.stepsToCheck.grid != nil {
 		grid = options.stepsToCheck.grid
 	} else {
-		grid = NewGrid()
-		if !grid.LoadSDKFromFile(puzzlePath(puzzleName)) {
+		tempGrid := NewGrid()
+		if !tempGrid.LoadSDKFromFile(puzzlePath(puzzleName)) {
 			t.Fatal("Couldn't load puzzle ", puzzleName)
 		}
+		grid = tempGrid
 	}
 
 	if options.transpose {
 		newGrid := grid.impl().transpose()
-		grid.Done()
 		grid = newGrid
 	}
 
@@ -497,6 +497,4 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 	}
 
 	//TODO: we should do exhaustive testing of SolveStep application. We used to test it here, but as long as targetCells and targetNums are correct it should be fine.
-
-	grid.Done()
 }

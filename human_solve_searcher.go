@@ -157,7 +157,7 @@ type synchronousFindCoordinator struct {
 }
 
 //humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
-func humanSolveHelper(grid Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep, endConditionSolved bool) *SolveDirections {
+func humanSolveHelper(grid MutableGrid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep, endConditionSolved bool) *SolveDirections {
 	//Short circuit solving if it has multiple solutions.
 	if grid.HasMultipleSolutions() {
 		return nil
@@ -197,7 +197,7 @@ func humanSolveHelper(grid Grid, options *HumanSolveOptions, previousSteps []*Co
 
 //humanSolveSearch is a new implementation of the core implementation of
 //HumanSolve. Mutates the grid.
-func humanSolveSearch(grid Grid, options *HumanSolveOptions) []*CompoundSolveStep {
+func humanSolveSearch(grid MutableGrid, options *HumanSolveOptions) []*CompoundSolveStep {
 	var result []*CompoundSolveStep
 
 	for !grid.Solved() {
@@ -298,8 +298,9 @@ func (p *humanSolveItem) Grid() Grid {
 		} else if p.parent == nil {
 			result = p.searcher.grid
 		} else {
-			result = p.parent.Grid().Copy()
-			p.step.Apply(result)
+			grid := p.parent.Grid().Copy()
+			p.step.Apply(grid)
+			result = grid
 		}
 
 		p.cachedGrid = result

@@ -217,11 +217,11 @@ func (c *mainController) StatusLine() string {
 
 //TODO: should this vend a copy of the grid? I want to make it so the only
 //easy way to mutate the grid is via model mutators.
-func (c *mainController) Grid() sudoku.Grid {
+func (c *mainController) Grid() sudoku.MutableGrid {
 	return c.model.grid
 }
 
-func (c *mainController) SetGrid(grid sudoku.Grid) {
+func (c *mainController) SetGrid(grid sudoku.MutableGrid) {
 	oldCell := c.Selected()
 	c.model.SetGrid(grid)
 	//The currently selected cell is tied to the grid, so we need to fix it up.

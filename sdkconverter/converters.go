@@ -59,7 +59,7 @@ type SudokuPuzzleConverter interface {
 	//Load loads the puzzle defined by `puzzle`, in the format tied to this
 	//partcular converter, into the provided grid. Returns false if the puzzle
 	//couldn't be loaded (generally because it's invalid)
-	Load(grid sudoku.Grid, puzzle string) bool
+	Load(grid sudoku.MutableGrid, puzzle string) bool
 	//DataString returns the serialization of the provided grid in the format provided by this converter.
 	DataString(grid sudoku.Grid) string
 	//Valid returns true if the provided string will successfully deserialize
@@ -134,7 +134,7 @@ func Format(puzzle string) string {
 //Load returns a new grid that is loaded up from the provided puzzle string.
 //The format is guessed from the input string. If no valid format is guessed,
 //an empty (non-nil) grid is returned.
-func Load(puzzle string) sudoku.Grid {
+func Load(puzzle string) sudoku.MutableGrid {
 	grid := sudoku.NewGrid()
 	LoadInto(grid, puzzle)
 	return grid
@@ -143,7 +143,7 @@ func Load(puzzle string) sudoku.Grid {
 //LoadInto loads the given puzzle state into the given grid. The format of the
 //puzzle string is guessed. If no valid format can be detected, the grid won't
 //be modified.
-func LoadInto(grid sudoku.Grid, puzzle string) {
+func LoadInto(grid sudoku.MutableGrid, puzzle string) {
 	formatString := Format(puzzle)
 	converter := Converters[formatString]
 	if converter == nil {
@@ -227,7 +227,7 @@ func parseKomoCell(data string) cellInfo {
 	return result
 }
 
-func (c *komoConverter) Load(grid sudoku.Grid, puzzle string) bool {
+func (c *komoConverter) Load(grid sudoku.MutableGrid, puzzle string) bool {
 	//TODO: also handle odd things like user-provided marks and other things.
 
 	if !c.Valid(puzzle) {
@@ -446,7 +446,7 @@ func parseDokuCell(data string) cellInfo {
 	return result
 }
 
-func (c *dokuConverter) Load(grid sudoku.Grid, puzzle string) bool {
+func (c *dokuConverter) Load(grid sudoku.MutableGrid, puzzle string) bool {
 
 	if !c.Valid(puzzle) {
 		return false
@@ -474,7 +474,7 @@ func (c *dokuConverter) Load(grid sudoku.Grid, puzzle string) bool {
 	return true
 }
 
-func (c *sdkConverter) Load(grid sudoku.Grid, puzzle string) bool {
+func (c *sdkConverter) Load(grid sudoku.MutableGrid, puzzle string) bool {
 	if !c.Valid(puzzle) {
 		return false
 	}

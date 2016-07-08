@@ -560,7 +560,7 @@ func TestMultiSolutions(t *testing.T) {
 		t.Skip("Skipping TestMultiSolutions in short test mode,")
 	}
 
-	var grid Grid
+	var grid MutableGrid
 
 	files := map[string]int{
 		"multiple-solutions.sdk":  4,
@@ -611,7 +611,6 @@ func TestTranspose(t *testing.T) {
 	defer grid.Done()
 	grid.LoadSDK(TEST_GRID)
 	transposedGrid := grid.impl().transpose()
-	defer transposedGrid.Done()
 	if transposedGrid == nil {
 		t.Log("Transpose gave us back a nil grid")
 		t.FailNow()
@@ -776,7 +775,7 @@ func TestGenerateMultipleSolutions(t *testing.T) {
 		t.Skip("Skipping TestGenerateDiabolical in short test mode,")
 	}
 
-	var grid Grid
+	var grid MutableGrid
 
 	for i := 0; i < 10; i++ {
 		grid = GenerateGrid(nil)

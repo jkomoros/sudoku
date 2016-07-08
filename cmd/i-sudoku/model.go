@@ -5,7 +5,7 @@ import (
 )
 
 type model struct {
-	grid                   sudoku.Grid
+	grid                   sudoku.MutableGrid
 	currentCommand         *commandList
 	commands               *commandList
 	inProgressMultiCommand *multiCommand
@@ -156,7 +156,7 @@ func (m *model) InGroup() bool {
 	return m.inProgressMultiCommand != nil
 }
 
-func (m *model) SetGrid(grid sudoku.Grid) {
+func (m *model) SetGrid(grid sudoku.MutableGrid) {
 	m.commands = nil
 	m.currentCommand = nil
 	m.grid = grid

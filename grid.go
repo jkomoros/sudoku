@@ -34,85 +34,25 @@ const (
 //Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
 //be acted on in various ways.
 type Grid interface {
-	//Done marks the grid as ready to be used by another consumer of it. This potentially allows
-	//grids to be reused (but not currently).
-	Done()
-
-	//LoadSDK loads a puzzle in SDK format. Unlike Load, LoadSDK "locks" the cells
-	//that are filled. See cell.Lock for more on the concept of locking.
-	LoadSDK(data string)
-
-	//Load takes the string data and parses it into the puzzle. The format is the
-	//'sdk' format: a `.` marks an empty cell, a number denotes a filled cell, and
-	//an (optional) newline marks a new row. Load also accepts other variations on
-	//the sdk format, including one with a `|` between each cell. For other sudoku
-	//formats see the sdkconverter subpackage.
-	Load(data string)
-
-	//LoadSDKFromFile is a simple convenience wrapper around LoadSDK that loads a grid based on the contents
-	//of the file at the given path.
-	LoadSDKFromFile(path string) bool
 
 	//Copy returns a new grid that has all of the same numbers and excludes filled in it.
-	Copy() Grid
-
-	//ResetExcludes calls ResetExcludes on all cells in the grid. See
-	//Cell.SetExcluded for more about excludes.
-	ResetExcludes()
-
-	//ResetMarks calls ResetMarks on all cells in the grid. See Cell.SetMark for
-	//more about marks.
-	ResetMarks()
-
-	//ResetUnlockedCells clears out numbers, marks, and excludes from each cell
-	//that is unlocked. In general a locked cell represents a number present in
-	//the original puzzle, so this method effectively clears all user
-	//modifications back to the start of the puzzle.
-	ResetUnlockedCells()
-
-	//UnlockCells unlocks all cells. See cell.Lock for more information on the
-	//concept of locking.
-	UnlockCells()
-
-	//LockFilledCells locks all cells in the grid that have a number set.
-	LockFilledCells()
+	Copy() MutableGrid
 
 	//Cells returns a CellSlice with pointers to every cell in the grid,
 	//from left to right and top to bottom.
 	Cells() CellSlice
 
-	//MutableCells returns a MutableCellSlice with pointers to every cell in the
-	//grid, from left to right and top to bottom.
-	MutableCells() MutableCellSlice
-
 	//Row returns a CellSlice containing all of the cells in the given row (0
 	//indexed), in order from left to right.
 	Row(index int) CellSlice
-
-	//MutableRow returns a MutableCellSlice containing all of the cells in the
-	//girven row (0 indexed), in order from left to right.
-	MutableRow(index int) MutableCellSlice
 
 	//Col returns a CellSlice containing all of the cells in the given column (0
 	//indexed), in order from top to bottom.
 	Col(index int) CellSlice
 
-	//MutableCol returns a MutableCellSlice containing all of the cells in the
-	//given column (0 indexed), in order from top to bottom.
-	MutableCol(index int) MutableCellSlice
-
 	//Block returns a CellSlice containing all of the cells in the given block (0
 	//indexed), in order from left to right, top to bottom.
 	Block(index int) CellSlice
-
-	//MutableBlock returns a MutableCellSlice containing all of the cells in the
-	//given block (0 indexed), in order from left to right, top to bottom.
-	MutableBlock(index int) MutableCellSlice
-
-	//MutableCell returns a mutable cell. This is a safer operation than
-	//grid.Cell(a,b).Mutable() because if you call it on a read-only grid it will
-	//fail at compile time as opposed to run time.
-	MutableCell(row, col int) MutableCell
 
 	//Cell returns a reference to a specific cell (zero-indexed) in the grid.
 	Cell(row, col int) Cell
@@ -144,30 +84,10 @@ type Grid interface {
 	//activley added marks.
 	Diagram(showMarks bool) string
 
-	//Fill will find a random filling of the puzzle such that every cell is filled
-	//and no cells conflict with their neighbors. If it cannot find one,  it will
-	//return false and leave the grid as it found it. Generally you would only
-	//want to call this on grids that have more than one solution (e.g. a fully
-	//blank grid). Fill provides a good starting point for generated puzzles.
-	Fill() bool
-
-	//HumanSolution returns the SolveDirections that represent how a human would
-	//solve this puzzle. It does not mutate the grid. If options is nil, will use
-	//reasonable defaults.
+	//HumanSolution returns the SolveDirections that represent how a human
+	//would solve this puzzle. If options is nil, will use reasonable
+	//defaults.
 	HumanSolution(options *HumanSolveOptions) *SolveDirections
-
-	//HumanSolve is the workhorse of the package. It solves the puzzle much like a
-	//human would, applying complex logic techniques iteratively to find a
-	//sequence of steps that a reasonable human might apply to solve the puzzle.
-	//HumanSolve is an expensive operation because at each step it identifies all
-	//of the valid logic rules it could apply and then selects between them based
-	//on various weightings. HumanSolve endeavors to find the most realistic human
-	//solution it can by using a large number of possible techniques with
-	//realistic weights, as well as by doing things like being more likely to pick
-	//a cell that is in the same row/cell/block as the last filled cell. Returns
-	//nil if the puzzle does not have a single valid solution. If options is nil,
-	//will use reasonable defaults. Mutates the grid.
-	HumanSolve(options *HumanSolveOptions) *SolveDirections
 
 	//Hint returns a SolveDirections with precisely one CompoundSolveStep that is
 	//a reasonable next step to move the puzzle towards being completed. It is
@@ -175,8 +95,7 @@ type Grid interface {
 	//logically implied; the truncated return value of HumanSolve. Returns nil if
 	//the puzzle has multiple solutions or is otherwise invalid. If options is
 	//nil, will use reasonable defaults. optionalPreviousSteps, if provided,
-	//serves to help the algorithm pick the most realistic next steps. Does not
-	//mutate the grid.
+	//serves to help the algorithm pick the most realistic next steps.
 	Hint(options *HumanSolveOptions, optionalPreviousSteps []*CompoundSolveStep) *SolveDirections
 
 	//Difficulty returns a value between 0.0 and 1.0, representing how hard the
@@ -189,30 +108,21 @@ type Grid interface {
 	//times until the difficultly number begins to converge to an average.
 	Difficulty() float64
 
-	//Solve searches for a solution to the puzzle as it currently exists
-	//without unfilling any cells. If one exists, it will fill in all cells to
-	//fit that solution and return true. If there are no solutions the grid
-	//will remain untouched and it will return false. If multiple solutions
-	//exist, Solve will pick one at random.
-	Solve() bool
-
 	//NumSolutions returns the total number of solutions found in the grid when it
 	//is solved forward from this point. A valid Sudoku puzzle has only one
-	//solution. Does not mutate the grid.
+	//solution.
 	NumSolutions() int
 
-	//HasSolution returns true if the grid has at least one solution. Does not
-	//mutate the grid.
+	//HasSolution returns true if the grid has at least one solution.
 	HasSolution() bool
 
 	//HasMultipleSolutions returns true if the grid has more than one solution.
-	//Does not mutate the grid.
 	HasMultipleSolutions() bool
 
 	//Solutions returns a slice of grids that represent possible solutions if you
 	//were to solve forward this grid. The current grid is not modified. If there
 	//are no solutions forward from this location it will return a slice with
-	//len() 0. Does not mutate the grid.
+	//len() 0.
 	Solutions() []Grid
 
 	//HumanSolvePossibleSteps returns a list of CompoundSolveSteps that could
@@ -229,7 +139,6 @@ type Grid interface {
 	//The rest of these are private methods
 	queue() *finiteQueue
 	numFilledCells() int
-	replace(other Grid)
 	cachedSolutionsLock() *sync.RWMutex
 	cachedSolutions() []Grid
 	cachedSolutionsRequestedLength() int
@@ -238,6 +147,108 @@ type Grid interface {
 	searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid
 	//ONLY TO BE USED FOR TESTING!
 	impl() *gridImpl
+}
+
+//MutableGrid is a sudoku Grid that can be mutated.
+type MutableGrid interface {
+	//MutableGrid contains all of Grid's (read-only) methods.
+	Grid
+
+	//Done marks the grid as ready to be used by another consumer of it. This potentially allows
+	//grids to be reused (but not currently).
+	Done()
+	//TODO: get rid of this: it really doesn't make any sense anymore now that
+	//a given gridImpl might be shown to be mutable or not to different
+	//people.
+
+	//LoadSDK loads a puzzle in SDK format. Unlike Load, LoadSDK "locks" the cells
+	//that are filled. See cell.Lock for more on the concept of locking.
+	LoadSDK(data string)
+	//TODO: all of these Load methos should be top-level functions that return
+	//a Grid
+
+	//Load takes the string data and parses it into the puzzle. The format is the
+	//'sdk' format: a `.` marks an empty cell, a number denotes a filled cell, and
+	//an (optional) newline marks a new row. Load also accepts other variations on
+	//the sdk format, including one with a `|` between each cell. For other sudoku
+	//formats see the sdkconverter subpackage.
+	Load(data string)
+
+	//LoadSDKFromFile is a simple convenience wrapper around LoadSDK that loads a grid based on the contents
+	//of the file at the given path.
+	LoadSDKFromFile(path string) bool
+
+	//ResetExcludes calls ResetExcludes on all cells in the grid. See
+	//Cell.SetExcluded for more about excludes.
+	ResetExcludes()
+
+	//ResetMarks calls ResetMarks on all cells in the grid. See Cell.SetMark for
+	//more about marks.
+	ResetMarks()
+
+	//ResetUnlockedCells clears out numbers, marks, and excludes from each cell
+	//that is unlocked. In general a locked cell represents a number present in
+	//the original puzzle, so this method effectively clears all user
+	//modifications back to the start of the puzzle.
+	ResetUnlockedCells()
+
+	//UnlockCells unlocks all cells. See cell.Lock for more information on the
+	//concept of locking.
+	UnlockCells()
+
+	//LockFilledCells locks all cells in the grid that have a number set.
+	LockFilledCells()
+
+	//MutableCells returns a MutableCellSlice with pointers to every cell in the
+	//grid, from left to right and top to bottom.
+	MutableCells() MutableCellSlice
+
+	//MutableRow returns a MutableCellSlice containing all of the cells in the
+	//girven row (0 indexed), in order from left to right.
+	MutableRow(index int) MutableCellSlice
+
+	//MutableCol returns a MutableCellSlice containing all of the cells in the
+	//given column (0 indexed), in order from top to bottom.
+	MutableCol(index int) MutableCellSlice
+
+	//MutableBlock returns a MutableCellSlice containing all of the cells in the
+	//given block (0 indexed), in order from left to right, top to bottom.
+	MutableBlock(index int) MutableCellSlice
+
+	//MutableCell returns a mutable cell. This is a safer operation than
+	//grid.Cell(a,b).Mutable() because if you call it on a read-only grid it will
+	//fail at compile time as opposed to run time.
+	MutableCell(row, col int) MutableCell
+
+	//Fill will find a random filling of the puzzle such that every cell is filled
+	//and no cells conflict with their neighbors. If it cannot find one,  it will
+	//return false and leave the grid as it found it. Generally you would only
+	//want to call this on grids that have more than one solution (e.g. a fully
+	//blank grid). Fill provides a good starting point for generated puzzles.
+	Fill() bool
+
+	//HumanSolve is the workhorse of the package. It solves the puzzle much like a
+	//human would, applying complex logic techniques iteratively to find a
+	//sequence of steps that a reasonable human might apply to solve the puzzle.
+	//HumanSolve is an expensive operation because at each step it identifies all
+	//of the valid logic rules it could apply and then selects between them based
+	//on various weightings. HumanSolve endeavors to find the most realistic human
+	//solution it can by using a large number of possible techniques with
+	//realistic weights, as well as by doing things like being more likely to pick
+	//a cell that is in the same row/cell/block as the last filled cell. Returns
+	//nil if the puzzle does not have a single valid solution. If options is nil,
+	//will use reasonable defaults. Mutates the grid.
+	HumanSolve(options *HumanSolveOptions) *SolveDirections
+
+	//Solve searches for a solution to the puzzle as it currently exists
+	//without unfilling any cells. If one exists, it will fill in all cells to
+	//fit that solution and return true. If there are no solutions the grid
+	//will remain untouched and it will return false. If multiple solutions
+	//exist, Solve will pick one at random.
+	Solve() bool
+
+	//Private methods
+	replace(other MutableGrid)
 }
 
 //gridImpl is the default implementation of Grid
@@ -265,7 +276,7 @@ type gridImpl struct {
 	cachedDifficulty                  float64
 }
 
-var gridCache chan Grid
+var gridCache chan MutableGrid
 
 const _MAX_GRIDS = 100
 
@@ -273,10 +284,10 @@ const _MAX_GRIDS = 100
 const _NUM_SOLVER_THREADS = 4
 
 func init() {
-	gridCache = make(chan Grid, _MAX_GRIDS)
+	gridCache = make(chan MutableGrid, _MAX_GRIDS)
 }
 
-func getGrid() Grid {
+func getGrid() MutableGrid {
 	select {
 	case grid := <-gridCache:
 		return grid
@@ -297,7 +308,7 @@ func dropGrids() {
 	}
 }
 
-func returnGrid(grid Grid) {
+func returnGrid(grid MutableGrid) {
 	grid.ResetExcludes()
 	grid.ResetMarks()
 	select {
@@ -309,7 +320,7 @@ func returnGrid(grid Grid) {
 }
 
 //NewGrid creates a new, blank grid with all of its cells unfilled.
-func NewGrid() Grid {
+func NewGrid() MutableGrid {
 	result := &gridImpl{}
 
 	result.invalidCells = make(map[*cellImpl]bool)
@@ -409,7 +420,7 @@ func (self *gridImpl) LoadSDKFromFile(path string) bool {
 	return true
 }
 
-func (self *gridImpl) Copy() Grid {
+func (self *gridImpl) Copy() MutableGrid {
 	//TODO: ideally we'd have some kind of smart SparseGrid or something that we can return.
 	result := NewGrid()
 	result.replace(self)
@@ -417,7 +428,7 @@ func (self *gridImpl) Copy() Grid {
 }
 
 //Copies the state of the other grid into self, so they look the same.
-func (self *gridImpl) replace(other Grid) {
+func (self *gridImpl) replace(other MutableGrid) {
 	//Also set excludes
 	for _, otherCell := range other.MutableCells() {
 		selfCell := otherCell.MutableInGrid(self)

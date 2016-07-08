@@ -50,7 +50,7 @@ type Cell interface {
 	InGrid(grid Grid) Cell
 
 	//MutableInGrid is like InGrid, but will only work on grids that are mutable.
-	MutableInGrid(grid Grid) MutableCell
+	MutableInGrid(grid MutableGrid) MutableCell
 
 	//Number returns the number the cell is currently set to.
 	Number() int
@@ -178,6 +178,7 @@ type MutableCell interface {
 	excludedBulk() [DIM]bool
 	setMarksBulk(other [DIM]bool)
 	marksBulk() [DIM]bool
+	mutableGrid() MutableGrid
 	//To be used only for testing!!!!
 	impl() *cellImpl
 }
@@ -209,6 +210,10 @@ func (self *cellImpl) gridImpl() *gridImpl {
 }
 
 func (self *cellImpl) grid() Grid {
+	return self.gridRef
+}
+
+func (self *cellImpl) mutableGrid() MutableGrid {
 	return self.gridRef
 }
 
@@ -260,7 +265,7 @@ func (self *cellImpl) Block() int {
 	return self.block
 }
 
-func (self *cellImpl) MutableInGrid(grid Grid) MutableCell {
+func (self *cellImpl) MutableInGrid(grid MutableGrid) MutableCell {
 	if grid == nil {
 		return nil
 	}

@@ -51,7 +51,7 @@ func (self *gridImpl) Fill() bool {
 //define the desired difficulty; the best option is to repeatedly generate
 //puzzles until you find one that matches your desired difficulty. cmd/dokugen
 //applies this technique.
-func GenerateGrid(options *GenerationOptions) Grid {
+func GenerateGrid(options *GenerationOptions) MutableGrid {
 
 	if options == nil {
 		options = DefaultGenerationOptions()

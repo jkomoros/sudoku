@@ -84,7 +84,6 @@ func (self *gridImpl) nOrFewerSolutions(max int) []Grid {
 						return
 					}
 					result := grid.(Grid).searchSolutions(queue, firstRun, max)
-					grid.(Grid).Done()
 					if result != nil {
 						incomingSolutions <- result
 					}
