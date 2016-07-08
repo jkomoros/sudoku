@@ -29,3 +29,28 @@ func newCellModification(cell Cell) *CellModification {
 		MarksChanges:    make(map[int]bool),
 	}
 }
+
+func (self *gridImpl) CopyWithModifications(modifications GridModifcation) Grid {
+	//TODO: when we have an honest-to-god readonly grid impl, optimize this.
+	result := self.Copy()
+
+	for _, modification := range modifications {
+		cell := modification.Cell.MutableInGrid(result)
+
+		if modification.Number >= 0 && modification.Number < DIM {
+			cell.SetNumber(modification.Number)
+		}
+
+		for key, val := range modification.ExcludesChanges {
+			//setExcluded will skip invalid entries
+			cell.SetExcluded(key, val)
+		}
+
+		for key, val := range modification.MarksChanges {
+			//SetMark will skip invalid numbers
+			cell.SetMark(key, val)
+		}
+	}
+
+	return result
+}
