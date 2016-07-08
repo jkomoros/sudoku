@@ -213,7 +213,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 
 	logger := log.New(errOutput, "", log.LstdFlags)
 
-	var grid *sudoku.Grid
+	var grid sudoku.Grid
 
 	writer := NewOutputWriter(options, output)
 
@@ -227,7 +227,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 		bar = options.progress.AddBar(options.NUM).PrependElapsed().AppendCompleted()
 	}
 
-	var incomingPuzzles []*sudoku.Grid
+	var incomingPuzzles []sudoku.Grid
 
 	if options.PUZZLE_TO_SOLVE != "" {
 		//There are puzzles to load up.
@@ -238,7 +238,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 			logger.Fatalln("Read error for specified file:", err)
 		}
 
-		var tempGrid *sudoku.Grid
+		var tempGrid sudoku.Grid
 
 		var puzzleData []string
 
@@ -345,7 +345,7 @@ type StoredPuzzle struct {
 }
 
 //TODO: take a sudoku.GenerationOptions to simplify signature
-func storePuzzle(dbName string, grid *sudoku.Grid, difficulty float64, options *sudoku.GenerationOptions, logger *log.Logger) bool {
+func storePuzzle(dbName string, grid sudoku.Grid, difficulty float64, options *sudoku.GenerationOptions, logger *log.Logger) bool {
 
 	db, err := bolt.Open(dbName, 0600, nil)
 	if err != nil {
@@ -408,7 +408,7 @@ func storePuzzle(dbName string, grid *sudoku.Grid, difficulty float64, options *
 }
 
 //TODO: take a sudoku.GenerationOptions to simplify signature
-func vendPuzzle(dbName string, min float64, max float64, options *sudoku.GenerationOptions) *sudoku.Grid {
+func vendPuzzle(dbName string, min float64, max float64, options *sudoku.GenerationOptions) sudoku.Grid {
 
 	db, err := bolt.Open(dbName, 0600, nil)
 	if err != nil {
@@ -509,8 +509,8 @@ func vendPuzzle(dbName string, min float64, max float64, options *sudoku.Generat
 	return grid
 }
 
-func generatePuzzle(min float64, max float64, options *sudoku.GenerationOptions, skipCache bool, logger *log.Logger) *sudoku.Grid {
-	var result *sudoku.Grid
+func generatePuzzle(min float64, max float64, options *sudoku.GenerationOptions, skipCache bool, logger *log.Logger) sudoku.Grid {
+	var result sudoku.Grid
 
 	if !skipCache {
 		result = vendPuzzle(_STORED_PUZZLES_DB, min, max, options)

@@ -202,7 +202,7 @@ func TestGridCreation(t *testing.T) {
 	data := strings.Join(nCopies(rowData, DIM), ROW_SEP)
 	grid := NewGrid()
 	grid.LoadSDK(data)
-	if len(grid.cells) != DIM*DIM {
+	if len(grid.Cells()) != DIM*DIM {
 		t.Log("Didn't generate enough cells")
 		t.Fail()
 	}
@@ -210,12 +210,12 @@ func TestGridCreation(t *testing.T) {
 		t.Log("The grid round-tripped with different result than data in")
 		t.Fail()
 	}
-	if grid.cells[10].Number() != 1 {
-		t.Log("A random spot check of a cell had the wrong number: %s", grid.cells[10])
+	if grid.Cells()[10].Number() != 1 {
+		t.Log("A random spot check of a cell had the wrong number: %s", grid.Cells()[10])
 		t.Fail()
 	}
 
-	if grid.numFilledCells != DIM*DIM {
+	if grid.numFilledCells() != DIM*DIM {
 		t.Log("We didn't think all cells were filled, but they were!")
 		t.Fail()
 	}
@@ -424,7 +424,7 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
-	if num := grid.fillSimpleCells(); num != 45 {
+	if num := grid.impl().fillSimpleCells(); num != 45 {
 		t.Log("We filled simple cells on the test grid but didn't get as many as we were expecting: ", num, "/", 45)
 		t.Fail()
 	}
@@ -479,7 +479,7 @@ func TestAdvancedSolve(t *testing.T) {
 		t.Fail()
 	}
 
-	if grid.numFilledCells != 27 {
+	if grid.numFilledCells() != 27 {
 		t.Log("The advanced grid's rank was wrong at load: ", grid.rank())
 		t.Fail()
 	}
@@ -494,7 +494,7 @@ func TestAdvancedSolve(t *testing.T) {
 	copy := grid.Copy()
 	defer copy.Done()
 
-	copy.fillSimpleCells()
+	copy.impl().fillSimpleCells()
 
 	if copy.Solved() {
 		t.Log("Advanced grid was 'solved' with just fillSimpleCells")
@@ -535,12 +535,12 @@ func TestAdvancedSolve(t *testing.T) {
 		t.Fail()
 	}
 
-	if grid.numFilledCells != DIM*DIM {
+	if grid.numFilledCells() != DIM*DIM {
 		t.Log("After solving, we didn't think all cells were filled.")
 		t.Fail()
 	}
 
-	if grid.cachedSolutions != nil {
+	if grid.cachedSolutions() != nil {
 		t.Log("The cache of solutions was supposed to be expired when we copied in the solution, but it wasn't")
 		t.Fail()
 	}
@@ -560,7 +560,7 @@ func TestMultiSolutions(t *testing.T) {
 		t.Skip("Skipping TestMultiSolutions in short test mode,")
 	}
 
-	var grid *Grid
+	var grid Grid
 
 	files := map[string]int{
 		"multiple-solutions.sdk":  4,
@@ -610,7 +610,7 @@ func TestTranspose(t *testing.T) {
 	grid := NewGrid()
 	defer grid.Done()
 	grid.LoadSDK(TEST_GRID)
-	transposedGrid := grid.transpose()
+	transposedGrid := grid.impl().transpose()
 	defer transposedGrid.Done()
 	if transposedGrid == nil {
 		t.Log("Transpose gave us back a nil grid")
@@ -776,7 +776,7 @@ func TestGenerateMultipleSolutions(t *testing.T) {
 		t.Skip("Skipping TestGenerateDiabolical in short test mode,")
 	}
 
-	var grid *Grid
+	var grid Grid
 
 	for i := 0; i < 10; i++ {
 		grid = GenerateGrid(nil)
@@ -798,16 +798,16 @@ func TestGenerateMinFilledCells(t *testing.T) {
 
 	grid := GenerateGrid(&options)
 
-	if grid.numFilledCells < options.MinFilledCells {
-		t.Error("Grid came back with too few cells filled: ", grid.numFilledCells, "expected", options.MinFilledCells)
+	if grid.numFilledCells() < options.MinFilledCells {
+		t.Error("Grid came back with too few cells filled: ", grid.numFilledCells(), "expected", options.MinFilledCells)
 	}
 
 	options.Symmetry = SYMMETRY_VERTICAL
 
 	grid = GenerateGrid(&options)
 
-	if grid.numFilledCells < options.MinFilledCells {
-		t.Error("Grid came back with too few cells filled: ", grid.numFilledCells, "expected", options.MinFilledCells)
+	if grid.numFilledCells() < options.MinFilledCells {
+		t.Error("Grid came back with too few cells filled: ", grid.numFilledCells(), "expected", options.MinFilledCells)
 	}
 }
 
@@ -950,8 +950,7 @@ func TestUnlockCells(t *testing.T) {
 	}
 
 	someCellsLocked := false
-	for i := range grid.cells {
-		cell := grid.cells[i]
+	for _, cell := range grid.Cells() {
 		if cell.Locked() {
 			someCellsLocked = true
 		}
@@ -963,8 +962,7 @@ func TestUnlockCells(t *testing.T) {
 
 	grid.UnlockCells()
 
-	for i := range grid.cells {
-		cell := grid.cells[i]
+	for _, cell := range grid.Cells() {
 		if cell.Locked() {
 			t.Fatal("Found a locked cell after calling grid.UnlockCells", cell)
 		}
@@ -1000,31 +998,31 @@ func TestResetUnlockedCells(t *testing.T) {
 func TestNumFilledCells(t *testing.T) {
 	grid := NewGrid()
 
-	if grid.numFilledCells != 0 {
+	if grid.numFilledCells() != 0 {
 		t.Error("New grid thought it already had filled cells")
 	}
 
 	grid.MutableCell(0, 0).SetNumber(1)
 
-	if grid.numFilledCells != 1 {
+	if grid.numFilledCells() != 1 {
 		t.Error("Grid with one cell set didn't think it had any filled cells.")
 	}
 
 	grid.MutableCell(0, 0).SetNumber(2)
 
-	if grid.numFilledCells != 1 {
+	if grid.numFilledCells() != 1 {
 		t.Error("Grid with a number set on a cell after another cell didn't notice that it was still just one cell.")
 	}
 
 	grid.MutableCell(0, 0).SetNumber(0)
 
-	if grid.numFilledCells != 0 {
+	if grid.numFilledCells() != 0 {
 		t.Error("Grid with cell unset didn't notice that it was now zero again")
 	}
 
 	grid.MutableCell(0, 0).SetNumber(0)
 
-	if grid.numFilledCells != 0 {
+	if grid.numFilledCells() != 0 {
 		t.Error("Setting a cell to 0 that was already zero got wrong num filled cells.")
 	}
 }
@@ -1036,8 +1034,7 @@ func TestLockFilledCells(t *testing.T) {
 
 	var lockedCell Cell
 
-	for i := range grid.cells {
-		cell := &grid.cells[i]
+	for _, cell := range grid.MutableCells() {
 
 		if cell.Number() == 0 {
 			cell.Lock()
@@ -1048,8 +1045,7 @@ func TestLockFilledCells(t *testing.T) {
 
 	grid.LockFilledCells()
 
-	for i := range grid.cells {
-		cell := &grid.cells[i]
+	for _, cell := range grid.Cells() {
 
 		if cell.Number() != 0 && !cell.Locked() {
 			t.Error("Found a cell that was filled but not locked after LockFilledCells", cell)

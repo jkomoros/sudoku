@@ -5,11 +5,7 @@ import (
 	"sync"
 )
 
-//Solve searches for a solution to the puzzle as it currently exists without
-//unfilling any cells. If one exists, it will fill in all cells to fit that
-//solution and return true. If there are no solutions the grid will remain
-//untouched and it will return false. If multiple solutions exist, Solve will pick one at random.
-func (self *Grid) Solve() bool {
+func (self *gridImpl) Solve() bool {
 
 	//Special case; check if it's already solved.
 	//TODO: removing this causes Solve, when called on an already solved grid, to sometimes fail. Why is that?
@@ -26,36 +22,32 @@ func (self *Grid) Solve() bool {
 	return true
 }
 
-//NumSolutions returns the total number of solutions found in the grid when it is solved forward
-//from this point. A valid Sudoku puzzle has only one solution. Does not mutate the grid.
-func (self *Grid) NumSolutions() int {
+func (self *gridImpl) NumSolutions() int {
 	return len(self.Solutions())
 }
 
-//HasSolution returns true if the grid has at least one solution. Does not mutate the grid.
-func (self *Grid) HasSolution() bool {
+func (self *gridImpl) HasSolution() bool {
 	//TODO: optimize this to bail as soon as we find a single solution.
 	return len(self.nOrFewerSolutions(1)) > 0
 }
 
-//HasMultipleSolutions returns true if the grid has more than one solution. Does not mutate the grid.
-func (self *Grid) HasMultipleSolutions() bool {
+func (self *gridImpl) HasMultipleSolutions() bool {
 	return len(self.nOrFewerSolutions(2)) >= 2
 }
 
-//Solutions returns a slice of grids that represent possible solutions if you were to solve forward this grid. The current grid is not modified.
-//If there are no solutions forward from this location it will return a slice with len() 0. Does not mutate the grid.
-func (self *Grid) Solutions() (solutions []*Grid) {
+func (self *gridImpl) Solutions() (solutions []Grid) {
 	return self.nOrFewerSolutions(0)
 }
 
-//The actual workhorse of solutions generating. 0 means "as many as you can find". It might return more than you asked for, if it already had more results than requested sitting around.
-func (self *Grid) nOrFewerSolutions(max int) []*Grid {
+//The actual workhorse of solutions generating. 0 means "as many as you can
+//find". It might return more than you asked for, if it already had more
+//results than requested sitting around.
+func (self *gridImpl) nOrFewerSolutions(max int) []Grid {
 
-	self.cachedSolutionsLock.RLock()
-	hasNoCachedSolutions := self.cachedSolutions == nil
-	cachedSolutionsLen := self.cachedSolutionsRequestedLength
-	self.cachedSolutionsLock.RUnlock()
+	self.cachedSolutionsLockRef.RLock()
+	hasNoCachedSolutions := self.cachedSolutionsRef == nil
+	cachedSolutionsLen := self.cachedSolutionsRequestedLengthRef
+	self.cachedSolutionsLockRef.RUnlock()
 
 	if hasNoCachedSolutions || (max == 0 && cachedSolutionsLen != 0) || (max > 0 && cachedSolutionsLen < max && cachedSolutionsLen > 0) {
 
@@ -69,12 +61,12 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		//and block, which prevented them from looping back up and getting the signal to shut down.
 		//Since there's only a known number of threads, we'll make sure they all ahve a place to leave their work
 		//without blocking so they can get the signal to shut down.
-		incomingSolutions := make(chan *Grid, _NUM_SOLVER_THREADS)
+		incomingSolutions := make(chan Grid, _NUM_SOLVER_THREADS)
 
 		//Using a pattern for closing fan in style receivers from http://blog.golang.org/pipelines
 		var wg sync.WaitGroup
 
-		var solutions []*Grid
+		var solutions []Grid
 
 		//TODO: figure out a way to kill all of these threads when necessary.
 
@@ -91,8 +83,8 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 					if !ok {
 						return
 					}
-					result := grid.(*Grid).searchSolutions(queue, firstRun, max)
-					grid.(*Grid).Done()
+					result := grid.(Grid).searchSolutions(queue, firstRun, max)
+					grid.(Grid).Done()
 					if result != nil {
 						incomingSolutions <- result
 					}
@@ -156,22 +148,22 @@ func (self *Grid) nOrFewerSolutions(max int) []*Grid {
 		//but we won't have as many that we could reuse.
 		queue.Exit <- true
 
-		self.cachedSolutionsLock.Lock()
-		self.cachedSolutions = solutions
-		self.cachedSolutionsRequestedLength = max
-		self.cachedSolutionsLock.Unlock()
+		self.cachedSolutionsLockRef.Lock()
+		self.cachedSolutionsRef = solutions
+		self.cachedSolutionsRequestedLengthRef = max
+		self.cachedSolutionsLockRef.Unlock()
 
 	}
 
 	//TODO: rejigger this to not need a write lock then a read lock when setting.
-	self.cachedSolutionsLock.RLock()
-	result := self.cachedSolutions
-	self.cachedSolutionsLock.RUnlock()
+	self.cachedSolutionsLockRef.RLock()
+	result := self.cachedSolutionsRef
+	self.cachedSolutionsLockRef.RUnlock()
 	return result
 
 }
 
-func (self *Grid) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) *Grid {
+func (self *gridImpl) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid {
 	//This will only be called by Solutions.
 	//We will return ourselves if we are a solution, and if not we will return nil.
 	//If there are any sub children, we will send them to counter before we're done.
@@ -209,7 +201,7 @@ func (self *Grid) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, num
 		possibilities[i] = unshuffledPossibilities[j]
 	}
 
-	var result *Grid
+	var result Grid
 
 	for i, num := range possibilities {
 		copy := self.Copy()
@@ -233,7 +225,7 @@ func (self *Grid) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, num
 
 //Fills in all of the cells it can without branching or doing any advanced
 //techniques that require anything more than a single cell's possibles list.
-func (self *Grid) fillSimpleCells() int {
+func (self *gridImpl) fillSimpleCells() int {
 	count := 0
 	getter := self.queue().NewGetter()
 	obj := getter.GetSmallerThan(2)

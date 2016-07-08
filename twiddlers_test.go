@@ -8,7 +8,7 @@ import (
 func TestTwiddleTwiddle(t *testing.T) {
 
 	twiddlerFMaker := func(returnValue float64) probabilityTwiddler {
-		return func(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
+		return func(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid Grid) probabilityTweak {
 			return probabilityTweak(returnValue)
 		}
 	}

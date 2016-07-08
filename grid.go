@@ -33,31 +33,239 @@ const (
 
 //Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
 //be acted on in various ways.
-type Grid struct {
+type Grid interface {
+	//Done marks the grid as ready to be used by another consumer of it. This potentially allows
+	//grids to be reused (but not currently).
+	Done()
+
+	//LoadSDK loads a puzzle in SDK format. Unlike Load, LoadSDK "locks" the cells
+	//that are filled. See cell.Lock for more on the concept of locking.
+	LoadSDK(data string)
+
+	//Load takes the string data and parses it into the puzzle. The format is the
+	//'sdk' format: a `.` marks an empty cell, a number denotes a filled cell, and
+	//an (optional) newline marks a new row. Load also accepts other variations on
+	//the sdk format, including one with a `|` between each cell. For other sudoku
+	//formats see the sdkconverter subpackage.
+	Load(data string)
+
+	//LoadSDKFromFile is a simple convenience wrapper around LoadSDK that loads a grid based on the contents
+	//of the file at the given path.
+	LoadSDKFromFile(path string) bool
+
+	//Copy returns a new grid that has all of the same numbers and excludes filled in it.
+	Copy() Grid
+
+	//ResetExcludes calls ResetExcludes on all cells in the grid. See
+	//Cell.SetExcluded for more about excludes.
+	ResetExcludes()
+
+	//ResetMarks calls ResetMarks on all cells in the grid. See Cell.SetMark for
+	//more about marks.
+	ResetMarks()
+
+	//ResetUnlockedCells clears out numbers, marks, and excludes from each cell
+	//that is unlocked. In general a locked cell represents a number present in
+	//the original puzzle, so this method effectively clears all user
+	//modifications back to the start of the puzzle.
+	ResetUnlockedCells()
+
+	//UnlockCells unlocks all cells. See cell.Lock for more information on the
+	//concept of locking.
+	UnlockCells()
+
+	//LockFilledCells locks all cells in the grid that have a number set.
+	LockFilledCells()
+
+	//Cells returns a CellSlice with pointers to every cell in the grid,
+	//from left to right and top to bottom.
+	Cells() CellSlice
+
+	//MutableCells returns a MutableCellSlice with pointers to every cell in the
+	//grid, from left to right and top to bottom.
+	MutableCells() MutableCellSlice
+
+	//Row returns a CellSlice containing all of the cells in the given row (0
+	//indexed), in order from left to right.
+	Row(index int) CellSlice
+
+	//MutableRow returns a MutableCellSlice containing all of the cells in the
+	//girven row (0 indexed), in order from left to right.
+	MutableRow(index int) MutableCellSlice
+
+	//Col returns a CellSlice containing all of the cells in the given column (0
+	//indexed), in order from top to bottom.
+	Col(index int) CellSlice
+
+	//MutableCol returns a MutableCellSlice containing all of the cells in the
+	//given column (0 indexed), in order from top to bottom.
+	MutableCol(index int) MutableCellSlice
+
+	//Block returns a CellSlice containing all of the cells in the given block (0
+	//indexed), in order from left to right, top to bottom.
+	Block(index int) CellSlice
+
+	//MutableBlock returns a MutableCellSlice containing all of the cells in the
+	//given block (0 indexed), in order from left to right, top to bottom.
+	MutableBlock(index int) MutableCellSlice
+
+	//MutableCell returns a mutable cell. This is a safer operation than
+	//grid.Cell(a,b).Mutable() because if you call it on a read-only grid it will
+	//fail at compile time as opposed to run time.
+	MutableCell(row, col int) MutableCell
+
+	//Cell returns a reference to a specific cell (zero-indexed) in the grid.
+	Cell(row, col int) Cell
+
+	//Solved returns true if all cells are filled without violating any
+	//constraints; that is, the puzzle is solved.
+	Solved() bool
+
+	//Invalid returns true if any numbers are set in the grid that conflict with
+	//numbers set in neighborhing cells; when a valid solution cannot be arrived
+	//at by continuing to fill additional cells.
+	Invalid() bool
+
+	//Empty returns true if none of the grid's cells are filled.
+	Empty() bool
+
+	//DataString represents the serialized format of the grid (not including
+	//excludes) in canonical sdk format; the output is valid to pass to
+	//Grid.Load(). If you want other formats, see the sdkconverter subpackage.
+	DataString() string
+
+	//String returns a concise representation of the grid appropriate for printing
+	//to the screen. Currently simply an alias for DataString.
+	String() string
+
+	//Diagram returns a verbose visual representation of a grid, representing not
+	//just filled numbers but also what numbers in a cell are possible. If
+	//showMarks is true, instead of printing the possibles, it will print only the
+	//activley added marks.
+	Diagram(showMarks bool) string
+
+	//Fill will find a random filling of the puzzle such that every cell is filled
+	//and no cells conflict with their neighbors. If it cannot find one,  it will
+	//return false and leave the grid as it found it. Generally you would only
+	//want to call this on grids that have more than one solution (e.g. a fully
+	//blank grid). Fill provides a good starting point for generated puzzles.
+	Fill() bool
+
+	//HumanSolution returns the SolveDirections that represent how a human would
+	//solve this puzzle. It does not mutate the grid. If options is nil, will use
+	//reasonable defaults.
+	HumanSolution(options *HumanSolveOptions) *SolveDirections
+
+	//HumanSolve is the workhorse of the package. It solves the puzzle much like a
+	//human would, applying complex logic techniques iteratively to find a
+	//sequence of steps that a reasonable human might apply to solve the puzzle.
+	//HumanSolve is an expensive operation because at each step it identifies all
+	//of the valid logic rules it could apply and then selects between them based
+	//on various weightings. HumanSolve endeavors to find the most realistic human
+	//solution it can by using a large number of possible techniques with
+	//realistic weights, as well as by doing things like being more likely to pick
+	//a cell that is in the same row/cell/block as the last filled cell. Returns
+	//nil if the puzzle does not have a single valid solution. If options is nil,
+	//will use reasonable defaults. Mutates the grid.
+	HumanSolve(options *HumanSolveOptions) *SolveDirections
+
+	//Hint returns a SolveDirections with precisely one CompoundSolveStep that is
+	//a reasonable next step to move the puzzle towards being completed. It is
+	//effectively a hint to the user about what Fill step to do next, and why it's
+	//logically implied; the truncated return value of HumanSolve. Returns nil if
+	//the puzzle has multiple solutions or is otherwise invalid. If options is
+	//nil, will use reasonable defaults. optionalPreviousSteps, if provided,
+	//serves to help the algorithm pick the most realistic next steps. Does not
+	//mutate the grid.
+	Hint(options *HumanSolveOptions, optionalPreviousSteps []*CompoundSolveStep) *SolveDirections
+
+	//Difficulty returns a value between 0.0 and 1.0, representing how hard the
+	//puzzle would be for a human to solve. :This is an EXTREMELY expensive method
+	//(although repeated calls without mutating the grid return a cached value
+	//quickly). It human solves the puzzle, extracts signals out of the
+	//solveDirections, and then passes those signals into a machine-learned model
+	//that was trained on hundreds of thousands of solves by real users in order
+	//to generate a candidate difficulty. It then repeats the process multiple
+	//times until the difficultly number begins to converge to an average.
+	Difficulty() float64
+
+	//Solve searches for a solution to the puzzle as it currently exists
+	//without unfilling any cells. If one exists, it will fill in all cells to
+	//fit that solution and return true. If there are no solutions the grid
+	//will remain untouched and it will return false. If multiple solutions
+	//exist, Solve will pick one at random.
+	Solve() bool
+
+	//NumSolutions returns the total number of solutions found in the grid when it
+	//is solved forward from this point. A valid Sudoku puzzle has only one
+	//solution. Does not mutate the grid.
+	NumSolutions() int
+
+	//HasSolution returns true if the grid has at least one solution. Does not
+	//mutate the grid.
+	HasSolution() bool
+
+	//HasMultipleSolutions returns true if the grid has more than one solution.
+	//Does not mutate the grid.
+	HasMultipleSolutions() bool
+
+	//Solutions returns a slice of grids that represent possible solutions if you
+	//were to solve forward this grid. The current grid is not modified. If there
+	//are no solutions forward from this location it will return a slice with
+	//len() 0. Does not mutate the grid.
+	Solutions() []Grid
+
+	//HumanSolvePossibleSteps returns a list of CompoundSolveSteps that could
+	//apply at this state, along with the probability distribution that a human
+	//would pick each one. The optional previousSteps argument is the list of
+	//CompoundSolveSteps that have been applied to the grid so far, and is used
+	//primarily to tweak the probability distribution and make, for example, it
+	//more likely to pick cells in the same block as the cell that was just
+	//filled. This method is the workhorse at the core of HumanSolve() and is
+	//exposed here primarily so users of this library can get a peek at which
+	//possibilites exist at each step. cmd/i-sudoku is one user of this method.
+	HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution)
+
+	//The rest of these are private methods
+	queue() *finiteQueue
+	numFilledCells() int
+	replace(other Grid)
+	cachedSolutionsLock() *sync.RWMutex
+	cachedSolutions() []Grid
+	cachedSolutionsRequestedLength() int
+	blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int)
+	rank() int
+	searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid
+	//ONLY TO BE USED FOR TESTING!
+	impl() *gridImpl
+}
+
+//gridImpl is the default implementation of Grid
+type gridImpl struct {
 	initalized bool
 	//This is the internal representation only. Having it be a fixed array
 	//helps with memory locality and performance. However, iterating over the
 	//cells means  that you get a copy, and have to be careful not to try
 	//modifying it because the modifications won't work.
-	cells               [DIM * DIM]cellImpl
-	rows                [DIM]CellSlice
-	cols                [DIM]CellSlice
-	blocks              [DIM]CellSlice
-	queueGetterLock     sync.RWMutex
-	theQueue            *finiteQueue
-	numFilledCells      int
-	invalidCells        map[*cellImpl]bool
-	cachedSolutionsLock sync.RWMutex
-	cachedSolutions     []*Grid
+	cells                  [DIM * DIM]cellImpl
+	rows                   [DIM]CellSlice
+	cols                   [DIM]CellSlice
+	blocks                 [DIM]CellSlice
+	queueGetterLock        sync.RWMutex
+	theQueue               *finiteQueue
+	numFilledCellsCounter  int
+	invalidCells           map[*cellImpl]bool
+	cachedSolutionsLockRef sync.RWMutex
+	cachedSolutionsRef     []Grid
 	//The number of solutions that we REQUESTED when we got back
 	//this list of cachedSolutions. This helps us avoid extra work
 	//in cases where there's only one solution but in the past we'd
 	//asked for more.
-	cachedSolutionsRequestedLength int
-	cachedDifficulty               float64
+	cachedSolutionsRequestedLengthRef int
+	cachedDifficulty                  float64
 }
 
-var gridCache chan *Grid
+var gridCache chan Grid
 
 const _MAX_GRIDS = 100
 
@@ -65,10 +273,10 @@ const _MAX_GRIDS = 100
 const _NUM_SOLVER_THREADS = 4
 
 func init() {
-	gridCache = make(chan *Grid, _MAX_GRIDS)
+	gridCache = make(chan Grid, _MAX_GRIDS)
 }
 
-func getGrid() *Grid {
+func getGrid() Grid {
 	select {
 	case grid := <-gridCache:
 		return grid
@@ -89,7 +297,7 @@ func dropGrids() {
 	}
 }
 
-func returnGrid(grid *Grid) {
+func returnGrid(grid Grid) {
 	grid.ResetExcludes()
 	grid.ResetMarks()
 	select {
@@ -101,8 +309,8 @@ func returnGrid(grid *Grid) {
 }
 
 //NewGrid creates a new, blank grid with all of its cells unfilled.
-func NewGrid() *Grid {
-	result := &Grid{}
+func NewGrid() Grid {
+	result := &gridImpl{}
 
 	result.invalidCells = make(map[*cellImpl]bool)
 
@@ -121,13 +329,31 @@ func NewGrid() *Grid {
 		result.blocks[index] = result.cellSlice(result.blockExtents(index))
 	}
 
-	result.cachedSolutionsRequestedLength = -1
+	result.cachedSolutionsRequestedLengthRef = -1
 
 	result.initalized = true
 	return result
 }
 
-func (self *Grid) queue() *finiteQueue {
+func (self *gridImpl) impl() *gridImpl {
+	return self
+}
+
+func (self *gridImpl) numFilledCells() int {
+	return self.numFilledCellsCounter
+}
+
+func (self *gridImpl) cachedSolutions() []Grid {
+	//Assumes someone else holds the lock
+	return self.cachedSolutionsRef
+}
+
+func (self *gridImpl) cachedSolutionsRequestedLength() int {
+	//Assumes someone else holds the lock for us
+	return self.cachedSolutionsRequestedLengthRef
+}
+
+func (self *gridImpl) queue() *finiteQueue {
 
 	self.queueGetterLock.RLock()
 	queue := self.theQueue
@@ -146,28 +372,22 @@ func (self *Grid) queue() *finiteQueue {
 	return queue
 }
 
-//Done marks the grid as ready to be used by another consumer of it. This potentially allows
-//grids to be reused (but not currently).
-func (self *Grid) Done() {
+func (self *gridImpl) cachedSolutionsLock() *sync.RWMutex {
+	return &self.cachedSolutionsLockRef
+}
+
+func (self *gridImpl) Done() {
 	//We're done using this grid; it's okay use to use it again.
 	returnGrid(self)
 }
 
-//LoadSDK loads a puzzle in SDK format. Unlike Load, LoadSDK "locks" the cells
-//that are filled. See cell.Lock for more on the concept of locking.
-func (self *Grid) LoadSDK(data string) {
-
+func (self *gridImpl) LoadSDK(data string) {
 	self.UnlockCells()
 	self.Load(data)
 	self.LockFilledCells()
 }
 
-//Load takes the string data and parses it into the puzzle. The format is the
-//'sdk' format: a `.` marks an empty cell, a number denotes a filled cell, and
-//an (optional) newline marks a new row. Load also accepts other variations on
-//the sdk format, including one with a `|` between each cell. For other sudoku
-//formats see the sdkconverter subpackage.
-func (self *Grid) Load(data string) {
+func (self *gridImpl) Load(data string) {
 	//All col separators are basically just to make it easier to read. Remove them.
 	data = strings.Replace(data, ALT_COL_SEP, COL_SEP, -1)
 	data = strings.Replace(data, COL_SEP, "", -1)
@@ -180,9 +400,7 @@ func (self *Grid) Load(data string) {
 	}
 }
 
-//LoadSDKFromFile is a simple convenience wrapper around LoadSDK that loads a grid based on the contents
-//of the file at the given path.
-func (self *Grid) LoadSDKFromFile(path string) bool {
+func (self *gridImpl) LoadSDKFromFile(path string) bool {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return false
@@ -191,8 +409,7 @@ func (self *Grid) LoadSDKFromFile(path string) bool {
 	return true
 }
 
-//Copy returns a new grid that has all of the same numbers and excludes filled in it.
-func (self *Grid) Copy() *Grid {
+func (self *gridImpl) Copy() Grid {
 	//TODO: ideally we'd have some kind of smart SparseGrid or something that we can return.
 	result := NewGrid()
 	result.replace(self)
@@ -200,10 +417,9 @@ func (self *Grid) Copy() *Grid {
 }
 
 //Copies the state of the other grid into self, so they look the same.
-func (self *Grid) replace(other *Grid) {
+func (self *gridImpl) replace(other Grid) {
 	//Also set excludes
-	for index := range other.cells {
-		otherCell := &other.cells[index]
+	for _, otherCell := range other.MutableCells() {
 		selfCell := otherCell.MutableInGrid(self)
 
 		selfCell.SetNumber(otherCell.Number())
@@ -224,15 +440,15 @@ func (self *Grid) replace(other *Grid) {
 			selfCell.Unlock()
 		}
 	}
-	self.cachedSolutionsLock.Lock()
-	other.cachedSolutionsLock.RLock()
-	self.cachedSolutionsRequestedLength = other.cachedSolutionsRequestedLength
-	self.cachedSolutions = other.cachedSolutions
-	other.cachedSolutionsLock.RUnlock()
-	self.cachedSolutionsLock.Unlock()
+	self.cachedSolutionsLock().Lock()
+	other.cachedSolutionsLock().RLock()
+	self.cachedSolutionsRequestedLengthRef = other.cachedSolutionsRequestedLength()
+	self.cachedSolutionsRef = other.cachedSolutions()
+	other.cachedSolutionsLock().RUnlock()
+	self.cachedSolutionsLock().Unlock()
 }
 
-func (self *Grid) transpose() *Grid {
+func (self *gridImpl) transpose() Grid {
 	//Returns a new grid that is the same as this grid (ignoring overrides, which are nulled), but with rows and cols swapped.
 	result := NewGrid()
 	for r := 0; r < DIM; r++ {
@@ -247,26 +463,19 @@ func (self *Grid) transpose() *Grid {
 	return result
 }
 
-//ResetExcludes calls ResetExcludes on all cells in the grid. See Cell.SetExcluded for more about excludes.
-func (self *Grid) ResetExcludes() {
+func (self *gridImpl) ResetExcludes() {
 	for i := range self.cells {
 		self.cells[i].ResetExcludes()
 	}
 }
 
-//ResetMarks calls ResetMarks on all cells in the grid. See Cell.SetMark for
-//more about marks.
-func (self *Grid) ResetMarks() {
+func (self *gridImpl) ResetMarks() {
 	for i := range self.cells {
 		self.cells[i].ResetMarks()
 	}
 }
 
-//ResetUnlockedCells clears out numbers, marks, and excludes from each cell
-//that is unlocked. In general a locked cell represents a number present in
-//the original puzzle, so this method effectively clears all user
-//modifications back to the start of the puzzle.
-func (self *Grid) ResetUnlockedCells() {
+func (self *gridImpl) ResetUnlockedCells() {
 	for i := range self.cells {
 		cell := &self.cells[i]
 		if cell.Locked() {
@@ -278,16 +487,13 @@ func (self *Grid) ResetUnlockedCells() {
 	}
 }
 
-//UnlockCells unlocks all cells. See cell.Lock for more information on the
-//concept of locking.
-func (self *Grid) UnlockCells() {
+func (self *gridImpl) UnlockCells() {
 	for i := range self.cells {
 		self.cells[i].Unlock()
 	}
 }
 
-//LockFilledCells locks all cells in the grid that have a number set.
-func (self *Grid) LockFilledCells() {
+func (self *gridImpl) LockFilledCells() {
 	for i := range self.cells {
 		cell := &self.cells[i]
 		if cell.Number() != 0 {
@@ -296,15 +502,11 @@ func (self *Grid) LockFilledCells() {
 	}
 }
 
-//Cells returns a CellSlice with pointers to every cell in the grid,
-//from left to right and top to bottom.
-func (self *Grid) Cells() CellSlice {
+func (self *gridImpl) Cells() CellSlice {
 	return self.MutableCells().cellSlice()
 }
 
-//MutableCells returns a MutableCellSlice with pointers to every cell in the
-//grid, from left to right and top to bottom.
-func (self *Grid) MutableCells() MutableCellSlice {
+func (self *gridImpl) MutableCells() MutableCellSlice {
 	//Returns a CellSlice of all of the cells in order.
 	result := make(MutableCellSlice, len(self.cells))
 	for i := range self.cells {
@@ -315,8 +517,7 @@ func (self *Grid) MutableCells() MutableCellSlice {
 	return result
 }
 
-//Row returns a CellSlice containing all of the cells in the given row (0 indexed), in order from left to right.
-func (self *Grid) Row(index int) CellSlice {
+func (self *gridImpl) Row(index int) CellSlice {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Row: ", index)
 		return nil
@@ -324,9 +525,7 @@ func (self *Grid) Row(index int) CellSlice {
 	return self.rows[index]
 }
 
-//MutableRow returns a MutableCellSlice containing all of the cells in the
-//girven row (0 indexed), in order from left to right.
-func (self *Grid) MutableRow(index int) MutableCellSlice {
+func (self *gridImpl) MutableRow(index int) MutableCellSlice {
 	result := self.Row(index)
 	if result == nil {
 		return nil
@@ -334,8 +533,7 @@ func (self *Grid) MutableRow(index int) MutableCellSlice {
 	return result.mutableCellSlice()
 }
 
-//Col returns a CellSlice containing all of the cells in the given column (0 indexed), in order from top to bottom.
-func (self *Grid) Col(index int) CellSlice {
+func (self *gridImpl) Col(index int) CellSlice {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Col: ", index)
 		return nil
@@ -343,9 +541,7 @@ func (self *Grid) Col(index int) CellSlice {
 	return self.cols[index]
 }
 
-//MutableCol returns a MutableCellSlice containing all of the cells in the
-//given column (0 indexed), in order from top to bottom.
-func (self *Grid) MutableCol(index int) MutableCellSlice {
+func (self *gridImpl) MutableCol(index int) MutableCellSlice {
 	result := self.Col(index)
 	if result == nil {
 		return nil
@@ -353,8 +549,7 @@ func (self *Grid) MutableCol(index int) MutableCellSlice {
 	return result.mutableCellSlice()
 }
 
-//Block returns a CellSlice containing all of the cells in the given block (0 indexed), in order from left to right, top to bottom.
-func (self *Grid) Block(index int) CellSlice {
+func (self *gridImpl) Block(index int) CellSlice {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Block: ", index)
 		return nil
@@ -362,9 +557,7 @@ func (self *Grid) Block(index int) CellSlice {
 	return self.blocks[index]
 }
 
-//MutableBlock returns a MutableCellSlice containing all of the cells in the
-//given block (0 indexed), in order from left to right, top to bottom.
-func (self *Grid) MutableBlock(index int) MutableCellSlice {
+func (self *gridImpl) MutableBlock(index int) MutableCellSlice {
 	result := self.Block(index)
 	if result == nil {
 		return nil
@@ -372,7 +565,7 @@ func (self *Grid) MutableBlock(index int) MutableCellSlice {
 	return result.mutableCellSlice()
 }
 
-func (self *Grid) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
+func (self *gridImpl) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
 	//Conceptually, we'll pretend like the grid is made up of blocks that are arrayed with row/column
 	//Once we find the block r/c, we'll multiply by the actual dim to get the upper left corner.
 
@@ -385,13 +578,13 @@ func (self *Grid) blockExtents(index int) (topRow int, topCol int, bottomRow int
 	return row, col, row + BLOCK_DIM - 1, col + BLOCK_DIM - 1
 }
 
-func (self *Grid) blockForCell(row int, col int) int {
+func (self *gridImpl) blockForCell(row int, col int) int {
 	blockCol := col / BLOCK_DIM
 	blockRow := row / BLOCK_DIM
 	return blockRow*BLOCK_DIM + blockCol
 }
 
-func (self *Grid) blockHasNeighbors(index int) (top bool, right bool, bottom bool, left bool) {
+func (self *gridImpl) blockHasNeighbors(index int) (top bool, right bool, bottom bool, left bool) {
 	topRow, topCol, bottomRow, bottomCol := self.blockExtents(index)
 	top = topRow != 0
 	bottom = bottomRow != DIM-1
@@ -402,7 +595,7 @@ func (self *Grid) blockHasNeighbors(index int) (top bool, right bool, bottom boo
 
 //cellImpl is required because some clients in the package need the actual
 //underlying pointer for comparison.
-func (self *Grid) cellImpl(row int, col int) *cellImpl {
+func (self *gridImpl) cellImpl(row int, col int) *cellImpl {
 	index := row*DIM + col
 	if index >= DIM*DIM || index < 0 {
 		log.Println("Invalid row/col index passed to Cell: ", row, ", ", col)
@@ -411,19 +604,15 @@ func (self *Grid) cellImpl(row int, col int) *cellImpl {
 	return &self.cells[index]
 }
 
-//MutableCell returns a mutable cell. This is a safer operation than
-//grid.Cell(a,b).Mutable() because if you call it on a read-only grid it will
-//fail at compile time as opposed to run time.
-func (self *Grid) MutableCell(row int, col int) MutableCell {
+func (self *gridImpl) MutableCell(row int, col int) MutableCell {
 	return self.cellImpl(row, col)
 }
 
-//Cell returns a reference to a specific cell (zero-indexed) in the grid.
-func (self *Grid) Cell(row int, col int) Cell {
+func (self *gridImpl) Cell(row int, col int) Cell {
 	return self.cellImpl(row, col)
 }
 
-func (self *Grid) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
+func (self *gridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
 	length := (rowTwo - rowOne + 1) * (colTwo - colOne + 1)
 	result := make(CellSlice, length)
 	currentRow := rowOne
@@ -444,26 +633,24 @@ func (self *Grid) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) Cell
 	return CellSlice(result)
 }
 
-//Solved returns true if all cells are filled without violating any constraints; that is, the puzzle is solved.
-func (self *Grid) Solved() bool {
+func (self *gridImpl) Solved() bool {
 	//TODO: use numFilledCells here.
-	if self.numFilledCells != len(self.cells) {
+	if self.numFilledCellsCounter != len(self.cells) {
 		return false
 	}
 	return !self.Invalid()
 }
 
-//We separate this so that we can call it repeatedly within fillSimpleCells, and because we know we won't break the more expensive tests.
-func (self *Grid) cellsInvalid() bool {
+//We separate this so that we can call it repeatedly within fillSimpleCells,
+//and because we know we won't break the more expensive tests.
+func (self *gridImpl) cellsInvalid() bool {
 	if len(self.invalidCells) > 0 {
 		return true
 	}
 	return false
 }
 
-//Invalid returns true if any numbers are set in the grid that conflict with numbers set in neighborhing cells;
-//when a valid solution cannot be arrived at by continuing to fill additional cells.
-func (self *Grid) Invalid() bool {
+func (self *gridImpl) Invalid() bool {
 	//Grid will never be invalid based on moves made by the solver; it will detect times that
 	//someone called SetNumber with an impossible number after the fact, though.
 
@@ -508,38 +695,37 @@ func (self *Grid) Invalid() bool {
 	return false
 }
 
-//Returns true if none of the grid's cells are filled.
-func (self *Grid) Empty() bool {
-	return self.numFilledCells == 0
+func (self *gridImpl) Empty() bool {
+	return self.numFilledCells() == 0
 }
 
 //Called by cells when they notice they are invalid and the grid might not know that.
-func (self *Grid) cellIsInvalid(cell *cellImpl) {
+func (self *gridImpl) cellIsInvalid(cell *cellImpl) {
 	//Doesn't matter if it was already set.
 	self.invalidCells[cell] = true
 }
 
 //Called by cells when they notice they are valid and think the grid might not know that.
-func (self *Grid) cellIsValid(cell *cellImpl) {
+func (self *gridImpl) cellIsValid(cell *cellImpl) {
 	delete(self.invalidCells, cell)
 }
 
-func (self *Grid) cellModified(cell *cellImpl, oldNumber int) {
-	self.cachedSolutionsLock.Lock()
-	self.cachedSolutions = nil
-	self.cachedSolutionsRequestedLength = -1
-	self.cachedSolutionsLock.Unlock()
+func (self *gridImpl) cellModified(cell *cellImpl, oldNumber int) {
+	self.cachedSolutionsLock().Lock()
+	self.cachedSolutionsRef = nil
+	self.cachedSolutionsRequestedLengthRef = -1
+	self.cachedSolutionsLock().Unlock()
 	self.cachedDifficulty = 0.0
 
 	if cell.Number() == 0 && oldNumber != 0 {
-		self.numFilledCells--
+		self.numFilledCellsCounter--
 	} else if cell.Number() != 0 && oldNumber == 0 {
-		self.numFilledCells++
+		self.numFilledCellsCounter++
 	}
 
 }
 
-func (self *Grid) cellRankChanged(cell *cellImpl) {
+func (self *gridImpl) cellRankChanged(cell *cellImpl) {
 	//We don't want to create the queue if it doesn't exist. But if it does exist we want to get the real one.
 	self.queueGetterLock.RLock()
 	queue := self.theQueue
@@ -549,13 +735,11 @@ func (self *Grid) cellRankChanged(cell *cellImpl) {
 	}
 }
 
-func (self *Grid) rank() int {
-	return len(self.cells) - self.numFilledCells
+func (self *gridImpl) rank() int {
+	return len(self.cells) - self.numFilledCellsCounter
 }
 
-//DataString represents the serialized format of the grid (not including excludes) in canonical sdk format; the output
-//is valid to pass to Grid.Load(). If you want other formats, see the sdkconverter subpackage.
-func (self *Grid) DataString() string {
+func (self *gridImpl) DataString() string {
 	var rows []string
 	for r := 0; r < DIM; r++ {
 		var row []string
@@ -567,17 +751,11 @@ func (self *Grid) DataString() string {
 	return strings.Join(rows, ROW_SEP)
 }
 
-//String returns a concise representation of the grid appropriate for printing to the screen.
-//Currently simply an alias for DataString.
-func (self *Grid) String() string {
+func (self *gridImpl) String() string {
 	return self.DataString()
 }
 
-//Diagram returns a verbose visual representation of a grid, representing not
-//just filled numbers but also what numbers in a cell are possible. If
-//showMarks is true, instead of printing the possibles, it will print only the
-//activley added marks.
-func (self *Grid) Diagram(showMarks bool) string {
+func (self *gridImpl) Diagram(showMarks bool) string {
 	var rows []string
 
 	//Generate a block boundary row to use later.

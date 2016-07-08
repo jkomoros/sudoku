@@ -6,7 +6,7 @@ import (
 
 //TODO: test a few more puzzles to make sure I'm exercising it correctly.
 
-func swordfishExampleGrid(t *testing.T) *Grid {
+func swordfishExampleGrid(t *testing.T) Grid {
 	grid := NewGrid()
 
 	puzzleName := "swordfish_example.sdk"
@@ -75,7 +75,7 @@ func TestSwordfishRow(t *testing.T) {
 	techniqueVariantsTestHelper(t, "Swordfish Row")
 
 	grid := swordfishExampleGrid(t)
-	grid = grid.transpose()
+	grid = grid.impl().transpose()
 
 	options := solveTechniqueTestHelperOptions{
 		targetCells:  []cellRef{{1, 1}, {4, 5}},

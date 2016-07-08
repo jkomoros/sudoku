@@ -36,7 +36,7 @@ type SolveTechnique interface {
 	//current state of Grid. All of the returned steps are valid and useful to
 	//apply. Will return early once maxResults have been found if maxResults >
 	//0.
-	Candidates(grid *Grid, maxResults int) []*SolveStep
+	Candidates(grid Grid, maxResults int) []*SolveStep
 
 	//Find returns as many steps as it can find in the grid for that
 	//technique, in a random order. HumanSolve repeatedly applies
@@ -44,7 +44,7 @@ type SolveTechnique interface {
 	//solution. A technique's Find method will send results as it finds them
 	//to coordinator.foundResult, and will periodically see if
 	//coordinator.shouldEarlyExit--if it should, it will stop searching.
-	find(grid *Grid, coordinator findCoordinator)
+	find(grid Grid, coordinator findCoordinator)
 	//TODO: if we keep this signature, we should consider having each find method actually wrap its internals in a goRoutine
 	//to make it safer to use--although that would probably require a new signature.
 
@@ -458,7 +458,7 @@ func (self *basicSolveTechnique) normalizeStep(step *SolveStep) {
 }
 
 //A helper func making it easier for derived classes to implement Candidates()
-func (self *basicSolveTechnique) candidatesHelper(technique SolveTechnique, grid *Grid, maxResults int) []*SolveStep {
+func (self *basicSolveTechnique) candidatesHelper(technique SolveTechnique, grid Grid, maxResults int) []*SolveStep {
 	var steps []*SolveStep
 
 	results := make(chan *SolveStep, DIM*DIM)
@@ -522,7 +522,7 @@ func (self *basicSolveTechnique) difficultyHelper(baseDifficulty float64) float6
 	return groupMultiplier * fillMultiplier * math.Pow(baseDifficulty, float64(self.k))
 }
 
-func (self *basicSolveTechnique) getter(grid *Grid) func(int) CellSlice {
+func (self *basicSolveTechnique) getter(grid Grid) func(int) CellSlice {
 	switch self.groupType {
 	case _GROUP_ROW:
 		return func(i int) CellSlice {

@@ -39,16 +39,16 @@ func (self *nakedSubsetTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%s are only possible in %s, which means that they can't be in any other cell in %s %d", step.TargetNums.Description(), step.PointerCells.Description(), groupName, groupNum)
 }
 
-func (self *nakedSubsetTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+func (self *nakedSubsetTechnique) Candidates(grid Grid, maxResults int) []*SolveStep {
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *nakedSubsetTechnique) find(grid *Grid, coordinator findCoordinator) {
+func (self *nakedSubsetTechnique) find(grid Grid, coordinator findCoordinator) {
 	//TODO: test that this will find multiple if they exist.
 	nakedSubset(grid, self, self.k, self.getter(grid), coordinator)
 }
 
-func nakedSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellSlice, coordinator findCoordinator) {
+func nakedSubset(grid Grid, technique SolveTechnique, k int, collectionGetter func(int) CellSlice, coordinator findCoordinator) {
 	//NOTE: very similar implemenation in hiddenSubset.
 	//TODO: randomize order we visit things.
 	for _, i := range rand.Perm(DIM) {

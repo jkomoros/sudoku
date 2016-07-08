@@ -44,15 +44,15 @@ func (self *obviousInCollectionTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%s is the only cell in %s %d that is unfilled, and it must be %d", step.TargetCells.Description(), groupName, groupNumber, num)
 }
 
-func (self *obviousInCollectionTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+func (self *obviousInCollectionTechnique) Candidates(grid Grid, maxResults int) []*SolveStep {
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *obviousInCollectionTechnique) find(grid *Grid, coordinator findCoordinator) {
+func (self *obviousInCollectionTechnique) find(grid Grid, coordinator findCoordinator) {
 	obviousInCollection(grid, self, self.getter(grid), coordinator)
 }
 
-func obviousInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice, coordinator findCoordinator) {
+func obviousInCollection(grid Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice, coordinator findCoordinator) {
 	indexes := rand.Perm(DIM)
 	for _, index := range indexes {
 
@@ -98,11 +98,11 @@ func (self *nakedSingleTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is the only remaining valid number for that cell", num)
 }
 
-func (self *nakedSingleTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+func (self *nakedSingleTechnique) Candidates(grid Grid, maxResults int) []*SolveStep {
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *nakedSingleTechnique) find(grid *Grid, coordinator findCoordinator) {
+func (self *nakedSingleTechnique) find(grid Grid, coordinator findCoordinator) {
 	//TODO: test that this will find multiple if they exist.
 	getter := grid.queue().NewGetter()
 	for {
@@ -173,16 +173,16 @@ func (self *hiddenSingleTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%d is required in the %d %s, and %s is the only %s it fits", num, groupNum, groupName, otherGroupNum, otherGroupName)
 }
 
-func (self *hiddenSingleTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+func (self *hiddenSingleTechnique) Candidates(grid Grid, maxResults int) []*SolveStep {
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *hiddenSingleTechnique) find(grid *Grid, coordinator findCoordinator) {
+func (self *hiddenSingleTechnique) find(grid Grid, coordinator findCoordinator) {
 	//TODO: test that if there are multiple we find them both.
 	necessaryInCollection(grid, self, self.getter(grid), coordinator)
 }
 
-func necessaryInCollection(grid *Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice, coordinator findCoordinator) {
+func necessaryInCollection(grid Grid, technique SolveTechnique, collectionGetter func(index int) CellSlice, coordinator findCoordinator) {
 	//This will be a random item
 	indexes := rand.Perm(DIM)
 

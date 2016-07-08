@@ -680,14 +680,14 @@ func (self CellSlice) sameAsRefs(refs []cellRef) bool {
 	return true
 }
 
-func (self cellRef) MutableCell(grid *Grid) MutableCell {
+func (self cellRef) MutableCell(grid Grid) MutableCell {
 	if grid == nil {
 		return nil
 	}
 	return grid.MutableCell(self.row, self.col)
 }
 
-func (self cellRef) Cell(grid *Grid) Cell {
+func (self cellRef) Cell(grid Grid) Cell {
 	if grid == nil {
 		return nil
 	}
@@ -838,7 +838,7 @@ func (self intSet) toSlice() IntSlice {
 	return result
 }
 
-func (self cellSet) toSlice(grid *Grid) CellSlice {
+func (self cellSet) toSlice(grid Grid) CellSlice {
 	var result CellSlice
 	for item, val := range self {
 		if val {
@@ -848,7 +848,7 @@ func (self cellSet) toSlice(grid *Grid) CellSlice {
 	return result
 }
 
-func (self cellSet) toMutableSlice(grid *Grid) MutableCellSlice {
+func (self cellSet) toMutableSlice(grid Grid) MutableCellSlice {
 	var result MutableCellSlice
 	for item, val := range self {
 		if val {

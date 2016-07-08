@@ -473,7 +473,7 @@ func TestStepsDescription(t *testing.T) {
 }
 
 //TODO: this is useful. Should we use this in other tests?
-func cellRefsToCells(refs []cellRef, grid *Grid) CellSlice {
+func cellRefsToCells(refs []cellRef, grid Grid) CellSlice {
 	var result CellSlice
 	for _, ref := range refs {
 		result = append(result, ref.Cell(grid))
@@ -487,7 +487,7 @@ func TestPuzzleDifficulty(t *testing.T) {
 	grid.LoadSDK(TEST_GRID)
 
 	//We use the cheaper one for testing so it completes faster.
-	difficulty := grid.calcluateDifficulty(false)
+	difficulty := grid.impl().calcluateDifficulty(false)
 
 	if grid.Solved() {
 		t.Log("Difficulty shouldn't have changed the underlying grid, but it did.")
@@ -519,7 +519,7 @@ func puzzleDifficultyHelper(filename string, t *testing.T) {
 
 	go func() {
 		//We use the cheaper one for testing so it completes faster
-		_ = otherGrid.calcluateDifficulty(false)
+		_ = otherGrid.impl().calcluateDifficulty(false)
 		done <- true
 	}()
 

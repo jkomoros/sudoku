@@ -226,7 +226,7 @@ type solveTechniqueTestHelperOptions struct {
 	//Useful if you're going to be do repeated calls to the test helper with the
 	//same list of steps.
 	stepsToCheck struct {
-		grid   *Grid
+		grid   Grid
 		solver SolveTechnique
 		steps  []*SolveStep
 	}
@@ -240,7 +240,7 @@ type solveTechniqueTestHelperOptions struct {
 
 //TODO: 97473c18633203a6eaa075d968ba77d85ba28390 introduced an error here where we don't return all techniques,
 //at least for forcing chains technique.
-func getStepsForTechnique(technique SolveTechnique, grid *Grid, fetchAll bool) []*SolveStep {
+func getStepsForTechnique(technique SolveTechnique, grid Grid, fetchAll bool) []*SolveStep {
 
 	maxResults := 0
 	if !fetchAll {
@@ -251,9 +251,9 @@ func getStepsForTechnique(technique SolveTechnique, grid *Grid, fetchAll bool) [
 
 }
 
-func humanSolveTechniqueTestHelperStepGenerator(t *testing.T, puzzleName string, techniqueName string, options solveTechniqueTestHelperOptions) (*Grid, SolveTechnique, []*SolveStep) {
+func humanSolveTechniqueTestHelperStepGenerator(t *testing.T, puzzleName string, techniqueName string, options solveTechniqueTestHelperOptions) (Grid, SolveTechnique, []*SolveStep) {
 
-	var grid *Grid
+	var grid Grid
 
 	if options.stepsToCheck.grid != nil {
 		grid = options.stepsToCheck.grid
@@ -265,7 +265,7 @@ func humanSolveTechniqueTestHelperStepGenerator(t *testing.T, puzzleName string,
 	}
 
 	if options.transpose {
-		newGrid := grid.transpose()
+		newGrid := grid.impl().transpose()
 		grid.Done()
 		grid = newGrid
 	}
@@ -286,7 +286,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 
 	//TODO: test for col and block as well
 
-	var grid *Grid
+	var grid Grid
 	var solver SolveTechnique
 	var steps []*SolveStep
 

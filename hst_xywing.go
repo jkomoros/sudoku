@@ -46,11 +46,11 @@ func (self *xywingTechnique) variant(step *SolveStep) string {
 	return self.Name()
 }
 
-func (self *xywingTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+func (self *xywingTechnique) Candidates(grid Grid, maxResults int) []*SolveStep {
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *xywingTechnique) find(grid *Grid, coordinator findCoordinator) {
+func (self *xywingTechnique) find(grid Grid, coordinator findCoordinator) {
 
 	getter := grid.queue().NewGetter()
 

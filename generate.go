@@ -27,10 +27,7 @@ func DefaultGenerationOptions() *GenerationOptions {
 	return result
 }
 
-//Fill will find a random filling of the puzzle such that every cell is filled and no cells conflict with their neighbors. If it cannot find one,
-// it will return false and leave the grid as it found it. Generally you would only want to call this on
-//grids that have more than one solution (e.g. a fully blank grid). Fill provides a good starting point for generated puzzles.
-func (self *Grid) Fill() bool {
+func (self *gridImpl) Fill() bool {
 
 	solutions := self.nOrFewerSolutions(1)
 
@@ -54,7 +51,7 @@ func (self *Grid) Fill() bool {
 //define the desired difficulty; the best option is to repeatedly generate
 //puzzles until you find one that matches your desired difficulty. cmd/dokugen
 //applies this technique.
-func GenerateGrid(options *GenerationOptions) *Grid {
+func GenerateGrid(options *GenerationOptions) Grid {
 
 	if options == nil {
 		options = DefaultGenerationOptions()
@@ -75,10 +72,11 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 		symmetryPercentage = 1.0
 	}
 
-	cells := make(MutableCellSlice, len(grid.cells[:]))
+	originalCells := grid.MutableCells()
+	cells := make(MutableCellSlice, len(originalCells))
 
-	for i, j := range rand.Perm(len(grid.cells[:])) {
-		cells[i] = &grid.cells[j]
+	for i, j := range rand.Perm(len(cells)) {
+		cells[i] = originalCells[j]
 	}
 
 	for _, cell := range cells {
@@ -114,7 +112,7 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 			numCellsToFillThisStep = 2
 		}
 
-		if grid.numFilledCells-numCellsToFillThisStep < options.MinFilledCells {
+		if grid.numFilledCells()-numCellsToFillThisStep < options.MinFilledCells {
 			//Doing this step would leave us with too few cells filled. Finish.
 			break
 		}

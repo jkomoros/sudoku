@@ -13,7 +13,7 @@ type probabilityTweak float64
 //bad). If a twiddler's weight is a negative number (e.g. -1.0) it means do
 //not modify the twiddler.Note that previousGrid is the grid state BEFORE the
 //proposedStep is applied.
-type probabilityTwiddler func(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak
+type probabilityTwiddler func(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid Grid) probabilityTweak
 
 type probabilityTwiddlerItem struct {
 	f      probabilityTwiddler
@@ -60,7 +60,7 @@ func init() {
 	}
 }
 
-func (p *probabilityTwiddlerItem) Twiddle(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
+func (p *probabilityTwiddlerItem) Twiddle(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid Grid) probabilityTweak {
 
 	result := p.f(proposedStep, inProgressCompoundStep, pastSteps, previousGrid)
 
@@ -78,7 +78,7 @@ func (p *probabilityTwiddlerItem) Twiddle(proposedStep *SolveStep, inProgressCom
 //the fact that for cull steps in particular, we want to heavily incentivize
 //steps that directly reduce possibilities in the next round of steps. This is
 //conceptually similar to ChainSimilarity, but more targeted.
-func twiddlePointingTargetOverlap(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
+func twiddlePointingTargetOverlap(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid Grid) probabilityTweak {
 	if len(inProgressCompoundStep) == 0 {
 		return 0.0
 	}
@@ -149,7 +149,7 @@ func twiddlePointingTargetOverlap(proposedStep *SolveStep, inProgressCompoundSte
 //twiddleTechniqueWeight is a fundamental twiddler based on the
 //HumanLikeliehood of the current technique. In fact, it's so fundamental that
 //it's arguably not even a twiddler at all.
-func twiddleHumanLikelihood(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
+func twiddleHumanLikelihood(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid Grid) probabilityTweak {
 	if proposedStep == nil {
 		return 1.0
 	}
@@ -161,7 +161,7 @@ func twiddleHumanLikelihood(proposedStep *SolveStep, inProgressCompoundStep []*S
 //practice, will often choose to look for cells to fill for a number that is
 //represented more in the grid, since they're more likely to be constrained by
 //neighorbors with the same number.
-func twiddleCommonNumbers(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
+func twiddleCommonNumbers(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid Grid) probabilityTweak {
 
 	//Skip steps that aren't fill or fill multiple
 	if !proposedStep.Technique.IsFill() || len(proposedStep.TargetNums) > 1 {
@@ -205,7 +205,7 @@ func twiddleCommonNumbers(proposedStep *SolveStep, inProgressCompoundStep []*Sol
 // last step had targetCells that shared a row, then a step with
 //target cells in that same row will be more likely this step. This captures the fact that humans, in practice,
 //will have 'chains' of steps that are all related.
-func twiddleChainedSteps(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
+func twiddleChainedSteps(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid Grid) probabilityTweak {
 
 	var lastModifiedCells CellSlice
 
@@ -246,7 +246,7 @@ func twiddleChainedSteps(proposedStep *SolveStep, inProgressCompoundStep []*Solv
 //twiddlePreferFilledGroups benefits steps that fill cells in groups that are
 //more filled than others. This reflects that humans tend to focus on groups
 //that are more constrained when picking a cell to focus on.
-func twiddlePreferFilledGroups(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
+func twiddlePreferFilledGroups(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid Grid) probabilityTweak {
 
 	//Sanity check
 	if !proposedStep.Technique.IsFill() || len(proposedStep.TargetCells) > 1 {

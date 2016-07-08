@@ -47,10 +47,10 @@ type Cell interface {
 	//InGrid returns a reference to a cell in the provided grid that has the same
 	//row/column as this cell. Effectively, this cell's analogue in the other
 	//grid.
-	InGrid(grid *Grid) Cell
+	InGrid(grid Grid) Cell
 
 	//MutableInGrid is like InGrid, but will only work on grids that are mutable.
-	MutableInGrid(grid *Grid) MutableCell
+	MutableInGrid(grid Grid) MutableCell
 
 	//Number returns the number the cell is currently set to.
 	Number() int
@@ -110,7 +110,9 @@ type Cell interface {
 	//at compile time instead of run-time.
 	mutable() MutableCell
 	ref() cellRef
-	grid() *Grid
+	//TODO: audit uses of gridImpl; most should use grid() instead.
+	grid() Grid
+	gridImpl() *gridImpl
 	diagramRows(showMarks bool) []string
 	rank() int
 	implicitNumber() int
@@ -181,7 +183,7 @@ type MutableCell interface {
 }
 
 type cellImpl struct {
-	gridRef *Grid
+	gridRef *gridImpl
 	//The number if it's explicitly set. Number() will return it if it's explicitly or implicitly set.
 	number          int
 	row             int
@@ -197,12 +199,16 @@ type cellImpl struct {
 	locked bool
 }
 
-func newCell(grid *Grid, row int, col int) cellImpl {
+func newCell(grid *gridImpl, row int, col int) cellImpl {
 	//TODO: we should not set the number until neighbors are initialized.
 	return cellImpl{gridRef: grid, row: row, col: col, block: grid.blockForCell(row, col)}
 }
 
-func (self *cellImpl) grid() *Grid {
+func (self *cellImpl) gridImpl() *gridImpl {
+	return self.gridRef
+}
+
+func (self *cellImpl) grid() Grid {
 	return self.gridRef
 }
 
@@ -254,14 +260,14 @@ func (self *cellImpl) Block() int {
 	return self.block
 }
 
-func (self *cellImpl) MutableInGrid(grid *Grid) MutableCell {
+func (self *cellImpl) MutableInGrid(grid Grid) MutableCell {
 	if grid == nil {
 		return nil
 	}
 	return grid.MutableCell(self.Row(), self.Col())
 }
 
-func (self *cellImpl) InGrid(grid *Grid) Cell {
+func (self *cellImpl) InGrid(grid Grid) Cell {
 	//Returns our analogue in the given grid.
 	if grid == nil {
 		return nil

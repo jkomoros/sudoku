@@ -59,9 +59,9 @@ type SudokuPuzzleConverter interface {
 	//Load loads the puzzle defined by `puzzle`, in the format tied to this
 	//partcular converter, into the provided grid. Returns false if the puzzle
 	//couldn't be loaded (generally because it's invalid)
-	Load(grid *sudoku.Grid, puzzle string) bool
+	Load(grid sudoku.Grid, puzzle string) bool
 	//DataString returns the serialization of the provided grid in the format provided by this converter.
-	DataString(grid *sudoku.Grid) string
+	DataString(grid sudoku.Grid) string
 	//Valid returns true if the provided string will successfully deserialize
 	//with the given converter to a grid. For example, if the string contains
 	//data only 50 cells, this should return false.
@@ -134,7 +134,7 @@ func Format(puzzle string) string {
 //Load returns a new grid that is loaded up from the provided puzzle string.
 //The format is guessed from the input string. If no valid format is guessed,
 //an empty (non-nil) grid is returned.
-func Load(puzzle string) *sudoku.Grid {
+func Load(puzzle string) sudoku.Grid {
 	grid := sudoku.NewGrid()
 	LoadInto(grid, puzzle)
 	return grid
@@ -143,7 +143,7 @@ func Load(puzzle string) *sudoku.Grid {
 //LoadInto loads the given puzzle state into the given grid. The format of the
 //puzzle string is guessed. If no valid format can be detected, the grid won't
 //be modified.
-func LoadInto(grid *sudoku.Grid, puzzle string) {
+func LoadInto(grid sudoku.Grid, puzzle string) {
 	formatString := Format(puzzle)
 	converter := Converters[formatString]
 	if converter == nil {
@@ -227,7 +227,7 @@ func parseKomoCell(data string) cellInfo {
 	return result
 }
 
-func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) bool {
+func (c *komoConverter) Load(grid sudoku.Grid, puzzle string) bool {
 	//TODO: also handle odd things like user-provided marks and other things.
 
 	if !c.Valid(puzzle) {
@@ -247,7 +247,7 @@ func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) bool {
 	return true
 }
 
-func (c *komoConverter) DataString(grid *sudoku.Grid) string {
+func (c *komoConverter) DataString(grid sudoku.Grid) string {
 
 	//TODO: understand marks, user-filled numbers.
 	//TODO: actually lock locked cells.
@@ -327,7 +327,7 @@ func (c *komoConverter) Valid(puzzle string) bool {
 	return true
 }
 
-func (c *dokuConverter) DataString(grid *sudoku.Grid) string {
+func (c *dokuConverter) DataString(grid sudoku.Grid) string {
 	result := ""
 	for r := 0; r < sudoku.DIM; r++ {
 		for c := 0; c < sudoku.DIM; c++ {
@@ -446,7 +446,7 @@ func parseDokuCell(data string) cellInfo {
 	return result
 }
 
-func (c *dokuConverter) Load(grid *sudoku.Grid, puzzle string) bool {
+func (c *dokuConverter) Load(grid sudoku.Grid, puzzle string) bool {
 
 	if !c.Valid(puzzle) {
 		return false
@@ -474,7 +474,7 @@ func (c *dokuConverter) Load(grid *sudoku.Grid, puzzle string) bool {
 	return true
 }
 
-func (c *sdkConverter) Load(grid *sudoku.Grid, puzzle string) bool {
+func (c *sdkConverter) Load(grid sudoku.Grid, puzzle string) bool {
 	if !c.Valid(puzzle) {
 		return false
 	}
@@ -482,7 +482,7 @@ func (c *sdkConverter) Load(grid *sudoku.Grid, puzzle string) bool {
 	return true
 }
 
-func (c *sdkConverter) DataString(grid *sudoku.Grid) string {
+func (c *sdkConverter) DataString(grid sudoku.Grid) string {
 	return grid.DataString()
 }
 
