@@ -341,21 +341,44 @@ func (self CellSlice) chainSimilarity(other CellSlice) float64 {
 	otherCol := make([]float64, DIM)
 	otherBlock := make([]float64, DIM)
 
-	//How much to add each time we find a cell with that row/col/block.
-	//This saves us from having to loop through again to compute the average
-	selfProportion := float64(1) / float64(len(self))
-	otherProportion := float64(1) / float64(len(other))
+	//Keep track of how many of each we added to each row, col, and block so
+	//we can do one more pass to normalize to proportions.
+	rowCounter := 0.0
+	colCounter := 0.0
+	blockCounter := 0.0
 
 	for _, cell := range self {
-		selfRow[cell.Row()] += selfProportion
-		selfCol[cell.Col()] += selfProportion
-		selfBlock[cell.Block()] += selfProportion
+		selfRow[cell.Row()] += 1.0
+		rowCounter++
+		selfCol[cell.Col()] += 1.0
+		colCounter++
+		selfBlock[cell.Block()] += 1.0
+		blockCounter++
 	}
 
+	//Normalize self slices by count for each.
+	for i := 0; i < DIM; i++ {
+		selfRow[i] /= rowCounter
+		selfCol[i] /= colCounter
+		selfBlock[i] /= blockCounter
+	}
+
+	rowCounter, colCounter, blockCounter = 0.0, 0.0, 0.0
+
 	for _, cell := range other {
-		otherRow[cell.Row()] += otherProportion
-		otherCol[cell.Col()] += otherProportion
-		otherBlock[cell.Block()] += otherProportion
+		otherRow[cell.Row()] += 1.0
+		rowCounter++
+		otherCol[cell.Col()] += 1.0
+		colCounter++
+		otherBlock[cell.Block()] += 1.0
+		blockCounter++
+	}
+
+	//Normalize other slices by count for each.
+	for i := 0; i < DIM; i++ {
+		otherRow[i] /= rowCounter
+		otherCol[i] /= colCounter
+		otherBlock[i] /= blockCounter
 	}
 
 	rowDiff := 0.0
