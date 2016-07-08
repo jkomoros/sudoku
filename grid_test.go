@@ -160,11 +160,11 @@ func TestGridCopy(t *testing.T) {
 	grid := NewGrid()
 	grid.LoadSDK(ADVANCED_TEST_GRID)
 
-	cell := grid.Cell(0, 0).Mutable()
+	cell := grid.MutableCell(0, 0)
 	cell.SetMark(3, true)
 	cell.SetMark(4, true)
 
-	cell = grid.Cell(0, 2).Mutable()
+	cell = grid.MutableCell(0, 2)
 	cell.SetExcluded(3, true)
 	cell.SetExcluded(4, true)
 
@@ -377,8 +377,7 @@ func TestGridLoad(t *testing.T) {
 	}
 
 	//Twiddle an exclude to make sure it copies over correctly.
-	//TODO: switch over all grid.Cell(a,b).Mutable() to grid.MutableCell(a,b)
-	grid.Cell(2, 0).Mutable().SetExcluded(4, true)
+	grid.MutableCell(2, 0).SetExcluded(4, true)
 
 	if grid.Diagram(false) != TEST_GRID_EXCLUDED_DIAGRAM {
 		t.Error("Diagram did not reflect the manually excluded item: \n", grid.Diagram(false))

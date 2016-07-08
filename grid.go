@@ -237,8 +237,8 @@ func (self *Grid) transpose() *Grid {
 	result := NewGrid()
 	for r := 0; r < DIM; r++ {
 		for c := 0; c < DIM; c++ {
-			original := self.Cell(r, c).Mutable()
-			copy := result.Cell(c, r).Mutable()
+			original := self.MutableCell(r, c)
+			copy := result.MutableCell(c, r)
 			copy.SetNumber(original.Number())
 			//TODO: shouldn't we have a lock here or something?
 			copy.setExcludedBulk(original.excludedBulk())
