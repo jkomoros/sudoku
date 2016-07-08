@@ -138,6 +138,7 @@ func (self CellSlice) FilterByUnfilled() CellSlice {
 //FilterByUnfilled returns a new CellSlice with only the cells in the list
 //that are not filled with any number.
 func (self MutableCellSlice) FilterByUnfilled() MutableCellSlice {
+	//TODO: test all of the mutableCellSlice methods
 	//TODO: test this
 	filter := func(cell Cell) bool {
 		return cell.Number() == 0
