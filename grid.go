@@ -39,14 +39,14 @@ type Grid struct {
 	//helps with memory locality and performance. However, iterating over the
 	//cells means  that you get a copy, and have to be careful not to try
 	//modifying it because the modifications won't work.
-	cells               [DIM * DIM]Cell
+	cells               [DIM * DIM]cellImpl
 	rows                [DIM]CellSlice
 	cols                [DIM]CellSlice
 	blocks              [DIM]CellSlice
 	queueGetterLock     sync.RWMutex
 	theQueue            *finiteQueue
 	numFilledCells      int
-	invalidCells        map[*Cell]bool
+	invalidCells        map[*cellImpl]bool
 	cachedSolutionsLock sync.RWMutex
 	cachedSolutions     []*Grid
 	//The number of solutions that we REQUESTED when we got back
@@ -104,7 +104,7 @@ func returnGrid(grid *Grid) {
 func NewGrid() *Grid {
 	result := &Grid{}
 
-	result.invalidCells = make(map[*Cell]bool)
+	result.invalidCells = make(map[*cellImpl]bool)
 
 	i := 0
 	for r := 0; r < DIM; r++ {
@@ -174,7 +174,7 @@ func (self *Grid) Load(data string) {
 	//TODO: shouldn't we have more error checking, like for wrong dimensions?
 	for r, row := range strings.Split(data, ROW_SEP) {
 		for c, data := range strings.Split(row, "") {
-			cell := self.Cell(r, c)
+			cell := self.cellImpl(r, c)
 			cell.load(data)
 		}
 	}
@@ -208,14 +208,16 @@ func (self *Grid) replace(other *Grid) {
 
 		selfCell.SetNumber(otherCell.Number())
 		//TODO: the fact that I'm reaching into Cell's excludeLock outside of Cell is a Smell.
-		selfCell.excludedLock.Lock()
-		otherCell.excludedLock.RLock()
-		for i := 0; i < DIM; i++ {
-			selfCell.excluded[i] = otherCell.excluded[i]
-			selfCell.marks[i] = otherCell.marks[i]
-		}
-		otherCell.excludedLock.RUnlock()
-		selfCell.excludedLock.Unlock()
+		selfCell.excludedLock().Lock()
+		otherCell.excludedLock().RLock()
+
+		//TODO: it's conceivable that this extra copying is what's taking 15%
+		//longer.
+		selfCell.setExcludedBulk(otherCell.excludedBulk())
+		selfCell.setMarksBulk(otherCell.marksBulk())
+
+		otherCell.excludedLock().RUnlock()
+		selfCell.excludedLock().Unlock()
 		if otherCell.Locked() {
 			selfCell.Lock()
 		} else {
@@ -238,8 +240,8 @@ func (self *Grid) transpose() *Grid {
 			original := self.Cell(r, c)
 			copy := result.Cell(c, r)
 			copy.SetNumber(original.Number())
-			//This should be a copy since it's an array, right?
-			copy.excluded = original.excluded
+			//TODO: shouldn't we have a lock here or something?
+			copy.setExcludedBulk(original.excludedBulk())
 		}
 	}
 	return result
@@ -362,8 +364,9 @@ func (self *Grid) blockHasNeighbors(index int) (top bool, right bool, bottom boo
 	return
 }
 
-//Cell returns a reference to a specific cell (zero-indexed) in the grid.
-func (self *Grid) Cell(row int, col int) *Cell {
+//cellImpl is required because some clients in the package need the actual
+//underlying pointer for comparison.
+func (self *Grid) cellImpl(row int, col int) *cellImpl {
 	index := row*DIM + col
 	if index >= DIM*DIM || index < 0 {
 		log.Println("Invalid row/col index passed to Cell: ", row, ", ", col)
@@ -372,9 +375,14 @@ func (self *Grid) Cell(row int, col int) *Cell {
 	return &self.cells[index]
 }
 
+//Cell returns a reference to a specific cell (zero-indexed) in the grid.
+func (self *Grid) Cell(row int, col int) Cell {
+	return self.cellImpl(row, col)
+}
+
 func (self *Grid) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
 	length := (rowTwo - rowOne + 1) * (colTwo - colOne + 1)
-	result := make([]*Cell, length)
+	result := make(CellSlice, length)
 	currentRow := rowOne
 	currentCol := colOne
 	for i := 0; i < length; i++ {
@@ -463,17 +471,17 @@ func (self *Grid) Empty() bool {
 }
 
 //Called by cells when they notice they are invalid and the grid might not know that.
-func (self *Grid) cellIsInvalid(cell *Cell) {
+func (self *Grid) cellIsInvalid(cell *cellImpl) {
 	//Doesn't matter if it was already set.
 	self.invalidCells[cell] = true
 }
 
 //Called by cells when they notice they are valid and think the grid might not know that.
-func (self *Grid) cellIsValid(cell *Cell) {
+func (self *Grid) cellIsValid(cell *cellImpl) {
 	delete(self.invalidCells, cell)
 }
 
-func (self *Grid) cellModified(cell *Cell, oldNumber int) {
+func (self *Grid) cellModified(cell *cellImpl, oldNumber int) {
 	self.cachedSolutionsLock.Lock()
 	self.cachedSolutions = nil
 	self.cachedSolutionsRequestedLength = -1
@@ -488,7 +496,7 @@ func (self *Grid) cellModified(cell *Cell, oldNumber int) {
 
 }
 
-func (self *Grid) cellRankChanged(cell *Cell) {
+func (self *Grid) cellRankChanged(cell *cellImpl) {
 	//We don't want to create the queue if it doesn't exist. But if it does exist we want to get the real one.
 	self.queueGetterLock.RLock()
 	queue := self.theQueue

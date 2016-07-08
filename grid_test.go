@@ -291,7 +291,7 @@ func TestGridCreation(t *testing.T) {
 		t.Log("We got a different number of neighbors than what we were expecting: ", len(neighbors))
 		t.Fail()
 	}
-	neighborsMap := make(map[*Cell]bool)
+	neighborsMap := make(map[Cell]bool)
 	for _, neighbor := range neighbors {
 		if neighbor == nil {
 			t.Log("We found a nil neighbor")
@@ -326,7 +326,7 @@ func TestGridCells(t *testing.T) {
 
 	//Make sure it's the same cells
 	for i, cell := range cells {
-		if cell.grid != grid {
+		if cell.grid() != grid {
 			t.Error("cell #", i, "had wrong grid")
 		}
 		if cell != grid.Cell(cell.Row(), cell.Col()) {
@@ -393,10 +393,12 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
-	for c, cell := range grid.cells {
+	for c, cell := range grid.Cells() {
 		copyCell := cell.InGrid(copy)
-		if !IntSlice(cell.impossibles[:]).SameAs(IntSlice(copyCell.impossibles[:])) {
-			t.Error("Cells at position", c, "had different impossibles:\n", cell.impossibles, "\n", copyCell.impossibles)
+		cellI := cell.impl()
+		copyCellI := copyCell.impl()
+		if !IntSlice(cellI.impossibles[:]).SameAs(IntSlice(copyCellI.impossibles[:])) {
+			t.Error("Cells at position", c, "had different impossibles:\n", cellI.impossibles, "\n", copyCellI.impossibles)
 		}
 		for i := 1; i <= DIM; i++ {
 			if cell.Possible(i) != copyCell.Possible(i) {
@@ -1032,7 +1034,7 @@ func TestLockFilledCells(t *testing.T) {
 	grid.LoadSDK(TEST_GRID)
 	defer grid.Done()
 
-	var lockedCell *Cell
+	var lockedCell Cell
 
 	for i := range grid.cells {
 		cell := &grid.cells[i]

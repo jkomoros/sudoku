@@ -8,7 +8,7 @@ import (
 )
 
 //CellSlice is a list of cells with many convenience methods for doing common operations on them.
-type CellSlice []*Cell
+type CellSlice []Cell
 
 //IntSlice is a list of ints, with many convenience methods specific to sudoku.
 type IntSlice []int
@@ -30,15 +30,15 @@ type cellSliceSorter struct {
 	CellSlice
 }
 
-func getRow(cell *Cell) int {
+func getRow(cell Cell) int {
 	return cell.Row()
 }
 
-func getCol(cell *Cell) int {
+func getCol(cell Cell) int {
 	return cell.Col()
 }
 
-func getBlock(cell *Cell) int {
+func getBlock(cell Cell) int {
 	return cell.Block()
 }
 
@@ -105,7 +105,7 @@ func (self CellSlice) AllBlocks() IntSlice {
 
 //AddExclude sets the given number to excluded on all cells in the set.
 func (self CellSlice) AddExclude(exclude int) {
-	mapper := func(cell *Cell) {
+	mapper := func(cell Cell) {
 		cell.SetExcluded(exclude, true)
 	}
 	self.Map(mapper)
@@ -115,7 +115,7 @@ func (self CellSlice) AddExclude(exclude int) {
 //that are not filled with any number.
 func (self CellSlice) FilterByUnfilled() CellSlice {
 	//TODO: test this
-	filter := func(cell *Cell) bool {
+	filter := func(cell Cell) bool {
 		return cell.Number() == 0
 	}
 	return self.Filter(filter)
@@ -125,7 +125,7 @@ func (self CellSlice) FilterByUnfilled() CellSlice {
 //number in them.
 func (self CellSlice) FilterByFilled() CellSlice {
 	//TODO: test this
-	filter := func(cell *Cell) bool {
+	filter := func(cell Cell) bool {
 		return cell.Number() != 0
 	}
 	return self.Filter(filter)
@@ -135,7 +135,7 @@ func (self CellSlice) FilterByFilled() CellSlice {
 //as an active possibility.
 func (self CellSlice) FilterByPossible(possible int) CellSlice {
 	//TODO: test this
-	filter := func(cell *Cell) bool {
+	filter := func(cell Cell) bool {
 		return cell.Possible(possible)
 	}
 	return self.Filter(filter)
@@ -145,7 +145,7 @@ func (self CellSlice) FilterByPossible(possible int) CellSlice {
 //number of possible numbers.
 func (self CellSlice) FilterByNumPossibilities(target int) CellSlice {
 	//TODO: test this
-	filter := func(cell *Cell) bool {
+	filter := func(cell Cell) bool {
 		return len(cell.Possibilities()) == target
 	}
 	return self.Filter(filter)
@@ -155,7 +155,7 @@ func (self CellSlice) FilterByNumPossibilities(target int) CellSlice {
 func (self CellSlice) FilterByHasPossibilities() CellSlice {
 	//Returns a list of cells that have possibilities.
 	//TODO: test this.
-	filter := func(cell *Cell) bool {
+	filter := func(cell Cell) bool {
 		return len(cell.Possibilities()) > 0
 	}
 	return self.Filter(filter)
@@ -164,11 +164,11 @@ func (self CellSlice) FilterByHasPossibilities() CellSlice {
 //RemoveCells returns a new CellSlice that does not contain any of the cells included in the provided CellSlice.
 func (self CellSlice) RemoveCells(targets CellSlice) CellSlice {
 	//TODO: test this.
-	targetCells := make(map[*Cell]bool)
+	targetCells := make(map[Cell]bool)
 	for _, cell := range targets {
 		targetCells[cell] = true
 	}
-	filterFunc := func(cell *Cell) bool {
+	filterFunc := func(cell Cell) bool {
 		return !targetCells[cell]
 	}
 	return self.Filter(filterFunc)
@@ -261,7 +261,7 @@ func (self CellSlice) FilledNums() IntSlice {
 }
 
 //CollectNums collects the result of running fetcher across all items in the list.
-func (self CellSlice) CollectNums(fetcher func(*Cell) int) IntSlice {
+func (self CellSlice) CollectNums(fetcher func(Cell) int) IntSlice {
 	var result IntSlice
 	for _, cell := range self {
 		result = append(result, fetcher(cell))
@@ -286,7 +286,7 @@ func (self cellSliceSorter) Swap(i, j int) {
 }
 
 //Filter returns a new CellSlice that includes all cells where filter returned true.
-func (self CellSlice) Filter(filter func(*Cell) bool) CellSlice {
+func (self CellSlice) Filter(filter func(Cell) bool) CellSlice {
 	var result CellSlice
 	for _, cell := range self {
 		if filter(cell) {
@@ -297,7 +297,7 @@ func (self CellSlice) Filter(filter func(*Cell) bool) CellSlice {
 }
 
 //Map executes the mapper function on each cell in the list.
-func (self CellSlice) Map(mapper func(*Cell)) {
+func (self CellSlice) Map(mapper func(Cell)) {
 	for _, cell := range self {
 		mapper(cell)
 	}
@@ -507,7 +507,7 @@ func (self CellSlice) sameAsRefs(refs []cellRef) bool {
 	return true
 }
 
-func (self cellRef) Cell(grid *Grid) *Cell {
+func (self cellRef) Cell(grid *Grid) Cell {
 	if grid == nil {
 		return nil
 	}
@@ -752,7 +752,7 @@ func (self CellSlice) Intersection(other CellSlice) CellSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	grid := self[0].grid
+	grid := self[0].grid()
 	return self.toCellSet().intersection(other.toCellSet()).toSlice(grid)
 }
 
@@ -762,7 +762,7 @@ func (self CellSlice) Difference(other CellSlice) CellSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	grid := self[0].grid
+	grid := self[0].grid()
 	return self.toCellSet().difference(other.toCellSet()).toSlice(grid)
 }
 
@@ -772,6 +772,6 @@ func (self CellSlice) Union(other CellSlice) CellSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	grid := self[0].grid
+	grid := self[0].grid()
 	return self.toCellSet().union(other.toCellSet()).toSlice(grid)
 }

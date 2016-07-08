@@ -62,7 +62,7 @@ func (self *guessTechnique) find(grid *Grid, coordinator findCoordinator) {
 		}
 
 		//Convert RankedObject to a cell
-		cell := obj.(*Cell)
+		cell := obj.(Cell)
 
 		cellInSolvedGrid := cell.InGrid(solvedGrid)
 

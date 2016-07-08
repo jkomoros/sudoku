@@ -116,7 +116,7 @@ func (self *nakedSingleTechnique) find(grid *Grid, coordinator findCoordinator) 
 			//If there weren't any, period, then results is still nil already.
 			return
 		}
-		cell := obj.(*Cell)
+		cell := obj.(Cell)
 		step := &SolveStep{
 			Technique:    self,
 			TargetCells:  CellSlice{cell},

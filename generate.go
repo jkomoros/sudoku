@@ -75,7 +75,7 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 		symmetryPercentage = 1.0
 	}
 
-	cells := make([]*Cell, len(grid.cells[:]))
+	cells := make(CellSlice, len(grid.cells[:]))
 
 	for i, j := range rand.Perm(len(grid.cells[:])) {
 		cells[i] = &grid.cells[j]
@@ -89,7 +89,7 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 		}
 
 		var otherNum int
-		var otherCell *Cell
+		var otherCell Cell
 
 		if rand.Float64() < symmetryPercentage {
 

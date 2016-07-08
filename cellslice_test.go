@@ -58,7 +58,7 @@ func TestBasicCellSlice(t *testing.T) {
 		t.Fail()
 	}
 
-	nums := row.CollectNums(func(cell *Cell) int {
+	nums := row.CollectNums(func(cell Cell) int {
 		return cell.Row()
 	})
 
@@ -67,7 +67,7 @@ func TestBasicCellSlice(t *testing.T) {
 		t.Fail()
 	}
 
-	isZeroRow := func(cell *Cell) bool {
+	isZeroRow := func(cell Cell) bool {
 		return cell.Row() == 0
 	}
 

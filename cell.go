@@ -33,47 +33,173 @@ const (
 //filled status of its neighbors, and whether any possibilities have been
 //explicitly excluded by solve techniques. Cells should not be constructed on
 //their own; create a Grid and grab references to the cells from there.
-type Cell struct {
-	grid *Grid
+type Cell interface {
+	//Row returns the cell's row in its parent grid.
+	Row() int
+	//Col returns the cell's column in its parent grid.
+	Col() int
+	//Block returns the cell's block in its parent grid.
+	Block() int
+	//InGrid returns a reference to a cell in the provided grid that has the same
+	//row/column as this cell. Effectively, this cell's analogue in the other
+	//grid.
+	InGrid(grid *Grid) Cell
+	//Number returns the number the cell is currently set to.
+	Number() int
+	//SetNumber explicitly sets the number of the cell. This operation could cause
+	//the grid to become invalid if it conflicts with its neighbors' numbers. This
+	//operation will affect the Possiblities() of its neighbor cells.
+	SetNumber(number int)
+	//SetExcluded defines whether a possibility is considered not feasible, even
+	//if not directly precluded by the Number()s of the cell's neighbors. This is
+	//used by advanced HumanSolve techniques that cull possibilities that are
+	//logically excluded by the state of the grid, in a non-direct way. The state
+	//of Excluded bits will affect the results of this cell's Possibilities()
+	//list.
+	SetExcluded(number int, excluded bool)
+	//ResetExcludes sets all excluded bits to false, so that Possibilities() will
+	//be based purely on direct implications of the Number()s of neighbors. See
+	//also SetExcluded.
+	ResetExcludes()
+	//SetMark sets the mark at the given index to true. Marks represent number
+	//marks proactively added to a cell by a user. They have no effect on the
+	//solver or human solver; they only are visible when Diagram(true) is called.
+	SetMark(number int, mark bool)
+	//Mark reads out whether the given mark has been set for this cell. See
+	//SetMark for a description of what marks represent.
+	Mark(number int) bool
+	//Marks returns an IntSlice with each mark, in ascending order.
+	Marks() IntSlice
+	//ResetMarks removes all marks. See SetMark for a description of what marks
+	//represent.
+	ResetMarks()
+	//Possible returns whether or not a given number is legal to fill via
+	//SetNumber, given the state of the grid (specifically, the cell's neighbors)
+	//and the numbers the cell was told to explicitly exclude via SetExclude. If
+	//the cell is already filled with a number, it will return false for all
+	//numbers.
+	Possible(number int) bool
+	//Possibilities returns a list of all current possibilities for this cell: all
+	//numbers for which cell.Possible returns true.
+	Possibilities() IntSlice
+	//Invalid returns true if the cell has no valid possibilities to fill in,
+	//implying that the grid is in an invalid state because this cell cannot be
+	//filled with a number without violating a constraint.
+	Invalid() bool
+	//Lock 'locks' the cell. Locking represents the concept of cells that are set
+	//at the beginning of the puzzle and that users may not modify. Locking does
+	//not change whether calls to SetNumber or SetMark will fail; it only impacts
+	//Diagram().
+	Lock()
+	//Unlock 'unlocks' the cell. See Lock for more information on the concept of
+	//locking.
+	Unlock()
+	//Locked returns whether or not the cell is locked. See Lock for more
+	//information on the concept of locking.
+	Locked() bool
+	//SymmetricalPartner returns the cell's partner in the grid, based on the type
+	//of symmetry requested.
+	SymmetricalPartner(symmetry SymmetryType) Cell
+	//Neighbors returns a CellSlice of all of the cell's neighbors--the other
+	//cells in its row, column, and block. The set of neighbors is the set of
+	//cells that this cell's number must not conflict with.
+	Neighbors() CellSlice
+	//String returns a debug-friendly summary of the Cell.
+	String() string
+	//DiagramExtents returns the top, left, height, and width coordinate in
+	//grid.Diagram's output that  corresponds to the contents of this cell. The
+	//top left corner is 0,0
+	DiagramExtents() (top, left, height, width int)
+
+	//The following are methods that are only internal. Some of them are
+	//nasty.
+	setPossible(number int)
+	setImpossible(number int)
+	ref() cellRef
+	grid() *Grid
+	excludedLock() *sync.RWMutex
+	setExcludedBulk(other [DIM]bool)
+	excludedBulk() [DIM]bool
+	setMarksBulk(other [DIM]bool)
+	marksBulk() [DIM]bool
+	diagramRows(showMarks bool) []string
+	rank() int
+	implicitNumber() int
+	//To be used only for testing!!!!
+	impl() *cellImpl
+}
+
+type cellImpl struct {
+	gridRef *Grid
 	//The number if it's explicitly set. Number() will return it if it's explicitly or implicitly set.
-	number        int
-	row           int
-	col           int
-	block         int
-	neighborsLock sync.RWMutex
-	neighbors     CellSlice
-	impossibles   [DIM]int
-	excludedLock  sync.RWMutex
-	excluded      [DIM]bool
+	number          int
+	row             int
+	col             int
+	block           int
+	neighborsLock   sync.RWMutex
+	neighbors       CellSlice
+	impossibles     [DIM]int
+	excludedLockRef sync.RWMutex
+	excluded        [DIM]bool
 	//TODO: do we need a marks lock?
 	marks  [DIM]bool
 	locked bool
 }
 
-func newCell(grid *Grid, row int, col int) Cell {
+func newCell(grid *Grid, row int, col int) cellImpl {
 	//TODO: we should not set the number until neighbors are initialized.
-	return Cell{grid: grid, row: row, col: col, block: grid.blockForCell(row, col)}
+	return cellImpl{gridRef: grid, row: row, col: col, block: grid.blockForCell(row, col)}
 }
 
-//Row returns the cell's row in its parent grid.
-func (self *Cell) Row() int {
+func (self *cellImpl) grid() *Grid {
+	return self.gridRef
+}
+
+func (self *cellImpl) impl() *cellImpl {
+	return self
+}
+
+func (self *cellImpl) excludedLock() *sync.RWMutex {
+	return &self.excludedLockRef
+}
+
+func (self *cellImpl) setExcludedBulk(other [DIM]bool) {
+	//Assumes someone else already holds the lock
+	for i := 0; i < DIM; i++ {
+		self.excluded[i] = other[i]
+	}
+}
+
+func (self *cellImpl) excludedBulk() [DIM]bool {
+	//Assumes someone else already holds the lock
+	return self.excluded
+}
+
+func (self *cellImpl) setMarksBulk(other [DIM]bool) {
+	//Assumes someone else already holds the lock for us
+	for i := 0; i < DIM; i++ {
+		self.marks[i] = other[i]
+	}
+}
+
+func (self *cellImpl) marksBulk() [DIM]bool {
+	//Assumes someone else already holds the lock
+	return self.marks
+}
+
+func (self *cellImpl) Row() int {
 	return self.row
 }
 
-//Col returns the cell's column in its parent grid.
-func (self *Cell) Col() int {
+func (self *cellImpl) Col() int {
 	return self.col
 }
 
-//Block returns the cell's block in its parent grid.
-func (self *Cell) Block() int {
+func (self *cellImpl) Block() int {
 	return self.block
 }
 
-//InGrid returns a reference to a cell in the provided grid that has the same
-//row/column as this cell. Effectively, this cell's analogue in the other
-//grid.
-func (self *Cell) InGrid(grid *Grid) *Cell {
+func (self *cellImpl) InGrid(grid *Grid) Cell {
 	//Returns our analogue in the given grid.
 	if grid == nil {
 		return nil
@@ -81,23 +207,19 @@ func (self *Cell) InGrid(grid *Grid) *Cell {
 	return grid.Cell(self.Row(), self.Col())
 }
 
-func (self *Cell) load(data string) {
+func (self *cellImpl) load(data string) {
 	//Format, for now, is just the number itself, or 0 if no number.
 	data = strings.Replace(data, ALT_0, "0", -1)
 	num, _ := strconv.Atoi(data)
 	self.SetNumber(num)
 }
 
-//Number returns the number the cell is currently set to.
-func (self *Cell) Number() int {
+func (self *cellImpl) Number() int {
 	//A layer of indirection since number needs to be used from the Setter.
 	return self.number
 }
 
-//SetNumber explicitly sets the number of the cell. This operation could cause
-//the grid to become invalid if it conflicts with its neighbors' numbers. This
-//operation will affect the Possiblities() of its neighbor cells.
-func (self *Cell) SetNumber(number int) {
+func (self *cellImpl) SetNumber(number int) {
 	//Sets the explicit number. This will affect its neighbors possibles list.
 	if self.number == number {
 		//No work to do now.
@@ -123,17 +245,17 @@ func (self *Cell) SetNumber(number int) {
 		}
 		self.alertNeighbors(number, false)
 	}
-	if self.grid != nil {
-		self.grid.cellModified(self, oldNumber)
+	if self.gridRef != nil {
+		self.gridRef.cellModified(self, oldNumber)
 		if (oldNumber > 0 && number == 0) || (oldNumber == 0 && number > 0) {
 			//Our rank will have changed.
 			//TODO: figure out how to test this.
-			self.grid.cellRankChanged(self)
+			self.gridRef.cellRankChanged(self)
 		}
 	}
 }
 
-func (self *Cell) alertNeighbors(number int, possible bool) {
+func (self *cellImpl) alertNeighbors(number int, possible bool) {
 	for _, cell := range self.Neighbors() {
 		if possible {
 			cell.setPossible(number)
@@ -143,7 +265,7 @@ func (self *Cell) alertNeighbors(number int, possible bool) {
 	}
 }
 
-func (self *Cell) setPossible(number int) {
+func (self *cellImpl) setPossible(number int) {
 	//Number is 1 indexed, but we store it as 0-indexed
 	number--
 	if number < 0 || number >= DIM {
@@ -154,75 +276,63 @@ func (self *Cell) setPossible(number int) {
 		return
 	}
 	self.impossibles[number]--
-	if self.impossibles[number] == 0 && self.grid != nil {
+	if self.impossibles[number] == 0 && self.gridRef != nil {
 		//TODO: should we check exclusion to save work?
 		//Our rank will have changed.
-		self.grid.cellRankChanged(self)
+		self.gridRef.cellRankChanged(self)
 		//We may have just become valid.
 		self.checkInvalid()
 	}
 
 }
 
-func (self *Cell) setImpossible(number int) {
+func (self *cellImpl) setImpossible(number int) {
 	//Number is 1 indexed, but we store it as 0-indexed
 	number--
 	if number < 0 || number >= DIM {
 		return
 	}
 	self.impossibles[number]++
-	if self.impossibles[number] == 1 && self.grid != nil {
+	if self.impossibles[number] == 1 && self.gridRef != nil {
 		//TODO: should we check exclusion to save work?
 		//Our rank will have changed.
-		self.grid.cellRankChanged(self)
+		self.gridRef.cellRankChanged(self)
 		//We may have just become invalid.
 		self.checkInvalid()
 	}
 }
 
-//SetExcluded defines whether a possibility is considered not feasible, even
-//if not directly precluded by the Number()s of the cell's neighbors. This is
-//used by advanced HumanSolve techniques that cull possibilities that are
-//logically excluded by the state of the grid, in a non-direct way. The state
-//of Excluded bits will affect the results of this cell's Possibilities()
-//list.
-func (self *Cell) SetExcluded(number int, excluded bool) {
+func (self *cellImpl) SetExcluded(number int, excluded bool) {
 	number--
 	if number < 0 || number >= DIM {
 		return
 	}
-	self.excludedLock.Lock()
+	self.excludedLockRef.Lock()
 	self.excluded[number] = excluded
-	self.excludedLock.Unlock()
+	self.excludedLockRef.Unlock()
 	//Our rank may have changed.
 	//TODO: should we check if we're invalid already?
-	if self.grid != nil {
-		self.grid.cellRankChanged(self)
+	if self.gridRef != nil {
+		self.gridRef.cellRankChanged(self)
 		self.checkInvalid()
 	}
 }
 
-//ResetExcludes sets all excluded bits to false, so that Possibilities() will
-//be based purely on direct implications of the Number()s of neighbors. See
-//also SetExcluded.
-func (self *Cell) ResetExcludes() {
-	self.excludedLock.Lock()
+func (self *cellImpl) ResetExcludes() {
+	self.excludedLockRef.Lock()
 	for i := 0; i < DIM; i++ {
 		self.excluded[i] = false
 	}
-	self.excludedLock.Unlock()
+	self.excludedLockRef.Unlock()
 	//Our rank may have changed.
 	//TODO: should we check if we're invalid already?
-	if self.grid != nil {
-		self.grid.cellRankChanged(self)
+	if self.gridRef != nil {
+		self.gridRef.cellRankChanged(self)
 		self.checkInvalid()
 	}
 }
 
-//SetMark sets the mark at the given index to true. Marks represent number
-//marks proactively added to a cell by a user. They have no effect on the
-//solver or human solver; they only are visible when Diagram(true) is called.
-func (self *Cell) SetMark(number int, marked bool) {
+func (self *cellImpl) SetMark(number int, marked bool) {
 	number--
 	if number < 0 || number >= DIM {
 		return
@@ -230,9 +340,7 @@ func (self *Cell) SetMark(number int, marked bool) {
 	self.marks[number] = marked
 }
 
-//Mark reads out whether the given mark has been set for this cell. See
-//SetMark for a description of what marks represent.
-func (self *Cell) Mark(number int) bool {
+func (self *cellImpl) Mark(number int) bool {
 	number--
 	if number < 0 || number >= DIM {
 		return false
@@ -240,8 +348,7 @@ func (self *Cell) Mark(number int) bool {
 	return self.marks[number]
 }
 
-//Marks returns an IntSlice with each mark, in ascending order.
-func (self *Cell) Marks() IntSlice {
+func (self *cellImpl) Marks() IntSlice {
 	var result IntSlice
 	for i := 0; i < DIM; i++ {
 		if self.marks[i] {
@@ -251,37 +358,29 @@ func (self *Cell) Marks() IntSlice {
 	return result
 }
 
-//ResetMarks removes all marks. See SetMark for a description of what marks
-//represent.
-func (self *Cell) ResetMarks() {
+func (self *cellImpl) ResetMarks() {
 	for i := 0; i < DIM; i++ {
 		self.marks[i] = false
 	}
 }
 
-//Possible returns whether or not a given number is legal to fill via
-//SetNumber, given the state of the grid (specifically, the cell's neighbors)
-//and the numbers the cell was told to explicitly exclude via SetExclude. If
-//the cell is already filled with a number, it will return false for all
-//numbers.
-func (self *Cell) Possible(number int) bool {
+func (self *cellImpl) Possible(number int) bool {
 	//Number is 1 indexed, but we store it as 0-indexed
 	number--
 	if number < 0 || number >= DIM {
 		return false
 	}
-	self.excludedLock.RLock()
+	self.excludedLockRef.RLock()
 	isExcluded := self.excluded[number]
-	self.excludedLock.RUnlock()
+	self.excludedLockRef.RUnlock()
 	return self.impossibles[number] == 0 && !isExcluded
 }
 
-//Possibilities returns a list of all current possibilities for this cell: all
-//numbers for which cell.Possible returns true.
-func (self *Cell) Possibilities() (result IntSlice) {
+func (self *cellImpl) Possibilities() IntSlice {
 	//TODO: performance improvement would be to not need to grab the lock DIM
 	//times in Possible and lift it out into a PossibleImpl that has assumes
 	//the lock is already grabbed.
+	var result IntSlice
 	if self.number != 0 {
 		return nil
 	}
@@ -293,28 +392,25 @@ func (self *Cell) Possibilities() (result IntSlice) {
 	return result
 }
 
-func (self *Cell) checkInvalid() {
+func (self *cellImpl) checkInvalid() {
 	if self.grid == nil {
 		return
 	}
 	if self.Invalid() {
-		self.grid.cellIsInvalid(self)
+		self.gridRef.cellIsInvalid(self)
 	} else {
-		self.grid.cellIsValid(self)
+		self.gridRef.cellIsValid(self)
 	}
 }
 
-//Invalid returns true if the cell has no valid possibilities to fill in,
-//implying that the grid is in an invalid state because this cell cannot be
-//filled with a number without violating a constraint.
-func (self *Cell) Invalid() bool {
+func (self *cellImpl) Invalid() bool {
 	//Returns true if no numbers are possible.
 	//TODO: figure out a way to send this back up to the solver when it happens.
 	//TODO: shouldn't this always return true if there is a number set?
 	for i, counter := range self.impossibles {
-		self.excludedLock.RLock()
+		self.excludedLockRef.RLock()
 		excluded := self.excluded[i]
-		self.excludedLock.RUnlock()
+		self.excludedLockRef.RUnlock()
 		if counter == 0 && !excluded {
 			return false
 		}
@@ -322,27 +418,19 @@ func (self *Cell) Invalid() bool {
 	return true
 }
 
-//Lock 'locks' the cell. Locking represents the concept of cells that are set
-//at the beginning of the puzzle and that users may not modify. Locking does
-//not change whether calls to SetNumber or SetMark will fail; it only impacts
-//Diagram().
-func (self *Cell) Lock() {
+func (self *cellImpl) Lock() {
 	self.locked = true
 }
 
-//Unlock 'unlocks' the cell. See Lock for more information on the concept of
-//locking.
-func (self *Cell) Unlock() {
+func (self *cellImpl) Unlock() {
 	self.locked = false
 }
 
-//Locked returns whether or not the cell is locked. See Lock for more
-//information on the concept of locking.
-func (self *Cell) Locked() bool {
+func (self *cellImpl) Locked() bool {
 	return self.locked
 }
 
-func (self *Cell) rank() int {
+func (self *cellImpl) rank() int {
 	if self.number != 0 {
 		return 0
 	}
@@ -355,18 +443,18 @@ func (self *Cell) rank() int {
 	return count
 }
 
-func (self *Cell) ref() cellRef {
+func (self *cellImpl) ref() cellRef {
 	return cellRef{self.Row(), self.Col()}
 }
 
 //Sets ourselves to a random one of our possibilities.
-func (self *Cell) pickRandom() {
+func (self *cellImpl) pickRandom() {
 	possibilities := self.Possibilities()
 	choice := possibilities[rand.Intn(len(possibilities))]
 	self.SetNumber(choice)
 }
 
-func (self *Cell) implicitNumber() int {
+func (self *cellImpl) implicitNumber() int {
 	//Impossibles is in 0-index space, but represents nubmers in 1-indexed space.
 	result := -1
 	for i, counter := range self.impossibles {
@@ -382,9 +470,7 @@ func (self *Cell) implicitNumber() int {
 	return result + 1
 }
 
-//SymmetricalPartner returns the cell's partner in the grid, based on the type
-//of symmetry requested.
-func (self *Cell) SymmetricalPartner(symmetry SymmetryType) *Cell {
+func (self *cellImpl) SymmetricalPartner(symmetry SymmetryType) Cell {
 
 	if symmetry == SYMMETRY_ANY {
 		//TODO: don't chose a type of smmetry that doesn't have a partner
@@ -394,15 +480,15 @@ func (self *Cell) SymmetricalPartner(symmetry SymmetryType) *Cell {
 
 	switch symmetry {
 	case SYMMETRY_BOTH:
-		if cell := self.grid.Cell(DIM-self.Row()-1, DIM-self.Col()-1); cell != self {
+		if cell := self.gridRef.cellImpl(DIM-self.Row()-1, DIM-self.Col()-1); cell != self {
 			return cell
 		}
 	case SYMMETRY_HORIZONTAL:
-		if cell := self.grid.Cell(DIM-self.Row()-1, self.Col()); cell != self {
+		if cell := self.gridRef.cellImpl(DIM-self.Row()-1, self.Col()); cell != self {
 			return cell
 		}
 	case SYMMETRY_VERTICAL:
-		if cell := self.grid.Cell(self.Row(), DIM-self.Col()-1); cell != self {
+		if cell := self.gridRef.cellImpl(self.Row(), DIM-self.Col()-1); cell != self {
 			return cell
 		}
 	}
@@ -411,11 +497,8 @@ func (self *Cell) SymmetricalPartner(symmetry SymmetryType) *Cell {
 	return nil
 }
 
-//Neighbors returns a CellSlice of all of the cell's neighbors--the other
-//cells in its row, column, and block. The set of neighbors is the set of
-//cells that this cell's number must not conflict with.
-func (self *Cell) Neighbors() CellSlice {
-	if self.grid == nil || !self.grid.initalized {
+func (self *cellImpl) Neighbors() CellSlice {
+	if self.gridRef == nil || !self.gridRef.initalized {
 		return nil
 	}
 
@@ -425,27 +508,27 @@ func (self *Cell) Neighbors() CellSlice {
 
 	if neighbors == nil {
 		//We don't want duplicates, so we will collect in a map (used as a set) and then reduce.
-		neighborsMap := make(map[*Cell]bool)
-		for _, cell := range self.grid.Row(self.Row()) {
+		neighborsMap := make(map[Cell]bool)
+		for _, cell := range self.gridRef.Row(self.Row()) {
 			if cell == self {
 				continue
 			}
 			neighborsMap[cell] = true
 		}
-		for _, cell := range self.grid.Col(self.Col()) {
+		for _, cell := range self.gridRef.Col(self.Col()) {
 			if cell == self {
 				continue
 			}
 			neighborsMap[cell] = true
 		}
-		for _, cell := range self.grid.Block(self.Block()) {
+		for _, cell := range self.gridRef.Block(self.Block()) {
 			if cell == self {
 				continue
 			}
 			neighborsMap[cell] = true
 		}
 		self.neighborsLock.Lock()
-		self.neighbors = make([]*Cell, len(neighborsMap))
+		self.neighbors = make(CellSlice, len(neighborsMap))
 		i := 0
 		for cell := range neighborsMap {
 			self.neighbors[i] = cell
@@ -458,21 +541,20 @@ func (self *Cell) Neighbors() CellSlice {
 
 }
 
-func (self *Cell) dataString() string {
+func (self *cellImpl) dataString() string {
 	result := strconv.Itoa(self.Number())
 	return strings.Replace(result, "0", ALT_0, -1)
 }
 
-//String returns a debug-friendly summary of the Cell.
-func (self *Cell) String() string {
+func (self *cellImpl) String() string {
 	return "Cell[" + strconv.Itoa(self.Row()) + "][" + strconv.Itoa(self.Col()) + "]:" + strconv.Itoa(self.Number()) + "\n"
 }
 
-func (self *Cell) positionInBlock() (top, right, bottom, left bool) {
+func (self *cellImpl) positionInBlock() (top, right, bottom, left bool) {
 	if self.grid == nil {
 		return
 	}
-	topRow, topCol, bottomRow, bottomCol := self.grid.blockExtents(self.Block())
+	topRow, topCol, bottomRow, bottomCol := self.gridRef.blockExtents(self.Block())
 	top = self.Row() == topRow
 	right = self.Col() == bottomCol
 	bottom = self.Row() == bottomRow
@@ -480,10 +562,7 @@ func (self *Cell) positionInBlock() (top, right, bottom, left bool) {
 	return
 }
 
-//DiagramExtents returns the top, left, height, and width coordinate in
-//grid.Diagram's output that  corresponds to the contents of this cell. The
-//top left corner is 0,0
-func (self *Cell) DiagramExtents() (top, left, height, width int) {
+func (self *cellImpl) DiagramExtents() (top, left, height, width int) {
 	top = self.Col() * (BLOCK_DIM + 1)
 	top += self.Col() / BLOCK_DIM
 
@@ -494,7 +573,7 @@ func (self *Cell) DiagramExtents() (top, left, height, width int) {
 
 }
 
-func (self *Cell) diagramRows(showMarks bool) (rows []string) {
+func (self *cellImpl) diagramRows(showMarks bool) (rows []string) {
 	//We'll only draw barriers at our bottom right edge.
 	_, right, bottom, _ := self.positionInBlock()
 	current := 0
@@ -551,6 +630,6 @@ func (self *Cell) diagramRows(showMarks bool) (rows []string) {
 	return rows
 }
 
-func (self *Cell) diagram() string {
+func (self *cellImpl) diagram() string {
 	return strings.Join(self.diagramRows(false), "\n")
 }

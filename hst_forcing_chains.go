@@ -98,7 +98,7 @@ func (self *forcingChainsTechnique) find(grid *Grid, coordinator findCoordinator
 			break
 		}
 
-		candidateCell := candidate.(*Cell)
+		candidateCell := candidate.(Cell)
 
 		if len(candidateCell.Possibilities()) != 2 {
 			//We found one with 1 possibility, which isn't interesting for us--nakedSingle should do that one.
@@ -224,7 +224,7 @@ func (c *chainSearcherAccumulator) reduce() {
 	}
 }
 
-func chainSearcher(generation int, maxGeneration int, cell *Cell, numToApply int, accum *chainSearcherAccumulator) {
+func chainSearcher(generation int, maxGeneration int, cell Cell, numToApply int, accum *chainSearcherAccumulator) {
 
 	/*
 	 * chainSearcher implements a DFS to search forward through implication chains to
@@ -245,7 +245,7 @@ func chainSearcher(generation int, maxGeneration int, cell *Cell, numToApply int
 
 	//Becuase this is a DFS, if we see an invalidity in this grid, it's a meaningful invalidity
 	//and we should avoid it.
-	if cell.grid.Invalid() {
+	if cell.grid().Invalid() {
 		return
 	}
 

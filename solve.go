@@ -196,7 +196,7 @@ func (self *Grid) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, num
 		panic("Queue didn't have any cells.")
 	}
 
-	cell, ok := rankedObject.(*Cell)
+	cell, ok := rankedObject.(Cell)
 	if !ok {
 		panic("We got back a non-cell from the grid's queue")
 	}
@@ -238,7 +238,7 @@ func (self *Grid) fillSimpleCells() int {
 	getter := self.queue().NewGetter()
 	obj := getter.GetSmallerThan(2)
 	for obj != nil && !self.cellsInvalid() {
-		cell, ok := obj.(*Cell)
+		cell, ok := obj.(Cell)
 		if !ok {
 			continue
 		}

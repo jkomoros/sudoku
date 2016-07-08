@@ -131,13 +131,15 @@ func TestNecessaryInRow(t *testing.T) {
 
 	//SetNumber will affect the other cells in row, so do it first.
 	for _, cell := range grid.Row(3) {
-		cell.number = 0
-		copy(cell.impossibles[:], impossibles)
+		cellI := cell.impl()
+		cellI.number = 0
+		copy(cellI.impossibles[:], impossibles)
 	}
 
 	cell := grid.Cell(3, 3)
+	cellI := cell.impl()
 	//This is the only cell where DIM will be allowed.
-	cell.impossibles[DIM-1] = 0
+	cellI.impossibles[DIM-1] = 0
 
 	//Now that cell should be filled by this technique.
 
@@ -217,13 +219,15 @@ func TestNecessaryInCol(t *testing.T) {
 
 	//SetNumber will affect the other cells in row, so do it first.
 	for _, cell := range grid.Col(3) {
-		cell.number = 0
-		copy(cell.impossibles[:], impossibles)
+		cellI := cell.impl()
+		cellI.number = 0
+		copy(cellI.impossibles[:], impossibles)
 	}
 
 	cell := grid.Cell(3, 3)
+	cellI := cell.impl()
 	//This is the only cell where DIM will be allowed.
-	cell.impossibles[DIM-1] = 0
+	cellI.impossibles[DIM-1] = 0
 
 	//Now that cell should be filled by this technique.
 
@@ -303,13 +307,15 @@ func TestNecessaryInBlock(t *testing.T) {
 
 	//SetNumber will affect the other cells in row, so do it first.
 	for _, cell := range grid.Block(4) {
-		cell.number = 0
-		copy(cell.impossibles[:], impossibles)
+		cellI := cell.impl()
+		cellI.number = 0
+		copy(cellI.impossibles[:], impossibles)
 	}
 
 	cell := grid.Cell(3, 3)
+	cellI := cell.impl()
 	//This is the only cell where DIM will be allowed.
-	cell.impossibles[DIM-1] = 0
+	cellI.impossibles[DIM-1] = 0
 
 	//Now that cell should be filled by this technique.
 

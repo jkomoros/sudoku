@@ -67,7 +67,7 @@ func (self *xywingTechnique) find(grid *Grid, coordinator findCoordinator) {
 			break
 		}
 
-		pivotCell := pivot.(*Cell)
+		pivotCell := pivot.(Cell)
 
 		possibilities := pivotCell.Possibilities()
 
@@ -145,7 +145,7 @@ func (self *xywingTechnique) find(grid *Grid, coordinator findCoordinator) {
 						//so create chunked step variants.
 
 						for _, block := range affectedCells.AllBlocks() {
-							filter := func(cell *Cell) bool {
+							filter := func(cell Cell) bool {
 								return cell.Block() == block
 							}
 							chunkedAffectedCells := affectedCells.Filter(filter)

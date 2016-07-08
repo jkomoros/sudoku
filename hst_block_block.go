@@ -129,7 +129,7 @@ func (self *blockBlockInteractionTechnique) Description(step *SolveStep) string 
 	//make sure we get a stable order
 	blockNums.Sort()
 
-	grid := step.TargetCells[0].grid
+	grid := step.TargetCells[0].grid()
 	var majorAxisIsRow bool
 	rowOne, colOne, _, _ := grid.blockExtents(blockNums[0])
 	rowTwo, colTwo, _, _ := grid.blockExtents(blockNums[1])
