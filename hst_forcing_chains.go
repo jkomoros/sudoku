@@ -117,11 +117,11 @@ func (self *forcingChainsTechnique) find(grid *Grid, coordinator findCoordinator
 		secondAccumulator := &chainSearcherAccumulator{make(map[cellRef]IntSlice), make(map[cellRef]IntSlice)}
 
 		chainSearcher(0, _MAX_IMPLICATION_STEPS,
-			candidateCell.InGrid(firstGrid).Mutable(),
+			candidateCell.MutableInGrid(firstGrid),
 			firstPossibilityNum, firstAccumulator)
 
 		chainSearcher(0, _MAX_IMPLICATION_STEPS,
-			candidateCell.InGrid(secondGrid).Mutable(),
+			candidateCell.MutableInGrid(secondGrid),
 			secondPossibilityNum, secondAccumulator)
 
 		firstAccumulator.reduce()

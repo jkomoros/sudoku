@@ -204,7 +204,7 @@ func (self *Grid) replace(other *Grid) {
 	//Also set excludes
 	for index := range other.cells {
 		otherCell := &other.cells[index]
-		selfCell := otherCell.InGrid(self).Mutable()
+		selfCell := otherCell.MutableInGrid(self)
 
 		selfCell.SetNumber(otherCell.Number())
 		//TODO: the fact that I'm reaching into Cell's excludeLock outside of Cell is a Smell.

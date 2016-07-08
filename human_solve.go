@@ -229,11 +229,11 @@ func (self *SolveStep) Apply(grid *Grid) {
 		if len(self.TargetCells) == 0 || len(self.TargetNums) == 0 {
 			return
 		}
-		cell := self.TargetCells[0].InGrid(grid).Mutable()
+		cell := self.TargetCells[0].MutableInGrid(grid)
 		cell.SetNumber(self.TargetNums[0])
 	} else {
 		for _, cell := range self.TargetCells {
-			gridCell := cell.InGrid(grid).Mutable()
+			gridCell := cell.MutableInGrid(grid)
 			for _, exclude := range self.TargetNums {
 				gridCell.SetExcluded(exclude, true)
 			}
