@@ -20,7 +20,7 @@ const (
 
 type mainController struct {
 	model    *model
-	selected *sudoku.Cell
+	selected sudoku.MutableCell
 	mode     InputMode
 	//The size of the console output. Not used for much.
 	outputWidth int
@@ -226,7 +226,7 @@ func (c *mainController) SetGrid(grid *sudoku.Grid) {
 	c.model.SetGrid(grid)
 	//The currently selected cell is tied to the grid, so we need to fix it up.
 	if oldCell != nil {
-		c.SetSelected(oldCell.InGrid(c.model.grid))
+		c.SetSelected(oldCell.MutableInGrid(c.model.grid))
 	}
 	if c.model.grid != nil {
 		//IF there are already some locked cells, we assume that only those
@@ -571,7 +571,7 @@ func (c *mainController) ShowHint() {
 	//This hast to be after setting console message, since SetConsoleMessage clears the last hint.
 	c.lastShownHint = hint
 	lastStep := hint.CompoundSteps[0].FillStep
-	c.SetSelected(lastStep.TargetCells[0].InGrid(c.Grid()))
+	c.SetSelected(lastStep.TargetCells[0].MutableInGrid(c.Grid()))
 }
 
 func (c *mainController) EnterHint() {
@@ -582,17 +582,17 @@ func (c *mainController) EnterHint() {
 	cell := lastStep.TargetCells[0]
 	num := lastStep.TargetNums[0]
 
-	c.SetSelected(cell.InGrid(c.Grid()))
+	c.SetSelected(cell.MutableInGrid(c.Grid()))
 	c.SetSelectedNumber(num)
 
 	c.ClearConsole()
 }
 
-func (c *mainController) Selected() *sudoku.Cell {
+func (c *mainController) Selected() sudoku.MutableCell {
 	return c.selected
 }
 
-func (c *mainController) SetSelected(cell *sudoku.Cell) {
+func (c *mainController) SetSelected(cell sudoku.MutableCell) {
 	if cell == c.selected {
 		//Already done
 		return
@@ -605,7 +605,7 @@ func (c *mainController) EnsureSelected() {
 	c.EnsureGrid()
 	//Ensures that at least one cell is selected.
 	if c.Selected() == nil {
-		c.SetSelected(c.Grid().Cell(0, 0))
+		c.SetSelected(c.Grid().MutableCell(0, 0))
 	}
 }
 
@@ -627,7 +627,7 @@ func (c *mainController) MoveSelectionLeft(fast bool) {
 			}
 			continue
 		}
-		c.SetSelected(c.Grid().Cell(row, col))
+		c.SetSelected(c.Grid().MutableCell(row, col))
 		break
 	}
 }
@@ -650,7 +650,7 @@ func (c *mainController) MoveSelectionRight(fast bool) {
 			}
 			continue
 		}
-		c.SetSelected(c.Grid().Cell(row, col))
+		c.SetSelected(c.Grid().MutableCell(row, col))
 		break
 	}
 }
@@ -673,7 +673,7 @@ func (m *mainController) MoveSelectionUp(fast bool) {
 			}
 			continue
 		}
-		m.SetSelected(m.Grid().Cell(r, c))
+		m.SetSelected(m.Grid().MutableCell(r, c))
 		break
 	}
 }
@@ -696,7 +696,7 @@ func (m *mainController) MoveSelectionDown(fast bool) {
 			}
 			continue
 		}
-		m.SetSelected(m.Grid().Cell(r, c))
+		m.SetSelected(m.Grid().MutableCell(r, c))
 		break
 	}
 }

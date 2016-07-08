@@ -158,7 +158,7 @@ type cellInfo struct {
 	marks  sudoku.IntSlice
 }
 
-func (i cellInfo) fillCell(cell *sudoku.Cell) {
+func (i cellInfo) fillCell(cell sudoku.MutableCell) {
 	cell.SetNumber(i.number)
 	if i.locked {
 		cell.Lock()
@@ -240,7 +240,7 @@ func (c *komoConverter) Load(grid *sudoku.Grid, puzzle string) bool {
 	for r, row := range rows {
 		cols := strings.Split(row, ",")
 		for c, col := range cols {
-			parseKomoCell(col).fillCell(grid.Cell(r, c))
+			parseKomoCell(col).fillCell(grid.MutableCell(r, c))
 		}
 	}
 
@@ -467,7 +467,7 @@ func (c *dokuConverter) Load(grid *sudoku.Grid, puzzle string) bool {
 	for r, row := range rows {
 		cols := strings.Split(row, "|")
 		for c, col := range cols {
-			parseDokuCell(col).fillCell(grid.Cell(r, c))
+			parseDokuCell(col).fillCell(grid.MutableCell(r, c))
 		}
 	}
 

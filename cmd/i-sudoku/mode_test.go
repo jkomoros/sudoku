@@ -158,14 +158,14 @@ func TestDefaultMode(t *testing.T) {
 func TestReset(t *testing.T) {
 	m := newController()
 
-	var cell *sudoku.Cell
+	var cell sudoku.MutableCell
 
 	//find an unfilled cell.
 	for _, candidateCell := range m.Grid().Cells() {
 		if candidateCell.Locked() {
 			continue
 		}
-		cell = candidateCell
+		cell = candidateCell.Mutable()
 		break
 	}
 	//Enter command mode

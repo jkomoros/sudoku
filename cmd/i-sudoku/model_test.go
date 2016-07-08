@@ -10,7 +10,7 @@ func TestMarkMutator(t *testing.T) {
 	model := &model{}
 	model.SetGrid(sudoku.NewGrid())
 
-	cell := model.grid.Cell(0, 0)
+	cell := model.grid.MutableCell(0, 0)
 
 	cell.SetMark(1, true)
 
