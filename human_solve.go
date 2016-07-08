@@ -390,7 +390,6 @@ func (c *CompoundSolveStep) Steps() []*SolveStep {
 
 func (self *gridImpl) HumanSolution(options *HumanSolveOptions) *SolveDirections {
 	clone := self.Copy()
-	defer clone.Done()
 	return clone.HumanSolve(options)
 }
 
@@ -404,7 +403,6 @@ func (self *gridImpl) Hint(options *HumanSolveOptions, optionalPreviousSteps []*
 	//the fill step at the end (cull them if not), and test that.
 
 	clone := self.Copy()
-	defer clone.Done()
 
 	result := humanSolveHelper(clone, options, optionalPreviousSteps, false)
 

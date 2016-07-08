@@ -156,13 +156,6 @@ type MutableGrid interface {
 	//MutableGrid contains all of Grid's (read-only) methods.
 	Grid
 
-	//Done marks the grid as ready to be used by another consumer of it. This potentially allows
-	//grids to be reused (but not currently).
-	Done()
-	//TODO: get rid of this: it really doesn't make any sense anymore now that
-	//a given gridImpl might be shown to be mutable or not to different
-	//people.
-
 	//LoadSDK loads a puzzle in SDK format. Unlike Load, LoadSDK "locks" the cells
 	//that are filled. See cell.Lock for more on the concept of locking.
 	LoadSDK(data string)
@@ -278,48 +271,8 @@ type gridImpl struct {
 	cachedDifficulty                  float64
 }
 
-var gridCache chan MutableGrid
-
-const _MAX_GRIDS = 100
-
 //TODO:Allow num solver threads to be set at runtime
 const _NUM_SOLVER_THREADS = 4
-
-func init() {
-	gridCache = make(chan MutableGrid, _MAX_GRIDS)
-}
-
-func getGrid() MutableGrid {
-	select {
-	case grid := <-gridCache:
-		return grid
-	default:
-		return NewGrid()
-	}
-	return nil
-}
-
-func dropGrids() {
-	for {
-		select {
-		case <-gridCache:
-			//Keep on going
-		default:
-			return
-		}
-	}
-}
-
-func returnGrid(grid MutableGrid) {
-	grid.ResetExcludes()
-	grid.ResetMarks()
-	select {
-	case gridCache <- grid:
-		//Returned it to the queue.
-	default:
-		//Drop it on the floor.
-	}
-}
 
 //NewGrid creates a new, blank grid with all of its cells unfilled.
 func NewGrid() MutableGrid {
@@ -387,11 +340,6 @@ func (self *gridImpl) queue() *finiteQueue {
 
 func (self *gridImpl) cachedSolutionsLock() *sync.RWMutex {
 	return &self.cachedSolutionsLockRef
-}
-
-func (self *gridImpl) Done() {
-	//We're done using this grid; it's okay use to use it again.
-	returnGrid(self)
 }
 
 func (self *gridImpl) LoadSDK(data string) {

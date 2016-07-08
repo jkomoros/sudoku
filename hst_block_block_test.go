@@ -8,7 +8,6 @@ import (
 
 func TestPairwiseBlocks(t *testing.T) {
 	grid := NewGrid()
-	defer grid.Done()
 	result := pairwiseBlocks(grid)
 
 	//TODO: should this be encoded as DIM x DIM?

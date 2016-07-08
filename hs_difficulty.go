@@ -183,7 +183,6 @@ func (self SolveDirections) Walkthrough() string {
 	steps := self.Steps()
 
 	clone := self.Grid().Copy()
-	defer clone.Done()
 
 	DIVIDER := "\n\n--------------------------------------------\n\n"
 

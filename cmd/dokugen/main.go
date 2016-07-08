@@ -329,7 +329,6 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 
 		writer.EndOfRec()
 
-		grid.Done()
 		if bar != nil {
 			bar.Incr()
 		}

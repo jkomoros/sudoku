@@ -286,7 +286,6 @@ func TestMarks(t *testing.T) {
 
 func TestCellLock(t *testing.T) {
 	grid := NewGrid()
-	defer grid.Done()
 
 	cell := grid.MutableCell(3, 3)
 
@@ -315,7 +314,6 @@ func TestCellLock(t *testing.T) {
 
 func TestSymmetry(t *testing.T) {
 	grid := NewGrid()
-	defer grid.Done()
 
 	cell := grid.Cell(3, 3)
 

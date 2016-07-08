@@ -7,7 +7,6 @@ import (
 func TestDokugen(t *testing.T) {
 	//TODO: test that neighbors are alerted correctly about SetNumbers happening.
 	grid := NewGrid()
-	defer grid.Done()
 	row, col, num := 3, 3, 3
 	target := grid.MutableCell(row, col)
 	target.SetNumber(num)

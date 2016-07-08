@@ -49,7 +49,6 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 	techniqueVariantsTestHelper(t, "Only Legal Number")
 
 	grid := NewGrid()
-	defer grid.Done()
 	//Load up a solved grid
 	grid.LoadSDK(SOLVED_TEST_GRID)
 	cell := grid.MutableCell(3, 3)

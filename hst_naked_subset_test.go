@@ -6,7 +6,6 @@ import (
 
 func TestSubsetCellsWithNPossibilities(t *testing.T) {
 	grid := NewGrid()
-	defer grid.Done()
 	if !grid.LoadSDKFromFile(puzzlePath("nakedpair3.sdk")) {
 		t.Log("Failed to load nakedpair3.sdk")
 		t.Fail()

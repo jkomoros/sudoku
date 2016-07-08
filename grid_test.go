@@ -150,10 +150,8 @@ func BenchmarkGridCopy(b *testing.B) {
 	grid := NewGrid()
 	grid.LoadSDK(ADVANCED_TEST_GRID)
 	for i := 0; i < b.N; i++ {
-		gridCopy := grid.Copy()
-		defer gridCopy.Done()
+		_ = grid.Copy()
 	}
-	grid.Done()
 }
 
 func TestGridCopy(t *testing.T) {
@@ -309,12 +307,10 @@ func TestGridCreation(t *testing.T) {
 		}
 	}
 
-	grid.Done()
 }
 
 func TestGridCells(t *testing.T) {
 	grid := NewGrid()
-	defer grid.Done()
 
 	grid.LoadSDK(TEST_GRID)
 
@@ -349,7 +345,6 @@ func TestGridCells(t *testing.T) {
 
 func TestGridLoad(t *testing.T) {
 	grid := NewGrid()
-	defer grid.Done()
 	grid.LoadSDK(TEST_GRID)
 
 	cell := grid.MutableCell(0, 0)
@@ -386,7 +381,6 @@ func TestGridLoad(t *testing.T) {
 	//Test copying.
 
 	copy := grid.Copy()
-	defer copy.Done()
 
 	if grid.DataString() != copy.DataString() {
 		t.Log("Copied grid does not have the same datastring!")
@@ -471,7 +465,6 @@ func TestGridLoad(t *testing.T) {
 
 func TestAdvancedSolve(t *testing.T) {
 	grid := NewGrid()
-	defer grid.Done()
 	grid.LoadSDKFromFile(puzzlePath("advancedtestgrid.sdk"))
 
 	if grid.DataString() != ADVANCED_TEST_GRID {
@@ -492,7 +485,6 @@ func TestAdvancedSolve(t *testing.T) {
 	}
 
 	copy := grid.Copy()
-	defer copy.Done()
 
 	copy.impl().fillSimpleCells()
 
@@ -579,8 +571,6 @@ func TestMultiSolutions(t *testing.T) {
 				t.Fatal("On run", i, "Grid", file, " with", numSolutions, "solutions was found to only have", num)
 			}
 
-			grid.Done()
-
 			//Get a new version of grid to reset all caches
 			grid = NewGrid()
 			grid.LoadSDKFromFile(puzzlePath(file))
@@ -596,7 +586,6 @@ func TestMultiSolutions(t *testing.T) {
 				t.Fatal("On run", i, "Grid", file, "with", numSolutions, "solutions was found to only have", num, "after calling HasMultipleSolutions first.")
 			}
 
-			grid.Done()
 		}
 	}
 
@@ -608,7 +597,6 @@ func TestTranspose(t *testing.T) {
 	//(although that does work)
 
 	grid := NewGrid()
-	defer grid.Done()
 	grid.LoadSDK(TEST_GRID)
 	transposedGrid := grid.impl().transpose()
 	if transposedGrid == nil {
@@ -638,15 +626,12 @@ func TestFill(t *testing.T) {
 		t.Fail()
 	}
 
-	grid.Done()
-
 }
 
 func BenchmarkFill(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		grid := NewGrid()
 		grid.Fill()
-		grid.Done()
 	}
 }
 
@@ -655,7 +640,6 @@ func BenchmarkAdvancedSolve(b *testing.B) {
 		grid := NewGrid()
 		grid.LoadSDK(ADVANCED_TEST_GRID)
 		grid.Solve()
-		grid.Done()
 	}
 }
 
@@ -664,38 +648,11 @@ func BenchmarkDifficulty(b *testing.B) {
 		grid := NewGrid()
 		grid.LoadSDK(ADVANCED_TEST_GRID)
 		grid.Difficulty()
-		grid.Done()
-	}
-}
-
-func TestGridCache(t *testing.T) {
-	//TODO: these tests aren't that great.
-
-	//Make sure we're in a known state.
-	dropGrids()
-
-	grid := getGrid()
-	if grid == nil {
-		t.Log("We got back an empty grid from GetGrid")
-		t.Fail()
-	}
-	other := getGrid()
-	if grid == other {
-		t.Log("We got back the same grid without returning it first.")
-		t.Fail()
-	}
-	returnGrid(grid)
-	third := getGrid()
-	if third != grid {
-		t.Log("We aren't reusing grids as often as we should be.")
-		t.Fail()
 	}
 }
 
 func TestGenerate(t *testing.T) {
 	grid := GenerateGrid(nil)
-
-	defer grid.Done()
 
 	if grid == nil {
 		t.Log("We didn't get back a generated grid")
@@ -780,8 +737,6 @@ func TestGenerateMultipleSolutions(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		grid = GenerateGrid(nil)
 
-		defer grid.Done()
-
 		if grid.HasMultipleSolutions() {
 			t.Fatal("On run", i, "we got back a generated grid that has more than one solution: ", grid)
 		}
@@ -822,8 +777,6 @@ func TestSymmetricalGenerate(t *testing.T) {
 
 	grid := GenerateGrid(&options)
 
-	defer grid.Done()
-
 	if grid == nil {
 		t.Fatal("Did not get a generated grid back")
 	}
@@ -841,9 +794,6 @@ func TestSymmetricalGenerate(t *testing.T) {
 			}
 		}
 	}
-
-	//We're going to clobber this variable with another grid.
-	grid.Done()
 
 	//Now test a non 1.0 symmetry
 	percentage := 0.5
@@ -937,12 +887,10 @@ func TestLoadFromFile(t *testing.T) {
 		t.Log("We didn't get back a grid looking like what we expected.")
 		t.Fail()
 	}
-	grid.Done()
 }
 
 func TestUnlockCells(t *testing.T) {
 	grid := NewGrid()
-	defer grid.Done()
 
 	for i := 0; i < DIM; i++ {
 		grid.MutableCell(i, i).Lock()
@@ -971,7 +919,6 @@ func TestUnlockCells(t *testing.T) {
 func TestResetUnlockedCells(t *testing.T) {
 	grid := NewGrid()
 	grid.LoadSDK(TEST_GRID)
-	defer grid.Done()
 
 	grid.LockFilledCells()
 
@@ -1029,7 +976,6 @@ func TestNumFilledCells(t *testing.T) {
 func TestLockFilledCells(t *testing.T) {
 	grid := NewGrid()
 	grid.LoadSDK(TEST_GRID)
-	defer grid.Done()
 
 	var lockedCell Cell
 

@@ -11,7 +11,6 @@ import (
 func BenchmarkHumanSolve(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		grid := NewGrid()
-		defer grid.Done()
 		grid.LoadSDK(TEST_GRID)
 		grid.HumanSolve(nil)
 	}
@@ -203,7 +202,6 @@ func TestNewCompoundSolveStep(t *testing.T) {
 
 func TestHumanSolve(t *testing.T) {
 	grid := NewGrid()
-	defer grid.Done()
 	grid.LoadSDK(TEST_GRID)
 
 	steps := grid.HumanSolution(nil)
@@ -231,7 +229,6 @@ func TestHumanSolve(t *testing.T) {
 
 func TestHumanSolveOptionsNoGuess(t *testing.T) {
 	grid := NewGrid()
-	defer grid.Done()
 	grid.LoadSDK(TEST_GRID)
 
 	options := DefaultHumanSolveOptions()
@@ -248,7 +245,6 @@ func TestHumanSolveOptionsNoGuess(t *testing.T) {
 func TestShortTechniquesToUseHumanSolveOptions(t *testing.T) {
 
 	grid := NewGrid()
-	defer grid.Done()
 	grid.LoadSDK(TEST_GRID)
 
 	shortTechniqueOptions := DefaultHumanSolveOptions()
@@ -337,7 +333,6 @@ func TestHint(t *testing.T) {
 
 func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string) {
 	grid := NewGrid()
-	defer grid.Done()
 
 	grid.LoadSDK(TEST_GRID)
 
@@ -367,7 +362,6 @@ func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string
 func TestHumanSolveWithGuess(t *testing.T) {
 
 	grid := NewGrid()
-	defer grid.Done()
 
 	if !grid.LoadSDKFromFile(puzzlePath("harddifficulty.sdk")) {
 		t.Fatal("harddifficulty.sdk wasn't loaded")
@@ -404,7 +398,6 @@ func TestHumanSolveWithGuess(t *testing.T) {
 func TestStepsDescription(t *testing.T) {
 
 	grid := NewGrid()
-	defer grid.Done()
 
 	//It's really brittle that we load techniques in this way... it changes every time we add a new early technique!
 	steps := SolveDirections{
@@ -483,7 +476,6 @@ func cellRefsToCells(refs []cellRef, grid Grid) CellSlice {
 
 func TestPuzzleDifficulty(t *testing.T) {
 	grid := NewGrid()
-	defer grid.Done()
 	grid.LoadSDK(TEST_GRID)
 
 	//We use the cheaper one for testing so it completes faster.
