@@ -314,8 +314,8 @@ func TestTwiddleChainedSteps(t *testing.T) {
 	}
 
 	expected := []probabilityTweak{
-		0.13894954943731375,
-		0.26826957952797265,
+		0.12316184623065915,
+		0.22758459260747887,
 		1.0,
 	}
 
