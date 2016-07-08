@@ -149,6 +149,8 @@ type Grid interface {
 	impl() *gridImpl
 }
 
+//TODO: before pushing this, check performance delta. It's bad!
+
 //MutableGrid is a sudoku Grid that can be mutated.
 type MutableGrid interface {
 	//MutableGrid contains all of Grid's (read-only) methods.
