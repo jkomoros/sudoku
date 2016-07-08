@@ -481,7 +481,7 @@ func (self MutableCellSlice) cellSlice() CellSlice {
 func (self CellSlice) mutableCellSlice() MutableCellSlice {
 	result := make(MutableCellSlice, len(self))
 	for i, item := range self {
-		result[i] = item.Mutable()
+		result[i] = item.mutable()
 	}
 	return result
 }

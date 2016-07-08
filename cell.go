@@ -99,16 +99,16 @@ type Cell interface {
 	//top left corner is 0,0
 	DiagramExtents() (top, left, height, width int)
 
-	//Mutable will return a MutableCell underlying this one, or nil if that's
+	//The following are methods that are only internal. Some of them are
+	//nasty.
+
+	//mutable will return a MutableCell underlying this one, or nil if that's
 	//not possible. This should succeed if you're calling it from a method
 	//that was called on a MutableGrid, but otherwise expect it to fail. In
 	//general it is always safer to use grid.MutableCell(r,c),
 	//cell.MutableInGrid(grid), etc wherever available because thos will fail
 	//at compile time instead of run-time.
-	Mutable() MutableCell
-
-	//The following are methods that are only internal. Some of them are
-	//nasty.
+	mutable() MutableCell
 	ref() cellRef
 	grid() *Grid
 	diagramRows(showMarks bool) []string
@@ -238,7 +238,7 @@ func (self *cellImpl) marksBulk() [DIM]bool {
 	return self.marks
 }
 
-func (self *cellImpl) Mutable() MutableCell {
+func (self *cellImpl) mutable() MutableCell {
 	return self
 }
 
@@ -539,7 +539,7 @@ func (self *cellImpl) MutableSymmetricalPartner(symmetry SymmetryType) MutableCe
 		return nil
 	}
 
-	return result.Mutable()
+	return result.mutable()
 }
 
 func (self *cellImpl) SymmetricalPartner(symmetry SymmetryType) Cell {
