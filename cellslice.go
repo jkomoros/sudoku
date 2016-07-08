@@ -347,13 +347,38 @@ func (self CellSlice) chainSimilarity(other CellSlice) float64 {
 	colCounter := 0.0
 	blockCounter := 0.0
 
+	offbyOneIncrement := 0.25
+
 	for _, cell := range self {
 		selfRow[cell.Row()] += 1.0
 		rowCounter++
+		if cell.Row() > 0 {
+			selfRow[cell.Row()-1] += offbyOneIncrement
+			rowCounter += offbyOneIncrement
+		}
+		if cell.Row() < DIM-1 {
+			selfRow[cell.Row()+1] += offbyOneIncrement
+			rowCounter += offbyOneIncrement
+		}
+
 		selfCol[cell.Col()] += 1.0
 		colCounter++
+		if cell.Col() > 0 {
+			selfCol[cell.Col()-1] += offbyOneIncrement
+			colCounter += offbyOneIncrement
+		}
+		if cell.Col() < DIM-1 {
+			selfCol[cell.Col()+1] += offbyOneIncrement
+			colCounter += offbyOneIncrement
+		}
+
 		selfBlock[cell.Block()] += 1.0
 		blockCounter++
+
+		//Nearby blocks don't get the partial points. If we were to, we'd give
+		//points for blocks that are directly adjacent, or half as many for
+		//diagonally adjacent. But calculating that neighbors is non-trivial
+		//right now so just skip it.
 	}
 
 	//Normalize self slices by count for each.
@@ -368,10 +393,33 @@ func (self CellSlice) chainSimilarity(other CellSlice) float64 {
 	for _, cell := range other {
 		otherRow[cell.Row()] += 1.0
 		rowCounter++
+		if cell.Row() > 0 {
+			otherRow[cell.Row()-1] += offbyOneIncrement
+			rowCounter += offbyOneIncrement
+		}
+		if cell.Row() < DIM-1 {
+			otherRow[cell.Row()+1] += offbyOneIncrement
+			rowCounter += offbyOneIncrement
+		}
+
 		otherCol[cell.Col()] += 1.0
 		colCounter++
+		if cell.Col() > 0 {
+			otherCol[cell.Col()-1] += offbyOneIncrement
+			colCounter += offbyOneIncrement
+		}
+		if cell.Col() < DIM-1 {
+			otherCol[cell.Col()+1] += offbyOneIncrement
+			colCounter += offbyOneIncrement
+		}
+
 		otherBlock[cell.Block()] += 1.0
 		blockCounter++
+
+		//Nearby blocks don't get the partial points. If we were to, we'd give
+		//points for blocks that are directly adjacent, or half as many for
+		//diagonally adjacent. But calculating that neighbors is non-trivial
+		//right now so just skip it.
 	}
 
 	//Normalize other slices by count for each.
