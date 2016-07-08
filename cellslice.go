@@ -7,7 +7,9 @@ import (
 	"strings"
 )
 
-//CellSlice is a list of cells with many convenience methods for doing common operations on them.
+//CellSlice is a list of cells with many convenience methods for doing common
+//operations on them. MutableCellSlice is similar, but operates on a slice of
+//MutableCells.
 type CellSlice []Cell
 
 //MutableCellSlice is a CellSlice that contains references to

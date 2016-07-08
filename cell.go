@@ -32,26 +32,33 @@ const (
 //the number that is filled, the numbers that are currently legal given the
 //filled status of its neighbors, and whether any possibilities have been
 //explicitly excluded by solve techniques. Cells should not be constructed on
-//their own; create a Grid and grab references to the cells from there.
+//their own; create a Grid and grab references to the cells from there. Cell
+//does not contain methods to mutate the Cell. See MutableCell for that.
 type Cell interface {
 	//Row returns the cell's row in its parent grid.
 	Row() int
+
 	//Col returns the cell's column in its parent grid.
 	Col() int
+
 	//Block returns the cell's block in its parent grid.
 	Block() int
+
 	//InGrid returns a reference to a cell in the provided grid that has the same
 	//row/column as this cell. Effectively, this cell's analogue in the other
 	//grid.
 	InGrid(grid *Grid) Cell
+
 	//MutableInGrid is like InGrid, but will only work on grids that are mutable.
 	MutableInGrid(grid *Grid) MutableCell
+
 	//Number returns the number the cell is currently set to.
 	Number() int
 
 	//Mark reads out whether the given mark has been set for this cell. See
 	//SetMark for a description of what marks represent.
 	Mark(number int) bool
+
 	//Marks returns an IntSlice with each mark, in ascending order.
 	Marks() IntSlice
 
@@ -61,9 +68,11 @@ type Cell interface {
 	//the cell is already filled with a number, it will return false for all
 	//numbers.
 	Possible(number int) bool
+
 	//Possibilities returns a list of all current possibilities for this cell: all
 	//numbers for which cell.Possible returns true.
 	Possibilities() IntSlice
+
 	//Invalid returns true if the cell has no valid possibilities to fill in,
 	//implying that the grid is in an invalid state because this cell cannot be
 	//filled with a number without violating a constraint.
@@ -72,19 +81,24 @@ type Cell interface {
 	//Locked returns whether or not the cell is locked. See Lock for more
 	//information on the concept of locking.
 	Locked() bool
+
 	//SymmetricalPartner returns the cell's partner in the grid, based on the type
 	//of symmetry requested.
 	SymmetricalPartner(symmetry SymmetryType) Cell
+
 	//Neighbors returns a CellSlice of all of the cell's neighbors--the other
 	//cells in its row, column, and block. The set of neighbors is the set of
 	//cells that this cell's number must not conflict with.
 	Neighbors() CellSlice
+
 	//String returns a debug-friendly summary of the Cell.
 	String() string
+
 	//DiagramExtents returns the top, left, height, and width coordinate in
 	//grid.Diagram's output that  corresponds to the contents of this cell. The
 	//top left corner is 0,0
 	DiagramExtents() (top, left, height, width int)
+
 	//Mutable will return a MutableCell underlying this one, or nil if that's
 	//not possible. This should succeed if you're calling it from a method
 	//that was called on a MutableGrid, but otherwise expect it to fail. In
@@ -104,11 +118,14 @@ type Cell interface {
 
 //MutableCell is a Cell that also has methods that allow mutation of the cell.
 type MutableCell interface {
+	//MutableCell contains all of Cell's (read-only) methods.
 	Cell
+
 	//SetNumber explicitly sets the number of the cell. This operation could cause
 	//the grid to become invalid if it conflicts with its neighbors' numbers. This
 	//operation will affect the Possiblities() of its neighbor cells.
 	SetNumber(number int)
+
 	//SetExcluded defines whether a possibility is considered not feasible, even
 	//if not directly precluded by the Number()s of the cell's neighbors. This is
 	//used by advanced HumanSolve techniques that cull possibilities that are
@@ -116,22 +133,27 @@ type MutableCell interface {
 	//of Excluded bits will affect the results of this cell's Possibilities()
 	//list.
 	SetExcluded(number int, excluded bool)
+
 	//ResetExcludes sets all excluded bits to false, so that Possibilities() will
 	//be based purely on direct implications of the Number()s of neighbors. See
 	//also SetExcluded.
 	ResetExcludes()
+
 	//SetMark sets the mark at the given index to true. Marks represent number
 	//marks proactively added to a cell by a user. They have no effect on the
 	//solver or human solver; they only are visible when Diagram(true) is called.
 	SetMark(number int, mark bool)
+
 	//ResetMarks removes all marks. See SetMark for a description of what marks
 	//represent.
 	ResetMarks()
+
 	//Lock 'locks' the cell. Locking represents the concept of cells that are set
 	//at the beginning of the puzzle and that users may not modify. Locking does
 	//not change whether calls to SetNumber or SetMark will fail; it only impacts
 	//Diagram().
 	Lock()
+
 	//Unlock 'unlocks' the cell. See Lock for more information on the concept of
 	//locking.
 	Unlock()
