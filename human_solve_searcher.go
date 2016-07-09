@@ -298,9 +298,7 @@ func (p *humanSolveItem) Grid() Grid {
 		} else if p.parent == nil {
 			result = p.searcher.grid
 		} else {
-			grid := p.parent.Grid().Copy()
-			p.step.Apply(grid)
-			result = grid
+			result = p.parent.Grid().CopyWithModifications(p.step.Modifications())
 		}
 
 		p.cachedGrid = result
