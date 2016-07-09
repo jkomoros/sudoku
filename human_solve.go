@@ -361,6 +361,17 @@ func (c *CompoundSolveStep) Apply(grid MutableGrid) {
 	c.FillStep.Apply(grid)
 }
 
+//Modifications returns the set of modifications that this CompoundSolveStep
+//would make to a Grid if Apply were called.
+func (c *CompoundSolveStep) Modifications() GridModifcation {
+	var result GridModifcation
+	for _, step := range c.PrecursorSteps {
+		result = append(result, step.Modifications()...)
+	}
+	result = append(result, c.FillStep.Modifications()...)
+	return result
+}
+
 //Description returns a human-readable sentence describing what the CompoundSolveStep
 //instructs the user to do, and what reasoning it used to decide that this
 //step was logically valid to apply.

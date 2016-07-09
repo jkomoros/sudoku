@@ -45,6 +45,49 @@ func TestHumanSolveAlmostSolvedGrid(t *testing.T) {
 	}
 }
 
+func TestCompoundSolveStepModifications(t *testing.T) {
+	grid := NewGrid()
+
+	solveStep := &SolveStep{
+		Technique:   techniquesByName["Only Legal Number"],
+		TargetNums:  IntSlice{1},
+		TargetCells: CellSlice{grid.Cell(0, 0)},
+	}
+
+	tests := []struct {
+		step           *CompoundSolveStep
+		expectedLength int
+		description    string
+	}{
+		{
+			&CompoundSolveStep{
+				PrecursorSteps: nil,
+				FillStep:       solveStep,
+			},
+			1,
+			"Single fill step",
+		},
+		{
+			&CompoundSolveStep{
+				PrecursorSteps: []*SolveStep{
+					solveStep,
+					solveStep,
+				},
+				FillStep: solveStep,
+			},
+			3,
+			"Two precursor steps",
+		},
+	}
+
+	for i, test := range tests {
+		result := test.step.Modifications()
+		if len(result) != test.expectedLength {
+			t.Error("Test", i, test.description, "failed. Got len", len(result), "wanted", test.expectedLength)
+		}
+	}
+}
+
 func TestSolveStepModifications(t *testing.T) {
 	grid := NewGrid()
 	tests := []struct {
