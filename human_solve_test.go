@@ -45,6 +45,90 @@ func TestHumanSolveAlmostSolvedGrid(t *testing.T) {
 	}
 }
 
+func TestSolveStepModifications(t *testing.T) {
+	grid := NewGrid()
+	tests := []struct {
+		step        *SolveStep
+		expected    GridModifcation
+		description string
+	}{
+		{
+			&SolveStep{
+				Technique: techniquesByName["Only Legal Number"],
+				TargetCells: CellSlice{
+					grid.Cell(0, 0),
+					grid.Cell(0, 1),
+					grid.Cell(0, 2),
+				},
+				TargetNums: IntSlice{1},
+			},
+			GridModifcation{
+				&CellModification{
+					Cell:            grid.Cell(0, 0),
+					Number:          1,
+					ExcludesChanges: make(map[int]bool),
+				},
+				&CellModification{
+					Cell:            grid.Cell(0, 1),
+					Number:          1,
+					ExcludesChanges: make(map[int]bool),
+				},
+				&CellModification{
+					Cell:            grid.Cell(0, 2),
+					Number:          1,
+					ExcludesChanges: make(map[int]bool),
+				},
+			},
+			"Fill step",
+		},
+		{
+			&SolveStep{
+				Technique: techniquesByName["Pointing Pair Row"],
+				TargetCells: CellSlice{
+					grid.Cell(0, 0),
+					grid.Cell(0, 1),
+					grid.Cell(0, 2),
+				},
+				TargetNums: IntSlice{1, 2},
+			},
+			GridModifcation{
+				&CellModification{
+					Cell:   grid.Cell(0, 0),
+					Number: -1,
+					ExcludesChanges: map[int]bool{
+						1: true,
+						2: true,
+					},
+				},
+				&CellModification{
+					Cell:   grid.Cell(0, 1),
+					Number: -1,
+					ExcludesChanges: map[int]bool{
+						1: true,
+						2: true,
+					},
+				},
+				&CellModification{
+					Cell:   grid.Cell(0, 2),
+					Number: -1,
+					ExcludesChanges: map[int]bool{
+						1: true,
+						2: true,
+					},
+				},
+			},
+			"Cull step",
+		},
+	}
+
+	for i, test := range tests {
+		result := test.step.Modifications()
+		if !result.equivalent(test.expected) {
+			t.Error("Test", i, test.description, "failed. Got", result, "Expected", test.expected)
+		}
+	}
+}
+
 func TestCompoundSolveStep(t *testing.T) {
 
 	nInRowTechnique := techniquesByName["Necessary In Row"]

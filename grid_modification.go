@@ -30,6 +30,51 @@ func newCellModification(cell Cell) *CellModification {
 	}
 }
 
+//equivalent returns true if the other grid modification is equivalent to this one.
+func (m GridModifcation) equivalent(other GridModifcation) bool {
+	if len(m) != len(other) {
+		return false
+	}
+	for i, modification := range m {
+		otherModification := other[i]
+		if modification.Cell.ref().String() != otherModification.Cell.ref().String() {
+			return false
+		}
+		if modification.Number != otherModification.Number {
+			return false
+		}
+
+		if len(modification.ExcludesChanges) != len(otherModification.ExcludesChanges) {
+			return false
+		}
+
+		for key, val := range modification.ExcludesChanges {
+			otherVal, ok := otherModification.ExcludesChanges[key]
+			if !ok {
+				return false
+			}
+			if val != otherVal {
+				return false
+			}
+		}
+
+		if len(modification.MarksChanges) != len(otherModification.MarksChanges) {
+			return false
+		}
+
+		for key, val := range modification.MarksChanges {
+			otherVal, ok := otherModification.MarksChanges[key]
+			if !ok {
+				return false
+			}
+			if val != otherVal {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 func (self *gridImpl) CopyWithModifications(modifications GridModifcation) Grid {
 	//TODO: when we have an honest-to-god readonly grid impl, optimize this.
 	result := self.Copy()

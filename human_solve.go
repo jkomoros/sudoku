@@ -241,6 +241,29 @@ func (self *SolveStep) Apply(grid MutableGrid) {
 	}
 }
 
+//Modifications returns the GridModifications repesenting how this SolveStep
+//would mutate the grid.
+func (self *SolveStep) Modifications() GridModifcation {
+	var result GridModifcation
+
+	for _, cell := range self.TargetCells {
+		modification := newCellModification(cell)
+		if self.Technique.IsFill() {
+			if len(self.TargetNums) != 1 {
+				//Sanity check
+				continue
+			}
+			modification.Number = self.TargetNums[0]
+		} else {
+			for _, num := range self.TargetNums {
+				modification.ExcludesChanges[num] = true
+			}
+		}
+		result = append(result, modification)
+	}
+	return result
+}
+
 //Description returns a human-readable sentence describing what the SolveStep
 //instructs the user to do, and what reasoning it used to decide that this
 //step was logically valid to apply.
