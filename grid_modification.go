@@ -19,6 +19,25 @@ type CellModification struct {
 	MarksChanges map[int]bool
 }
 
+//TODO: grid.Copy/MutableCopy
+
+//TODO: in multi-step human solve helper use mutablecopy
+
+//TODO: Audit all uses of MutableCell/MutableGrid and see if it's better to
+//use CopyWithModifications
+
+//TODO: make queueInteface
+
+//TODO: make an immutableQueue, which is just a list of pointers, with a fix()
+//method that does a one-time sort before the first thing is called. Getters
+//are just an index into the static queue.
+
+//TOOD: make readOnlyCellImpl. Test if neighbors should be derived or not. Can
+//burn excludes and impossibles into one array. Everything should be actual
+//contiguous memory, no pointers.
+
+//TODO: make readOnlyGridImpl.
+
 //newCellModification returns a CellModification for the given cell that is a
 //no-op.
 func newCellModification(cell Cell) *CellModification {
