@@ -380,7 +380,7 @@ func TestGridLoad(t *testing.T) {
 
 	//Test copying.
 
-	copy := grid.Copy()
+	copy := grid.MutableCopy()
 
 	if grid.DataString() != copy.DataString() {
 		t.Log("Copied grid does not have the same datastring!")
@@ -484,7 +484,7 @@ func TestAdvancedSolve(t *testing.T) {
 		t.Fail()
 	}
 
-	copy := grid.Copy()
+	copy := grid.MutableCopy()
 
 	copy.impl().fillSimpleCells()
 
@@ -501,7 +501,7 @@ func TestAdvancedSolve(t *testing.T) {
 	}
 
 	if len(solutions) != 1 {
-		t.Log("We found the wrong number of solutions in Advanced grid.")
+		t.Log("We found the wrong number of solutions in Advanced grid:", len(solutions))
 		t.FailNow()
 	}
 

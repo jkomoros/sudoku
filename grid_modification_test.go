@@ -17,7 +17,7 @@ func TestCopyWithModifications(t *testing.T) {
 	gridMarksCell.SetMark(2, true)
 	gridMarksCell.SetMark(1, false)
 
-	gridExcludes := sourceGrid.Copy()
+	gridExcludes := sourceGrid.MutableCopy()
 	gridExcludesCell := gridExcludes.MutableCell(0, 0)
 	gridExcludesCell.SetExcluded(2, true)
 	gridExcludesCell.SetExcluded(1, false)

@@ -108,8 +108,8 @@ func (self *forcingChainsTechnique) find(grid Grid, coordinator findCoordinator)
 		firstPossibilityNum := candidateCell.Possibilities()[0]
 		secondPossibilityNum := candidateCell.Possibilities()[1]
 
-		firstGrid := grid.Copy()
-		secondGrid := grid.Copy()
+		firstGrid := grid.MutableCopy()
+		secondGrid := grid.MutableCopy()
 
 		//Check that the neighbor isn't just already having a single possibility, because then this technique is overkill.
 

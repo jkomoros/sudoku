@@ -423,7 +423,7 @@ func (c *CompoundSolveStep) Steps() []*SolveStep {
 }
 
 func (self *gridImpl) HumanSolution(options *HumanSolveOptions) *SolveDirections {
-	clone := self.Copy()
+	clone := self.MutableCopy()
 	return clone.HumanSolve(options)
 }
 
@@ -436,7 +436,7 @@ func (self *gridImpl) Hint(options *HumanSolveOptions, optionalPreviousSteps []*
 	//TODO: test that non-fill steps before the last one are necessary to unlock
 	//the fill step at the end (cull them if not), and test that.
 
-	clone := self.Copy()
+	clone := self.MutableCopy()
 
 	result := humanSolveHelper(clone, options, optionalPreviousSteps, false)
 

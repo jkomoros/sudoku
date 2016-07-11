@@ -19,8 +19,6 @@ type CellModification struct {
 	MarksChanges map[int]bool
 }
 
-//TODO: grid.Copy/MutableCopy
-
 //TODO: in multi-step human solve helper use mutablecopy
 
 //TODO: Audit all uses of MutableCell/MutableGrid and see if it's better to
@@ -99,7 +97,7 @@ func (m GridModifcation) equivalent(other GridModifcation) bool {
 
 func (self *gridImpl) CopyWithModifications(modifications GridModifcation) Grid {
 	//TODO: when we have an honest-to-god readonly grid impl, optimize this.
-	result := self.Copy()
+	result := self.MutableCopy()
 
 	for _, modification := range modifications {
 		cell := modification.Cell.MutableInGrid(result)

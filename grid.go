@@ -36,7 +36,11 @@ const (
 type Grid interface {
 
 	//Copy returns a new grid that has all of the same numbers and excludes filled in it.
-	Copy() MutableGrid
+	Copy() Grid
+
+	//MutableCopy returns a new, mutable grid that has all of the same numbers
+	//and excludes filled in it.
+	MutableCopy() MutableGrid
 
 	//CopyWithModifications returns a new Grid that has the given
 	//modifications applied.
@@ -374,11 +378,15 @@ func (self *gridImpl) LoadSDKFromFile(path string) bool {
 	return true
 }
 
-func (self *gridImpl) Copy() MutableGrid {
+func (self *gridImpl) MutableCopy() MutableGrid {
 	//TODO: ideally we'd have some kind of smart SparseGrid or something that we can return.
 	result := NewGrid()
 	result.replace(self)
 	return result
+}
+
+func (self *gridImpl) Copy() Grid {
+	return self.MutableCopy()
 }
 
 //Copies the state of the other grid into self, so they look the same.

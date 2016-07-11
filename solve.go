@@ -203,8 +203,10 @@ func (self *gridImpl) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool,
 	var result Grid
 
 	for i, num := range possibilities {
-		copy := self.Copy()
-		copy.MutableCell(cell.Row(), cell.Col()).SetNumber(num)
+		//TODO: this seems like a natural place to use CopyWithModifications,
+		//but gridImpl.fillSimpleCells will be called on it.
+		copy := self.MutableCopy()
+		cell.MutableInGrid(copy).SetNumber(num)
 		//As an optimization for cases where there are many solutions, we'll just continue a DFS until we barf then unroll back up.
 		//It doesn't appear to slow things down in the general case
 		if i == 0 && !isFirstRun {

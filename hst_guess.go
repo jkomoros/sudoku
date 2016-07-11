@@ -35,7 +35,7 @@ func (self *guessTechnique) find(grid Grid, coordinator findCoordinator) {
 	//possibilities, and then just immediately return the correct value for
 	//it. Done!
 
-	solvedGrid := grid.Copy()
+	solvedGrid := grid.MutableCopy()
 	solvedGrid.Solve()
 
 	if !solvedGrid.Solved() {
