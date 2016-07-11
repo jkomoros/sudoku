@@ -12,10 +12,10 @@ import (
 //MutableCells.
 type CellSlice []Cell
 
-//MutableCellSlice is a CellSlice that contains references to
-//MutableCellSlices. It doesn't have analogues for each CellSlice method; only
-//ones that return a CellSlice. Note: MutableCellSlices are not mutable
-//themselves; the "mutable" refers to the MutableCell.
+//MutableCellSlice is a CellSlice that contains references to MutableCells. It
+//doesn't have analogues for each CellSlice method; only ones that return a
+//CellSlice. Note: MutableCellSlices are not mutable themselves; the "mutable"
+//refers to the MutableCell.
 type MutableCellSlice []MutableCell
 
 //IntSlice is a list of ints, with many convenience methods specific to sudoku.
