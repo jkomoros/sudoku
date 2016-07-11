@@ -19,8 +19,6 @@ type CellModification struct {
 	MarksChanges map[int]bool
 }
 
-//TODO: in multi-step human solve helper use mutablecopy
-
 //TODO: Audit all uses of MutableCell/MutableGrid and see if it's better to
 //use CopyWithModifications
 

@@ -200,6 +200,7 @@ func humanSolveHelper(grid MutableGrid, options *HumanSolveOptions, previousStep
 func humanSolveSearch(grid MutableGrid, options *HumanSolveOptions) []*CompoundSolveStep {
 	var result []*CompoundSolveStep
 
+	//TODO: it FEELS like here we should be using read only grids.
 	for !grid.Solved() {
 		newStep := humanSolveSearchSingleStep(grid, options, result)
 		if newStep == nil {
