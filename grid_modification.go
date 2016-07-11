@@ -19,6 +19,8 @@ type CellModification struct {
 	MarksChanges map[int]bool
 }
 
+//TODO: audit all uses of step/compoundstep.Apply()
+
 //TOOD: make readOnlyCellImpl. Test if neighbors should be derived or not. Can
 //burn excludes and impossibles into one array. Everything should be actual
 //contiguous memory, no pointers.
