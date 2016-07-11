@@ -2,6 +2,7 @@ package sudoku
 
 import (
 	"math/rand"
+	"sort"
 	"sync"
 )
 
@@ -16,6 +17,16 @@ type queue interface {
 type queueGetter interface {
 	Get() rankedObject
 	GetSmallerThan(max int) rankedObject
+}
+
+type readOnlyCellQueue struct {
+	grid     Grid
+	cellRefs [DIM * DIM]cellRef
+}
+
+type readOnlyCellQueueGetter struct {
+	queue   *readOnlyCellQueue
+	counter int
 }
 
 type finiteQueue struct {
@@ -85,6 +96,65 @@ func newSyncedFiniteQueue(min int, max int, done chan bool) *syncedFiniteQueue {
 		done}
 	go result.workLoop()
 	return result
+}
+
+//defaultRefs should be called to initalize the object to have default refs.
+//No need to call this if you're copying in an earlier state.
+func (r *readOnlyCellQueue) defaultRefs() {
+
+	counter := 0
+	for row := 0; row < DIM; row++ {
+		for col := 0; col < DIM; col++ {
+			r.cellRefs[counter] = cellRef{row, col}
+			counter++
+		}
+	}
+}
+
+//Fix should be called after all of the items are in place and before any
+//Getters have been vended.
+func (r *readOnlyCellQueue) fix() {
+	sort.Sort(r)
+}
+
+func (r *readOnlyCellQueue) Len() int {
+	return DIM * DIM
+}
+
+func (r *readOnlyCellQueue) Less(i, j int) bool {
+	firstCellRank := r.cellRefs[i].Cell(r.grid).rank()
+	secondCellRank := r.cellRefs[j].Cell(r.grid).rank()
+	return firstCellRank < secondCellRank
+}
+
+func (r *readOnlyCellQueue) Swap(i, j int) {
+	r.cellRefs[i], r.cellRefs[j] = r.cellRefs[j], r.cellRefs[i]
+}
+
+func (r *readOnlyCellQueue) NewGetter() queueGetter {
+	return &readOnlyCellQueueGetter{queue: r}
+}
+
+func (r *readOnlyCellQueueGetter) Get() rankedObject {
+	if r.counter >= r.queue.Len() {
+		return nil
+	}
+	result := r.queue.cellRefs[r.counter].Cell(r.queue.grid)
+	r.counter++
+	return result
+}
+
+func (r *readOnlyCellQueueGetter) GetSmallerThan(max int) rankedObject {
+	item := r.Get()
+	if item == nil {
+		return nil
+	}
+	if item.rank() >= max {
+		//Put it back!
+		r.counter--
+		return nil
+	}
+	return item
 }
 
 func (self *finiteQueueBucket) getItem() rankedObject {

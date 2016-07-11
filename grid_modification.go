@@ -19,10 +19,6 @@ type CellModification struct {
 	MarksChanges map[int]bool
 }
 
-//TODO: make an immutableQueue, which is just a list of pointers, with a fix()
-//method that does a one-time sort before the first thing is called. Getters
-//are just an index into the static queue.
-
 //TOOD: make readOnlyCellImpl. Test if neighbors should be derived or not. Can
 //burn excludes and impossibles into one array. Everything should be actual
 //contiguous memory, no pointers.
