@@ -119,6 +119,7 @@ type Cell interface {
 }
 
 //MutableCell is a Cell that also has methods that allow mutation of the cell.
+//They are generally gathered from Mutable* methods on a MutableGrid.
 type MutableCell interface {
 	//MutableCell contains all of Cell's (read-only) methods.
 	Cell

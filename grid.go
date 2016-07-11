@@ -32,7 +32,7 @@ const (
 )
 
 //Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
-//be acted on in various ways.
+//be acted on in various ways. Grid is read-only. For mutator methods, see MutableGrid.
 type Grid interface {
 
 	//Copy returns a new grid that has all of the same numbers and excludes filled in it.
