@@ -36,7 +36,10 @@ type CellModification struct {
 //burn excludes and impossibles into one array. Everything should be actual
 //contiguous memory, no pointers.
 
-//TODO: make readOnlyGridImpl.
+//TODO: make readOnlyGridImpl. Two possible approaches: a version that is
+//incredibly easy to copy and then do minor tweaks. Or a version that stores a
+//dictionary of cell configs, and any time you grab a Cell we look it up in
+//the dict or in the ancestors' dicts.
 
 //newCellModification returns a CellModification for the given cell that is a
 //no-op.
