@@ -132,10 +132,6 @@ func TestFiniteQueueGetter(t *testing.T) {
 		t.Log("We didn't get a getter back from NewGetter")
 		t.Fail()
 	}
-	if getter.queue != queue {
-		t.Log("We got back a getter that didn't have the right queue")
-		t.Fail()
-	}
 	for _, obj := range objects {
 		retrievedObj := getter.Get()
 		if retrievedObj == nil {

@@ -145,7 +145,7 @@ type Grid interface {
 	HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution)
 
 	//The rest of these are private methods
-	queue() *finiteQueue
+	queue() queue
 	numFilledCells() int
 	cachedSolutionsLock() *sync.RWMutex
 	cachedSolutions() []Grid
@@ -327,7 +327,7 @@ func (self *gridImpl) cachedSolutionsRequestedLength() int {
 	return self.cachedSolutionsRequestedLengthRef
 }
 
-func (self *gridImpl) queue() *finiteQueue {
+func (self *gridImpl) queue() queue {
 
 	self.queueGetterLock.RLock()
 	queue := self.theQueue

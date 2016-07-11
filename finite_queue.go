@@ -9,6 +9,15 @@ type rankedObject interface {
 	rank() int
 }
 
+type queue interface {
+	NewGetter() queueGetter
+}
+
+type queueGetter interface {
+	Get() rankedObject
+	GetSmallerThan(max int) rankedObject
+}
+
 type finiteQueue struct {
 	min           int
 	max           int
@@ -199,7 +208,7 @@ func (self *syncedFiniteQueue) workLoop() {
 
 }
 
-func (self *finiteQueue) NewGetter() *finiteQueueGetter {
+func (self *finiteQueue) NewGetter() queueGetter {
 	list, _ := self.getBucket(self.min)
 	return &finiteQueueGetter{self, make(map[rankedObject]int), list, 0}
 }

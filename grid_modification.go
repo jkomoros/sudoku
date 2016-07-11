@@ -19,8 +19,6 @@ type CellModification struct {
 	MarksChanges map[int]bool
 }
 
-//TODO: make queueInteface
-
 //TODO: make an immutableQueue, which is just a list of pointers, with a fix()
 //method that does a one-time sort before the first thing is called. Getters
 //are just an index into the static queue.
