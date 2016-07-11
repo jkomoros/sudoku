@@ -19,9 +19,6 @@ type CellModification struct {
 	MarksChanges map[int]bool
 }
 
-//TODO: Audit all uses of MutableCell/MutableGrid and see if it's better to
-//use CopyWithModifications
-
 //TODO: make queueInteface
 
 //TODO: make an immutableQueue, which is just a list of pointers, with a fix()
