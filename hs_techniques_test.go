@@ -298,6 +298,11 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 		grid, solver, steps = humanSolveTechniqueTestHelperStepGenerator(t, puzzleName, techniqueName, options)
 	}
 
+	//This is so weird... if I don't have this no-op here the compiler warns
+	//that grid is declared and not used... despite the fact that it OBVIOUSLY
+	//is.
+	grid.Cell(0, 0)
+
 	//Check if solveStep is nil here
 	if len(steps) == 0 {
 		t.Fatal(techniqueName, " didn't find a cell it should have.")
@@ -410,7 +415,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 				foundMatch = false
 				for _, ref := range options.targetCells {
 					for _, cell := range step.TargetCells {
-						if ref.Cell(grid) == cell {
+						if ref == cell.ref() {
 							//TODO: break out early
 							foundMatch = true
 						}

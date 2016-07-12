@@ -341,7 +341,7 @@ func TestTwiddleChainedSteps(t *testing.T) {
 func TestTwiddlePreferFilledGroups(t *testing.T) {
 	grid := NewGrid()
 
-	keyCell := grid.Cell(0, 0)
+	keyCell := grid.MutableCell(0, 0)
 
 	step := &SolveStep{
 		TargetCells: CellSlice{

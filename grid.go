@@ -363,7 +363,7 @@ func (self *gridImpl) Load(data string) {
 	//TODO: shouldn't we have more error checking, like for wrong dimensions?
 	for r, row := range strings.Split(data, ROW_SEP) {
 		for c, data := range strings.Split(row, "") {
-			cell := self.cellImpl(r, c)
+			cell := self.mutableCellImpl(r, c)
 			cell.load(data)
 		}
 	}
@@ -566,9 +566,7 @@ func (self *gridImpl) blockHasNeighbors(index int) (top bool, right bool, bottom
 	return
 }
 
-//cellImpl is required because some clients in the package need the actual
-//underlying pointer for comparison.
-func (self *gridImpl) cellImpl(row int, col int) *mutableCellImpl {
+func (self *gridImpl) mutableCellImpl(row int, col int) *mutableCellImpl {
 	index := row*DIM + col
 	if index >= DIM*DIM || index < 0 {
 		log.Println("Invalid row/col index passed to Cell: ", row, ", ", col)
@@ -577,8 +575,19 @@ func (self *gridImpl) cellImpl(row int, col int) *mutableCellImpl {
 	return &self.cells[index]
 }
 
+//cellImpl is required because some clients in the package need the actual
+//underlying pointer for comparison.
+func (self *gridImpl) cellImpl(row int, col int) *cellImpl {
+	index := row*DIM + col
+	if index >= DIM*DIM || index < 0 {
+		log.Println("Invalid row/col index passed to Cell: ", row, ", ", col)
+		return nil
+	}
+	return &self.cells[index].cellImpl
+}
+
 func (self *gridImpl) MutableCell(row int, col int) MutableCell {
-	return self.cellImpl(row, col)
+	return self.mutableCellImpl(row, col)
 }
 
 func (self *gridImpl) Cell(row int, col int) Cell {

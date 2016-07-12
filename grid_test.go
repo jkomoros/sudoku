@@ -325,7 +325,7 @@ func TestGridCells(t *testing.T) {
 		if cell.grid() != grid {
 			t.Error("cell #", i, "had wrong grid")
 		}
-		if cell != grid.Cell(cell.Row(), cell.Col()) {
+		if cell != grid.MutableCell(cell.Row(), cell.Col()) {
 			t.Error("cell #", i, "was not the same as the right one in the grid")
 		}
 	}
