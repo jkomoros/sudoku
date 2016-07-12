@@ -261,14 +261,14 @@ type gridImpl struct {
 	//helps with memory locality and performance. However, iterating over the
 	//cells means  that you get a copy, and have to be careful not to try
 	//modifying it because the modifications won't work.
-	cells                  [DIM * DIM]cellImpl
+	cells                  [DIM * DIM]mutableCellImpl
 	rows                   [DIM]CellSlice
 	cols                   [DIM]CellSlice
 	blocks                 [DIM]CellSlice
 	queueGetterLock        sync.RWMutex
 	theQueue               *finiteQueue
 	numFilledCellsCounter  int
-	invalidCells           map[*cellImpl]bool
+	invalidCells           map[*mutableCellImpl]bool
 	cachedSolutionsLockRef sync.RWMutex
 	cachedSolutionsRef     []Grid
 	//The number of solutions that we REQUESTED when we got back
@@ -286,7 +286,7 @@ const _NUM_SOLVER_THREADS = 4
 func NewGrid() MutableGrid {
 	result := &gridImpl{}
 
-	result.invalidCells = make(map[*cellImpl]bool)
+	result.invalidCells = make(map[*mutableCellImpl]bool)
 
 	i := 0
 	for r := 0; r < DIM; r++ {
@@ -568,7 +568,7 @@ func (self *gridImpl) blockHasNeighbors(index int) (top bool, right bool, bottom
 
 //cellImpl is required because some clients in the package need the actual
 //underlying pointer for comparison.
-func (self *gridImpl) cellImpl(row int, col int) *cellImpl {
+func (self *gridImpl) cellImpl(row int, col int) *mutableCellImpl {
 	index := row*DIM + col
 	if index >= DIM*DIM || index < 0 {
 		log.Println("Invalid row/col index passed to Cell: ", row, ", ", col)
@@ -673,17 +673,17 @@ func (self *gridImpl) Empty() bool {
 }
 
 //Called by cells when they notice they are invalid and the grid might not know that.
-func (self *gridImpl) cellIsInvalid(cell *cellImpl) {
+func (self *gridImpl) cellIsInvalid(cell *mutableCellImpl) {
 	//Doesn't matter if it was already set.
 	self.invalidCells[cell] = true
 }
 
 //Called by cells when they notice they are valid and think the grid might not know that.
-func (self *gridImpl) cellIsValid(cell *cellImpl) {
+func (self *gridImpl) cellIsValid(cell *mutableCellImpl) {
 	delete(self.invalidCells, cell)
 }
 
-func (self *gridImpl) cellModified(cell *cellImpl, oldNumber int) {
+func (self *gridImpl) cellModified(cell *mutableCellImpl, oldNumber int) {
 	self.cachedSolutionsLock().Lock()
 	self.cachedSolutionsRef = nil
 	self.cachedSolutionsRequestedLengthRef = -1
@@ -698,7 +698,7 @@ func (self *gridImpl) cellModified(cell *cellImpl, oldNumber int) {
 
 }
 
-func (self *gridImpl) cellRankChanged(cell *cellImpl) {
+func (self *gridImpl) cellRankChanged(cell *mutableCellImpl) {
 	//We don't want to create the queue if it doesn't exist. But if it does exist we want to get the real one.
 	self.queueGetterLock.RLock()
 	queue := self.theQueue

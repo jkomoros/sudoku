@@ -181,10 +181,10 @@ type MutableCell interface {
 	marksBulk() [DIM]bool
 	mutableGrid() MutableGrid
 	//To be used only for testing!!!!
-	impl() *cellImpl
+	impl() *mutableCellImpl
 }
 
-type cellImpl struct {
+type mutableCellImpl struct {
 	gridRef *gridImpl
 	//The number if it's explicitly set. Number() will return it if it's explicitly or implicitly set.
 	number          int
@@ -201,79 +201,79 @@ type cellImpl struct {
 	locked bool
 }
 
-func newCell(grid *gridImpl, row int, col int) cellImpl {
+func newCell(grid *gridImpl, row int, col int) mutableCellImpl {
 	//TODO: we should not set the number until neighbors are initialized.
-	return cellImpl{gridRef: grid, row: row, col: col, block: grid.blockForCell(row, col)}
+	return mutableCellImpl{gridRef: grid, row: row, col: col, block: grid.blockForCell(row, col)}
 }
 
-func (self *cellImpl) gridImpl() *gridImpl {
+func (self *mutableCellImpl) gridImpl() *gridImpl {
 	return self.gridRef
 }
 
-func (self *cellImpl) grid() Grid {
+func (self *mutableCellImpl) grid() Grid {
 	return self.gridRef
 }
 
-func (self *cellImpl) mutableGrid() MutableGrid {
+func (self *mutableCellImpl) mutableGrid() MutableGrid {
 	return self.gridRef
 }
 
-func (self *cellImpl) impl() *cellImpl {
+func (self *mutableCellImpl) impl() *mutableCellImpl {
 	return self
 }
 
-func (self *cellImpl) excludedLock() *sync.RWMutex {
+func (self *mutableCellImpl) excludedLock() *sync.RWMutex {
 	return &self.excludedLockRef
 }
 
-func (self *cellImpl) setExcludedBulk(other [DIM]bool) {
+func (self *mutableCellImpl) setExcludedBulk(other [DIM]bool) {
 	//Assumes someone else already holds the lock
 	for i := 0; i < DIM; i++ {
 		self.excluded[i] = other[i]
 	}
 }
 
-func (self *cellImpl) excludedBulk() [DIM]bool {
+func (self *mutableCellImpl) excludedBulk() [DIM]bool {
 	//Assumes someone else already holds the lock
 	return self.excluded
 }
 
-func (self *cellImpl) setMarksBulk(other [DIM]bool) {
+func (self *mutableCellImpl) setMarksBulk(other [DIM]bool) {
 	//Assumes someone else already holds the lock for us
 	for i := 0; i < DIM; i++ {
 		self.marks[i] = other[i]
 	}
 }
 
-func (self *cellImpl) marksBulk() [DIM]bool {
+func (self *mutableCellImpl) marksBulk() [DIM]bool {
 	//Assumes someone else already holds the lock
 	return self.marks
 }
 
-func (self *cellImpl) mutable() MutableCell {
+func (self *mutableCellImpl) mutable() MutableCell {
 	return self
 }
 
-func (self *cellImpl) Row() int {
+func (self *mutableCellImpl) Row() int {
 	return self.row
 }
 
-func (self *cellImpl) Col() int {
+func (self *mutableCellImpl) Col() int {
 	return self.col
 }
 
-func (self *cellImpl) Block() int {
+func (self *mutableCellImpl) Block() int {
 	return self.block
 }
 
-func (self *cellImpl) MutableInGrid(grid MutableGrid) MutableCell {
+func (self *mutableCellImpl) MutableInGrid(grid MutableGrid) MutableCell {
 	if grid == nil {
 		return nil
 	}
 	return grid.MutableCell(self.Row(), self.Col())
 }
 
-func (self *cellImpl) InGrid(grid Grid) Cell {
+func (self *mutableCellImpl) InGrid(grid Grid) Cell {
 	//Returns our analogue in the given grid.
 	if grid == nil {
 		return nil
@@ -281,19 +281,19 @@ func (self *cellImpl) InGrid(grid Grid) Cell {
 	return grid.Cell(self.Row(), self.Col())
 }
 
-func (self *cellImpl) load(data string) {
+func (self *mutableCellImpl) load(data string) {
 	//Format, for now, is just the number itself, or 0 if no number.
 	data = strings.Replace(data, ALT_0, "0", -1)
 	num, _ := strconv.Atoi(data)
 	self.SetNumber(num)
 }
 
-func (self *cellImpl) Number() int {
+func (self *mutableCellImpl) Number() int {
 	//A layer of indirection since number needs to be used from the Setter.
 	return self.number
 }
 
-func (self *cellImpl) SetNumber(number int) {
+func (self *mutableCellImpl) SetNumber(number int) {
 	//Sets the explicit number. This will affect its neighbors possibles list.
 	if self.number == number {
 		//No work to do now.
@@ -329,7 +329,7 @@ func (self *cellImpl) SetNumber(number int) {
 	}
 }
 
-func (self *cellImpl) alertNeighbors(number int, possible bool) {
+func (self *mutableCellImpl) alertNeighbors(number int, possible bool) {
 	for _, cell := range self.MutableNeighbors() {
 		if possible {
 			cell.setPossible(number)
@@ -339,7 +339,7 @@ func (self *cellImpl) alertNeighbors(number int, possible bool) {
 	}
 }
 
-func (self *cellImpl) setPossible(number int) {
+func (self *mutableCellImpl) setPossible(number int) {
 	//Number is 1 indexed, but we store it as 0-indexed
 	number--
 	if number < 0 || number >= DIM {
@@ -360,7 +360,7 @@ func (self *cellImpl) setPossible(number int) {
 
 }
 
-func (self *cellImpl) setImpossible(number int) {
+func (self *mutableCellImpl) setImpossible(number int) {
 	//Number is 1 indexed, but we store it as 0-indexed
 	number--
 	if number < 0 || number >= DIM {
@@ -376,7 +376,7 @@ func (self *cellImpl) setImpossible(number int) {
 	}
 }
 
-func (self *cellImpl) SetExcluded(number int, excluded bool) {
+func (self *mutableCellImpl) SetExcluded(number int, excluded bool) {
 	number--
 	if number < 0 || number >= DIM {
 		return
@@ -392,7 +392,7 @@ func (self *cellImpl) SetExcluded(number int, excluded bool) {
 	}
 }
 
-func (self *cellImpl) ResetExcludes() {
+func (self *mutableCellImpl) ResetExcludes() {
 	self.excludedLockRef.Lock()
 	for i := 0; i < DIM; i++ {
 		self.excluded[i] = false
@@ -406,7 +406,7 @@ func (self *cellImpl) ResetExcludes() {
 	}
 }
 
-func (self *cellImpl) SetMark(number int, marked bool) {
+func (self *mutableCellImpl) SetMark(number int, marked bool) {
 	number--
 	if number < 0 || number >= DIM {
 		return
@@ -414,7 +414,7 @@ func (self *cellImpl) SetMark(number int, marked bool) {
 	self.marks[number] = marked
 }
 
-func (self *cellImpl) Mark(number int) bool {
+func (self *mutableCellImpl) Mark(number int) bool {
 	number--
 	if number < 0 || number >= DIM {
 		return false
@@ -422,7 +422,7 @@ func (self *cellImpl) Mark(number int) bool {
 	return self.marks[number]
 }
 
-func (self *cellImpl) Marks() IntSlice {
+func (self *mutableCellImpl) Marks() IntSlice {
 	var result IntSlice
 	for i := 0; i < DIM; i++ {
 		if self.marks[i] {
@@ -432,13 +432,13 @@ func (self *cellImpl) Marks() IntSlice {
 	return result
 }
 
-func (self *cellImpl) ResetMarks() {
+func (self *mutableCellImpl) ResetMarks() {
 	for i := 0; i < DIM; i++ {
 		self.marks[i] = false
 	}
 }
 
-func (self *cellImpl) Possible(number int) bool {
+func (self *mutableCellImpl) Possible(number int) bool {
 	//Number is 1 indexed, but we store it as 0-indexed
 	number--
 	if number < 0 || number >= DIM {
@@ -450,7 +450,7 @@ func (self *cellImpl) Possible(number int) bool {
 	return self.impossibles[number] == 0 && !isExcluded
 }
 
-func (self *cellImpl) Possibilities() IntSlice {
+func (self *mutableCellImpl) Possibilities() IntSlice {
 	//TODO: performance improvement would be to not need to grab the lock DIM
 	//times in Possible and lift it out into a PossibleImpl that has assumes
 	//the lock is already grabbed.
@@ -466,7 +466,7 @@ func (self *cellImpl) Possibilities() IntSlice {
 	return result
 }
 
-func (self *cellImpl) checkInvalid() {
+func (self *mutableCellImpl) checkInvalid() {
 	if self.grid == nil {
 		return
 	}
@@ -477,7 +477,7 @@ func (self *cellImpl) checkInvalid() {
 	}
 }
 
-func (self *cellImpl) Invalid() bool {
+func (self *mutableCellImpl) Invalid() bool {
 	//Returns true if no numbers are possible.
 	//TODO: figure out a way to send this back up to the solver when it happens.
 	//TODO: shouldn't this always return true if there is a number set?
@@ -492,19 +492,19 @@ func (self *cellImpl) Invalid() bool {
 	return true
 }
 
-func (self *cellImpl) Lock() {
+func (self *mutableCellImpl) Lock() {
 	self.locked = true
 }
 
-func (self *cellImpl) Unlock() {
+func (self *mutableCellImpl) Unlock() {
 	self.locked = false
 }
 
-func (self *cellImpl) Locked() bool {
+func (self *mutableCellImpl) Locked() bool {
 	return self.locked
 }
 
-func (self *cellImpl) rank() int {
+func (self *mutableCellImpl) rank() int {
 	if self.number != 0 {
 		return 0
 	}
@@ -517,18 +517,18 @@ func (self *cellImpl) rank() int {
 	return count
 }
 
-func (self *cellImpl) ref() cellRef {
+func (self *mutableCellImpl) ref() cellRef {
 	return cellRef{self.Row(), self.Col()}
 }
 
 //Sets ourselves to a random one of our possibilities.
-func (self *cellImpl) pickRandom() {
+func (self *mutableCellImpl) pickRandom() {
 	possibilities := self.Possibilities()
 	choice := possibilities[rand.Intn(len(possibilities))]
 	self.SetNumber(choice)
 }
 
-func (self *cellImpl) implicitNumber() int {
+func (self *mutableCellImpl) implicitNumber() int {
 	//Impossibles is in 0-index space, but represents nubmers in 1-indexed space.
 	result := -1
 	for i, counter := range self.impossibles {
@@ -544,7 +544,7 @@ func (self *cellImpl) implicitNumber() int {
 	return result + 1
 }
 
-func (self *cellImpl) MutableSymmetricalPartner(symmetry SymmetryType) MutableCell {
+func (self *mutableCellImpl) MutableSymmetricalPartner(symmetry SymmetryType) MutableCell {
 	result := self.SymmetricalPartner(symmetry)
 
 	if result == nil {
@@ -554,7 +554,7 @@ func (self *cellImpl) MutableSymmetricalPartner(symmetry SymmetryType) MutableCe
 	return result.mutable()
 }
 
-func (self *cellImpl) SymmetricalPartner(symmetry SymmetryType) Cell {
+func (self *mutableCellImpl) SymmetricalPartner(symmetry SymmetryType) Cell {
 
 	if symmetry == SYMMETRY_ANY {
 		//TODO: don't chose a type of smmetry that doesn't have a partner
@@ -581,7 +581,7 @@ func (self *cellImpl) SymmetricalPartner(symmetry SymmetryType) Cell {
 	return nil
 }
 
-func (self *cellImpl) MutableNeighbors() MutableCellSlice {
+func (self *mutableCellImpl) MutableNeighbors() MutableCellSlice {
 	result := self.Neighbors()
 	if result == nil {
 		return nil
@@ -589,7 +589,7 @@ func (self *cellImpl) MutableNeighbors() MutableCellSlice {
 	return result.mutableCellSlice()
 }
 
-func (self *cellImpl) Neighbors() CellSlice {
+func (self *mutableCellImpl) Neighbors() CellSlice {
 	if self.gridRef == nil || !self.gridRef.initalized {
 		return nil
 	}
@@ -633,16 +633,16 @@ func (self *cellImpl) Neighbors() CellSlice {
 
 }
 
-func (self *cellImpl) dataString() string {
+func (self *mutableCellImpl) dataString() string {
 	result := strconv.Itoa(self.Number())
 	return strings.Replace(result, "0", ALT_0, -1)
 }
 
-func (self *cellImpl) String() string {
+func (self *mutableCellImpl) String() string {
 	return "Cell[" + strconv.Itoa(self.Row()) + "][" + strconv.Itoa(self.Col()) + "]:" + strconv.Itoa(self.Number()) + "\n"
 }
 
-func (self *cellImpl) positionInBlock() (top, right, bottom, left bool) {
+func (self *mutableCellImpl) positionInBlock() (top, right, bottom, left bool) {
 	if self.grid == nil {
 		return
 	}
@@ -654,7 +654,7 @@ func (self *cellImpl) positionInBlock() (top, right, bottom, left bool) {
 	return
 }
 
-func (self *cellImpl) DiagramExtents() (top, left, height, width int) {
+func (self *mutableCellImpl) DiagramExtents() (top, left, height, width int) {
 	top = self.Col() * (BLOCK_DIM + 1)
 	top += self.Col() / BLOCK_DIM
 
@@ -665,7 +665,7 @@ func (self *cellImpl) DiagramExtents() (top, left, height, width int) {
 
 }
 
-func (self *cellImpl) diagramRows(showMarks bool) (rows []string) {
+func (self *mutableCellImpl) diagramRows(showMarks bool) (rows []string) {
 	//We'll only draw barriers at our bottom right edge.
 	_, right, bottom, _ := self.positionInBlock()
 	current := 0
@@ -722,6 +722,6 @@ func (self *cellImpl) diagramRows(showMarks bool) (rows []string) {
 	return rows
 }
 
-func (self *cellImpl) diagram() string {
+func (self *mutableCellImpl) diagram() string {
 	return strings.Join(self.diagramRows(false), "\n")
 }
