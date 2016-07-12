@@ -19,6 +19,10 @@ type queueGetter interface {
 	GetSmallerThan(max int) rankedObject
 }
 
+//readOnlyCellQueue is a special queue that fits queue and queue getter
+//interfaces and is optimized for use as grid.queue when you know that grid
+//isn't mutable. It's also designed to be easy to bootstrap by copying the
+//value of a previous queue, then calling fix().
 type readOnlyCellQueue struct {
 	grid     Grid
 	cellRefs [DIM * DIM]cellRef
