@@ -21,9 +21,10 @@ type CellModification struct {
 
 //TODO: audit all uses of step/compoundstep.Apply()
 
-//TOOD: make readOnlyCellImpl. Test if neighbors should be derived or not. Can
-//burn excludes and impossibles into one array. Everything should be actual
-//contiguous memory, no pointers.
+//TOOD: make readOnlyCellImpl. Test if neighbors should be derived or not.
+//Everything should be actual contiguous memory, no pointers (except for
+//grid). Likely should make cellImpl embed a readOnlyCellImpl and only
+//override items it needs to.
 
 //TODO: make readOnlyGridImpl. Two possible approaches: a version that is
 //incredibly easy to copy and then do minor tweaks. Or a version that stores a
