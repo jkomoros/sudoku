@@ -319,6 +319,49 @@ func NewGrid() MutableGrid {
 	return result
 }
 
+//newStarterGrid is the underlying implementation to create a *gridImpl based
+//on a source Grid. gridImpl.CopyWithModifications doesn't use this because it
+//can be optimized.
+func newStarterGrid(grid Grid) *gridImpl {
+
+	//TODO: test this once it actually knows what it's doing!
+
+	result := &gridImpl{
+		invalid: grid.Invalid(),
+		solved:  grid.Solved(),
+	}
+
+	var cells [DIM * DIM]cellImpl
+
+	for i, sourceCell := range grid.Cells() {
+		cells[i] = cellImpl{
+			//TODO: set gridRef once its type is gridImpl.
+			number: sourceCell.Number(),
+			row:    sourceCell.Row(),
+			col:    sourceCell.Col(),
+			block:  sourceCell.Block(),
+			//TODO: actually copy in impossibles, excluded, marks.
+			locked: sourceCell.Locked(),
+		}
+	}
+
+	//TODO: set result.theQueue.grid to result once result fulfills Grid
+	//interface
+
+	i := 0
+	for r := 0; r < DIM; r++ {
+		for c := 0; c < DIM; c++ {
+			result.theQueue.cellRefs[i] = cellRef{r, c}
+			i++
+		}
+	}
+
+	result.theQueue.fix()
+
+	return result
+
+}
+
 func (self *mutableGridImpl) impl() *mutableGridImpl {
 	return self
 }
