@@ -87,6 +87,11 @@ func (m GridModifcation) equivalent(other GridModifcation) bool {
 	return true
 }
 
+func (self *gridImpl) CopyWithModifications(modifications GridModifcation) Grid {
+	//TODO: actuall implement this
+	return nil
+}
+
 func (self *mutableGridImpl) CopyWithModifications(modifications GridModifcation) Grid {
 	//TODO: when we have an honest-to-god readonly grid impl, optimize this.
 	result := self.MutableCopy()

@@ -147,9 +147,6 @@ type Grid interface {
 	//The rest of these are private methods
 	queue() queue
 	numFilledCells() int
-	cachedSolutionsLock() *sync.RWMutex
-	cachedSolutions() []Grid
-	cachedSolutionsRequestedLength() int
 	blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int)
 	rank() int
 	searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid
@@ -252,6 +249,9 @@ type MutableGrid interface {
 
 	//Private methods
 	replace(other MutableGrid)
+	cachedSolutionsLock() *sync.RWMutex
+	cachedSolutions() []Grid
+	cachedSolutionsRequestedLength() int
 }
 
 //mutableGridImpl is the default implementation of MutableGrid
@@ -362,8 +362,18 @@ func newStarterGrid(grid Grid) *gridImpl {
 
 }
 
+func (self *gridImpl) impl() *mutableGridImpl {
+	//TODO: implement this!
+	return nil
+}
+
 func (self *mutableGridImpl) impl() *mutableGridImpl {
 	return self
+}
+
+func (self *gridImpl) numFilledCells() int {
+	//TODO: implement this!
+	return 0
 }
 
 func (self *mutableGridImpl) numFilledCells() int {
@@ -378,6 +388,11 @@ func (self *mutableGridImpl) cachedSolutions() []Grid {
 func (self *mutableGridImpl) cachedSolutionsRequestedLength() int {
 	//Assumes someone else holds the lock for us
 	return self.cachedSolutionsRequestedLengthRef
+}
+
+func (self *gridImpl) queue() queue {
+	//TODO: implement this!
+	return nil
 }
 
 func (self *mutableGridImpl) queue() queue {
@@ -431,11 +446,21 @@ func (self *mutableGridImpl) LoadSDKFromFile(path string) bool {
 	return true
 }
 
+func (self *gridImpl) MutableCopy() MutableGrid {
+	//TODO: implement this!
+	return nil
+}
+
 func (self *mutableGridImpl) MutableCopy() MutableGrid {
 	//TODO: ideally we'd have some kind of smart SparseGrid or something that we can return.
 	result := NewGrid()
 	result.replace(self)
 	return result
+}
+
+func (self *gridImpl) Copy() Grid {
+	//TODO: implement this.
+	return nil
 }
 
 func (self *mutableGridImpl) Copy() Grid {
@@ -528,6 +553,11 @@ func (self *mutableGridImpl) LockFilledCells() {
 	}
 }
 
+func (self *gridImpl) Cells() CellSlice {
+	//TODO: implement this
+	return nil
+}
+
 func (self *mutableGridImpl) Cells() CellSlice {
 	return self.MutableCells().cellSlice()
 }
@@ -541,6 +571,11 @@ func (self *mutableGridImpl) MutableCells() MutableCellSlice {
 	}
 	//TODO: cache this result
 	return result
+}
+
+func (self *gridImpl) Row(index int) CellSlice {
+	//TODO: implement this
+	return nil
 }
 
 func (self *mutableGridImpl) Row(index int) CellSlice {
@@ -559,6 +594,11 @@ func (self *mutableGridImpl) MutableRow(index int) MutableCellSlice {
 	return result.mutableCellSlice()
 }
 
+func (self *gridImpl) Col(index int) CellSlice {
+	//TODO: implement this
+	return nil
+}
+
 func (self *mutableGridImpl) Col(index int) CellSlice {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Col: ", index)
@@ -575,6 +615,11 @@ func (self *mutableGridImpl) MutableCol(index int) MutableCellSlice {
 	return result.mutableCellSlice()
 }
 
+func (self *gridImpl) Block(index int) CellSlice {
+	//TODO: implemen this
+	return nil
+}
+
 func (self *mutableGridImpl) Block(index int) CellSlice {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Block: ", index)
@@ -589,6 +634,11 @@ func (self *mutableGridImpl) MutableBlock(index int) MutableCellSlice {
 		return nil
 	}
 	return result.mutableCellSlice()
+}
+
+func (self *gridImpl) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
+	//TODO: implement this!
+	return 0, 0, 0, 0
 }
 
 func (self *mutableGridImpl) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
@@ -643,6 +693,11 @@ func (self *mutableGridImpl) MutableCell(row int, col int) MutableCell {
 	return self.mutableCellImpl(row, col)
 }
 
+func (self *gridImpl) Cell(row int, col int) Cell {
+	//TODO: implement this!
+	return nil
+}
+
 func (self *mutableGridImpl) Cell(row int, col int) Cell {
 	return self.cellImpl(row, col)
 }
@@ -668,6 +723,11 @@ func (self *mutableGridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTw
 	return CellSlice(result)
 }
 
+func (self *gridImpl) Solved() bool {
+	//TODO: implement this!
+	return false
+}
+
 func (self *mutableGridImpl) Solved() bool {
 	//TODO: use numFilledCells here.
 	if self.numFilledCellsCounter != len(self.cells) {
@@ -682,6 +742,11 @@ func (self *mutableGridImpl) cellsInvalid() bool {
 	if len(self.invalidCells) > 0 {
 		return true
 	}
+	return false
+}
+
+func (self *gridImpl) Invalid() bool {
+	//TODO: implement this!
 	return false
 }
 
@@ -730,6 +795,11 @@ func (self *mutableGridImpl) Invalid() bool {
 	return false
 }
 
+func (self *gridImpl) Empty() bool {
+	//TODO: implement this!
+	return false
+}
+
 func (self *mutableGridImpl) Empty() bool {
 	return self.numFilledCells() == 0
 }
@@ -770,8 +840,18 @@ func (self *mutableGridImpl) cellRankChanged(cell *mutableCellImpl) {
 	}
 }
 
+func (self *gridImpl) rank() int {
+	//TODO: implement this!
+	return 0
+}
+
 func (self *mutableGridImpl) rank() int {
 	return len(self.cells) - self.numFilledCellsCounter
+}
+
+func (self *gridImpl) DataString() string {
+	//TODO: implement this!
+	return ""
 }
 
 func (self *mutableGridImpl) DataString() string {
@@ -786,8 +866,17 @@ func (self *mutableGridImpl) DataString() string {
 	return strings.Join(rows, ROW_SEP)
 }
 
+func (self *gridImpl) String() string {
+	return self.DataString()
+}
+
 func (self *mutableGridImpl) String() string {
 	return self.DataString()
+}
+
+func (self *gridImpl) Diagram(showMarks bool) string {
+	//TODO: implement this!
+	return ""
 }
 
 func (self *mutableGridImpl) Diagram(showMarks bool) string {

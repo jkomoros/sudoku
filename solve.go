@@ -22,8 +22,18 @@ func (self *mutableGridImpl) Solve() bool {
 	return true
 }
 
+func (self *gridImpl) NumSolutions() int {
+	//TODO: implement this!
+	return 0
+}
+
 func (self *mutableGridImpl) NumSolutions() int {
 	return len(self.Solutions())
+}
+
+func (self *gridImpl) HasSolution() bool {
+	//TODO: implement this!
+	return false
 }
 
 func (self *mutableGridImpl) HasSolution() bool {
@@ -31,8 +41,18 @@ func (self *mutableGridImpl) HasSolution() bool {
 	return len(self.nOrFewerSolutions(1)) > 0
 }
 
+func (self *gridImpl) HasMultipleSolutions() bool {
+	//TODO: implement this!
+	return false
+}
+
 func (self *mutableGridImpl) HasMultipleSolutions() bool {
 	return len(self.nOrFewerSolutions(2)) >= 2
+}
+
+func (self *gridImpl) Solutions() []Grid {
+	//TODO: implement this
+	return nil
 }
 
 func (self *mutableGridImpl) Solutions() (solutions []Grid) {
@@ -160,6 +180,11 @@ func (self *mutableGridImpl) nOrFewerSolutions(max int) []Grid {
 	self.cachedSolutionsLockRef.RUnlock()
 	return result
 
+}
+
+func (self *gridImpl) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid {
+	//TODO: implement this!
+	return nil
 }
 
 func (self *mutableGridImpl) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid {

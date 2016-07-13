@@ -422,6 +422,11 @@ func (c *CompoundSolveStep) Steps() []*SolveStep {
 	return append(c.PrecursorSteps, c.FillStep)
 }
 
+func (self *gridImpl) HumanSolution(options *HumanSolveOptions) *SolveDirections {
+	//TODO implement this!
+	return nil
+}
+
 func (self *mutableGridImpl) HumanSolution(options *HumanSolveOptions) *SolveDirections {
 	clone := self.MutableCopy()
 	return clone.HumanSolve(options)
@@ -429,6 +434,11 @@ func (self *mutableGridImpl) HumanSolution(options *HumanSolveOptions) *SolveDir
 
 func (self *mutableGridImpl) HumanSolve(options *HumanSolveOptions) *SolveDirections {
 	return humanSolveHelper(self, options, nil, true)
+}
+
+func (self *gridImpl) Hint(options *HumanSolveOptions, optionalPreviousSteps []*CompoundSolveStep) *SolveDirections {
+	//TODO: implement this!
+	return nil
 }
 
 func (self *mutableGridImpl) Hint(options *HumanSolveOptions, optionalPreviousSteps []*CompoundSolveStep) *SolveDirections {
@@ -442,6 +452,11 @@ func (self *mutableGridImpl) Hint(options *HumanSolveOptions, optionalPreviousSt
 
 	return result
 
+}
+
+func (self *gridImpl) Difficulty() float64 {
+	//TODO: impelment this!
+	return 0.0
 }
 
 func (self *mutableGridImpl) Difficulty() float64 {
