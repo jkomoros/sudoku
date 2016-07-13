@@ -27,7 +27,7 @@ func DefaultGenerationOptions() *GenerationOptions {
 	return result
 }
 
-func (self *gridImpl) Fill() bool {
+func (self *mutableGridImpl) Fill() bool {
 
 	solutions := self.nOrFewerSolutions(1)
 

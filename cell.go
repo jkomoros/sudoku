@@ -113,7 +113,7 @@ type Cell interface {
 	ref() cellRef
 	//TODO: audit uses of gridImpl; most should use grid() instead.
 	grid() Grid
-	gridImpl() *gridImpl
+	gridImpl() *mutableGridImpl
 	diagramRows(showMarks bool) []string
 	rank() int
 	implicitNumber() int
@@ -190,7 +190,7 @@ type MutableCell interface {
 //mutableCellImpl, which manages locks and mutates the underlying values in a
 //controlled way.
 type cellImpl struct {
-	gridRef *gridImpl
+	gridRef *mutableGridImpl
 	//The number if it's explicitly set. Number() will return it if it's explicitly or implicitly set.
 	number      int
 	row         int
@@ -212,12 +212,12 @@ type mutableCellImpl struct {
 	//TODO: do we need a marks lock?
 }
 
-func newCell(grid *gridImpl, row int, col int) mutableCellImpl {
+func newCell(grid *mutableGridImpl, row int, col int) mutableCellImpl {
 	//TODO: we should not set the number until neighbors are initialized.
 	return mutableCellImpl{cellImpl: cellImpl{gridRef: grid, row: row, col: col, block: grid.blockForCell(row, col)}}
 }
 
-func (self *cellImpl) gridImpl() *gridImpl {
+func (self *cellImpl) gridImpl() *mutableGridImpl {
 	return self.gridRef
 }
 

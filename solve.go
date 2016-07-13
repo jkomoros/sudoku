@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-func (self *gridImpl) Solve() bool {
+func (self *mutableGridImpl) Solve() bool {
 
 	//Special case; check if it's already solved.
 	//TODO: removing this causes Solve, when called on an already solved grid, to sometimes fail. Why is that?
@@ -22,27 +22,27 @@ func (self *gridImpl) Solve() bool {
 	return true
 }
 
-func (self *gridImpl) NumSolutions() int {
+func (self *mutableGridImpl) NumSolutions() int {
 	return len(self.Solutions())
 }
 
-func (self *gridImpl) HasSolution() bool {
+func (self *mutableGridImpl) HasSolution() bool {
 	//TODO: optimize this to bail as soon as we find a single solution.
 	return len(self.nOrFewerSolutions(1)) > 0
 }
 
-func (self *gridImpl) HasMultipleSolutions() bool {
+func (self *mutableGridImpl) HasMultipleSolutions() bool {
 	return len(self.nOrFewerSolutions(2)) >= 2
 }
 
-func (self *gridImpl) Solutions() (solutions []Grid) {
+func (self *mutableGridImpl) Solutions() (solutions []Grid) {
 	return self.nOrFewerSolutions(0)
 }
 
 //The actual workhorse of solutions generating. 0 means "as many as you can
 //find". It might return more than you asked for, if it already had more
 //results than requested sitting around.
-func (self *gridImpl) nOrFewerSolutions(max int) []Grid {
+func (self *mutableGridImpl) nOrFewerSolutions(max int) []Grid {
 
 	self.cachedSolutionsLockRef.RLock()
 	hasNoCachedSolutions := self.cachedSolutionsRef == nil
@@ -162,7 +162,7 @@ func (self *gridImpl) nOrFewerSolutions(max int) []Grid {
 
 }
 
-func (self *gridImpl) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid {
+func (self *mutableGridImpl) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid {
 	//This will only be called by Solutions.
 	//We will return ourselves if we are a solution, and if not we will return nil.
 	//If there are any sub children, we will send them to counter before we're done.
@@ -226,7 +226,7 @@ func (self *gridImpl) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool,
 
 //Fills in all of the cells it can without branching or doing any advanced
 //techniques that require anything more than a single cell's possibles list.
-func (self *gridImpl) fillSimpleCells() int {
+func (self *mutableGridImpl) fillSimpleCells() int {
 	count := 0
 	getter := self.queue().NewGetter()
 	obj := getter.GetSmallerThan(2)

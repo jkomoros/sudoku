@@ -154,7 +154,7 @@ type Grid interface {
 	rank() int
 	searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid
 	//ONLY TO BE USED FOR TESTING!
-	impl() *gridImpl
+	impl() *mutableGridImpl
 }
 
 //TODO: before pushing this, check performance delta. It's bad!
@@ -255,7 +255,7 @@ type MutableGrid interface {
 }
 
 //gridImpl is the default implementation of Grid
-type gridImpl struct {
+type mutableGridImpl struct {
 	initalized bool
 	//This is the internal representation only. Having it be a fixed array
 	//helps with memory locality and performance. However, iterating over the
@@ -284,7 +284,7 @@ const _NUM_SOLVER_THREADS = 4
 
 //NewGrid creates a new, blank grid with all of its cells unfilled.
 func NewGrid() MutableGrid {
-	result := &gridImpl{}
+	result := &mutableGridImpl{}
 
 	result.invalidCells = make(map[*mutableCellImpl]bool)
 
@@ -309,25 +309,25 @@ func NewGrid() MutableGrid {
 	return result
 }
 
-func (self *gridImpl) impl() *gridImpl {
+func (self *mutableGridImpl) impl() *mutableGridImpl {
 	return self
 }
 
-func (self *gridImpl) numFilledCells() int {
+func (self *mutableGridImpl) numFilledCells() int {
 	return self.numFilledCellsCounter
 }
 
-func (self *gridImpl) cachedSolutions() []Grid {
+func (self *mutableGridImpl) cachedSolutions() []Grid {
 	//Assumes someone else holds the lock
 	return self.cachedSolutionsRef
 }
 
-func (self *gridImpl) cachedSolutionsRequestedLength() int {
+func (self *mutableGridImpl) cachedSolutionsRequestedLength() int {
 	//Assumes someone else holds the lock for us
 	return self.cachedSolutionsRequestedLengthRef
 }
 
-func (self *gridImpl) queue() queue {
+func (self *mutableGridImpl) queue() queue {
 
 	self.queueGetterLock.RLock()
 	queue := self.theQueue
@@ -346,17 +346,17 @@ func (self *gridImpl) queue() queue {
 	return queue
 }
 
-func (self *gridImpl) cachedSolutionsLock() *sync.RWMutex {
+func (self *mutableGridImpl) cachedSolutionsLock() *sync.RWMutex {
 	return &self.cachedSolutionsLockRef
 }
 
-func (self *gridImpl) LoadSDK(data string) {
+func (self *mutableGridImpl) LoadSDK(data string) {
 	self.UnlockCells()
 	self.Load(data)
 	self.LockFilledCells()
 }
 
-func (self *gridImpl) Load(data string) {
+func (self *mutableGridImpl) Load(data string) {
 	//All col separators are basically just to make it easier to read. Remove them.
 	data = strings.Replace(data, ALT_COL_SEP, COL_SEP, -1)
 	data = strings.Replace(data, COL_SEP, "", -1)
@@ -369,7 +369,7 @@ func (self *gridImpl) Load(data string) {
 	}
 }
 
-func (self *gridImpl) LoadSDKFromFile(path string) bool {
+func (self *mutableGridImpl) LoadSDKFromFile(path string) bool {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return false
@@ -378,19 +378,19 @@ func (self *gridImpl) LoadSDKFromFile(path string) bool {
 	return true
 }
 
-func (self *gridImpl) MutableCopy() MutableGrid {
+func (self *mutableGridImpl) MutableCopy() MutableGrid {
 	//TODO: ideally we'd have some kind of smart SparseGrid or something that we can return.
 	result := NewGrid()
 	result.replace(self)
 	return result
 }
 
-func (self *gridImpl) Copy() Grid {
+func (self *mutableGridImpl) Copy() Grid {
 	return self.MutableCopy()
 }
 
 //Copies the state of the other grid into self, so they look the same.
-func (self *gridImpl) replace(other MutableGrid) {
+func (self *mutableGridImpl) replace(other MutableGrid) {
 	//Also set excludes
 	for _, otherCell := range other.MutableCells() {
 		selfCell := otherCell.MutableInGrid(self)
@@ -421,7 +421,7 @@ func (self *gridImpl) replace(other MutableGrid) {
 	self.cachedSolutionsLock().Unlock()
 }
 
-func (self *gridImpl) transpose() Grid {
+func (self *mutableGridImpl) transpose() Grid {
 	//Returns a new grid that is the same as this grid (ignoring overrides, which are nulled), but with rows and cols swapped.
 	result := NewGrid()
 	for r := 0; r < DIM; r++ {
@@ -436,19 +436,19 @@ func (self *gridImpl) transpose() Grid {
 	return result
 }
 
-func (self *gridImpl) ResetExcludes() {
+func (self *mutableGridImpl) ResetExcludes() {
 	for i := range self.cells {
 		self.cells[i].ResetExcludes()
 	}
 }
 
-func (self *gridImpl) ResetMarks() {
+func (self *mutableGridImpl) ResetMarks() {
 	for i := range self.cells {
 		self.cells[i].ResetMarks()
 	}
 }
 
-func (self *gridImpl) ResetUnlockedCells() {
+func (self *mutableGridImpl) ResetUnlockedCells() {
 	for i := range self.cells {
 		cell := &self.cells[i]
 		if cell.Locked() {
@@ -460,13 +460,13 @@ func (self *gridImpl) ResetUnlockedCells() {
 	}
 }
 
-func (self *gridImpl) UnlockCells() {
+func (self *mutableGridImpl) UnlockCells() {
 	for i := range self.cells {
 		self.cells[i].Unlock()
 	}
 }
 
-func (self *gridImpl) LockFilledCells() {
+func (self *mutableGridImpl) LockFilledCells() {
 	for i := range self.cells {
 		cell := &self.cells[i]
 		if cell.Number() != 0 {
@@ -475,11 +475,11 @@ func (self *gridImpl) LockFilledCells() {
 	}
 }
 
-func (self *gridImpl) Cells() CellSlice {
+func (self *mutableGridImpl) Cells() CellSlice {
 	return self.MutableCells().cellSlice()
 }
 
-func (self *gridImpl) MutableCells() MutableCellSlice {
+func (self *mutableGridImpl) MutableCells() MutableCellSlice {
 	//Returns a CellSlice of all of the cells in order.
 	result := make(MutableCellSlice, len(self.cells))
 	for i := range self.cells {
@@ -490,7 +490,7 @@ func (self *gridImpl) MutableCells() MutableCellSlice {
 	return result
 }
 
-func (self *gridImpl) Row(index int) CellSlice {
+func (self *mutableGridImpl) Row(index int) CellSlice {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Row: ", index)
 		return nil
@@ -498,7 +498,7 @@ func (self *gridImpl) Row(index int) CellSlice {
 	return self.rows[index]
 }
 
-func (self *gridImpl) MutableRow(index int) MutableCellSlice {
+func (self *mutableGridImpl) MutableRow(index int) MutableCellSlice {
 	result := self.Row(index)
 	if result == nil {
 		return nil
@@ -506,7 +506,7 @@ func (self *gridImpl) MutableRow(index int) MutableCellSlice {
 	return result.mutableCellSlice()
 }
 
-func (self *gridImpl) Col(index int) CellSlice {
+func (self *mutableGridImpl) Col(index int) CellSlice {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Col: ", index)
 		return nil
@@ -514,7 +514,7 @@ func (self *gridImpl) Col(index int) CellSlice {
 	return self.cols[index]
 }
 
-func (self *gridImpl) MutableCol(index int) MutableCellSlice {
+func (self *mutableGridImpl) MutableCol(index int) MutableCellSlice {
 	result := self.Col(index)
 	if result == nil {
 		return nil
@@ -522,7 +522,7 @@ func (self *gridImpl) MutableCol(index int) MutableCellSlice {
 	return result.mutableCellSlice()
 }
 
-func (self *gridImpl) Block(index int) CellSlice {
+func (self *mutableGridImpl) Block(index int) CellSlice {
 	if index < 0 || index >= DIM {
 		log.Println("Invalid index passed to Block: ", index)
 		return nil
@@ -530,7 +530,7 @@ func (self *gridImpl) Block(index int) CellSlice {
 	return self.blocks[index]
 }
 
-func (self *gridImpl) MutableBlock(index int) MutableCellSlice {
+func (self *mutableGridImpl) MutableBlock(index int) MutableCellSlice {
 	result := self.Block(index)
 	if result == nil {
 		return nil
@@ -538,7 +538,7 @@ func (self *gridImpl) MutableBlock(index int) MutableCellSlice {
 	return result.mutableCellSlice()
 }
 
-func (self *gridImpl) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
+func (self *mutableGridImpl) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
 	//Conceptually, we'll pretend like the grid is made up of blocks that are arrayed with row/column
 	//Once we find the block r/c, we'll multiply by the actual dim to get the upper left corner.
 
@@ -551,13 +551,13 @@ func (self *gridImpl) blockExtents(index int) (topRow int, topCol int, bottomRow
 	return row, col, row + BLOCK_DIM - 1, col + BLOCK_DIM - 1
 }
 
-func (self *gridImpl) blockForCell(row int, col int) int {
+func (self *mutableGridImpl) blockForCell(row int, col int) int {
 	blockCol := col / BLOCK_DIM
 	blockRow := row / BLOCK_DIM
 	return blockRow*BLOCK_DIM + blockCol
 }
 
-func (self *gridImpl) blockHasNeighbors(index int) (top bool, right bool, bottom bool, left bool) {
+func (self *mutableGridImpl) blockHasNeighbors(index int) (top bool, right bool, bottom bool, left bool) {
 	topRow, topCol, bottomRow, bottomCol := self.blockExtents(index)
 	top = topRow != 0
 	bottom = bottomRow != DIM-1
@@ -566,7 +566,7 @@ func (self *gridImpl) blockHasNeighbors(index int) (top bool, right bool, bottom
 	return
 }
 
-func (self *gridImpl) mutableCellImpl(row int, col int) *mutableCellImpl {
+func (self *mutableGridImpl) mutableCellImpl(row int, col int) *mutableCellImpl {
 	index := row*DIM + col
 	if index >= DIM*DIM || index < 0 {
 		log.Println("Invalid row/col index passed to Cell: ", row, ", ", col)
@@ -577,7 +577,7 @@ func (self *gridImpl) mutableCellImpl(row int, col int) *mutableCellImpl {
 
 //cellImpl is required because some clients in the package need the actual
 //underlying pointer for comparison.
-func (self *gridImpl) cellImpl(row int, col int) *cellImpl {
+func (self *mutableGridImpl) cellImpl(row int, col int) *cellImpl {
 	index := row*DIM + col
 	if index >= DIM*DIM || index < 0 {
 		log.Println("Invalid row/col index passed to Cell: ", row, ", ", col)
@@ -586,15 +586,15 @@ func (self *gridImpl) cellImpl(row int, col int) *cellImpl {
 	return &self.cells[index].cellImpl
 }
 
-func (self *gridImpl) MutableCell(row int, col int) MutableCell {
+func (self *mutableGridImpl) MutableCell(row int, col int) MutableCell {
 	return self.mutableCellImpl(row, col)
 }
 
-func (self *gridImpl) Cell(row int, col int) Cell {
+func (self *mutableGridImpl) Cell(row int, col int) Cell {
 	return self.cellImpl(row, col)
 }
 
-func (self *gridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
+func (self *mutableGridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
 	length := (rowTwo - rowOne + 1) * (colTwo - colOne + 1)
 	result := make(CellSlice, length)
 	currentRow := rowOne
@@ -615,7 +615,7 @@ func (self *gridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) 
 	return CellSlice(result)
 }
 
-func (self *gridImpl) Solved() bool {
+func (self *mutableGridImpl) Solved() bool {
 	//TODO: use numFilledCells here.
 	if self.numFilledCellsCounter != len(self.cells) {
 		return false
@@ -625,14 +625,14 @@ func (self *gridImpl) Solved() bool {
 
 //We separate this so that we can call it repeatedly within fillSimpleCells,
 //and because we know we won't break the more expensive tests.
-func (self *gridImpl) cellsInvalid() bool {
+func (self *mutableGridImpl) cellsInvalid() bool {
 	if len(self.invalidCells) > 0 {
 		return true
 	}
 	return false
 }
 
-func (self *gridImpl) Invalid() bool {
+func (self *mutableGridImpl) Invalid() bool {
 	//Grid will never be invalid based on moves made by the solver; it will detect times that
 	//someone called SetNumber with an impossible number after the fact, though.
 
@@ -677,22 +677,22 @@ func (self *gridImpl) Invalid() bool {
 	return false
 }
 
-func (self *gridImpl) Empty() bool {
+func (self *mutableGridImpl) Empty() bool {
 	return self.numFilledCells() == 0
 }
 
 //Called by cells when they notice they are invalid and the grid might not know that.
-func (self *gridImpl) cellIsInvalid(cell *mutableCellImpl) {
+func (self *mutableGridImpl) cellIsInvalid(cell *mutableCellImpl) {
 	//Doesn't matter if it was already set.
 	self.invalidCells[cell] = true
 }
 
 //Called by cells when they notice they are valid and think the grid might not know that.
-func (self *gridImpl) cellIsValid(cell *mutableCellImpl) {
+func (self *mutableGridImpl) cellIsValid(cell *mutableCellImpl) {
 	delete(self.invalidCells, cell)
 }
 
-func (self *gridImpl) cellModified(cell *mutableCellImpl, oldNumber int) {
+func (self *mutableGridImpl) cellModified(cell *mutableCellImpl, oldNumber int) {
 	self.cachedSolutionsLock().Lock()
 	self.cachedSolutionsRef = nil
 	self.cachedSolutionsRequestedLengthRef = -1
@@ -707,7 +707,7 @@ func (self *gridImpl) cellModified(cell *mutableCellImpl, oldNumber int) {
 
 }
 
-func (self *gridImpl) cellRankChanged(cell *mutableCellImpl) {
+func (self *mutableGridImpl) cellRankChanged(cell *mutableCellImpl) {
 	//We don't want to create the queue if it doesn't exist. But if it does exist we want to get the real one.
 	self.queueGetterLock.RLock()
 	queue := self.theQueue
@@ -717,11 +717,11 @@ func (self *gridImpl) cellRankChanged(cell *mutableCellImpl) {
 	}
 }
 
-func (self *gridImpl) rank() int {
+func (self *mutableGridImpl) rank() int {
 	return len(self.cells) - self.numFilledCellsCounter
 }
 
-func (self *gridImpl) DataString() string {
+func (self *mutableGridImpl) DataString() string {
 	var rows []string
 	for r := 0; r < DIM; r++ {
 		var row []string
@@ -733,11 +733,11 @@ func (self *gridImpl) DataString() string {
 	return strings.Join(rows, ROW_SEP)
 }
 
-func (self *gridImpl) String() string {
+func (self *mutableGridImpl) String() string {
 	return self.DataString()
 }
 
-func (self *gridImpl) Diagram(showMarks bool) string {
+func (self *mutableGridImpl) Diagram(showMarks bool) string {
 	var rows []string
 
 	//Generate a block boundary row to use later.

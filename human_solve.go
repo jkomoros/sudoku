@@ -422,16 +422,16 @@ func (c *CompoundSolveStep) Steps() []*SolveStep {
 	return append(c.PrecursorSteps, c.FillStep)
 }
 
-func (self *gridImpl) HumanSolution(options *HumanSolveOptions) *SolveDirections {
+func (self *mutableGridImpl) HumanSolution(options *HumanSolveOptions) *SolveDirections {
 	clone := self.MutableCopy()
 	return clone.HumanSolve(options)
 }
 
-func (self *gridImpl) HumanSolve(options *HumanSolveOptions) *SolveDirections {
+func (self *mutableGridImpl) HumanSolve(options *HumanSolveOptions) *SolveDirections {
 	return humanSolveHelper(self, options, nil, true)
 }
 
-func (self *gridImpl) Hint(options *HumanSolveOptions, optionalPreviousSteps []*CompoundSolveStep) *SolveDirections {
+func (self *mutableGridImpl) Hint(options *HumanSolveOptions, optionalPreviousSteps []*CompoundSolveStep) *SolveDirections {
 
 	//TODO: test that non-fill steps before the last one are necessary to unlock
 	//the fill step at the end (cull them if not), and test that.
@@ -444,7 +444,7 @@ func (self *gridImpl) Hint(options *HumanSolveOptions, optionalPreviousSteps []*
 
 }
 
-func (self *gridImpl) Difficulty() float64 {
+func (self *mutableGridImpl) Difficulty() float64 {
 
 	//TODO: test that the memoization works (that is, the cached value is thrown out if the grid is modified)
 	//It's hard to test because self.calculateDifficulty(true) is so expensive to run.
@@ -464,7 +464,7 @@ func (self *gridImpl) Difficulty() float64 {
 	return self.cachedDifficulty
 }
 
-func (self *gridImpl) calcluateDifficulty(accurate bool) float64 {
+func (self *mutableGridImpl) calcluateDifficulty(accurate bool) float64 {
 	//This can be an extremely expensive method. Do not call repeatedly!
 	//returns the difficulty of the grid, which is a number between 0.0 and 1.0.
 	//This is a probabilistic measure; repeated calls may return different numbers, although generally we wait for the results to converge.
@@ -503,7 +503,7 @@ func (self *gridImpl) calcluateDifficulty(accurate bool) float64 {
 
 //This function will HumanSolve _NUM_SOLVES_FOR_DIFFICULTY times, then average the signals together, then
 //give the difficulty for THAT. This is more accurate becuase the weights were trained on such averaged signals.
-func gridDifficultyHelper(grid *gridImpl) float64 {
+func gridDifficultyHelper(grid *mutableGridImpl) float64 {
 
 	collector := make(chan DifficultySignals, _NUM_SOLVES_FOR_DIFFICULTY)
 	//Might as well run all of the human solutions in parallel

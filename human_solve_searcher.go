@@ -753,7 +753,7 @@ func (n *humanSolveSearcherHeap) Pop() interface{} {
 	return item
 }
 
-func (self *gridImpl) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
+func (self *mutableGridImpl) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
 
 	//TODO: with the new approach, we're getting a lot more extreme negative difficulty values. Train a new model!
 
