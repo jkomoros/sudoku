@@ -373,6 +373,7 @@ func (self *mutableGridImpl) initalized() bool {
 
 func (self *gridImpl) impl() *mutableGridImpl {
 	//TODO: implement this!
+	//TODO: can we get rid of this method in general?
 	return nil
 }
 
