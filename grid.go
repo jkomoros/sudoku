@@ -459,13 +459,13 @@ func (self *gridImpl) MutableCopy() MutableGrid {
 }
 
 func (self *mutableGridImpl) MutableCopy() MutableGrid {
-	//TODO: ideally we'd have some kind of smart SparseGrid or something that we can return.
 	result := NewGrid()
 	result.replace(self)
 	return result
 }
 
 func (self *gridImpl) Copy() Grid {
+	//Since it's read-only, no need to actually make a copy.
 	return self
 }
 
