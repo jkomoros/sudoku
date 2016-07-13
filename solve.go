@@ -252,6 +252,12 @@ func (self *mutableGridImpl) searchSolutions(queue *syncedFiniteQueue, isFirstRu
 //Fills in all of the cells it can without branching or doing any advanced
 //techniques that require anything more than a single cell's possibles list.
 func (self *mutableGridImpl) fillSimpleCells() int {
+
+	//TODO: make it so fillSimpleCells returns a Grid that has simplecells
+	//filled. To make it work on readOnlyGrids, we can batch up all of the
+	//items at 1 and apply in one batch, then do it again, repeating until
+	//none are left.
+
 	count := 0
 	getter := self.queue().NewGetter()
 	obj := getter.GetSmallerThan(2)
