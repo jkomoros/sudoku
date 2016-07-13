@@ -646,12 +646,7 @@ func (self *mutableGridImpl) MutableBlock(index int) MutableCellSlice {
 	return result.mutableCellSlice()
 }
 
-func (self *gridImpl) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
-	//TODO: implement this!
-	return 0, 0, 0, 0
-}
-
-func (self *mutableGridImpl) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
+func gridBlockExtentsImpl(grid Grid, index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
 	//Conceptually, we'll pretend like the grid is made up of blocks that are arrayed with row/column
 	//Once we find the block r/c, we'll multiply by the actual dim to get the upper left corner.
 
@@ -662,6 +657,14 @@ func (self *mutableGridImpl) blockExtents(index int) (topRow int, topCol int, bo
 	row := blockRow * BLOCK_DIM
 
 	return row, col, row + BLOCK_DIM - 1, col + BLOCK_DIM - 1
+}
+
+func (self *gridImpl) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
+	return gridBlockExtentsImpl(self, index)
+}
+
+func (self *mutableGridImpl) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
+	return gridBlockExtentsImpl(self, index)
 }
 
 func (self *gridImpl) blockForCell(row int, col int) int {
