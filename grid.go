@@ -466,8 +466,7 @@ func (self *mutableGridImpl) MutableCopy() MutableGrid {
 }
 
 func (self *gridImpl) Copy() Grid {
-	//TODO: implement this.
-	return nil
+	return self
 }
 
 func (self *mutableGridImpl) Copy() Grid {
