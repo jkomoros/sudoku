@@ -341,18 +341,17 @@ func newStarterGrid(grid Grid) *gridImpl {
 
 	for i, sourceCell := range grid.Cells() {
 		cells[i] = cellImpl{
-			//TODO: set gridRef once its type is gridImpl.
-			number: sourceCell.Number(),
-			row:    sourceCell.Row(),
-			col:    sourceCell.Col(),
-			block:  sourceCell.Block(),
+			gridRef: result,
+			number:  sourceCell.Number(),
+			row:     sourceCell.Row(),
+			col:     sourceCell.Col(),
+			block:   sourceCell.Block(),
 			//TODO: actually copy in impossibles, excluded, marks.
 			locked: sourceCell.Locked(),
 		}
 	}
 
-	//TODO: set result.theQueue.grid to result once result fulfills Grid
-	//interface
+	result.theQueue.grid = result
 
 	i := 0
 	for r := 0; r < DIM; r++ {
