@@ -147,6 +147,7 @@ type Grid interface {
 	//The rest of these are private methods
 	queue() queue
 	numFilledCells() int
+	blockForCell(row int, col int) int
 	blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int)
 	rank() int
 	searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid
@@ -249,6 +250,11 @@ type MutableGrid interface {
 
 	//Private methods
 	replace(other MutableGrid)
+	initalized() bool
+	cellRankChanged(cell MutableCell)
+	cellModified(cell MutableCell, oldNumber int)
+	cellIsValid(cell MutableCell)
+	cellIsInvalid(cell MutableCell)
 	cachedSolutionsLock() *sync.RWMutex
 	cachedSolutions() []Grid
 	cachedSolutionsRequestedLength() int
@@ -256,7 +262,7 @@ type MutableGrid interface {
 
 //mutableGridImpl is the default implementation of MutableGrid
 type mutableGridImpl struct {
-	initalized bool
+	isInitalized bool
 	//This is the internal representation only. Having it be a fixed array
 	//helps with memory locality and performance. However, iterating over the
 	//cells means  that you get a copy, and have to be careful not to try
@@ -268,7 +274,7 @@ type mutableGridImpl struct {
 	queueGetterLock        sync.RWMutex
 	theQueue               *finiteQueue
 	numFilledCellsCounter  int
-	invalidCells           map[*mutableCellImpl]bool
+	invalidCells           map[MutableCell]bool
 	cachedSolutionsLockRef sync.RWMutex
 	cachedSolutionsRef     []Grid
 	//The number of solutions that we REQUESTED when we got back
@@ -296,7 +302,7 @@ const _NUM_SOLVER_THREADS = 4
 func NewGrid() MutableGrid {
 	result := &mutableGridImpl{}
 
-	result.invalidCells = make(map[*mutableCellImpl]bool)
+	result.invalidCells = make(map[MutableCell]bool)
 
 	i := 0
 	for r := 0; r < DIM; r++ {
@@ -315,7 +321,7 @@ func NewGrid() MutableGrid {
 
 	result.cachedSolutionsRequestedLengthRef = -1
 
-	result.initalized = true
+	result.isInitalized = true
 	return result
 }
 
@@ -360,6 +366,10 @@ func newStarterGrid(grid Grid) *gridImpl {
 
 	return result
 
+}
+
+func (self *mutableGridImpl) initalized() bool {
+	return self.isInitalized
 }
 
 func (self *gridImpl) impl() *mutableGridImpl {
@@ -654,6 +664,11 @@ func (self *mutableGridImpl) blockExtents(index int) (topRow int, topCol int, bo
 	return row, col, row + BLOCK_DIM - 1, col + BLOCK_DIM - 1
 }
 
+func (self *gridImpl) blockForCell(row int, col int) int {
+	//TODO: implement this!
+	return 0
+}
+
 func (self *mutableGridImpl) blockForCell(row int, col int) int {
 	blockCol := col / BLOCK_DIM
 	blockRow := row / BLOCK_DIM
@@ -802,17 +817,17 @@ func (self *mutableGridImpl) Empty() bool {
 }
 
 //Called by cells when they notice they are invalid and the grid might not know that.
-func (self *mutableGridImpl) cellIsInvalid(cell *mutableCellImpl) {
+func (self *mutableGridImpl) cellIsInvalid(cell MutableCell) {
 	//Doesn't matter if it was already set.
 	self.invalidCells[cell] = true
 }
 
 //Called by cells when they notice they are valid and think the grid might not know that.
-func (self *mutableGridImpl) cellIsValid(cell *mutableCellImpl) {
+func (self *mutableGridImpl) cellIsValid(cell MutableCell) {
 	delete(self.invalidCells, cell)
 }
 
-func (self *mutableGridImpl) cellModified(cell *mutableCellImpl, oldNumber int) {
+func (self *mutableGridImpl) cellModified(cell MutableCell, oldNumber int) {
 	self.cachedSolutionsLock().Lock()
 	self.cachedSolutionsRef = nil
 	self.cachedSolutionsRequestedLengthRef = -1
@@ -827,7 +842,7 @@ func (self *mutableGridImpl) cellModified(cell *mutableCellImpl, oldNumber int) 
 
 }
 
-func (self *mutableGridImpl) cellRankChanged(cell *mutableCellImpl) {
+func (self *mutableGridImpl) cellRankChanged(cell MutableCell) {
 	//We don't want to create the queue if it doesn't exist. But if it does exist we want to get the real one.
 	self.queueGetterLock.RLock()
 	queue := self.theQueue
