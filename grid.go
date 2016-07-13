@@ -833,8 +833,7 @@ func (self *mutableGridImpl) Invalid() bool {
 }
 
 func (self *gridImpl) Empty() bool {
-	//TODO: implement this!
-	return false
+	return self.filledCellsCount == 0
 }
 
 func (self *mutableGridImpl) Empty() bool {
@@ -878,8 +877,7 @@ func (self *mutableGridImpl) cellRankChanged(cell MutableCell) {
 }
 
 func (self *gridImpl) rank() int {
-	//TODO: implement this!
-	return 0
+	return len(self.cells) - self.filledCellsCount
 }
 
 func (self *mutableGridImpl) rank() int {
