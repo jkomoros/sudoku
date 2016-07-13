@@ -291,8 +291,11 @@ type mutableGridImpl struct {
 type gridImpl struct {
 	//This structure is designed to be easy to just use copy() and minor fix
 	//ups to get a valid copy very quickly--so no pointers.
-	cells            [DIM * DIM]cellImpl
-	theQueue         readOnlyCellQueue
+	cells    [DIM * DIM]cellImpl
+	theQueue readOnlyCellQueue
+	//TODO: consider whether we should have rows, cols, and blocks cached. On
+	//the downside it makes Grid.CopyWithModifications much slower (way more
+	//fix up). On the other hand, those might be accessed pretty often...
 	filledCellsCount int
 	invalid          bool
 	solved           bool
@@ -584,8 +587,10 @@ func (self *mutableGridImpl) MutableCells() MutableCellSlice {
 }
 
 func (self *gridImpl) Row(index int) CellSlice {
-	//TODO: implement this
-	return nil
+	if index < 0 || index >= DIM {
+		return nil
+	}
+	return self.cellSlice(index, 0, index, DIM-1)
 }
 
 func (self *mutableGridImpl) Row(index int) CellSlice {
@@ -605,8 +610,10 @@ func (self *mutableGridImpl) MutableRow(index int) MutableCellSlice {
 }
 
 func (self *gridImpl) Col(index int) CellSlice {
-	//TODO: implement this
-	return nil
+	if index < 0 || index >= DIM {
+		return nil
+	}
+	return self.cellSlice(0, index, DIM-1, index)
 }
 
 func (self *mutableGridImpl) Col(index int) CellSlice {
@@ -626,8 +633,10 @@ func (self *mutableGridImpl) MutableCol(index int) MutableCellSlice {
 }
 
 func (self *gridImpl) Block(index int) CellSlice {
-	//TODO: implemen this
-	return nil
+	if index < 0 || index >= DIM {
+		return nil
+	}
+	return self.cellSlice(self.blockExtents(index))
 }
 
 func (self *mutableGridImpl) Block(index int) CellSlice {
