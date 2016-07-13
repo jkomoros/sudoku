@@ -151,8 +151,6 @@ type Grid interface {
 	blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int)
 	rank() int
 	searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid
-	//ONLY TO BE USED FOR TESTING!
-	impl() *mutableGridImpl
 }
 
 //TODO: before pushing this, check performance delta. It's bad!
@@ -258,6 +256,8 @@ type MutableGrid interface {
 	cachedSolutionsLock() *sync.RWMutex
 	cachedSolutions() []Grid
 	cachedSolutionsRequestedLength() int
+	//ONLY TO BE USED FOR TESTING!
+	impl() *mutableGridImpl
 }
 
 //mutableGridImpl is the default implementation of MutableGrid
@@ -370,12 +370,6 @@ func newStarterGrid(grid MutableGrid) *gridImpl {
 
 func (self *mutableGridImpl) initalized() bool {
 	return self.isInitalized
-}
-
-func (self *gridImpl) impl() *mutableGridImpl {
-	//TODO: implement this!
-	//TODO: can we get rid of this method in general?
-	return nil
 }
 
 func (self *mutableGridImpl) impl() *mutableGridImpl {
@@ -510,7 +504,7 @@ func (self *mutableGridImpl) replace(other MutableGrid) {
 	self.cachedSolutionsLock().Unlock()
 }
 
-func (self *mutableGridImpl) transpose() Grid {
+func (self *mutableGridImpl) transpose() MutableGrid {
 	//Returns a new grid that is the same as this grid (ignoring overrides, which are nulled), but with rows and cols swapped.
 	result := NewGrid()
 	for r := 0; r < DIM; r++ {
