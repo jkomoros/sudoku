@@ -326,9 +326,10 @@ func NewGrid() MutableGrid {
 }
 
 //newStarterGrid is the underlying implementation to create a *gridImpl based
-//on a source Grid. gridImpl.CopyWithModifications doesn't use this because it
-//can be optimized.
-func newStarterGrid(grid Grid) *gridImpl {
+//on a source MutableGrid. The reason it accepts a MutableGrid and not a Grid
+//is to reinforce that if you have a Grid and want another Grid you should
+//either use Copy() or CopyWithModifications, which are much faster.
+func newStarterGrid(grid MutableGrid) *gridImpl {
 
 	//TODO: test this once it actually knows what it's doing!
 
