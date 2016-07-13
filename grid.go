@@ -670,23 +670,13 @@ func (self *mutableGridImpl) blockHasNeighbors(index int) (top bool, right bool,
 }
 
 func (self *mutableGridImpl) mutableCellImpl(row int, col int) *mutableCellImpl {
+	//TODO: can we get rid of this?
 	index := row*DIM + col
 	if index >= DIM*DIM || index < 0 {
 		log.Println("Invalid row/col index passed to Cell: ", row, ", ", col)
 		return nil
 	}
 	return &self.cells[index]
-}
-
-//cellImpl is required because some clients in the package need the actual
-//underlying pointer for comparison.
-func (self *mutableGridImpl) cellImpl(row int, col int) *cellImpl {
-	index := row*DIM + col
-	if index >= DIM*DIM || index < 0 {
-		log.Println("Invalid row/col index passed to Cell: ", row, ", ", col)
-		return nil
-	}
-	return &self.cells[index].cellImpl
 }
 
 func (self *mutableGridImpl) MutableCell(row int, col int) MutableCell {
@@ -699,7 +689,14 @@ func (self *gridImpl) Cell(row int, col int) Cell {
 }
 
 func (self *mutableGridImpl) Cell(row int, col int) Cell {
-	return self.cellImpl(row, col)
+	index := row*DIM + col
+	if index >= DIM*DIM || index < 0 {
+		log.Println("Invalid row/col index passed to Cell: ", row, ", ", col)
+		return nil
+	}
+	//A first version of this just returned &self.cells[index], but that
+	//caused lots of tests to fail. Hmmmm...
+	return &self.cells[index].cellImpl
 }
 
 func (self *mutableGridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
