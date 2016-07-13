@@ -714,13 +714,14 @@ func (self *mutableGridImpl) Cell(row int, col int) Cell {
 	return &self.cells[index].cellImpl
 }
 
-func (self *mutableGridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
+func gridCellSliceImpl(grid Grid, rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
+	//both gridImpl and mutableGridImpl can use the same basic implementation
 	length := (rowTwo - rowOne + 1) * (colTwo - colOne + 1)
 	result := make(CellSlice, length)
 	currentRow := rowOne
 	currentCol := colOne
 	for i := 0; i < length; i++ {
-		result[i] = self.Cell(currentRow, currentCol)
+		result[i] = grid.Cell(currentRow, currentCol)
 		if colTwo > currentCol {
 			currentCol++
 		} else {
@@ -733,6 +734,14 @@ func (self *mutableGridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTw
 		}
 	}
 	return CellSlice(result)
+}
+
+func (self *gridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
+	return gridCellSliceImpl(self, rowOne, colOne, rowTwo, colTwo)
+}
+
+func (self *mutableGridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
+	return gridCellSliceImpl(self, rowOne, colOne, rowTwo, colTwo)
 }
 
 func (self *gridImpl) Solved() bool {
