@@ -763,8 +763,7 @@ func (self *mutableGridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTw
 }
 
 func (self *gridImpl) Solved() bool {
-	//TODO: implement this!
-	return false
+	return self.solved
 }
 
 func (self *mutableGridImpl) Solved() bool {
@@ -785,8 +784,7 @@ func (self *mutableGridImpl) cellsInvalid() bool {
 }
 
 func (self *gridImpl) Invalid() bool {
-	//TODO: implement this!
-	return false
+	return self.invalid
 }
 
 func (self *mutableGridImpl) Invalid() bool {
