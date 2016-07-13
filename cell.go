@@ -111,9 +111,7 @@ type Cell interface {
 	mutable() MutableCell
 
 	ref() cellRef
-	//TODO: audit uses of gridImpl; most should use grid() instead.
 	grid() Grid
-	gridImpl() *mutableGridImpl
 	diagramRows(showMarks bool) []string
 	rank() int
 	implicitNumber() int
@@ -215,10 +213,6 @@ type mutableCellImpl struct {
 func newCell(grid *mutableGridImpl, row int, col int) mutableCellImpl {
 	//TODO: we should not set the number until neighbors are initialized.
 	return mutableCellImpl{cellImpl: cellImpl{gridRef: grid, row: row, col: col, block: grid.blockForCell(row, col)}}
-}
-
-func (self *cellImpl) gridImpl() *mutableGridImpl {
-	return self.gridRef
 }
 
 func (self *cellImpl) grid() Grid {
