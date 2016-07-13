@@ -676,15 +676,18 @@ func (self *mutableGridImpl) blockExtents(index int) (topRow int, topCol int, bo
 	return gridBlockExtentsImpl(self, index)
 }
 
-func (self *gridImpl) blockForCell(row int, col int) int {
-	//TODO: implement this!
-	return 0
-}
-
-func (self *mutableGridImpl) blockForCell(row int, col int) int {
+func gridBlockForCellImpl(row, col int) int {
 	blockCol := col / BLOCK_DIM
 	blockRow := row / BLOCK_DIM
 	return blockRow*BLOCK_DIM + blockCol
+}
+
+func (self *gridImpl) blockForCell(row int, col int) int {
+	return gridBlockForCellImpl(row, col)
+}
+
+func (self *mutableGridImpl) blockForCell(row int, col int) int {
+	return gridBlockForCellImpl(row, col)
 }
 
 func (self *mutableGridImpl) blockHasNeighbors(index int) (top bool, right bool, bottom bool, left bool) {
