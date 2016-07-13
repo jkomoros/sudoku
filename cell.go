@@ -587,17 +587,23 @@ func (self *cellImpl) SymmetricalPartner(symmetry SymmetryType) Cell {
 		symmetry = typesOfSymmetry[rand.Intn(len(typesOfSymmetry))]
 	}
 
+	var cell Cell
+
 	switch symmetry {
 	case SYMMETRY_BOTH:
-		if cell := self.gridRef.cellImpl(DIM-self.Row()-1, DIM-self.Col()-1); cell != self {
+		cell = self.gridRef.Cell(DIM-self.Row()-1, DIM-self.Col()-1)
+		if cell != nil && (cell.Row() != self.Row() || cell.Col() != self.Col()) {
 			return cell
 		}
 	case SYMMETRY_HORIZONTAL:
-		if cell := self.gridRef.cellImpl(DIM-self.Row()-1, self.Col()); cell != self {
+		cell = self.gridRef.Cell(DIM-self.Row()-1, self.Col())
+		if cell != nil && (cell.Row() != self.Row() || cell.Col() != self.Col()) {
 			return cell
 		}
+
 	case SYMMETRY_VERTICAL:
-		if cell := self.gridRef.cellImpl(self.Row(), DIM-self.Col()-1); cell != self {
+		cell = self.gridRef.Cell(self.Row(), DIM-self.Col()-1)
+		if cell != nil && (cell.Row() != self.Row() || cell.Col() != self.Col()) {
 			return cell
 		}
 	}
