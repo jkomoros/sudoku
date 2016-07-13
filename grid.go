@@ -291,10 +291,11 @@ type mutableGridImpl struct {
 type gridImpl struct {
 	//This structure is designed to be easy to just use copy() and minor fix
 	//ups to get a valid copy very quickly--so no pointers.
-	cells    [DIM * DIM]cellImpl
-	theQueue readOnlyCellQueue
-	invalid  bool
-	solved   bool
+	cells            [DIM * DIM]cellImpl
+	theQueue         readOnlyCellQueue
+	filledCellsCount int
+	invalid          bool
+	solved           bool
 }
 
 //TODO:Allow num solver threads to be set at runtime
@@ -336,8 +337,9 @@ func newStarterGrid(grid MutableGrid) *gridImpl {
 	//TODO: test this once it actually knows what it's doing!
 
 	result := &gridImpl{
-		invalid: grid.Invalid(),
-		solved:  grid.Solved(),
+		filledCellsCount: grid.numFilledCells(),
+		invalid:          grid.Invalid(),
+		solved:           grid.Solved(),
 	}
 
 	var cells [DIM * DIM]cellImpl
@@ -379,8 +381,7 @@ func (self *mutableGridImpl) impl() *mutableGridImpl {
 }
 
 func (self *gridImpl) numFilledCells() int {
-	//TODO: implement this!
-	return 0
+	return self.filledCellsCount
 }
 
 func (self *mutableGridImpl) numFilledCells() int {
