@@ -399,8 +399,7 @@ func (self *mutableGridImpl) cachedSolutionsRequestedLength() int {
 }
 
 func (self *gridImpl) queue() queue {
-	//TODO: implement this!
-	return nil
+	return &self.theQueue
 }
 
 func (self *mutableGridImpl) queue() queue {
