@@ -254,7 +254,7 @@ type MutableGrid interface {
 	replace(other MutableGrid)
 }
 
-//gridImpl is the default implementation of Grid
+//mutableGridImpl is the default implementation of MutableGrid
 type mutableGridImpl struct {
 	initalized bool
 	//This is the internal representation only. Having it be a fixed array
@@ -277,6 +277,16 @@ type mutableGridImpl struct {
 	//asked for more.
 	cachedSolutionsRequestedLengthRef int
 	cachedDifficulty                  float64
+}
+
+//gridImpl is the default implementation of Grid.
+type gridImpl struct {
+	//This structure is designed to be easy to just use copy() and minor fix
+	//ups to get a valid copy very quickly--so no pointers.
+	cells    [DIM * DIM]cellImpl
+	theQueue readOnlyCellQueue
+	invalid  bool
+	solved   bool
 }
 
 //TODO:Allow num solver threads to be set at runtime
