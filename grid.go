@@ -560,8 +560,12 @@ func (self *mutableGridImpl) LockFilledCells() {
 }
 
 func (self *gridImpl) Cells() CellSlice {
-	//TODO: implement this
-	return nil
+	result := make(CellSlice, len(self.cells))
+	for i := range self.cells {
+		result[i] = &self.cells[i]
+	}
+	//TODO: consider caching this?
+	return result
 }
 
 func (self *mutableGridImpl) Cells() CellSlice {
