@@ -909,12 +909,7 @@ func (self *mutableGridImpl) String() string {
 	return self.DataString()
 }
 
-func (self *gridImpl) Diagram(showMarks bool) string {
-	//TODO: implement this!
-	return ""
-}
-
-func (self *mutableGridImpl) Diagram(showMarks bool) string {
+func gridDiagramImpl(grid Grid, showMarks bool) string {
 	var rows []string
 
 	//Generate a block boundary row to use later.
@@ -930,9 +925,9 @@ func (self *mutableGridImpl) Diagram(showMarks bool) string {
 
 	for r := 0; r < DIM; r++ {
 		var tempRows []string
-		tempRows = self.Cell(r, 0).diagramRows(showMarks)
+		tempRows = grid.Cell(r, 0).diagramRows(showMarks)
 		for c := 1; c < DIM; c++ {
-			cellRows := self.Cell(r, c).diagramRows(showMarks)
+			cellRows := grid.Cell(r, c).diagramRows(showMarks)
 			for i := range tempRows {
 				tempRows[i] += cellRows[i]
 				//Are we at a block boundary?
@@ -949,4 +944,12 @@ func (self *mutableGridImpl) Diagram(showMarks bool) string {
 		}
 	}
 	return strings.Join(rows, "\n")
+}
+
+func (self *gridImpl) Diagram(showMarks bool) string {
+	return gridDiagramImpl(self, showMarks)
+}
+
+func (self *mutableGridImpl) Diagram(showMarks bool) string {
+	return gridDiagramImpl(self, showMarks)
 }
