@@ -884,21 +884,25 @@ func (self *mutableGridImpl) rank() int {
 	return len(self.cells) - self.numFilledCellsCounter
 }
 
-func (self *gridImpl) DataString() string {
-	//TODO: implement this!
-	return ""
-}
-
-func (self *mutableGridImpl) DataString() string {
+func gridDataStringImpl(grid Grid) string {
 	var rows []string
+	cells := grid.Cells()
 	for r := 0; r < DIM; r++ {
 		var row []string
 		for c := 0; c < DIM; c++ {
-			row = append(row, self.cells[r*DIM+c].dataString())
+			row = append(row, cells[r*DIM+c].dataString())
 		}
 		rows = append(rows, strings.Join(row, COL_SEP))
 	}
 	return strings.Join(rows, ROW_SEP)
+}
+
+func (self *gridImpl) DataString() string {
+	return gridDataStringImpl(self)
+}
+
+func (self *mutableGridImpl) DataString() string {
+	return gridDataStringImpl(self)
 }
 
 func (self *gridImpl) String() string {

@@ -113,6 +113,7 @@ type Cell interface {
 	ref() cellRef
 	grid() Grid
 	diagramRows(showMarks bool) []string
+	dataString() string
 	rank() int
 	implicitNumber() int
 }
