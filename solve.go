@@ -57,6 +57,8 @@ func (self *mutableGridImpl) Solutions() (solutions []Grid) {
 }
 
 func cachedNOrFewerSolutions(self *mutableGridImpl, max int) []Grid {
+	//TODO: investigate how useful this actually is for mutableGridImpl, and
+	//also test whether it makes sense to make one for gridImpl.
 	self.cachedSolutionsLockRef.RLock()
 	hasNoCachedSolutions := self.cachedSolutionsRef == nil
 	cachedSolutionsLen := self.cachedSolutionsRequestedLengthRef
