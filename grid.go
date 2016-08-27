@@ -158,6 +158,9 @@ type Grid interface {
 
 //TODO: before pushing this, check performance delta. It's bad!
 
+//TODO: exhaustively test gridImpl and read only grids to make sure we're
+//actually exercising gridImpl, and not mutalbeGrids everywhere.
+
 //MutableGrid is a sudoku Grid that can be mutated.
 type MutableGrid interface {
 	//MutableGrid contains all of Grid's (read-only) methods.
