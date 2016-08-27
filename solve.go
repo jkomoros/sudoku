@@ -23,8 +23,7 @@ func (self *mutableGridImpl) Solve() bool {
 }
 
 func (self *gridImpl) NumSolutions() int {
-	//TODO: implement this!
-	return 0
+	return len(self.Solutions())
 }
 
 func (self *mutableGridImpl) NumSolutions() int {
@@ -32,8 +31,8 @@ func (self *mutableGridImpl) NumSolutions() int {
 }
 
 func (self *gridImpl) HasSolution() bool {
-	//TODO: implement this!
-	return false
+	//TODO: optimize this to bail as soon as we find a single solution.
+	return len(nOrFewerSolutions(self, 1)) > 0
 }
 
 func (self *mutableGridImpl) HasSolution() bool {
@@ -42,8 +41,7 @@ func (self *mutableGridImpl) HasSolution() bool {
 }
 
 func (self *gridImpl) HasMultipleSolutions() bool {
-	//TODO: implement this!
-	return false
+	return len(nOrFewerSolutions(self, 2)) >= 2
 }
 
 func (self *mutableGridImpl) HasMultipleSolutions() bool {
@@ -51,8 +49,7 @@ func (self *mutableGridImpl) HasMultipleSolutions() bool {
 }
 
 func (self *gridImpl) Solutions() []Grid {
-	//TODO: implement this
-	return nil
+	return nOrFewerSolutions(self, 0)
 }
 
 func (self *mutableGridImpl) Solutions() (solutions []Grid) {
