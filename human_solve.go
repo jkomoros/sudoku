@@ -423,8 +423,8 @@ func (c *CompoundSolveStep) Steps() []*SolveStep {
 }
 
 func (self *gridImpl) HumanSolution(options *HumanSolveOptions) *SolveDirections {
-	//TODO implement this!
-	return nil
+	return humanSolveHelper(self, options, nil, true)
+
 }
 
 func (self *mutableGridImpl) HumanSolution(options *HumanSolveOptions) *SolveDirections {
@@ -437,8 +437,8 @@ func (self *mutableGridImpl) HumanSolve(options *HumanSolveOptions) *SolveDirect
 }
 
 func (self *gridImpl) Hint(options *HumanSolveOptions, optionalPreviousSteps []*CompoundSolveStep) *SolveDirections {
-	//TODO: implement this!
-	return nil
+
+	return humanSolveHelper(self, options, optionalPreviousSteps, false)
 }
 
 func (self *mutableGridImpl) Hint(options *HumanSolveOptions, optionalPreviousSteps []*CompoundSolveStep) *SolveDirections {
