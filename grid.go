@@ -154,9 +154,6 @@ type Grid interface {
 	blockForCell(row int, col int) int
 	blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int)
 	rank() int
-	//TODO: this seems like it should be a top-level function that takes a
-	//Grid as its first argument.
-	searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid
 }
 
 //TODO: before pushing this, check performance delta. It's bad!

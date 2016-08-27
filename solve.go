@@ -103,7 +103,7 @@ func (self *mutableGridImpl) nOrFewerSolutions(max int) []Grid {
 					if !ok {
 						return
 					}
-					result := grid.(Grid).searchSolutions(queue, firstRun, max)
+					result := searchGridSolutions(grid.(Grid), queue, firstRun, max)
 					if result != nil {
 						incomingSolutions <- result
 					}
@@ -187,27 +187,27 @@ func (self *gridImpl) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool,
 	return nil
 }
 
-func (self *mutableGridImpl) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid {
+func searchGridSolutions(grid Grid, queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid {
 	//This will only be called by Solutions.
 	//We will return ourselves if we are a solution, and if not we will return nil.
 	//If there are any sub children, we will send them to counter before we're done.
 
-	if self.Invalid() {
+	if grid.Invalid() {
 		return nil
 	}
 
-	self.fillSimpleCells()
+	grid = withSimpleCellsFilled(grid)
 	//Have any cells noticed they were invalid while solving forward?
-	if self.basicInvalid() {
+	if grid.basicInvalid() {
 		return nil
 	}
 
-	if self.Solved() {
-		return self
+	if grid.Solved() {
+		return grid
 	}
 
 	//Well, looks like we're going to have to branch.
-	rankedObject := self.queue().NewGetter().Get()
+	rankedObject := grid.queue().NewGetter().Get()
 	if rankedObject == nil {
 		panic("Queue didn't have any cells.")
 	}
@@ -230,12 +230,12 @@ func (self *mutableGridImpl) searchSolutions(queue *syncedFiniteQueue, isFirstRu
 	for i, num := range possibilities {
 		//TODO: this seems like a natural place to use CopyWithModifications,
 		//but gridImpl.fillSimpleCells will be called on it.
-		copy := self.MutableCopy()
+		copy := grid.MutableCopy()
 		cell.MutableInGrid(copy).SetNumber(num)
 		//As an optimization for cases where there are many solutions, we'll just continue a DFS until we barf then unroll back up.
 		//It doesn't appear to slow things down in the general case
 		if i == 0 && !isFirstRun {
-			result = copy.searchSolutions(queue, false, numSoughtSolutions)
+			result = searchGridSolutions(copy, queue, false, numSoughtSolutions)
 			if result != nil && numSoughtSolutions == 1 {
 				//No need to spin off other branches, just return up.
 				return result
@@ -249,26 +249,40 @@ func (self *mutableGridImpl) searchSolutions(queue *syncedFiniteQueue, isFirstRu
 
 }
 
-//Fills in all of the cells it can without branching or doing any advanced
-//techniques that require anything more than a single cell's possibles list.
-func (self *mutableGridImpl) fillSimpleCells() int {
+//Returns a copy of Grid that has filled in all of the cells it can without
+//branching or doing any advanced techniques that require anything more than a
+//single cell's possibles list.
+func withSimpleCellsFilled(grid Grid) Grid {
 
-	//TODO: make it so fillSimpleCells returns a Grid that has simplecells
-	//filled. To make it work on readOnlyGrids, we can batch up all of the
-	//items at 1 and apply in one batch, then do it again, repeating until
-	//none are left.
+	//We fetch all of the cells that have a single possibility, then create a
+	//copy with all of those filled. Then we repeat, because filling those
+	//cells may have set other cells to now only have one possibility. Repeat
+	//until no more cells with one possibility found.
 
-	count := 0
-	getter := self.queue().NewGetter()
-	obj := getter.GetSmallerThan(2)
-	for obj != nil && !self.basicInvalid() {
-		cell, ok := obj.(MutableCell)
-		if !ok {
-			continue
+	changesMade := true
+
+	for changesMade {
+		changesMade = false
+		getter := grid.queue().NewGetter()
+		obj := getter.GetSmallerThan(2)
+
+		var modifications GridModifcation
+		for obj != nil && !grid.basicInvalid() {
+			cell, ok := obj.(MutableCell)
+			if !ok {
+				continue
+			}
+			changesMade = true
+			modification := &CellModification{
+				Cell:   cell,
+				Number: cell.implicitNumber(),
+			}
+			modifications = append(modifications, modification)
+			obj = getter.GetSmallerThan(2)
 		}
-		cell.SetNumber(cell.implicitNumber())
-		count++
-		obj = getter.GetSmallerThan(2)
+
+		grid = grid.CopyWithModifications(modifications)
+
 	}
-	return count
+	return grid
 }
