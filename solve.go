@@ -182,11 +182,6 @@ func (self *mutableGridImpl) nOrFewerSolutions(max int) []Grid {
 
 }
 
-func (self *gridImpl) searchSolutions(queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid {
-	//TODO: implement this!
-	return nil
-}
-
 func searchGridSolutions(grid Grid, queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid {
 	//This will only be called by Solutions.
 	//We will return ourselves if we are a solution, and if not we will return nil.
