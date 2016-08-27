@@ -146,6 +146,10 @@ type Grid interface {
 
 	//The rest of these are private methods
 	queue() queue
+	//Quick, non-exhausitve test for invaliditiies that the solver might have
+	//done while solving. Not robust to a human putting it obvious
+	//invalidities.
+	basicInvalid() bool
 	numFilledCells() int
 	blockForCell(row int, col int) int
 	blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int)
@@ -776,11 +780,15 @@ func (self *mutableGridImpl) Solved() bool {
 
 //We separate this so that we can call it repeatedly within fillSimpleCells,
 //and because we know we won't break the more expensive tests.
-func (self *mutableGridImpl) cellsInvalid() bool {
+func (self *mutableGridImpl) basicInvalid() bool {
 	if len(self.invalidCells) > 0 {
 		return true
 	}
 	return false
+}
+
+func (self *gridImpl) basicInvalid() bool {
+	return self.invalid
 }
 
 func (self *gridImpl) Invalid() bool {
@@ -791,7 +799,7 @@ func (self *mutableGridImpl) Invalid() bool {
 	//Grid will never be invalid based on moves made by the solver; it will detect times that
 	//someone called SetNumber with an impossible number after the fact, though.
 
-	if self.cellsInvalid() {
+	if self.basicInvalid() {
 		return true
 	}
 	for i := 0; i < DIM; i++ {

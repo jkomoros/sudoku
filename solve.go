@@ -198,7 +198,7 @@ func (self *mutableGridImpl) searchSolutions(queue *syncedFiniteQueue, isFirstRu
 
 	self.fillSimpleCells()
 	//Have any cells noticed they were invalid while solving forward?
-	if self.cellsInvalid() {
+	if self.basicInvalid() {
 		return nil
 	}
 
@@ -261,7 +261,7 @@ func (self *mutableGridImpl) fillSimpleCells() int {
 	count := 0
 	getter := self.queue().NewGetter()
 	obj := getter.GetSmallerThan(2)
-	for obj != nil && !self.cellsInvalid() {
+	for obj != nil && !self.basicInvalid() {
 		cell, ok := obj.(MutableCell)
 		if !ok {
 			continue
