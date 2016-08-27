@@ -455,8 +455,7 @@ func (self *mutableGridImpl) Hint(options *HumanSolveOptions, optionalPreviousSt
 }
 
 func (self *gridImpl) Difficulty() float64 {
-	//TODO: impelment this!
-	return 0.0
+	return calcluateGridDifficulty(self, true)
 }
 
 func (self *mutableGridImpl) Difficulty() float64 {
@@ -474,12 +473,12 @@ func (self *mutableGridImpl) Difficulty() float64 {
 	//Yes, this memoization will fail in the (rare!) cases where a grid's actual difficulty is 0.0, but
 	//the worst case scenario is that we just return the same value.
 	if self.cachedDifficulty == 0.0 {
-		self.cachedDifficulty = self.calcluateDifficulty(true)
+		self.cachedDifficulty = calcluateGridDifficulty(self, true)
 	}
 	return self.cachedDifficulty
 }
 
-func (self *mutableGridImpl) calcluateDifficulty(accurate bool) float64 {
+func calcluateGridDifficulty(grid Grid, accurate bool) float64 {
 	//This can be an extremely expensive method. Do not call repeatedly!
 	//returns the difficulty of the grid, which is a number between 0.0 and 1.0.
 	//This is a probabilistic measure; repeated calls may return different numbers, although generally we wait for the results to converge.
@@ -490,7 +489,7 @@ func (self *mutableGridImpl) calcluateDifficulty(accurate bool) float64 {
 	average := 0.0
 	lastAverage := 0.0
 
-	self.HasMultipleSolutions()
+	grid.HasMultipleSolutions()
 
 	//Since this is so expensive, in testing situations we want to run it in less accurate mode (so it goes fast!)
 	maxIterations := _MAX_DIFFICULTY_ITERATIONS
@@ -499,7 +498,7 @@ func (self *mutableGridImpl) calcluateDifficulty(accurate bool) float64 {
 	}
 
 	for i := 0; i < maxIterations; i++ {
-		difficulty := gridDifficultyHelper(self)
+		difficulty := gridDifficultyHelper(grid)
 
 		accum += difficulty
 		average = accum / (float64(i) + 1.0)
@@ -518,7 +517,7 @@ func (self *mutableGridImpl) calcluateDifficulty(accurate bool) float64 {
 
 //This function will HumanSolve _NUM_SOLVES_FOR_DIFFICULTY times, then average the signals together, then
 //give the difficulty for THAT. This is more accurate becuase the weights were trained on such averaged signals.
-func gridDifficultyHelper(grid *mutableGridImpl) float64 {
+func gridDifficultyHelper(grid Grid) float64 {
 
 	collector := make(chan DifficultySignals, _NUM_SOLVES_FOR_DIFFICULTY)
 	//Might as well run all of the human solutions in parallel
