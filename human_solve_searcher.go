@@ -768,19 +768,13 @@ func (n *humanSolveSearcherHeap) Pop() interface{} {
 	return item
 }
 
-func (self *gridImpl) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
-	//TODO: implement this!
-	return nil, nil
-}
-
-func (self *mutableGridImpl) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
-
+func humanSolvePossibleStepsImpl(grid Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
 	//TODO: with the new approach, we're getting a lot more extreme negative difficulty values. Train a new model!
 
 	//We send a copy here because our own selves will likely be modified soon
 	//after returning from this, and if the other threads haven't gotten the
 	//signal yet to shut down they might get in a weird state.
-	searcher := newHumanSolveSearcher(self.Copy(), previousSteps, options)
+	searcher := newHumanSolveSearcher(grid, previousSteps, options)
 
 	searcher.Search()
 
@@ -807,4 +801,13 @@ func (self *mutableGridImpl) HumanSolvePossibleSteps(options *HumanSolveOptions,
 	invertedDistribution := distri.invert()
 
 	return resultSteps, invertedDistribution
+
+}
+
+func (self *gridImpl) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
+	return humanSolvePossibleStepsImpl(self, options, previousSteps)
+}
+
+func (self *mutableGridImpl) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
+	return humanSolvePossibleStepsImpl(self.Copy(), options, previousSteps)
 }
