@@ -157,7 +157,7 @@ type synchronousFindCoordinator struct {
 }
 
 //humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
-func humanSolveHelper(grid MutableGrid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep, endConditionSolved bool) *SolveDirections {
+func humanSolveHelper(grid Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep, endConditionSolved bool) *SolveDirections {
 	//Short circuit solving if it has multiple solutions.
 	if grid.HasMultipleSolutions() {
 		return nil
@@ -197,10 +197,20 @@ func humanSolveHelper(grid MutableGrid, options *HumanSolveOptions, previousStep
 
 //humanSolveSearch is a new implementation of the core implementation of
 //HumanSolve. Mutates the grid.
-func humanSolveSearch(grid MutableGrid, options *HumanSolveOptions) []*CompoundSolveStep {
+func humanSolveSearch(grid Grid, options *HumanSolveOptions) []*CompoundSolveStep {
 	var result []*CompoundSolveStep
 
-	//TODO: it FEELS like here we should be using read only grids.
+	isMutableGrid := false
+
+	mGrid, ok := grid.(MutableGrid)
+
+	if ok {
+		isMutableGrid = true
+	}
+
+	//TODO: it FEELS like here we should be using read only grids. Test what
+	//happens if we get rid of the mutablegrid path (and modify the callers
+	//who expect us to mutate the grid)
 	for !grid.Solved() {
 		newStep := humanSolveSearchSingleStep(grid, options, result)
 		if newStep == nil {
@@ -208,7 +218,12 @@ func humanSolveSearch(grid MutableGrid, options *HumanSolveOptions) []*CompoundS
 			return nil
 		}
 		result = append(result, newStep)
-		newStep.Apply(grid)
+		if isMutableGrid {
+			newStep.Apply(mGrid)
+		} else {
+			grid = grid.CopyWithModifications(newStep.Modifications())
+		}
+
 	}
 
 	return result
