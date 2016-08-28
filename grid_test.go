@@ -421,6 +421,7 @@ func TestGridLoad(t *testing.T) {
 	previousRank := grid.rank()
 
 	grid = withSimpleCellsFilled(grid).MutableCopy()
+	cell = cell.MutableInGrid(grid)
 
 	if num := previousRank - grid.rank(); num != 45 {
 		t.Log("We filled simple cells on the test grid but didn't get as many as we were expecting: ", num, "/", 45)
@@ -445,7 +446,7 @@ func TestGridLoad(t *testing.T) {
 	cell.SetNumber(cell.Number() + 1)
 
 	if !grid.Invalid() {
-		t.Log("Grid didn't notice it was invalid when it actually was.")
+		t.Error("Grid didn't notice it was invalid when it actually was.", grid)
 		t.Fail()
 	}
 
