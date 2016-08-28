@@ -837,15 +837,10 @@ func (self *gridImpl) Invalid() bool {
 	return self.invalid
 }
 
-func (self *mutableGridImpl) Invalid() bool {
-	//Grid will never be invalid based on moves made by the solver; it will detect times that
-	//someone called SetNumber with an impossible number after the fact, though.
-
-	if self.basicInvalid() {
-		return true
-	}
+//Returns true if any row, col, or block in the grid has a duplicate number
+func gridGroupsInvalid(grid Grid) bool {
 	for i := 0; i < DIM; i++ {
-		row := self.Row(i)
+		row := grid.Row(i)
 		rowCheck := make(map[int]bool)
 		for _, cell := range row {
 			if cell.Number() == 0 {
@@ -856,7 +851,7 @@ func (self *mutableGridImpl) Invalid() bool {
 			}
 			rowCheck[cell.Number()] = true
 		}
-		col := self.Col(i)
+		col := grid.Col(i)
 		colCheck := make(map[int]bool)
 		for _, cell := range col {
 			if cell.Number() == 0 {
@@ -867,7 +862,7 @@ func (self *mutableGridImpl) Invalid() bool {
 			}
 			colCheck[cell.Number()] = true
 		}
-		block := self.Block(i)
+		block := grid.Block(i)
 		blockCheck := make(map[int]bool)
 		for _, cell := range block {
 			if cell.Number() == 0 {
@@ -880,6 +875,17 @@ func (self *mutableGridImpl) Invalid() bool {
 		}
 	}
 	return false
+}
+
+func (self *mutableGridImpl) Invalid() bool {
+	//Grid will never be invalid based on moves made by the solver; it will detect times that
+	//someone called SetNumber with an impossible number after the fact, though.
+
+	if self.basicInvalid() {
+		return true
+	}
+	return gridGroupsInvalid(self)
+
 }
 
 func (self *gridImpl) Empty() bool {
