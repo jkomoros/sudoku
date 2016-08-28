@@ -176,6 +176,9 @@ type MutableCell interface {
 	Unlock()
 
 	//The following are private methods
+
+	//TODO: a number of thse would be better handled by having a generic path
+	//and if it can cast to mutableCellImpl doing a fast path.
 	setPossible(number int)
 	setImpossible(number int)
 	excludedLock() *sync.RWMutex
