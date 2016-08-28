@@ -499,8 +499,21 @@ func (self *mutableGridImpl) LoadSDKFromFile(path string) bool {
 }
 
 func (self *gridImpl) MutableCopy() MutableGrid {
-	//TODO: implement this!
-	return nil
+	result := NewGrid()
+	result.Load(self.DataString())
+	for _, sourceCell := range self.cells {
+		destCell := sourceCell.MutableInGrid(result)
+		destCell.excludedLock().Lock()
+		destCell.setExcludedBulk(sourceCell.excluded)
+		destCell.setMarksBulk(sourceCell.marks)
+		destCell.excludedLock().Unlock()
+		if sourceCell.Locked() {
+			destCell.Lock()
+		} else {
+			destCell.Unlock()
+		}
+	}
+	return result
 }
 
 func (self *mutableGridImpl) MutableCopy() MutableGrid {
