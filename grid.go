@@ -259,9 +259,13 @@ type MutableGrid interface {
 	cellModified(cell MutableCell, oldNumber int)
 	cellIsValid(cell MutableCell)
 	cellIsInvalid(cell MutableCell)
+	//TODO: you can move these to not be used unless it can be casted to an
+	//impl where we know we can do it.
 	cachedSolutionsLock() *sync.RWMutex
 	cachedSolutions() []Grid
 	cachedSolutionsRequestedLength() int
+	//TODO: instead of having this in the interface we should just try casting
+	//to it and see if it succeeed.
 	//ONLY TO BE USED FOR TESTING!
 	impl() *mutableGridImpl
 }
