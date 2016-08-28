@@ -422,7 +422,7 @@ func TestGridLoad(t *testing.T) {
 
 	grid = withSimpleCellsFilled(grid).MutableCopy()
 
-	if num := grid.rank() - previousRank; num != 45 {
+	if num := previousRank - grid.rank(); num != 45 {
 		t.Log("We filled simple cells on the test grid but didn't get as many as we were expecting: ", num, "/", 45)
 		t.Fail()
 	}
