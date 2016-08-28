@@ -41,7 +41,7 @@ func TestCopyWithModifications(t *testing.T) {
 			GridModifcation{
 				&CellModification{
 					Cell:   sourceGrid.Cell(0, 0),
-					Number: DIM,
+					Number: DIM + 1,
 				},
 			},
 			sourceGrid,
