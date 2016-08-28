@@ -332,8 +332,54 @@ func (self *cellImpl) Number() int {
 	return self.number
 }
 
+func (self *cellImpl) setNumber(number int) {
+	//Should only be used inside of CopyWithModifications
+
+	//Substantially recreated in mutableCellImpl.SetNumber
+
+	if self.number == number {
+		//No work to do now.
+		return
+	}
+	oldNumber := self.number
+	self.number = number
+	if oldNumber > 0 {
+		for i := 1; i <= DIM; i++ {
+			if i == oldNumber {
+				continue
+			}
+			self.setPossible(i)
+		}
+		for _, cell := range self.Neighbors() {
+			cellImpl, ok := cell.(*cellImpl)
+			if !ok {
+				panic("Thought all neighbors would be cellImpl but they weren't")
+			}
+			cellImpl.setPossible(number)
+		}
+	}
+	if number > 0 {
+		for i := 1; i <= DIM; i++ {
+			if i == number {
+				continue
+			}
+			self.setImpossible(i)
+		}
+		for _, cell := range self.Neighbors() {
+			cellImpl, ok := cell.(*cellImpl)
+			if !ok {
+				panic("Thought all neighbors would be cellImpl but they weren't")
+			}
+			cellImpl.setImpossible(number)
+		}
+	}
+}
+
 func (self *mutableCellImpl) SetNumber(number int) {
 	//Sets the explicit number. This will affect its neighbors possibles list.
+
+	//Substantially recreated in cellImpl.setNumber
+
 	if self.cellImpl.number == number {
 		//No work to do now.
 		return
