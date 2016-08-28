@@ -99,7 +99,7 @@ func (self *mutableGridImpl) CopyWithModifications(modifications GridModifcation
 	for _, modification := range modifications {
 		cell := modification.Cell.MutableInGrid(result)
 
-		if modification.Number >= 0 && modification.Number < DIM {
+		if modification.Number >= 0 && modification.Number <= DIM {
 			cell.SetNumber(modification.Number)
 		}
 
