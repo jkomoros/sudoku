@@ -756,6 +756,10 @@ func (self *mutableGridImpl) MutableCell(row int, col int) MutableCell {
 }
 
 func (self *gridImpl) Cell(row int, col int) Cell {
+	return self.cellImpl(row, col)
+}
+
+func (self *gridImpl) cellImpl(row int, col int) *cellImpl {
 	index := row*DIM + col
 	if index >= DIM*DIM || index < 0 {
 		return nil
