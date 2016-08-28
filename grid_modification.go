@@ -97,12 +97,16 @@ func (self *gridImpl) CopyWithModifications(modifications GridModifcation) Grid 
 	//Copy in everything
 	*result = *self
 
+	cellNumberModified := false
+
 	for _, modification := range modifications {
 		cell := result.cellImpl(modification.Cell.Row(), modification.Cell.Col())
 
 		if modification.Number >= 0 && modification.Number <= DIM {
 			//cell.setNumber will handle setting all of the impossibles
-			cell.setNumber(modification.Number)
+			if cell.setNumber(modification.Number) {
+				cellNumberModified = true
+			}
 		}
 
 		for key, val := range modification.ExcludesChanges {
@@ -118,10 +122,58 @@ func (self *gridImpl) CopyWithModifications(modifications GridModifcation) Grid 
 		}
 	}
 
-	//TODO: set invalid, solved, filledCellsCount correctly (only if a number
-	//was set)
+	if cellNumberModified {
 
-	result.theQueue.fix()
+		//At least one cell's number was modified, which means we need to fix
+		//up the queue, numFilledCells, Invalid, Solved.
+
+		filledCellsCount := 0
+
+		for _, cell := range result.cells {
+			if cell.number == 0 {
+				continue
+			}
+			filledCellsCount++
+		}
+
+		result.filledCellsCount = filledCellsCount
+
+		//Check if we're invalid.
+
+		invalid := false
+
+		for _, cell := range result.cells {
+			//Make sure we have at least one possibility per cell
+			foundPossibility := false
+			for i := 0; i < DIM; i++ {
+				if cell.impossibles[i] == 0 {
+					foundPossibility = true
+					break
+				}
+			}
+			if !foundPossibility {
+				invalid = true
+				break
+			}
+		}
+
+		if !invalid {
+			//Let's do a deep check
+			invalid = gridGroupsInvalid(result)
+		}
+
+		result.invalid = invalid
+
+		if filledCellsCount == DIM*DIM && !result.invalid {
+			//All cells are filled and it's not invalid, so it's solved!
+			result.solved = true
+		} else {
+			//No way it's solved
+			result.solved = false
+		}
+
+		result.theQueue.fix()
+	}
 
 	return result
 
