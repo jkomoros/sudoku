@@ -332,14 +332,16 @@ func (self *cellImpl) Number() int {
 	return self.number
 }
 
-func (self *cellImpl) setNumber(number int) {
+//setNumber returns true if the number was actually set, false if it was a no-
+//op.
+func (self *cellImpl) setNumber(number int) bool {
 	//Should only be used inside of CopyWithModifications
 
 	//Substantially recreated in mutableCellImpl.SetNumber
 
 	if self.number == number {
 		//No work to do now.
-		return
+		return false
 	}
 	oldNumber := self.number
 	self.number = number
@@ -373,6 +375,8 @@ func (self *cellImpl) setNumber(number int) {
 			cellImpl.setImpossible(number)
 		}
 	}
+
+	return true
 }
 
 func (self *mutableCellImpl) SetNumber(number int) {

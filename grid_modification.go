@@ -88,8 +88,43 @@ func (m GridModifcation) equivalent(other GridModifcation) bool {
 }
 
 func (self *gridImpl) CopyWithModifications(modifications GridModifcation) Grid {
-	//TODO: actuall implement this
-	return nil
+
+	//TODO: test this implementation deeply! Lots of crazy stuff that could go
+	//wrong.
+
+	var result *gridImpl
+
+	//Copy in everything
+	*result = *self
+
+	for _, modification := range modifications {
+		cell := result.cellImpl(modification.Cell.Row(), modification.Cell.Col())
+
+		if modification.Number >= 0 && modification.Number <= DIM {
+			//cell.setNumber will handle setting all of the impossibles
+			cell.setNumber(modification.Number)
+		}
+
+		for key, val := range modification.ExcludesChanges {
+			//Key is 1-indexed
+			key--
+			cell.excluded[key] = val
+		}
+
+		for key, val := range modification.MarksChanges {
+			//Key is 1-indexed
+			key--
+			cell.marks[key] = val
+		}
+	}
+
+	//TODO: set invalid, solved, filledCellsCount correctly (only if a number
+	//was set)
+
+	result.theQueue.fix()
+
+	return result
+
 }
 
 func (self *mutableGridImpl) CopyWithModifications(modifications GridModifcation) Grid {
