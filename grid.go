@@ -360,9 +360,11 @@ func newStarterGrid(grid MutableGrid) *gridImpl {
 		//TODO: if we can cast to *mutableGridImpl, fast path this by copying
 		//in the memory directly.
 		var marks [DIM]bool
+		var excluded [DIM]bool
 
 		for i := 1; i <= DIM; i++ {
 			marks[i-1] = sourceCell.Mark(i)
+			excluded[i-1] = sourceCell.Excluded(i)
 		}
 
 		cells[i] = cellImpl{
@@ -371,9 +373,10 @@ func newStarterGrid(grid MutableGrid) *gridImpl {
 			row:     sourceCell.Row(),
 			col:     sourceCell.Col(),
 			block:   sourceCell.Block(),
-			//TODO: actually copy in impossibles, excluded.
-			marks:  marks,
-			locked: sourceCell.Locked(),
+			//TODO: actually copy in impossibles.
+			marks:    marks,
+			excluded: excluded,
+			locked:   sourceCell.Locked(),
 		}
 	}
 
