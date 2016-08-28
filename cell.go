@@ -73,6 +73,10 @@ type Cell interface {
 	//numbers for which cell.Possible returns true.
 	Possibilities() IntSlice
 
+	//Excluded returns whether or not the given number has been specifically
+	//excluded with SetExcluded.
+	Excluded(number int) bool
+
 	//Invalid returns true if the cell has no valid possibilities to fill in,
 	//implying that the grid is in an invalid state because this cell cannot be
 	//filled with a number without violating a constraint.
@@ -406,6 +410,14 @@ func (self *mutableCellImpl) setImpossible(number int) {
 		//We may have just become invalid.
 		self.checkInvalid()
 	}
+}
+
+func (self *cellImpl) Excluded(number int) bool {
+	number--
+	if number < 0 || number >= DIM {
+		return false
+	}
+	return self.excluded[number]
 }
 
 func (self *mutableCellImpl) SetExcluded(number int, excluded bool) {
