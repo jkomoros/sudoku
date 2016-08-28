@@ -361,22 +361,31 @@ func newStarterGrid(grid MutableGrid) *gridImpl {
 		//in the memory directly.
 		var marks [DIM]bool
 		var excluded [DIM]bool
+		var impossibles [DIM]int
+
+		filledNeighborNums := make(map[int]int)
+
+		for _, neighbor := range sourceCell.Neighbors() {
+			filledNeighborNums[neighbor.Number()]++
+		}
 
 		for i := 1; i <= DIM; i++ {
 			marks[i-1] = sourceCell.Mark(i)
 			excluded[i-1] = sourceCell.Excluded(i)
+			impossibles[i-1] = filledNeighborNums[i]
+
 		}
 
 		cells[i] = cellImpl{
-			gridRef: result,
-			number:  sourceCell.Number(),
-			row:     sourceCell.Row(),
-			col:     sourceCell.Col(),
-			block:   sourceCell.Block(),
-			//TODO: actually copy in impossibles.
-			marks:    marks,
-			excluded: excluded,
-			locked:   sourceCell.Locked(),
+			gridRef:     result,
+			number:      sourceCell.Number(),
+			row:         sourceCell.Row(),
+			col:         sourceCell.Col(),
+			block:       sourceCell.Block(),
+			marks:       marks,
+			excluded:    excluded,
+			impossibles: impossibles,
+			locked:      sourceCell.Locked(),
 		}
 	}
 
