@@ -357,6 +357,8 @@ func newStarterGrid(grid MutableGrid) *gridImpl {
 
 	for i, sourceCell := range grid.Cells() {
 
+		//TODO: if we can cast to *mutableGridImpl, fast path this by copying
+		//in the memory directly.
 		var marks [DIM]bool
 
 		for i := 1; i <= DIM; i++ {
