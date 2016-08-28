@@ -356,13 +356,21 @@ func newStarterGrid(grid MutableGrid) *gridImpl {
 	var cells [DIM * DIM]cellImpl
 
 	for i, sourceCell := range grid.Cells() {
+
+		var marks [DIM]bool
+
+		for i := 1; i <= DIM; i++ {
+			marks[i-1] = sourceCell.Mark(i)
+		}
+
 		cells[i] = cellImpl{
 			gridRef: result,
 			number:  sourceCell.Number(),
 			row:     sourceCell.Row(),
 			col:     sourceCell.Col(),
 			block:   sourceCell.Block(),
-			//TODO: actually copy in impossibles, excluded, marks.
+			//TODO: actually copy in impossibles, excluded.
+			marks:  marks,
 			locked: sourceCell.Locked(),
 		}
 	}
