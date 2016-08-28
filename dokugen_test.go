@@ -38,7 +38,9 @@ func TestDokugen(t *testing.T) {
 		}
 	}
 
-	if grid.impl().fillSimpleCells() != 0 {
+	filledGrid := withSimpleCellsFilled(grid)
+
+	if filledGrid.rank() != grid.rank() {
 		t.Log("We filled more than 0 cells even though there aren't any cells to obviously fill!")
 		t.Fail()
 	}

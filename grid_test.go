@@ -418,7 +418,11 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
-	if num := grid.impl().fillSimpleCells(); num != 45 {
+	previousRank := grid.rank()
+
+	grid = withSimpleCellsFilled(grid).MutableCopy()
+
+	if num := grid.rank() - previousRank; num != 45 {
 		t.Log("We filled simple cells on the test grid but didn't get as many as we were expecting: ", num, "/", 45)
 		t.Fail()
 	}
@@ -484,9 +488,7 @@ func TestAdvancedSolve(t *testing.T) {
 		t.Fail()
 	}
 
-	copy := grid.MutableCopy()
-
-	copy.impl().fillSimpleCells()
+	copy := withSimpleCellsFilled(grid).MutableCopy()
 
 	if copy.Solved() {
 		t.Log("Advanced grid was 'solved' with just fillSimpleCells")
