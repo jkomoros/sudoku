@@ -378,18 +378,22 @@ func (self *mutableCellImpl) alertNeighbors(number int, possible bool) {
 	}
 }
 
-func (self *mutableCellImpl) setPossible(number int) {
+func (self *cellImpl) setPossible(number int) {
 	//Number is 1 indexed, but we store it as 0-indexed
 	number--
 	if number < 0 || number >= DIM {
 		return
 	}
-	if self.cellImpl.impossibles[number] == 0 {
+	if self.impossibles[number] == 0 {
 		log.Println("We were told to mark something that was already possible to possible.")
 		return
 	}
-	self.cellImpl.impossibles[number]--
-	if self.cellImpl.impossibles[number] == 0 && self.mutableGridRef != nil {
+	self.impossibles[number]--
+}
+
+func (self *mutableCellImpl) setPossible(number int) {
+	self.cellImpl.setPossible(number)
+	if self.cellImpl.impossibles[number-1] == 0 && self.mutableGridRef != nil {
 		//TODO: should we check exclusion to save work?
 		//Our rank will have changed.
 		self.mutableGridRef.cellRankChanged(self)
@@ -399,14 +403,18 @@ func (self *mutableCellImpl) setPossible(number int) {
 
 }
 
-func (self *mutableCellImpl) setImpossible(number int) {
+func (self *cellImpl) setImpossible(number int) {
 	//Number is 1 indexed, but we store it as 0-indexed
 	number--
 	if number < 0 || number >= DIM {
 		return
 	}
-	self.cellImpl.impossibles[number]++
-	if self.cellImpl.impossibles[number] == 1 && self.mutableGridRef != nil {
+	self.impossibles[number]++
+}
+
+func (self *mutableCellImpl) setImpossible(number int) {
+	self.cellImpl.setImpossible(number)
+	if self.cellImpl.impossibles[number-1] == 1 && self.mutableGridRef != nil {
 		//TODO: should we check exclusion to save work?
 		//Our rank will have changed.
 		self.mutableGridRef.cellRankChanged(self)
