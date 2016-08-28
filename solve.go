@@ -251,6 +251,9 @@ func searchGridSolutions(grid Grid, queue *syncedFiniteQueue, isFirstRun bool, n
 //single cell's possibles list.
 func withSimpleCellsFilled(grid Grid) Grid {
 
+	//TODO: it's weird that this isn't a method (it is just to save a little
+	//tiny bit of wiring up the same impl to both underlying structs)
+
 	//We fetch all of the cells that have a single possibility, then create a
 	//copy with all of those filled. Then we repeat, because filling those
 	//cells may have set other cells to now only have one possibility. Repeat
