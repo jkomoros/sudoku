@@ -92,7 +92,7 @@ func (self *gridImpl) CopyWithModifications(modifications GridModifcation) Grid 
 	//TODO: test this implementation deeply! Lots of crazy stuff that could go
 	//wrong.
 
-	result = new(gridImpl)
+	result := new(gridImpl)
 
 	//Copy in everything
 	*result = *self
