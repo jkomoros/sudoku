@@ -528,6 +528,8 @@ func (self *gridImpl) Copy() Grid {
 }
 
 func (self *mutableGridImpl) Copy() Grid {
+	//TODO: next step: set this to return newStarterGrid(self), then keep
+	//fixing errors that uncovers!
 	return self.MutableCopy()
 }
 
