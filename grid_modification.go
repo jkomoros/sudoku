@@ -97,6 +97,11 @@ func (self *gridImpl) CopyWithModifications(modifications GridModifcation) Grid 
 	//Copy in everything
 	*result = *self
 
+	for i := 0; i < DIM*DIM; i++ {
+		cell := &result.cells[i]
+		cell.gridRef = result
+	}
+
 	cellNumberModified := false
 
 	for _, modification := range modifications {
