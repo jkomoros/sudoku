@@ -9,7 +9,6 @@ of thousands of solves by real users.
 package sudoku
 
 import (
-	"log"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -435,7 +434,7 @@ func (self *cellImpl) setPossible(number int) {
 		return
 	}
 	if self.impossibles[number] == 0 {
-		log.Println("We were told to mark something that was already possible to possible.")
+		panic("We were told to mark something that was already possible to possible.")
 		return
 	}
 	self.impossibles[number]--
