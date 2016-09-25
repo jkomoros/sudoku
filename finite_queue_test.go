@@ -70,7 +70,7 @@ func TestReadOnlyCellQueue(t *testing.T) {
 
 	modification := newCellModification(grid.Cell(0, 0))
 	modification.Number = 5
-	modifiedGrid := grid.CopyWithModifications(GridModifcation{modification})
+	modifiedGrid := grid.CopyWithModifications(GridModification{modification})
 
 	newQueue := readOnlyCellQueue{
 		grid:     modifiedGrid,

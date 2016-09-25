@@ -1,7 +1,7 @@
 package sudoku
 
 //GridModification is a series of CellModifications to apply to a Grid.
-type GridModifcation []*CellModification
+type GridModification []*CellModification
 
 //CellModification represents a modification to be made to a given Cell in a
 //grid.
@@ -43,7 +43,7 @@ func newCellModification(cell Cell) *CellModification {
 }
 
 //equivalent returns true if the other grid modification is equivalent to this one.
-func (m GridModifcation) equivalent(other GridModifcation) bool {
+func (m GridModification) equivalent(other GridModification) bool {
 	if len(m) != len(other) {
 		return false
 	}
@@ -87,7 +87,7 @@ func (m GridModifcation) equivalent(other GridModifcation) bool {
 	return true
 }
 
-func (self *gridImpl) CopyWithModifications(modifications GridModifcation) Grid {
+func (self *gridImpl) CopyWithModifications(modifications GridModification) Grid {
 
 	//TODO: test this implementation deeply! Lots of crazy stuff that could go
 	//wrong.
@@ -184,7 +184,7 @@ func (self *gridImpl) CopyWithModifications(modifications GridModifcation) Grid 
 
 }
 
-func (self *mutableGridImpl) CopyWithModifications(modifications GridModifcation) Grid {
+func (self *mutableGridImpl) CopyWithModifications(modifications GridModification) Grid {
 	//TODO: when we have an honest-to-god readonly grid impl, optimize this.
 	result := self.MutableCopy()
 

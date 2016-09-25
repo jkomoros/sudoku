@@ -44,7 +44,7 @@ type Grid interface {
 
 	//CopyWithModifications returns a new Grid that has the given
 	//modifications applied.
-	CopyWithModifications(modifications GridModifcation) Grid
+	CopyWithModifications(modifications GridModification) Grid
 
 	//Cells returns a CellSlice with pointers to every cell in the grid,
 	//from left to right and top to bottom.

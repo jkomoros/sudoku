@@ -229,7 +229,7 @@ func searchGridSolutions(grid Grid, queue *syncedFiniteQueue, isFirstRun bool, n
 		//but gridImpl.fillSimpleCells will be called on it.
 		modification := newCellModification(cell)
 		modification.Number = num
-		copy := grid.CopyWithModifications(GridModifcation{
+		copy := grid.CopyWithModifications(GridModification{
 			modification,
 		})
 		//As an optimization for cases where there are many solutions, we'll just continue a DFS until we barf then unroll back up.
@@ -269,7 +269,7 @@ func withSimpleCellsFilled(grid Grid) Grid {
 		getter := grid.queue().NewGetter()
 		obj := getter.GetSmallerThan(2)
 
-		var modifications GridModifcation
+		var modifications GridModification
 		for obj != nil && !grid.basicInvalid() {
 			cell, ok := obj.(Cell)
 			if !ok {

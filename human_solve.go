@@ -243,8 +243,8 @@ func (self *SolveStep) Apply(grid MutableGrid) {
 
 //Modifications returns the GridModifications repesenting how this SolveStep
 //would mutate the grid.
-func (self *SolveStep) Modifications() GridModifcation {
-	var result GridModifcation
+func (self *SolveStep) Modifications() GridModification {
+	var result GridModification
 
 	for _, cell := range self.TargetCells {
 		modification := newCellModification(cell)
@@ -363,8 +363,8 @@ func (c *CompoundSolveStep) Apply(grid MutableGrid) {
 
 //Modifications returns the set of modifications that this CompoundSolveStep
 //would make to a Grid if Apply were called.
-func (c *CompoundSolveStep) Modifications() GridModifcation {
-	var result GridModifcation
+func (c *CompoundSolveStep) Modifications() GridModification {
+	var result GridModification
 	for _, step := range c.PrecursorSteps {
 		result = append(result, step.Modifications()...)
 	}

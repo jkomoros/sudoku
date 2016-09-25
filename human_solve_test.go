@@ -92,7 +92,7 @@ func TestSolveStepModifications(t *testing.T) {
 	grid := NewGrid()
 	tests := []struct {
 		step        *SolveStep
-		expected    GridModifcation
+		expected    GridModification
 		description string
 	}{
 		{
@@ -105,7 +105,7 @@ func TestSolveStepModifications(t *testing.T) {
 				},
 				TargetNums: IntSlice{1},
 			},
-			GridModifcation{
+			GridModification{
 				&CellModification{
 					Cell:            grid.Cell(0, 0),
 					Number:          1,
@@ -134,7 +134,7 @@ func TestSolveStepModifications(t *testing.T) {
 				},
 				TargetNums: IntSlice{1, 2},
 			},
-			GridModifcation{
+			GridModification{
 				&CellModification{
 					Cell:   grid.Cell(0, 0),
 					Number: -1,

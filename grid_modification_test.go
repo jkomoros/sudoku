@@ -23,12 +23,12 @@ func TestCopyWithModifications(t *testing.T) {
 	gridExcludesCell.SetExcluded(1, false)
 
 	tests := []struct {
-		modifications GridModifcation
+		modifications GridModification
 		expected      Grid
 		description   string
 	}{
 		{
-			GridModifcation{
+			GridModification{
 				&CellModification{
 					Cell:   sourceGrid.Cell(0, 0),
 					Number: 5,
@@ -38,7 +38,7 @@ func TestCopyWithModifications(t *testing.T) {
 			"Single valid number",
 		},
 		{
-			GridModifcation{
+			GridModification{
 				&CellModification{
 					Cell:   sourceGrid.Cell(0, 0),
 					Number: DIM + 1,
@@ -48,7 +48,7 @@ func TestCopyWithModifications(t *testing.T) {
 			"Single invalid number",
 		},
 		{
-			GridModifcation{
+			GridModification{
 				&CellModification{
 					Cell:   sourceGrid.Cell(0, 0),
 					Number: -1,
@@ -63,7 +63,7 @@ func TestCopyWithModifications(t *testing.T) {
 			"Marks",
 		},
 		{
-			GridModifcation{
+			GridModification{
 				&CellModification{
 					Cell:   sourceGrid.Cell(0, 0),
 					Number: -1,
