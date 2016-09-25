@@ -271,9 +271,9 @@ func withSimpleCellsFilled(grid Grid) Grid {
 
 		var modifications GridModifcation
 		for obj != nil && !grid.basicInvalid() {
-			cell, ok := obj.(MutableCell)
+			cell, ok := obj.(Cell)
 			if !ok {
-				continue
+				panic("Expected a Cell in the queue, found something else")
 			}
 			changesMade = true
 			modification := &CellModification{
@@ -283,6 +283,9 @@ func withSimpleCellsFilled(grid Grid) Grid {
 			modifications = append(modifications, modification)
 			obj = getter.GetSmallerThan(2)
 		}
+
+		//TODO: for some reason the grid isn't actually having the
+		//modifications made here, so it loops forever.
 
 		grid = grid.CopyWithModifications(modifications)
 
