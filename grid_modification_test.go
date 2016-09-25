@@ -84,6 +84,12 @@ func TestCopyWithModifications(t *testing.T) {
 		if result.Diagram(true) != test.expected.Diagram(true) {
 			t.Error("Test", i, "failed", test.description, "Got", result.Diagram(true), "expected", test.expected.Diagram(true))
 		}
+
+		//Also test the non-mutalbe grid implementation (assuming grid.Copy always returns a non-mutalbe grid)
+		nonMutableResult := sourceGrid.Copy().CopyWithModifications(test.modifications)
+		if result.Diagram(true) != test.expected.Diagram(true) {
+			t.Error("Test", i, "failed with non-mutable copy", test.description, "Got", nonMutableResult.Diagram(true), "expected", test.expected.Diagram(true))
+		}
 	}
 
 }
