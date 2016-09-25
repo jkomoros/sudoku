@@ -169,11 +169,11 @@ func TestGridCopy(t *testing.T) {
 	gridCopy := grid.Copy()
 
 	if grid.Diagram(true) != gridCopy.Diagram(true) {
-		t.Error("Grid and copy don't match in marks")
+		t.Error("Grid and copy don't match in marks. Got", gridCopy.Diagram(true), "wanted", grid.Diagram(true))
 	}
 
 	if grid.Diagram(false) != gridCopy.Diagram(false) {
-		t.Error("Grid and copy don't match in terms of excludes")
+		t.Error("Grid and copy don't match in terms of excludes. Got", gridCopy.Diagram(false), "wanted", grid.Diagram(false))
 	}
 }
 
