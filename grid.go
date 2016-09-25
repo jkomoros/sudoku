@@ -353,8 +353,6 @@ func newStarterGrid(grid MutableGrid) *gridImpl {
 		solved:           grid.Solved(),
 	}
 
-	var cells [DIM * DIM]cellImpl
-
 	for i, sourceCell := range grid.Cells() {
 
 		//TODO: if we can cast to *mutableGridImpl, fast path this by copying
@@ -388,7 +386,7 @@ func newStarterGrid(grid MutableGrid) *gridImpl {
 			}
 		}
 
-		cells[i] = cellImpl{
+		result.cells[i] = cellImpl{
 			gridRef:     result,
 			number:      sourceCell.Number(),
 			row:         sourceCell.Row(),
