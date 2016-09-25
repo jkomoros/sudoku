@@ -42,6 +42,27 @@ func newCellModification(cell Cell) *CellModification {
 	}
 }
 
+//normalize makes sure the GridModification is legal.
+func (m GridModification) normalize() {
+	for _, cellModification := range m {
+		for key, _ := range cellModification.ExcludesChanges {
+			if key <= 0 || key > DIM {
+				delete(cellModification.ExcludesChanges, key)
+			}
+		}
+		for key, _ := range cellModification.MarksChanges {
+			if key <= 0 || key > DIM {
+				delete(cellModification.MarksChanges, key)
+			}
+		}
+
+		if cellModification.Number < -1 || cellModification.Number > DIM {
+			cellModification.Number = -1
+		}
+	}
+
+}
+
 //equivalent returns true if the other grid modification is equivalent to this one.
 func (m GridModification) equivalent(other GridModification) bool {
 	if len(m) != len(other) {
@@ -91,6 +112,8 @@ func (self *gridImpl) CopyWithModifications(modifications GridModification) Grid
 
 	//TODO: test this implementation deeply! Lots of crazy stuff that could go
 	//wrong.
+
+	modifications.normalize()
 
 	result := new(gridImpl)
 
@@ -187,6 +210,8 @@ func (self *gridImpl) CopyWithModifications(modifications GridModification) Grid
 func (self *mutableGridImpl) CopyWithModifications(modifications GridModification) Grid {
 	//TODO: when we have an honest-to-god readonly grid impl, optimize this.
 	result := self.MutableCopy()
+
+	modifications.normalize()
 
 	for _, modification := range modifications {
 		cell := modification.Cell.MutableInGrid(result)
