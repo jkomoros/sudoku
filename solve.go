@@ -275,20 +275,27 @@ func withSimpleCellsFilled(grid Grid) Grid {
 			if !ok {
 				panic("Expected a Cell in the queue, found something else")
 			}
-			changesMade = true
-			modification := &CellModification{
-				Cell:   cell,
-				Number: cell.implicitNumber(),
+
+			//TODO: this next check didn't used to be necessary on
+			//mutableGridImpls... perhaps there's a different in behavior for
+			//queues on mutableGrids and nonmutable grids?
+
+			//Some cells we get will already be filled (rank 0), but if we
+			//found one that isn't, then do a modification.
+			if cell.Number() == 0 {
+				changesMade = true
+				modification := &CellModification{
+					Cell:   cell,
+					Number: cell.implicitNumber(),
+				}
+				modifications = append(modifications, modification)
 			}
-			modifications = append(modifications, modification)
 			obj = getter.GetSmallerThan(2)
 		}
 
-		//TODO: for some reason the grid isn't actually having the
-		//modifications made here, so it loops forever.
-
-		grid = grid.CopyWithModifications(modifications)
-
+		if modifications != nil {
+			grid = grid.CopyWithModifications(modifications)
+		}
 	}
 	return grid
 }
