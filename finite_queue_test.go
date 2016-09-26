@@ -44,8 +44,8 @@ func TestReadOnlyCellQueue(t *testing.T) {
 		counter++
 	}
 
-	if counter != DIM*DIM {
-		t.Error("Default getter didn't give us all items")
+	if counter != 54 {
+		t.Error("Default getter didn't give us all items:", counter)
 	}
 
 	//Make sure a new getter starts at beginning
@@ -94,7 +94,7 @@ func TestReadOnlyCellQueue(t *testing.T) {
 		item = getter.Get()
 	}
 
-	if counter != DIM*DIM {
+	if counter != 53 {
 		t.Error("New getter returned too early:", counter)
 	}
 
