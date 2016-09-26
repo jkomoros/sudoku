@@ -538,8 +538,6 @@ func (self *mutableGridImpl) Copy() Grid {
 
 	//Can't flip on yet because:
 	// * TestMultiSolutions gets stuck in infinte loop, never even gets past first of 1000 runs.
-	// * TestAdvancedSolve fails (returns 0 when there should be 1 solution)
-	//   * searchGridSolutions getting in an infinite loop exploring the exact same cell even though it's filled...
 
 	return self.MutableCopy()
 }
