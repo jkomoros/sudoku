@@ -539,6 +539,9 @@ func (self *mutableGridImpl) Copy() Grid {
 	//Can't flip on yet because:
 	// * TestMultiSolutions gets stuck in infinte loop, never even gets past first of 1000 runs.
 	// * TestAdvancedSolve fails (returns 0 when there should be 1 solution)
+	//     * This is almost certainly because of the oddity noted in a TODO of withSimpleCellsFilled
+	//       that the getter for the special cellReadOnlyGetter is returning cells with rank 0 when the
+	//       other queue doesn't do that.
 
 	return self.MutableCopy()
 }
