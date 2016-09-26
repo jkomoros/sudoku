@@ -276,24 +276,12 @@ func withSimpleCellsFilled(grid Grid) Grid {
 				panic("Expected a Cell in the queue, found something else")
 			}
 
-			//TODO: this next check didn't used to be necessary on
-			//mutableGridImpls... perhaps there's a different in behavior for
-			//queues on mutableGrids and nonmutable grids?
-
-			//Yes, the behavior is different--mutable grids have a minimum
-			//legal rank of 1, but the special cellReadOnly don't have such a
-			//minmum, so they return items with a rank of 0.
-
-			//Some cells we get will already be filled (rank 0), but if we
-			//found one that isn't, then do a modification.
-			if cell.Number() == 0 {
-				changesMade = true
-				modification := &CellModification{
-					Cell:   cell,
-					Number: cell.implicitNumber(),
-				}
-				modifications = append(modifications, modification)
+			changesMade = true
+			modification := &CellModification{
+				Cell:   cell,
+				Number: cell.implicitNumber(),
 			}
+			modifications = append(modifications, modification)
 			obj = getter.GetSmallerThan(2)
 		}
 
