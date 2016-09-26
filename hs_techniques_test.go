@@ -226,7 +226,7 @@ type solveTechniqueTestHelperOptions struct {
 	//Useful if you're going to be do repeated calls to the test helper with the
 	//same list of steps.
 	stepsToCheck struct {
-		grid   Grid
+		grid   MutableGrid
 		solver SolveTechnique
 		steps  []*SolveStep
 	}
@@ -251,9 +251,9 @@ func getStepsForTechnique(technique SolveTechnique, grid Grid, fetchAll bool) []
 
 }
 
-func humanSolveTechniqueTestHelperStepGenerator(t *testing.T, puzzleName string, techniqueName string, options solveTechniqueTestHelperOptions) (Grid, SolveTechnique, []*SolveStep) {
+func humanSolveTechniqueTestHelperStepGenerator(t *testing.T, puzzleName string, techniqueName string, options solveTechniqueTestHelperOptions) (MutableGrid, SolveTechnique, []*SolveStep) {
 
-	var grid Grid
+	var grid MutableGrid
 
 	if options.stepsToCheck.grid != nil {
 		grid = options.stepsToCheck.grid

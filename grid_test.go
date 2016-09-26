@@ -169,11 +169,11 @@ func TestGridCopy(t *testing.T) {
 	gridCopy := grid.Copy()
 
 	if grid.Diagram(true) != gridCopy.Diagram(true) {
-		t.Error("Grid and copy don't match in marks")
+		t.Error("Grid and copy don't match in marks. Got", gridCopy.Diagram(true), "wanted", grid.Diagram(true))
 	}
 
 	if grid.Diagram(false) != gridCopy.Diagram(false) {
-		t.Error("Grid and copy don't match in terms of excludes")
+		t.Error("Grid and copy don't match in terms of excludes. Got", gridCopy.Diagram(false), "wanted", grid.Diagram(false))
 	}
 }
 
@@ -418,7 +418,12 @@ func TestGridLoad(t *testing.T) {
 		t.Fail()
 	}
 
-	if num := grid.impl().fillSimpleCells(); num != 45 {
+	previousRank := grid.rank()
+
+	grid = withSimpleCellsFilled(grid).MutableCopy()
+	cell = cell.MutableInGrid(grid)
+
+	if num := previousRank - grid.rank(); num != 45 {
 		t.Log("We filled simple cells on the test grid but didn't get as many as we were expecting: ", num, "/", 45)
 		t.Fail()
 	}
@@ -441,7 +446,7 @@ func TestGridLoad(t *testing.T) {
 	cell.SetNumber(cell.Number() + 1)
 
 	if !grid.Invalid() {
-		t.Log("Grid didn't notice it was invalid when it actually was.")
+		t.Error("Grid didn't notice it was invalid when it actually was.", grid)
 		t.Fail()
 	}
 
@@ -484,9 +489,7 @@ func TestAdvancedSolve(t *testing.T) {
 		t.Fail()
 	}
 
-	copy := grid.MutableCopy()
-
-	copy.impl().fillSimpleCells()
+	copy := withSimpleCellsFilled(grid).MutableCopy()
 
 	if copy.Solved() {
 		t.Log("Advanced grid was 'solved' with just fillSimpleCells")

@@ -140,12 +140,21 @@ func (r *readOnlyCellQueue) NewGetter() queueGetter {
 }
 
 func (r *readOnlyCellQueueGetter) Get() rankedObject {
-	if r.counter >= r.queue.Len() {
-		return nil
+	//This will never return an item with a rank less than 0, which is the
+	//behavior of normal finiteQueues in Grids because of how they're
+	//configured. It feels kind of weird that we bake that constraint in here;
+	//although I guess it's appropriate given that these
+	//readOnlyCellQueueGetters are so specialized anyway.
+	for {
+		if r.counter >= r.queue.Len() {
+			return nil
+		}
+		result := r.queue.cellRefs[r.counter].Cell(r.queue.grid)
+		r.counter++
+		if result.rank() > 0 {
+			return result
+		}
 	}
-	result := r.queue.cellRefs[r.counter].Cell(r.queue.grid)
-	r.counter++
-	return result
 }
 
 func (r *readOnlyCellQueueGetter) GetSmallerThan(max int) rankedObject {

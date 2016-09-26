@@ -92,7 +92,7 @@ func TestSolveStepModifications(t *testing.T) {
 	grid := NewGrid()
 	tests := []struct {
 		step        *SolveStep
-		expected    GridModifcation
+		expected    GridModification
 		description string
 	}{
 		{
@@ -105,7 +105,7 @@ func TestSolveStepModifications(t *testing.T) {
 				},
 				TargetNums: IntSlice{1},
 			},
-			GridModifcation{
+			GridModification{
 				&CellModification{
 					Cell:            grid.Cell(0, 0),
 					Number:          1,
@@ -134,7 +134,7 @@ func TestSolveStepModifications(t *testing.T) {
 				},
 				TargetNums: IntSlice{1, 2},
 			},
-			GridModifcation{
+			GridModification{
 				&CellModification{
 					Cell:   grid.Cell(0, 0),
 					Number: -1,
@@ -606,7 +606,7 @@ func TestPuzzleDifficulty(t *testing.T) {
 	grid.LoadSDK(TEST_GRID)
 
 	//We use the cheaper one for testing so it completes faster.
-	difficulty := grid.impl().calcluateDifficulty(false)
+	difficulty := calcluateGridDifficulty(grid, false)
 
 	if grid.Solved() {
 		t.Log("Difficulty shouldn't have changed the underlying grid, but it did.")
@@ -638,7 +638,7 @@ func puzzleDifficultyHelper(filename string, t *testing.T) {
 
 	go func() {
 		//We use the cheaper one for testing so it completes faster
-		_ = otherGrid.impl().calcluateDifficulty(false)
+		_ = calcluateGridDifficulty(otherGrid, false)
 		done <- true
 	}()
 

@@ -29,7 +29,7 @@ func DefaultGenerationOptions() *GenerationOptions {
 
 func (self *mutableGridImpl) Fill() bool {
 
-	solutions := self.nOrFewerSolutions(1)
+	solutions := nOrFewerSolutions(self, 1)
 
 	if len(solutions) != 0 {
 		//We use Load instead of loadSDK because we are just incidentally using it to load state.

@@ -243,8 +243,8 @@ func (self *SolveStep) Apply(grid MutableGrid) {
 
 //Modifications returns the GridModifications repesenting how this SolveStep
 //would mutate the grid.
-func (self *SolveStep) Modifications() GridModifcation {
-	var result GridModifcation
+func (self *SolveStep) Modifications() GridModification {
+	var result GridModification
 
 	for _, cell := range self.TargetCells {
 		modification := newCellModification(cell)
@@ -363,8 +363,8 @@ func (c *CompoundSolveStep) Apply(grid MutableGrid) {
 
 //Modifications returns the set of modifications that this CompoundSolveStep
 //would make to a Grid if Apply were called.
-func (c *CompoundSolveStep) Modifications() GridModifcation {
-	var result GridModifcation
+func (c *CompoundSolveStep) Modifications() GridModification {
+	var result GridModification
 	for _, step := range c.PrecursorSteps {
 		result = append(result, step.Modifications()...)
 	}
@@ -422,6 +422,11 @@ func (c *CompoundSolveStep) Steps() []*SolveStep {
 	return append(c.PrecursorSteps, c.FillStep)
 }
 
+func (self *gridImpl) HumanSolution(options *HumanSolveOptions) *SolveDirections {
+	return humanSolveHelper(self, options, nil, true)
+
+}
+
 func (self *mutableGridImpl) HumanSolution(options *HumanSolveOptions) *SolveDirections {
 	clone := self.MutableCopy()
 	return clone.HumanSolve(options)
@@ -429,6 +434,11 @@ func (self *mutableGridImpl) HumanSolution(options *HumanSolveOptions) *SolveDir
 
 func (self *mutableGridImpl) HumanSolve(options *HumanSolveOptions) *SolveDirections {
 	return humanSolveHelper(self, options, nil, true)
+}
+
+func (self *gridImpl) Hint(options *HumanSolveOptions, optionalPreviousSteps []*CompoundSolveStep) *SolveDirections {
+
+	return humanSolveHelper(self, options, optionalPreviousSteps, false)
 }
 
 func (self *mutableGridImpl) Hint(options *HumanSolveOptions, optionalPreviousSteps []*CompoundSolveStep) *SolveDirections {
@@ -442,6 +452,10 @@ func (self *mutableGridImpl) Hint(options *HumanSolveOptions, optionalPreviousSt
 
 	return result
 
+}
+
+func (self *gridImpl) Difficulty() float64 {
+	return calcluateGridDifficulty(self, true)
 }
 
 func (self *mutableGridImpl) Difficulty() float64 {
@@ -459,12 +473,12 @@ func (self *mutableGridImpl) Difficulty() float64 {
 	//Yes, this memoization will fail in the (rare!) cases where a grid's actual difficulty is 0.0, but
 	//the worst case scenario is that we just return the same value.
 	if self.cachedDifficulty == 0.0 {
-		self.cachedDifficulty = self.calcluateDifficulty(true)
+		self.cachedDifficulty = calcluateGridDifficulty(self, true)
 	}
 	return self.cachedDifficulty
 }
 
-func (self *mutableGridImpl) calcluateDifficulty(accurate bool) float64 {
+func calcluateGridDifficulty(grid Grid, accurate bool) float64 {
 	//This can be an extremely expensive method. Do not call repeatedly!
 	//returns the difficulty of the grid, which is a number between 0.0 and 1.0.
 	//This is a probabilistic measure; repeated calls may return different numbers, although generally we wait for the results to converge.
@@ -475,7 +489,7 @@ func (self *mutableGridImpl) calcluateDifficulty(accurate bool) float64 {
 	average := 0.0
 	lastAverage := 0.0
 
-	self.HasMultipleSolutions()
+	grid.HasMultipleSolutions()
 
 	//Since this is so expensive, in testing situations we want to run it in less accurate mode (so it goes fast!)
 	maxIterations := _MAX_DIFFICULTY_ITERATIONS
@@ -484,7 +498,7 @@ func (self *mutableGridImpl) calcluateDifficulty(accurate bool) float64 {
 	}
 
 	for i := 0; i < maxIterations; i++ {
-		difficulty := gridDifficultyHelper(self)
+		difficulty := gridDifficultyHelper(grid)
 
 		accum += difficulty
 		average = accum / (float64(i) + 1.0)
@@ -503,7 +517,7 @@ func (self *mutableGridImpl) calcluateDifficulty(accurate bool) float64 {
 
 //This function will HumanSolve _NUM_SOLVES_FOR_DIFFICULTY times, then average the signals together, then
 //give the difficulty for THAT. This is more accurate becuase the weights were trained on such averaged signals.
-func gridDifficultyHelper(grid *mutableGridImpl) float64 {
+func gridDifficultyHelper(grid Grid) float64 {
 
 	collector := make(chan DifficultySignals, _NUM_SOLVES_FOR_DIFFICULTY)
 	//Might as well run all of the human solutions in parallel

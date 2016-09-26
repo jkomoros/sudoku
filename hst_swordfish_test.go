@@ -6,7 +6,7 @@ import (
 
 //TODO: test a few more puzzles to make sure I'm exercising it correctly.
 
-func swordfishExampleGrid(t *testing.T) Grid {
+func swordfishExampleGrid(t *testing.T) MutableGrid {
 	grid := NewGrid()
 
 	puzzleName := "swordfish_example.sdk"

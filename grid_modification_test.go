@@ -23,12 +23,12 @@ func TestCopyWithModifications(t *testing.T) {
 	gridExcludesCell.SetExcluded(1, false)
 
 	tests := []struct {
-		modifications GridModifcation
+		modifications GridModification
 		expected      Grid
 		description   string
 	}{
 		{
-			GridModifcation{
+			GridModification{
 				&CellModification{
 					Cell:   sourceGrid.Cell(0, 0),
 					Number: 5,
@@ -38,17 +38,17 @@ func TestCopyWithModifications(t *testing.T) {
 			"Single valid number",
 		},
 		{
-			GridModifcation{
+			GridModification{
 				&CellModification{
 					Cell:   sourceGrid.Cell(0, 0),
-					Number: DIM,
+					Number: DIM + 1,
 				},
 			},
 			sourceGrid,
 			"Single invalid number",
 		},
 		{
-			GridModifcation{
+			GridModification{
 				&CellModification{
 					Cell:   sourceGrid.Cell(0, 0),
 					Number: -1,
@@ -63,7 +63,7 @@ func TestCopyWithModifications(t *testing.T) {
 			"Marks",
 		},
 		{
-			GridModifcation{
+			GridModification{
 				&CellModification{
 					Cell:   sourceGrid.Cell(0, 0),
 					Number: -1,
@@ -83,6 +83,12 @@ func TestCopyWithModifications(t *testing.T) {
 		result := sourceGrid.CopyWithModifications(test.modifications)
 		if result.Diagram(true) != test.expected.Diagram(true) {
 			t.Error("Test", i, "failed", test.description, "Got", result.Diagram(true), "expected", test.expected.Diagram(true))
+		}
+
+		//Also test the non-mutalbe grid implementation (assuming grid.Copy always returns a non-mutalbe grid)
+		nonMutableResult := sourceGrid.Copy().CopyWithModifications(test.modifications)
+		if result.Diagram(true) != test.expected.Diagram(true) {
+			t.Error("Test", i, "failed with non-mutable copy", test.description, "Got", nonMutableResult.Diagram(true), "expected", test.expected.Diagram(true))
 		}
 	}
 

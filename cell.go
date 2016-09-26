@@ -9,7 +9,6 @@ of thousands of solves by real users.
 package sudoku
 
 import (
-	"log"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -73,6 +72,10 @@ type Cell interface {
 	//numbers for which cell.Possible returns true.
 	Possibilities() IntSlice
 
+	//Excluded returns whether or not the given number has been specifically
+	//excluded with SetExcluded.
+	Excluded(number int) bool
+
 	//Invalid returns true if the cell has no valid possibilities to fill in,
 	//implying that the grid is in an invalid state because this cell cannot be
 	//filled with a number without violating a constraint.
@@ -111,10 +114,9 @@ type Cell interface {
 	mutable() MutableCell
 
 	ref() cellRef
-	//TODO: audit uses of gridImpl; most should use grid() instead.
 	grid() Grid
-	gridImpl() *mutableGridImpl
 	diagramRows(showMarks bool) []string
+	dataString() string
 	rank() int
 	implicitNumber() int
 }
@@ -173,6 +175,9 @@ type MutableCell interface {
 	Unlock()
 
 	//The following are private methods
+
+	//TODO: a number of thse would be better handled by having a generic path
+	//and if it can cast to mutableCellImpl doing a fast path.
 	setPossible(number int)
 	setImpossible(number int)
 	excludedLock() *sync.RWMutex
@@ -190,7 +195,7 @@ type MutableCell interface {
 //mutableCellImpl, which manages locks and mutates the underlying values in a
 //controlled way.
 type cellImpl struct {
-	gridRef *mutableGridImpl
+	gridRef Grid
 	//The number if it's explicitly set. Number() will return it if it's explicitly or implicitly set.
 	number      int
 	row         int
@@ -206,19 +211,27 @@ type cellImpl struct {
 
 type mutableCellImpl struct {
 	cellImpl
+	//TODO: It seems silly to store an extra gridRef here since we already
+	//have one in cellImpl. But no other way seemed to work and allow such
+	//code resuse.
+	mutableGridRef  MutableGrid
 	neighborsLock   sync.RWMutex
 	neighbors       CellSlice
 	excludedLockRef sync.RWMutex
 	//TODO: do we need a marks lock?
 }
 
-func newCell(grid *mutableGridImpl, row int, col int) mutableCellImpl {
-	//TODO: we should not set the number until neighbors are initialized.
-	return mutableCellImpl{cellImpl: cellImpl{gridRef: grid, row: row, col: col, block: grid.blockForCell(row, col)}}
-}
+func newCell(grid MutableGrid, row int, col int) mutableCellImpl {
+	var block int
 
-func (self *cellImpl) gridImpl() *mutableGridImpl {
-	return self.gridRef
+	//Grid is only nil in contrived tests.
+	if grid != nil {
+		block = grid.blockForCell(row, col)
+	}
+
+	return mutableCellImpl{cellImpl: cellImpl{gridRef: grid, row: row, col: col, block: block},
+		mutableGridRef: grid,
+	}
 }
 
 func (self *cellImpl) grid() Grid {
@@ -226,7 +239,7 @@ func (self *cellImpl) grid() Grid {
 }
 
 func (self *mutableCellImpl) mutableGrid() MutableGrid {
-	return self.cellImpl.gridRef
+	return self.mutableGridRef
 }
 
 func (self *mutableCellImpl) impl() *mutableCellImpl {
@@ -268,8 +281,15 @@ func (self *cellImpl) marksBulk() [DIM]bool {
 }
 
 func (self *cellImpl) mutable() MutableCell {
-	//TODO: this is a horibble hack. I'm going to need to get rid of it...
-	return self.gridRef.MutableCell(self.Row(), self.Col())
+	//TODO: the very existence of this seems like a terrible hack...
+
+	//We can only cast up if our gridRef happens to also satisfy MutableGrid.
+	switch g := self.gridRef.(type) {
+	default:
+		return nil
+	case MutableGrid:
+		return self.MutableInGrid(g)
+	}
 }
 
 func (self *cellImpl) Row() int {
@@ -311,8 +331,58 @@ func (self *cellImpl) Number() int {
 	return self.number
 }
 
+//setNumber returns true if the number was actually set, false if it was a no-
+//op.
+func (self *cellImpl) setNumber(number int) bool {
+	//Should only be used inside of CopyWithModifications
+
+	//Substantially recreated in mutableCellImpl.SetNumber
+
+	if self.number == number {
+		//No work to do now.
+		return false
+	}
+	oldNumber := self.number
+	self.number = number
+	if oldNumber > 0 {
+		for i := 1; i <= DIM; i++ {
+			if i == oldNumber {
+				continue
+			}
+			self.setPossible(i)
+		}
+		for _, cell := range self.Neighbors() {
+			cellImpl, ok := cell.(*cellImpl)
+			if !ok {
+				panic("Thought all neighbors would be cellImpl but they weren't")
+			}
+			cellImpl.setPossible(oldNumber)
+		}
+	}
+	if number > 0 {
+		for i := 1; i <= DIM; i++ {
+			if i == number {
+				continue
+			}
+			self.setImpossible(i)
+		}
+		for _, cell := range self.Neighbors() {
+			cellImpl, ok := cell.(*cellImpl)
+			if !ok {
+				panic("Thought all neighbors would be cellImpl but they weren't")
+			}
+			cellImpl.setImpossible(number)
+		}
+	}
+
+	return true
+}
+
 func (self *mutableCellImpl) SetNumber(number int) {
 	//Sets the explicit number. This will affect its neighbors possibles list.
+
+	//Substantially recreated in cellImpl.setNumber
+
 	if self.cellImpl.number == number {
 		//No work to do now.
 		return
@@ -337,12 +407,12 @@ func (self *mutableCellImpl) SetNumber(number int) {
 		}
 		self.alertNeighbors(number, false)
 	}
-	if self.cellImpl.gridRef != nil {
-		self.cellImpl.gridRef.cellModified(self, oldNumber)
+	if self.mutableGridRef != nil {
+		self.mutableGridRef.cellModified(self, oldNumber)
 		if (oldNumber > 0 && number == 0) || (oldNumber == 0 && number > 0) {
 			//Our rank will have changed.
 			//TODO: figure out how to test this.
-			self.cellImpl.gridRef.cellRankChanged(self)
+			self.mutableGridRef.cellRankChanged(self)
 		}
 	}
 }
@@ -357,41 +427,57 @@ func (self *mutableCellImpl) alertNeighbors(number int, possible bool) {
 	}
 }
 
-func (self *mutableCellImpl) setPossible(number int) {
+func (self *cellImpl) setPossible(number int) {
 	//Number is 1 indexed, but we store it as 0-indexed
 	number--
 	if number < 0 || number >= DIM {
 		return
 	}
-	if self.cellImpl.impossibles[number] == 0 {
-		log.Println("We were told to mark something that was already possible to possible.")
+	if self.impossibles[number] == 0 {
+		panic("We were told to mark something that was already possible to possible.")
 		return
 	}
-	self.cellImpl.impossibles[number]--
-	if self.cellImpl.impossibles[number] == 0 && self.cellImpl.gridRef != nil {
+	self.impossibles[number]--
+}
+
+func (self *mutableCellImpl) setPossible(number int) {
+	self.cellImpl.setPossible(number)
+	if self.cellImpl.impossibles[number-1] == 0 && self.mutableGridRef != nil {
 		//TODO: should we check exclusion to save work?
 		//Our rank will have changed.
-		self.gridRef.cellRankChanged(self)
+		self.mutableGridRef.cellRankChanged(self)
 		//We may have just become valid.
 		self.checkInvalid()
 	}
 
 }
 
-func (self *mutableCellImpl) setImpossible(number int) {
+func (self *cellImpl) setImpossible(number int) {
 	//Number is 1 indexed, but we store it as 0-indexed
 	number--
 	if number < 0 || number >= DIM {
 		return
 	}
-	self.cellImpl.impossibles[number]++
-	if self.cellImpl.impossibles[number] == 1 && self.cellImpl.gridRef != nil {
+	self.impossibles[number]++
+}
+
+func (self *mutableCellImpl) setImpossible(number int) {
+	self.cellImpl.setImpossible(number)
+	if self.cellImpl.impossibles[number-1] == 1 && self.mutableGridRef != nil {
 		//TODO: should we check exclusion to save work?
 		//Our rank will have changed.
-		self.gridRef.cellRankChanged(self)
+		self.mutableGridRef.cellRankChanged(self)
 		//We may have just become invalid.
 		self.checkInvalid()
 	}
+}
+
+func (self *cellImpl) Excluded(number int) bool {
+	number--
+	if number < 0 || number >= DIM {
+		return false
+	}
+	return self.excluded[number]
 }
 
 func (self *mutableCellImpl) SetExcluded(number int, excluded bool) {
@@ -404,8 +490,8 @@ func (self *mutableCellImpl) SetExcluded(number int, excluded bool) {
 	self.excludedLockRef.Unlock()
 	//Our rank may have changed.
 	//TODO: should we check if we're invalid already?
-	if self.cellImpl.gridRef != nil {
-		self.cellImpl.gridRef.cellRankChanged(self)
+	if self.mutableGridRef != nil {
+		self.mutableGridRef.cellRankChanged(self)
 		self.checkInvalid()
 	}
 }
@@ -418,8 +504,8 @@ func (self *mutableCellImpl) ResetExcludes() {
 	self.excludedLockRef.Unlock()
 	//Our rank may have changed.
 	//TODO: should we check if we're invalid already?
-	if self.cellImpl.gridRef != nil {
-		self.cellImpl.gridRef.cellRankChanged(self)
+	if self.mutableGridRef != nil {
+		self.mutableGridRef.cellRankChanged(self)
 		self.checkInvalid()
 	}
 }
@@ -495,9 +581,9 @@ func (self *mutableCellImpl) checkInvalid() {
 		return
 	}
 	if self.Invalid() {
-		self.cellImpl.gridRef.cellIsInvalid(self)
+		self.mutableGridRef.cellIsInvalid(self)
 	} else {
-		self.cellImpl.gridRef.cellIsValid(self)
+		self.mutableGridRef.cellIsValid(self)
 	}
 }
 
@@ -593,17 +679,23 @@ func (self *cellImpl) SymmetricalPartner(symmetry SymmetryType) Cell {
 		symmetry = typesOfSymmetry[rand.Intn(len(typesOfSymmetry))]
 	}
 
+	var cell Cell
+
 	switch symmetry {
 	case SYMMETRY_BOTH:
-		if cell := self.gridRef.cellImpl(DIM-self.Row()-1, DIM-self.Col()-1); cell != self {
+		cell = self.gridRef.Cell(DIM-self.Row()-1, DIM-self.Col()-1)
+		if cell != nil && (cell.Row() != self.Row() || cell.Col() != self.Col()) {
 			return cell
 		}
 	case SYMMETRY_HORIZONTAL:
-		if cell := self.gridRef.cellImpl(DIM-self.Row()-1, self.Col()); cell != self {
+		cell = self.gridRef.Cell(DIM-self.Row()-1, self.Col())
+		if cell != nil && (cell.Row() != self.Row() || cell.Col() != self.Col()) {
 			return cell
 		}
+
 	case SYMMETRY_VERTICAL:
-		if cell := self.gridRef.cellImpl(self.Row(), DIM-self.Col()-1); cell != self {
+		cell = self.gridRef.Cell(self.Row(), DIM-self.Col()-1)
+		if cell != nil && (cell.Row() != self.Row() || cell.Col() != self.Col()) {
 			return cell
 		}
 	}
@@ -623,7 +715,7 @@ func (self *mutableCellImpl) MutableNeighbors() MutableCellSlice {
 //Neighbors is similar to cellImpl.Neighbors except it caches the work if
 //possible.
 func (self *mutableCellImpl) Neighbors() CellSlice {
-	if self.gridRef == nil || !self.gridRef.initalized {
+	if self.mutableGridRef == nil || !self.mutableGridRef.initalized() {
 		return nil
 	}
 
@@ -684,7 +776,7 @@ func (self *cellImpl) String() string {
 }
 
 func (self *cellImpl) positionInBlock() (top, right, bottom, left bool) {
-	if self.grid == nil {
+	if self.gridRef == nil {
 		return
 	}
 	topRow, topCol, bottomRow, bottomCol := self.gridRef.blockExtents(self.Block())
