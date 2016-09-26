@@ -31,6 +31,13 @@ const (
 	DIAGRAM_LOCKED     = "X"
 )
 
+//TODO: should grid have Mutable on it, that returns self if it's a mutable
+//grid, or creates a mutable version? Because in some cases we don't want to
+//create a copy if we just want at the underlying impl. But it's a bit weird--
+//if it was a RO grid, then mutating that thing will not change the original
+//grid, but if it was, it will. Probably makes sense to audit how often
+//MutableCopy is used, and what the desired semantics are.
+
 //Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
 //be acted on in various ways. Grid is read-only. For mutator methods, see MutableGrid.
 type Grid interface {
