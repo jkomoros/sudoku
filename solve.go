@@ -225,8 +225,6 @@ func searchGridSolutions(grid Grid, queue *syncedFiniteQueue, isFirstRun bool, n
 	var result Grid
 
 	for i, num := range possibilities {
-		//TODO: this seems like a natural place to use CopyWithModifications,
-		//but gridImpl.fillSimpleCells will be called on it.
 		modification := newCellModification(cell)
 		modification.Number = num
 		copy := grid.CopyWithModifications(GridModification{
