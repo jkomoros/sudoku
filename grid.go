@@ -528,6 +528,11 @@ func (self *gridImpl) Copy() Grid {
 func (self *mutableGridImpl) Copy() Grid {
 	//TODO: next step: set this to return newStarterGrid(self), then keep
 	//fixing errors that uncovers!
+
+	//Can't flip on yet because:
+	// * TestMultiSolutions gets stuck in infinte loop, never even gets past first of 1000 runs.
+	// * TestAdvancedSolve fails (returns 0 when there should be 1 solution)
+
 	return self.MutableCopy()
 }
 
