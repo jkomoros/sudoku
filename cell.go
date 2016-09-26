@@ -356,7 +356,7 @@ func (self *cellImpl) setNumber(number int) bool {
 			if !ok {
 				panic("Thought all neighbors would be cellImpl but they weren't")
 			}
-			cellImpl.setPossible(number)
+			cellImpl.setPossible(oldNumber)
 		}
 	}
 	if number > 0 {
