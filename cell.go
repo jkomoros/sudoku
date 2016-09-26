@@ -255,11 +255,8 @@ func (self *mutableCellImpl) excludedLock() *sync.RWMutex {
 }
 
 func (self *cellImpl) setExcludedBulk(other [DIM]bool) {
-	//TODO: can't this just be a straight set?
 	//Assumes someone else already holds the lock
-	for i := 0; i < DIM; i++ {
-		self.excluded[i] = other[i]
-	}
+	self.excluded = other
 }
 
 func (self *cellImpl) excludedBulk() [DIM]bool {
@@ -268,11 +265,8 @@ func (self *cellImpl) excludedBulk() [DIM]bool {
 }
 
 func (self *cellImpl) setMarksBulk(other [DIM]bool) {
-	//TODO: can't this just be a straight set?
 	//Assumes someone else already holds the lock for us
-	for i := 0; i < DIM; i++ {
-		self.marks[i] = other[i]
-	}
+	self.marks = other
 }
 
 func (self *cellImpl) marksBulk() [DIM]bool {
