@@ -125,6 +125,8 @@ func (self *gridImpl) CopyWithModifications(modifications GridModification) Grid
 		cell.gridRef = result
 	}
 
+	result.theQueue.grid = result
+
 	cellNumberModified := false
 
 	for _, modification := range modifications {
