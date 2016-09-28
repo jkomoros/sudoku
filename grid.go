@@ -42,6 +42,8 @@ const (
 //can check if it's going to be a cheap up-convert with side effects or not.
 //And since that's odd, maybe it should be a package-internal method.
 
+//If we do that, remove all of the instances of reflection up (like in mutableCellSlice).
+
 //Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
 //be acted on in various ways. Grid is read-only. For mutator methods, see MutableGrid.
 type Grid interface {
