@@ -205,6 +205,8 @@ type cellImpl struct {
 	excluded    [DIM]bool
 	marks       [DIM]bool
 	locked      bool
+	//TODO: should cellImpl have a pointer to its wrapping mutableCellImpl?
+	//That makes up-casting easy.
 }
 
 //TODO: test cellImpl separately.
