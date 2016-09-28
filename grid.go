@@ -38,6 +38,10 @@ const (
 //grid, but if it was, it will. Probably makes sense to audit how often
 //MutableCopy is used, and what the desired semantics are.
 
+//No, it's better for it to return either the underlying grid or nil, so you
+//can check if it's going to be a cheap up-convert with side effects or not.
+//And since that's odd, maybe it should be a package-internal method.
+
 //Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
 //be acted on in various ways. Grid is read-only. For mutator methods, see MutableGrid.
 type Grid interface {
