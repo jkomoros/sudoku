@@ -48,6 +48,10 @@ const (
 //never actually exposed outside of Solve, HumanSolve (or, more importantly,
 //outside of the package).
 
+//TODO: Consdier making a pool of ROGrids (with a private done() method). That
+//MIGHT help with performance. But it's also kind of hard because ROGrids
+//might be handed out multiple times. You'd need a refcounting like thing.
+
 //Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
 //be acted on in various ways. Grid is read-only. For mutator methods, see MutableGrid.
 type Grid interface {
