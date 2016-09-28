@@ -44,6 +44,10 @@ const (
 
 //If we do that, remove all of the instances of reflection up (like in mutableCellSlice).
 
+//TODO: consider making non-mutable grids an implementation detail that is
+//never actually exposed outside of Solve, HumanSolve (or, more importantly,
+//outside of the package).
+
 //Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
 //be acted on in various ways. Grid is read-only. For mutator methods, see MutableGrid.
 type Grid interface {
