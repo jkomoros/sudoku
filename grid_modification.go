@@ -130,6 +130,7 @@ func (self *gridImpl) CopyWithModifications(modifications GridModification) Grid
 	result.theQueue.grid = result
 
 	cellNumberModified := false
+	excludesModififed := false
 
 	for _, modification := range modifications {
 		cell := result.cellImpl(modification.Cell.Row(), modification.Cell.Col())
@@ -144,7 +145,10 @@ func (self *gridImpl) CopyWithModifications(modifications GridModification) Grid
 		for key, val := range modification.ExcludesChanges {
 			//Key is 1-indexed
 			key--
-			cell.excluded[key] = val
+			if cell.excluded[key] != val {
+				cell.excluded[key] = val
+				excludesModififed = true
+			}
 		}
 
 		for key, val := range modification.MarksChanges {
@@ -154,12 +158,13 @@ func (self *gridImpl) CopyWithModifications(modifications GridModification) Grid
 		}
 	}
 
+	filledCellsCount := 0
+
 	if cellNumberModified {
 
 		//At least one cell's number was modified, which means we need to fix
-		//up the queue, numFilledCells, Invalid, Solved.
-
-		filledCellsCount := 0
+		//up the queue, numFilledCells, Invalid, Solved. (And some of those we
+		//also need to do if any excludes were modified but no numbers were.)
 
 		for _, cell := range result.cells {
 			if cell.number == 0 {
@@ -172,13 +177,17 @@ func (self *gridImpl) CopyWithModifications(modifications GridModification) Grid
 
 		//Check if we're invalid.
 
+	}
+
+	if cellNumberModified || excludesModififed {
+
 		invalid := false
 
 		for _, cell := range result.cells {
 			//Make sure we have at least one possibility per cell
 			foundPossibility := false
-			for i := 0; i < DIM; i++ {
-				if cell.impossibles[i] == 0 {
+			for i := 1; i <= DIM; i++ {
+				if cell.Possible(i) {
 					foundPossibility = true
 					break
 				}
