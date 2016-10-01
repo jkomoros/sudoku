@@ -114,6 +114,7 @@ type Cell interface {
 	mutable() MutableCell
 
 	ref() cellRef
+	//TODO: should this be a public method? Seems useful in some circumstances...
 	grid() Grid
 	diagramRows(showMarks bool) []string
 	dataString() string
