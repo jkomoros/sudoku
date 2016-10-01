@@ -703,7 +703,10 @@ func (self *cellImpl) SymmetricalPartner(symmetry SymmetryType) Cell {
 func (self *mutableCellImpl) MutableNeighbors() MutableCellSlice {
 	//TODO: optimize this by caching. It's called a LOT. I also wonder if
 	//implies we should just have its own implementation. (But if we cache
-	//that probably doesn't matter.)
+	//that probably doesn't matter.). Hmmmm, it turns out that memoizing this
+	//had between a -20% to +5% impact on HumanSolve (highly variable), and a
+	//~+5% impact on AdvancedSolve. That was true if we used the same lock or
+	//a new lock as non-mutable Neighbors.
 	result := self.Neighbors()
 	if result == nil {
 		return nil
