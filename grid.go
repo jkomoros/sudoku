@@ -52,6 +52,12 @@ const (
 //MIGHT help with performance. But it's also kind of hard because ROGrids
 //might be handed out multiple times. You'd need a refcounting like thing.
 
+//TODO: Audit the whole codebase for violations of the invariant where a Grid
+//can never change out from under you (unless someone in the package reflects
+//it to realize it's a mutable grid and then cast it.). This would happen in
+//things that take as input a MutableGrid or mutableGridImpl and then return a
+//Grid that is derived exactly form it.
+
 //Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
 //be acted on in various ways. Grid is read-only. For mutator methods, see MutableGrid.
 type Grid interface {
