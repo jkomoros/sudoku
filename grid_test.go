@@ -175,6 +175,14 @@ func TestGridCopy(t *testing.T) {
 	if grid.Diagram(false) != gridCopy.Diagram(false) {
 		t.Error("Grid and copy don't match in terms of excludes. Got", gridCopy.Diagram(false), "wanted", grid.Diagram(false))
 	}
+
+	//Make sure that the grid that was returned from copy does not change when the grid it was derived from is modified.
+
+	grid.MutableCell(1, 2).SetNumber(5)
+
+	if grid.Diagram(true) == gridCopy.Diagram(true) {
+		t.Error("A read-only grid copy changed when the grid it was created from was mutated. Got", gridCopy.Diagram(true), "from both")
+	}
 }
 
 func TestGridCreation(t *testing.T) {
