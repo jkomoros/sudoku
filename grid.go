@@ -328,7 +328,14 @@ type gridImpl struct {
 	filledCellsCount int
 	invalid          bool
 	solved           bool
+	//Consider having Neighbors cached. That's accessed quite often and is
+	//pretty expensive...
 }
+
+//TODO: consider having a raw cellRefSlice that can be converted into a
+//cellSlice or mutableCellSlice with a ref to a grid. That way everyone can
+//just have one cache of neigbhors for each cell position, and then instead of
+//recalculating each time, it's just a simple clone...
 
 //TODO:Allow num solver threads to be set at runtime
 const _NUM_SOLVER_THREADS = 4
