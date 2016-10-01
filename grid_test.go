@@ -188,6 +188,10 @@ func TestGridCopy(t *testing.T) {
 
 	gridCopy := grid.Copy()
 
+	if !isGridImpl(gridCopy) {
+		t.Error("Expected grid.copy() to return a gridImpl but it didn't")
+	}
+
 	if grid.Diagram(true) != gridCopy.Diagram(true) {
 		t.Error("Grid and copy don't match in marks. Got", gridCopy.Diagram(true), "wanted", grid.Diagram(true))
 	}
