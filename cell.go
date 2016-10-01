@@ -701,7 +701,9 @@ func (self *cellImpl) SymmetricalPartner(symmetry SymmetryType) Cell {
 }
 
 func (self *mutableCellImpl) MutableNeighbors() MutableCellSlice {
-	//TODO: optimize this by caching. It's called a LOT.
+	//TODO: optimize this by caching. It's called a LOT. I also wonder if
+	//implies we should just have its own implementation. (But if we cache
+	//that probably doesn't matter.)
 	result := self.Neighbors()
 	if result == nil {
 		return nil
