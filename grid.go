@@ -187,6 +187,11 @@ type Grid interface {
 
 //TODO: exhaustively test gridImpl and read only grids to make sure we're
 //actually exercising gridImpl, and not mutalbeGrids everywhere.
+// Still not done:
+// * grid_test.go
+// * dokugen_test.go
+// * grid_modification_test.go
+// * cell_test.go
 
 //MutableGrid is a sudoku Grid that can be mutated.
 type MutableGrid interface {

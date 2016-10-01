@@ -667,6 +667,10 @@ func TestGridLoad(t *testing.T) {
 }
 
 func TestAdvancedSolve(t *testing.T) {
+
+	//TODO: this is the next test in grid_test.go to make test immutable grid,
+	//too.
+
 	grid := NewGrid()
 	grid.LoadSDKFromFile(puzzlePath("advancedtestgrid.sdk"))
 
