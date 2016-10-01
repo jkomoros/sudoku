@@ -146,6 +146,26 @@ func init() {
 	runtime.GOMAXPROCS(_NUM_SOLVER_THREADS)
 }
 
+//returns true if the provided grid is a gridImpl
+func isGridImpl(grid Grid) bool {
+	switch grid.(type) {
+	default:
+		return false
+	case *gridImpl:
+		return true
+	}
+}
+
+//returns true if the provided grid is a mutableGridImpl
+func isMutableGridImpl(grid Grid) bool {
+	switch grid.(type) {
+	default:
+		return false
+	case *mutableGridImpl:
+		return true
+	}
+}
+
 func BenchmarkGridCopy(b *testing.B) {
 	grid := NewGrid()
 	grid.LoadSDK(ADVANCED_TEST_GRID)
@@ -209,8 +229,16 @@ func TestGridCreation(t *testing.T) {
 	grid := NewGrid()
 	grid.LoadSDK(data)
 
+	if !isMutableGridImpl(grid) {
+		t.Error("Expected grid to be mutable under the covers but it wasn't")
+	}
+
 	//We want to run all of the same tests on a Grid and MutableGrid.
 	roGrid := grid.Copy()
+
+	if !isGridImpl(roGrid) {
+		t.Error("Expected ROgrid to be immutable under the covers but it wasn't")
+	}
 
 	grids := []struct {
 		grid        Grid
