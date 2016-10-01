@@ -419,6 +419,8 @@ func TestGridCells(t *testing.T) {
 
 func TestMutableGridLoad(t *testing.T) {
 
+	//Substantially recreated in TestGridLoad
+
 	grid := NewGrid()
 	grid.LoadSDK(TEST_GRID)
 
@@ -528,6 +530,138 @@ func TestMutableGridLoad(t *testing.T) {
 
 	if !grid.Invalid() {
 		t.Error("Grid didn't notice when it became invalid because one of its cells has no more possibilities")
+	}
+
+}
+
+func TestGridLoad(t *testing.T) {
+
+	//Substantially recreated in TestMutableGridLoad
+
+	mutableGrid := NewGrid()
+	mutableGrid.LoadSDK(TEST_GRID)
+
+	grid := mutableGrid.Copy()
+
+	if !isGridImpl(grid) {
+		t.Fatal("Expected grid from mutable copy to be immutable")
+	}
+
+	cell := grid.Cell(0, 0)
+
+	if cell.Number() != 6 {
+		t.Error("The loaded grid did not have a 6 in the upper left corner")
+	}
+
+	cell = grid.Cell(DIM-1, DIM-1)
+
+	if cell.Number() != 7 {
+		t.Error("The loaded grid did not have a 7 in the bottom right corner")
+	}
+
+	if grid.DataString() != TEST_GRID {
+		t.Error("The real test grid did not survive a round trip via DataString: \n", grid.DataString(), "\n\n", TEST_GRID)
+	}
+
+	if grid.Diagram(false) != TEST_GRID_DIAGRAM {
+		t.Error("The grid did not match the expected diagram: \n", grid.Diagram(false))
+	}
+
+	//Test copying.
+
+	copy := grid.Copy()
+
+	if grid.DataString() != copy.DataString() {
+		t.Error("Copied grid does not have the same datastring!")
+	}
+
+	for c, cell := range grid.Cells() {
+		copyCell := cell.InGrid(copy)
+		cellI := cell.(*cellImpl)
+		copyCellI := copyCell.(*cellImpl)
+		if !IntSlice(cellI.impossibles[:]).SameAs(IntSlice(copyCellI.impossibles[:])) {
+			t.Error("Cells at position", c, "had different impossibles:\n", cellI.impossibles, "\n", copyCellI.impossibles)
+		}
+		for i := 1; i <= DIM; i++ {
+			if cell.Possible(i) != copyCell.Possible(i) {
+				t.Error("The copy of the grid did not have the same possible at cell ", c, " i ", i)
+			}
+		}
+	}
+
+	if grid.Solved() {
+		t.Error("Grid reported it was solved when it was not.")
+	}
+
+	if grid.Invalid() {
+		t.Error("Grid thought it was invalid when it wasn't: \n", grid.Diagram(false))
+	}
+
+	previousRank := grid.rank()
+
+	grid = withSimpleCellsFilled(grid)
+	cell = cell.InGrid(grid)
+
+	if num := previousRank - grid.rank(); num != 45 {
+		t.Error("We filled simple cells on the test grid but didn't get as many as we were expecting: ", num, "/", 45)
+	}
+
+	if grid.Invalid() {
+		t.Error("fillSimpleCells filled in something that made the grid invalid: \n", grid.Diagram(false))
+	}
+
+	if !grid.Solved() {
+		t.Error("Grid didn't think it was solved when it was.")
+	}
+
+	if grid.DataString() != SOLVED_TEST_GRID {
+		t.Error("After filling simple cells, the grid was not actually solved correctly.")
+	}
+
+	grid = grid.CopyWithModifications(GridModification{
+		&CellModification{
+			Cell:   cell,
+			Number: cell.Number() + 1,
+		},
+	})
+
+	if !grid.Invalid() {
+		t.Error("Grid didn't notice it was invalid when it actually was.", grid)
+	}
+
+	grid = grid.CopyWithModifications(GridModification{
+		&CellModification{
+			Cell:   cell,
+			Number: cell.Number(),
+		},
+	})
+
+	if grid.Invalid() {
+		t.Error("Grid didn't noticed when it flipped from being invalid to being valid again.")
+	}
+
+	grid = grid.CopyWithModifications(GridModification{
+		&CellModification{
+			Cell:   cell,
+			Number: 0,
+		},
+	})
+
+	excludes := map[int]bool{}
+
+	for i := 1; i <= DIM; i++ {
+		excludes[i] = true
+	}
+
+	grid = grid.CopyWithModifications(GridModification{
+		&CellModification{
+			Cell:            cell,
+			ExcludesChanges: excludes,
+		},
+	})
+
+	if !grid.Invalid() {
+		t.Error("Grid didn't notice when it became invalid because one of its cells has no more possibilities", grid.Diagram(false))
 	}
 
 }
