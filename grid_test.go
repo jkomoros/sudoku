@@ -358,6 +358,12 @@ func TestGridCells(t *testing.T) {
 
 	grid.LoadSDK(TEST_GRID)
 
+	//Test the mutableGridImpl
+
+	if !isMutableGridImpl(grid) {
+		t.Error("Expected to get a mutableGridimpl from LoadSDK")
+	}
+
 	cells := grid.MutableCells()
 
 	if len(cells) != DIM*DIM {
@@ -370,6 +376,30 @@ func TestGridCells(t *testing.T) {
 			t.Error("cell #", i, "had wrong grid")
 		}
 		if cell != grid.MutableCell(cell.Row(), cell.Col()) {
+			t.Error("cell #", i, "was not the same as the right one in the grid")
+		}
+	}
+
+	//Now do the same test for a gridImpl
+
+	roGrid := grid.Copy()
+
+	if !isGridImpl(roGrid) {
+		t.Error("Expected to get a gridImpl from grid.Copy")
+	}
+
+	roCells := roGrid.Cells()
+
+	if len(roCells) != DIM*DIM {
+		t.Fatal("Grid.cells gave back a cellslice with wrong number of cells", len(roCells))
+	}
+
+	//Make sure it's the same cells
+	for i, cell := range roCells {
+		if cell.grid() != roGrid {
+			t.Error("cell #", i, "had wrong grid")
+		}
+		if cell != roGrid.Cell(cell.Row(), cell.Col()) {
 			t.Error("cell #", i, "was not the same as the right one in the grid")
 		}
 	}
