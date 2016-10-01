@@ -3,6 +3,8 @@ package sudoku
 //GridModification is a series of CellModifications to apply to a Grid.
 type GridModification []*CellModification
 
+//TODO: consider changing GridModification to be value type of CellModification.
+
 //CellModification represents a modification to be made to a given Cell in a
 //grid.
 type CellModification struct {
