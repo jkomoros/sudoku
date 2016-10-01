@@ -188,6 +188,7 @@ type MutableCell interface {
 	marksBulk() [DIM]bool
 	mutableGrid() MutableGrid
 	//To be used only for testing!!!!
+	//TODO: instead of exposing this, testing should just cast explicitly
 	impl() *mutableCellImpl
 }
 
