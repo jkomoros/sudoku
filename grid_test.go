@@ -208,110 +208,114 @@ func TestGridCreation(t *testing.T) {
 	data := strings.Join(nCopies(rowData, DIM), ROW_SEP)
 	grid := NewGrid()
 	grid.LoadSDK(data)
-	if len(grid.Cells()) != DIM*DIM {
-		t.Log("Didn't generate enough cells")
-		t.Fail()
-	}
-	if grid.DataString() != data {
-		t.Log("The grid round-tripped with different result than data in")
-		t.Fail()
-	}
-	if grid.Cells()[10].Number() != 1 {
-		t.Log("A random spot check of a cell had the wrong number: %s", grid.Cells()[10])
-		t.Fail()
-	}
 
-	if grid.numFilledCells() != DIM*DIM {
-		t.Log("We didn't think all cells were filled, but they were!")
-		t.Fail()
-	}
+	//We want to run all of the same tests on a Grid and MutableGrid.
+	roGrid := grid.Copy()
 
-	for count := 0; count < DIM; count++ {
-		col := grid.Col(count)
-		if num := len(col); num != DIM {
-			t.Log("We got back a column but it had the wrong amount of items: ", num, "\n")
-			t.Fail()
+	grids := []struct {
+		grid        Grid
+		description string
+	}{
+		{
+			grid:        grid,
+			description: "Mutable grid",
+		},
+		{
+			grid:        roGrid,
+			description: "Read Only Grid",
+		},
+	}
+	for _, config := range grids {
+
+		grid := config.grid
+		description := config.description
+
+		if len(grid.Cells()) != DIM*DIM {
+			t.Error(description, "Didn't generate enough cells")
 		}
-		for i, cell := range col {
-			if cell.Col() != count {
-				t.Log("One of the cells we got back when asking for column ", count, " was not in the right column.")
-				t.Fail()
+		if grid.DataString() != data {
+			t.Error(description, "The grid round-tripped with different result than data in")
+		}
+		if grid.Cells()[10].Number() != 1 {
+			t.Error(description, "A random spot check of a cell had the wrong number: %s", grid.Cells()[10])
+		}
+
+		if grid.numFilledCells() != DIM*DIM {
+			t.Error(description, "We didn't think all cells were filled, but they were!")
+		}
+
+		for count := 0; count < DIM; count++ {
+			col := grid.Col(count)
+			if num := len(col); num != DIM {
+				t.Error(description, "We got back a column but it had the wrong amount of items: ", num, "\n")
 			}
-			if cell.Row() != i {
-				t.Log("One of the cells we got back when asking for column ", count, " was not in the right row.")
-				t.Fail()
+			for i, cell := range col {
+				if cell.Col() != count {
+					t.Error(description, "One of the cells we got back when asking for column ", count, " was not in the right column.")
+				}
+				if cell.Row() != i {
+					t.Error(description, "One of the cells we got back when asking for column ", count, " was not in the right row.")
+				}
 			}
-		}
 
-		row := grid.Row(count)
-		if len(row) != DIM {
-			t.Log("We got back a row but it had the wrong number of items.")
-			t.Fail()
-		}
-		for i, cell := range row {
-			if cell.Row() != count {
-				t.Log("One of the cells we got back when asking for row ", count, " was not in the right rows.")
-				t.Fail()
+			row := grid.Row(count)
+			if len(row) != DIM {
+				t.Error(description, "We got back a row but it had the wrong number of items.")
 			}
-			if cell.Col() != i {
-				t.Log("One of the cells we got back from row ", count, " was not in the right column.")
-				t.Fail()
+			for i, cell := range row {
+				if cell.Row() != count {
+					t.Error(description, "One of the cells we got back when asking for row ", count, " was not in the right rows.")
+				}
+				if cell.Col() != i {
+					t.Error(description, "One of the cells we got back from row ", count, " was not in the right column.")
+				}
 			}
-		}
 
-		block := grid.Block(count)
-		if len(block) != DIM {
-			t.Log("We got back a block but it had the wrong number of items.")
-			t.Fail()
-		}
-
-		for _, cell := range block {
-			if cell.Block() != count {
-				t.Log("We got a cell back in a block with the wrong block number")
-				t.Fail()
+			block := grid.Block(count)
+			if len(block) != DIM {
+				t.Error(description, "We got back a block but it had the wrong number of items.")
 			}
+
+			for _, cell := range block {
+				if cell.Block() != count {
+					t.Error(description, "We got a cell back in a block with the wrong block number")
+				}
+			}
+
+			if block[0].Row() != blockUpperLeftRow[count] || block[0].Col() != blockUpperLeftCol[count] {
+				t.Error(description, "We got back the wrong first cell from block ", count, ": ", block[0])
+			}
+
+			if block[DIM-1].Row() != blockUpperLeftRow[count]+BLOCK_DIM-1 || block[DIM-1].Col() != blockUpperLeftCol[count]+BLOCK_DIM-1 {
+				t.Error(description, "We got back the wrong last cell from block ", count, ": ", block[0])
+			}
+
 		}
 
-		if block[0].Row() != blockUpperLeftRow[count] || block[0].Col() != blockUpperLeftCol[count] {
-			t.Log("We got back the wrong first cell from block ", count, ": ", block[0])
-			t.Fail()
+		cell := grid.Cell(2, 2)
+
+		if cell.Row() != 2 || cell.Col() != 2 {
+			t.Error(description, "We grabbed a cell but what we got back was the wrong row and col.")
 		}
 
-		if block[DIM-1].Row() != blockUpperLeftRow[count]+BLOCK_DIM-1 || block[DIM-1].Col() != blockUpperLeftCol[count]+BLOCK_DIM-1 {
-			t.Log("We got back the wrong last cell from block ", count, ": ", block[0])
-			t.Fail()
+		neighbors := cell.Neighbors()
+
+		if len(neighbors) != _NUM_NEIGHBORS {
+			t.Error(description, "We got a different number of neighbors than what we were expecting: ", len(neighbors))
 		}
-
-	}
-
-	cell := grid.Cell(2, 2)
-
-	if cell.Row() != 2 || cell.Col() != 2 {
-		t.Log("We grabbed a cell but what we got back was the wrong row and col.")
-		t.Fail()
-	}
-
-	neighbors := cell.Neighbors()
-
-	if len(neighbors) != _NUM_NEIGHBORS {
-		t.Log("We got a different number of neighbors than what we were expecting: ", len(neighbors))
-		t.Fail()
-	}
-	neighborsMap := make(map[Cell]bool)
-	for _, neighbor := range neighbors {
-		if neighbor == nil {
-			t.Log("We found a nil neighbor")
-			t.Fail()
-		}
-		if neighbor.Row() != cell.Row() && neighbor.Col() != cell.Col() && neighbor.Block() != cell.Block() {
-			t.Log("We found a neighbor in ourselves that doesn't appear to be related: Neighbor: ", neighbor, " Cell: ", cell)
-			t.Fail()
-		}
-		if _, ok := neighborsMap[neighbor]; ok {
-			t.Log("We found a duplicate in the neighbors list")
-			t.Fail()
-		} else {
-			neighborsMap[cell] = true
+		neighborsMap := make(map[Cell]bool)
+		for _, neighbor := range neighbors {
+			if neighbor == nil {
+				t.Error(description, "We found a nil neighbor")
+			}
+			if neighbor.Row() != cell.Row() && neighbor.Col() != cell.Col() && neighbor.Block() != cell.Block() {
+				t.Error(description, "We found a neighbor in ourselves that doesn't appear to be related: Neighbor: ", neighbor, " Cell: ", cell)
+			}
+			if _, ok := neighborsMap[neighbor]; ok {
+				t.Error(description, "We found a duplicate in the neighbors list")
+			} else {
+				neighborsMap[cell] = true
+			}
 		}
 	}
 
