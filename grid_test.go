@@ -417,32 +417,33 @@ func TestGridCells(t *testing.T) {
 	}
 }
 
-func TestGridLoad(t *testing.T) {
+func TestMutableGridLoad(t *testing.T) {
+
 	grid := NewGrid()
 	grid.LoadSDK(TEST_GRID)
+
+	if !isMutableGridImpl(grid) {
+		t.Fatal("Expected grid from LoadSDK to be mutable")
+	}
 
 	cell := grid.MutableCell(0, 0)
 
 	if cell.Number() != 6 {
-		t.Log("The loaded grid did not have a 6 in the upper left corner")
-		t.Fail()
+		t.Error("The loaded grid did not have a 6 in the upper left corner")
 	}
 
 	cell = grid.MutableCell(DIM-1, DIM-1)
 
 	if cell.Number() != 7 {
-		t.Log("The loaded grid did not have a 7 in the bottom right corner")
-		t.Fail()
+		t.Error("The loaded grid did not have a 7 in the bottom right corner")
 	}
 
 	if grid.DataString() != TEST_GRID {
-		t.Log("The real test grid did not survive a round trip via DataString: \n", grid.DataString(), "\n\n", TEST_GRID)
-		t.Fail()
+		t.Error("The real test grid did not survive a round trip via DataString: \n", grid.DataString(), "\n\n", TEST_GRID)
 	}
 
 	if grid.Diagram(false) != TEST_GRID_DIAGRAM {
-		t.Log("The grid did not match the expected diagram: \n", grid.Diagram(false))
-		t.Fail()
+		t.Error("The grid did not match the expected diagram: \n", grid.Diagram(false))
 	}
 
 	//Twiddle an exclude to make sure it copies over correctly.
@@ -457,8 +458,7 @@ func TestGridLoad(t *testing.T) {
 	copy := grid.MutableCopy()
 
 	if grid.DataString() != copy.DataString() {
-		t.Log("Copied grid does not have the same datastring!")
-		t.Fail()
+		t.Error("Copied grid does not have the same datastring!")
 	}
 
 	for c, cell := range grid.MutableCells() {
@@ -478,18 +478,15 @@ func TestGridLoad(t *testing.T) {
 	copy.MutableCell(0, 0).SetNumber(5)
 
 	if copy.Cell(0, 0).Number() == grid.Cell(0, 0).Number() {
-		t.Log("When we modified the copy's cell, it also affected the original.")
-		t.Fail()
+		t.Error("When we modified the copy's cell, it also affected the original.")
 	}
 
 	if grid.Solved() {
-		t.Log("Grid reported it was solved when it was not.")
-		t.Fail()
+		t.Error("Grid reported it was solved when it was not.")
 	}
 
 	if grid.Invalid() {
-		t.Log("Grid thought it was invalid when it wasn't: \n", grid.Diagram(false))
-		t.Fail()
+		t.Error("Grid thought it was invalid when it wasn't: \n", grid.Diagram(false))
 	}
 
 	previousRank := grid.rank()
@@ -498,37 +495,31 @@ func TestGridLoad(t *testing.T) {
 	cell = cell.MutableInGrid(grid)
 
 	if num := previousRank - grid.rank(); num != 45 {
-		t.Log("We filled simple cells on the test grid but didn't get as many as we were expecting: ", num, "/", 45)
-		t.Fail()
+		t.Error("We filled simple cells on the test grid but didn't get as many as we were expecting: ", num, "/", 45)
 	}
 
 	if grid.Invalid() {
-		t.Log("fillSimpleCells filled in something that made the grid invalid: \n", grid.Diagram(false))
-		t.Fail()
+		t.Error("fillSimpleCells filled in something that made the grid invalid: \n", grid.Diagram(false))
 	}
 
 	if !grid.Solved() {
-		t.Log("Grid didn't think it was solved when it was.")
-		t.Fail()
+		t.Error("Grid didn't think it was solved when it was.")
 	}
 
 	if grid.DataString() != SOLVED_TEST_GRID {
-		t.Log("After filling simple cells, the grid was not actually solved correctly.")
-		t.Fail()
+		t.Error("After filling simple cells, the grid was not actually solved correctly.")
 	}
 
 	cell.SetNumber(cell.Number() + 1)
 
 	if !grid.Invalid() {
 		t.Error("Grid didn't notice it was invalid when it actually was.", grid)
-		t.Fail()
 	}
 
 	cell.SetNumber(cell.Number() - 1)
 
 	if grid.Invalid() {
-		t.Log("Grid didn't noticed when it flipped from being invalid to being valid again.")
-		t.Fail()
+		t.Error("Grid didn't noticed when it flipped from being invalid to being valid again.")
 	}
 
 	for i := 1; i <= DIM; i++ {
@@ -536,8 +527,7 @@ func TestGridLoad(t *testing.T) {
 	}
 
 	if !grid.Invalid() {
-		t.Log("Grid didn't notice when it became invalid because one of its cells has no more possibilities")
-		t.Fail()
+		t.Error("Grid didn't notice when it became invalid because one of its cells has no more possibilities")
 	}
 
 }
