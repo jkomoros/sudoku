@@ -701,6 +701,7 @@ func (self *cellImpl) SymmetricalPartner(symmetry SymmetryType) Cell {
 }
 
 func (self *mutableCellImpl) MutableNeighbors() MutableCellSlice {
+	//TODO: optimize this by caching. It's called a LOT.
 	result := self.Neighbors()
 	if result == nil {
 		return nil
