@@ -122,10 +122,6 @@ type Cell interface {
 	implicitNumber() int
 }
 
-//TODO: the tests for cells rely heavily on the fact that mutableCellImpl
-//embeds and defers to cellImpl. If that were no longer true those tests would
-//have to be strengthened...
-
 //MutableCell is a Cell that also has methods that allow mutation of the cell.
 //They are generally gathered from Mutable* methods on a MutableGrid.
 type MutableCell interface {
@@ -219,6 +215,9 @@ type cellImpl struct {
 
 type mutableCellImpl struct {
 	cellImpl
+	//NOTE: the tests for cells rely heavily on the fact that mutableCellImpl
+	//embeds and defers to cellImpl. If that were no longer true those tests would
+	//have to be strengthened...
 	//TODO: It seems silly to store an extra gridRef here since we already
 	//have one in cellImpl. But no other way seemed to work and allow such
 	//code resuse.
