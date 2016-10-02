@@ -1216,11 +1216,27 @@ func TestResetUnlockedCells(t *testing.T) {
 	beforeExcludesDiagram := grid.Diagram(false)
 	beforeMarksDiagram := grid.Diagram(true)
 
+	roGrid := grid.Copy()
+
+	if !isGridImpl(roGrid) {
+		t.Fatal("Expected grid.Copy to give a rogrid")
+	}
+
+	if roGrid.Diagram(false) != beforeExcludesDiagram {
+		t.Error("RO Grid didn't have right excludes")
+	}
+
+	if roGrid.Diagram(true) != beforeMarksDiagram {
+		t.Error("RO Grid didn't have right marks")
+	}
+
 	grid.MutableCell(0, 4).SetNumber(3)
 	grid.MutableCell(0, 5).SetMark(1, true)
 	grid.MutableCell(0, 6).SetExcluded(1, true)
 
 	grid.ResetUnlockedCells()
+
+	roGrid = grid.Copy()
 
 	if grid.Diagram(false) != beforeExcludesDiagram {
 		t.Error("Reseting unlocked cells didn't get right outcome. Got\n\n", grid.Diagram(false), "\n\nwanted\n\n", beforeExcludesDiagram)
@@ -1228,6 +1244,14 @@ func TestResetUnlockedCells(t *testing.T) {
 
 	if grid.Diagram(true) != beforeMarksDiagram {
 		t.Error("Reseting unlocked cells didn't get right outcome. Got\n\n", grid.Diagram(true), "\n\nwanted\n\n", beforeMarksDiagram)
+	}
+
+	if roGrid.Diagram(false) != beforeExcludesDiagram {
+		t.Error("Reseting unlocked cells didn't get right outcome in rogrid. Got\n\n", roGrid.Diagram(false), "\n\nwanted\n\n", beforeExcludesDiagram)
+	}
+
+	if roGrid.Diagram(true) != beforeMarksDiagram {
+		t.Error("Reseting unlocked cells didn't get right outcome in rogrid. Got\n\n", roGrid.Diagram(true), "\n\nwanted\n\n", beforeMarksDiagram)
 	}
 
 }
