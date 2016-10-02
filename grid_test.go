@@ -1259,33 +1259,72 @@ func TestResetUnlockedCells(t *testing.T) {
 func TestNumFilledCells(t *testing.T) {
 	grid := NewGrid()
 
+	if !isMutableGridImpl(grid) {
+		t.Fatal("Expected NewGrid to give mutable grid")
+	}
+
+	roGrid := grid.Copy()
+
+	if !isGridImpl(roGrid) {
+		t.Fatal("Expected grid.Copy to give ro grid")
+	}
+
 	if grid.numFilledCells() != 0 {
 		t.Error("New grid thought it already had filled cells")
 	}
 
+	if roGrid.numFilledCells() != 0 {
+		t.Error("New grid thought it already had filled cells in ro copy")
+	}
+
 	grid.MutableCell(0, 0).SetNumber(1)
+
+	roGrid = grid.Copy()
 
 	if grid.numFilledCells() != 1 {
 		t.Error("Grid with one cell set didn't think it had any filled cells.")
 	}
 
+	if roGrid.numFilledCells() != 1 {
+		t.Error("Grid with one cell set didn't think it had any filled cells in ro copy.")
+	}
+
 	grid.MutableCell(0, 0).SetNumber(2)
+
+	roGrid = grid.Copy()
 
 	if grid.numFilledCells() != 1 {
 		t.Error("Grid with a number set on a cell after another cell didn't notice that it was still just one cell.")
 	}
 
+	if roGrid.numFilledCells() != 1 {
+		t.Error("Grid with a number set on a cell after another cell didn't notice that it was still just one cell in rocopy.")
+	}
+
 	grid.MutableCell(0, 0).SetNumber(0)
+
+	roGrid = grid.Copy()
 
 	if grid.numFilledCells() != 0 {
 		t.Error("Grid with cell unset didn't notice that it was now zero again")
 	}
 
+	if roGrid.numFilledCells() != 0 {
+		t.Error("Grid with cell unset didn't notice that it was now zero again in ro copy")
+	}
+
 	grid.MutableCell(0, 0).SetNumber(0)
+
+	roGrid = grid.Copy()
 
 	if grid.numFilledCells() != 0 {
 		t.Error("Setting a cell to 0 that was already zero got wrong num filled cells.")
 	}
+
+	if roGrid.numFilledCells() != 0 {
+		t.Error("Setting a cell to 0 that was already zero got wrong num filled cells in rogrid.")
+	}
+
 }
 
 func TestLockFilledCells(t *testing.T) {
