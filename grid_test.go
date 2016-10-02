@@ -1159,6 +1159,10 @@ func TestLoadFromFile(t *testing.T) {
 func TestUnlockCells(t *testing.T) {
 	grid := NewGrid()
 
+	if !isMutableGridImpl(grid) {
+		t.Fatal("Expected Newgrid to return mutable grid")
+	}
+
 	for i := 0; i < DIM; i++ {
 		grid.MutableCell(i, i).Lock()
 	}
@@ -1174,11 +1178,31 @@ func TestUnlockCells(t *testing.T) {
 		t.Error("After locking some cells, no cells were locked")
 	}
 
+	roGrid := grid.Copy()
+
+	for _, cell := range roGrid.Cells() {
+		if cell.Locked() {
+			someCellsLocked = true
+		}
+	}
+
+	if !someCellsLocked {
+		t.Error("After locking some cells and copying, no cells were locked in ro grid.")
+	}
+
 	grid.UnlockCells()
 
 	for _, cell := range grid.Cells() {
 		if cell.Locked() {
 			t.Fatal("Found a locked cell after calling grid.UnlockCells", cell)
+		}
+	}
+
+	roGrid = grid.Copy()
+
+	for _, cell := range roGrid.Cells() {
+		if cell.Locked() {
+			t.Error("Found a locked cell after calling grid.UnlockCells and copying", cell)
 		}
 	}
 }
