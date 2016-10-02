@@ -9,6 +9,12 @@ func TestCopyWithModifications(t *testing.T) {
 	sourceGrid.MutableCell(0, 0).SetMark(1, true)
 	sourceGrid.MutableCell(0, 0).SetExcluded(1, true)
 
+	sourceGridRO := sourceGrid.Copy()
+
+	if !isGridImpl(sourceGridRO) {
+		t.Fatal("Expected grid.Copy to return an immutable grid")
+	}
+
 	gridFive := NewGrid()
 	gridFive.MutableCell(0, 0).SetNumber(5)
 
@@ -85,8 +91,8 @@ func TestCopyWithModifications(t *testing.T) {
 			t.Error("Test", i, "failed", test.description, "Got", result.Diagram(true), "expected", test.expected.Diagram(true))
 		}
 
-		//Also test the non-mutalbe grid implementation (assuming grid.Copy always returns a non-mutalbe grid)
-		nonMutableResult := sourceGrid.Copy().CopyWithModifications(test.modifications)
+		//Also test the non-mutalbe grid implementation
+		nonMutableResult := sourceGridRO.CopyWithModifications(test.modifications)
 		if result.Diagram(true) != test.expected.Diagram(true) {
 			t.Error("Test", i, "failed with non-mutable copy", test.description, "Got", nonMutableResult.Diagram(true), "expected", test.expected.Diagram(true))
 		}
