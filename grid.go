@@ -721,15 +721,19 @@ func (self *mutableGridImpl) MutableCells() MutableCellSlice {
 	return result
 }
 
+func legalIndex(index int) bool {
+	return index >= 0 && index < DIM
+}
+
 func (self *gridImpl) Row(index int) CellSlice {
-	if index < 0 || index >= DIM {
+	if !legalIndex(index) {
 		return nil
 	}
 	return self.cellSlice(index, 0, index, DIM-1)
 }
 
 func (self *mutableGridImpl) Row(index int) CellSlice {
-	if index < 0 || index >= DIM {
+	if !legalIndex(index) {
 		log.Println("Invalid index passed to Row: ", index)
 		return nil
 	}
@@ -737,22 +741,22 @@ func (self *mutableGridImpl) Row(index int) CellSlice {
 }
 
 func (self *mutableGridImpl) MutableRow(index int) MutableCellSlice {
-	result := self.Row(index)
-	if result == nil {
+	if !legalIndex(index) {
 		return nil
 	}
-	return result.mutableCellSlice()
+
+	return self.mutableCellSlice(index, 0, index, DIM-1)
 }
 
 func (self *gridImpl) Col(index int) CellSlice {
-	if index < 0 || index >= DIM {
+	if !legalIndex(index) {
 		return nil
 	}
 	return self.cellSlice(0, index, DIM-1, index)
 }
 
 func (self *mutableGridImpl) Col(index int) CellSlice {
-	if index < 0 || index >= DIM {
+	if !legalIndex(index) {
 		log.Println("Invalid index passed to Col: ", index)
 		return nil
 	}
@@ -760,22 +764,21 @@ func (self *mutableGridImpl) Col(index int) CellSlice {
 }
 
 func (self *mutableGridImpl) MutableCol(index int) MutableCellSlice {
-	result := self.Col(index)
-	if result == nil {
+	if !legalIndex(index) {
 		return nil
 	}
-	return result.mutableCellSlice()
+	return self.mutableCellSlice(0, index, DIM-1, index)
 }
 
 func (self *gridImpl) Block(index int) CellSlice {
-	if index < 0 || index >= DIM {
+	if !legalIndex(index) {
 		return nil
 	}
 	return self.cellSlice(self.blockExtents(index))
 }
 
 func (self *mutableGridImpl) Block(index int) CellSlice {
-	if index < 0 || index >= DIM {
+	if !legalIndex(index) {
 		log.Println("Invalid index passed to Block: ", index)
 		return nil
 	}
@@ -783,11 +786,10 @@ func (self *mutableGridImpl) Block(index int) CellSlice {
 }
 
 func (self *mutableGridImpl) MutableBlock(index int) MutableCellSlice {
-	result := self.Block(index)
-	if result == nil {
+	if !legalIndex(index) {
 		return nil
 	}
-	return result.mutableCellSlice()
+	return self.mutableCellSlice(self.blockExtents(index))
 }
 
 func gridBlockExtentsImpl(grid Grid, index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
@@ -872,6 +874,9 @@ func (self *mutableGridImpl) Cell(row int, col int) Cell {
 }
 
 func gridCellSliceImpl(grid Grid, rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
+
+	//Substantially recreated in gridMutableCellSliceImpl
+
 	//both gridImpl and mutableGridImpl can use the same basic implementation
 	length := (rowTwo - rowOne + 1) * (colTwo - colOne + 1)
 	result := make(CellSlice, length)
@@ -890,7 +895,7 @@ func gridCellSliceImpl(grid Grid, rowOne int, colOne int, rowTwo int, colTwo int
 			}
 		}
 	}
-	return CellSlice(result)
+	return result
 }
 
 func (self *gridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
@@ -899,6 +904,35 @@ func (self *gridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) 
 
 func (self *mutableGridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
 	return gridCellSliceImpl(self, rowOne, colOne, rowTwo, colTwo)
+}
+
+func gridMutableCellSliceImpl(grid MutableGrid, rowOne int, colOne int, rowTwo int, colTwo int) MutableCellSlice {
+
+	//Substantially recreated in gridCellSliceImpl
+
+	//both gridImpl and mutableGridImpl can use the same basic implementation
+	length := (rowTwo - rowOne + 1) * (colTwo - colOne + 1)
+	result := make(MutableCellSlice, length)
+	currentRow := rowOne
+	currentCol := colOne
+	for i := 0; i < length; i++ {
+		result[i] = grid.MutableCell(currentRow, currentCol)
+		if colTwo > currentCol {
+			currentCol++
+		} else {
+			if rowTwo > currentRow {
+				currentRow++
+				currentCol = colOne
+			} else {
+				//This should only happen the last time through the loop.
+			}
+		}
+	}
+	return result
+}
+
+func (self *mutableGridImpl) mutableCellSlice(rowOne int, colOne int, rowTwo int, colTwo int) MutableCellSlice {
+	return gridMutableCellSliceImpl(self, rowOne, colOne, rowTwo, colTwo)
 }
 
 func (self *gridImpl) Solved() bool {
