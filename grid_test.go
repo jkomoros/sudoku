@@ -675,70 +675,59 @@ func TestAdvancedSolve(t *testing.T) {
 	grid.LoadSDKFromFile(puzzlePath("advancedtestgrid.sdk"))
 
 	if grid.DataString() != ADVANCED_TEST_GRID {
-		t.Log("Advanced grid didn't survive a roundtrip to DataString")
-		t.Fail()
+		t.Error("Advanced grid didn't survive a roundtrip to DataString")
 	}
 
 	if grid.numFilledCells() != 27 {
-		t.Log("The advanced grid's rank was wrong at load: ", grid.rank())
-		t.Fail()
+		t.Error("The advanced grid's rank was wrong at load: ", grid.rank())
 	}
 
 	grid.HasMultipleSolutions()
 
 	if grid.DataString() != ADVANCED_TEST_GRID {
-		t.Log("HasMultipleSolutions mutated the underlying grid.")
-		t.Fail()
+		t.Error("HasMultipleSolutions mutated the underlying grid.")
 	}
 
 	copy := withSimpleCellsFilled(grid).MutableCopy()
 
 	if copy.Solved() {
-		t.Log("Advanced grid was 'solved' with just fillSimpleCells")
-		t.Fail()
+		t.Error("Advanced grid was 'solved' with just fillSimpleCells")
 	}
 
 	solutions := grid.Solutions()
 
 	if grid.DataString() != ADVANCED_TEST_GRID {
-		t.Log("Calling Solutions() modified the original grid.")
-		t.Fail()
+		t.Error("Calling Solutions() modified the original grid.")
 	}
 
 	if len(solutions) != 1 {
-		t.Log("We found the wrong number of solutions in Advanced grid:", len(solutions))
-		t.FailNow()
+		t.Error("We found the wrong number of solutions in Advanced grid:", len(solutions))
 	}
 
 	if solutions[0].DataString() != SOLVED_ADVANCED_TEST_GRID {
-		t.Log("Solve found the wrong solution.")
-		t.Fail()
+		t.Error("Solve found the wrong solution.")
 	}
 
 	if grid.NumSolutions() != 1 {
-		t.Log("Grid didn't find any solutions but there is one.")
-		t.Fail()
+		t.Error("Grid didn't find any solutions but there is one.")
 	}
 
 	if !grid.HasSolution() {
-		t.Log("Grid didn't find any solutions but there is one.")
-		t.Fail()
+		t.Error("Grid didn't find any solutions but there is one.")
 	}
 
 	grid.Solve()
 
 	if !grid.Solved() {
-		t.Log("The grid itself didn't get mutated to a solved state.")
-		t.Fail()
+		t.Error("The grid itself didn't get mutated to a solved state.")
 	}
 
 	if grid.numFilledCells() != DIM*DIM {
-		t.Log("After solving, we didn't think all cells were filled.")
-		t.Fail()
+		t.Error("After solving, we didn't think all cells were filled.")
 	}
 
 	if grid.cachedSolutions() != nil {
-		t.Log("The cache of solutions was supposed to be expired when we copied in the solution, but it wasn't")
+		t.Error("The cache of solutions was supposed to be expired when we copied in the solution, but it wasn't")
 		t.Fail()
 	}
 
