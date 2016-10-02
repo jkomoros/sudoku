@@ -668,79 +668,121 @@ func TestGridLoad(t *testing.T) {
 
 func TestAdvancedSolve(t *testing.T) {
 
-	//TODO: this is the next test in grid_test.go to make test immutable grid,
-	//too.
-
 	grid := NewGrid()
 	grid.LoadSDKFromFile(puzzlePath("advancedtestgrid.sdk"))
 
-	if grid.DataString() != ADVANCED_TEST_GRID {
-		t.Error("Advanced grid didn't survive a roundtrip to DataString")
+	if !isMutableGridImpl(grid) {
+		t.Fatal("Expected load sdk from file to return mutable grid")
 	}
 
-	if grid.numFilledCells() != 27 {
-		t.Error("The advanced grid's rank was wrong at load: ", grid.rank())
+	roGrid := grid.Copy()
+
+	if !isGridImpl(roGrid) {
+		t.Fatal("Expected copy to return roGrid")
 	}
 
-	grid.HasMultipleSolutions()
+	//Run all the tests on mutable and non-mutable grids.
 
-	if grid.DataString() != ADVANCED_TEST_GRID {
-		t.Error("HasMultipleSolutions mutated the underlying grid.")
+	data := []struct {
+		grid        Grid
+		mGridTest   bool
+		description string
+	}{
+		{
+			grid,
+			true,
+			"mutable",
+		},
+		{
+			roGrid,
+			false,
+			"ro",
+		},
 	}
 
-	copy := withSimpleCellsFilled(grid).MutableCopy()
+	for _, rec := range data {
 
-	if copy.Solved() {
-		t.Error("Advanced grid was 'solved' with just fillSimpleCells")
+		grid := rec.grid
+
+		description := rec.description
+
+		if grid.DataString() != ADVANCED_TEST_GRID {
+			t.Error(description, "Advanced grid didn't survive a roundtrip to DataString")
+		}
+
+		if grid.numFilledCells() != 27 {
+			t.Error(description, "The advanced grid's rank was wrong at load: ", grid.rank())
+		}
+
+		grid.HasMultipleSolutions()
+
+		if grid.DataString() != ADVANCED_TEST_GRID {
+			t.Error(description, "HasMultipleSolutions mutated the underlying grid.")
+		}
+
+		copy := withSimpleCellsFilled(grid)
+
+		if copy.Solved() {
+			t.Error(description, "Advanced grid was 'solved' with just fillSimpleCells")
+		}
+
+		solutions := grid.Solutions()
+
+		if grid.DataString() != ADVANCED_TEST_GRID {
+			t.Error(description, "Calling Solutions() modified the original grid.")
+		}
+
+		if len(solutions) != 1 {
+			t.Error(description, "We found the wrong number of solutions in Advanced grid:", len(solutions))
+		}
+
+		if solutions[0].DataString() != SOLVED_ADVANCED_TEST_GRID {
+			t.Error(description, "Solve found the wrong solution.")
+		}
+
+		if grid.NumSolutions() != 1 {
+			t.Error(description, "Grid didn't find any solutions but there is one.")
+		}
+
+		if !grid.HasSolution() {
+			t.Error(description, "Grid didn't find any solutions but there is one.")
+		}
+
+		if rec.mGridTest {
+
+			mGrid := grid.MutableCopy()
+
+			mGrid.Solve()
+
+			if !mGrid.Solved() {
+				t.Error("The grid itself didn't get mutated to a solved state.")
+			}
+
+			if mGrid.numFilledCells() != DIM*DIM {
+				t.Error("After solving, we didn't think all cells were filled.")
+			}
+
+			if mGrid.cachedSolutions() != nil {
+				t.Error("The cache of solutions was supposed to be expired when we copied in the solution, but it wasn't")
+				t.Fail()
+			}
+
+			if !mGrid.Solve() {
+				t.Error("Solve called on already solved grid did not return true")
+			}
+		}
+
+		//TODO: test that nOrFewerSolutions does stop at max (unless cached)
+		//TODO: test HasMultipleSolutions
 	}
-
-	solutions := grid.Solutions()
-
-	if grid.DataString() != ADVANCED_TEST_GRID {
-		t.Error("Calling Solutions() modified the original grid.")
-	}
-
-	if len(solutions) != 1 {
-		t.Error("We found the wrong number of solutions in Advanced grid:", len(solutions))
-	}
-
-	if solutions[0].DataString() != SOLVED_ADVANCED_TEST_GRID {
-		t.Error("Solve found the wrong solution.")
-	}
-
-	if grid.NumSolutions() != 1 {
-		t.Error("Grid didn't find any solutions but there is one.")
-	}
-
-	if !grid.HasSolution() {
-		t.Error("Grid didn't find any solutions but there is one.")
-	}
-
-	grid.Solve()
-
-	if !grid.Solved() {
-		t.Error("The grid itself didn't get mutated to a solved state.")
-	}
-
-	if grid.numFilledCells() != DIM*DIM {
-		t.Error("After solving, we didn't think all cells were filled.")
-	}
-
-	if grid.cachedSolutions() != nil {
-		t.Error("The cache of solutions was supposed to be expired when we copied in the solution, but it wasn't")
-		t.Fail()
-	}
-
-	if !grid.Solve() {
-		t.Error("Solve called on already solved grid did not return true")
-	}
-
-	//TODO: test that nOrFewerSolutions does stop at max (unless cached)
-	//TODO: test HasMultipleSolutions
 
 }
 
 func TestMultiSolutions(t *testing.T) {
+
+	//TODO: consider testing immutable grids here, too. Currently don't since
+	//this is such an expensive test anyway and we should have good coverage
+	//elsewhere.
 
 	if testing.Short() {
 		t.Skip("Skipping TestMultiSolutions in short test mode,")
@@ -877,6 +919,9 @@ func TestGenerate(t *testing.T) {
 }
 
 func TestGridEmpty(t *testing.T) {
+
+	//TODO: next test to write for immutable grids
+
 	grid := NewGrid()
 
 	if !grid.Empty() {
