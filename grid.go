@@ -311,9 +311,6 @@ type mutableGridImpl struct {
 	rows                   [DIM]CellSlice
 	cols                   [DIM]CellSlice
 	blocks                 [DIM]CellSlice
-	mutableRows            [DIM]MutableCellSlice
-	mutableCols            [DIM]MutableCellSlice
-	mutableBlocks          [DIM]MutableCellSlice
 	queueGetterLock        sync.RWMutex
 	theQueue               *finiteQueue
 	numFilledCellsCounter  int
@@ -367,17 +364,10 @@ func NewGrid() MutableGrid {
 		}
 	}
 
-	//TODO: investigate getting rid of the mutable Rows/cols/blocks stashed,
-	//since they aren't used very often.
 	for index := 0; index < DIM; index++ {
 		result.rows[index] = result.cellSlice(index, 0, index, DIM-1)
-		result.mutableRows[index] = result.mutableCellSlice(index, 0, index, DIM-1)
-
 		result.cols[index] = result.cellSlice(0, index, DIM-1, index)
-		result.mutableCols[index] = result.mutableCellSlice(0, index, DIM-1, index)
-
 		result.blocks[index] = result.cellSlice(result.blockExtents(index))
-		result.mutableBlocks[index] = result.mutableCellSlice(result.blockExtents(index))
 	}
 
 	result.cachedSolutionsRequestedLengthRef = -1
@@ -754,7 +744,8 @@ func (self *mutableGridImpl) MutableRow(index int) MutableCellSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return self.mutableRows[index]
+
+	return self.mutableCellSlice(index, 0, index, DIM-1)
 }
 
 func (self *gridImpl) Col(index int) CellSlice {
@@ -776,7 +767,7 @@ func (self *mutableGridImpl) MutableCol(index int) MutableCellSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return self.mutableCols[index]
+	return self.mutableCellSlice(0, index, DIM-1, index)
 }
 
 func (self *gridImpl) Block(index int) CellSlice {
@@ -798,7 +789,7 @@ func (self *mutableGridImpl) MutableBlock(index int) MutableCellSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return self.mutableBlocks[index]
+	return self.mutableCellSlice(self.blockExtents(index))
 }
 
 func gridBlockExtentsImpl(grid Grid, index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
