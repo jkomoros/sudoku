@@ -177,15 +177,9 @@ type MutableCell interface {
 
 	//The following are private methods
 
-	//TODO: a number of thse would be better handled by having a generic path
-	//and if it can cast to mutableCellImpl doing a fast path.
 	setPossible(number int)
 	setImpossible(number int)
 	excludedLock() *sync.RWMutex
-	setExcludedBulk(other [DIM]bool)
-	excludedBulk() [DIM]bool
-	setMarksBulk(other [DIM]bool)
-	marksBulk() [DIM]bool
 	mutableGrid() MutableGrid
 	//To be used only for testing!!!!
 	//TODO: instead of exposing this, testing should just cast explicitly
@@ -259,26 +253,6 @@ func (self *cellImpl) impl() *cellImpl {
 
 func (self *mutableCellImpl) excludedLock() *sync.RWMutex {
 	return &self.excludedLockRef
-}
-
-func (self *cellImpl) setExcludedBulk(other [DIM]bool) {
-	//Assumes someone else already holds the lock
-	self.excluded = other
-}
-
-func (self *cellImpl) excludedBulk() [DIM]bool {
-	//Assumes someone else already holds the lock
-	return self.excluded
-}
-
-func (self *cellImpl) setMarksBulk(other [DIM]bool) {
-	//Assumes someone else already holds the lock for us
-	self.marks = other
-}
-
-func (self *cellImpl) marksBulk() [DIM]bool {
-	//Assumes someone else already holds the lock
-	return self.marks
 }
 
 func (self *cellImpl) mutable() MutableCell {

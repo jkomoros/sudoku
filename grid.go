@@ -536,9 +536,26 @@ func (self *gridImpl) MutableCopy() MutableGrid {
 	result.Load(self.DataString())
 	for _, sourceCell := range self.cells {
 		destCell := sourceCell.MutableInGrid(result)
+
+		//TODO: for performane consider doing the cast once at top of loop to
+		//mutableGridImpl.
+		destCellImpl, ok := destCell.(*mutableCellImpl)
+
 		destCell.excludedLock().Lock()
-		destCell.setExcludedBulk(sourceCell.excluded)
-		destCell.setMarksBulk(sourceCell.marks)
+		if ok {
+			//fast path for cellImpl
+
+			destCellImpl.excluded = sourceCell.excluded
+			destCellImpl.marks = sourceCell.marks
+
+		} else {
+			//Fall back on slower path if destCell can't be casted to impl.
+			for i := 1; i <= DIM; i++ {
+				destCell.SetExcluded(i, sourceCell.Excluded(i))
+				destCell.SetMark(i, sourceCell.Mark(i))
+			}
+		}
+
 		destCell.excludedLock().Unlock()
 		if sourceCell.Locked() {
 			destCell.Lock()
@@ -575,10 +592,26 @@ func (self *mutableGridImpl) replace(other MutableGrid) {
 		selfCell.excludedLock().Lock()
 		otherCell.excludedLock().RLock()
 
-		//TODO: it's conceivable that this extra copying is what's taking 15%
-		//longer.
-		selfCell.setExcludedBulk(otherCell.excludedBulk())
-		selfCell.setMarksBulk(otherCell.marksBulk())
+		//TODO: for performance consider doing the reflection once at the top
+		//of the loop to mutableGridImpl
+		selfCellImpl, selfOk := selfCell.(*mutableCellImpl)
+
+		otherCellImpl, otherOk := otherCell.(*mutableCellImpl)
+
+		if selfOk && otherOk {
+			//Fast path
+
+			//TODO: it's conceivable that this extra copying is what's taking 15%
+			//longer.
+			selfCellImpl.excluded = otherCellImpl.excluded
+			selfCellImpl.marks = otherCellImpl.marks
+		} else {
+			//Generic slow path
+			for i := 1; i <= DIM; i++ {
+				selfCell.SetExcluded(i, otherCell.Excluded(i))
+				selfCell.SetMark(i, otherCell.Mark(i))
+			}
+		}
 
 		otherCell.excludedLock().RUnlock()
 		selfCell.excludedLock().Unlock()
@@ -604,8 +637,22 @@ func (self *mutableGridImpl) transpose() MutableGrid {
 			original := self.MutableCell(r, c)
 			copy := result.MutableCell(c, r)
 			copy.SetNumber(original.Number())
-			//TODO: shouldn't we have a lock here or something?
-			copy.setExcludedBulk(original.excludedBulk())
+
+			//TODO: for performance consider doing the cast once at top to
+			//mutableGridImpl
+			copyImpl, copyOk := copy.(*mutableCellImpl)
+			originalImpl, originalOk := original.(*mutableCellImpl)
+
+			//TODO: shouldn't we have to have a lock here or something?
+			if copyOk && originalOk {
+				//Fast path
+				copyImpl.excluded = originalImpl.excluded
+			} else {
+				//slow generic path
+				for i := 1; i <= DIM; i++ {
+					copy.SetExcluded(i, original.Excluded(i))
+				}
+			}
 		}
 	}
 	return result
