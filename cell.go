@@ -105,14 +105,6 @@ type Cell interface {
 	//The following are methods that are only internal. Some of them are
 	//nasty.
 
-	//mutable will return a MutableCell underlying this one, or nil if that's
-	//not possible. This should succeed if you're calling it from a method
-	//that was called on a MutableGrid, but otherwise expect it to fail. In
-	//general it is always safer to use grid.MutableCell(r,c),
-	//cell.MutableInGrid(grid), etc wherever available because thos will fail
-	//at compile time instead of run-time.
-	mutable() MutableCell
-
 	ref() cellRef
 	//TODO: should this be a public method? Seems useful in some circumstances...
 	grid() Grid
@@ -250,18 +242,6 @@ func (self *cellImpl) impl() *cellImpl {
 
 func (self *mutableCellImpl) excludedLock() *sync.RWMutex {
 	return &self.excludedLockRef
-}
-
-func (self *cellImpl) mutable() MutableCell {
-	//TODO: the very existence of this seems like a terrible hack...
-
-	//We can only cast up if our gridRef happens to also satisfy MutableGrid.
-	switch g := self.gridRef.(type) {
-	default:
-		return nil
-	case MutableGrid:
-		return self.MutableInGrid(g)
-	}
 }
 
 func (self *cellImpl) Row() int {
@@ -640,7 +620,7 @@ func (self *mutableCellImpl) MutableSymmetricalPartner(symmetry SymmetryType) Mu
 		return nil
 	}
 
-	return result.mutable()
+	return result.MutableInGrid(self.mutableGridRef)
 }
 
 func (self *cellImpl) SymmetricalPartner(symmetry SymmetryType) Cell {
