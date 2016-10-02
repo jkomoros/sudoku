@@ -316,11 +316,18 @@ func TestSymmetry(t *testing.T) {
 	grid := NewGrid()
 
 	cell := grid.Cell(3, 3)
+	mutableCell := grid.MutableCell(3, 3)
 
 	partner := cell.SymmetricalPartner(SYMMETRY_BOTH)
 
 	if partner.Row() != 5 || partner.Col() != 5 {
 		t.Error("Got wrong symmetrical partner (both) for 3,3: ", partner)
+	}
+
+	mutablePartner := mutableCell.MutableSymmetricalPartner(SYMMETRY_BOTH)
+
+	if mutablePartner.Row() != 5 || mutablePartner.Col() != 5 {
+		t.Error("Got wrong symmetrical partner (both) for 3,3: ", mutablePartner)
 	}
 
 	partner = cell.SymmetricalPartner(SYMMETRY_HORIZONTAL)
@@ -329,15 +336,33 @@ func TestSymmetry(t *testing.T) {
 		t.Error("Got wrong symmetrical partner (horizontal) for 3,3: ", partner)
 	}
 
+	mutablePartner = mutableCell.MutableSymmetricalPartner(SYMMETRY_HORIZONTAL)
+
+	if mutablePartner.Row() != 5 || mutablePartner.Col() != 3 {
+		t.Error("Got wrong symmetrical partner (horizontal) for 3,3: ", mutablePartner)
+	}
+
 	partner = cell.SymmetricalPartner(SYMMETRY_VERTICAL)
 
 	if partner.Row() != 3 || partner.Col() != 5 {
 		t.Error("Got wrong symmetrical partner (vertical) for 3,3: ", partner)
 	}
 
+	mutablePartner = mutableCell.MutableSymmetricalPartner(SYMMETRY_VERTICAL)
+
+	if mutablePartner.Row() != 3 || mutablePartner.Col() != 5 {
+		t.Error("Got wrong symmetrical partner (vertical) for 3,3: ", mutablePartner)
+	}
+
 	partner = cell.SymmetricalPartner(SYMMETRY_ANY)
 
 	if partner == nil {
+		t.Error("Didn't get back a symmerical partner for (any) for 3,3")
+	}
+
+	mutablePartner = mutableCell.MutableSymmetricalPartner(SYMMETRY_ANY)
+
+	if mutablePartner == nil {
 		t.Error("Didn't get back a symmerical partner for (any) for 3,3")
 	}
 
@@ -347,10 +372,22 @@ func TestSymmetry(t *testing.T) {
 		t.Error("Should have gotten back nil for SYMMETRY_NONE for 3,3, got: ", partner)
 	}
 
+	mutablePartner = mutableCell.MutableSymmetricalPartner(SYMMETRY_NONE)
+
+	if mutablePartner != nil {
+		t.Error("Should have gotten back nil for SYMMETRY_NONE for 3,3, got: ", mutablePartner)
+	}
+
 	cell = grid.Cell(4, 4)
 
 	if cell.SymmetricalPartner(SYMMETRY_BOTH) != nil || cell.SymmetricalPartner(SYMMETRY_HORIZONTAL) != nil || cell.SymmetricalPartner(SYMMETRY_VERTICAL) != nil {
 		t.Error("Middle cell got a symmetrical partner for some kind of symmetry.")
+	}
+
+	mutableCell = grid.MutableCell(4, 4)
+
+	if mutableCell.MutableSymmetricalPartner(SYMMETRY_BOTH) != nil || mutableCell.MutableSymmetricalPartner(SYMMETRY_HORIZONTAL) != nil || mutableCell.MutableSymmetricalPartner(SYMMETRY_VERTICAL) != nil {
+		t.Error("Middle cell got a mutable symmetrical partner for some kind of symmetry.")
 	}
 
 }
