@@ -130,13 +130,13 @@ func TestNecessaryInRow(t *testing.T) {
 
 	//SetNumber will affect the other cells in row, so do it first.
 	for _, cell := range grid.MutableRow(3) {
-		cellI := cell.impl()
+		cellI := cell.(*mutableCellImpl)
 		cellI.number = 0
 		copy(cellI.impossibles[:], impossibles)
 	}
 
 	cell := grid.MutableCell(3, 3)
-	cellI := cell.impl()
+	cellI := cell.(*mutableCellImpl)
 	//This is the only cell where DIM will be allowed.
 	cellI.impossibles[DIM-1] = 0
 
@@ -218,13 +218,13 @@ func TestNecessaryInCol(t *testing.T) {
 
 	//SetNumber will affect the other cells in row, so do it first.
 	for _, cell := range grid.MutableCol(3) {
-		cellI := cell.impl()
+		cellI := cell.(*mutableCellImpl)
 		cellI.number = 0
 		copy(cellI.impossibles[:], impossibles)
 	}
 
 	cell := grid.MutableCell(3, 3)
-	cellI := cell.impl()
+	cellI := cell.(*mutableCellImpl)
 	//This is the only cell where DIM will be allowed.
 	cellI.impossibles[DIM-1] = 0
 
@@ -306,13 +306,13 @@ func TestNecessaryInBlock(t *testing.T) {
 
 	//SetNumber will affect the other cells in row, so do it first.
 	for _, cell := range grid.MutableBlock(4) {
-		cellI := cell.impl()
+		cellI := cell.(*mutableCellImpl)
 		cellI.number = 0
 		copy(cellI.impossibles[:], impossibles)
 	}
 
 	cell := grid.MutableCell(3, 3)
-	cellI := cell.impl()
+	cellI := cell.(*mutableCellImpl)
 	//This is the only cell where DIM will be allowed.
 	cellI.impossibles[DIM-1] = 0
 

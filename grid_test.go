@@ -465,8 +465,8 @@ func TestMutableGridLoad(t *testing.T) {
 
 	for c, cell := range grid.MutableCells() {
 		copyCell := cell.MutableInGrid(copy)
-		cellI := cell.impl()
-		copyCellI := copyCell.impl()
+		cellI := cell.(*mutableCellImpl)
+		copyCellI := copyCell.(*mutableCellImpl)
 		if !IntSlice(cellI.impossibles[:]).SameAs(IntSlice(copyCellI.impossibles[:])) {
 			t.Error("Cells at position", c, "had different impossibles:\n", cellI.impossibles, "\n", copyCellI.impossibles)
 		}

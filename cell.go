@@ -181,9 +181,6 @@ type MutableCell interface {
 	setImpossible(number int)
 	excludedLock() *sync.RWMutex
 	mutableGrid() MutableGrid
-	//To be used only for testing!!!!
-	//TODO: instead of exposing this, testing should just cast explicitly
-	impl() *mutableCellImpl
 }
 
 //cellImpl is a simple, read-only cell. If used in isolation it expects its
