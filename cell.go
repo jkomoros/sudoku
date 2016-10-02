@@ -687,7 +687,11 @@ func (self *mutableCellImpl) MutableNeighbors() MutableCellSlice {
 	if result == nil {
 		return nil
 	}
-	return result.mutableCellSlice()
+	mutableResult := make(MutableCellSlice, len(result))
+	for i, item := range result {
+		mutableResult[i] = item.MutableInGrid(self.mutableGridRef)
+	}
+	return mutableResult
 }
 
 //Neighbors is similar to cellImpl.Neighbors except it caches the work if
