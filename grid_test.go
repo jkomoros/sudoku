@@ -920,18 +920,40 @@ func TestGenerate(t *testing.T) {
 
 func TestGridEmpty(t *testing.T) {
 
-	//TODO: next test to write for immutable grids
-
 	grid := NewGrid()
+
+	if !isMutableGridImpl(grid) {
+		t.Fatal("Expected mutable grid impl from NewGrid")
+	}
 
 	if !grid.Empty() {
 		t.Error("Fresh grid wasn't empty")
+	}
+
+	roGrid := grid.Copy()
+
+	if !isGridImpl(roGrid) {
+		t.Error("Expected immutable grid impl from NewGrid.Copy()")
+	}
+
+	if !grid.Empty() {
+		t.Error("RO fresh grid wasn't empty")
 	}
 
 	grid.LoadSDK(TEST_GRID)
 
 	if grid.Empty() {
 		t.Error("A filled grid was reported as empty")
+	}
+
+	roGrid = grid.Copy()
+
+	if grid.Diagram(false) != roGrid.Diagram(false) {
+		t.Error("Grid and roGrid had different data strings")
+	}
+
+	if roGrid.Empty() {
+		t.Error("A filled rogrid was reported as empty")
 	}
 
 	//Reset the grid
@@ -943,6 +965,12 @@ func TestGridEmpty(t *testing.T) {
 
 	if !grid.Empty() {
 		t.Error("A forcibly cleared grid did not report as empty.")
+	}
+
+	roGrid = grid.Copy()
+
+	if !roGrid.Empty() {
+		t.Error("A forcibly cleared ro grid did not report as empty")
 	}
 }
 
