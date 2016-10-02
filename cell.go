@@ -122,6 +122,10 @@ type Cell interface {
 	implicitNumber() int
 }
 
+//TODO: the tests for cells rely heavily on the fact that mutableCellImpl
+//embeds and defers to cellImpl. If that were no longer true those tests would
+//have to be strengthened...
+
 //MutableCell is a Cell that also has methods that allow mutation of the cell.
 //They are generally gathered from Mutable* methods on a MutableGrid.
 type MutableCell interface {
