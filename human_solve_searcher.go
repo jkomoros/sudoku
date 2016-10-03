@@ -210,7 +210,10 @@ func humanSolveSearch(grid Grid, options *HumanSolveOptions) []*CompoundSolveSte
 
 	//TODO: it FEELS like here we should be using read only grids. Test what
 	//happens if we get rid of the mutablegrid path (and modify the callers
-	//who expect us to mutate the grid)
+	//who expect us to mutate the grid). however, we tried doing this, and it
+	//added 90% to BenchmarkHumansolve. Presumably it's because we are
+	//creating tons of extra grids when we can just accumulate the results in
+	//the one item otherwise.
 	for !grid.Solved() {
 		newStep := humanSolveSearchSingleStep(grid, options, result)
 		if newStep == nil {
