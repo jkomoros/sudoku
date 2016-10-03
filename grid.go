@@ -833,9 +833,7 @@ func (self *mutableGridImpl) Cell(row int, col int) Cell {
 		log.Println("Invalid row/col index passed to Cell: ", row, ", ", col)
 		return nil
 	}
-	//A first version of this just returned &self.cells[index], but that
-	//caused lots of tests to fail. Hmmmm...
-	return &self.cells[index].cellImpl
+	return &self.cells[index]
 }
 
 func gridCellSliceImpl(grid Grid, rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {

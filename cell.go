@@ -700,19 +700,19 @@ func (self *cellImpl) Neighbors() CellSlice {
 	//We don't want duplicates, so we will collect in a map (used as a set) and then reduce.
 	neighborsMap := make(map[Cell]bool)
 	for _, cell := range self.gridRef.Row(self.Row()) {
-		if cell == self {
+		if cell.Row() == self.Row() && cell.Col() == self.Col() {
 			continue
 		}
 		neighborsMap[cell] = true
 	}
 	for _, cell := range self.gridRef.Col(self.Col()) {
-		if cell == self {
+		if cell.Row() == self.Row() && cell.Col() == self.Col() {
 			continue
 		}
 		neighborsMap[cell] = true
 	}
 	for _, cell := range self.gridRef.Block(self.Block()) {
-		if cell == self {
+		if cell.Row() == self.Row() && cell.Col() == self.Col() {
 			continue
 		}
 		neighborsMap[cell] = true
