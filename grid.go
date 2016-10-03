@@ -301,16 +301,14 @@ type mutableGridImpl struct {
 	theQueue              *finiteQueue
 	numFilledCellsCounter int
 	invalidCells          map[MutableCell]bool
-	//TODO: we can drop the "Ref" in each of these; they were only necessary
-	//when we needed a method name of the same name.
-	cachedSolutionsLockRef sync.RWMutex
-	cachedSolutionsRef     []Grid
+	cachedSolutionsLock   sync.RWMutex
+	cachedSolutions       []Grid
 	//The number of solutions that we REQUESTED when we got back
 	//this list of cachedSolutions. This helps us avoid extra work
 	//in cases where there's only one solution but in the past we'd
 	//asked for more.
-	cachedSolutionsRequestedLengthRef int
-	cachedDifficulty                  float64
+	cachedSolutionsRequestedLength int
+	cachedDifficulty               float64
 }
 
 //gridImpl is the default implementation of Grid.
@@ -358,7 +356,7 @@ func NewGrid() MutableGrid {
 		result.blocks[index] = result.cellSlice(result.blockExtents(index))
 	}
 
-	result.cachedSolutionsRequestedLengthRef = -1
+	result.cachedSolutionsRequestedLength = -1
 
 	result.isInitalized = true
 	return result
@@ -450,16 +448,6 @@ func (self *mutableGridImpl) numFilledCells() int {
 	return self.numFilledCellsCounter
 }
 
-func (self *mutableGridImpl) cachedSolutions() []Grid {
-	//Assumes someone else holds the lock
-	return self.cachedSolutionsRef
-}
-
-func (self *mutableGridImpl) cachedSolutionsRequestedLength() int {
-	//Assumes someone else holds the lock for us
-	return self.cachedSolutionsRequestedLengthRef
-}
-
 func (self *gridImpl) queue() queue {
 	return &self.theQueue
 }
@@ -481,10 +469,6 @@ func (self *mutableGridImpl) queue() queue {
 		self.queueGetterLock.Unlock()
 	}
 	return queue
-}
-
-func (self *mutableGridImpl) cachedSolutionsLock() *sync.RWMutex {
-	return &self.cachedSolutionsLockRef
 }
 
 func (self *mutableGridImpl) LoadSDK(data string) {
@@ -608,12 +592,12 @@ func (self *mutableGridImpl) replace(other MutableGrid) {
 	otherImpl, ok := other.(*mutableGridImpl)
 
 	if ok {
-		self.cachedSolutionsLockRef.Lock()
-		otherImpl.cachedSolutionsLockRef.RLock()
-		self.cachedSolutionsRequestedLengthRef = otherImpl.cachedSolutionsRequestedLengthRef
-		self.cachedSolutionsRef = otherImpl.cachedSolutionsRef
-		otherImpl.cachedSolutionsLockRef.RUnlock()
-		self.cachedSolutionsLockRef.Unlock()
+		self.cachedSolutionsLock.Lock()
+		otherImpl.cachedSolutionsLock.RLock()
+		self.cachedSolutionsRequestedLength = otherImpl.cachedSolutionsRequestedLength
+		self.cachedSolutions = otherImpl.cachedSolutions
+		otherImpl.cachedSolutionsLock.RUnlock()
+		self.cachedSolutionsLock.Unlock()
 	}
 }
 
@@ -1023,10 +1007,10 @@ func (self *mutableGridImpl) cellIsValid(cell MutableCell) {
 }
 
 func (self *mutableGridImpl) cellModified(cell MutableCell, oldNumber int) {
-	self.cachedSolutionsLock().Lock()
-	self.cachedSolutionsRef = nil
-	self.cachedSolutionsRequestedLengthRef = -1
-	self.cachedSolutionsLock().Unlock()
+	self.cachedSolutionsLock.Lock()
+	self.cachedSolutions = nil
+	self.cachedSolutionsRequestedLength = -1
+	self.cachedSolutionsLock.Unlock()
 	self.cachedDifficulty = 0.0
 
 	if cell.Number() == 0 && oldNumber != 0 {

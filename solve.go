@@ -59,23 +59,23 @@ func (self *mutableGridImpl) Solutions() (solutions []Grid) {
 func cachedNOrFewerSolutions(self *mutableGridImpl, max int) []Grid {
 	//TODO: investigate how useful this actually is for mutableGridImpl, and
 	//also test whether it makes sense to make one for gridImpl.
-	self.cachedSolutionsLockRef.RLock()
-	hasNoCachedSolutions := self.cachedSolutionsRef == nil
-	cachedSolutionsLen := self.cachedSolutionsRequestedLengthRef
-	self.cachedSolutionsLockRef.RUnlock()
+	self.cachedSolutionsLock.RLock()
+	hasNoCachedSolutions := self.cachedSolutions == nil
+	cachedSolutionsLen := self.cachedSolutionsRequestedLength
+	self.cachedSolutionsLock.RUnlock()
 
 	if hasNoCachedSolutions || (max == 0 && cachedSolutionsLen != 0) || (max > 0 && cachedSolutionsLen < max && cachedSolutionsLen > 0) {
 		solutions := nOrFewerSolutions(self, max)
-		self.cachedSolutionsLockRef.Lock()
-		self.cachedSolutionsRef = solutions
-		self.cachedSolutionsRequestedLengthRef = max
-		self.cachedSolutionsLockRef.Unlock()
+		self.cachedSolutionsLock.Lock()
+		self.cachedSolutions = solutions
+		self.cachedSolutionsRequestedLength = max
+		self.cachedSolutionsLock.Unlock()
 	}
 
 	//TODO: rejigger this to not need a write lock then a read lock when setting.
-	self.cachedSolutionsLockRef.RLock()
-	result := self.cachedSolutionsRef
-	self.cachedSolutionsLockRef.RUnlock()
+	self.cachedSolutionsLock.RLock()
+	result := self.cachedSolutions
+	self.cachedSolutionsLock.RUnlock()
 	return result
 
 }
