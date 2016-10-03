@@ -60,20 +60,20 @@ func cachedNOrFewerSolutions(self *mutableGridImpl, max int) []Grid {
 	self.cachedSolutionsLock.RLock()
 	hasNoCachedSolutions := self.cachedSolutions == nil
 	cachedSolutionsLen := self.cachedSolutionsRequestedLength
+	//If these two values are OK we'll just return the value from the cache.
+	result := self.cachedSolutions
 	self.cachedSolutionsLock.RUnlock()
 
 	if hasNoCachedSolutions || (max == 0 && cachedSolutionsLen != 0) || (max > 0 && cachedSolutionsLen < max && cachedSolutionsLen > 0) {
+		//Nope, we need to recalculate solutions.
 		solutions := nOrFewerSolutions(self, max)
+		result = solutions
 		self.cachedSolutionsLock.Lock()
 		self.cachedSolutions = solutions
 		self.cachedSolutionsRequestedLength = max
 		self.cachedSolutionsLock.Unlock()
 	}
 
-	//TODO: rejigger this to not need a write lock then a read lock when setting.
-	self.cachedSolutionsLock.RLock()
-	result := self.cachedSolutions
-	self.cachedSolutionsLock.RUnlock()
 	return result
 
 }
