@@ -211,7 +211,7 @@ func (self *gridImpl) CopyWithModifications(modifications GridModification) Grid
 }
 
 func (self *mutableGridImpl) CopyWithModifications(modifications GridModification) Grid {
-	//TODO: when we have an honest-to-god readonly grid impl, optimize this.
+
 	result := self.MutableCopy()
 
 	modifications.normalize()
