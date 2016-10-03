@@ -186,7 +186,8 @@ type Grid interface {
 	rank() int
 }
 
-//TODO: before pushing this, check performance delta. It's bad!
+//TODO: before pushing this, check performance delta. It's good, but not quite
+//as good as it used to be. Look for where the regression was.
 
 //MutableGrid is a sudoku Grid that can be mutated directly.
 type MutableGrid interface {
