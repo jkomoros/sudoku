@@ -245,9 +245,7 @@ type MutableGrid interface {
 	//given block (0 indexed), in order from left to right, top to bottom.
 	MutableBlock(index int) MutableCellSlice
 
-	//MutableCell returns a mutable cell. This is a safer operation than
-	//grid.Cell(a,b).Mutable() because if you call it on a read-only grid it will
-	//fail at compile time as opposed to run time.
+	//MutableCell returns a reference to a Mutable Cell at the given location.
 	MutableCell(row, col int) MutableCell
 
 	//Fill will find a random filling of the puzzle such that every cell is filled
