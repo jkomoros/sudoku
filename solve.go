@@ -31,12 +31,10 @@ func (self *mutableGridImpl) NumSolutions() int {
 }
 
 func (self *gridImpl) HasSolution() bool {
-	//TODO: optimize this to bail as soon as we find a single solution.
 	return len(nOrFewerSolutions(self, 1)) > 0
 }
 
 func (self *mutableGridImpl) HasSolution() bool {
-	//TODO: optimize this to bail as soon as we find a single solution.
 	return len(cachedNOrFewerSolutions(self, 1)) > 0
 }
 
