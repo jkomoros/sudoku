@@ -41,6 +41,8 @@ type SolveDirections struct {
 	//A copy of the Grid when the SolveDirections was generated. Grab a
 	//reference from SolveDirections.Grid().
 	gridSnapshot Grid
+	//TODO: can gridSnapshot just be exposed directly since it's a RO grid?
+
 	//The list of CompoundSolveSteps that, when applied in order, would cause
 	//the SolveDirection's Grid() to be solved.
 	CompoundSteps []*CompoundSolveStep
