@@ -23,16 +23,6 @@ type CellModification struct {
 
 //TODO: audit all uses of step/compoundstep.Apply()
 
-//TOOD: make readOnlyCellImpl. Test if neighbors should be derived or not.
-//Everything should be actual contiguous memory, no pointers (except for
-//grid). Likely should make cellImpl embed a readOnlyCellImpl and only
-//override items it needs to.
-
-//TODO: make readOnlyGridImpl. Two possible approaches: a version that is
-//incredibly easy to copy and then do minor tweaks. Or a version that stores a
-//dictionary of cell configs, and any time you grab a Cell we look it up in
-//the dict or in the ancestors' dicts.
-
 //newCellModification returns a CellModification for the given cell that is a
 //no-op.
 func newCellModification(cell Cell) *CellModification {
