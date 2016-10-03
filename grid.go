@@ -58,24 +58,25 @@ const (
 //things that take as input a MutableGrid or mutableGridImpl and then return a
 //Grid that is derived exactly form it.
 
-//TODO: update package comments about Grid/MutableGrid concepts before committing
-
 //TODO: go through and mark new TODOs with "." afterwards if they have been
 //affirmatively pushed back to "can do any time", so the "grep" for TODOs can
 //distinguish the ones I need to do before merging to master.
 
-//Grid is the primary type in the package. It represents a DIMxDIM sudoku puzzle that can
-//be acted on in various ways. Grid is read-only. For mutator methods, see MutableGrid.
+//Grid is the primary type in the package. It represents a DIMxDIM sudoku
+//puzzle that can be acted on in various ways. Grid is read-only; the way to
+//modify it is to create a copy with CopyWithModifications. For grids that can
+//be mutated directly, see MutableGrid.
 type Grid interface {
 
-	//Copy returns a new grid that has all of the same numbers and excludes filled in it.
+	//Copy returns a new immutable grid that has all of the same observable
+	//state (including set numbers, locks, excludes, marks, etc)
 	Copy() Grid
 
-	//MutableCopy returns a new, mutable grid that has all of the same numbers
-	//and excludes filled in it.
+	//MutableCopy returns a new, mutable grid that has all of the same
+	//starting state (including set numbers, locks, excludes, marks, etc.)
 	MutableCopy() MutableGrid
 
-	//CopyWithModifications returns a new Grid that has the given
+	//CopyWithModifications returns a new immutable Grid that has the given
 	//modifications applied.
 	CopyWithModifications(modifications GridModification) Grid
 
@@ -191,7 +192,7 @@ type Grid interface {
 
 //TODO: before pushing this, check performance delta. It's bad!
 
-//MutableGrid is a sudoku Grid that can be mutated.
+//MutableGrid is a sudoku Grid that can be mutated directly.
 type MutableGrid interface {
 	//MutableGrid contains all of Grid's (read-only) methods.
 	Grid
