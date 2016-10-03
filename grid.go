@@ -284,11 +284,6 @@ type MutableGrid interface {
 	cellModified(cell MutableCell, oldNumber int)
 	cellIsValid(cell MutableCell)
 	cellIsInvalid(cell MutableCell)
-	//TODO: you can move these to not be used unless it can be casted to an
-	//impl where we know we can do it.
-	cachedSolutionsLock() *sync.RWMutex
-	cachedSolutions() []Grid
-	cachedSolutionsRequestedLength() int
 }
 
 //mutableGridImpl is the default implementation of MutableGrid
@@ -298,14 +293,16 @@ type mutableGridImpl struct {
 	//helps with memory locality and performance. However, iterating over the
 	//cells means  that you get a copy, and have to be careful not to try
 	//modifying it because the modifications won't work.
-	cells                  [DIM * DIM]mutableCellImpl
-	rows                   [DIM]CellSlice
-	cols                   [DIM]CellSlice
-	blocks                 [DIM]CellSlice
-	queueGetterLock        sync.RWMutex
-	theQueue               *finiteQueue
-	numFilledCellsCounter  int
-	invalidCells           map[MutableCell]bool
+	cells                 [DIM * DIM]mutableCellImpl
+	rows                  [DIM]CellSlice
+	cols                  [DIM]CellSlice
+	blocks                [DIM]CellSlice
+	queueGetterLock       sync.RWMutex
+	theQueue              *finiteQueue
+	numFilledCellsCounter int
+	invalidCells          map[MutableCell]bool
+	//TODO: we can drop the "Ref" in each of these; they were only necessary
+	//when we needed a method name of the same name.
 	cachedSolutionsLockRef sync.RWMutex
 	cachedSolutionsRef     []Grid
 	//The number of solutions that we REQUESTED when we got back
@@ -608,12 +605,16 @@ func (self *mutableGridImpl) replace(other MutableGrid) {
 			selfCell.Unlock()
 		}
 	}
-	self.cachedSolutionsLock().Lock()
-	other.cachedSolutionsLock().RLock()
-	self.cachedSolutionsRequestedLengthRef = other.cachedSolutionsRequestedLength()
-	self.cachedSolutionsRef = other.cachedSolutions()
-	other.cachedSolutionsLock().RUnlock()
-	self.cachedSolutionsLock().Unlock()
+	otherImpl, ok := other.(*mutableGridImpl)
+
+	if ok {
+		self.cachedSolutionsLockRef.Lock()
+		otherImpl.cachedSolutionsLockRef.RLock()
+		self.cachedSolutionsRequestedLengthRef = otherImpl.cachedSolutionsRequestedLengthRef
+		self.cachedSolutionsRef = otherImpl.cachedSolutionsRef
+		otherImpl.cachedSolutionsLockRef.RUnlock()
+		self.cachedSolutionsLockRef.Unlock()
+	}
 }
 
 func (self *mutableGridImpl) transpose() MutableGrid {

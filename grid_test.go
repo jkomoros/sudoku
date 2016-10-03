@@ -762,7 +762,7 @@ func TestAdvancedSolve(t *testing.T) {
 				t.Error("After solving, we didn't think all cells were filled.")
 			}
 
-			if mGrid.cachedSolutions() != nil {
+			if mGrid.(*mutableGridImpl).cachedSolutionsRef != nil {
 				t.Error("The cache of solutions was supposed to be expired when we copied in the solution, but it wasn't")
 				t.Fail()
 			}
