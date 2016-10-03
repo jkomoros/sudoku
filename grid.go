@@ -363,8 +363,6 @@ func NewGrid() MutableGrid {
 //either use Copy() or CopyWithModifications, which are much faster.
 func newStarterGrid(grid MutableGrid) *gridImpl {
 
-	//TODO: test this once it actually knows what it's doing!
-
 	result := &gridImpl{
 		filledCellsCount: grid.numFilledCells(),
 		invalid:          grid.Invalid(),
