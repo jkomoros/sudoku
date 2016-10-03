@@ -200,8 +200,6 @@ type MutableGrid interface {
 	//LoadSDK loads a puzzle in SDK format. Unlike Load, LoadSDK "locks" the cells
 	//that are filled. See cell.Lock for more on the concept of locking.
 	LoadSDK(data string)
-	//TODO: all of these Load methos should be top-level functions that return
-	//a Grid
 
 	//Load takes the string data and parses it into the puzzle. The format is the
 	//'sdk' format: a `.` marks an empty cell, a number denotes a filled cell, and
