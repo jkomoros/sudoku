@@ -58,10 +58,6 @@ const (
 //things that take as input a MutableGrid or mutableGridImpl and then return a
 //Grid that is derived exactly form it.
 
-//TODO: go through and mark new TODOs with "." afterwards if they have been
-//affirmatively pushed back to "can do any time", so the "grep" for TODOs can
-//distinguish the ones I need to do before merging to master.
-
 //Grid is the primary type in the package. It represents a DIMxDIM sudoku
 //puzzle that can be acted on in various ways. Grid is read-only; the way to
 //modify it is to create a copy with CopyWithModifications. For grids that can
