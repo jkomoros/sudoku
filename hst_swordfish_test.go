@@ -75,7 +75,7 @@ func TestSwordfishRow(t *testing.T) {
 	techniqueVariantsTestHelper(t, "Swordfish Row")
 
 	grid := swordfishExampleGrid(t)
-	grid = grid.impl().transpose()
+	grid = grid.(*mutableGridImpl).transpose()
 
 	options := solveTechniqueTestHelperOptions{
 		targetCells:  []cellRef{{1, 1}, {4, 5}},

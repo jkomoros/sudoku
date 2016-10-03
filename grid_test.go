@@ -834,7 +834,7 @@ func TestTranspose(t *testing.T) {
 
 	grid := NewGrid()
 	grid.LoadSDK(TEST_GRID)
-	transposedGrid := grid.impl().transpose()
+	transposedGrid := grid.(*mutableGridImpl).transpose()
 	if transposedGrid == nil {
 		t.Log("Transpose gave us back a nil grid")
 		t.FailNow()

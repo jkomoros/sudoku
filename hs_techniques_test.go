@@ -266,7 +266,7 @@ func humanSolveTechniqueTestHelperStepGenerator(t *testing.T, puzzleName string,
 	}
 
 	if options.transpose {
-		newGrid := grid.impl().transpose()
+		newGrid := grid.(*mutableGridImpl).transpose()
 		grid = newGrid
 	}
 

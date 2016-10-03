@@ -289,10 +289,6 @@ type MutableGrid interface {
 	cachedSolutionsLock() *sync.RWMutex
 	cachedSolutions() []Grid
 	cachedSolutionsRequestedLength() int
-	//TODO: instead of having this in the interface we should just try casting
-	//to it and see if it succeeed.
-	//ONLY TO BE USED FOR TESTING!
-	impl() *mutableGridImpl
 }
 
 //mutableGridImpl is the default implementation of MutableGrid
@@ -447,10 +443,6 @@ func newStarterGrid(grid MutableGrid) *gridImpl {
 
 func (self *mutableGridImpl) initalized() bool {
 	return self.isInitalized
-}
-
-func (self *mutableGridImpl) impl() *mutableGridImpl {
-	return self
 }
 
 func (self *gridImpl) numFilledCells() int {
