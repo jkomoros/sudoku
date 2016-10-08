@@ -210,10 +210,7 @@ type mutableCellImpl struct {
 func newCell(grid *mutableGridImpl, row int, col int) mutableCellImpl {
 	var block int
 
-	//Grid is only nil in contrived tests.
-	if grid != nil {
-		block = grid.blockForCell(row, col)
-	}
+	block = blockForCell(row, col)
 
 	return mutableCellImpl{cellImpl: cellImpl{gridRef: grid, row: row, col: col, block: block},
 		mutableGridRef: grid,

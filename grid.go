@@ -184,7 +184,6 @@ type Grid interface {
 	//invalidities.
 	basicInvalid() bool
 	numFilledCells() int
-	blockForCell(row int, col int) int
 	blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int)
 	rank() int
 }
@@ -809,18 +808,12 @@ func (self *mutableGridImpl) blockExtents(index int) (topRow int, topCol int, bo
 	return gridBlockExtentsImpl(self, index)
 }
 
-func gridBlockForCellImpl(row, col int) int {
+func blockForCell(row, col int) int {
+	//TODO: if we ever support non-square blocking, we'd need to not have this
+	//be generic but tied to a specific grid.
 	blockCol := col / BLOCK_DIM
 	blockRow := row / BLOCK_DIM
 	return blockRow*BLOCK_DIM + blockCol
-}
-
-func (self *gridImpl) blockForCell(row int, col int) int {
-	return gridBlockForCellImpl(row, col)
-}
-
-func (self *mutableGridImpl) blockForCell(row int, col int) int {
-	return gridBlockForCellImpl(row, col)
 }
 
 func (self *mutableGridImpl) blockHasNeighbors(index int) (top bool, right bool, bottom bool, left bool) {
