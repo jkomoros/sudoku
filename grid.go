@@ -275,10 +275,6 @@ type MutableGrid interface {
 
 	//Private methods
 	replace(other MutableGrid)
-	initalized() bool
-	cellModified(cell MutableCell, oldNumber int)
-	cellIsValid(cell MutableCell)
-	cellIsInvalid(cell MutableCell)
 }
 
 //mutableGridImpl is the default implementation of MutableGrid
