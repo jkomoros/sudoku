@@ -276,7 +276,6 @@ type MutableGrid interface {
 	//Private methods
 	replace(other MutableGrid)
 	initalized() bool
-	cellRankChanged(cell MutableCell)
 	cellModified(cell MutableCell, oldNumber int)
 	cellIsValid(cell MutableCell)
 	cellIsInvalid(cell MutableCell)

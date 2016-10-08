@@ -206,14 +206,14 @@ type mutableCellImpl struct {
 	//TODO: It seems silly to store an extra gridRef here since we already
 	//have one in cellImpl. But no other way seemed to work and allow such
 	//code resuse.
-	mutableGridRef  MutableGrid
+	mutableGridRef  *mutableGridImpl
 	neighborsLock   sync.RWMutex
 	neighbors       CellSlice
 	excludedLockRef sync.RWMutex
 	//TODO: do we need a marks lock?
 }
 
-func newCell(grid MutableGrid, row int, col int) mutableCellImpl {
+func newCell(grid *mutableGridImpl, row int, col int) mutableCellImpl {
 	var block int
 
 	//Grid is only nil in contrived tests.
