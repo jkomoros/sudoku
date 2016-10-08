@@ -715,6 +715,11 @@ func (self CellReference) Cell(grid Grid) Cell {
 	return grid.Cell(self.Row, self.Col)
 }
 
+//Block returns the block that this CellReference is in.
+func (self CellReference) Block() int {
+	return blockForCell(self.Row, self.Col)
+}
+
 func (self CellReference) String() string {
 	return "(" + strconv.Itoa(self.Row) + "," + strconv.Itoa(self.Col) + ")"
 }
