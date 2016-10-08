@@ -51,6 +51,9 @@ const (
 //TODO: Consdier making a pool of ROGrids (with a private done() method). That
 //MIGHT help with performance. But it's also kind of hard because ROGrids
 //might be handed out multiple times. You'd need a refcounting like thing.
+//Tried this; it's actually surprisingly hard to get right (have to make sure
+//that you don't accidentally call done() on a grid that YOU didn't copy
+//yourself), and the speed up was only roughly 3% for BenchmarkAdvancedSolve.
 
 //TODO: Audit the whole codebase for violations of the invariant where a Grid
 //can never change out from under you (unless someone in the package reflects
