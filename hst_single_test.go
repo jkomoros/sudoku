@@ -48,9 +48,7 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 
 	techniqueVariantsTestHelper(t, "Only Legal Number")
 
-	grid := NewGrid()
-	//Load up a solved grid
-	grid.LoadSDK(SOLVED_TEST_GRID)
+	grid := MutableLoadSDK(SOLVED_TEST_GRID)
 	cell := grid.MutableCell(3, 3)
 	num := cell.Number()
 	cell.SetNumber(0)
@@ -112,12 +110,8 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 
 //TODO: use the test solve helper func for these three tests.
 func TestNecessaryInRow(t *testing.T) {
-	grid := NewGrid()
-
-	//We DON'T call grid.done because we will have poked some unrealistic values into the cells.
-
 	//Load up a solved grid
-	grid.LoadSDK(SOLVED_TEST_GRID)
+	grid := MutableLoad(SOLVED_TEST_GRID)
 
 	//We're going to cheat an set up an unrealistic grid.
 
@@ -200,12 +194,9 @@ func TestNecessaryInRow(t *testing.T) {
 }
 
 func TestNecessaryInCol(t *testing.T) {
-	grid := NewGrid()
-
-	//We DON'T call grid.done because we will have poked some unrealistic values into the cells.
 
 	//Load up a solved grid
-	grid.LoadSDK(SOLVED_TEST_GRID)
+	grid := MutableLoadSDK(SOLVED_TEST_GRID)
 
 	//We're going to cheat an set up an unrealistic grid.
 
@@ -288,12 +279,9 @@ func TestNecessaryInCol(t *testing.T) {
 }
 
 func TestNecessaryInBlock(t *testing.T) {
-	grid := NewGrid()
-
-	//We DON'T call grid.done because we will have poked some unrealistic values into the cells.
 
 	//Load up a solved grid
-	grid.LoadSDK(SOLVED_TEST_GRID)
+	grid := MutableLoadSDK(SOLVED_TEST_GRID)
 
 	//We're going to cheat an set up an unrealistic grid.
 

@@ -195,12 +195,10 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 
 func TestTwiddleCommonNumbers(t *testing.T) {
 
-	grid := NewGrid()
-	grid.LoadSDK(TEST_GRID)
+	grid := MutableLoadSDK(TEST_GRID)
 
 	//Fill all of the 4's
-	solvedGrid := NewGrid()
-	solvedGrid.LoadSDK(SOLVED_TEST_GRID)
+	solvedGrid := MutableLoadSDK(SOLVED_TEST_GRID)
 
 	for _, cell := range solvedGrid.Cells() {
 		if cell.Number() == 4 {

@@ -33,6 +33,7 @@ func (self *mutableGridImpl) Fill() bool {
 
 	if len(solutions) != 0 {
 		//We use Load instead of loadSDK because we are just incidentally using it to load state.
+
 		self.Load(solutions[0].DataString())
 		return true
 	}

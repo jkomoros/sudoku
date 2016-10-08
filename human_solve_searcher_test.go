@@ -6,8 +6,7 @@ import (
 
 func TestHumanSolveSearcher(t *testing.T) {
 
-	grid := NewGrid()
-	grid.LoadSDK(TEST_GRID)
+	grid := MutableLoadSDK(TEST_GRID)
 
 	searcher := newHumanSolveSearcher(grid, nil, DefaultHumanSolveOptions())
 

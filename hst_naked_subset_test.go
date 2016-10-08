@@ -5,8 +5,9 @@ import (
 )
 
 func TestSubsetCellsWithNPossibilities(t *testing.T) {
-	grid := NewGrid()
-	if !grid.LoadSDKFromFile(puzzlePath("nakedpair3.sdk")) {
+	grid, err := MutableLoadSDKFromFile(puzzlePath("nakedpair3.sdk"))
+
+	if err != nil {
 		t.Log("Failed to load nakedpair3.sdk")
 		t.Fail()
 	}

@@ -194,20 +194,13 @@ type MutableGrid interface {
 	//MutableGrid contains all of Grid's (read-only) methods.
 	Grid
 
-	//LoadSDK loads a puzzle in SDK format. Unlike Load, LoadSDK "locks" the cells
-	//that are filled. See cell.Lock for more on the concept of locking.
-	LoadSDK(data string)
-
-	//Load takes the string data and parses it into the puzzle. The format is the
-	//'sdk' format: a `.` marks an empty cell, a number denotes a filled cell, and
-	//an (optional) newline marks a new row. Load also accepts other variations on
-	//the sdk format, including one with a `|` between each cell. For other sudoku
-	//formats see the sdkconverter subpackage.
+	//Load is like the top-level MutableLoad, but mutates this grid as opposed
+	//to returning a new one.
 	Load(data string)
 
-	//LoadSDKFromFile is a simple convenience wrapper around LoadSDK that loads a grid based on the contents
-	//of the file at the given path.
-	LoadSDKFromFile(path string) bool
+	//LoadSDK is like the top-level MutableLoadSDK, but mutates this grid as
+	//opposed to returning a new one.
+	LoadSDK(data string)
 
 	//ResetExcludes calls ResetExcludes on all cells in the grid. See
 	//Cell.SetExcluded for more about excludes.
@@ -460,12 +453,6 @@ func (self *mutableGridImpl) queue() queue {
 	return queue
 }
 
-func (self *mutableGridImpl) LoadSDK(data string) {
-	self.UnlockCells()
-	self.Load(data)
-	self.LockFilledCells()
-}
-
 func (self *mutableGridImpl) Load(data string) {
 	//All col separators are basically just to make it easier to read. Remove them.
 	data = strings.Replace(data, ALT_COL_SEP, COL_SEP, -1)
@@ -479,13 +466,61 @@ func (self *mutableGridImpl) Load(data string) {
 	}
 }
 
-func (self *mutableGridImpl) LoadSDKFromFile(path string) bool {
+//Load takes the string data and returns a puzzle with that data. The format
+//is the 'sdk' format: a `.` marks an empty cell, a number denotes a filled
+//cell, and an (optional) newline marks a new row. Load also accepts other
+//variations on the sdk format, including one with a `|` between each cell.
+//For other sudoku formats see the sdkconverter subpackage. For a MutableGrid,
+//see MutableLoad.
+func Load(data string) Grid {
+	//TODO: optimize this to not need a mutable grid under the covers
+	return MutableLoad(data)
+}
+
+//MutableLoad is similar to Load, but returns a MutableGrid. If you want to
+//operate on an existing grid instead of returning a new one, see
+//MutableGrid.Load.
+func MutableLoad(data string) MutableGrid {
+	result := NewGrid()
+	result.Load(data)
+	return result
+}
+
+func (self *mutableGridImpl) LoadSDK(data string) {
+	self.Load(data)
+	self.LockFilledCells()
+}
+
+//LoadSDK loads a puzzle in SDK format. Unlike Load, LoadSDK "locks" the cells
+//that are filled. See cell.Lock for more on the concept of locking. For a
+//MutableGrid, see MutableLoadSDK.
+func LoadSDK(data string) Grid {
+	return MutableLoadSDK(data)
+}
+
+//MutableLoadSDK is like LoadSDK, but returns a MutableGrid. If you want to
+//operate on an existing grid, see MutableGrid.LoadSDK.
+func MutableLoadSDK(data string) MutableGrid {
+	result := NewGrid()
+	result.LoadSDK(data)
+	return result
+}
+
+//LoadSDKFromFile is a simple convenience wrapper around LoadSDK that loads a
+//grid based on the contents of the file at the given path. For a MutableGrid,
+//see MutableLoadSDKFromFile.
+func LoadSDKFromFile(path string) (Grid, error) {
+	return MutableLoadSDKFromFile(path)
+}
+
+//MutableLoadSDKFromFile is similar to LoadSDKFromFile, but returns a
+//MutableGrid.
+func MutableLoadSDKFromFile(path string) (MutableGrid, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return false
+		return nil, err
 	}
-	self.LoadSDK(string(data))
-	return true
+	return MutableLoadSDK(string(data)), nil
 }
 
 func (self *gridImpl) MutableCopy() MutableGrid {

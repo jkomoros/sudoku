@@ -7,8 +7,7 @@ import (
 )
 
 func TestBasicCellSlice(t *testing.T) {
-	grid := NewGrid()
-	grid.LoadSDK(SOLVED_TEST_GRID)
+	grid := LoadSDK(SOLVED_TEST_GRID)
 	row := CellSlice(grid.Row(2))
 	if !row.SameRow() {
 		t.Log("The items of a row were not all of the same row.")
@@ -246,8 +245,8 @@ func TestChainDissimilarity(t *testing.T) {
 }
 
 func TestFilledNums(t *testing.T) {
-	grid := NewGrid()
-	if !grid.LoadSDKFromFile(puzzlePath("nakedpairblock1.sdk")) {
+	grid, err := LoadSDKFromFile(puzzlePath("nakedpairblock1.sdk"))
+	if err != nil {
 		t.Fatal("Couldn't load file")
 	}
 

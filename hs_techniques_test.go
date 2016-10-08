@@ -258,8 +258,8 @@ func humanSolveTechniqueTestHelperStepGenerator(t *testing.T, puzzleName string,
 	if options.stepsToCheck.grid != nil {
 		grid = options.stepsToCheck.grid
 	} else {
-		tempGrid := NewGrid()
-		if !tempGrid.LoadSDKFromFile(puzzlePath(puzzleName)) {
+		tempGrid, err := MutableLoadSDKFromFile(puzzlePath(puzzleName))
+		if err != nil {
 			t.Fatal("Couldn't load puzzle ", puzzleName)
 		}
 		grid = tempGrid

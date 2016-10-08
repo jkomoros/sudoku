@@ -7,11 +7,12 @@ import (
 //TODO: test a few more puzzles to make sure I'm exercising it correctly.
 
 func swordfishExampleGrid(t *testing.T) MutableGrid {
-	grid := NewGrid()
 
 	puzzleName := "swordfish_example.sdk"
 
-	if !grid.LoadSDKFromFile(puzzlePath(puzzleName)) {
+	grid, err := MutableLoadSDKFromFile(puzzlePath(puzzleName))
+
+	if err != nil {
 		t.Fatal("Couldn't load puzzle ", puzzleName)
 	}
 

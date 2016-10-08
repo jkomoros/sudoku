@@ -167,16 +167,15 @@ func isMutableGridImpl(grid Grid) bool {
 }
 
 func BenchmarkGridCopy(b *testing.B) {
-	grid := NewGrid()
-	grid.LoadSDK(ADVANCED_TEST_GRID)
+	grid := LoadSDK(ADVANCED_TEST_GRID)
 	for i := 0; i < b.N; i++ {
 		_ = grid.Copy()
 	}
 }
 
 func TestGridCopy(t *testing.T) {
-	grid := NewGrid()
-	grid.LoadSDK(ADVANCED_TEST_GRID)
+
+	grid := MutableLoadSDK(ADVANCED_TEST_GRID)
 
 	cell := grid.MutableCell(0, 0)
 	cell.SetMark(3, true)
@@ -230,8 +229,7 @@ func TestGridCreation(t *testing.T) {
 	cellData := "1"
 	rowData := strings.Join(nCopies(cellData, DIM), COL_SEP)
 	data := strings.Join(nCopies(rowData, DIM), ROW_SEP)
-	grid := NewGrid()
-	grid.LoadSDK(data)
+	grid := MutableLoadSDK(data)
 
 	if !isMutableGridImpl(grid) {
 		t.Error("Expected grid to be mutable under the covers but it wasn't")
@@ -354,9 +352,8 @@ func TestGridCreation(t *testing.T) {
 }
 
 func TestGridCells(t *testing.T) {
-	grid := NewGrid()
 
-	grid.LoadSDK(TEST_GRID)
+	grid := MutableLoadSDK(TEST_GRID)
 
 	//Test the mutableGridImpl
 
@@ -421,8 +418,7 @@ func TestMutableGridLoad(t *testing.T) {
 
 	//Substantially recreated in TestGridLoad
 
-	grid := NewGrid()
-	grid.LoadSDK(TEST_GRID)
+	grid := MutableLoadSDK(TEST_GRID)
 
 	if !isMutableGridImpl(grid) {
 		t.Fatal("Expected grid from LoadSDK to be mutable")
@@ -538,8 +534,7 @@ func TestGridLoad(t *testing.T) {
 
 	//Substantially recreated in TestMutableGridLoad
 
-	mutableGrid := NewGrid()
-	mutableGrid.LoadSDK(TEST_GRID)
+	mutableGrid := LoadSDK(TEST_GRID)
 
 	grid := mutableGrid.Copy()
 
@@ -668,8 +663,7 @@ func TestGridLoad(t *testing.T) {
 
 func TestAdvancedSolve(t *testing.T) {
 
-	grid := NewGrid()
-	grid.LoadSDKFromFile(puzzlePath("advancedtestgrid.sdk"))
+	grid, _ := MutableLoadSDKFromFile(puzzlePath("advancedtestgrid.sdk"))
 
 	if !isMutableGridImpl(grid) {
 		t.Fatal("Expected load sdk from file to return mutable grid")
@@ -799,8 +793,7 @@ func TestMultiSolutions(t *testing.T) {
 
 		for file, numSolutions := range files {
 
-			grid = NewGrid()
-			grid.LoadSDKFromFile(puzzlePath(file))
+			grid, _ = MutableLoadSDKFromFile(puzzlePath(file))
 
 			//Test num solutions from the beginning.
 			if num := grid.NumSolutions(); num != numSolutions {
@@ -808,8 +801,7 @@ func TestMultiSolutions(t *testing.T) {
 			}
 
 			//Get a new version of grid to reset all caches
-			grid = NewGrid()
-			grid.LoadSDKFromFile(puzzlePath(file))
+			grid, _ = MutableLoadSDKFromFile(puzzlePath(file))
 
 			if !grid.HasMultipleSolutions() {
 				t.Fatal("On run", i, "Grid", file, "with multiple solutions was reported as only having one.")
@@ -832,8 +824,7 @@ func TestTranspose(t *testing.T) {
 	//TODO: this test doesn't verify that a grid with specific excludes set is transposed as well
 	//(although that does work)
 
-	grid := NewGrid()
-	grid.LoadSDK(TEST_GRID)
+	grid := MutableLoadSDK(TEST_GRID)
 	transposedGrid := grid.(*mutableGridImpl).transpose()
 	if transposedGrid == nil {
 		t.Log("Transpose gave us back a nil grid")
@@ -873,16 +864,14 @@ func BenchmarkFill(b *testing.B) {
 
 func BenchmarkAdvancedSolve(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		grid := NewGrid()
-		grid.LoadSDK(ADVANCED_TEST_GRID)
+		grid := MutableLoadSDK(ADVANCED_TEST_GRID)
 		grid.Solve()
 	}
 }
 
 func BenchmarkDifficulty(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		grid := NewGrid()
-		grid.LoadSDK(ADVANCED_TEST_GRID)
+		grid := LoadSDK(ADVANCED_TEST_GRID)
 		grid.Difficulty()
 	}
 }
@@ -940,7 +929,7 @@ func TestGridEmpty(t *testing.T) {
 		t.Error("RO fresh grid wasn't empty")
 	}
 
-	grid.LoadSDK(TEST_GRID)
+	grid.Load(TEST_GRID)
 
 	if grid.Empty() {
 		t.Error("A filled grid was reported as empty")
@@ -1145,8 +1134,8 @@ func puzzlePath(name string) string {
 }
 
 func TestLoadFromFile(t *testing.T) {
-	grid := NewGrid()
-	if !grid.LoadSDKFromFile(puzzlePath("hiddenpair1.sdk")) {
+	grid, err := MutableLoadSDKFromFile(puzzlePath("hiddenpair1.sdk"))
+	if err != nil {
 		t.Log("Grid loading failed.")
 		t.Fail()
 	}
@@ -1208,10 +1197,7 @@ func TestUnlockCells(t *testing.T) {
 }
 
 func TestResetUnlockedCells(t *testing.T) {
-	grid := NewGrid()
-	grid.LoadSDK(TEST_GRID)
-
-	grid.LockFilledCells()
+	grid := MutableLoadSDK(TEST_GRID)
 
 	beforeExcludesDiagram := grid.Diagram(false)
 	beforeMarksDiagram := grid.Diagram(true)
@@ -1328,8 +1314,7 @@ func TestNumFilledCells(t *testing.T) {
 }
 
 func TestLockFilledCells(t *testing.T) {
-	grid := NewGrid()
-	grid.LoadSDK(TEST_GRID)
+	grid := MutableLoadSDK(TEST_GRID)
 
 	var lockedCell Cell
 

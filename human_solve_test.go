@@ -10,8 +10,7 @@ import (
 
 func BenchmarkHumanSolve(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		grid := NewGrid()
-		grid.LoadSDK(TEST_GRID)
+		grid := MutableLoadSDK(TEST_GRID)
 		grid.HumanSolve(nil)
 	}
 }
@@ -20,8 +19,7 @@ func TestHumanSolveAlmostSolvedGrid(t *testing.T) {
 	//Tests human solve on a grid with only one cell left to solve. This is an
 	//interesting case in HumanSolve because it triggers ExitCondition #1.
 
-	grid := NewGrid()
-	grid.LoadSDK(SOLVED_TEST_GRID)
+	grid := MutableLoadSDK(SOLVED_TEST_GRID)
 
 	cell := grid.MutableCell(0, 0)
 
@@ -328,8 +326,7 @@ func TestNewCompoundSolveStep(t *testing.T) {
 }
 
 func TestHumanSolve(t *testing.T) {
-	grid := NewGrid()
-	grid.LoadSDK(TEST_GRID)
+	grid := MutableLoadSDK(TEST_GRID)
 
 	steps := grid.HumanSolution(nil)
 
@@ -355,8 +352,7 @@ func TestHumanSolve(t *testing.T) {
 }
 
 func TestHumanSolveOptionsNoGuess(t *testing.T) {
-	grid := NewGrid()
-	grid.LoadSDK(TEST_GRID)
+	grid := MutableLoadSDK(TEST_GRID)
 
 	options := DefaultHumanSolveOptions()
 	options.TechniquesToUse = Techniques[0:3]
@@ -371,8 +367,7 @@ func TestHumanSolveOptionsNoGuess(t *testing.T) {
 
 func TestShortTechniquesToUseHumanSolveOptions(t *testing.T) {
 
-	grid := NewGrid()
-	grid.LoadSDK(TEST_GRID)
+	grid := LoadSDK(TEST_GRID)
 
 	shortTechniqueOptions := DefaultHumanSolveOptions()
 	shortTechniqueOptions.TechniquesToUse = Techniques[0:2]
@@ -459,9 +454,8 @@ func TestHint(t *testing.T) {
 }
 
 func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string) {
-	grid := NewGrid()
 
-	grid.LoadSDK(TEST_GRID)
+	grid := LoadSDK(TEST_GRID)
 
 	diagram := grid.Diagram(false)
 
@@ -488,9 +482,9 @@ func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string
 
 func TestHumanSolveWithGuess(t *testing.T) {
 
-	grid := NewGrid()
+	grid, err := MutableLoadSDKFromFile(puzzlePath("harddifficulty.sdk"))
 
-	if !grid.LoadSDKFromFile(puzzlePath("harddifficulty.sdk")) {
+	if err != nil {
 		t.Fatal("harddifficulty.sdk wasn't loaded")
 	}
 
@@ -602,8 +596,7 @@ func cellRefsToCells(refs []cellRef, grid Grid) CellSlice {
 }
 
 func TestPuzzleDifficulty(t *testing.T) {
-	grid := NewGrid()
-	grid.LoadSDK(TEST_GRID)
+	grid := LoadSDK(TEST_GRID)
 
 	//We use the cheaper one for testing so it completes faster.
 	difficulty := calcluateGridDifficulty(grid, false)
@@ -626,8 +619,9 @@ func TestPuzzleDifficulty(t *testing.T) {
 }
 
 func puzzleDifficultyHelper(filename string, t *testing.T) {
-	otherGrid := NewGrid()
-	if !otherGrid.LoadSDKFromFile(puzzlePath(filename)) {
+	otherGrid, err := LoadSDKFromFile(puzzlePath(filename))
+
+	if err != nil {
 		t.Log("Whoops, couldn't load the file to test:", filename)
 		t.Fail()
 	}

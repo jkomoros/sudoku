@@ -108,14 +108,14 @@ func ToSDK(format string, other string) (sdk string) {
 //ToOther is a conenience wrapper that takes the name of a format and the sdk datastring
 //and returns the DataString in the other format.
 func ToOther(format string, sdk string) (other string) {
-	grid := sudoku.NewGrid()
+
 	converter := Converters[format]
 
 	if converter == nil {
 		return ""
 	}
 
-	grid.LoadSDK(sdk)
+	grid := sudoku.LoadSDK(sdk)
 
 	return converter.DataString(grid)
 }
