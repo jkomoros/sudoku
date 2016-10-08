@@ -184,7 +184,6 @@ type Grid interface {
 	//invalidities.
 	basicInvalid() bool
 	numFilledCells() int
-	blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int)
 	rank() int
 }
 
@@ -336,7 +335,7 @@ func NewGrid() MutableGrid {
 	for index := 0; index < DIM; index++ {
 		result.rows[index] = result.cellSlice(index, 0, index, DIM-1)
 		result.cols[index] = result.cellSlice(0, index, DIM-1, index)
-		result.blocks[index] = result.cellSlice(result.blockExtents(index))
+		result.blocks[index] = result.cellSlice(blockExtents(index))
 	}
 
 	result.cachedSolutionsRequestedLength = -1
@@ -769,7 +768,7 @@ func (self *gridImpl) Block(index int) CellSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return self.cellSlice(self.blockExtents(index))
+	return self.cellSlice(blockExtents(index))
 }
 
 func (self *mutableGridImpl) Block(index int) CellSlice {
@@ -784,12 +783,14 @@ func (self *mutableGridImpl) MutableBlock(index int) MutableCellSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return self.mutableCellSlice(self.blockExtents(index))
+	return self.mutableCellSlice(blockExtents(index))
 }
 
-func gridBlockExtentsImpl(grid Grid, index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
+func blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
 	//Conceptually, we'll pretend like the grid is made up of blocks that are arrayed with row/column
 	//Once we find the block r/c, we'll multiply by the actual dim to get the upper left corner.
+
+	//TODO: consider calculating all of the values for this at init time.
 
 	blockCol := index % BLOCK_DIM
 	blockRow := (index - blockCol) / BLOCK_DIM
@@ -798,14 +799,6 @@ func gridBlockExtentsImpl(grid Grid, index int) (topRow int, topCol int, bottomR
 	row := blockRow * BLOCK_DIM
 
 	return row, col, row + BLOCK_DIM - 1, col + BLOCK_DIM - 1
-}
-
-func (self *gridImpl) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
-	return gridBlockExtentsImpl(self, index)
-}
-
-func (self *mutableGridImpl) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
-	return gridBlockExtentsImpl(self, index)
 }
 
 func blockForCell(row, col int) int {
@@ -817,7 +810,7 @@ func blockForCell(row, col int) int {
 }
 
 func (self *mutableGridImpl) blockHasNeighbors(index int) (top bool, right bool, bottom bool, left bool) {
-	topRow, topCol, bottomRow, bottomCol := self.blockExtents(index)
+	topRow, topCol, bottomRow, bottomCol := blockExtents(index)
 	top = topRow != 0
 	bottom = bottomRow != DIM-1
 	left = topCol != 0

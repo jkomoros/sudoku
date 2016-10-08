@@ -734,7 +734,7 @@ func (self *cellImpl) positionInBlock() (top, right, bottom, left bool) {
 	if self.gridRef == nil {
 		return
 	}
-	topRow, topCol, bottomRow, bottomCol := self.gridRef.blockExtents(self.Block())
+	topRow, topCol, bottomRow, bottomCol := blockExtents(self.Block())
 	top = self.Row() == topRow
 	right = self.Col() == bottomCol
 	bottom = self.Row() == bottomRow

@@ -53,8 +53,8 @@ func (self *blockBlockInteractionTechnique) find(grid Grid, coordinator findCoor
 
 			//Now we need to figure out if these blocks are in the same row or same col
 			var majorAxisIsRow bool
-			rowOne, colOne, _, _ := grid.blockExtents(pair[0])
-			rowTwo, colTwo, _, _ := grid.blockExtents(pair[1])
+			rowOne, colOne, _, _ := blockExtents(pair[0])
+			rowTwo, colTwo, _, _ := blockExtents(pair[1])
 
 			if rowOne == rowTwo {
 				majorAxisIsRow = true
@@ -129,10 +129,9 @@ func (self *blockBlockInteractionTechnique) Description(step *SolveStep) string 
 	//make sure we get a stable order
 	blockNums.Sort()
 
-	grid := step.TargetCells[0].Grid()
 	var majorAxisIsRow bool
-	rowOne, colOne, _, _ := grid.blockExtents(blockNums[0])
-	rowTwo, colTwo, _, _ := grid.blockExtents(blockNums[1])
+	rowOne, colOne, _, _ := blockExtents(blockNums[0])
+	rowTwo, colTwo, _, _ := blockExtents(blockNums[1])
 
 	if rowOne == rowTwo {
 		majorAxisIsRow = true
@@ -166,8 +165,8 @@ func pairwiseBlocks(grid Grid) [][]int {
 			return nil
 		}
 		//Get the upper left cell cooordinates for both blocks.
-		rowOne, colOne, _, _ := grid.blockExtents(pair[0])
-		rowTwo, colTwo, _, _ := grid.blockExtents(pair[1])
+		rowOne, colOne, _, _ := blockExtents(pair[0])
+		rowTwo, colTwo, _, _ := blockExtents(pair[1])
 		//Then see if thw coords are the same.
 		if rowOne == rowTwo || colOne == colTwo {
 			//Found one that's the same, keep it
