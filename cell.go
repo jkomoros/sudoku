@@ -97,11 +97,12 @@ type Cell interface {
 	//Grid returns a reference to the Grid that this Cell is associated with.
 	Grid() Grid
 
+	//Reference returns a CellReference corresponding to this cell.
+	Reference() CellReference
+
 	//The following are methods that are only internal. Some of them are
 	//nasty.
 
-	//TODO: ref should be public now that CellReference is.
-	ref() CellReference
 	diagramRows(showMarks bool) []string
 	dataString() string
 	rank() int
@@ -581,7 +582,7 @@ func (self *cellImpl) rank() int {
 	return count
 }
 
-func (self *cellImpl) ref() CellReference {
+func (self *cellImpl) Reference() CellReference {
 	return CellReference{self.Row(), self.Col()}
 }
 

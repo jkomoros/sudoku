@@ -62,7 +62,7 @@ func (m GridModification) equivalent(other GridModification) bool {
 	}
 	for i, modification := range m {
 		otherModification := other[i]
-		if modification.Cell.ref().String() != otherModification.Cell.ref().String() {
+		if modification.Cell.Reference().String() != otherModification.Cell.Reference().String() {
 			return false
 		}
 		if modification.Number != otherModification.Number {

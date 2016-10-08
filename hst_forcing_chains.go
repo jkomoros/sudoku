@@ -254,8 +254,8 @@ func chainSearcher(generation int, maxGeneration int, cell MutableCell, numToApp
 	cell.SetNumber(numToApply)
 
 	//Accumulate information about this cell being set. We'll reduce out duplicates later.
-	accum.numbers[cell.ref()] = append(accum.numbers[cell.ref()], numToApply)
-	accum.firstGeneration[cell.ref()] = append(accum.firstGeneration[cell.ref()], generation)
+	accum.numbers[cell.Reference()] = append(accum.numbers[cell.Reference()], numToApply)
+	accum.firstGeneration[cell.Reference()] = append(accum.firstGeneration[cell.Reference()], generation)
 
 	for _, cellToVisit := range cellsToVisit {
 		possibilities := cellToVisit.Possibilities()

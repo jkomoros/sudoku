@@ -644,7 +644,7 @@ func (self CellSlice) Description() string {
 	strings := make(stringSlice, len(self))
 
 	for i, cell := range self {
-		strings[i] = cell.ref().String()
+		strings[i] = cell.Reference().String()
 	}
 
 	return strings.description()
@@ -653,7 +653,7 @@ func (self CellSlice) Description() string {
 func (self CellSlice) sameAsRefs(refs CellReferenceSlice) bool {
 	cellSet := make(map[string]bool)
 	for _, cell := range self {
-		cellSet[cell.ref().String()] = true
+		cellSet[cell.Reference().String()] = true
 	}
 
 	refSet := make(map[string]bool)
@@ -840,7 +840,7 @@ func (self IntSlice) toIntSet() intSet {
 func (self CellSlice) toCellSet() cellSet {
 	result := make(cellSet)
 	for _, item := range self {
-		result[item.ref()] = true
+		result[item.Reference()] = true
 	}
 	return result
 }
@@ -848,7 +848,7 @@ func (self CellSlice) toCellSet() cellSet {
 func (self MutableCellSlice) toCellSet() cellSet {
 	result := make(cellSet)
 	for _, item := range self {
-		result[item.ref()] = true
+		result[item.Reference()] = true
 	}
 	return result
 }

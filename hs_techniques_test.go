@@ -415,7 +415,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 				foundMatch = false
 				for _, ref := range options.targetCells {
 					for _, cell := range step.TargetCells {
-						if ref == cell.ref() {
+						if ref == cell.Reference() {
 							//TODO: break out early
 							foundMatch = true
 						}

@@ -386,7 +386,7 @@ func (c *CompoundSolveStep) Description() string {
 	}
 
 	var result []string
-	result = append(result, "Based on the other numbers you've entered, "+c.FillStep.TargetCells[0].ref().String()+" can only be a "+strconv.Itoa(c.FillStep.TargetNums[0])+".")
+	result = append(result, "Based on the other numbers you've entered, "+c.FillStep.TargetCells[0].Reference().String()+" can only be a "+strconv.Itoa(c.FillStep.TargetNums[0])+".")
 	result = append(result, "How do we know that?")
 	if len(c.PrecursorSteps) > 0 {
 		result = append(result, "We can't fill any cells right away so first we need to cull some possibilities.")

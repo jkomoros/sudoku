@@ -1043,10 +1043,10 @@ func TestSymmetricalGenerate(t *testing.T) {
 			cell := grid.Cell(r, c)
 			otherCell := cell.SymmetricalPartner(SYMMETRY_VERTICAL)
 			if cell.Number() != 0 && otherCell.Number() == 0 {
-				t.Error("Cell ", cell.ref().String(), "'s partner not filled but should be")
+				t.Error("Cell ", cell.Reference().String(), "'s partner not filled but should be")
 			}
 			if cell.Number() == 0 && otherCell.Number() != 0 {
-				t.Error("Cell ", cell.ref().String(), "'s partner IS filled and should be empty")
+				t.Error("Cell ", cell.Reference().String(), "'s partner IS filled and should be empty")
 			}
 		}
 	}
