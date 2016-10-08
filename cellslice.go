@@ -30,8 +30,6 @@ type MutableCellSlice []MutableCell
 //Col(), Block(). That way actual cells could be used. ... But then actual
 //cellsw ould have to grow a Cell, MutableCell.
 
-//TODO; create global neighbors, which Cell.Neighbors is a thin wrapper around.
-
 //TODO: make Neighbors, Row, Col, Block, etc global public functions that give
 //a CellReferenceSlice. Then audit all places we use Row, Col, Block and see
 //if we ACTUALLY need those, or can just use the global.

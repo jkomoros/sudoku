@@ -688,37 +688,45 @@ func (self *mutableCellImpl) Neighbors() CellSlice {
 
 }
 
-//Neighbors doesn't cache its work (at least right now)
-func (self *cellImpl) Neighbors() CellSlice {
+func neighbors(cell CellReference) CellReferenceSlice {
+
+	//TODO: we shoudl just calculate this once at init time globally.
+
 	//We don't want duplicates, so we will collect in a map (used as a set) and then reduce.
-	neighborsMap := make(map[Cell]bool)
-	for _, cell := range self.gridRef.Row(self.Row()) {
-		if cell.Row() == self.Row() && cell.Col() == self.Col() {
+
+	neighborsMap := make(map[CellReference]bool)
+	for _, other := range row(cell.Row) {
+		if cell.Row == other.Row && cell.Col == other.Col {
 			continue
 		}
-		neighborsMap[cell] = true
+		neighborsMap[other] = true
 	}
-	for _, cell := range self.gridRef.Col(self.Col()) {
-		if cell.Row() == self.Row() && cell.Col() == self.Col() {
+	for _, other := range col(cell.Col) {
+		if cell.Row == other.Row && cell.Col == other.Col {
 			continue
 		}
-		neighborsMap[cell] = true
+		neighborsMap[other] = true
 	}
-	for _, cell := range self.gridRef.Block(self.Block()) {
-		if cell.Row() == self.Row() && cell.Col() == self.Col() {
+	for _, other := range block(cell.Block()) {
+		if cell.Row == other.Row && cell.Col == other.Col {
 			continue
 		}
-		neighborsMap[cell] = true
+		neighborsMap[other] = true
 	}
 
-	neighbors := make(CellSlice, len(neighborsMap))
+	neighbors := make(CellReferenceSlice, len(neighborsMap))
 	i := 0
 	for cell := range neighborsMap {
 		neighbors[i] = cell
 		i++
 	}
 	return neighbors
+}
 
+//Neighbors doesn't cache its work (at least right now)
+func (self *cellImpl) Neighbors() CellSlice {
+	//TODO: consider caching this.
+	return neighbors(self.Reference()).CellSlice(self.gridRef)
 }
 
 func (self *cellImpl) dataString() string {
