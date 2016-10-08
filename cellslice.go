@@ -686,10 +686,16 @@ func (self CellReferenceSlice) chainSimilarity(other CellReferenceSlice) float64
 
 //Description returns a human-readable description of the cells in the list, like "(0,1), (0,2), and (0,3)"
 func (self CellSlice) Description() string {
+	//TODO: consider getting rid of this method.
+	return self.CellReferenceSlice().Description()
+}
+
+//Description returns a human-readable description of the cells in the list, like "(0,1), (0,2), and (0,3)"
+func (self CellReferenceSlice) Description() string {
 	strings := make(stringSlice, len(self))
 
 	for i, cell := range self {
-		strings[i] = cell.Reference().String()
+		strings[i] = cell.String()
 	}
 
 	return strings.description()
