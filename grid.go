@@ -326,6 +326,8 @@ const _NUM_SOLVER_THREADS = 4
 
 //NewGrid creates a new, blank grid with all of its cells unfilled.
 func NewGrid() MutableGrid {
+
+	//TODO: shouldn't this be NewMutableGrid?
 	result := &mutableGridImpl{}
 
 	result.invalidCells = make(map[MutableCell]bool)
