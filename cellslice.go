@@ -47,6 +47,10 @@ type mutableCellSliceSorter struct {
 	MutableCellSlice
 }
 
+type cellReferenceSliceSorter struct {
+	CellReferenceSlice
+}
+
 func getRow(cell Cell) int {
 	return cell.Row()
 }
@@ -383,6 +387,13 @@ func (self MutableCellSlice) Sort() {
 	sort.Sort(sorter)
 }
 
+//Sort mutates the provided CellReferenceSlice so that the cells are in order
+//from left to right, top to bottom based on their position in the grid.
+func (self CellReferenceSlice) Sort() {
+	sorter := cellReferenceSliceSorter{self}
+	sort.Sort(sorter)
+}
+
 //FilledNums returns an IntSlice representing all of the numbers that have been actively set on cells
 //in the list. Cells that are empty (are set to '0') are not included.
 func (self CellSlice) FilledNums() IntSlice {
@@ -413,6 +424,10 @@ func (self mutableCellSliceSorter) Len() int {
 	return len(self.MutableCellSlice)
 }
 
+func (self cellReferenceSliceSorter) Len() int {
+	return len(self.CellReferenceSlice)
+}
+
 func (self cellSliceSorter) Less(i, j int) bool {
 	//Sort based on the index of the cell.
 	one := self.CellSlice[i]
@@ -429,12 +444,24 @@ func (self mutableCellSliceSorter) Less(i, j int) bool {
 	return (one.Row()*DIM + one.Col()) < (two.Row()*DIM + two.Col())
 }
 
+func (self cellReferenceSliceSorter) Less(i, j int) bool {
+	//Sort based on the index of the cell.
+	one := self.CellReferenceSlice[i]
+	two := self.CellReferenceSlice[j]
+
+	return (one.Row*DIM + one.Col) < (two.Row*DIM + two.Col)
+}
+
 func (self cellSliceSorter) Swap(i, j int) {
 	self.CellSlice[i], self.CellSlice[j] = self.CellSlice[j], self.CellSlice[i]
 }
 
 func (self mutableCellSliceSorter) Swap(i, j int) {
 	self.MutableCellSlice[i], self.MutableCellSlice[j] = self.MutableCellSlice[j], self.MutableCellSlice[i]
+}
+
+func (self cellReferenceSliceSorter) Swap(i, j int) {
+	self.CellReferenceSlice[i], self.CellReferenceSlice[j] = self.CellReferenceSlice[j], self.CellReferenceSlice[i]
 }
 
 //Filter returns a new CellSlice that includes all cells where filter returned true.
