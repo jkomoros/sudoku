@@ -719,11 +719,21 @@ func legalIndex(index int) bool {
 	return index >= 0 && index < DIM
 }
 
-func (self *gridImpl) Row(index int) CellSlice {
+func row(index int) CellReferenceSlice {
+	//TODO: calculate this once at init
 	if !legalIndex(index) {
 		return nil
 	}
-	return cellSliceImpl(index, 0, index, DIM-1).CellSlice(self)
+	return cellSliceImpl(index, 0, index, DIM-1)
+}
+
+func (self *gridImpl) Row(index int) CellSlice {
+	//TODO: for all of these use global Row, block, etc.
+
+	if !legalIndex(index) {
+		return nil
+	}
+	return row(index).CellSlice(self)
 }
 
 func (self *mutableGridImpl) Row(index int) CellSlice {
@@ -739,14 +749,22 @@ func (self *mutableGridImpl) MutableRow(index int) MutableCellSlice {
 		return nil
 	}
 
-	return cellSliceImpl(index, 0, index, DIM-1).MutableCellSlice(self)
+	return row(index).MutableCellSlice(self)
+}
+
+func col(index int) CellReferenceSlice {
+	//TODO: calculate this once at init
+	if !legalIndex(index) {
+		return nil
+	}
+	return cellSliceImpl(0, index, DIM-1, index)
 }
 
 func (self *gridImpl) Col(index int) CellSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return cellSliceImpl(0, index, DIM-1, index).CellSlice(self)
+	return col(index).CellSlice(self)
 }
 
 func (self *mutableGridImpl) Col(index int) CellSlice {
@@ -761,14 +779,22 @@ func (self *mutableGridImpl) MutableCol(index int) MutableCellSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return cellSliceImpl(0, index, DIM-1, index).MutableCellSlice(self)
+	return col(index).MutableCellSlice(self)
+}
+
+func block(index int) CellReferenceSlice {
+	//TODO: calculate this once at init
+	if !legalIndex(index) {
+		return nil
+	}
+	return cellSliceImpl(blockExtents(index))
 }
 
 func (self *gridImpl) Block(index int) CellSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return cellSliceImpl(blockExtents(index)).CellSlice(self)
+	return block(index).CellSlice(self)
 }
 
 func (self *mutableGridImpl) Block(index int) CellSlice {
@@ -783,7 +809,7 @@ func (self *mutableGridImpl) MutableBlock(index int) MutableCellSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return cellSliceImpl(blockExtents(index)).MutableCellSlice(self)
+	return block(index).MutableCellSlice(self)
 }
 
 func blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
