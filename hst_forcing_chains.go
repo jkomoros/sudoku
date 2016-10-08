@@ -245,7 +245,7 @@ func chainSearcher(generation int, maxGeneration int, cell MutableCell, numToApp
 
 	//Becuase this is a DFS, if we see an invalidity in this grid, it's a meaningful invalidity
 	//and we should avoid it.
-	if cell.grid().Invalid() {
+	if cell.Grid().Invalid() {
 		return
 	}
 

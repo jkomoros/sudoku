@@ -372,7 +372,7 @@ func TestGridCells(t *testing.T) {
 
 	//Make sure it's the same cells
 	for i, cell := range cells {
-		if cell.grid() != grid {
+		if cell.Grid() != grid {
 			t.Error("cell #", i, "had wrong grid")
 		}
 		if cell != grid.MutableCell(cell.Row(), cell.Col()) {
@@ -396,7 +396,7 @@ func TestGridCells(t *testing.T) {
 
 	//Make sure it's the same cells
 	for i, cell := range roCells {
-		if cell.grid() != roGrid {
+		if cell.Grid() != roGrid {
 			t.Error("cell #", i, "had wrong grid")
 		}
 		if cell != roGrid.Cell(cell.Row(), cell.Col()) {

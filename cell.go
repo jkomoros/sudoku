@@ -102,12 +102,13 @@ type Cell interface {
 	//top left corner is 0,0
 	DiagramExtents() (top, left, height, width int)
 
+	//Grid returns a reference to the Grid that this Cell is associated with.
+	Grid() Grid
+
 	//The following are methods that are only internal. Some of them are
 	//nasty.
 
 	ref() cellRef
-	//TODO: should this be a public method? Seems useful in some circumstances...
-	grid() Grid
 	diagramRows(showMarks bool) []string
 	dataString() string
 	rank() int
@@ -167,12 +168,15 @@ type MutableCell interface {
 	//locking.
 	Unlock()
 
+	//MutableGrid returns a reference to the MutableGrid this MutableCell is
+	//associated with.
+	MutableGrid() MutableGrid
+
 	//The following are private methods
 
 	setPossible(number int)
 	setImpossible(number int)
 	excludedLock() *sync.RWMutex
-	mutableGrid() MutableGrid
 }
 
 //cellImpl is a simple, read-only cell. If used in isolation it expects its
@@ -224,11 +228,11 @@ func newCell(grid MutableGrid, row int, col int) mutableCellImpl {
 	}
 }
 
-func (self *cellImpl) grid() Grid {
+func (self *cellImpl) Grid() Grid {
 	return self.gridRef
 }
 
-func (self *mutableCellImpl) mutableGrid() MutableGrid {
+func (self *mutableCellImpl) MutableGrid() MutableGrid {
 	return self.mutableGridRef
 }
 

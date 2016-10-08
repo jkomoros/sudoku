@@ -939,7 +939,7 @@ func (self CellSlice) Intersection(other CellSlice) CellSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	grid := self[0].grid()
+	grid := self[0].Grid()
 	return self.toCellSet().intersection(other.toCellSet()).toSlice(grid)
 }
 
@@ -949,7 +949,7 @@ func (self MutableCellSlice) Intersection(other CellSlice) MutableCellSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	grid := self[0].mutableGrid()
+	grid := self[0].MutableGrid()
 	return self.toCellSet().intersection(other.toCellSet()).toMutableSlice(grid)
 }
 
@@ -959,7 +959,7 @@ func (self CellSlice) Difference(other CellSlice) CellSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	grid := self[0].grid()
+	grid := self[0].Grid()
 	return self.toCellSet().difference(other.toCellSet()).toSlice(grid)
 }
 
@@ -969,7 +969,7 @@ func (self MutableCellSlice) Difference(other CellSlice) MutableCellSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	grid := self[0].mutableGrid()
+	grid := self[0].MutableGrid()
 	return self.toCellSet().difference(other.toCellSet()).toMutableSlice(grid)
 }
 
@@ -979,7 +979,7 @@ func (self CellSlice) Union(other CellSlice) CellSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	grid := self[0].grid()
+	grid := self[0].Grid()
 	return self.toCellSet().union(other.toCellSet()).toSlice(grid)
 }
 
@@ -989,6 +989,6 @@ func (self MutableCellSlice) Union(other CellSlice) MutableCellSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	grid := self[0].mutableGrid()
+	grid := self[0].MutableGrid()
 	return self.toCellSet().union(other.toCellSet()).toMutableSlice(grid)
 }
