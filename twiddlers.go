@@ -228,7 +228,7 @@ func twiddleChainedSteps(proposedStep *SolveStep, inProgressCompoundStep []*Solv
 	//Logically we should be attenuating Dissimilarity here, but for some reason the math.Pow(dissimilairty, 10) doesn't actually
 	//appear to work here, which is maddening.
 
-	similarity := proposedStep.TargetCells.chainSimilarity(lastModifiedCells)
+	similarity := proposedStep.TargetCells.CellReferenceSlice().chainSimilarity(lastModifiedCells.CellReferenceSlice())
 
 	//We want it to be dissimilar is larger; flip it.
 	dissimilarity := 1.0 - similarity

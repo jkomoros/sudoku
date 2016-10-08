@@ -486,7 +486,7 @@ func (self MutableCellSlice) cellSlice() CellSlice {
 //'similar' the CellSlices are. For example, two cells that are in the same
 //row within the same block are very similar; cells that are in different
 //rows, cols, and blocks are extremelye dissimilar.
-func (self CellSlice) chainSimilarity(other CellSlice) float64 {
+func (self CellReferenceSlice) chainSimilarity(other CellReferenceSlice) float64 {
 
 	//TODO: should this be in this file? It's awfully specific to HumanSolve needs, and extremely complex.
 	if other == nil || len(self) == 0 || len(other) == 0 {
@@ -529,25 +529,25 @@ func (self CellSlice) chainSimilarity(other CellSlice) float64 {
 	offbyOneIncrement := 0.25
 
 	for _, cell := range self {
-		selfRow[cell.Row()] += 1.0
+		selfRow[cell.Row] += 1.0
 		rowCounter++
-		if cell.Row() > 0 {
-			selfRow[cell.Row()-1] += offbyOneIncrement
+		if cell.Row > 0 {
+			selfRow[cell.Row-1] += offbyOneIncrement
 			rowCounter += offbyOneIncrement
 		}
-		if cell.Row() < DIM-1 {
-			selfRow[cell.Row()+1] += offbyOneIncrement
+		if cell.Row < DIM-1 {
+			selfRow[cell.Row+1] += offbyOneIncrement
 			rowCounter += offbyOneIncrement
 		}
 
-		selfCol[cell.Col()] += 1.0
+		selfCol[cell.Col] += 1.0
 		colCounter++
-		if cell.Col() > 0 {
-			selfCol[cell.Col()-1] += offbyOneIncrement
+		if cell.Col > 0 {
+			selfCol[cell.Col-1] += offbyOneIncrement
 			colCounter += offbyOneIncrement
 		}
-		if cell.Col() < DIM-1 {
-			selfCol[cell.Col()+1] += offbyOneIncrement
+		if cell.Col < DIM-1 {
+			selfCol[cell.Col+1] += offbyOneIncrement
 			colCounter += offbyOneIncrement
 		}
 
@@ -570,25 +570,25 @@ func (self CellSlice) chainSimilarity(other CellSlice) float64 {
 	rowCounter, colCounter, blockCounter = 0.0, 0.0, 0.0
 
 	for _, cell := range other {
-		otherRow[cell.Row()] += 1.0
+		otherRow[cell.Row] += 1.0
 		rowCounter++
-		if cell.Row() > 0 {
-			otherRow[cell.Row()-1] += offbyOneIncrement
+		if cell.Row > 0 {
+			otherRow[cell.Row-1] += offbyOneIncrement
 			rowCounter += offbyOneIncrement
 		}
-		if cell.Row() < DIM-1 {
-			otherRow[cell.Row()+1] += offbyOneIncrement
+		if cell.Row < DIM-1 {
+			otherRow[cell.Row+1] += offbyOneIncrement
 			rowCounter += offbyOneIncrement
 		}
 
-		otherCol[cell.Col()] += 1.0
+		otherCol[cell.Col] += 1.0
 		colCounter++
-		if cell.Col() > 0 {
-			otherCol[cell.Col()-1] += offbyOneIncrement
+		if cell.Col > 0 {
+			otherCol[cell.Col-1] += offbyOneIncrement
 			colCounter += offbyOneIncrement
 		}
-		if cell.Col() < DIM-1 {
-			otherCol[cell.Col()+1] += offbyOneIncrement
+		if cell.Col < DIM-1 {
+			otherCol[cell.Col+1] += offbyOneIncrement
 			colCounter += offbyOneIncrement
 		}
 

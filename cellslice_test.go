@@ -202,8 +202,6 @@ func TestChainDissimilarity(t *testing.T) {
 
 	//Now run the tests
 
-	grid := NewGrid()
-
 	var results chainTestResults
 
 	equivalenceGroup := -1
@@ -212,15 +210,7 @@ func TestChainDissimilarity(t *testing.T) {
 		if !test.equivalentToPrevious {
 			equivalenceGroup++
 		}
-		var listOne CellSlice
-		var listTwo CellSlice
-		for _, ref := range test.one {
-			listOne = append(listOne, ref.Cell(grid))
-		}
-		for _, ref := range test.two {
-			listTwo = append(listTwo, ref.Cell(grid))
-		}
-		similarity := listOne.chainSimilarity(listTwo)
+		similarity := test.one.chainSimilarity(test.two)
 		if similarity < 0.0 {
 			t.Fatal(test.name, "failed with a dissimilarity less than 0.0: ", similarity)
 		}
