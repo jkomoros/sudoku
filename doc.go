@@ -11,6 +11,17 @@ Grid's methods, plus mutating methods. Under the covers, this indirection
 allows expensive searching operations that require hundreds of grid allocations
 to be much more efficient.
 
+To get a MutableGrid version of a Grid, use Grid.MutableCopy. MutableGrids can
+be used as-is wherever a Grid is required.
+
+To load a grid, see Load, LoadSDK, and LoadSDKFromFile.
+
+To generate a new puzzle, see GenerateGrid.
+
+To Solve a puzzle, see Grid.Solve.
+
+To solve a puzzle like a human would, see Grid.HumanSolve.
+
 */
 package sudoku
 
