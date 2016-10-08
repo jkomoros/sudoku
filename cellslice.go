@@ -18,6 +18,12 @@ type CellSlice []Cell
 //refers to the MutableCell.
 type MutableCellSlice []MutableCell
 
+//TODO: Audit all uses of {CellSlice, MutableCellSlice}.CellReferenceSlice to
+//make sure we aren't doing unnecessary conversions once we've implemented
+//more nums
+
+//TODO: remove more CellSlice methods that aren't necessary anymore.
+
 //CellReferenceSlice is a slice of CellReferences with many convenience methods.
 type CellReferenceSlice []CellReference
 
