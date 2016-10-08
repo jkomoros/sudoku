@@ -100,7 +100,8 @@ type Cell interface {
 	//The following are methods that are only internal. Some of them are
 	//nasty.
 
-	ref() cellRef
+	//TODO: ref should be public now that CellReference is.
+	ref() CellReference
 	diagramRows(showMarks bool) []string
 	dataString() string
 	rank() int
@@ -580,8 +581,8 @@ func (self *cellImpl) rank() int {
 	return count
 }
 
-func (self *cellImpl) ref() cellRef {
-	return cellRef{self.Row(), self.Col()}
+func (self *cellImpl) ref() CellReference {
+	return CellReference{self.Row(), self.Col()}
 }
 
 //Sets ourselves to a random one of our possibilities.

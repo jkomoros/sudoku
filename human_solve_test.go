@@ -587,7 +587,8 @@ func TestStepsDescription(t *testing.T) {
 }
 
 //TODO: this is useful. Should we use this in other tests?
-func cellRefsToCells(refs []cellRef, grid Grid) CellSlice {
+func cellRefsToCells(refs []CellReference, grid Grid) CellSlice {
+	//TODO: this should be gotten rid of and replaced with generic one.
 	var result CellSlice
 	for _, ref := range refs {
 		result = append(result, ref.Cell(grid))

@@ -407,7 +407,7 @@ func newStarterGrid(grid MutableGrid) *gridImpl {
 	i := 0
 	for r := 0; r < DIM; r++ {
 		for c := 0; c < DIM; c++ {
-			result.theQueue.cellRefs[i] = cellRef{r, c}
+			result.theQueue.cellRefs[i] = CellReference{r, c}
 			i++
 		}
 	}

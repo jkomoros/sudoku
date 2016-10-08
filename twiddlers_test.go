@@ -211,7 +211,7 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 		//Step with 2 filled
 		{
 			techniquesByName["Only Legal Number"],
-			cellRefsToCells([]cellRef{{1, 0}}, grid),
+			cellRefsToCells([]CellReference{{1, 0}}, grid),
 			IntSlice{8},
 			nil,
 			nil,
@@ -220,7 +220,7 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 		//Step with non-fill technique
 		{
 			techniquesByName["Hidden Pair Block"],
-			cellRefsToCells([]cellRef{{1, 0}}, grid),
+			cellRefsToCells([]CellReference{{1, 0}}, grid),
 			IntSlice{8},
 			nil,
 			nil,
@@ -229,7 +229,7 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 		//High valued 1
 		{
 			techniquesByName["Only Legal Number"],
-			cellRefsToCells([]cellRef{{0, 4}}, grid),
+			cellRefsToCells([]CellReference{{0, 4}}, grid),
 			IntSlice{5},
 			nil,
 			nil,
@@ -238,7 +238,7 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 		//Already-filled number
 		{
 			techniquesByName["Only Legal Number"],
-			cellRefsToCells([]cellRef{{0, 4}}, grid),
+			cellRefsToCells([]CellReference{{0, 4}}, grid),
 			IntSlice{4},
 			nil,
 			nil,
@@ -268,7 +268,7 @@ func TestTwiddleChainedSteps(t *testing.T) {
 	lastStep := []*SolveStep{
 		{
 			nil,
-			cellRefsToCells([]cellRef{
+			cellRefsToCells([]CellReference{
 				{0, 0},
 			}, grid),
 			nil,
@@ -281,7 +281,7 @@ func TestTwiddleChainedSteps(t *testing.T) {
 	possibilities := []*SolveStep{
 		{
 			nil,
-			cellRefsToCells([]cellRef{
+			cellRefsToCells([]CellReference{
 				{1, 0},
 			}, grid),
 			nil,
@@ -291,7 +291,7 @@ func TestTwiddleChainedSteps(t *testing.T) {
 		},
 		{
 			nil,
-			cellRefsToCells([]cellRef{
+			cellRefsToCells([]CellReference{
 				{2, 2},
 			}, grid),
 			nil,
@@ -301,7 +301,7 @@ func TestTwiddleChainedSteps(t *testing.T) {
 		},
 		{
 			nil,
-			cellRefsToCells([]cellRef{
+			cellRefsToCells([]CellReference{
 				{7, 7},
 			}, grid),
 			nil,

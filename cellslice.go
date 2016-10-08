@@ -27,11 +27,13 @@ type intSet map[int]bool
 
 //TODO: consider removing cellSet, since it's not actually used anywhere
 //(it was built for forcing_chains, but we ended up not using it there)
-type cellSet map[cellRef]bool
+type cellSet map[CellReference]bool
 
-type cellRef struct {
-	row int
-	col int
+//CellReference is a reference to a generic cell located at a specific row and
+//column.
+type CellReference struct {
+	Row int
+	Col int
 }
 
 type cellSliceSorter struct {
@@ -645,7 +647,7 @@ func (self CellSlice) Description() string {
 	return strings.description()
 }
 
-func (self CellSlice) sameAsRefs(refs []cellRef) bool {
+func (self CellSlice) sameAsRefs(refs []CellReference) bool {
 	cellSet := make(map[string]bool)
 	for _, cell := range self {
 		cellSet[cell.ref().String()] = true
@@ -669,22 +671,25 @@ func (self CellSlice) sameAsRefs(refs []cellRef) bool {
 	return true
 }
 
-func (self cellRef) MutableCell(grid MutableGrid) MutableCell {
+//MutableCell returns the MutableCell in the given grid that this
+//CellReference refers to.
+func (self CellReference) MutableCell(grid MutableGrid) MutableCell {
 	if grid == nil {
 		return nil
 	}
-	return grid.MutableCell(self.row, self.col)
+	return grid.MutableCell(self.Row, self.Col)
 }
 
-func (self cellRef) Cell(grid Grid) Cell {
+//Cell returns the Cell in the given grid that this CellReference refers to.
+func (self CellReference) Cell(grid Grid) Cell {
 	if grid == nil {
 		return nil
 	}
-	return grid.Cell(self.row, self.col)
+	return grid.Cell(self.Row, self.Col)
 }
 
-func (self cellRef) String() string {
-	return "(" + strconv.Itoa(self.row) + "," + strconv.Itoa(self.col) + ")"
+func (self CellReference) String() string {
+	return "(" + strconv.Itoa(self.Row) + "," + strconv.Itoa(self.Col) + ")"
 }
 
 func (self stringSlice) description() string {

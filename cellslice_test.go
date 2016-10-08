@@ -19,10 +19,10 @@ func TestBasicCellSlice(t *testing.T) {
 		t.Fail()
 	}
 
-	var refs []cellRef
+	var refs []CellReference
 
 	for i := 0; i < DIM; i++ {
-		refs = append(refs, cellRef{2, i})
+		refs = append(refs, CellReference{2, i})
 	}
 
 	if !row.sameAsRefs(refs) {
@@ -100,8 +100,8 @@ func TestBasicCellSlice(t *testing.T) {
 
 type chainTestConfiguration struct {
 	name                 string
-	one                  []cellRef
-	two                  []cellRef
+	one                  []CellReference
+	two                  []CellReference
 	equivalentToPrevious bool
 }
 
@@ -138,64 +138,64 @@ func TestChainDissimilarity(t *testing.T) {
 	tests := []chainTestConfiguration{
 		{
 			"same row same block",
-			[]cellRef{{0, 0}},
-			[]cellRef{{0, 1}},
+			[]CellReference{{0, 0}},
+			[]CellReference{{0, 1}},
 			false,
 		},
 		//this next one verifies that it doesn't matter which of self or other you do first.
 		{
 			"same row same block, just flipped self and other",
-			[]cellRef{{0, 1}},
-			[]cellRef{{0, 0}},
+			[]CellReference{{0, 1}},
+			[]CellReference{{0, 0}},
 			true,
 		},
 		//These next two should be the same difficulty.
 		{
 			"same block 2 in same row 2 in same col 2 total",
-			[]cellRef{{0, 0}},
-			[]cellRef{{0, 1}, {1, 0}},
+			[]CellReference{{0, 0}},
+			[]CellReference{{0, 1}, {1, 0}},
 			false,
 		},
 		{
 			"two full rows at opposite ends",
-			[]cellRef{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 8}},
-			[]cellRef{{7, 0}, {7, 1}, {7, 2}, {7, 3}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}},
+			[]CellReference{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 8}},
+			[]CellReference{{7, 0}, {7, 1}, {7, 2}, {7, 3}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}},
 			true,
 		},
 		{
 			"same row different blocks",
-			[]cellRef{{0, 0}, {0, 1}},
-			[]cellRef{{0, 3}, {0, 4}},
+			[]CellReference{{0, 0}, {0, 1}},
+			[]CellReference{{0, 3}, {0, 4}},
 			true,
 		},
 		{
 			"same col different blocks",
-			[]cellRef{{0, 0}, {1, 0}},
-			[]cellRef{{3, 0}, {4, 0}},
+			[]CellReference{{0, 0}, {1, 0}},
+			[]CellReference{{3, 0}, {4, 0}},
 			true,
 		},
 		{
 			"same row different blocks, 2 vs 3",
-			[]cellRef{{0, 0}, {0, 1}},
-			[]cellRef{{0, 3}, {0, 4}, {0, 5}},
+			[]CellReference{{0, 0}, {0, 1}},
+			[]CellReference{{0, 3}, {0, 4}, {0, 5}},
 			true,
 		},
 		{
 			"same block opposite corners 1 x 1",
-			[]cellRef{{0, 0}},
-			[]cellRef{{2, 2}},
+			[]CellReference{{0, 0}},
+			[]CellReference{{2, 2}},
 			true,
 		},
 		{
 			"adjacent rows two different blocks",
-			[]cellRef{{0, 0}, {0, 1}},
-			[]cellRef{{1, 3}, {1, 4}},
+			[]CellReference{{0, 0}, {0, 1}},
+			[]CellReference{{1, 3}, {1, 4}},
 			false,
 		},
 		{
 			"single cell opposite corners",
-			[]cellRef{{0, 0}},
-			[]cellRef{{8, 8}},
+			[]CellReference{{0, 0}},
+			[]CellReference{{8, 8}},
 			false,
 		},
 	}

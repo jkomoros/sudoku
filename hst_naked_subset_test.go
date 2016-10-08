@@ -30,8 +30,8 @@ func TestSubsetCellsWithNPossibilities(t *testing.T) {
 func TestNakedPairCol(t *testing.T) {
 
 	options := solveTechniqueTestHelperOptions{
-		targetCells:  []cellRef{{2, 8}, {3, 8}, {4, 8}},
-		pointerCells: []cellRef{{6, 8}, {7, 8}},
+		targetCells:  []CellReference{{2, 8}, {3, 8}, {4, 8}},
+		pointerCells: []CellReference{{6, 8}, {7, 8}},
 		targetSame:   _GROUP_COL,
 		targetGroup:  8,
 		targetNums:   IntSlice([]int{2, 3}),
@@ -46,8 +46,8 @@ func TestNakedPairRow(t *testing.T) {
 
 	options := solveTechniqueTestHelperOptions{
 		transpose:    true,
-		targetCells:  []cellRef{{8, 2}, {8, 3}, {8, 4}},
-		pointerCells: []cellRef{{8, 6}, {8, 7}},
+		targetCells:  []CellReference{{8, 2}, {8, 3}, {8, 4}},
+		pointerCells: []CellReference{{8, 6}, {8, 7}},
 		targetSame:   _GROUP_ROW,
 		targetGroup:  8,
 		targetNums:   IntSlice([]int{2, 3}),
@@ -61,8 +61,8 @@ func TestNakedPairRow(t *testing.T) {
 func TestNakedPairBlock(t *testing.T) {
 
 	options := solveTechniqueTestHelperOptions{
-		targetCells:  []cellRef{{2, 0}, {2, 1}, {2, 2}},
-		pointerCells: []cellRef{{0, 0}, {0, 1}},
+		targetCells:  []CellReference{{2, 0}, {2, 1}, {2, 2}},
+		pointerCells: []CellReference{{0, 0}, {0, 1}},
 		targetSame:   _GROUP_BLOCK,
 		targetGroup:  0,
 		targetNums:   IntSlice([]int{1, 2}),
@@ -77,8 +77,8 @@ func TestNakedTriple(t *testing.T) {
 	//TODO: test for col and block as well
 
 	options := solveTechniqueTestHelperOptions{
-		targetCells:  []cellRef{{4, 1}, {4, 2}, {4, 6}, {4, 7}},
-		pointerCells: []cellRef{{4, 3}, {4, 4}, {4, 5}},
+		targetCells:  []CellReference{{4, 1}, {4, 2}, {4, 6}, {4, 7}},
+		pointerCells: []CellReference{{4, 3}, {4, 4}, {4, 5}},
 		targetSame:   _GROUP_ROW,
 		targetGroup:  4,
 		targetNums:   IntSlice([]int{3, 5, 8}),

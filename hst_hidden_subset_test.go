@@ -35,8 +35,8 @@ func TestSubsetCellsWithNUniquePossibilities(t *testing.T) {
 
 func TestHiddenPairRow(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		targetCells:  []cellRef{{4, 7}, {4, 8}},
-		pointerCells: []cellRef{{4, 7}, {4, 8}},
+		targetCells:  []CellReference{{4, 7}, {4, 8}},
+		pointerCells: []CellReference{{4, 7}, {4, 8}},
 		targetSame:   _GROUP_ROW,
 		targetGroup:  4,
 		targetNums:   IntSlice([]int{7, 8, 2}),
@@ -52,8 +52,8 @@ func TestHiddenPairCol(t *testing.T) {
 
 	options := solveTechniqueTestHelperOptions{
 		transpose:    true,
-		targetCells:  []cellRef{{7, 4}, {8, 4}},
-		pointerCells: []cellRef{{7, 4}, {8, 4}},
+		targetCells:  []CellReference{{7, 4}, {8, 4}},
+		pointerCells: []CellReference{{7, 4}, {8, 4}},
 		targetSame:   _GROUP_COL,
 		targetGroup:  4,
 		targetNums:   IntSlice([]int{7, 8, 2}),
@@ -67,8 +67,8 @@ func TestHiddenPairCol(t *testing.T) {
 
 func TestHiddenPairBlock(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		targetCells:  []cellRef{{4, 7}, {4, 8}},
-		pointerCells: []cellRef{{4, 7}, {4, 8}},
+		targetCells:  []CellReference{{4, 7}, {4, 8}},
+		pointerCells: []CellReference{{4, 7}, {4, 8}},
 		//Yes, in this case we want them to be the same row.
 		targetSame:  _GROUP_ROW,
 		targetGroup: 4,
