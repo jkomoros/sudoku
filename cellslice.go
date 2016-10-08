@@ -695,6 +695,34 @@ func (self CellReference) String() string {
 	return "(" + strconv.Itoa(self.Row) + "," + strconv.Itoa(self.Col) + ")"
 }
 
+//CellSlice returns a CellSlice with Cells corresponding to our references, in
+//the given grid.
+func (self CellReferenceSlice) CellSlice(grid Grid) CellSlice {
+
+	result := make(CellSlice, len(self))
+
+	for i, ref := range self {
+		result[i] = ref.Cell(grid)
+	}
+
+	return result
+
+}
+
+//CellSlice returns a MutableCellSlice with MutableCells corresponding to our
+//references, in the given grid.
+func (self CellReferenceSlice) MutableCellSlice(grid MutableGrid) MutableCellSlice {
+
+	result := make(MutableCellSlice, len(self))
+
+	for i, ref := range self {
+		result[i] = ref.MutableCell(grid)
+	}
+
+	return result
+
+}
+
 func (self stringSlice) description() string {
 	if len(self) == 0 {
 		return ""
