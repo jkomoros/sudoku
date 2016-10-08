@@ -25,26 +25,26 @@ func TestForcingChains(t *testing.T) {
 
 	tests := []multipleValidStepLoopOptions{
 		{
-			targetCells:  []CellReference{{0, 1}},
+			targetCells:  CellReferenceSlice{{0, 1}},
 			targetNums:   IntSlice([]int{7}),
-			pointerCells: []CellReference{{1, 0}},
+			pointerCells: CellReferenceSlice{{1, 0}},
 			pointerNums:  IntSlice([]int{1, 2}),
 			description:  "cell (1,0) only has two options, 1 and 2, and if you put either one in and see the chain of implications it leads to, both ones end up with 7 in cell (0,1), so we can just fill that number in",
 			extra:        6,
 		},
 		{
-			targetCells:  []CellReference{{0, 1}},
+			targetCells:  CellReferenceSlice{{0, 1}},
 			targetNums:   IntSlice([]int{7}),
-			pointerCells: []CellReference{{5, 1}},
+			pointerCells: CellReferenceSlice{{5, 1}},
 			pointerNums:  IntSlice([]int{1, 2}),
 			//Explicitly don't test description after the first one.
 			extra: 4,
 		},
 		//Another particularly long one
 		{
-			targetCells:  []CellReference{{1, 0}},
+			targetCells:  CellReferenceSlice{{1, 0}},
 			targetNums:   IntSlice([]int{1}),
-			pointerCells: []CellReference{{0, 1}},
+			pointerCells: CellReferenceSlice{{0, 1}},
 			pointerNums:  IntSlice([]int{2, 7}),
 			extra:        5,
 		},

@@ -18,6 +18,9 @@ type CellSlice []Cell
 //refers to the MutableCell.
 type MutableCellSlice []MutableCell
 
+//CellReferenceSlice is a slice of CellReferences with many convenience methods.
+type CellReferenceSlice []CellReference
+
 //IntSlice is a list of ints, with many convenience methods specific to sudoku.
 type IntSlice []int
 
@@ -647,7 +650,7 @@ func (self CellSlice) Description() string {
 	return strings.description()
 }
 
-func (self CellSlice) sameAsRefs(refs []CellReference) bool {
+func (self CellSlice) sameAsRefs(refs CellReferenceSlice) bool {
 	cellSet := make(map[string]bool)
 	for _, cell := range self {
 		cellSet[cell.ref().String()] = true
