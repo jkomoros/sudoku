@@ -28,6 +28,8 @@ type MutableCellSlice []MutableCell
 //Col(), Block(). That way actual cells could be used. ... But then actual
 //cellsw ould have to grow a Cell, MutableCell.
 
+//TODO; create global neighbors, which Cell.Neighbors is a thin wrapper around.
+
 //CellReferenceSlice is a slice of CellReferences with many convenience methods.
 type CellReferenceSlice []CellReference
 
