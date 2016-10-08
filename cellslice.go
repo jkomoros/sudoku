@@ -120,6 +120,18 @@ func (self CellSlice) AllBlocks() IntSlice {
 	return self.CollectNums(getBlock).Unique()
 }
 
+//CellReferenceSlice returns a CellReferenceSlice that corresponds to the
+//cells in this MutableCellSlice.
+func (self MutableCellSlice) CellReferenceSlice() CellReferenceSlice {
+	result := make(CellReferenceSlice, len(self))
+
+	for i, cell := range self {
+		result[i] = cell.Reference()
+	}
+
+	return result
+}
+
 //FilterByUnfilled returns a new CellSlice with only the cells in the list
 //that are not filled with any number.
 func (self CellSlice) FilterByUnfilled() CellSlice {
@@ -648,6 +660,18 @@ func (self CellSlice) Description() string {
 	}
 
 	return strings.description()
+}
+
+//CellReferenceSlice returns a CellReferenceSlice that corresponds to the
+//cells in this CellSlice.
+func (self CellSlice) CellReferenceSlice() CellReferenceSlice {
+	result := make(CellReferenceSlice, len(self))
+
+	for i, cell := range self {
+		result[i] = cell.Reference()
+	}
+
+	return result
 }
 
 func (self CellSlice) sameAsRefs(refs CellReferenceSlice) bool {
