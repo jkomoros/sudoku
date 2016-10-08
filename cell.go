@@ -198,8 +198,6 @@ type cellImpl struct {
 	//cell.mutable, but that ended up being slower.
 }
 
-//TODO: test cellImpl separately.
-
 type mutableCellImpl struct {
 	cellImpl
 	//NOTE: the tests for cells rely heavily on the fact that mutableCellImpl
