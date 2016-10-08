@@ -255,7 +255,7 @@ func (c *komoConverter) DataString(grid sudoku.Grid) string {
 	//The komo puzzle format fills all cells and marks which ones are 'locked',
 	//whereas the default sdk format simply leaves non-'locked' cells as blank.
 	//So we need to solve the puzzle.
-	solvedGrid := grid.Copy()
+	solvedGrid := grid.MutableCopy()
 
 	//Solve the grid.
 	if !solvedGrid.Solve() {
