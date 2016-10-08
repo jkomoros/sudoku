@@ -469,7 +469,7 @@ func (c *mainController) ShowDifficulty() {
 	//handleEvents is dropping keypress events on the floor.
 	c.SetConsoleMessage(msg, false)
 
-	unfilledGrid := c.Grid().Copy()
+	unfilledGrid := c.Grid().MutableCopy()
 	unfilledGrid.ResetUnlockedCells()
 
 	//Tell the main loop to not process anything yet.
