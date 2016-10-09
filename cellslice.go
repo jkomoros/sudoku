@@ -284,6 +284,20 @@ func (self MutableCellSlice) RemoveCells(targets CellSlice) MutableCellSlice {
 	return self.Filter(filterFunc)
 }
 
+//RemoveCells returns a new CellReferenceSlice that does not contain any of
+//the cells included in the provided CellReferenceSlice.
+func (self CellReferenceSlice) RemoveCells(targets CellReferenceSlice) CellReferenceSlice {
+	//TODO: test this.
+	targetCells := make(map[CellReference]bool)
+	for _, cell := range targets {
+		targetCells[cell] = true
+	}
+	filterFunc := func(cell CellReference) bool {
+		return !targetCells[cell]
+	}
+	return self.Filter(filterFunc)
+}
+
 //PossibilitiesUnion returns an IntSlice that is the union of all active possibilities in cells in the set.
 func (self CellSlice) PossibilitiesUnion() IntSlice {
 	//Returns an IntSlice of the union of all possibilities.
