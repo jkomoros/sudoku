@@ -5,7 +5,7 @@ import (
 )
 
 type model struct {
-	grid                   *sudoku.Grid
+	grid                   sudoku.MutableGrid
 	currentCommand         *commandList
 	commands               *commandList
 	inProgressMultiCommand *multiCommand
@@ -156,7 +156,7 @@ func (m *model) InGroup() bool {
 	return m.inProgressMultiCommand != nil
 }
 
-func (m *model) SetGrid(grid *sudoku.Grid) {
+func (m *model) SetGrid(grid sudoku.MutableGrid) {
 	m.commands = nil
 	m.currentCommand = nil
 	m.grid = grid
@@ -225,7 +225,7 @@ func (m *model) newNumberCommand(row, col int, num int) *numberCommand {
 }
 
 func (m *markCommand) Apply(model *model) {
-	cell := model.grid.Cell(m.row, m.col)
+	cell := model.grid.MutableCell(m.row, m.col)
 	if cell == nil {
 		return
 	}
@@ -235,7 +235,7 @@ func (m *markCommand) Apply(model *model) {
 }
 
 func (m *markCommand) Undo(model *model) {
-	cell := model.grid.Cell(m.row, m.col)
+	cell := model.grid.MutableCell(m.row, m.col)
 	if cell == nil {
 		return
 	}
@@ -246,7 +246,7 @@ func (m *markCommand) Undo(model *model) {
 }
 
 func (n *numberCommand) Apply(model *model) {
-	cell := model.grid.Cell(n.row, n.col)
+	cell := model.grid.MutableCell(n.row, n.col)
 	if cell == nil {
 		return
 	}
@@ -254,7 +254,7 @@ func (n *numberCommand) Apply(model *model) {
 }
 
 func (n *numberCommand) Undo(model *model) {
-	cell := model.grid.Cell(n.row, n.col)
+	cell := model.grid.MutableCell(n.row, n.col)
 	if cell == nil {
 		return
 	}

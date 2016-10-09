@@ -20,11 +20,11 @@ func (self *guessTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("we have no other moves to make, so we randomly pick a cell with the smallest number of possibilities, %s, and pick one of its possibilities", step.TargetCells.Description())
 }
 
-func (self *guessTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+func (self *guessTechnique) Candidates(grid Grid, maxResults int) []*SolveStep {
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *guessTechnique) find(grid *Grid, coordinator findCoordinator) {
+func (self *guessTechnique) find(grid Grid, coordinator findCoordinator) {
 
 	//We used to have a very elaborate aparatus for guess logic where we'd
 	//earnestly guess and then HumanSolve forward until we discovered a
@@ -35,7 +35,7 @@ func (self *guessTechnique) find(grid *Grid, coordinator findCoordinator) {
 	//possibilities, and then just immediately return the correct value for
 	//it. Done!
 
-	solvedGrid := grid.Copy()
+	solvedGrid := grid.MutableCopy()
 	solvedGrid.Solve()
 
 	if !solvedGrid.Solved() {
@@ -62,7 +62,7 @@ func (self *guessTechnique) find(grid *Grid, coordinator findCoordinator) {
 		}
 
 		//Convert RankedObject to a cell
-		cell := obj.(*Cell)
+		cell := obj.(Cell)
 
 		cellInSolvedGrid := cell.InGrid(solvedGrid)
 

@@ -14,6 +14,92 @@ func (self *SimpleRankedObject) rank() int {
 	return self._rank
 }
 
+func TestReadOnlyCellQueue(t *testing.T) {
+	grid := NewGrid()
+	//Load up a realistic grid with realistic ranks for cells.
+	grid.Load(ADVANCED_TEST_GRID)
+
+	queue := readOnlyCellQueue{
+		grid: grid,
+	}
+
+	queue.defaultRefs()
+	queue.fix()
+
+	getter := queue.NewGetter()
+
+	lastRank := 0
+	counter := 0
+	item := getter.Get()
+	for item != nil {
+
+		if item.rank() < lastRank {
+			t.Error("Item", counter, "was smaller than a rank already seen:", item.rank())
+		}
+
+		lastRank = item.rank()
+
+		item = getter.Get()
+
+		counter++
+	}
+
+	if counter != 54 {
+		t.Error("Default getter didn't give us all items:", counter)
+	}
+
+	//Make sure a new getter starts at beginning
+	newGetter := queue.NewGetter()
+
+	item = newGetter.Get()
+
+	if item == nil {
+		t.Error("Getting from a new getter gave us nil")
+	}
+
+	item = newGetter.GetSmallerThan(4)
+
+	for item != nil {
+		if item.rank() >= 4 {
+			t.Error("GetSmallerThan returned too high a rank", item.rank())
+		}
+		item = newGetter.GetSmallerThan(4)
+	}
+
+	//Test copying in state from a previous one.
+
+	modification := newCellModification(grid.Cell(0, 0))
+	modification.Number = 5
+	modifiedGrid := grid.CopyWithModifications(GridModification{modification})
+
+	newQueue := readOnlyCellQueue{
+		grid:     modifiedGrid,
+		cellRefs: queue.cellRefs,
+	}
+
+	newQueue.fix()
+
+	getter = newQueue.NewGetter()
+
+	item = getter.Get()
+	counter = 0
+	lastRank = 0
+	for item != nil {
+
+		if item.rank() < lastRank {
+			t.Error("In new getter got an out-of-rank item")
+		}
+		lastRank = item.rank()
+		counter++
+		item = getter.Get()
+	}
+
+	if counter != 53 {
+		t.Error("New getter returned too early:", counter)
+	}
+
+}
+
 func TestFiniteQueue(t *testing.T) {
 	queue := newFiniteQueue(1, DIM)
 	if queue == nil {
@@ -130,10 +216,6 @@ func TestFiniteQueueGetter(t *testing.T) {
 	getter := queue.NewGetter()
 	if getter == nil {
 		t.Log("We didn't get a getter back from NewGetter")
-		t.Fail()
-	}
-	if getter.queue != queue {
-		t.Log("We got back a getter that didn't have the right queue")
 		t.Fail()
 	}
 	for _, obj := range objects {

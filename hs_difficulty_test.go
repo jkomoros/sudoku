@@ -94,7 +94,7 @@ func TestHintDirections(t *testing.T) {
 			{
 				FillStep: &SolveStep{
 					techniquesByName["Necessary In Row"],
-					[]*Cell{
+					CellSlice{
 						grid.Cell(2, 3),
 					},
 					IntSlice{4},
@@ -121,12 +121,12 @@ func TestHintDirections(t *testing.T) {
 				PrecursorSteps: []*SolveStep{
 					{
 						techniquesByName["Naked Pair Block"],
-						[]*Cell{
+						CellSlice{
 							grid.Cell(2, 3),
 							grid.Cell(2, 3),
 						},
 						IntSlice{4, 5},
-						[]*Cell{
+						CellSlice{
 							grid.Cell(3, 4),
 							grid.Cell(4, 5),
 						},
@@ -135,12 +135,12 @@ func TestHintDirections(t *testing.T) {
 					},
 					{
 						techniquesByName["Naked Pair Block"],
-						[]*Cell{
+						CellSlice{
 							grid.Cell(3, 2),
 							grid.Cell(3, 2),
 						},
 						IntSlice{4, 5},
-						[]*Cell{
+						CellSlice{
 							grid.Cell(5, 5),
 							grid.Cell(4, 6),
 						},
@@ -150,7 +150,7 @@ func TestHintDirections(t *testing.T) {
 				},
 				FillStep: &SolveStep{
 					techniquesByName["Necessary In Row"],
-					[]*Cell{
+					CellSlice{
 						grid.Cell(2, 3),
 					},
 					IntSlice{4},

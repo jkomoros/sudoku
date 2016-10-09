@@ -14,11 +14,11 @@ func (self *blockBlockInteractionTechnique) humanLikelihood(step *SolveStep) flo
 	return self.difficultyHelper(60.0)
 }
 
-func (self *blockBlockInteractionTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+func (self *blockBlockInteractionTechnique) Candidates(grid Grid, maxResults int) []*SolveStep {
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *blockBlockInteractionTechnique) find(grid *Grid, coordinator findCoordinator) {
+func (self *blockBlockInteractionTechnique) find(grid Grid, coordinator findCoordinator) {
 
 	pairs := pairwiseBlocks(grid)
 
@@ -129,7 +129,7 @@ func (self *blockBlockInteractionTechnique) Description(step *SolveStep) string 
 	//make sure we get a stable order
 	blockNums.Sort()
 
-	grid := step.TargetCells[0].grid
+	grid := step.TargetCells[0].Grid()
 	var majorAxisIsRow bool
 	rowOne, colOne, _, _ := grid.blockExtents(blockNums[0])
 	rowTwo, colTwo, _, _ := grid.blockExtents(blockNums[1])
@@ -155,7 +155,7 @@ func (self *blockBlockInteractionTechnique) Description(step *SolveStep) string 
 }
 
 //Technically in the future different grids could have different blcok partioning schemes
-func pairwiseBlocks(grid *Grid) [][]int {
+func pairwiseBlocks(grid Grid) [][]int {
 	//Returns a list of pairs of block IDs, where the blocks are in either the same row or column.
 
 	//TODO: implement this in a way that doesn't generate all of the pairs and cull.

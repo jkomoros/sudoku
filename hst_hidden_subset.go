@@ -39,16 +39,16 @@ func (self hiddenSubsetTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("%s are only possible in %s within %s %d, which means that only those numbers could be in those cells", step.PointerNums.Description(), step.PointerCells.Description(), groupName, groupNum)
 }
 
-func (self *hiddenSubsetTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+func (self *hiddenSubsetTechnique) Candidates(grid Grid, maxResults int) []*SolveStep {
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *hiddenSubsetTechnique) find(grid *Grid, coordinator findCoordinator) {
+func (self *hiddenSubsetTechnique) find(grid Grid, coordinator findCoordinator) {
 	//TODO: test that this will find multiple if they exist.
 	hiddenSubset(grid, self, self.k, self.getter(grid), coordinator)
 }
 
-func hiddenSubset(grid *Grid, technique SolveTechnique, k int, collectionGetter func(int) CellSlice, coordinator findCoordinator) {
+func hiddenSubset(grid Grid, technique SolveTechnique, k int, collectionGetter func(int) CellSlice, coordinator findCoordinator) {
 	//NOTE: very similar implemenation in nakedSubset.
 	for _, i := range rand.Perm(DIM) {
 

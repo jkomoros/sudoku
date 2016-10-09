@@ -10,9 +10,7 @@ import (
 
 func BenchmarkHumanSolve(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		grid := NewGrid()
-		defer grid.Done()
-		grid.LoadSDK(TEST_GRID)
+		grid := MutableLoadSDK(TEST_GRID)
 		grid.HumanSolve(nil)
 	}
 }
@@ -21,10 +19,9 @@ func TestHumanSolveAlmostSolvedGrid(t *testing.T) {
 	//Tests human solve on a grid with only one cell left to solve. This is an
 	//interesting case in HumanSolve because it triggers ExitCondition #1.
 
-	grid := NewGrid()
-	grid.LoadSDK(SOLVED_TEST_GRID)
+	grid := MutableLoadSDK(SOLVED_TEST_GRID)
 
-	cell := grid.Cell(0, 0)
+	cell := grid.MutableCell(0, 0)
 
 	solvedNumber := cell.Number()
 
@@ -43,6 +40,133 @@ func TestHumanSolveAlmostSolvedGrid(t *testing.T) {
 
 	if cell.Number() != solvedNumber {
 		t.Error("Got wrong number in cell. Got", cell.Number(), "expected", solvedNumber)
+	}
+}
+
+func TestCompoundSolveStepModifications(t *testing.T) {
+	grid := NewGrid()
+
+	solveStep := &SolveStep{
+		Technique:   techniquesByName["Only Legal Number"],
+		TargetNums:  IntSlice{1},
+		TargetCells: CellSlice{grid.Cell(0, 0)},
+	}
+
+	tests := []struct {
+		step           *CompoundSolveStep
+		expectedLength int
+		description    string
+	}{
+		{
+			&CompoundSolveStep{
+				PrecursorSteps: nil,
+				FillStep:       solveStep,
+			},
+			1,
+			"Single fill step",
+		},
+		{
+			&CompoundSolveStep{
+				PrecursorSteps: []*SolveStep{
+					solveStep,
+					solveStep,
+				},
+				FillStep: solveStep,
+			},
+			3,
+			"Two precursor steps",
+		},
+	}
+
+	for i, test := range tests {
+		result := test.step.Modifications()
+		if len(result) != test.expectedLength {
+			t.Error("Test", i, test.description, "failed. Got len", len(result), "wanted", test.expectedLength)
+		}
+	}
+}
+
+func TestSolveStepModifications(t *testing.T) {
+	grid := NewGrid()
+	tests := []struct {
+		step        *SolveStep
+		expected    GridModification
+		description string
+	}{
+		{
+			&SolveStep{
+				Technique: techniquesByName["Only Legal Number"],
+				TargetCells: CellSlice{
+					grid.Cell(0, 0),
+					grid.Cell(0, 1),
+					grid.Cell(0, 2),
+				},
+				TargetNums: IntSlice{1},
+			},
+			GridModification{
+				&CellModification{
+					Cell:            grid.Cell(0, 0),
+					Number:          1,
+					ExcludesChanges: make(map[int]bool),
+				},
+				&CellModification{
+					Cell:            grid.Cell(0, 1),
+					Number:          1,
+					ExcludesChanges: make(map[int]bool),
+				},
+				&CellModification{
+					Cell:            grid.Cell(0, 2),
+					Number:          1,
+					ExcludesChanges: make(map[int]bool),
+				},
+			},
+			"Fill step",
+		},
+		{
+			&SolveStep{
+				Technique: techniquesByName["Pointing Pair Row"],
+				TargetCells: CellSlice{
+					grid.Cell(0, 0),
+					grid.Cell(0, 1),
+					grid.Cell(0, 2),
+				},
+				TargetNums: IntSlice{1, 2},
+			},
+			GridModification{
+				&CellModification{
+					Cell:   grid.Cell(0, 0),
+					Number: -1,
+					ExcludesChanges: map[int]bool{
+						1: true,
+						2: true,
+					},
+				},
+				&CellModification{
+					Cell:   grid.Cell(0, 1),
+					Number: -1,
+					ExcludesChanges: map[int]bool{
+						1: true,
+						2: true,
+					},
+				},
+				&CellModification{
+					Cell:   grid.Cell(0, 2),
+					Number: -1,
+					ExcludesChanges: map[int]bool{
+						1: true,
+						2: true,
+					},
+				},
+			},
+			"Cull step",
+		},
+	}
+
+	for i, test := range tests {
+		result := test.step.Modifications()
+		if !result.equivalent(test.expected) {
+			t.Error("Test", i, test.description, "failed. Got", result, "Expected", test.expected)
+		}
 	}
 }
 
@@ -202,9 +326,7 @@ func TestNewCompoundSolveStep(t *testing.T) {
 }
 
 func TestHumanSolve(t *testing.T) {
-	grid := NewGrid()
-	defer grid.Done()
-	grid.LoadSDK(TEST_GRID)
+	grid := MutableLoadSDK(TEST_GRID)
 
 	steps := grid.HumanSolution(nil)
 
@@ -230,9 +352,7 @@ func TestHumanSolve(t *testing.T) {
 }
 
 func TestHumanSolveOptionsNoGuess(t *testing.T) {
-	grid := NewGrid()
-	defer grid.Done()
-	grid.LoadSDK(TEST_GRID)
+	grid := MutableLoadSDK(TEST_GRID)
 
 	options := DefaultHumanSolveOptions()
 	options.TechniquesToUse = Techniques[0:3]
@@ -247,9 +367,7 @@ func TestHumanSolveOptionsNoGuess(t *testing.T) {
 
 func TestShortTechniquesToUseHumanSolveOptions(t *testing.T) {
 
-	grid := NewGrid()
-	defer grid.Done()
-	grid.LoadSDK(TEST_GRID)
+	grid := LoadSDK(TEST_GRID)
 
 	shortTechniqueOptions := DefaultHumanSolveOptions()
 	shortTechniqueOptions.TechniquesToUse = Techniques[0:2]
@@ -336,10 +454,8 @@ func TestHint(t *testing.T) {
 }
 
 func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string) {
-	grid := NewGrid()
-	defer grid.Done()
 
-	grid.LoadSDK(TEST_GRID)
+	grid := LoadSDK(TEST_GRID)
 
 	diagram := grid.Diagram(false)
 
@@ -366,10 +482,9 @@ func hintTestHelper(t *testing.T, options *HumanSolveOptions, description string
 
 func TestHumanSolveWithGuess(t *testing.T) {
 
-	grid := NewGrid()
-	defer grid.Done()
+	grid, err := MutableLoadSDKFromFile(puzzlePath("harddifficulty.sdk"))
 
-	if !grid.LoadSDKFromFile(puzzlePath("harddifficulty.sdk")) {
+	if err != nil {
 		t.Fatal("harddifficulty.sdk wasn't loaded")
 	}
 
@@ -404,7 +519,6 @@ func TestHumanSolveWithGuess(t *testing.T) {
 func TestStepsDescription(t *testing.T) {
 
 	grid := NewGrid()
-	defer grid.Done()
 
 	//It's really brittle that we load techniques in this way... it changes every time we add a new early technique!
 	steps := SolveDirections{
@@ -473,7 +587,7 @@ func TestStepsDescription(t *testing.T) {
 }
 
 //TODO: this is useful. Should we use this in other tests?
-func cellRefsToCells(refs []cellRef, grid *Grid) CellSlice {
+func cellRefsToCells(refs []cellRef, grid Grid) CellSlice {
 	var result CellSlice
 	for _, ref := range refs {
 		result = append(result, ref.Cell(grid))
@@ -482,12 +596,10 @@ func cellRefsToCells(refs []cellRef, grid *Grid) CellSlice {
 }
 
 func TestPuzzleDifficulty(t *testing.T) {
-	grid := NewGrid()
-	defer grid.Done()
-	grid.LoadSDK(TEST_GRID)
+	grid := LoadSDK(TEST_GRID)
 
 	//We use the cheaper one for testing so it completes faster.
-	difficulty := grid.calcluateDifficulty(false)
+	difficulty := calcluateGridDifficulty(grid, false)
 
 	if grid.Solved() {
 		t.Log("Difficulty shouldn't have changed the underlying grid, but it did.")
@@ -507,8 +619,9 @@ func TestPuzzleDifficulty(t *testing.T) {
 }
 
 func puzzleDifficultyHelper(filename string, t *testing.T) {
-	otherGrid := NewGrid()
-	if !otherGrid.LoadSDKFromFile(puzzlePath(filename)) {
+	otherGrid, err := LoadSDKFromFile(puzzlePath(filename))
+
+	if err != nil {
 		t.Log("Whoops, couldn't load the file to test:", filename)
 		t.Fail()
 	}
@@ -519,7 +632,7 @@ func puzzleDifficultyHelper(filename string, t *testing.T) {
 
 	go func() {
 		//We use the cheaper one for testing so it completes faster
-		_ = otherGrid.calcluateDifficulty(false)
+		_ = calcluateGridDifficulty(otherGrid, false)
 		done <- true
 	}()
 

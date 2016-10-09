@@ -40,7 +40,9 @@ const _DIFFICULTY_CONVERGENCE = 0.005
 type SolveDirections struct {
 	//A copy of the Grid when the SolveDirections was generated. Grab a
 	//reference from SolveDirections.Grid().
-	gridSnapshot *Grid
+	gridSnapshot Grid
+	//TODO: can gridSnapshot just be exposed directly since it's a RO grid?
+
 	//The list of CompoundSolveSteps that, when applied in order, would cause
 	//the SolveDirection's Grid() to be solved.
 	CompoundSteps []*CompoundSolveStep
@@ -129,10 +131,10 @@ func DefaultHumanSolveOptions() *HumanSolveOptions {
 }
 
 //Grid returns a snapshot of the grid at the time this SolveDirections was
-//generated. Returns a fresh copy every time.
-func (self SolveDirections) Grid() *Grid {
+//generated.
+func (self SolveDirections) Grid() Grid {
 	//TODO: this is the only pointer receiver method on SolveDirections.
-	return self.gridSnapshot.Copy()
+	return self.gridSnapshot
 }
 
 //Steps returns the list of all CompoundSolveSteps flattened into one stream
@@ -189,7 +191,7 @@ func (o *HumanSolveOptions) effectiveTechniquesToUse() []SolveTechnique {
 //IsUseful returns true if this SolveStep, when applied to the given grid, would do useful work--that is, it would
 //either fill a previously unfilled number, or cull previously un-culled possibilities. This is useful to ensure
 //HumanSolve doesn't get in a loop of applying the same useless steps.
-func (self *SolveStep) IsUseful(grid *Grid) bool {
+func (self *SolveStep) IsUseful(grid Grid) bool {
 	//Returns true IFF calling Apply with this step and the given grid would result in some useful work. Does not modify the gri.d
 
 	//All of this logic is substantially recreated in Apply.
@@ -223,22 +225,45 @@ func (self *SolveStep) IsUseful(grid *Grid) bool {
 
 //Apply does the solve operation to the Grid that is defined by the configuration of the SolveStep, mutating the
 //grid and bringing it one step closer to being solved.
-func (self *SolveStep) Apply(grid *Grid) {
+func (self *SolveStep) Apply(grid MutableGrid) {
 	//All of this logic is substantially recreated in IsUseful.
 	if self.Technique.IsFill() {
 		if len(self.TargetCells) == 0 || len(self.TargetNums) == 0 {
 			return
 		}
-		cell := self.TargetCells[0].InGrid(grid)
+		cell := self.TargetCells[0].MutableInGrid(grid)
 		cell.SetNumber(self.TargetNums[0])
 	} else {
 		for _, cell := range self.TargetCells {
-			gridCell := cell.InGrid(grid)
+			gridCell := cell.MutableInGrid(grid)
 			for _, exclude := range self.TargetNums {
 				gridCell.SetExcluded(exclude, true)
 			}
 		}
 	}
+}
+
+//Modifications returns the GridModifications repesenting how this SolveStep
+//would mutate the grid.
+func (self *SolveStep) Modifications() GridModification {
+	var result GridModification
+
+	for _, cell := range self.TargetCells {
+		modification := newCellModification(cell)
+		if self.Technique.IsFill() {
+			if len(self.TargetNums) != 1 {
+				//Sanity check
+				continue
+			}
+			modification.Number = self.TargetNums[0]
+		} else {
+			for _, num := range self.TargetNums {
+				modification.ExcludesChanges[num] = true
+			}
+		}
+		result = append(result, modification)
+	}
+	return result
 }
 
 //Description returns a human-readable sentence describing what the SolveStep
@@ -327,7 +352,7 @@ func (c *CompoundSolveStep) valid() bool {
 //Apply applies all of the steps in the CompoundSolveStep to the grid in
 //order: first each of the PrecursorSteps in order, then the fill step. It is
 //equivalent to calling Apply() on every step returned by Steps().
-func (c *CompoundSolveStep) Apply(grid *Grid) {
+func (c *CompoundSolveStep) Apply(grid MutableGrid) {
 	//TODO: test this
 	if !c.valid() {
 		return
@@ -336,6 +361,17 @@ func (c *CompoundSolveStep) Apply(grid *Grid) {
 		step.Apply(grid)
 	}
 	c.FillStep.Apply(grid)
+}
+
+//Modifications returns the set of modifications that this CompoundSolveStep
+//would make to a Grid if Apply were called.
+func (c *CompoundSolveStep) Modifications() GridModification {
+	var result GridModification
+	for _, step := range c.PrecursorSteps {
+		result = append(result, step.Modifications()...)
+	}
+	result = append(result, c.FillStep.Modifications()...)
+	return result
 }
 
 //Description returns a human-readable sentence describing what the CompoundSolveStep
@@ -388,45 +424,31 @@ func (c *CompoundSolveStep) Steps() []*SolveStep {
 	return append(c.PrecursorSteps, c.FillStep)
 }
 
-//HumanSolution returns the SolveDirections that represent how a human would
-//solve this puzzle. It does not mutate the grid. If options is nil, will use
-//reasonable defaults.
-func (self *Grid) HumanSolution(options *HumanSolveOptions) *SolveDirections {
-	clone := self.Copy()
-	defer clone.Done()
+func (self *gridImpl) HumanSolution(options *HumanSolveOptions) *SolveDirections {
+	return humanSolveHelper(self, options, nil, true)
+
+}
+
+func (self *mutableGridImpl) HumanSolution(options *HumanSolveOptions) *SolveDirections {
+	clone := self.MutableCopy()
 	return clone.HumanSolve(options)
 }
 
-//HumanSolve is the workhorse of the package. It solves the puzzle much like a
-//human would, applying complex logic techniques iteratively to find a
-//sequence of steps that a reasonable human might apply to solve the puzzle.
-//HumanSolve is an expensive operation because at each step it identifies all
-//of the valid logic rules it could apply and then selects between them based
-//on various weightings. HumanSolve endeavors to find the most realistic human
-//solution it can by using a large number of possible techniques with
-//realistic weights, as well as by doing things like being more likely to pick
-//a cell that is in the same row/cell/block as the last filled cell. Returns
-//nil if the puzzle does not have a single valid solution. If options is nil,
-//will use reasonable defaults. Mutates the grid.
-func (self *Grid) HumanSolve(options *HumanSolveOptions) *SolveDirections {
+func (self *mutableGridImpl) HumanSolve(options *HumanSolveOptions) *SolveDirections {
 	return humanSolveHelper(self, options, nil, true)
 }
 
-//Hint returns a SolveDirections with precisely one CompoundSolveStep that is
-//a reasonable next step to move the puzzle towards being completed. It is
-//effectively a hint to the user about what Fill step to do next, and why it's
-//logically implied; the truncated return value of HumanSolve. Returns nil if
-//the puzzle has multiple solutions or is otherwise invalid. If options is
-//nil, will use reasonable defaults. optionalPreviousSteps, if provided,
-//serves to help the algorithm pick the most realistic next steps. Does not
-//mutate the grid.
-func (self *Grid) Hint(options *HumanSolveOptions, optionalPreviousSteps []*CompoundSolveStep) *SolveDirections {
+func (self *gridImpl) Hint(options *HumanSolveOptions, optionalPreviousSteps []*CompoundSolveStep) *SolveDirections {
+
+	return humanSolveHelper(self, options, optionalPreviousSteps, false)
+}
+
+func (self *mutableGridImpl) Hint(options *HumanSolveOptions, optionalPreviousSteps []*CompoundSolveStep) *SolveDirections {
 
 	//TODO: test that non-fill steps before the last one are necessary to unlock
 	//the fill step at the end (cull them if not), and test that.
 
-	clone := self.Copy()
-	defer clone.Done()
+	clone := self.MutableCopy()
 
 	result := humanSolveHelper(clone, options, optionalPreviousSteps, false)
 
@@ -434,14 +456,11 @@ func (self *Grid) Hint(options *HumanSolveOptions, optionalPreviousSteps []*Comp
 
 }
 
-//Difficulty returns a value between 0.0 and 1.0, representing how hard the puzzle would be
-//for a human to solve. :This is an EXTREMELY expensive method (although repeated calls without
-//mutating the grid return a cached value quickly). It human solves the puzzle, extracts signals
-//out of the solveDirections, and then passes those signals into a machine-learned model that
-//was trained on hundreds of thousands of solves by real users in order to generate a candidate difficulty.
-//It then repeats the process multiple times until the difficultly number begins to converge to
-//an average.
-func (self *Grid) Difficulty() float64 {
+func (self *gridImpl) Difficulty() float64 {
+	return calcluateGridDifficulty(self, true)
+}
+
+func (self *mutableGridImpl) Difficulty() float64 {
 
 	//TODO: test that the memoization works (that is, the cached value is thrown out if the grid is modified)
 	//It's hard to test because self.calculateDifficulty(true) is so expensive to run.
@@ -456,12 +475,12 @@ func (self *Grid) Difficulty() float64 {
 	//Yes, this memoization will fail in the (rare!) cases where a grid's actual difficulty is 0.0, but
 	//the worst case scenario is that we just return the same value.
 	if self.cachedDifficulty == 0.0 {
-		self.cachedDifficulty = self.calcluateDifficulty(true)
+		self.cachedDifficulty = calcluateGridDifficulty(self, true)
 	}
 	return self.cachedDifficulty
 }
 
-func (self *Grid) calcluateDifficulty(accurate bool) float64 {
+func calcluateGridDifficulty(grid Grid, accurate bool) float64 {
 	//This can be an extremely expensive method. Do not call repeatedly!
 	//returns the difficulty of the grid, which is a number between 0.0 and 1.0.
 	//This is a probabilistic measure; repeated calls may return different numbers, although generally we wait for the results to converge.
@@ -472,7 +491,7 @@ func (self *Grid) calcluateDifficulty(accurate bool) float64 {
 	average := 0.0
 	lastAverage := 0.0
 
-	self.HasMultipleSolutions()
+	grid.HasMultipleSolutions()
 
 	//Since this is so expensive, in testing situations we want to run it in less accurate mode (so it goes fast!)
 	maxIterations := _MAX_DIFFICULTY_ITERATIONS
@@ -481,7 +500,7 @@ func (self *Grid) calcluateDifficulty(accurate bool) float64 {
 	}
 
 	for i := 0; i < maxIterations; i++ {
-		difficulty := gridDifficultyHelper(self)
+		difficulty := gridDifficultyHelper(grid)
 
 		accum += difficulty
 		average = accum / (float64(i) + 1.0)
@@ -500,12 +519,12 @@ func (self *Grid) calcluateDifficulty(accurate bool) float64 {
 
 //This function will HumanSolve _NUM_SOLVES_FOR_DIFFICULTY times, then average the signals together, then
 //give the difficulty for THAT. This is more accurate becuase the weights were trained on such averaged signals.
-func gridDifficultyHelper(grid *Grid) float64 {
+func gridDifficultyHelper(grid Grid) float64 {
 
 	collector := make(chan DifficultySignals, _NUM_SOLVES_FOR_DIFFICULTY)
 	//Might as well run all of the human solutions in parallel
 	for i := 0; i < _NUM_SOLVES_FOR_DIFFICULTY; i++ {
-		go func(gridToUse *Grid) {
+		go func(gridToUse Grid) {
 			solution := gridToUse.HumanSolution(nil)
 			if solution == nil {
 				log.Println("A generated grid turned out to have mutiple solutions (or otherwise return nil), indicating a very serious error:", gridToUse.DataString())

@@ -48,11 +48,8 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 
 	techniqueVariantsTestHelper(t, "Only Legal Number")
 
-	grid := NewGrid()
-	defer grid.Done()
-	//Load up a solved grid
-	grid.LoadSDK(SOLVED_TEST_GRID)
-	cell := grid.Cell(3, 3)
+	grid := MutableLoadSDK(SOLVED_TEST_GRID)
+	cell := grid.MutableCell(3, 3)
 	num := cell.Number()
 	cell.SetNumber(0)
 
@@ -113,12 +110,8 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 
 //TODO: use the test solve helper func for these three tests.
 func TestNecessaryInRow(t *testing.T) {
-	grid := NewGrid()
-
-	//We DON'T call grid.done because we will have poked some unrealistic values into the cells.
-
 	//Load up a solved grid
-	grid.LoadSDK(SOLVED_TEST_GRID)
+	grid := MutableLoad(SOLVED_TEST_GRID)
 
 	//We're going to cheat an set up an unrealistic grid.
 
@@ -130,14 +123,16 @@ func TestNecessaryInRow(t *testing.T) {
 	impossibles[DIM-1] = 1
 
 	//SetNumber will affect the other cells in row, so do it first.
-	for _, cell := range grid.Row(3) {
-		cell.number = 0
-		copy(cell.impossibles[:], impossibles)
+	for _, cell := range grid.MutableRow(3) {
+		cellI := cell.(*mutableCellImpl)
+		cellI.number = 0
+		copy(cellI.impossibles[:], impossibles)
 	}
 
-	cell := grid.Cell(3, 3)
+	cell := grid.MutableCell(3, 3)
+	cellI := cell.(*mutableCellImpl)
 	//This is the only cell where DIM will be allowed.
-	cell.impossibles[DIM-1] = 0
+	cellI.impossibles[DIM-1] = 0
 
 	//Now that cell should be filled by this technique.
 
@@ -199,12 +194,9 @@ func TestNecessaryInRow(t *testing.T) {
 }
 
 func TestNecessaryInCol(t *testing.T) {
-	grid := NewGrid()
-
-	//We DON'T call grid.done because we will have poked some unrealistic values into the cells.
 
 	//Load up a solved grid
-	grid.LoadSDK(SOLVED_TEST_GRID)
+	grid := MutableLoadSDK(SOLVED_TEST_GRID)
 
 	//We're going to cheat an set up an unrealistic grid.
 
@@ -216,14 +208,16 @@ func TestNecessaryInCol(t *testing.T) {
 	impossibles[DIM-1] = 1
 
 	//SetNumber will affect the other cells in row, so do it first.
-	for _, cell := range grid.Col(3) {
-		cell.number = 0
-		copy(cell.impossibles[:], impossibles)
+	for _, cell := range grid.MutableCol(3) {
+		cellI := cell.(*mutableCellImpl)
+		cellI.number = 0
+		copy(cellI.impossibles[:], impossibles)
 	}
 
-	cell := grid.Cell(3, 3)
+	cell := grid.MutableCell(3, 3)
+	cellI := cell.(*mutableCellImpl)
 	//This is the only cell where DIM will be allowed.
-	cell.impossibles[DIM-1] = 0
+	cellI.impossibles[DIM-1] = 0
 
 	//Now that cell should be filled by this technique.
 
@@ -285,12 +279,9 @@ func TestNecessaryInCol(t *testing.T) {
 }
 
 func TestNecessaryInBlock(t *testing.T) {
-	grid := NewGrid()
-
-	//We DON'T call grid.done because we will have poked some unrealistic values into the cells.
 
 	//Load up a solved grid
-	grid.LoadSDK(SOLVED_TEST_GRID)
+	grid := MutableLoadSDK(SOLVED_TEST_GRID)
 
 	//We're going to cheat an set up an unrealistic grid.
 
@@ -302,14 +293,16 @@ func TestNecessaryInBlock(t *testing.T) {
 	impossibles[DIM-1] = 1
 
 	//SetNumber will affect the other cells in row, so do it first.
-	for _, cell := range grid.Block(4) {
-		cell.number = 0
-		copy(cell.impossibles[:], impossibles)
+	for _, cell := range grid.MutableBlock(4) {
+		cellI := cell.(*mutableCellImpl)
+		cellI.number = 0
+		copy(cellI.impossibles[:], impossibles)
 	}
 
-	cell := grid.Cell(3, 3)
+	cell := grid.MutableCell(3, 3)
+	cellI := cell.(*mutableCellImpl)
 	//This is the only cell where DIM will be allowed.
-	cell.impossibles[DIM-1] = 0
+	cellI.impossibles[DIM-1] = 0
 
 	//Now that cell should be filled by this technique.
 

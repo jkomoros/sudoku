@@ -101,7 +101,7 @@ type humanSolveSearcher struct {
 
 	//Various options frozen in at creation time that various methods need
 	//access to.
-	grid                  *Grid
+	grid                  Grid
 	options               *HumanSolveOptions
 	previousCompoundSteps []*CompoundSolveStep
 }
@@ -125,7 +125,7 @@ type humanSolveItem struct {
 	twiddles       []twiddleRecord
 	heapIndex      int
 	searcher       *humanSolveSearcher
-	cachedGrid     *Grid
+	cachedGrid     Grid
 	cachedGoodness float64
 	//The index of the next techinque to return
 	techniqueIndex int
@@ -136,7 +136,7 @@ type humanSolveItem struct {
 //humanSolveWorkItem represents a unit of work that should be done during the
 //search.
 type humanSolveWorkItem struct {
-	grid        *Grid
+	grid        Grid
 	technique   SolveTechnique
 	coordinator findCoordinator
 }
@@ -157,7 +157,7 @@ type synchronousFindCoordinator struct {
 }
 
 //humanSolveHelper does most of the basic set up for both HumanSolve and Hint.
-func humanSolveHelper(grid *Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep, endConditionSolved bool) *SolveDirections {
+func humanSolveHelper(grid Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep, endConditionSolved bool) *SolveDirections {
 	//Short circuit solving if it has multiple solutions.
 	if grid.HasMultipleSolutions() {
 		return nil
@@ -197,9 +197,23 @@ func humanSolveHelper(grid *Grid, options *HumanSolveOptions, previousSteps []*C
 
 //humanSolveSearch is a new implementation of the core implementation of
 //HumanSolve. Mutates the grid.
-func humanSolveSearch(grid *Grid, options *HumanSolveOptions) []*CompoundSolveStep {
+func humanSolveSearch(grid Grid, options *HumanSolveOptions) []*CompoundSolveStep {
 	var result []*CompoundSolveStep
 
+	isMutableGrid := false
+
+	mGrid, ok := grid.(MutableGrid)
+
+	if ok {
+		isMutableGrid = true
+	}
+
+	//TODO: it FEELS like here we should be using read only grids. Test what
+	//happens if we get rid of the mutablegrid path (and modify the callers
+	//who expect us to mutate the grid). however, we tried doing this, and it
+	//added 90% to BenchmarkHumansolve. Presumably it's because we are
+	//creating tons of extra grids when we can just accumulate the results in
+	//the one item otherwise.
 	for !grid.Solved() {
 		newStep := humanSolveSearchSingleStep(grid, options, result)
 		if newStep == nil {
@@ -207,7 +221,12 @@ func humanSolveSearch(grid *Grid, options *HumanSolveOptions) []*CompoundSolveSt
 			return nil
 		}
 		result = append(result, newStep)
-		newStep.Apply(grid)
+		if isMutableGrid {
+			newStep.Apply(mGrid)
+		} else {
+			grid = grid.CopyWithModifications(newStep.Modifications())
+		}
+
 	}
 
 	return result
@@ -216,7 +235,7 @@ func humanSolveSearch(grid *Grid, options *HumanSolveOptions) []*CompoundSolveSt
 //humanSolveSearchSingleStep is the workhorse of the new HumanSolve. It
 //searches for the next CompoundSolveStep on the puzzle: a series of steps that
 //contains exactly one fill step at its end.
-func humanSolveSearchSingleStep(grid *Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep) *CompoundSolveStep {
+func humanSolveSearchSingleStep(grid Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep) *CompoundSolveStep {
 
 	//This function doesn't do much on top of HumanSolvePossibleSteps, but
 	//it's worth it to mirror humanSolveSearch
@@ -279,7 +298,7 @@ func (s *synchronousFindCoordinator) foundResult(step *SolveStep) bool {
 
 //PreviousGrid returns a grid with all of the steps applied up to BUT NOT
 //INCLUDING this items' step.
-func (p *humanSolveItem) PreviousGrid() *Grid {
+func (p *humanSolveItem) PreviousGrid() Grid {
 	if p.parent == nil {
 		return p.searcher.grid
 	}
@@ -287,19 +306,18 @@ func (p *humanSolveItem) PreviousGrid() *Grid {
 }
 
 //Grid returns a grid with all of this item's steps applied
-func (p *humanSolveItem) Grid() *Grid {
+func (p *humanSolveItem) Grid() Grid {
 
 	if p.cachedGrid == nil {
 
-		var result *Grid
+		var result Grid
 
 		if p.searcher.grid == nil {
 			result = nil
 		} else if p.parent == nil {
 			result = p.searcher.grid
 		} else {
-			result = p.parent.Grid().Copy()
-			p.step.Apply(result)
+			result = p.parent.Grid().CopyWithModifications(p.step.Modifications())
 		}
 
 		p.cachedGrid = result
@@ -458,7 +476,7 @@ func (p *humanSolveItem) NextSearchWorkItem() *humanSolveWorkItem {
  *
  ************************************************************/
 
-func newHumanSolveSearcher(grid *Grid, previousCompoundSteps []*CompoundSolveStep, options *HumanSolveOptions) *humanSolveSearcher {
+func newHumanSolveSearcher(grid Grid, previousCompoundSteps []*CompoundSolveStep, options *HumanSolveOptions) *humanSolveSearcher {
 	searcher := &humanSolveSearcher{
 		grid:                  grid,
 		options:               options,
@@ -753,23 +771,13 @@ func (n *humanSolveSearcherHeap) Pop() interface{} {
 	return item
 }
 
-//HumanSolvePossibleSteps returns a list of CompoundSolveSteps that could
-//apply at this state, along with the probability distribution that a human
-//would pick each one. The optional previousSteps argument is the list of
-//CompoundSolveSteps that have been applied to the grid so far, and is used
-//primarily to tweak the probability distribution and make, for example, it
-//more likely to pick cells in the same block as the cell that was just
-//filled. This method is the workhorse at the core of HumanSolve() and is
-//exposed here primarily so users of this library can get a peek at which
-//possibilites exist at each step. cmd/i-sudoku is one user of this method.
-func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
-
+func humanSolvePossibleStepsImpl(grid Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
 	//TODO: with the new approach, we're getting a lot more extreme negative difficulty values. Train a new model!
 
 	//We send a copy here because our own selves will likely be modified soon
 	//after returning from this, and if the other threads haven't gotten the
 	//signal yet to shut down they might get in a weird state.
-	searcher := newHumanSolveSearcher(self.Copy(), previousSteps, options)
+	searcher := newHumanSolveSearcher(grid, previousSteps, options)
 
 	searcher.Search()
 
@@ -796,4 +804,13 @@ func (self *Grid) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSt
 	invertedDistribution := distri.invert()
 
 	return resultSteps, invertedDistribution
+
+}
+
+func (self *gridImpl) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
+	return humanSolvePossibleStepsImpl(self, options, previousSteps)
+}
+
+func (self *mutableGridImpl) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
+	return humanSolvePossibleStepsImpl(self.Copy(), options, previousSteps)
 }

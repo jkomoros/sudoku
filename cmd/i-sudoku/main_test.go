@@ -33,9 +33,9 @@ func TestNewGrid(t *testing.T) {
 
 	unfilledNumberFound := false
 	for i := 0; i < 100; i++ {
-		model.SetSelected(model.Grid().Cell(3, 3))
+		model.SetSelected(model.Grid().MutableCell(3, 3))
 		model.NewGrid()
-		if model.Grid().Cell(3, 3).Number() == 0 {
+		if model.Grid().MutableCell(3, 3).Number() == 0 {
 			//Found one!
 			model.SetSelectedNumber(3)
 			if model.Grid().Cell(3, 3).Number() != 3 {
@@ -117,7 +117,7 @@ func TestEnsureSelected(t *testing.T) {
 
 func TestSelected(t *testing.T) {
 	model := newController()
-	next := model.Grid().Cell(2, 2)
+	next := model.Grid().MutableCell(2, 2)
 	model.SetSelected(next)
 	if model.Selected() != next {
 		t.Error("Set selected didn't change the selected cell.")
@@ -141,7 +141,7 @@ func TestMoveSelectionLeft(t *testing.T) {
 		t.Error("Wrong cell selected after move left at bounds", model.Selected())
 	}
 
-	model.SetSelected(model.Grid().Cell(1, 1))
+	model.SetSelected(model.Grid().MutableCell(1, 1))
 
 	model.MoveSelectionLeft(false)
 
@@ -152,17 +152,17 @@ func TestMoveSelectionLeft(t *testing.T) {
 	//Test fast move
 	model.SetGrid(sdkconverter.Load(FAST_MOVE_TEST_GRID))
 
-	model.SetSelected(model.Grid().Cell(4, 4))
+	model.SetSelected(model.Grid().MutableCell(4, 4))
 
 	model.MoveSelectionLeft(true)
 
-	if model.Selected() != model.Grid().Cell(4, 2) {
+	if model.Selected() != model.Grid().MutableCell(4, 2) {
 		t.Error("Fast move didn't skip the locked cell", model.Selected())
 	}
 	//No more spots to the left; should stay still.
 	model.MoveSelectionLeft(true)
 
-	if model.Selected() != model.Grid().Cell(4, 2) {
+	if model.Selected() != model.Grid().MutableCell(4, 2) {
 		t.Error("Fast move moved even though no more cells left in that direction")
 	}
 }
@@ -184,7 +184,7 @@ func TestMoveSelectionRight(t *testing.T) {
 		t.Error("Wrong cell selected after move right", model.Selected())
 	}
 
-	model.SetSelected(model.Grid().Cell(1, sudoku.DIM-1))
+	model.SetSelected(model.Grid().MutableCell(1, sudoku.DIM-1))
 
 	model.MoveSelectionRight(false)
 
@@ -195,17 +195,17 @@ func TestMoveSelectionRight(t *testing.T) {
 	//Test fast move
 	model.SetGrid(sdkconverter.Load(FAST_MOVE_TEST_GRID))
 
-	model.SetSelected(model.Grid().Cell(4, 4))
+	model.SetSelected(model.Grid().MutableCell(4, 4))
 
 	model.MoveSelectionRight(true)
 
-	if model.Selected() != model.Grid().Cell(4, 6) {
+	if model.Selected() != model.Grid().MutableCell(4, 6) {
 		t.Error("Fast move didn't skip the locked cell", model.Selected())
 	}
 	//No more spots to the left; should stay still.
 	model.MoveSelectionRight(true)
 
-	if model.Selected() != model.Grid().Cell(4, 6) {
+	if model.Selected() != model.Grid().MutableCell(4, 6) {
 		t.Error("Fast move moved even though no more cells left in that direction")
 	}
 }
@@ -227,7 +227,7 @@ func TestMoveSelectionUp(t *testing.T) {
 		t.Error("Wrong cell selected after move up at bounds", model.Selected())
 	}
 
-	model.SetSelected(model.Grid().Cell(1, 1))
+	model.SetSelected(model.Grid().MutableCell(1, 1))
 
 	model.MoveSelectionUp(false)
 
@@ -238,17 +238,17 @@ func TestMoveSelectionUp(t *testing.T) {
 	//Test fast move
 	model.SetGrid(sdkconverter.Load(FAST_MOVE_TEST_GRID))
 
-	model.SetSelected(model.Grid().Cell(4, 4))
+	model.SetSelected(model.Grid().MutableCell(4, 4))
 
 	model.MoveSelectionUp(true)
 
-	if model.Selected() != model.Grid().Cell(2, 4) {
+	if model.Selected() != model.Grid().MutableCell(2, 4) {
 		t.Error("Fast move didn't skip the locked cell", model.Selected())
 	}
 	//No more spots to the left; should stay still.
 	model.MoveSelectionUp(true)
 
-	if model.Selected() != model.Grid().Cell(2, 4) {
+	if model.Selected() != model.Grid().MutableCell(2, 4) {
 		t.Error("Fast move moved even though no more cells left in that direction")
 	}
 }
@@ -270,7 +270,7 @@ func TestMoveSelectionDown(t *testing.T) {
 		t.Error("Wrong cell selected after move down", model.Selected())
 	}
 
-	model.SetSelected(model.Grid().Cell(sudoku.DIM-1, 1))
+	model.SetSelected(model.Grid().MutableCell(sudoku.DIM-1, 1))
 
 	model.MoveSelectionDown(false)
 
@@ -281,17 +281,17 @@ func TestMoveSelectionDown(t *testing.T) {
 	//Test fast move
 	model.SetGrid(sdkconverter.Load(FAST_MOVE_TEST_GRID))
 
-	model.SetSelected(model.Grid().Cell(4, 4))
+	model.SetSelected(model.Grid().MutableCell(4, 4))
 
 	model.MoveSelectionDown(true)
 
-	if model.Selected() != model.Grid().Cell(6, 4) {
+	if model.Selected() != model.Grid().MutableCell(6, 4) {
 		t.Error("Fast move didn't skip the locked cell", model.Selected())
 	}
 	//No more spots to the left; should stay still.
 	model.MoveSelectionDown(true)
 
-	if model.Selected() != model.Grid().Cell(6, 4) {
+	if model.Selected() != model.Grid().MutableCell(6, 4) {
 		t.Error("Fast move moved even though no more cells left in that direction")
 	}
 }
@@ -303,7 +303,7 @@ func TestFillSelectedWithLegalMarks(t *testing.T) {
 	model.ToggleSelectedMark(4)
 
 	for i := 3; i < sudoku.DIM; i++ {
-		cell := model.Grid().Cell(0, i)
+		cell := model.Grid().MutableCell(0, i)
 		cell.SetNumber(i + 1)
 	}
 
@@ -354,11 +354,11 @@ func TestEnsureGrid(t *testing.T) {
 func TestSetSelectionNumber(t *testing.T) {
 	model := newController()
 
-	var lockedCell *sudoku.Cell
-	var unlockedCell *sudoku.Cell
+	var lockedCell sudoku.MutableCell
+	var unlockedCell sudoku.MutableCell
 
 	//Set an unlocked cell
-	for _, cell := range model.Grid().Cells() {
+	for _, cell := range model.Grid().MutableCells() {
 		if cell.Locked() {
 			if lockedCell == nil {
 				lockedCell = cell
@@ -424,11 +424,11 @@ func TestSetSelectionNumber(t *testing.T) {
 func TestToggleSelectedMark(t *testing.T) {
 	model := newController()
 
-	var lockedCell *sudoku.Cell
-	var unlockedCell *sudoku.Cell
+	var lockedCell sudoku.MutableCell
+	var unlockedCell sudoku.MutableCell
 
 	//Set an unlocked cell
-	for _, cell := range model.Grid().Cells() {
+	for _, cell := range model.Grid().MutableCells() {
 		if cell.Locked() {
 			if lockedCell == nil {
 				lockedCell = cell

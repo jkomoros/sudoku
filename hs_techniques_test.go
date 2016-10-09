@@ -226,7 +226,7 @@ type solveTechniqueTestHelperOptions struct {
 	//Useful if you're going to be do repeated calls to the test helper with the
 	//same list of steps.
 	stepsToCheck struct {
-		grid   *Grid
+		grid   MutableGrid
 		solver SolveTechnique
 		steps  []*SolveStep
 	}
@@ -240,7 +240,7 @@ type solveTechniqueTestHelperOptions struct {
 
 //TODO: 97473c18633203a6eaa075d968ba77d85ba28390 introduced an error here where we don't return all techniques,
 //at least for forcing chains technique.
-func getStepsForTechnique(technique SolveTechnique, grid *Grid, fetchAll bool) []*SolveStep {
+func getStepsForTechnique(technique SolveTechnique, grid Grid, fetchAll bool) []*SolveStep {
 
 	maxResults := 0
 	if !fetchAll {
@@ -251,22 +251,22 @@ func getStepsForTechnique(technique SolveTechnique, grid *Grid, fetchAll bool) [
 
 }
 
-func humanSolveTechniqueTestHelperStepGenerator(t *testing.T, puzzleName string, techniqueName string, options solveTechniqueTestHelperOptions) (*Grid, SolveTechnique, []*SolveStep) {
+func humanSolveTechniqueTestHelperStepGenerator(t *testing.T, puzzleName string, techniqueName string, options solveTechniqueTestHelperOptions) (MutableGrid, SolveTechnique, []*SolveStep) {
 
-	var grid *Grid
+	var grid MutableGrid
 
 	if options.stepsToCheck.grid != nil {
 		grid = options.stepsToCheck.grid
 	} else {
-		grid = NewGrid()
-		if !grid.LoadSDKFromFile(puzzlePath(puzzleName)) {
+		tempGrid, err := MutableLoadSDKFromFile(puzzlePath(puzzleName))
+		if err != nil {
 			t.Fatal("Couldn't load puzzle ", puzzleName)
 		}
+		grid = tempGrid
 	}
 
 	if options.transpose {
-		newGrid := grid.transpose()
-		grid.Done()
+		newGrid := grid.(*mutableGridImpl).transpose()
 		grid = newGrid
 	}
 
@@ -286,7 +286,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 
 	//TODO: test for col and block as well
 
-	var grid *Grid
+	var grid Grid
 	var solver SolveTechnique
 	var steps []*SolveStep
 
@@ -297,6 +297,11 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 	} else {
 		grid, solver, steps = humanSolveTechniqueTestHelperStepGenerator(t, puzzleName, techniqueName, options)
 	}
+
+	//This is so weird... if I don't have this no-op here the compiler warns
+	//that grid is declared and not used... despite the fact that it OBVIOUSLY
+	//is.
+	grid.Cell(0, 0)
 
 	//Check if solveStep is nil here
 	if len(steps) == 0 {
@@ -410,7 +415,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 				foundMatch = false
 				for _, ref := range options.targetCells {
 					for _, cell := range step.TargetCells {
-						if ref.Cell(grid) == cell {
+						if ref == cell.ref() {
 							//TODO: break out early
 							foundMatch = true
 						}
@@ -497,6 +502,4 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 	}
 
 	//TODO: we should do exhaustive testing of SolveStep application. We used to test it here, but as long as targetCells and targetNums are correct it should be fine.
-
-	grid.Done()
 }

@@ -7,10 +7,9 @@ import (
 func TestDokugen(t *testing.T) {
 	//TODO: test that neighbors are alerted correctly about SetNumbers happening.
 	grid := NewGrid()
-	defer grid.Done()
 	row, col, num := 3, 3, 3
 	target := grid.Cell(row, col)
-	target.SetNumber(num)
+	target.MutableInGrid(grid).SetNumber(num)
 	for _, cell := range grid.Col(col) {
 		if cell == target {
 			continue
@@ -39,32 +38,12 @@ func TestDokugen(t *testing.T) {
 		}
 	}
 
-	//Reset the grid to starting conditions.
-	target.SetNumber(0)
+	filledGrid := withSimpleCellsFilled(grid)
 
-	consumeCells(grid.queue(), DIM*DIM, "After reset to base", t)
-
-	target.SetNumber(num)
-
-	consumeCells(grid.queue(), _NUM_NEIGHBORS, "After setting one number", t)
-
-	if grid.fillSimpleCells() != 0 {
+	if filledGrid.rank() != grid.rank() {
 		t.Log("We filled more than 0 cells even though there aren't any cells to obviously fill!")
 		t.Fail()
 	}
 
 	//TODO: test that fillSimpleCells does work for cases where it should be obvious.
-}
-
-func consumeCells(queue *finiteQueue, expected int, msg string, t *testing.T) {
-	count := 0
-	queuedCell := queue.Get()
-	for queuedCell != nil {
-		count++
-		queuedCell = queue.Get()
-	}
-	if count != expected {
-		t.Log("The grid's queue didn't have the correct number of items in it (", msg, "). Expected ", expected, " but actually got ", count)
-		t.Fail()
-	}
 }

@@ -7,8 +7,16 @@ import (
 	"strings"
 )
 
-//CellSlice is a list of cells with many convenience methods for doing common operations on them.
-type CellSlice []*Cell
+//CellSlice is a list of cells with many convenience methods for doing common
+//operations on them. MutableCellSlice is similar, but operates on a slice of
+//MutableCells.
+type CellSlice []Cell
+
+//MutableCellSlice is a CellSlice that contains references to MutableCells. It
+//doesn't have analogues for each CellSlice method; only ones that return a
+//CellSlice. Note: MutableCellSlices are not mutable themselves; the "mutable"
+//refers to the MutableCell.
+type MutableCellSlice []MutableCell
 
 //IntSlice is a list of ints, with many convenience methods specific to sudoku.
 type IntSlice []int
@@ -30,15 +38,19 @@ type cellSliceSorter struct {
 	CellSlice
 }
 
-func getRow(cell *Cell) int {
+type mutableCellSliceSorter struct {
+	MutableCellSlice
+}
+
+func getRow(cell Cell) int {
 	return cell.Row()
 }
 
-func getCol(cell *Cell) int {
+func getCol(cell Cell) int {
 	return cell.Col()
 }
 
-func getBlock(cell *Cell) int {
+func getBlock(cell Cell) int {
 	return cell.Block()
 }
 
@@ -103,19 +115,22 @@ func (self CellSlice) AllBlocks() IntSlice {
 	return self.CollectNums(getBlock).Unique()
 }
 
-//AddExclude sets the given number to excluded on all cells in the set.
-func (self CellSlice) AddExclude(exclude int) {
-	mapper := func(cell *Cell) {
-		cell.SetExcluded(exclude, true)
-	}
-	self.Map(mapper)
-}
-
 //FilterByUnfilled returns a new CellSlice with only the cells in the list
 //that are not filled with any number.
 func (self CellSlice) FilterByUnfilled() CellSlice {
 	//TODO: test this
-	filter := func(cell *Cell) bool {
+	filter := func(cell Cell) bool {
+		return cell.Number() == 0
+	}
+	return self.Filter(filter)
+}
+
+//FilterByUnfilled returns a new CellSlice with only the cells in the list
+//that are not filled with any number.
+func (self MutableCellSlice) FilterByUnfilled() MutableCellSlice {
+	//TODO: test all of the mutableCellSlice methods
+	//TODO: test this
+	filter := func(cell Cell) bool {
 		return cell.Number() == 0
 	}
 	return self.Filter(filter)
@@ -125,7 +140,17 @@ func (self CellSlice) FilterByUnfilled() CellSlice {
 //number in them.
 func (self CellSlice) FilterByFilled() CellSlice {
 	//TODO: test this
-	filter := func(cell *Cell) bool {
+	filter := func(cell Cell) bool {
+		return cell.Number() != 0
+	}
+	return self.Filter(filter)
+}
+
+//FilterByFilled returns a new CellSlice with only the cells that have a
+//number in them.
+func (self MutableCellSlice) FilterByFilled() MutableCellSlice {
+	//TODO: test this
+	filter := func(cell Cell) bool {
 		return cell.Number() != 0
 	}
 	return self.Filter(filter)
@@ -135,7 +160,17 @@ func (self CellSlice) FilterByFilled() CellSlice {
 //as an active possibility.
 func (self CellSlice) FilterByPossible(possible int) CellSlice {
 	//TODO: test this
-	filter := func(cell *Cell) bool {
+	filter := func(cell Cell) bool {
+		return cell.Possible(possible)
+	}
+	return self.Filter(filter)
+}
+
+//FilterByPossible returns a new CellSlice with only the cells in the list that have the given number
+//as an active possibility.
+func (self MutableCellSlice) FilterByPossible(possible int) MutableCellSlice {
+	//TODO: test this
+	filter := func(cell Cell) bool {
 		return cell.Possible(possible)
 	}
 	return self.Filter(filter)
@@ -145,7 +180,17 @@ func (self CellSlice) FilterByPossible(possible int) CellSlice {
 //number of possible numbers.
 func (self CellSlice) FilterByNumPossibilities(target int) CellSlice {
 	//TODO: test this
-	filter := func(cell *Cell) bool {
+	filter := func(cell Cell) bool {
+		return len(cell.Possibilities()) == target
+	}
+	return self.Filter(filter)
+}
+
+//FilterByNumPossibles returns a new CellSlice with only cells that have precisely the provided
+//number of possible numbers.
+func (self MutableCellSlice) FilterByNumPossibilities(target int) MutableCellSlice {
+	//TODO: test this
+	filter := func(cell Cell) bool {
 		return len(cell.Possibilities()) == target
 	}
 	return self.Filter(filter)
@@ -155,7 +200,17 @@ func (self CellSlice) FilterByNumPossibilities(target int) CellSlice {
 func (self CellSlice) FilterByHasPossibilities() CellSlice {
 	//Returns a list of cells that have possibilities.
 	//TODO: test this.
-	filter := func(cell *Cell) bool {
+	filter := func(cell Cell) bool {
+		return len(cell.Possibilities()) > 0
+	}
+	return self.Filter(filter)
+}
+
+//FilterByHasPossibilities returns a new CellSlice with only cells that have 0 or more open possibilities.
+func (self MutableCellSlice) FilterByHasPossibilities() MutableCellSlice {
+	//Returns a list of cells that have possibilities.
+	//TODO: test this.
+	filter := func(cell Cell) bool {
 		return len(cell.Possibilities()) > 0
 	}
 	return self.Filter(filter)
@@ -164,11 +219,24 @@ func (self CellSlice) FilterByHasPossibilities() CellSlice {
 //RemoveCells returns a new CellSlice that does not contain any of the cells included in the provided CellSlice.
 func (self CellSlice) RemoveCells(targets CellSlice) CellSlice {
 	//TODO: test this.
-	targetCells := make(map[*Cell]bool)
+	targetCells := make(map[Cell]bool)
 	for _, cell := range targets {
 		targetCells[cell] = true
 	}
-	filterFunc := func(cell *Cell) bool {
+	filterFunc := func(cell Cell) bool {
+		return !targetCells[cell]
+	}
+	return self.Filter(filterFunc)
+}
+
+//RemoveCells returns a new CellSlice that does not contain any of the cells included in the provided CellSlice.
+func (self MutableCellSlice) RemoveCells(targets CellSlice) MutableCellSlice {
+	//TODO: test this.
+	targetCells := make(map[Cell]bool)
+	for _, cell := range targets {
+		targetCells[cell] = true
+	}
+	filterFunc := func(cell Cell) bool {
 		return !targetCells[cell]
 	}
 	return self.Filter(filterFunc)
@@ -213,6 +281,23 @@ func (self CellSlice) Subset(indexes IntSlice) CellSlice {
 	return result
 }
 
+//Subset returns a new CellSlice that is the subset of the list including the items at the indexes provided
+//in the IntSlice. See also InverseSubset.
+func (self MutableCellSlice) Subset(indexes IntSlice) MutableCellSlice {
+	//IntSlice.Subset is basically a carbon copy.
+	//TODO: what's this behavior if indexes has dupes? What SHOULD it be?
+	result := make(MutableCellSlice, len(indexes))
+	max := len(self)
+	for i, index := range indexes {
+		if index >= max {
+			//This probably is indicative of a larger problem.
+			continue
+		}
+		result[i] = self[index]
+	}
+	return result
+}
+
 //InverseSubset returns a new CellSlice that contains all of the elements from the list that are *not*
 //at the indexes provided in the IntSlice. See also Subset.
 func (self CellSlice) InverseSubset(indexes IntSlice) CellSlice {
@@ -240,10 +325,44 @@ func (self CellSlice) InverseSubset(indexes IntSlice) CellSlice {
 	return result
 }
 
+//InverseSubset returns a new CellSlice that contains all of the elements from the list that are *not*
+//at the indexes provided in the IntSlice. See also Subset.
+func (self MutableCellSlice) InverseSubset(indexes IntSlice) MutableCellSlice {
+	//TODO: figure out what this should do when presented with dupes.
+
+	//LIke Subset, but returns all of the items NOT called out in indexes.
+	var result MutableCellSlice
+
+	//Ensure indexes are in sorted order.
+	sort.Ints(indexes)
+
+	//Index into indexes we're considering
+	currentIndex := 0
+
+	for i := 0; i < len(self); i++ {
+		if currentIndex < len(indexes) && i == indexes[currentIndex] {
+			//Skip it!
+			currentIndex++
+		} else {
+			//Output it!
+			result = append(result, self[i])
+		}
+	}
+
+	return result
+}
+
 //Sort mutates the provided CellSlice so that the cells are in order from left to right, top to bottom
 //based on their position in the grid.
 func (self CellSlice) Sort() {
 	sorter := cellSliceSorter{self}
+	sort.Sort(sorter)
+}
+
+//Sort mutates the provided CellSlice so that the cells are in order from left to right, top to bottom
+//based on their position in the grid.
+func (self MutableCellSlice) Sort() {
+	sorter := mutableCellSliceSorter{self}
 	sort.Sort(sorter)
 }
 
@@ -261,7 +380,7 @@ func (self CellSlice) FilledNums() IntSlice {
 }
 
 //CollectNums collects the result of running fetcher across all items in the list.
-func (self CellSlice) CollectNums(fetcher func(*Cell) int) IntSlice {
+func (self CellSlice) CollectNums(fetcher func(Cell) int) IntSlice {
 	var result IntSlice
 	for _, cell := range self {
 		result = append(result, fetcher(cell))
@@ -273,6 +392,10 @@ func (self cellSliceSorter) Len() int {
 	return len(self.CellSlice)
 }
 
+func (self mutableCellSliceSorter) Len() int {
+	return len(self.MutableCellSlice)
+}
+
 func (self cellSliceSorter) Less(i, j int) bool {
 	//Sort based on the index of the cell.
 	one := self.CellSlice[i]
@@ -281,12 +404,24 @@ func (self cellSliceSorter) Less(i, j int) bool {
 	return (one.Row()*DIM + one.Col()) < (two.Row()*DIM + two.Col())
 }
 
+func (self mutableCellSliceSorter) Less(i, j int) bool {
+	//Sort based on the index of the cell.
+	one := self.MutableCellSlice[i]
+	two := self.MutableCellSlice[j]
+
+	return (one.Row()*DIM + one.Col()) < (two.Row()*DIM + two.Col())
+}
+
 func (self cellSliceSorter) Swap(i, j int) {
 	self.CellSlice[i], self.CellSlice[j] = self.CellSlice[j], self.CellSlice[i]
 }
 
+func (self mutableCellSliceSorter) Swap(i, j int) {
+	self.MutableCellSlice[i], self.MutableCellSlice[j] = self.MutableCellSlice[j], self.MutableCellSlice[i]
+}
+
 //Filter returns a new CellSlice that includes all cells where filter returned true.
-func (self CellSlice) Filter(filter func(*Cell) bool) CellSlice {
+func (self CellSlice) Filter(filter func(Cell) bool) CellSlice {
 	var result CellSlice
 	for _, cell := range self {
 		if filter(cell) {
@@ -296,11 +431,38 @@ func (self CellSlice) Filter(filter func(*Cell) bool) CellSlice {
 	return result
 }
 
+//Filter returns a new CellSlice that includes all cells where filter returned true.
+func (self MutableCellSlice) Filter(filter func(Cell) bool) MutableCellSlice {
+	var result MutableCellSlice
+	for _, cell := range self {
+		if filter(cell) {
+			result = append(result, cell)
+		}
+	}
+	return result
+}
+
 //Map executes the mapper function on each cell in the list.
-func (self CellSlice) Map(mapper func(*Cell)) {
+func (self CellSlice) Map(mapper func(Cell)) {
 	for _, cell := range self {
 		mapper(cell)
 	}
+}
+
+//Map executes the mapper function on each cell in the list.
+func (self MutableCellSlice) Map(mapper func(MutableCell)) {
+	for _, cell := range self {
+		mapper(cell)
+	}
+}
+
+//cellSlice returns a CellSlice of the same cells
+func (self MutableCellSlice) cellSlice() CellSlice {
+	result := make(CellSlice, len(self))
+	for i, item := range self {
+		result[i] = item
+	}
+	return result
 }
 
 //chainSimilarity returns a value between 0.0 and 1.0 depending on how
@@ -507,7 +669,14 @@ func (self CellSlice) sameAsRefs(refs []cellRef) bool {
 	return true
 }
 
-func (self cellRef) Cell(grid *Grid) *Cell {
+func (self cellRef) MutableCell(grid MutableGrid) MutableCell {
+	if grid == nil {
+		return nil
+	}
+	return grid.MutableCell(self.row, self.col)
+}
+
+func (self cellRef) Cell(grid Grid) Cell {
 	if grid == nil {
 		return nil
 	}
@@ -640,6 +809,14 @@ func (self CellSlice) toCellSet() cellSet {
 	return result
 }
 
+func (self MutableCellSlice) toCellSet() cellSet {
+	result := make(cellSet)
+	for _, item := range self {
+		result[item.ref()] = true
+	}
+	return result
+}
+
 func (self intSet) toSlice() IntSlice {
 	var result IntSlice
 	for item, val := range self {
@@ -650,11 +827,21 @@ func (self intSet) toSlice() IntSlice {
 	return result
 }
 
-func (self cellSet) toSlice(grid *Grid) CellSlice {
+func (self cellSet) toSlice(grid Grid) CellSlice {
 	var result CellSlice
 	for item, val := range self {
 		if val {
 			result = append(result, item.Cell(grid))
+		}
+	}
+	return result
+}
+
+func (self cellSet) toMutableSlice(grid MutableGrid) MutableCellSlice {
+	var result MutableCellSlice
+	for item, val := range self {
+		if val {
+			result = append(result, item.MutableCell(grid))
 		}
 	}
 	return result
@@ -752,8 +939,18 @@ func (self CellSlice) Intersection(other CellSlice) CellSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	grid := self[0].grid
+	grid := self[0].Grid()
 	return self.toCellSet().intersection(other.toCellSet()).toSlice(grid)
+}
+
+//Intersection returns a new CellSlice that represents the intersection of the
+//two CellSlices; that is, the cells that appear in both slices.
+func (self MutableCellSlice) Intersection(other CellSlice) MutableCellSlice {
+	if len(self) == 0 {
+		return nil
+	}
+	grid := self[0].MutableGrid()
+	return self.toCellSet().intersection(other.toCellSet()).toMutableSlice(grid)
 }
 
 //Difference returns a new CellSlice that contains all of the cells in the
@@ -762,8 +959,18 @@ func (self CellSlice) Difference(other CellSlice) CellSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	grid := self[0].grid
+	grid := self[0].Grid()
 	return self.toCellSet().difference(other.toCellSet()).toSlice(grid)
+}
+
+//Difference returns a new CellSlice that contains all of the cells in the
+//receiver that are not also in the other.
+func (self MutableCellSlice) Difference(other CellSlice) MutableCellSlice {
+	if len(self) == 0 {
+		return nil
+	}
+	grid := self[0].MutableGrid()
+	return self.toCellSet().difference(other.toCellSet()).toMutableSlice(grid)
 }
 
 //Union returns a new CellSlice that contains all of the cells that are in
@@ -772,6 +979,16 @@ func (self CellSlice) Union(other CellSlice) CellSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	grid := self[0].grid
+	grid := self[0].Grid()
 	return self.toCellSet().union(other.toCellSet()).toSlice(grid)
+}
+
+//Union returns a new CellSlice that contains all of the cells that are in
+//either the receiver or the other CellSlice.
+func (self MutableCellSlice) Union(other CellSlice) MutableCellSlice {
+	if len(self) == 0 {
+		return nil
+	}
+	grid := self[0].MutableGrid()
+	return self.toCellSet().union(other.toCellSet()).toMutableSlice(grid)
 }

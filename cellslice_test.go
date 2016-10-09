@@ -7,9 +7,7 @@ import (
 )
 
 func TestBasicCellSlice(t *testing.T) {
-	grid := NewGrid()
-	defer grid.Done()
-	grid.LoadSDK(SOLVED_TEST_GRID)
+	grid := LoadSDK(SOLVED_TEST_GRID)
 	row := CellSlice(grid.Row(2))
 	if !row.SameRow() {
 		t.Log("The items of a row were not all of the same row.")
@@ -58,7 +56,7 @@ func TestBasicCellSlice(t *testing.T) {
 		t.Fail()
 	}
 
-	nums := row.CollectNums(func(cell *Cell) int {
+	nums := row.CollectNums(func(cell Cell) int {
 		return cell.Row()
 	})
 
@@ -67,7 +65,7 @@ func TestBasicCellSlice(t *testing.T) {
 		t.Fail()
 	}
 
-	isZeroRow := func(cell *Cell) bool {
+	isZeroRow := func(cell Cell) bool {
 		return cell.Row() == 0
 	}
 
@@ -205,7 +203,6 @@ func TestChainDissimilarity(t *testing.T) {
 	//Now run the tests
 
 	grid := NewGrid()
-	defer grid.Done()
 
 	var results chainTestResults
 
@@ -248,9 +245,8 @@ func TestChainDissimilarity(t *testing.T) {
 }
 
 func TestFilledNums(t *testing.T) {
-	grid := NewGrid()
-	defer grid.Done()
-	if !grid.LoadSDKFromFile(puzzlePath("nakedpairblock1.sdk")) {
+	grid, err := LoadSDKFromFile(puzzlePath("nakedpairblock1.sdk"))
+	if err != nil {
 		t.Fatal("Couldn't load file")
 	}
 
@@ -306,7 +302,6 @@ func TestIntList(t *testing.T) {
 
 func TestInverseSubset(t *testing.T) {
 	grid := NewGrid()
-	defer grid.Done()
 	cells := grid.Row(0)
 
 	indexes := IntSlice([]int{4, 6, 2})

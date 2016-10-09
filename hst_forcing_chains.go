@@ -52,11 +52,11 @@ func (self *forcingChainsTechnique) Description(step *SolveStep) string {
 	return fmt.Sprintf("cell %s only has two options, %s, and if you put either one in and see the chain of implications it leads to, both ones end up with %s in cell %s, so we can just fill that number in", step.PointerCells.Description(), step.PointerNums.Description(), step.TargetNums.Description(), step.TargetCells.Description())
 }
 
-func (self *forcingChainsTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+func (self *forcingChainsTechnique) Candidates(grid Grid, maxResults int) []*SolveStep {
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *forcingChainsTechnique) find(grid *Grid, coordinator findCoordinator) {
+func (self *forcingChainsTechnique) find(grid Grid, coordinator findCoordinator) {
 	//TODO: test that this will find multiple if they exist.
 
 	/*
@@ -98,7 +98,7 @@ func (self *forcingChainsTechnique) find(grid *Grid, coordinator findCoordinator
 			break
 		}
 
-		candidateCell := candidate.(*Cell)
+		candidateCell := candidate.(Cell)
 
 		if len(candidateCell.Possibilities()) != 2 {
 			//We found one with 1 possibility, which isn't interesting for us--nakedSingle should do that one.
@@ -108,8 +108,8 @@ func (self *forcingChainsTechnique) find(grid *Grid, coordinator findCoordinator
 		firstPossibilityNum := candidateCell.Possibilities()[0]
 		secondPossibilityNum := candidateCell.Possibilities()[1]
 
-		firstGrid := grid.Copy()
-		secondGrid := grid.Copy()
+		firstGrid := grid.MutableCopy()
+		secondGrid := grid.MutableCopy()
 
 		//Check that the neighbor isn't just already having a single possibility, because then this technique is overkill.
 
@@ -117,11 +117,11 @@ func (self *forcingChainsTechnique) find(grid *Grid, coordinator findCoordinator
 		secondAccumulator := &chainSearcherAccumulator{make(map[cellRef]IntSlice), make(map[cellRef]IntSlice)}
 
 		chainSearcher(0, _MAX_IMPLICATION_STEPS,
-			candidateCell.InGrid(firstGrid),
+			candidateCell.MutableInGrid(firstGrid),
 			firstPossibilityNum, firstAccumulator)
 
 		chainSearcher(0, _MAX_IMPLICATION_STEPS,
-			candidateCell.InGrid(secondGrid),
+			candidateCell.MutableInGrid(secondGrid),
 			secondPossibilityNum, secondAccumulator)
 
 		firstAccumulator.reduce()
@@ -224,7 +224,7 @@ func (c *chainSearcherAccumulator) reduce() {
 	}
 }
 
-func chainSearcher(generation int, maxGeneration int, cell *Cell, numToApply int, accum *chainSearcherAccumulator) {
+func chainSearcher(generation int, maxGeneration int, cell MutableCell, numToApply int, accum *chainSearcherAccumulator) {
 
 	/*
 	 * chainSearcher implements a DFS to search forward through implication chains to
@@ -245,11 +245,11 @@ func chainSearcher(generation int, maxGeneration int, cell *Cell, numToApply int
 
 	//Becuase this is a DFS, if we see an invalidity in this grid, it's a meaningful invalidity
 	//and we should avoid it.
-	if cell.grid.Invalid() {
+	if cell.Grid().Invalid() {
 		return
 	}
 
-	cellsToVisit := cell.Neighbors().FilterByPossible(numToApply).FilterByNumPossibilities(2)
+	cellsToVisit := cell.MutableNeighbors().FilterByPossible(numToApply).FilterByNumPossibilities(2)
 
 	cell.SetNumber(numToApply)
 

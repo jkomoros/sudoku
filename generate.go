@@ -27,15 +27,13 @@ func DefaultGenerationOptions() *GenerationOptions {
 	return result
 }
 
-//Fill will find a random filling of the puzzle such that every cell is filled and no cells conflict with their neighbors. If it cannot find one,
-// it will return false and leave the grid as it found it. Generally you would only want to call this on
-//grids that have more than one solution (e.g. a fully blank grid). Fill provides a good starting point for generated puzzles.
-func (self *Grid) Fill() bool {
+func (self *mutableGridImpl) Fill() bool {
 
-	solutions := self.nOrFewerSolutions(1)
+	solutions := nOrFewerSolutions(self, 1)
 
 	if len(solutions) != 0 {
 		//We use Load instead of loadSDK because we are just incidentally using it to load state.
+
 		self.Load(solutions[0].DataString())
 		return true
 	}
@@ -54,7 +52,7 @@ func (self *Grid) Fill() bool {
 //define the desired difficulty; the best option is to repeatedly generate
 //puzzles until you find one that matches your desired difficulty. cmd/dokugen
 //applies this technique.
-func GenerateGrid(options *GenerationOptions) *Grid {
+func GenerateGrid(options *GenerationOptions) MutableGrid {
 
 	if options == nil {
 		options = DefaultGenerationOptions()
@@ -75,10 +73,11 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 		symmetryPercentage = 1.0
 	}
 
-	cells := make([]*Cell, len(grid.cells[:]))
+	originalCells := grid.MutableCells()
+	cells := make(MutableCellSlice, len(originalCells))
 
-	for i, j := range rand.Perm(len(grid.cells[:])) {
-		cells[i] = &grid.cells[j]
+	for i, j := range rand.Perm(len(cells)) {
+		cells[i] = originalCells[j]
 	}
 
 	for _, cell := range cells {
@@ -89,12 +88,12 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 		}
 
 		var otherNum int
-		var otherCell *Cell
+		var otherCell MutableCell
 
 		if rand.Float64() < symmetryPercentage {
 
 			//Pick a symmetrical partner for symmetryPercentage number of cells.
-			otherCell = cell.SymmetricalPartner(options.Symmetry)
+			otherCell = cell.MutableSymmetricalPartner(options.Symmetry)
 
 			if otherCell != nil {
 				if otherCell.Number() == 0 {
@@ -114,7 +113,7 @@ func GenerateGrid(options *GenerationOptions) *Grid {
 			numCellsToFillThisStep = 2
 		}
 
-		if grid.numFilledCells-numCellsToFillThisStep < options.MinFilledCells {
+		if grid.numFilledCells()-numCellsToFillThisStep < options.MinFilledCells {
 			//Doing this step would leave us with too few cells filled. Finish.
 			break
 		}

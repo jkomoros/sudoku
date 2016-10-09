@@ -6,12 +6,13 @@ import (
 
 //TODO: test a few more puzzles to make sure I'm exercising it correctly.
 
-func swordfishExampleGrid(t *testing.T) *Grid {
-	grid := NewGrid()
+func swordfishExampleGrid(t *testing.T) MutableGrid {
 
 	puzzleName := "swordfish_example.sdk"
 
-	if !grid.LoadSDKFromFile(puzzlePath(puzzleName)) {
+	grid, err := MutableLoadSDKFromFile(puzzlePath(puzzleName))
+
+	if err != nil {
 		t.Fatal("Couldn't load puzzle ", puzzleName)
 	}
 
@@ -35,7 +36,7 @@ func swordfishExampleGrid(t *testing.T) *Grid {
 	}
 
 	for ref, ints := range excludedConfig {
-		cell := ref.Cell(grid)
+		cell := ref.MutableCell(grid)
 		for _, exclude := range ints {
 			cell.SetExcluded(exclude, true)
 		}
@@ -75,7 +76,7 @@ func TestSwordfishRow(t *testing.T) {
 	techniqueVariantsTestHelper(t, "Swordfish Row")
 
 	grid := swordfishExampleGrid(t)
-	grid = grid.transpose()
+	grid = grid.(*mutableGridImpl).transpose()
 
 	options := solveTechniqueTestHelperOptions{
 		targetCells:  []cellRef{{1, 1}, {4, 5}},

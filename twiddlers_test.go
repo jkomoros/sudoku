@@ -8,7 +8,7 @@ import (
 func TestTwiddleTwiddle(t *testing.T) {
 
 	twiddlerFMaker := func(returnValue float64) probabilityTwiddler {
-		return func(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid *Grid) probabilityTweak {
+		return func(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid Grid) probabilityTweak {
 			return probabilityTweak(returnValue)
 		}
 	}
@@ -195,16 +195,14 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 
 func TestTwiddleCommonNumbers(t *testing.T) {
 
-	grid := NewGrid()
-	grid.LoadSDK(TEST_GRID)
+	grid := MutableLoadSDK(TEST_GRID)
 
 	//Fill all of the 4's
-	solvedGrid := NewGrid()
-	solvedGrid.LoadSDK(SOLVED_TEST_GRID)
+	solvedGrid := MutableLoadSDK(SOLVED_TEST_GRID)
 
 	for _, cell := range solvedGrid.Cells() {
 		if cell.Number() == 4 {
-			otherCell := cell.InGrid(grid)
+			otherCell := cell.MutableInGrid(grid)
 			otherCell.SetNumber(4)
 		}
 	}
@@ -341,7 +339,7 @@ func TestTwiddleChainedSteps(t *testing.T) {
 func TestTwiddlePreferFilledGroups(t *testing.T) {
 	grid := NewGrid()
 
-	keyCell := grid.Cell(0, 0)
+	keyCell := grid.MutableCell(0, 0)
 
 	step := &SolveStep{
 		TargetCells: CellSlice{
@@ -365,14 +363,14 @@ func TestTwiddlePreferFilledGroups(t *testing.T) {
 	testHelper(0.7043478260869563, "Completely empty grid")
 
 	//Fill the rest of the block
-	for _, cell := range grid.Block(0).RemoveCells(CellSlice{keyCell}) {
+	for _, cell := range grid.MutableBlock(0).RemoveCells(CellSlice{keyCell}) {
 		cell.SetNumber(1)
 	}
 
 	testHelper(0.28695652173913044, "Full block, empty everything else")
 
 	//Fill the rest of the row, too
-	for _, cell := range grid.Row(0).RemoveCells(CellSlice{keyCell}) {
+	for _, cell := range grid.MutableRow(0).RemoveCells(CellSlice{keyCell}) {
 		cell.SetNumber(1)
 	}
 
@@ -380,7 +378,7 @@ func TestTwiddlePreferFilledGroups(t *testing.T) {
 
 	//Fill the rest of the col, too.
 
-	for _, cell := range grid.Col(0).RemoveCells(CellSlice{keyCell}) {
+	for _, cell := range grid.MutableCol(0).RemoveCells(CellSlice{keyCell}) {
 		cell.SetNumber(1)
 	}
 

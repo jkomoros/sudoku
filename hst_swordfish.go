@@ -39,11 +39,11 @@ func (self *swordfishTechnique) Description(step *SolveStep) string {
 
 }
 
-func (self *swordfishTechnique) Candidates(grid *Grid, maxResults int) []*SolveStep {
+func (self *swordfishTechnique) Candidates(grid Grid, maxResults int) []*SolveStep {
 	return self.candidatesHelper(self, grid, maxResults)
 }
 
-func (self *swordfishTechnique) find(grid *Grid, coordinator findCoordinator) {
+func (self *swordfishTechnique) find(grid Grid, coordinator findCoordinator) {
 
 	getter := self.getter(grid)
 
