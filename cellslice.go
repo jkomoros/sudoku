@@ -507,6 +507,17 @@ func (self MutableCellSlice) Filter(filter func(Cell) bool) MutableCellSlice {
 	return result
 }
 
+//Filter returns a new CellReferenceSlice that includes all cells where filter returned true.
+func (self CellReferenceSlice) Filter(filter func(CellReference) bool) CellReferenceSlice {
+	var result CellReferenceSlice
+	for _, cell := range self {
+		if filter(cell) {
+			result = append(result, cell)
+		}
+	}
+	return result
+}
+
 //Map executes the mapper function on each cell in the list.
 func (self CellSlice) Map(mapper func(Cell)) {
 	for _, cell := range self {
