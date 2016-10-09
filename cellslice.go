@@ -145,6 +145,30 @@ func (self CellSlice) AllBlocks() IntSlice {
 	return self.CollectNums(getBlock).Unique()
 }
 
+//AllRows returns all of the rows for cells in this slice.
+func (self CellReferenceSlice) AllRows() IntSlice {
+	//TODO: test this.
+	return self.CollectNums(func(cell CellReference) int {
+		return cell.Row
+	}).Unique()
+}
+
+//AllCols returns all of the columns for cells in this slice.
+func (self CellReferenceSlice) AllCols() IntSlice {
+	//TODO: test this.
+	return self.CollectNums(func(cell CellReference) int {
+		return cell.Col
+	}).Unique()
+}
+
+//AllBlocks returns all of the blocks for cells in this slice.
+func (self CellReferenceSlice) AllBlocks() IntSlice {
+	//TODO: test this.
+	return self.CollectNums(func(cell CellReference) int {
+		return cell.Block()
+	}).Unique()
+}
+
 //CellReferenceSlice returns a CellReferenceSlice that corresponds to the
 //cells in this MutableCellSlice.
 func (self MutableCellSlice) CellReferenceSlice() CellReferenceSlice {
@@ -444,6 +468,15 @@ func (self CellSlice) FilledNums() IntSlice {
 
 //CollectNums collects the result of running fetcher across all items in the list.
 func (self CellSlice) CollectNums(fetcher func(Cell) int) IntSlice {
+	var result IntSlice
+	for _, cell := range self {
+		result = append(result, fetcher(cell))
+	}
+	return result
+}
+
+//CollectNums collects the result of running fetcher across all items in the list.
+func (self CellReferenceSlice) CollectNums(fetcher func(CellReference) int) IntSlice {
 	var result IntSlice
 	for _, cell := range self {
 		result = append(result, fetcher(cell))
