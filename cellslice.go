@@ -406,6 +406,23 @@ func (self MutableCellSlice) Subset(indexes IntSlice) MutableCellSlice {
 	return result
 }
 
+//Subset returns a new CellReferenceSlice that is the subset of the list including the items at the indexes provided
+//in the IntSlice. See also InverseSubset.
+func (self CellReferenceSlice) Subset(indexes IntSlice) CellReferenceSlice {
+	//IntSlice.Subset is basically a carbon copy.
+	//TODO: what's this behavior if indexes has dupes? What SHOULD it be?
+	result := make(CellReferenceSlice, len(indexes))
+	max := len(self)
+	for i, index := range indexes {
+		if index >= max {
+			//This probably is indicative of a larger problem.
+			continue
+		}
+		result[i] = self[index]
+	}
+	return result
+}
+
 //InverseSubset returns a new CellSlice that contains all of the elements from the list that are *not*
 //at the indexes provided in the IntSlice. See also Subset.
 func (self CellSlice) InverseSubset(indexes IntSlice) CellSlice {
@@ -440,6 +457,33 @@ func (self MutableCellSlice) InverseSubset(indexes IntSlice) MutableCellSlice {
 
 	//LIke Subset, but returns all of the items NOT called out in indexes.
 	var result MutableCellSlice
+
+	//Ensure indexes are in sorted order.
+	sort.Ints(indexes)
+
+	//Index into indexes we're considering
+	currentIndex := 0
+
+	for i := 0; i < len(self); i++ {
+		if currentIndex < len(indexes) && i == indexes[currentIndex] {
+			//Skip it!
+			currentIndex++
+		} else {
+			//Output it!
+			result = append(result, self[i])
+		}
+	}
+
+	return result
+}
+
+//InverseSubset returns a new CellReferenceSlice that contains all of the elements from the list that are *not*
+//at the indexes provided in the IntSlice. See also Subset.
+func (self CellReferenceSlice) InverseSubset(indexes IntSlice) CellReferenceSlice {
+	//TODO: figure out what this should do when presented with dupes.
+
+	//LIke Subset, but returns all of the items NOT called out in indexes.
+	var result CellReferenceSlice
 
 	//Ensure indexes are in sorted order.
 	sort.Ints(indexes)
