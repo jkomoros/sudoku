@@ -127,6 +127,34 @@ func (self CellSlice) Block() int {
 	return self[0].Block()
 }
 
+//Row returns the row that at least one of the cells is in. If SameRow() is false, the Row
+//may be any of the rows in the set.
+func (self CellReferenceSlice) Row() int {
+	//Will return the row of a random item.
+	if len(self) == 0 {
+		return 0
+	}
+	return self[0].Row
+}
+
+//Col returns the column that at least one of the cells is in. If SameCol() is false, the column
+//may be any of the columns in the set.
+func (self CellReferenceSlice) Col() int {
+	if len(self) == 0 {
+		return 0
+	}
+	return self[0].Col
+}
+
+//Block returns the row that at least one of the cells is in. If SameBlock() is false, the Block
+//may be any of the blocks in the set.
+func (self CellReferenceSlice) Block() int {
+	if len(self) == 0 {
+		return 0
+	}
+	return self[0].Block()
+}
+
 //AllRows returns all of the rows for cells in this slice.
 func (self CellSlice) AllRows() IntSlice {
 	//TODO: test this.
