@@ -1,0 +1,2 @@
+#Convenient alias to test how uncommitted changes change the benchmark values.
+alias bench-compare='go test -run=XXX -bench . > new.txt; git stash -q; go test -run=XXX -bench . > old.txt; git stash pop -q; benchcmp old.txt new.txt'
