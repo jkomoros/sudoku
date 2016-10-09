@@ -315,6 +315,34 @@ type gridImpl struct {
 //TODO:Allow num solver threads to be set at runtime
 const _NUM_SOLVER_THREADS = 4
 
+var neighborCache map[CellReference]CellReferenceSlice
+var rowCache map[int]CellReferenceSlice
+var colCache map[int]CellReferenceSlice
+var blockCache map[int]CellReferenceSlice
+
+func init() {
+
+	rowCache = make(map[int]CellReferenceSlice)
+	colCache = make(map[int]CellReferenceSlice)
+	blockCache = make(map[int]CellReferenceSlice)
+	for i := 0; i < DIM; i++ {
+		rowCache[i] = cellSliceImpl(i, 0, i, DIM-1)
+		colCache[i] = cellSliceImpl(0, i, DIM-1, i)
+		blockCache[i] = cellSliceImpl(blockExtents(i))
+	}
+	//Populate the neighborCachce
+
+	neighborCache = make(map[CellReference]CellReferenceSlice)
+
+	for r := 0; r < DIM; r++ {
+		for c := 0; c < DIM; c++ {
+			ref := CellReference{r, c}
+			neighborCache[ref] = calcNeighbors(ref)
+		}
+	}
+
+}
+
 //NewGrid creates a new, blank grid with all of its cells unfilled.
 func NewGrid() MutableGrid {
 
@@ -724,7 +752,7 @@ func row(index int) CellReferenceSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return cellSliceImpl(index, 0, index, DIM-1)
+	return rowCache[index]
 }
 
 func (self *gridImpl) Row(index int) CellSlice {
@@ -757,7 +785,7 @@ func col(index int) CellReferenceSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return cellSliceImpl(0, index, DIM-1, index)
+	return colCache[index]
 }
 
 func (self *gridImpl) Col(index int) CellSlice {
@@ -787,7 +815,7 @@ func block(index int) CellReferenceSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return cellSliceImpl(blockExtents(index))
+	return blockCache[index]
 }
 
 func (self *gridImpl) Block(index int) CellSlice {

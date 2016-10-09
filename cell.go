@@ -19,8 +19,6 @@ const (
 	SYMMETRY_BOTH
 )
 
-var neighborCache map[CellReference]CellReferenceSlice
-
 //Cell represents a single cell within a grid. It maintains information about
 //the number that is filled, the numbers that are currently legal given the
 //filled status of its neighbors, and whether any possibilities have been
@@ -207,18 +205,6 @@ type mutableCellImpl struct {
 	neighbors       CellSlice
 	excludedLockRef sync.RWMutex
 	//TODO: do we need a marks lock?
-}
-
-func init() {
-	//Populate the neighborCachce
-
-	neighborCache = make(map[CellReference]CellReferenceSlice)
-	for r := 0; r < DIM; r++ {
-		for c := 0; c < DIM; c++ {
-			ref := CellReference{r, c}
-			neighborCache[ref] = calcNeighbors(ref)
-		}
-	}
 }
 
 func newCell(grid *mutableGridImpl, row int, col int) mutableCellImpl {

@@ -30,12 +30,12 @@ type MutableCellSlice []MutableCell
 //Col(), Block(). That way actual cells could be used. ... But then actual
 //cellsw ould have to grow a Cell, MutableCell.
 
+//TODO: test whether the CellSlice caching on mutableGrid for row,block,col is
+//actually useful anymore.
+
 //TODO: make Neighbors, Row, Col, Block, etc global public functions that give
 //a CellReferenceSlice. Then audit all places we use Row, Col, Block and see
 //if we ACTUALLY need those, or can just use the global.
-
-//TODO: once all of the CellReferenceSlice methods are global, optimize them
-//to calculate it once at init
 
 //CellReferenceSlice is a slice of CellReferences with many convenience methods.
 type CellReferenceSlice []CellReference
