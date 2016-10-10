@@ -99,6 +99,27 @@ func (self CellSlice) SameBlock() bool {
 	return self.CollectNums(getBlock).Same()
 }
 
+//SameRow returns true if all cells are in the same row.
+func (self CellReferenceSlice) SameRow() bool {
+	return self.CollectNums(func(cell CellReference) int {
+		return cell.Row
+	}).Same()
+}
+
+//SameCol returns true if all cells are in the same column.
+func (self CellReferenceSlice) SameCol() bool {
+	return self.CollectNums(func(cell CellReference) int {
+		return cell.Col
+	}).Same()
+}
+
+//SameBlock returns true if all cells are in the same block.
+func (self CellReferenceSlice) SameBlock() bool {
+	return self.CollectNums(func(cell CellReference) int {
+		return cell.Block()
+	}).Same()
+}
+
 //Row returns the row that at least one of the cells is in. If SameRow() is false, the Row
 //may be any of the rows in the set.
 func (self CellSlice) Row() int {
