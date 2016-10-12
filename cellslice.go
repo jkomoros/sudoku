@@ -544,6 +544,8 @@ func (self MutableCellSlice) Sort() {
 //Sort mutates the provided CellReferenceSlice so that the cells are in order
 //from left to right, top to bottom based on their position in the grid.
 func (self CellReferenceSlice) Sort() {
+	//TODO: note that this is dangerous to have because we cache the public
+	//rows,cols,blocks, and don't ahve locks.
 	sorter := cellReferenceSliceSorter{self}
 	sort.Sort(sorter)
 }
