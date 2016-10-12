@@ -37,7 +37,9 @@ type MutableCellSlice []MutableCell
 
 //TODO: make Neighbors, Row, Col, Block, etc global public functions that give
 //a CellReferenceSlice. Then audit all places we use Row, Col, Block and see
-//if we ACTUALLY need those, or can just use the global.
+//if we ACTUALLY need those, or can just use the global. We might never need
+//to expose this externally, because they're kind of annoying, and the need
+//for performance is only really important internally to the package.
 
 //CellReferenceSlice is a slice of CellReferences with many convenience methods.
 type CellReferenceSlice []CellReference
