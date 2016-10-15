@@ -615,7 +615,7 @@ func TestGridLoad(t *testing.T) {
 
 	grid = grid.CopyWithModifications(GridModification{
 		&CellModification{
-			Cell:   cell,
+			Cell:   cell.Reference(),
 			Number: cell.Number() + 1,
 		},
 	})
@@ -626,7 +626,7 @@ func TestGridLoad(t *testing.T) {
 
 	grid = grid.CopyWithModifications(GridModification{
 		&CellModification{
-			Cell:   cell,
+			Cell:   cell.Reference(),
 			Number: cell.Number(),
 		},
 	})
@@ -637,7 +637,7 @@ func TestGridLoad(t *testing.T) {
 
 	grid = grid.CopyWithModifications(GridModification{
 		&CellModification{
-			Cell:   cell,
+			Cell:   cell.Reference(),
 			Number: 0,
 		},
 	})
@@ -650,7 +650,7 @@ func TestGridLoad(t *testing.T) {
 
 	grid = grid.CopyWithModifications(GridModification{
 		&CellModification{
-			Cell:            cell,
+			Cell:            cell.Reference(),
 			ExcludesChanges: excludes,
 		},
 	})

@@ -249,7 +249,7 @@ func (self *SolveStep) Modifications() GridModification {
 	var result GridModification
 
 	for _, cell := range self.TargetCells {
-		modification := newCellModification(cell)
+		modification := newCellModification(cell.Reference())
 		if self.Technique.IsFill() {
 			if len(self.TargetNums) != 1 {
 				//Sanity check

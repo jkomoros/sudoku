@@ -36,7 +36,7 @@ func TestCopyWithModifications(t *testing.T) {
 		{
 			GridModification{
 				&CellModification{
-					Cell:   sourceGrid.Cell(0, 0),
+					Cell:   CellReference{0, 0},
 					Number: 5,
 				},
 			},
@@ -46,7 +46,7 @@ func TestCopyWithModifications(t *testing.T) {
 		{
 			GridModification{
 				&CellModification{
-					Cell:   sourceGrid.Cell(0, 0),
+					Cell:   CellReference{0, 0},
 					Number: DIM + 1,
 				},
 			},
@@ -56,7 +56,7 @@ func TestCopyWithModifications(t *testing.T) {
 		{
 			GridModification{
 				&CellModification{
-					Cell:   sourceGrid.Cell(0, 0),
+					Cell:   CellReference{0, 0},
 					Number: -1,
 					MarksChanges: map[int]bool{
 						1:       false,
@@ -71,7 +71,7 @@ func TestCopyWithModifications(t *testing.T) {
 		{
 			GridModification{
 				&CellModification{
-					Cell:   sourceGrid.Cell(0, 0),
+					Cell:   CellReference{0, 0},
 					Number: -1,
 					ExcludesChanges: map[int]bool{
 						1:       false,

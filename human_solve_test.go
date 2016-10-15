@@ -105,17 +105,17 @@ func TestSolveStepModifications(t *testing.T) {
 			},
 			GridModification{
 				&CellModification{
-					Cell:            grid.Cell(0, 0),
+					Cell:            CellReference{0, 0},
 					Number:          1,
 					ExcludesChanges: make(map[int]bool),
 				},
 				&CellModification{
-					Cell:            grid.Cell(0, 1),
+					Cell:            CellReference{0, 1},
 					Number:          1,
 					ExcludesChanges: make(map[int]bool),
 				},
 				&CellModification{
-					Cell:            grid.Cell(0, 2),
+					Cell:            CellReference{0, 2},
 					Number:          1,
 					ExcludesChanges: make(map[int]bool),
 				},
@@ -134,7 +134,7 @@ func TestSolveStepModifications(t *testing.T) {
 			},
 			GridModification{
 				&CellModification{
-					Cell:   grid.Cell(0, 0),
+					Cell:   CellReference{0, 0},
 					Number: -1,
 					ExcludesChanges: map[int]bool{
 						1: true,
@@ -142,7 +142,7 @@ func TestSolveStepModifications(t *testing.T) {
 					},
 				},
 				&CellModification{
-					Cell:   grid.Cell(0, 1),
+					Cell:   CellReference{0, 1},
 					Number: -1,
 					ExcludesChanges: map[int]bool{
 						1: true,
@@ -150,7 +150,7 @@ func TestSolveStepModifications(t *testing.T) {
 					},
 				},
 				&CellModification{
-					Cell:   grid.Cell(0, 2),
+					Cell:   CellReference{0, 2},
 					Number: -1,
 					ExcludesChanges: map[int]bool{
 						1: true,
