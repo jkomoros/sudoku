@@ -1091,6 +1091,14 @@ func (self MutableCellSlice) toCellSet() cellSet {
 	return result
 }
 
+func (self CellReferenceSlice) toCellSet() cellSet {
+	result := make(cellSet)
+	for _, item := range self {
+		result[item] = true
+	}
+	return result
+}
+
 func (self intSet) toSlice() IntSlice {
 	var result IntSlice
 	for item, val := range self {
