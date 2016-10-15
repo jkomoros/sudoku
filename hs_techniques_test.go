@@ -107,9 +107,9 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 }
 
 type multipleValidStepLoopOptions struct {
-	targetCells  CellReferenceSlice
+	targetCells  CellRefSlice
 	targetNums   IntSlice
-	pointerCells CellReferenceSlice
+	pointerCells CellRefSlice
 	pointerNums  IntSlice
 	description  string
 	extra        interface{}
@@ -212,8 +212,8 @@ type solveTechniqueTestHelperOptions struct {
 	transpose bool
 	//Whether the descriptions of cells are a list of legal possible individual values, or must all match.
 	matchMode    solveTechniqueMatchMode
-	targetCells  CellReferenceSlice
-	pointerCells CellReferenceSlice
+	targetCells  CellRefSlice
+	pointerCells CellRefSlice
 	targetNums   IntSlice
 	pointerNums  IntSlice
 	targetSame   cellGroupType

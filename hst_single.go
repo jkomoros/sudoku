@@ -71,7 +71,7 @@ func obviousInCollection(grid Grid, technique SolveTechnique, collectionGetter f
 				possibility := possibilities[0]
 				step := &SolveStep{
 					Technique:    technique,
-					TargetCells:  CellReferenceSlice{cell.Reference()},
+					TargetCells:  CellRefSlice{cell.Reference()},
 					TargetNums:   IntSlice{possibility},
 					PointerCells: collection.RemoveCells(CellSlice{cell}).CellReferenceSlice(),
 				}
@@ -119,7 +119,7 @@ func (self *nakedSingleTechnique) find(grid Grid, coordinator findCoordinator) {
 		cell := obj.(Cell)
 		step := &SolveStep{
 			Technique:    self,
-			TargetCells:  CellReferenceSlice{cell.Reference()},
+			TargetCells:  CellRefSlice{cell.Reference()},
 			TargetNums:   IntSlice{cell.implicitNumber()},
 			PointerCells: cell.Neighbors().FilterByFilled().CellReferenceSlice(),
 		}
@@ -209,7 +209,7 @@ func necessaryInCollection(grid Grid, technique SolveTechnique, collectionGetter
 						//Found it... just make sure it's useful (it would be rare for it to not be).
 						step := &SolveStep{
 							Technique:    technique,
-							TargetCells:  CellReferenceSlice{cell.Reference()},
+							TargetCells:  CellRefSlice{cell.Reference()},
 							TargetNums:   IntSlice{index + 1},
 							PointerCells: collection.FilterByUnfilled().RemoveCells(CellSlice{cell}).CellReferenceSlice(),
 						}

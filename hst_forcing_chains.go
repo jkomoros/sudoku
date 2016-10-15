@@ -153,9 +153,9 @@ func (self *forcingChainsTechnique) find(grid Grid, coordinator findCoordinator)
 
 				//Okay, we have a candidate step. Is it useful?
 				step := &SolveStep{self,
-					CellReferenceSlice{cell},
+					CellRefSlice{cell},
 					IntSlice{numSlice[0]},
-					CellReferenceSlice{candidateCell.Reference()},
+					CellRefSlice{candidateCell.Reference()},
 					candidateCell.Possibilities(),
 					numImplicationSteps,
 				}

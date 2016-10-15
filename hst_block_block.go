@@ -85,7 +85,7 @@ func (self *blockBlockInteractionTechnique) find(grid Grid, coordinator findCoor
 				continue
 			}
 
-			var targetCells CellReferenceSlice
+			var targetCells CellRefSlice
 
 			if majorAxisIsRow {
 				targetCells = row(blockOneIndexes[0])

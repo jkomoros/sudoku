@@ -153,7 +153,7 @@ func (self *xywingTechnique) find(grid Grid, coordinator findCoordinator) {
 							step := &SolveStep{self,
 								chunkedAffectedCells.CellReferenceSlice(),
 								IntSlice{z},
-								CellReferenceSlice{pivotCell.Reference(), xCell.Reference(), yCell.Reference()},
+								CellRefSlice{pivotCell.Reference(), xCell.Reference(), yCell.Reference()},
 								IntSlice{x, y, z},
 								nil,
 							}
@@ -171,7 +171,7 @@ func (self *xywingTechnique) find(grid Grid, coordinator findCoordinator) {
 					step := &SolveStep{self,
 						affectedCells.CellReferenceSlice(),
 						IntSlice{z},
-						CellReferenceSlice{pivotCell.Reference(), xCell.Reference(), yCell.Reference()},
+						CellRefSlice{pivotCell.Reference(), xCell.Reference(), yCell.Reference()},
 						IntSlice{x, y, z},
 						nil,
 					}

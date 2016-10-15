@@ -48,7 +48,7 @@ func TestCompoundSolveStepModifications(t *testing.T) {
 	solveStep := &SolveStep{
 		Technique:  techniquesByName["Only Legal Number"],
 		TargetNums: IntSlice{1},
-		TargetCells: CellReferenceSlice{
+		TargetCells: CellRefSlice{
 			CellRef{0, 0},
 		},
 	}
@@ -96,7 +96,7 @@ func TestSolveStepModifications(t *testing.T) {
 		{
 			&SolveStep{
 				Technique: techniquesByName["Only Legal Number"],
-				TargetCells: CellReferenceSlice{
+				TargetCells: CellRefSlice{
 					CellRef{0, 0},
 					CellRef{0, 1},
 					CellRef{0, 2},
@@ -125,7 +125,7 @@ func TestSolveStepModifications(t *testing.T) {
 		{
 			&SolveStep{
 				Technique: techniquesByName["Pointing Pair Row"],
-				TargetCells: CellReferenceSlice{
+				TargetCells: CellRefSlice{
 					CellRef{0, 0},
 					CellRef{0, 1},
 					CellRef{0, 2},
@@ -527,7 +527,7 @@ func TestStepsDescription(t *testing.T) {
 			{
 				FillStep: &SolveStep{
 					techniquesByName["Only Legal Number"],
-					CellReferenceSlice{
+					CellRefSlice{
 						CellRef{0, 0},
 					},
 					IntSlice{1},
@@ -540,12 +540,12 @@ func TestStepsDescription(t *testing.T) {
 				PrecursorSteps: []*SolveStep{
 					{
 						techniquesByName["Pointing Pair Col"],
-						CellReferenceSlice{
+						CellRefSlice{
 							CellRef{1, 0},
 							CellRef{1, 1},
 						},
 						IntSlice{1, 2},
-						CellReferenceSlice{
+						CellRefSlice{
 							CellRef{1, 3},
 							CellRef{1, 4},
 						},
@@ -555,7 +555,7 @@ func TestStepsDescription(t *testing.T) {
 				},
 				FillStep: &SolveStep{
 					techniquesByName["Only Legal Number"],
-					CellReferenceSlice{
+					CellRefSlice{
 						CellRef{2, 0},
 					},
 					IntSlice{2},

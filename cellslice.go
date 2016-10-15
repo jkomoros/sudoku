@@ -40,7 +40,7 @@ type MutableCellSlice []MutableCell
 //for performance is only really important internally to the package.
 
 //CellReferenceSlice is a slice of CellReferences with many convenience methods.
-type CellReferenceSlice []CellRef
+type CellRefSlice []CellRef
 
 //IntSlice is a list of ints, with many convenience methods specific to sudoku.
 type IntSlice []int
@@ -69,7 +69,7 @@ type mutableCellSliceSorter struct {
 }
 
 type cellReferenceSliceSorter struct {
-	CellReferenceSlice
+	CellRefSlice
 }
 
 func getRow(cell Cell) int {
@@ -100,21 +100,21 @@ func (self CellSlice) SameBlock() bool {
 }
 
 //SameRow returns true if all cells are in the same row.
-func (self CellReferenceSlice) SameRow() bool {
+func (self CellRefSlice) SameRow() bool {
 	return self.CollectNums(func(cell CellRef) int {
 		return cell.Row
 	}).Same()
 }
 
 //SameCol returns true if all cells are in the same column.
-func (self CellReferenceSlice) SameCol() bool {
+func (self CellRefSlice) SameCol() bool {
 	return self.CollectNums(func(cell CellRef) int {
 		return cell.Col
 	}).Same()
 }
 
 //SameBlock returns true if all cells are in the same block.
-func (self CellReferenceSlice) SameBlock() bool {
+func (self CellRefSlice) SameBlock() bool {
 	return self.CollectNums(func(cell CellRef) int {
 		return cell.Block()
 	}).Same()
@@ -150,7 +150,7 @@ func (self CellSlice) Block() int {
 
 //Row returns the row that at least one of the cells is in. If SameRow() is false, the Row
 //may be any of the rows in the set.
-func (self CellReferenceSlice) Row() int {
+func (self CellRefSlice) Row() int {
 	//Will return the row of a random item.
 	if len(self) == 0 {
 		return 0
@@ -160,7 +160,7 @@ func (self CellReferenceSlice) Row() int {
 
 //Col returns the column that at least one of the cells is in. If SameCol() is false, the column
 //may be any of the columns in the set.
-func (self CellReferenceSlice) Col() int {
+func (self CellRefSlice) Col() int {
 	if len(self) == 0 {
 		return 0
 	}
@@ -169,7 +169,7 @@ func (self CellReferenceSlice) Col() int {
 
 //Block returns the row that at least one of the cells is in. If SameBlock() is false, the Block
 //may be any of the blocks in the set.
-func (self CellReferenceSlice) Block() int {
+func (self CellRefSlice) Block() int {
 	if len(self) == 0 {
 		return 0
 	}
@@ -195,7 +195,7 @@ func (self CellSlice) AllBlocks() IntSlice {
 }
 
 //AllRows returns all of the rows for cells in this slice.
-func (self CellReferenceSlice) AllRows() IntSlice {
+func (self CellRefSlice) AllRows() IntSlice {
 	//TODO: test this.
 	return self.CollectNums(func(cell CellRef) int {
 		return cell.Row
@@ -203,7 +203,7 @@ func (self CellReferenceSlice) AllRows() IntSlice {
 }
 
 //AllCols returns all of the columns for cells in this slice.
-func (self CellReferenceSlice) AllCols() IntSlice {
+func (self CellRefSlice) AllCols() IntSlice {
 	//TODO: test this.
 	return self.CollectNums(func(cell CellRef) int {
 		return cell.Col
@@ -211,7 +211,7 @@ func (self CellReferenceSlice) AllCols() IntSlice {
 }
 
 //AllBlocks returns all of the blocks for cells in this slice.
-func (self CellReferenceSlice) AllBlocks() IntSlice {
+func (self CellRefSlice) AllBlocks() IntSlice {
 	//TODO: test this.
 	return self.CollectNums(func(cell CellRef) int {
 		return cell.Block()
@@ -220,8 +220,8 @@ func (self CellReferenceSlice) AllBlocks() IntSlice {
 
 //CellReferenceSlice returns a CellReferenceSlice that corresponds to the
 //cells in this MutableCellSlice.
-func (self MutableCellSlice) CellReferenceSlice() CellReferenceSlice {
-	result := make(CellReferenceSlice, len(self))
+func (self MutableCellSlice) CellReferenceSlice() CellRefSlice {
+	result := make(CellRefSlice, len(self))
 
 	for i, cell := range self {
 		result[i] = cell.Reference()
@@ -359,7 +359,7 @@ func (self MutableCellSlice) RemoveCells(targets CellSlice) MutableCellSlice {
 
 //RemoveCells returns a new CellReferenceSlice that does not contain any of
 //the cells included in the provided CellReferenceSlice.
-func (self CellReferenceSlice) RemoveCells(targets CellReferenceSlice) CellReferenceSlice {
+func (self CellRefSlice) RemoveCells(targets CellRefSlice) CellRefSlice {
 	//TODO: test this.
 	targetCells := make(map[CellRef]bool)
 	for _, cell := range targets {
@@ -429,10 +429,10 @@ func (self MutableCellSlice) Subset(indexes IntSlice) MutableCellSlice {
 
 //Subset returns a new CellReferenceSlice that is the subset of the list including the items at the indexes provided
 //in the IntSlice. See also InverseSubset.
-func (self CellReferenceSlice) Subset(indexes IntSlice) CellReferenceSlice {
+func (self CellRefSlice) Subset(indexes IntSlice) CellRefSlice {
 	//IntSlice.Subset is basically a carbon copy.
 	//TODO: what's this behavior if indexes has dupes? What SHOULD it be?
-	result := make(CellReferenceSlice, len(indexes))
+	result := make(CellRefSlice, len(indexes))
 	max := len(self)
 	for i, index := range indexes {
 		if index >= max {
@@ -500,11 +500,11 @@ func (self MutableCellSlice) InverseSubset(indexes IntSlice) MutableCellSlice {
 
 //InverseSubset returns a new CellReferenceSlice that contains all of the elements from the list that are *not*
 //at the indexes provided in the IntSlice. See also Subset.
-func (self CellReferenceSlice) InverseSubset(indexes IntSlice) CellReferenceSlice {
+func (self CellRefSlice) InverseSubset(indexes IntSlice) CellRefSlice {
 	//TODO: figure out what this should do when presented with dupes.
 
 	//LIke Subset, but returns all of the items NOT called out in indexes.
-	var result CellReferenceSlice
+	var result CellRefSlice
 
 	//Ensure indexes are in sorted order.
 	sort.Ints(indexes)
@@ -541,7 +541,7 @@ func (self MutableCellSlice) Sort() {
 
 //Sort mutates the provided CellReferenceSlice so that the cells are in order
 //from left to right, top to bottom based on their position in the grid.
-func (self CellReferenceSlice) Sort() {
+func (self CellRefSlice) Sort() {
 	//TODO: note that this is dangerous to have because we cache the public
 	//rows,cols,blocks, and don't ahve locks.
 	sorter := cellReferenceSliceSorter{self}
@@ -571,7 +571,7 @@ func (self CellSlice) CollectNums(fetcher func(Cell) int) IntSlice {
 }
 
 //CollectNums collects the result of running fetcher across all items in the list.
-func (self CellReferenceSlice) CollectNums(fetcher func(CellRef) int) IntSlice {
+func (self CellRefSlice) CollectNums(fetcher func(CellRef) int) IntSlice {
 	var result IntSlice
 	for _, cell := range self {
 		result = append(result, fetcher(cell))
@@ -588,7 +588,7 @@ func (self mutableCellSliceSorter) Len() int {
 }
 
 func (self cellReferenceSliceSorter) Len() int {
-	return len(self.CellReferenceSlice)
+	return len(self.CellRefSlice)
 }
 
 func (self cellSliceSorter) Less(i, j int) bool {
@@ -609,8 +609,8 @@ func (self mutableCellSliceSorter) Less(i, j int) bool {
 
 func (self cellReferenceSliceSorter) Less(i, j int) bool {
 	//Sort based on the index of the cell.
-	one := self.CellReferenceSlice[i]
-	two := self.CellReferenceSlice[j]
+	one := self.CellRefSlice[i]
+	two := self.CellRefSlice[j]
 
 	return (one.Row*DIM + one.Col) < (two.Row*DIM + two.Col)
 }
@@ -624,7 +624,7 @@ func (self mutableCellSliceSorter) Swap(i, j int) {
 }
 
 func (self cellReferenceSliceSorter) Swap(i, j int) {
-	self.CellReferenceSlice[i], self.CellReferenceSlice[j] = self.CellReferenceSlice[j], self.CellReferenceSlice[i]
+	self.CellRefSlice[i], self.CellRefSlice[j] = self.CellRefSlice[j], self.CellRefSlice[i]
 }
 
 //Filter returns a new CellSlice that includes all cells where filter returned true.
@@ -650,8 +650,8 @@ func (self MutableCellSlice) Filter(filter func(Cell) bool) MutableCellSlice {
 }
 
 //Filter returns a new CellReferenceSlice that includes all cells where filter returned true.
-func (self CellReferenceSlice) Filter(filter func(CellRef) bool) CellReferenceSlice {
-	var result CellReferenceSlice
+func (self CellRefSlice) Filter(filter func(CellRef) bool) CellRefSlice {
+	var result CellRefSlice
 	for _, cell := range self {
 		if filter(cell) {
 			result = append(result, cell)
@@ -687,7 +687,7 @@ func (self MutableCellSlice) cellSlice() CellSlice {
 //'similar' the CellSlices are. For example, two cells that are in the same
 //row within the same block are very similar; cells that are in different
 //rows, cols, and blocks are extremelye dissimilar.
-func (self CellReferenceSlice) chainSimilarity(other CellReferenceSlice) float64 {
+func (self CellRefSlice) chainSimilarity(other CellRefSlice) float64 {
 
 	//TODO: should this be in this file? It's awfully specific to HumanSolve needs, and extremely complex.
 	if other == nil || len(self) == 0 || len(other) == 0 {
@@ -859,7 +859,7 @@ func (self CellSlice) Description() string {
 }
 
 //Description returns a human-readable description of the cells in the list, like "(0,1), (0,2), and (0,3)"
-func (self CellReferenceSlice) Description() string {
+func (self CellRefSlice) Description() string {
 	strings := make(stringSlice, len(self))
 
 	for i, cell := range self {
@@ -871,8 +871,8 @@ func (self CellReferenceSlice) Description() string {
 
 //CellReferenceSlice returns a CellReferenceSlice that corresponds to the
 //cells in this CellSlice.
-func (self CellSlice) CellReferenceSlice() CellReferenceSlice {
-	result := make(CellReferenceSlice, len(self))
+func (self CellSlice) CellReferenceSlice() CellRefSlice {
+	result := make(CellRefSlice, len(self))
 
 	for i, cell := range self {
 		result[i] = cell.Reference()
@@ -881,7 +881,7 @@ func (self CellSlice) CellReferenceSlice() CellReferenceSlice {
 	return result
 }
 
-func (self CellSlice) sameAsRefs(refs CellReferenceSlice) bool {
+func (self CellSlice) sameAsRefs(refs CellRefSlice) bool {
 
 	//TODO: audit all of the private methods on CellSlice, MutableCellSlice
 	//now that we might not use them since we use something on
@@ -909,7 +909,7 @@ func (self CellSlice) sameAsRefs(refs CellReferenceSlice) bool {
 	return true
 }
 
-func (self CellReferenceSlice) sameAs(refs CellReferenceSlice) bool {
+func (self CellRefSlice) sameAs(refs CellRefSlice) bool {
 	cellSet := make(map[string]bool)
 	for _, cell := range self {
 		cellSet[cell.String()] = true
@@ -961,7 +961,7 @@ func (self CellRef) String() string {
 
 //CellSlice returns a CellSlice with Cells corresponding to our references, in
 //the given grid.
-func (self CellReferenceSlice) CellSlice(grid Grid) CellSlice {
+func (self CellRefSlice) CellSlice(grid Grid) CellSlice {
 
 	result := make(CellSlice, len(self))
 
@@ -975,7 +975,7 @@ func (self CellReferenceSlice) CellSlice(grid Grid) CellSlice {
 
 //CellSlice returns a MutableCellSlice with MutableCells corresponding to our
 //references, in the given grid.
-func (self CellReferenceSlice) MutableCellSlice(grid MutableGrid) MutableCellSlice {
+func (self CellRefSlice) MutableCellSlice(grid MutableGrid) MutableCellSlice {
 
 	result := make(MutableCellSlice, len(self))
 
@@ -1117,7 +1117,7 @@ func (self MutableCellSlice) toCellSet() cellSet {
 	return result
 }
 
-func (self CellReferenceSlice) toCellSet() cellSet {
+func (self CellRefSlice) toCellSet() cellSet {
 	result := make(cellSet)
 	for _, item := range self {
 		result[item] = true
@@ -1145,8 +1145,8 @@ func (self cellSet) toSlice(grid Grid) CellSlice {
 	return result
 }
 
-func (self cellSet) toReferenceSlice() CellReferenceSlice {
-	var result CellReferenceSlice
+func (self cellSet) toReferenceSlice() CellRefSlice {
+	var result CellRefSlice
 	for item, val := range self {
 		if val {
 			result = append(result, item)
@@ -1273,7 +1273,7 @@ func (self MutableCellSlice) Intersection(other CellSlice) MutableCellSlice {
 
 //Intersection returns a new CellSlice that represents the intersection of the
 //two CellReferenceSlices; that is, the cells that appear in both slices.
-func (self CellReferenceSlice) Intersection(other CellReferenceSlice) CellReferenceSlice {
+func (self CellRefSlice) Intersection(other CellRefSlice) CellRefSlice {
 	if len(self) == 0 {
 		return nil
 	}
@@ -1302,7 +1302,7 @@ func (self MutableCellSlice) Difference(other CellSlice) MutableCellSlice {
 
 //Difference returns a new CellReferenceSlice that contains all of the cells in the
 //receiver that are not also in the other.
-func (self CellReferenceSlice) Difference(other CellReferenceSlice) CellReferenceSlice {
+func (self CellRefSlice) Difference(other CellRefSlice) CellRefSlice {
 	if len(self) == 0 {
 		return nil
 	}
@@ -1331,7 +1331,7 @@ func (self MutableCellSlice) Union(other CellSlice) MutableCellSlice {
 
 //Union returns a new CellSlice that contains all of the cells that are in
 //either the receiver or the other CellSlice.
-func (self CellReferenceSlice) Union(other CellReferenceSlice) CellReferenceSlice {
+func (self CellRefSlice) Union(other CellRefSlice) CellRefSlice {
 	if len(self) == 0 {
 		return nil
 	}

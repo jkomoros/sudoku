@@ -57,12 +57,12 @@ type SolveStep struct {
 	//The technique that was used to identify that this step is logically valid at this point in the solution.
 	Technique SolveTechnique
 	//The cells that will be affected by the techinque (either the number to fill in or possibilities to exclude).
-	TargetCells CellReferenceSlice
+	TargetCells CellRefSlice
 	//The numbers we will remove (or, in the case of Fill, add) to the TargetCells.
 	TargetNums IntSlice
 	//The cells that together lead the techinque to logically apply in this case; the cells behind the reasoning
 	//why the TargetCells will be mutated in the way specified by this SolveStep.
-	PointerCells CellReferenceSlice
+	PointerCells CellRefSlice
 	//The specific numbers in PointerCells that lead us to remove TargetNums from TargetCells.
 	//This is only very rarely needed (at this time only for hiddenSubset techniques)
 	PointerNums IntSlice

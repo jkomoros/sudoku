@@ -38,7 +38,7 @@ func TestHumanSolveSearcher(t *testing.T) {
 
 	simpleFillStep := &SolveStep{
 		Technique: nInRowTechnique,
-		TargetCells: CellReferenceSlice{
+		TargetCells: CellRefSlice{
 			CellRef{0, 0},
 		},
 		TargetNums: IntSlice{1},
@@ -82,7 +82,7 @@ func TestHumanSolveSearcher(t *testing.T) {
 
 	nonFillStep := &SolveStep{
 		Technique: techniquesByName["Pointing Pair Row"],
-		TargetCells: CellReferenceSlice{
+		TargetCells: CellRefSlice{
 			CellRef{0, 1},
 		},
 		TargetNums: IntSlice{2},
@@ -108,7 +108,7 @@ func TestHumanSolveSearcher(t *testing.T) {
 
 	expensiveStep := &SolveStep{
 		Technique: techniquesByName["Hidden Quad Block"],
-		TargetCells: CellReferenceSlice{
+		TargetCells: CellRefSlice{
 			CellRef{0, 2},
 		},
 		TargetNums: IntSlice{3},

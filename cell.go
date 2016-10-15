@@ -688,13 +688,13 @@ func (self *mutableCellImpl) Neighbors() CellSlice {
 
 }
 
-func neighbors(cell CellRef) CellReferenceSlice {
+func neighbors(cell CellRef) CellRefSlice {
 	//Neighbors takes advantage of the work we did at init time to cache all neighbor slices.
 	return neighborCache[cell]
 }
 
 //calcNeighbors actually calculates the neighbors slice for the given cell.
-func calcNeighbors(cell CellRef) CellReferenceSlice {
+func calcNeighbors(cell CellRef) CellRefSlice {
 
 	//We don't want duplicates, so we will collect in a map (used as a set) and then reduce.
 
@@ -718,7 +718,7 @@ func calcNeighbors(cell CellRef) CellReferenceSlice {
 		neighborsMap[other] = true
 	}
 
-	neighbors := make(CellReferenceSlice, len(neighborsMap))
+	neighbors := make(CellRefSlice, len(neighborsMap))
 	i := 0
 	for cell := range neighborsMap {
 		neighbors[i] = cell

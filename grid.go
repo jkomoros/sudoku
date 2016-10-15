@@ -315,16 +315,16 @@ type gridImpl struct {
 //TODO:Allow num solver threads to be set at runtime
 const _NUM_SOLVER_THREADS = 4
 
-var neighborCache map[CellRef]CellReferenceSlice
-var rowCache map[int]CellReferenceSlice
-var colCache map[int]CellReferenceSlice
-var blockCache map[int]CellReferenceSlice
+var neighborCache map[CellRef]CellRefSlice
+var rowCache map[int]CellRefSlice
+var colCache map[int]CellRefSlice
+var blockCache map[int]CellRefSlice
 
 func init() {
 
-	rowCache = make(map[int]CellReferenceSlice)
-	colCache = make(map[int]CellReferenceSlice)
-	blockCache = make(map[int]CellReferenceSlice)
+	rowCache = make(map[int]CellRefSlice)
+	colCache = make(map[int]CellRefSlice)
+	blockCache = make(map[int]CellRefSlice)
 	for i := 0; i < DIM; i++ {
 		rowCache[i] = cellSliceImpl(i, 0, i, DIM-1)
 		colCache[i] = cellSliceImpl(0, i, DIM-1, i)
@@ -332,7 +332,7 @@ func init() {
 	}
 	//Populate the neighborCachce
 
-	neighborCache = make(map[CellRef]CellReferenceSlice)
+	neighborCache = make(map[CellRef]CellRefSlice)
 
 	for r := 0; r < DIM; r++ {
 		for c := 0; c < DIM; c++ {
@@ -747,7 +747,7 @@ func legalIndex(index int) bool {
 	return index >= 0 && index < DIM
 }
 
-func row(index int) CellReferenceSlice {
+func row(index int) CellRefSlice {
 	//TODO: calculate this once at init
 	if !legalIndex(index) {
 		return nil
@@ -780,7 +780,7 @@ func (self *mutableGridImpl) MutableRow(index int) MutableCellSlice {
 	return row(index).MutableCellSlice(self)
 }
 
-func col(index int) CellReferenceSlice {
+func col(index int) CellRefSlice {
 	//TODO: calculate this once at init
 	if !legalIndex(index) {
 		return nil
@@ -810,7 +810,7 @@ func (self *mutableGridImpl) MutableCol(index int) MutableCellSlice {
 	return col(index).MutableCellSlice(self)
 }
 
-func block(index int) CellReferenceSlice {
+func block(index int) CellRefSlice {
 	//TODO: calculate this once at init
 	if !legalIndex(index) {
 		return nil
@@ -907,7 +907,7 @@ func (self *mutableGridImpl) Cell(row int, col int) Cell {
 	return &self.cells[index]
 }
 
-func cellSliceImpl(rowOne int, colOne int, rowTwo int, colTwo int) CellReferenceSlice {
+func cellSliceImpl(rowOne int, colOne int, rowTwo int, colTwo int) CellRefSlice {
 
 	//TODO: name this function better.
 
@@ -915,7 +915,7 @@ func cellSliceImpl(rowOne int, colOne int, rowTwo int, colTwo int) CellReference
 
 	//both gridImpl and mutableGridImpl can use the same basic implementation
 	length := (rowTwo - rowOne + 1) * (colTwo - colOne + 1)
-	result := make(CellReferenceSlice, length)
+	result := make(CellRefSlice, length)
 	currentRow := rowOne
 	currentCol := colOne
 	for i := 0; i < length; i++ {

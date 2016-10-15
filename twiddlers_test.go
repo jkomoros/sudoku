@@ -105,7 +105,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 				TargetCells: row(0),
 			},
 			&SolveStep{
-				TargetCells: CellReferenceSlice{
+				TargetCells: CellRefSlice{
 					CellRef{0, 0},
 				},
 			},
@@ -117,7 +117,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 				TargetCells: row(0).Intersection(block(0)),
 			},
 			&SolveStep{
-				TargetCells: CellReferenceSlice{
+				TargetCells: CellRefSlice{
 					CellRef{0, 0},
 				},
 			},
@@ -146,12 +146,12 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 		},
 		{
 			&SolveStep{
-				TargetCells: CellReferenceSlice{
+				TargetCells: CellRefSlice{
 					CellRef{0, 0},
 				},
 			},
 			&SolveStep{
-				TargetCells: CellReferenceSlice{
+				TargetCells: CellRefSlice{
 					CellRef{0, 0},
 				},
 			},
@@ -219,7 +219,7 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 		//Step with 2 filled
 		{
 			techniquesByName["Only Legal Number"],
-			CellReferenceSlice{{1, 0}},
+			CellRefSlice{{1, 0}},
 			IntSlice{8},
 			nil,
 			nil,
@@ -228,7 +228,7 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 		//Step with non-fill technique
 		{
 			techniquesByName["Hidden Pair Block"],
-			CellReferenceSlice{{1, 0}},
+			CellRefSlice{{1, 0}},
 			IntSlice{8},
 			nil,
 			nil,
@@ -237,7 +237,7 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 		//High valued 1
 		{
 			techniquesByName["Only Legal Number"],
-			CellReferenceSlice{{0, 4}},
+			CellRefSlice{{0, 4}},
 			IntSlice{5},
 			nil,
 			nil,
@@ -246,7 +246,7 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 		//Already-filled number
 		{
 			techniquesByName["Only Legal Number"],
-			CellReferenceSlice{{0, 4}},
+			CellRefSlice{{0, 4}},
 			IntSlice{4},
 			nil,
 			nil,
@@ -276,7 +276,7 @@ func TestTwiddleChainedSteps(t *testing.T) {
 	lastStep := []*SolveStep{
 		{
 			nil,
-			CellReferenceSlice{{0, 0}},
+			CellRefSlice{{0, 0}},
 			nil,
 			nil,
 			nil,
@@ -287,7 +287,7 @@ func TestTwiddleChainedSteps(t *testing.T) {
 	possibilities := []*SolveStep{
 		{
 			nil,
-			CellReferenceSlice{
+			CellRefSlice{
 				{1, 0},
 			},
 			nil,
@@ -297,7 +297,7 @@ func TestTwiddleChainedSteps(t *testing.T) {
 		},
 		{
 			nil,
-			CellReferenceSlice{
+			CellRefSlice{
 				{2, 2},
 			},
 			nil,
@@ -307,7 +307,7 @@ func TestTwiddleChainedSteps(t *testing.T) {
 		},
 		{
 			nil,
-			CellReferenceSlice{
+			CellRefSlice{
 				{7, 7},
 			},
 			nil,
@@ -348,7 +348,7 @@ func TestTwiddlePreferFilledGroups(t *testing.T) {
 	keyCell := grid.MutableCell(0, 0)
 
 	step := &SolveStep{
-		TargetCells: CellReferenceSlice{
+		TargetCells: CellRefSlice{
 			keyCell.Reference(),
 		},
 		Technique: techniquesByName["Only Legal Number"],

@@ -19,7 +19,7 @@ func TestBasicCellSlice(t *testing.T) {
 		t.Fail()
 	}
 
-	var refs CellReferenceSlice
+	var refs CellRefSlice
 
 	for i := 0; i < DIM; i++ {
 		refs = append(refs, CellRef{2, i})
@@ -100,8 +100,8 @@ func TestBasicCellSlice(t *testing.T) {
 
 type chainTestConfiguration struct {
 	name                 string
-	one                  CellReferenceSlice
-	two                  CellReferenceSlice
+	one                  CellRefSlice
+	two                  CellRefSlice
 	equivalentToPrevious bool
 }
 
@@ -138,64 +138,64 @@ func TestChainDissimilarity(t *testing.T) {
 	tests := []chainTestConfiguration{
 		{
 			"same row same block",
-			CellReferenceSlice{{0, 0}},
-			CellReferenceSlice{{0, 1}},
+			CellRefSlice{{0, 0}},
+			CellRefSlice{{0, 1}},
 			false,
 		},
 		//this next one verifies that it doesn't matter which of self or other you do first.
 		{
 			"same row same block, just flipped self and other",
-			CellReferenceSlice{{0, 1}},
-			CellReferenceSlice{{0, 0}},
+			CellRefSlice{{0, 1}},
+			CellRefSlice{{0, 0}},
 			true,
 		},
 		//These next two should be the same difficulty.
 		{
 			"same block 2 in same row 2 in same col 2 total",
-			CellReferenceSlice{{0, 0}},
-			CellReferenceSlice{{0, 1}, {1, 0}},
+			CellRefSlice{{0, 0}},
+			CellRefSlice{{0, 1}, {1, 0}},
 			false,
 		},
 		{
 			"two full rows at opposite ends",
-			CellReferenceSlice{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 8}},
-			CellReferenceSlice{{7, 0}, {7, 1}, {7, 2}, {7, 3}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}},
+			CellRefSlice{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 8}},
+			CellRefSlice{{7, 0}, {7, 1}, {7, 2}, {7, 3}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}},
 			true,
 		},
 		{
 			"same row different blocks",
-			CellReferenceSlice{{0, 0}, {0, 1}},
-			CellReferenceSlice{{0, 3}, {0, 4}},
+			CellRefSlice{{0, 0}, {0, 1}},
+			CellRefSlice{{0, 3}, {0, 4}},
 			true,
 		},
 		{
 			"same col different blocks",
-			CellReferenceSlice{{0, 0}, {1, 0}},
-			CellReferenceSlice{{3, 0}, {4, 0}},
+			CellRefSlice{{0, 0}, {1, 0}},
+			CellRefSlice{{3, 0}, {4, 0}},
 			true,
 		},
 		{
 			"same row different blocks, 2 vs 3",
-			CellReferenceSlice{{0, 0}, {0, 1}},
-			CellReferenceSlice{{0, 3}, {0, 4}, {0, 5}},
+			CellRefSlice{{0, 0}, {0, 1}},
+			CellRefSlice{{0, 3}, {0, 4}, {0, 5}},
 			true,
 		},
 		{
 			"same block opposite corners 1 x 1",
-			CellReferenceSlice{{0, 0}},
-			CellReferenceSlice{{2, 2}},
+			CellRefSlice{{0, 0}},
+			CellRefSlice{{2, 2}},
 			true,
 		},
 		{
 			"adjacent rows two different blocks",
-			CellReferenceSlice{{0, 0}, {0, 1}},
-			CellReferenceSlice{{1, 3}, {1, 4}},
+			CellRefSlice{{0, 0}, {0, 1}},
+			CellRefSlice{{1, 3}, {1, 4}},
 			false,
 		},
 		{
 			"single cell opposite corners",
-			CellReferenceSlice{{0, 0}},
-			CellReferenceSlice{{8, 8}},
+			CellRefSlice{{0, 0}},
+			CellRefSlice{{8, 8}},
 			false,
 		},
 	}

@@ -80,7 +80,7 @@ func hiddenSubset(grid Grid, technique SolveTechnique, k int, collectionGetter f
 }
 
 //TODO: come up with a better name for this HiddenSubset technique helper method
-func subsetCellsWithNUniquePossibilities(k int, inputCells CellSlice) ([]CellReferenceSlice, []IntSlice) {
+func subsetCellsWithNUniquePossibilities(k int, inputCells CellSlice) ([]CellRefSlice, []IntSlice) {
 	//Given a list of cells (often a row, col, or block) and a target group size K,
 	//returns a list of groups of cells of size K where all of the cells have K
 	//candidates that don't appear anywhere else in the group.
@@ -90,7 +90,7 @@ func subsetCellsWithNUniquePossibilities(k int, inputCells CellSlice) ([]CellRef
 	//First, cull any cells with no possibilities to help minimize n
 	cells := inputCells.FilterByHasPossibilities()
 
-	var cellResults []CellReferenceSlice
+	var cellResults []CellRefSlice
 	var intResults []IntSlice
 
 	for _, indexes := range subsetIndexes(len(cells), k) {
