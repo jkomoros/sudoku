@@ -6,8 +6,8 @@ import (
 
 func TestPointingPairCol(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		targetCells:  []CellReference{{3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1}},
-		pointerCells: []CellReference{{0, 1}, {2, 1}},
+		targetCells:  []CellRef{{3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1}},
+		pointerCells: []CellRef{{0, 1}, {2, 1}},
 		targetSame:   _GROUP_COL,
 		targetGroup:  1,
 		targetNums:   IntSlice([]int{7}),
@@ -20,8 +20,8 @@ func TestPointingPairCol(t *testing.T) {
 
 func TestPointingPairRow(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		targetCells:  []CellReference{{1, 3}, {1, 4}, {1, 5}, {1, 6}, {1, 7}, {1, 8}},
-		pointerCells: []CellReference{{1, 0}, {1, 2}},
+		targetCells:  []CellRef{{1, 3}, {1, 4}, {1, 5}, {1, 6}, {1, 7}, {1, 8}},
+		pointerCells: []CellRef{{1, 0}, {1, 2}},
 		targetSame:   _GROUP_ROW,
 		targetGroup:  1,
 		targetNums:   IntSlice([]int{7}),

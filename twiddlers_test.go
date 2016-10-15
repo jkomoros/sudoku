@@ -106,7 +106,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			},
 			&SolveStep{
 				TargetCells: CellReferenceSlice{
-					CellReference{0, 0},
+					CellRef{0, 0},
 				},
 			},
 			0.7704938271604939,
@@ -118,7 +118,7 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 			},
 			&SolveStep{
 				TargetCells: CellReferenceSlice{
-					CellReference{0, 0},
+					CellRef{0, 0},
 				},
 			},
 			0.4011111111111111,
@@ -147,12 +147,12 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 		{
 			&SolveStep{
 				TargetCells: CellReferenceSlice{
-					CellReference{0, 0},
+					CellRef{0, 0},
 				},
 			},
 			&SolveStep{
 				TargetCells: CellReferenceSlice{
-					CellReference{0, 0},
+					CellRef{0, 0},
 				},
 			},
 			0.010000000000000018,

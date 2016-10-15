@@ -98,7 +98,7 @@ type Cell interface {
 	Grid() Grid
 
 	//Reference returns a CellReference corresponding to this cell.
-	Reference() CellReference
+	Reference() CellRef
 
 	//The following are methods that are only internal. Some of them are
 	//nasty.
@@ -579,8 +579,8 @@ func (self *cellImpl) rank() int {
 	return count
 }
 
-func (self *cellImpl) Reference() CellReference {
-	return CellReference{self.Row(), self.Col()}
+func (self *cellImpl) Reference() CellRef {
+	return CellRef{self.Row(), self.Col()}
 }
 
 //Sets ourselves to a random one of our possibilities.
@@ -688,17 +688,17 @@ func (self *mutableCellImpl) Neighbors() CellSlice {
 
 }
 
-func neighbors(cell CellReference) CellReferenceSlice {
+func neighbors(cell CellRef) CellReferenceSlice {
 	//Neighbors takes advantage of the work we did at init time to cache all neighbor slices.
 	return neighborCache[cell]
 }
 
 //calcNeighbors actually calculates the neighbors slice for the given cell.
-func calcNeighbors(cell CellReference) CellReferenceSlice {
+func calcNeighbors(cell CellRef) CellReferenceSlice {
 
 	//We don't want duplicates, so we will collect in a map (used as a set) and then reduce.
 
-	neighborsMap := make(map[CellReference]bool)
+	neighborsMap := make(map[CellRef]bool)
 	for _, other := range row(cell.Row) {
 		if cell.Row == other.Row && cell.Col == other.Col {
 			continue

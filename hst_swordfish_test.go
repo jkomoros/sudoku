@@ -22,17 +22,17 @@ func swordfishExampleGrid(t *testing.T) MutableGrid {
 
 	//TODO: it's a smell that there's no way to serialize and load up a grid
 	//with extra excludes set.
-	excludedConfig := map[CellReference]IntSlice{
-		CellReference{0, 0}: IntSlice{1, 8},
-		CellReference{1, 3}: IntSlice{1},
-		CellReference{1, 4}: IntSlice{1, 8},
-		CellReference{2, 3}: IntSlice{1},
-		CellReference{2, 5}: IntSlice{1, 8},
-		CellReference{3, 0}: IntSlice{2, 8},
-		CellReference{4, 0}: IntSlice{7},
-		CellReference{4, 1}: IntSlice{7},
-		CellReference{7, 3}: IntSlice{1, 6},
-		CellReference{7, 5}: IntSlice{1},
+	excludedConfig := map[CellRef]IntSlice{
+		CellRef{0, 0}: IntSlice{1, 8},
+		CellRef{1, 3}: IntSlice{1},
+		CellRef{1, 4}: IntSlice{1, 8},
+		CellRef{2, 3}: IntSlice{1},
+		CellRef{2, 5}: IntSlice{1, 8},
+		CellRef{3, 0}: IntSlice{2, 8},
+		CellRef{4, 0}: IntSlice{7},
+		CellRef{4, 1}: IntSlice{7},
+		CellRef{7, 3}: IntSlice{1, 6},
+		CellRef{7, 5}: IntSlice{1},
 	}
 
 	for ref, ints := range excludedConfig {
@@ -52,8 +52,8 @@ func TestSwordfishCol(t *testing.T) {
 	grid := swordfishExampleGrid(t)
 
 	options := solveTechniqueTestHelperOptions{
-		targetCells:  []CellReference{{1, 1}, {5, 4}},
-		pointerCells: []CellReference{{1, 0}, {1, 5}, {5, 3}, {5, 5}, {8, 0}, {8, 3}},
+		targetCells:  []CellRef{{1, 1}, {5, 4}},
+		pointerCells: []CellRef{{1, 0}, {1, 5}, {5, 3}, {5, 5}, {8, 0}, {8, 3}},
 		targetNums:   IntSlice{1},
 		description:  "1 is only possible in two cells each in three different columns, all of which align onto three rows, which means that 1 can't be in any of the other cells in those rows ((1,1) and (5,4))",
 	}
@@ -79,8 +79,8 @@ func TestSwordfishRow(t *testing.T) {
 	grid = grid.(*mutableGridImpl).transpose()
 
 	options := solveTechniqueTestHelperOptions{
-		targetCells:  []CellReference{{1, 1}, {4, 5}},
-		pointerCells: []CellReference{{0, 1}, {5, 1}, {3, 5}, {5, 5}, {0, 8}, {3, 8}},
+		targetCells:  []CellRef{{1, 1}, {4, 5}},
+		pointerCells: []CellRef{{0, 1}, {5, 1}, {3, 5}, {5, 5}, {0, 8}, {3, 8}},
 		targetNums:   IntSlice{1},
 		description:  "1 is only possible in two cells each in three different rows, all of which align onto three columns, which means that 1 can't be in any of the other cells in those columns ((1,1) and (4,5))",
 	}

@@ -10,7 +10,7 @@ type GridModification []*CellModification
 type CellModification struct {
 	//The cell representing the cell to modify. The cell's analog (at the same
 	//row, col address) will be modified in the new grid.
-	Cell CellReference
+	Cell CellRef
 	//The number to put in the cell. Negative numbers signify no changes.
 	Number int
 	//The excludes to proactively set. Invalid numbers will be ignored.
@@ -25,7 +25,7 @@ type CellModification struct {
 
 //newCellModification returns a CellModification for the given cell that is a
 //no-op.
-func newCellModification(cell CellReference) *CellModification {
+func newCellModification(cell CellRef) *CellModification {
 	return &CellModification{
 		Cell:            cell,
 		Number:          -1,

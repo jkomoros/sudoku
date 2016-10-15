@@ -22,7 +22,7 @@ func TestBasicCellSlice(t *testing.T) {
 	var refs CellReferenceSlice
 
 	for i := 0; i < DIM; i++ {
-		refs = append(refs, CellReference{2, i})
+		refs = append(refs, CellRef{2, i})
 	}
 
 	if !row.sameAsRefs(refs) {

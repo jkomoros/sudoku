@@ -315,7 +315,7 @@ type gridImpl struct {
 //TODO:Allow num solver threads to be set at runtime
 const _NUM_SOLVER_THREADS = 4
 
-var neighborCache map[CellReference]CellReferenceSlice
+var neighborCache map[CellRef]CellReferenceSlice
 var rowCache map[int]CellReferenceSlice
 var colCache map[int]CellReferenceSlice
 var blockCache map[int]CellReferenceSlice
@@ -332,11 +332,11 @@ func init() {
 	}
 	//Populate the neighborCachce
 
-	neighborCache = make(map[CellReference]CellReferenceSlice)
+	neighborCache = make(map[CellRef]CellReferenceSlice)
 
 	for r := 0; r < DIM; r++ {
 		for c := 0; c < DIM; c++ {
-			ref := CellReference{r, c}
+			ref := CellRef{r, c}
 			neighborCache[ref] = calcNeighbors(ref)
 		}
 	}
@@ -433,7 +433,7 @@ func newStarterGrid(grid MutableGrid) *gridImpl {
 	i := 0
 	for r := 0; r < DIM; r++ {
 		for c := 0; c < DIM; c++ {
-			result.theQueue.cellRefs[i] = CellReference{r, c}
+			result.theQueue.cellRefs[i] = CellRef{r, c}
 			i++
 		}
 	}
@@ -919,7 +919,7 @@ func cellSliceImpl(rowOne int, colOne int, rowTwo int, colTwo int) CellReference
 	currentRow := rowOne
 	currentCol := colOne
 	for i := 0; i < length; i++ {
-		result[i] = CellReference{currentRow, currentCol}
+		result[i] = CellRef{currentRow, currentCol}
 		if colTwo > currentCol {
 			currentCol++
 		} else {

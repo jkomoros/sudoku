@@ -68,7 +68,7 @@ func TestReadOnlyCellQueue(t *testing.T) {
 
 	//Test copying in state from a previous one.
 
-	modification := newCellModification(CellReference{0, 0})
+	modification := newCellModification(CellRef{0, 0})
 	modification.Number = 5
 	modifiedGrid := grid.CopyWithModifications(GridModification{modification})
 

@@ -49,7 +49,7 @@ func TestCompoundSolveStepModifications(t *testing.T) {
 		Technique:  techniquesByName["Only Legal Number"],
 		TargetNums: IntSlice{1},
 		TargetCells: CellReferenceSlice{
-			CellReference{0, 0},
+			CellRef{0, 0},
 		},
 	}
 
@@ -97,25 +97,25 @@ func TestSolveStepModifications(t *testing.T) {
 			&SolveStep{
 				Technique: techniquesByName["Only Legal Number"],
 				TargetCells: CellReferenceSlice{
-					CellReference{0, 0},
-					CellReference{0, 1},
-					CellReference{0, 2},
+					CellRef{0, 0},
+					CellRef{0, 1},
+					CellRef{0, 2},
 				},
 				TargetNums: IntSlice{1},
 			},
 			GridModification{
 				&CellModification{
-					Cell:            CellReference{0, 0},
+					Cell:            CellRef{0, 0},
 					Number:          1,
 					ExcludesChanges: make(map[int]bool),
 				},
 				&CellModification{
-					Cell:            CellReference{0, 1},
+					Cell:            CellRef{0, 1},
 					Number:          1,
 					ExcludesChanges: make(map[int]bool),
 				},
 				&CellModification{
-					Cell:            CellReference{0, 2},
+					Cell:            CellRef{0, 2},
 					Number:          1,
 					ExcludesChanges: make(map[int]bool),
 				},
@@ -126,15 +126,15 @@ func TestSolveStepModifications(t *testing.T) {
 			&SolveStep{
 				Technique: techniquesByName["Pointing Pair Row"],
 				TargetCells: CellReferenceSlice{
-					CellReference{0, 0},
-					CellReference{0, 1},
-					CellReference{0, 2},
+					CellRef{0, 0},
+					CellRef{0, 1},
+					CellRef{0, 2},
 				},
 				TargetNums: IntSlice{1, 2},
 			},
 			GridModification{
 				&CellModification{
-					Cell:   CellReference{0, 0},
+					Cell:   CellRef{0, 0},
 					Number: -1,
 					ExcludesChanges: map[int]bool{
 						1: true,
@@ -142,7 +142,7 @@ func TestSolveStepModifications(t *testing.T) {
 					},
 				},
 				&CellModification{
-					Cell:   CellReference{0, 1},
+					Cell:   CellRef{0, 1},
 					Number: -1,
 					ExcludesChanges: map[int]bool{
 						1: true,
@@ -150,7 +150,7 @@ func TestSolveStepModifications(t *testing.T) {
 					},
 				},
 				&CellModification{
-					Cell:   CellReference{0, 2},
+					Cell:   CellRef{0, 2},
 					Number: -1,
 					ExcludesChanges: map[int]bool{
 						1: true,
@@ -528,7 +528,7 @@ func TestStepsDescription(t *testing.T) {
 				FillStep: &SolveStep{
 					techniquesByName["Only Legal Number"],
 					CellReferenceSlice{
-						CellReference{0, 0},
+						CellRef{0, 0},
 					},
 					IntSlice{1},
 					nil,
@@ -541,13 +541,13 @@ func TestStepsDescription(t *testing.T) {
 					{
 						techniquesByName["Pointing Pair Col"],
 						CellReferenceSlice{
-							CellReference{1, 0},
-							CellReference{1, 1},
+							CellRef{1, 0},
+							CellRef{1, 1},
 						},
 						IntSlice{1, 2},
 						CellReferenceSlice{
-							CellReference{1, 3},
-							CellReference{1, 4},
+							CellRef{1, 3},
+							CellRef{1, 4},
 						},
 						nil,
 						nil,
@@ -556,7 +556,7 @@ func TestStepsDescription(t *testing.T) {
 				FillStep: &SolveStep{
 					techniquesByName["Only Legal Number"],
 					CellReferenceSlice{
-						CellReference{2, 0},
+						CellRef{2, 0},
 					},
 					IntSlice{2},
 					nil,

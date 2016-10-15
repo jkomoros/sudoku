@@ -113,8 +113,8 @@ func (self *forcingChainsTechnique) find(grid Grid, coordinator findCoordinator)
 
 		//Check that the neighbor isn't just already having a single possibility, because then this technique is overkill.
 
-		firstAccumulator := &chainSearcherAccumulator{make(map[CellReference]IntSlice), make(map[CellReference]IntSlice)}
-		secondAccumulator := &chainSearcherAccumulator{make(map[CellReference]IntSlice), make(map[CellReference]IntSlice)}
+		firstAccumulator := &chainSearcherAccumulator{make(map[CellRef]IntSlice), make(map[CellRef]IntSlice)}
+		secondAccumulator := &chainSearcherAccumulator{make(map[CellRef]IntSlice), make(map[CellRef]IntSlice)}
 
 		chainSearcher(0, _MAX_IMPLICATION_STEPS,
 			candidateCell.MutableInGrid(firstGrid),
@@ -185,8 +185,8 @@ func (self *forcingChainsTechnique) find(grid Grid, coordinator findCoordinator)
 }
 
 type chainSearcherAccumulator struct {
-	numbers         map[CellReference]IntSlice
-	firstGeneration map[CellReference]IntSlice
+	numbers         map[CellRef]IntSlice
+	firstGeneration map[CellRef]IntSlice
 }
 
 func (c *chainSearcherAccumulator) String() string {

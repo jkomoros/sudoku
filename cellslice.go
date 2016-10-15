@@ -40,7 +40,7 @@ type MutableCellSlice []MutableCell
 //for performance is only really important internally to the package.
 
 //CellReferenceSlice is a slice of CellReferences with many convenience methods.
-type CellReferenceSlice []CellReference
+type CellReferenceSlice []CellRef
 
 //IntSlice is a list of ints, with many convenience methods specific to sudoku.
 type IntSlice []int
@@ -51,11 +51,11 @@ type intSet map[int]bool
 
 //TODO: consider removing cellSet, since it's not actually used anywhere
 //(it was built for forcing_chains, but we ended up not using it there)
-type cellSet map[CellReference]bool
+type cellSet map[CellRef]bool
 
 //CellReference is a reference to a generic cell located at a specific row and
 //column.
-type CellReference struct {
+type CellRef struct {
 	Row int
 	Col int
 }
@@ -101,21 +101,21 @@ func (self CellSlice) SameBlock() bool {
 
 //SameRow returns true if all cells are in the same row.
 func (self CellReferenceSlice) SameRow() bool {
-	return self.CollectNums(func(cell CellReference) int {
+	return self.CollectNums(func(cell CellRef) int {
 		return cell.Row
 	}).Same()
 }
 
 //SameCol returns true if all cells are in the same column.
 func (self CellReferenceSlice) SameCol() bool {
-	return self.CollectNums(func(cell CellReference) int {
+	return self.CollectNums(func(cell CellRef) int {
 		return cell.Col
 	}).Same()
 }
 
 //SameBlock returns true if all cells are in the same block.
 func (self CellReferenceSlice) SameBlock() bool {
-	return self.CollectNums(func(cell CellReference) int {
+	return self.CollectNums(func(cell CellRef) int {
 		return cell.Block()
 	}).Same()
 }
@@ -197,7 +197,7 @@ func (self CellSlice) AllBlocks() IntSlice {
 //AllRows returns all of the rows for cells in this slice.
 func (self CellReferenceSlice) AllRows() IntSlice {
 	//TODO: test this.
-	return self.CollectNums(func(cell CellReference) int {
+	return self.CollectNums(func(cell CellRef) int {
 		return cell.Row
 	}).Unique()
 }
@@ -205,7 +205,7 @@ func (self CellReferenceSlice) AllRows() IntSlice {
 //AllCols returns all of the columns for cells in this slice.
 func (self CellReferenceSlice) AllCols() IntSlice {
 	//TODO: test this.
-	return self.CollectNums(func(cell CellReference) int {
+	return self.CollectNums(func(cell CellRef) int {
 		return cell.Col
 	}).Unique()
 }
@@ -213,7 +213,7 @@ func (self CellReferenceSlice) AllCols() IntSlice {
 //AllBlocks returns all of the blocks for cells in this slice.
 func (self CellReferenceSlice) AllBlocks() IntSlice {
 	//TODO: test this.
-	return self.CollectNums(func(cell CellReference) int {
+	return self.CollectNums(func(cell CellRef) int {
 		return cell.Block()
 	}).Unique()
 }
@@ -361,11 +361,11 @@ func (self MutableCellSlice) RemoveCells(targets CellSlice) MutableCellSlice {
 //the cells included in the provided CellReferenceSlice.
 func (self CellReferenceSlice) RemoveCells(targets CellReferenceSlice) CellReferenceSlice {
 	//TODO: test this.
-	targetCells := make(map[CellReference]bool)
+	targetCells := make(map[CellRef]bool)
 	for _, cell := range targets {
 		targetCells[cell] = true
 	}
-	filterFunc := func(cell CellReference) bool {
+	filterFunc := func(cell CellRef) bool {
 		return !targetCells[cell]
 	}
 	return self.Filter(filterFunc)
@@ -571,7 +571,7 @@ func (self CellSlice) CollectNums(fetcher func(Cell) int) IntSlice {
 }
 
 //CollectNums collects the result of running fetcher across all items in the list.
-func (self CellReferenceSlice) CollectNums(fetcher func(CellReference) int) IntSlice {
+func (self CellReferenceSlice) CollectNums(fetcher func(CellRef) int) IntSlice {
 	var result IntSlice
 	for _, cell := range self {
 		result = append(result, fetcher(cell))
@@ -650,7 +650,7 @@ func (self MutableCellSlice) Filter(filter func(Cell) bool) MutableCellSlice {
 }
 
 //Filter returns a new CellReferenceSlice that includes all cells where filter returned true.
-func (self CellReferenceSlice) Filter(filter func(CellReference) bool) CellReferenceSlice {
+func (self CellReferenceSlice) Filter(filter func(CellRef) bool) CellReferenceSlice {
 	var result CellReferenceSlice
 	for _, cell := range self {
 		if filter(cell) {
@@ -935,7 +935,7 @@ func (self CellReferenceSlice) sameAs(refs CellReferenceSlice) bool {
 
 //MutableCell returns the MutableCell in the given grid that this
 //CellReference refers to.
-func (self CellReference) MutableCell(grid MutableGrid) MutableCell {
+func (self CellRef) MutableCell(grid MutableGrid) MutableCell {
 	if grid == nil {
 		return nil
 	}
@@ -943,7 +943,7 @@ func (self CellReference) MutableCell(grid MutableGrid) MutableCell {
 }
 
 //Cell returns the Cell in the given grid that this CellReference refers to.
-func (self CellReference) Cell(grid Grid) Cell {
+func (self CellRef) Cell(grid Grid) Cell {
 	if grid == nil {
 		return nil
 	}
@@ -951,11 +951,11 @@ func (self CellReference) Cell(grid Grid) Cell {
 }
 
 //Block returns the block that this CellReference is in.
-func (self CellReference) Block() int {
+func (self CellRef) Block() int {
 	return blockForCell(self.Row, self.Col)
 }
 
-func (self CellReference) String() string {
+func (self CellRef) String() string {
 	return "(" + strconv.Itoa(self.Row) + "," + strconv.Itoa(self.Col) + ")"
 }
 

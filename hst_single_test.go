@@ -6,7 +6,7 @@ import (
 
 func TestObviousInCollectionRow(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		targetCells: []CellReference{{2, 3}},
+		targetCells: []CellRef{{2, 3}},
 		targetSame:  _GROUP_ROW,
 		targetGroup: 2,
 		targetNums:  IntSlice([]int{7}),
@@ -20,7 +20,7 @@ func TestObviousInCollectionRow(t *testing.T) {
 func TestObviousInCollectionCol(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
 		transpose:   true,
-		targetCells: []CellReference{{3, 2}},
+		targetCells: []CellRef{{3, 2}},
 		targetSame:  _GROUP_COL,
 		targetGroup: 2,
 		targetNums:  IntSlice([]int{7}),
@@ -33,7 +33,7 @@ func TestObviousInCollectionCol(t *testing.T) {
 
 func TestObviousInCollectionBlock(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		targetCells: []CellReference{{4, 1}},
+		targetCells: []CellRef{{4, 1}},
 		targetSame:  _GROUP_BLOCK,
 		targetGroup: 3,
 		targetNums:  IntSlice([]int{9}),
