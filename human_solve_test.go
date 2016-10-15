@@ -44,12 +44,13 @@ func TestHumanSolveAlmostSolvedGrid(t *testing.T) {
 }
 
 func TestCompoundSolveStepModifications(t *testing.T) {
-	grid := NewGrid()
 
 	solveStep := &SolveStep{
-		Technique:   techniquesByName["Only Legal Number"],
-		TargetNums:  IntSlice{1},
-		TargetCells: CellSlice{grid.Cell(0, 0)},
+		Technique:  techniquesByName["Only Legal Number"],
+		TargetNums: IntSlice{1},
+		TargetCells: CellReferenceSlice{
+			CellReference{0, 0},
+		},
 	}
 
 	tests := []struct {
@@ -87,7 +88,6 @@ func TestCompoundSolveStepModifications(t *testing.T) {
 }
 
 func TestSolveStepModifications(t *testing.T) {
-	grid := NewGrid()
 	tests := []struct {
 		step        *SolveStep
 		expected    GridModification
@@ -96,10 +96,10 @@ func TestSolveStepModifications(t *testing.T) {
 		{
 			&SolveStep{
 				Technique: techniquesByName["Only Legal Number"],
-				TargetCells: CellSlice{
-					grid.Cell(0, 0),
-					grid.Cell(0, 1),
-					grid.Cell(0, 2),
+				TargetCells: CellReferenceSlice{
+					CellReference{0, 0},
+					CellReference{0, 1},
+					CellReference{0, 2},
 				},
 				TargetNums: IntSlice{1},
 			},
@@ -125,10 +125,10 @@ func TestSolveStepModifications(t *testing.T) {
 		{
 			&SolveStep{
 				Technique: techniquesByName["Pointing Pair Row"],
-				TargetCells: CellSlice{
-					grid.Cell(0, 0),
-					grid.Cell(0, 1),
-					grid.Cell(0, 2),
+				TargetCells: CellReferenceSlice{
+					CellReference{0, 0},
+					CellReference{0, 1},
+					CellReference{0, 2},
 				},
 				TargetNums: IntSlice{1, 2},
 			},
@@ -527,8 +527,8 @@ func TestStepsDescription(t *testing.T) {
 			{
 				FillStep: &SolveStep{
 					techniquesByName["Only Legal Number"],
-					CellSlice{
-						grid.Cell(0, 0),
+					CellReferenceSlice{
+						CellReference{0, 0},
 					},
 					IntSlice{1},
 					nil,
@@ -540,14 +540,14 @@ func TestStepsDescription(t *testing.T) {
 				PrecursorSteps: []*SolveStep{
 					{
 						techniquesByName["Pointing Pair Col"],
-						CellSlice{
-							grid.Cell(1, 0),
-							grid.Cell(1, 1),
+						CellReferenceSlice{
+							CellReference{1, 0},
+							CellReference{1, 1},
 						},
 						IntSlice{1, 2},
-						CellSlice{
-							grid.Cell(1, 3),
-							grid.Cell(1, 4),
+						CellReferenceSlice{
+							CellReference{1, 3},
+							CellReference{1, 4},
 						},
 						nil,
 						nil,
@@ -555,8 +555,8 @@ func TestStepsDescription(t *testing.T) {
 				},
 				FillStep: &SolveStep{
 					techniquesByName["Only Legal Number"],
-					CellSlice{
-						grid.Cell(2, 0),
+					CellReferenceSlice{
+						CellReference{2, 0},
 					},
 					IntSlice{2},
 					nil,
@@ -584,16 +584,6 @@ func TestStepsDescription(t *testing.T) {
 			t.Fail()
 		}
 	}
-}
-
-//TODO: this is useful. Should we use this in other tests?
-func cellRefsToCells(refs []CellReference, grid Grid) CellSlice {
-	//TODO: this should be gotten rid of and replaced with generic one.
-	var result CellSlice
-	for _, ref := range refs {
-		result = append(result, ref.Cell(grid))
-	}
-	return result
 }
 
 func TestPuzzleDifficulty(t *testing.T) {

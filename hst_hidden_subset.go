@@ -66,7 +66,7 @@ func hiddenSubset(grid Grid, technique SolveTechnique, k int, collectionGetter f
 
 				//numList is the numbers we want to KEEP. We need to invertit.
 
-				numsToRemove := group.PossibilitiesUnion().Difference(numList)
+				numsToRemove := group.CellSlice(grid).PossibilitiesUnion().Difference(numList)
 
 				step := &SolveStep{technique, group, numsToRemove, group, numList, nil}
 				if step.IsUseful(grid) {
@@ -80,7 +80,7 @@ func hiddenSubset(grid Grid, technique SolveTechnique, k int, collectionGetter f
 }
 
 //TODO: come up with a better name for this HiddenSubset technique helper method
-func subsetCellsWithNUniquePossibilities(k int, inputCells CellSlice) ([]CellSlice, []IntSlice) {
+func subsetCellsWithNUniquePossibilities(k int, inputCells CellSlice) ([]CellReferenceSlice, []IntSlice) {
 	//Given a list of cells (often a row, col, or block) and a target group size K,
 	//returns a list of groups of cells of size K where all of the cells have K
 	//candidates that don't appear anywhere else in the group.
@@ -90,7 +90,7 @@ func subsetCellsWithNUniquePossibilities(k int, inputCells CellSlice) ([]CellSli
 	//First, cull any cells with no possibilities to help minimize n
 	cells := inputCells.FilterByHasPossibilities()
 
-	var cellResults []CellSlice
+	var cellResults []CellReferenceSlice
 	var intResults []IntSlice
 
 	for _, indexes := range subsetIndexes(len(cells), k) {
@@ -106,7 +106,7 @@ func subsetCellsWithNUniquePossibilities(k int, inputCells CellSlice) ([]CellSli
 		for _, possibilitiesIndexes := range subsetIndexes(len(possibilitiesUnion), k) {
 			set := possibilitiesUnion.Subset(possibilitiesIndexes)
 			if len(set.Intersection(inversePossibilitiesUnion)) == 0 {
-				cellResults = append(cellResults, subset)
+				cellResults = append(cellResults, subset.CellReferenceSlice())
 				intResults = append(intResults, set)
 
 			}

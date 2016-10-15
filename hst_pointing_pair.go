@@ -40,7 +40,8 @@ func (self *pointingPairTechnique) find(grid Grid, coordinator findCoordinator) 
 	//TODO: test this returns multiple if they exist.
 
 	for _, i := range rand.Perm(DIM) {
-		block := grid.Block(i)
+		block := block(i)
+		blockCells := block.CellSlice(grid)
 
 		for _, num := range rand.Perm(DIM) {
 
@@ -48,7 +49,7 @@ func (self *pointingPairTechnique) find(grid Grid, coordinator findCoordinator) 
 				return
 			}
 
-			cells := block.FilterByPossible(num + 1)
+			cells := blockCells.FilterByPossible(num + 1).CellReferenceSlice()
 			//cellList is now a list of all cells that have that number.
 			if len(cells) <= 1 || len(cells) > BLOCK_DIM {
 				//Meh, not a match.
@@ -59,9 +60,9 @@ func (self *pointingPairTechnique) find(grid Grid, coordinator findCoordinator) 
 				//Yup!
 				var step *SolveStep
 				if self.groupType == _GROUP_ROW {
-					step = &SolveStep{self, grid.Row(cells.Row()).RemoveCells(block), []int{num + 1}, cells, nil, nil}
+					step = &SolveStep{self, row(cells.Row()).RemoveCells(block), []int{num + 1}, cells, nil, nil}
 				} else {
-					step = &SolveStep{self, grid.Col(cells.Col()).RemoveCells(block), []int{num + 1}, cells, nil, nil}
+					step = &SolveStep{self, col(cells.Col()).RemoveCells(block), []int{num + 1}, cells, nil, nil}
 				}
 				if step.IsUseful(grid) {
 					if coordinator.foundResult(step) {

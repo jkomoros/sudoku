@@ -354,13 +354,13 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 			//All must match
 
 			if options.targetCells != nil {
-				if !step.TargetCells.sameAsRefs(options.targetCells) {
+				if !step.TargetCells.sameAs(options.targetCells) {
 					l.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
 					continue
 				}
 			}
 			if options.pointerCells != nil {
-				if !step.PointerCells.sameAsRefs(options.pointerCells) {
+				if !step.PointerCells.sameAs(options.pointerCells) {
 					l.Error(techniqueName, " had the wrong pointer cells: ", step.PointerCells)
 					continue
 				}
@@ -415,7 +415,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 				foundMatch = false
 				for _, ref := range options.targetCells {
 					for _, cell := range step.TargetCells {
-						if ref == cell.Reference() {
+						if ref == cell {
 							//TODO: break out early
 							foundMatch = true
 						}

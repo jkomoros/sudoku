@@ -22,13 +22,13 @@ func (self *xwingTechnique) Description(step *SolveStep) string {
 	case _GROUP_ROW:
 		majorAxis = "rows"
 		minorAxis = "columns"
-		majorGroups = step.PointerCells.CollectNums(getRow).Unique()
-		minorGroups = step.PointerCells.CollectNums(getCol).Unique()
+		majorGroups = step.PointerCells.AllRows()
+		minorGroups = step.PointerCells.AllCols()
 	case _GROUP_COL:
 		majorAxis = "columns"
 		minorAxis = "rows"
-		majorGroups = step.PointerCells.CollectNums(getCol).Unique()
-		minorGroups = step.PointerCells.CollectNums(getRow).Unique()
+		majorGroups = step.PointerCells.AllCols()
+		minorGroups = step.PointerCells.AllRows()
 	}
 
 	//Ensure a stable description; Unique() doesn't have a guranteed order.
@@ -67,11 +67,11 @@ func (self *xwingTechnique) find(grid Grid, coordinator findCoordinator) {
 		//i is zero indexed right now
 		i++
 
-		var majorGroups []CellSlice
+		var majorGroups []CellReferenceSlice
 
 		for groupIndex := 0; groupIndex < DIM; groupIndex++ {
 			group := getter(groupIndex)
-			cells := group.FilterByPossible(i)
+			cells := group.FilterByPossible(i).CellReferenceSlice()
 			if len(cells) == 2 {
 				//Found a row that might fit the bill.
 				majorGroups = append(majorGroups, cells)
@@ -91,28 +91,28 @@ func (self *xwingTechnique) find(grid Grid, coordinator findCoordinator) {
 				return
 			}
 
-			var targetCells CellSlice
+			var targetCells CellReferenceSlice
 
-			currentGroups := []CellSlice{majorGroups[subsets[0]], majorGroups[subsets[1]]}
+			currentGroups := []CellReferenceSlice{majorGroups[subsets[0]], majorGroups[subsets[1]]}
 
 			//Are the possibilities in each row in the same column as the one above?
 			//We need to do this differently depending on if we're row or col.
 			if self.groupType == _GROUP_ROW {
 				//TODO: figure out a way to factor group row and col better so we don't duplicate code like this.
-				if currentGroups[0][0].Col() != currentGroups[1][0].Col() || currentGroups[0][1].Col() != currentGroups[1][1].Col() {
+				if currentGroups[0][0].Col != currentGroups[1][0].Col || currentGroups[0][1].Col != currentGroups[1][1].Col {
 					//Nope, the cells didn't line up.
 					continue
 				}
 				//All of the cells in those two columns
-				targetCells = append(grid.Col(currentGroups[0][0].Col()), grid.Col(currentGroups[0][1].Col())...)
+				targetCells = append(col(currentGroups[0][0].Col), col(currentGroups[0][1].Col)...)
 
 			} else if self.groupType == _GROUP_COL {
-				if currentGroups[0][0].Row() != currentGroups[1][0].Row() || currentGroups[0][1].Row() != currentGroups[1][1].Row() {
+				if currentGroups[0][0].Row != currentGroups[1][0].Row || currentGroups[0][1].Row != currentGroups[1][1].Row {
 					//Nope, the cells didn't line up.
 					continue
 				}
 				//All of the cells in those two columns
-				targetCells = append(grid.Row(currentGroups[0][0].Row()), grid.Row(currentGroups[0][1].Row())...)
+				targetCells = append(row(currentGroups[0][0].Row), row(currentGroups[0][1].Row)...)
 
 			}
 
@@ -121,7 +121,7 @@ func (self *xwingTechnique) find(grid Grid, coordinator findCoordinator) {
 			targetCells = targetCells.RemoveCells(currentGroups[1])
 
 			//And remove the cells that don't have the target number to remove (to keep the set tight; technically it's OK to include them it would just be a no-op for those cells)
-			targetCells = targetCells.FilterByPossible(i)
+			targetCells = targetCells.CellSlice(grid).FilterByPossible(i).CellReferenceSlice()
 
 			//Okay, we found a pair that works. Create a step for it (if it's useful)
 			step := &SolveStep{self, targetCells, IntSlice{i}, append(currentGroups[0], currentGroups[1]...), nil, nil}

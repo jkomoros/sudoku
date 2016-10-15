@@ -69,7 +69,7 @@ func (self *guessTechnique) find(grid Grid, coordinator findCoordinator) {
 		num := cellInSolvedGrid.Number()
 		step := &SolveStep{
 			Technique:   self,
-			TargetCells: CellSlice{cell},
+			TargetCells: CellReferenceSlice{cell.Reference()},
 			TargetNums:  IntSlice{num},
 		}
 

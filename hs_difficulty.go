@@ -102,7 +102,7 @@ func (self SolveDirections) Stats() []string {
 	steps := self.Steps()
 	for _, step := range steps {
 		if lastStep != nil {
-			similarityAccum += step.TargetCells.CellReferenceSlice().chainSimilarity(lastStep.TargetCells.CellReferenceSlice())
+			similarityAccum += step.TargetCells.chainSimilarity(lastStep.TargetCells)
 		}
 		techniqueCount[step.TechniqueVariant()] += 1
 		lastStep = step

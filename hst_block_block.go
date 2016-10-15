@@ -48,8 +48,8 @@ func (self *blockBlockInteractionTechnique) find(grid Grid, coordinator findCoor
 				continue
 			}
 			//Find cells in each block that have that possibility.
-			firstBlockCells := unfilledCellsForBlock[pair[0]].FilterByPossible(i)
-			secondBlockCells := unfilledCellsForBlock[pair[1]].FilterByPossible(i)
+			firstBlockCells := unfilledCellsForBlock[pair[0]].FilterByPossible(i).CellReferenceSlice()
+			secondBlockCells := unfilledCellsForBlock[pair[1]].FilterByPossible(i).CellReferenceSlice()
 
 			//Now we need to figure out if these blocks are in the same row or same col
 			var majorAxisIsRow bool
@@ -68,11 +68,11 @@ func (self *blockBlockInteractionTechnique) find(grid Grid, coordinator findCoor
 			var blockTwoIndexes IntSlice
 
 			if majorAxisIsRow {
-				blockOneIndexes = firstBlockCells.CollectNums(getRow).Unique()
-				blockTwoIndexes = secondBlockCells.CollectNums(getRow).Unique()
+				blockOneIndexes = firstBlockCells.AllRows().Unique()
+				blockTwoIndexes = secondBlockCells.AllRows().Unique()
 			} else {
-				blockOneIndexes = firstBlockCells.CollectNums(getCol).Unique()
-				blockTwoIndexes = secondBlockCells.CollectNums(getCol).Unique()
+				blockOneIndexes = firstBlockCells.AllCols().Unique()
+				blockTwoIndexes = secondBlockCells.AllCols().Unique()
 			}
 
 			if len(blockOneIndexes) != 2 || len(blockTwoIndexes) != 2 {
@@ -85,16 +85,16 @@ func (self *blockBlockInteractionTechnique) find(grid Grid, coordinator findCoor
 				continue
 			}
 
-			var targetCells CellSlice
+			var targetCells CellReferenceSlice
 
 			if majorAxisIsRow {
-				targetCells = grid.Row(blockOneIndexes[0])
-				targetCells = append(targetCells, grid.Row(blockOneIndexes[1])...)
-				targetCells = targetCells.RemoveCells(grid.Block(pair[0])).RemoveCells(grid.Block(pair[1]))
+				targetCells = row(blockOneIndexes[0])
+				targetCells = append(targetCells, row(blockOneIndexes[1])...)
+				targetCells = targetCells.RemoveCells(block(pair[0])).RemoveCells(block(pair[1]))
 			} else {
-				targetCells = grid.Col(blockOneIndexes[0])
-				targetCells = append(targetCells, grid.Col(blockOneIndexes[1])...)
-				targetCells = targetCells.RemoveCells(grid.Block(pair[0])).RemoveCells(grid.Block(pair[1]))
+				targetCells = col(blockOneIndexes[0])
+				targetCells = append(targetCells, col(blockOneIndexes[1])...)
+				targetCells = targetCells.RemoveCells(block(pair[0])).RemoveCells(block(pair[1]))
 			}
 
 			//Okay, we have a possible set. Now we need to create a step.
@@ -122,7 +122,7 @@ func (self *blockBlockInteractionTechnique) Description(step *SolveStep) string 
 		return ""
 	}
 
-	blockNums := step.PointerCells.CollectNums(getBlock).Unique()
+	blockNums := step.PointerCells.AllBlocks()
 	if len(blockNums) != 2 {
 		return ""
 	}

@@ -82,100 +82,108 @@ func TestTwiddlePointingTargetOverlap(t *testing.T) {
 	}{
 		{
 			&SolveStep{
-				TargetCells: grid.Row(0),
+				TargetCells: row(0),
 			},
 			&SolveStep{
-				PointerCells: grid.Row(0),
+				PointerCells: row(0),
 			},
 			0.000001,
 			"Full pointer/cell overlap",
 		},
 		{
 			&SolveStep{
-				TargetCells: grid.Row(0),
+				TargetCells: row(0),
 			},
 			&SolveStep{
-				TargetCells: grid.Row(0),
+				TargetCells: row(0),
 			},
 			0.010000000000000018,
 			"Full target/target overlap",
 		},
 		{
 			&SolveStep{
-				TargetCells: grid.Row(0),
+				TargetCells: row(0),
 			},
 			&SolveStep{
-				TargetCells: CellSlice{grid.Cell(0, 0)},
+				TargetCells: CellReferenceSlice{
+					CellReference{0, 0},
+				},
 			},
 			0.7704938271604939,
 			"Single cell out of 9",
 		},
 		{
 			&SolveStep{
-				TargetCells: grid.Row(0).Intersection(grid.Block(0)),
+				TargetCells: row(0).Intersection(block(0)),
 			},
 			&SolveStep{
-				TargetCells: CellSlice{grid.Cell(0, 0)},
+				TargetCells: CellReferenceSlice{
+					CellReference{0, 0},
+				},
 			},
 			0.4011111111111111,
 			"Single cell out of three",
 		},
 		{
 			&SolveStep{
-				TargetCells: grid.Row(0),
+				TargetCells: row(0),
 			},
 			&SolveStep{
-				TargetCells: grid.Row(7),
+				TargetCells: row(7),
 			},
 			1.0,
 			"Two rows no overlap",
 		},
 		{
 			&SolveStep{
-				TargetCells: grid.Row(0).Intersection(grid.Block(0)),
+				TargetCells: row(0).Intersection(block(0)),
 			},
 			&SolveStep{
-				TargetCells: grid.Row(DIM - 1).Intersection(grid.Block(DIM - 1)),
+				TargetCells: row(DIM - 1).Intersection(block(DIM - 1)),
 			},
 			1.0,
 			"Two three-cell rows no overlap",
 		},
 		{
 			&SolveStep{
-				TargetCells: CellSlice{grid.Cell(0, 0)},
+				TargetCells: CellReferenceSlice{
+					CellReference{0, 0},
+				},
 			},
 			&SolveStep{
-				TargetCells: CellSlice{grid.Cell(0, 0)},
+				TargetCells: CellReferenceSlice{
+					CellReference{0, 0},
+				},
 			},
 			0.010000000000000018,
 			"Two individual cells overlapping",
 		},
 		{
 			&SolveStep{
-				TargetCells: grid.Row(0),
+				TargetCells: row(0),
 			},
 			&SolveStep{
-				TargetCells: grid.Col(0),
+				TargetCells: col(0),
 			},
 			0.8747750865051903,
 			"Row and col intersecting at one point",
 		},
 		{
 			&SolveStep{
-				TargetCells: grid.Row(0),
+				TargetCells: row(0),
 			},
 			&SolveStep{
-				TargetCells: grid.Block(0),
+				TargetCells: block(0),
 			},
 			0.6084,
 			"First row and first block overlapping",
 		},
 		{
 			&SolveStep{
-				TargetCells: grid.Row(0).Intersection(grid.Block(0)),
+				TargetCells: row(0).Intersection(block(0)),
 			},
 			&SolveStep{
-				TargetCells: grid.Block(0),
+				TargetCells: block(0),
 			},
 			0.4011111111111111,
 			"First three cells and first block overlapping",
@@ -211,7 +219,7 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 		//Step with 2 filled
 		{
 			techniquesByName["Only Legal Number"],
-			cellRefsToCells(CellReferenceSlice{{1, 0}}, grid),
+			CellReferenceSlice{{1, 0}},
 			IntSlice{8},
 			nil,
 			nil,
@@ -220,7 +228,7 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 		//Step with non-fill technique
 		{
 			techniquesByName["Hidden Pair Block"],
-			cellRefsToCells(CellReferenceSlice{{1, 0}}, grid),
+			CellReferenceSlice{{1, 0}},
 			IntSlice{8},
 			nil,
 			nil,
@@ -229,7 +237,7 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 		//High valued 1
 		{
 			techniquesByName["Only Legal Number"],
-			cellRefsToCells(CellReferenceSlice{{0, 4}}, grid),
+			CellReferenceSlice{{0, 4}},
 			IntSlice{5},
 			nil,
 			nil,
@@ -238,7 +246,7 @@ func TestTwiddleCommonNumbers(t *testing.T) {
 		//Already-filled number
 		{
 			techniquesByName["Only Legal Number"],
-			cellRefsToCells(CellReferenceSlice{{0, 4}}, grid),
+			CellReferenceSlice{{0, 4}},
 			IntSlice{4},
 			nil,
 			nil,
@@ -268,9 +276,7 @@ func TestTwiddleChainedSteps(t *testing.T) {
 	lastStep := []*SolveStep{
 		{
 			nil,
-			cellRefsToCells(CellReferenceSlice{
-				{0, 0},
-			}, grid),
+			CellReferenceSlice{{0, 0}},
 			nil,
 			nil,
 			nil,
@@ -281,9 +287,9 @@ func TestTwiddleChainedSteps(t *testing.T) {
 	possibilities := []*SolveStep{
 		{
 			nil,
-			cellRefsToCells(CellReferenceSlice{
+			CellReferenceSlice{
 				{1, 0},
-			}, grid),
+			},
 			nil,
 			nil,
 			nil,
@@ -291,9 +297,9 @@ func TestTwiddleChainedSteps(t *testing.T) {
 		},
 		{
 			nil,
-			cellRefsToCells(CellReferenceSlice{
+			CellReferenceSlice{
 				{2, 2},
-			}, grid),
+			},
 			nil,
 			nil,
 			nil,
@@ -301,9 +307,9 @@ func TestTwiddleChainedSteps(t *testing.T) {
 		},
 		{
 			nil,
-			cellRefsToCells(CellReferenceSlice{
+			CellReferenceSlice{
 				{7, 7},
-			}, grid),
+			},
 			nil,
 			nil,
 			nil,
@@ -342,8 +348,8 @@ func TestTwiddlePreferFilledGroups(t *testing.T) {
 	keyCell := grid.MutableCell(0, 0)
 
 	step := &SolveStep{
-		TargetCells: CellSlice{
-			keyCell,
+		TargetCells: CellReferenceSlice{
+			keyCell.Reference(),
 		},
 		Technique: techniquesByName["Only Legal Number"],
 	}

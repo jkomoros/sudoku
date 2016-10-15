@@ -207,7 +207,7 @@ func twiddleCommonNumbers(proposedStep *SolveStep, inProgressCompoundStep []*Sol
 //will have 'chains' of steps that are all related.
 func twiddleChainedSteps(proposedStep *SolveStep, inProgressCompoundStep []*SolveStep, pastSteps []*CompoundSolveStep, previousGrid Grid) probabilityTweak {
 
-	var lastModifiedCells CellSlice
+	var lastModifiedCells CellReferenceSlice
 
 	if len(inProgressCompoundStep) > 0 {
 		lastModifiedCells = inProgressCompoundStep[len(inProgressCompoundStep)-1].TargetCells
@@ -228,7 +228,7 @@ func twiddleChainedSteps(proposedStep *SolveStep, inProgressCompoundStep []*Solv
 	//Logically we should be attenuating Dissimilarity here, but for some reason the math.Pow(dissimilairty, 10) doesn't actually
 	//appear to work here, which is maddening.
 
-	similarity := proposedStep.TargetCells.CellReferenceSlice().chainSimilarity(lastModifiedCells.CellReferenceSlice())
+	similarity := proposedStep.TargetCells.chainSimilarity(lastModifiedCells)
 
 	//We want it to be dissimilar is larger; flip it.
 	dissimilarity := 1.0 - similarity
@@ -258,8 +258,8 @@ func twiddlePreferFilledGroups(proposedStep *SolveStep, inProgressCompoundStep [
 	//We want unfilled, because lower is better.
 
 	blockUnfilledCount := len(previousGrid.Block(cell.Block()).FilterByUnfilled())
-	rowUnfilledCount := len(previousGrid.Row(cell.Row()).FilterByUnfilled())
-	colUnfilledCount := len(previousGrid.Col(cell.Col()).FilterByUnfilled())
+	rowUnfilledCount := len(previousGrid.Row(cell.Row).FilterByUnfilled())
+	colUnfilledCount := len(previousGrid.Col(cell.Col).FilterByUnfilled())
 
 	//Use DIM-1 because of course one item in that collection is unfilled--the
 	//Target Cell for this step!
