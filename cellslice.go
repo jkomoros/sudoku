@@ -884,9 +884,37 @@ func (self CellSlice) CellReferenceSlice() CellReferenceSlice {
 }
 
 func (self CellSlice) sameAsRefs(refs CellReferenceSlice) bool {
+
+	//TODO: audit all of the private methods on CellSlice, MutableCellSlice
+	//now that we might not use them since we use something on
+	//CellReferenceSlice.
 	cellSet := make(map[string]bool)
 	for _, cell := range self {
 		cellSet[cell.Reference().String()] = true
+	}
+
+	refSet := make(map[string]bool)
+	for _, ref := range refs {
+		refSet[ref.String()] = true
+	}
+
+	if len(cellSet) != len(refSet) {
+		return false
+	}
+
+	for item := range cellSet {
+		if _, ok := refSet[item]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (self CellReferenceSlice) sameAs(refs CellReferenceSlice) bool {
+	cellSet := make(map[string]bool)
+	for _, cell := range self {
+		cellSet[cell.String()] = true
 	}
 
 	refSet := make(map[string]bool)
