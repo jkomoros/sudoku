@@ -1147,6 +1147,16 @@ func (self cellSet) toSlice(grid Grid) CellSlice {
 	return result
 }
 
+func (self cellSet) toReferenceSlice() CellReferenceSlice {
+	var result CellReferenceSlice
+	for item, val := range self {
+		if val {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
 func (self cellSet) toMutableSlice(grid MutableGrid) MutableCellSlice {
 	var result MutableCellSlice
 	for item, val := range self {
@@ -1263,6 +1273,15 @@ func (self MutableCellSlice) Intersection(other CellSlice) MutableCellSlice {
 	return self.toCellSet().intersection(other.toCellSet()).toMutableSlice(grid)
 }
 
+//Intersection returns a new CellSlice that represents the intersection of the
+//two CellReferenceSlices; that is, the cells that appear in both slices.
+func (self CellReferenceSlice) Intersection(other CellReferenceSlice) CellReferenceSlice {
+	if len(self) == 0 {
+		return nil
+	}
+	return self.toCellSet().intersection(other.toCellSet()).toReferenceSlice()
+}
+
 //Difference returns a new CellSlice that contains all of the cells in the
 //receiver that are not also in the other.
 func (self CellSlice) Difference(other CellSlice) CellSlice {
@@ -1283,6 +1302,15 @@ func (self MutableCellSlice) Difference(other CellSlice) MutableCellSlice {
 	return self.toCellSet().difference(other.toCellSet()).toMutableSlice(grid)
 }
 
+//Difference returns a new CellReferenceSlice that contains all of the cells in the
+//receiver that are not also in the other.
+func (self CellReferenceSlice) Difference(other CellReferenceSlice) CellReferenceSlice {
+	if len(self) == 0 {
+		return nil
+	}
+	return self.toCellSet().difference(other.toCellSet()).toReferenceSlice()
+}
+
 //Union returns a new CellSlice that contains all of the cells that are in
 //either the receiver or the other CellSlice.
 func (self CellSlice) Union(other CellSlice) CellSlice {
@@ -1301,4 +1329,13 @@ func (self MutableCellSlice) Union(other CellSlice) MutableCellSlice {
 	}
 	grid := self[0].MutableGrid()
 	return self.toCellSet().union(other.toCellSet()).toMutableSlice(grid)
+}
+
+//Union returns a new CellSlice that contains all of the cells that are in
+//either the receiver or the other CellSlice.
+func (self CellReferenceSlice) Union(other CellReferenceSlice) CellReferenceSlice {
+	if len(self) == 0 {
+		return nil
+	}
+	return self.toCellSet().union(other.toCellSet()).toReferenceSlice()
 }
