@@ -500,7 +500,7 @@ func (c *mainController) ShowDebugHint() {
 		{
 			FillStep: &sudoku.SolveStep{
 				Technique:   sudoku.Techniques[0],
-				TargetCells: c.model.LastModifiedCells(),
+				TargetCells: c.model.LastModifiedCells().CellReferenceSlice(),
 			},
 		},
 	}
@@ -556,7 +556,7 @@ func (c *mainController) ShowHint() {
 		{
 			FillStep: &sudoku.SolveStep{
 				Technique:   sudoku.Techniques[0],
-				TargetCells: c.model.LastModifiedCells(),
+				TargetCells: c.model.LastModifiedCells().CellReferenceSlice(),
 			},
 		},
 	}
@@ -571,7 +571,7 @@ func (c *mainController) ShowHint() {
 	//This hast to be after setting console message, since SetConsoleMessage clears the last hint.
 	c.lastShownHint = hint
 	lastStep := hint.CompoundSteps[0].FillStep
-	c.SetSelected(lastStep.TargetCells[0].MutableInGrid(c.Grid()))
+	c.SetSelected(lastStep.TargetCells[0].MutableCell(c.Grid()))
 }
 
 func (c *mainController) EnterHint() {
@@ -582,7 +582,7 @@ func (c *mainController) EnterHint() {
 	cell := lastStep.TargetCells[0]
 	num := lastStep.TargetNums[0]
 
-	c.SetSelected(cell.MutableInGrid(c.Grid()))
+	c.SetSelected(cell.MutableCell(c.Grid()))
 	c.SetSelectedNumber(num)
 
 	c.ClearConsole()
@@ -787,7 +787,7 @@ func (c *mainController) checkHintDone() {
 	lastStep := c.lastShownHint.CompoundSteps[0].FillStep
 	num := lastStep.TargetNums[0]
 	cell := lastStep.TargetCells[0]
-	if cell.InGrid(c.Grid()).Number() == num {
+	if cell.Cell(c.Grid()).Number() == num {
 		c.ClearConsole()
 	}
 }
