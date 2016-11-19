@@ -491,7 +491,9 @@ func calcluateGridDifficulty(grid Grid, accurate bool) float64 {
 	average := 0.0
 	lastAverage := 0.0
 
-	//TODO: ... this is a no-op, right? Why is it here?
+	//TODO: ... this is a no-op, right? Why is it here? Presumably so that
+	//when every copy called HasMultipleSolutions at the top of HumanSolution
+	//it would already be cached?
 	grid.HasMultipleSolutions()
 
 	//Since this is so expensive, in testing situations we want to run it in less accurate mode (so it goes fast!)
