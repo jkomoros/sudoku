@@ -20,10 +20,6 @@ type MutableCellSlice []MutableCell
 
 //TODO: remove more CellSlice methods that aren't necessary anymore.
 
-//TODO: crazy idea: CellReference should just be an interface with Row(),
-//Col(), Block(). That way actual cells could be used. ... But then actual
-//cellsw ould have to grow a Cell, MutableCell.
-
 //CellReferenceSlice is a slice of CellReferences with many convenience methods.
 type CellRefSlice []CellRef
 
