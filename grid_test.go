@@ -870,6 +870,9 @@ func BenchmarkAdvancedSolve(b *testing.B) {
 }
 
 func BenchmarkDifficulty(b *testing.B) {
+	//NOTE: this benchmark is exceptionally noisy--it's heavily dependent on
+	//how quickly the difficulty converges given the specific HumanSolutions
+	//generated.
 	for i := 0; i < b.N; i++ {
 		grid := LoadSDK(ADVANCED_TEST_GRID)
 		grid.Difficulty()
