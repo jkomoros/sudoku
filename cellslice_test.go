@@ -81,7 +81,7 @@ func TestBasicCellSlice(t *testing.T) {
 		t.Fail()
 	}
 
-	description := cells.Description()
+	description := cells.CellReferenceSlice().Description()
 
 	if description != "(0,0), (0,1), and (0,2)" {
 		t.Log("Got wrong description of cellList: ", description)
