@@ -6,7 +6,7 @@ import (
 
 func TestObviousInCollectionRow(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		targetCells: []cellRef{{2, 3}},
+		targetCells: []CellRef{{2, 3}},
 		targetSame:  _GROUP_ROW,
 		targetGroup: 2,
 		targetNums:  IntSlice([]int{7}),
@@ -20,7 +20,7 @@ func TestObviousInCollectionRow(t *testing.T) {
 func TestObviousInCollectionCol(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
 		transpose:   true,
-		targetCells: []cellRef{{3, 2}},
+		targetCells: []CellRef{{3, 2}},
 		targetSame:  _GROUP_COL,
 		targetGroup: 2,
 		targetNums:  IntSlice([]int{7}),
@@ -33,7 +33,7 @@ func TestObviousInCollectionCol(t *testing.T) {
 
 func TestObviousInCollectionBlock(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		targetCells: []cellRef{{4, 1}},
+		targetCells: []CellRef{{4, 1}},
 		targetSame:  _GROUP_BLOCK,
 		targetGroup: 3,
 		targetNums:  IntSlice([]int{9}),
@@ -92,7 +92,7 @@ func TestSolveOnlyLegalNumber(t *testing.T) {
 
 	cellFromStep := step.TargetCells[0]
 
-	if cellFromStep.Col() != 3 || cellFromStep.Row() != 3 {
+	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
 		t.Log("The only legal number technique identified the wrong cell.")
 		t.Fail()
 	}
@@ -175,7 +175,7 @@ func TestNecessaryInRow(t *testing.T) {
 
 	cellFromStep := step.TargetCells[0]
 
-	if cellFromStep.Col() != 3 || cellFromStep.Row() != 3 {
+	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
 		t.Log("The necessary in row technique identified the wrong cell.")
 		t.Fail()
 	}
@@ -260,7 +260,7 @@ func TestNecessaryInCol(t *testing.T) {
 
 	cellFromStep := step.TargetCells[0]
 
-	if cellFromStep.Col() != 3 || cellFromStep.Row() != 3 {
+	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
 		t.Log("The necessary in col technique identified the wrong cell.")
 		t.Fail()
 	}
@@ -345,7 +345,7 @@ func TestNecessaryInBlock(t *testing.T) {
 
 	cellFromStep := step.TargetCells[0]
 
-	if cellFromStep.Col() != 3 || cellFromStep.Row() != 3 {
+	if cellFromStep.Col != 3 || cellFromStep.Row != 3 {
 		t.Log("The necessary in block technique identified the wrong cell.")
 		t.Fail()
 	}

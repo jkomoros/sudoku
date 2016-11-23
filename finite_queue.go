@@ -25,7 +25,7 @@ type queueGetter interface {
 //value of a previous queue, then calling fix().
 type readOnlyCellQueue struct {
 	grid     Grid
-	cellRefs [DIM * DIM]cellRef
+	cellRefs [DIM * DIM]CellRef
 }
 
 type readOnlyCellQueueGetter struct {
@@ -109,7 +109,7 @@ func (r *readOnlyCellQueue) defaultRefs() {
 	counter := 0
 	for row := 0; row < DIM; row++ {
 		for col := 0; col < DIM; col++ {
-			r.cellRefs[counter] = cellRef{row, col}
+			r.cellRefs[counter] = CellRef{row, col}
 			counter++
 		}
 	}

@@ -44,12 +44,13 @@ func TestHumanSolveAlmostSolvedGrid(t *testing.T) {
 }
 
 func TestCompoundSolveStepModifications(t *testing.T) {
-	grid := NewGrid()
 
 	solveStep := &SolveStep{
-		Technique:   techniquesByName["Only Legal Number"],
-		TargetNums:  IntSlice{1},
-		TargetCells: CellSlice{grid.Cell(0, 0)},
+		Technique:  techniquesByName["Only Legal Number"],
+		TargetNums: IntSlice{1},
+		TargetCells: CellRefSlice{
+			CellRef{0, 0},
+		},
 	}
 
 	tests := []struct {
@@ -87,7 +88,6 @@ func TestCompoundSolveStepModifications(t *testing.T) {
 }
 
 func TestSolveStepModifications(t *testing.T) {
-	grid := NewGrid()
 	tests := []struct {
 		step        *SolveStep
 		expected    GridModification
@@ -96,26 +96,26 @@ func TestSolveStepModifications(t *testing.T) {
 		{
 			&SolveStep{
 				Technique: techniquesByName["Only Legal Number"],
-				TargetCells: CellSlice{
-					grid.Cell(0, 0),
-					grid.Cell(0, 1),
-					grid.Cell(0, 2),
+				TargetCells: CellRefSlice{
+					CellRef{0, 0},
+					CellRef{0, 1},
+					CellRef{0, 2},
 				},
 				TargetNums: IntSlice{1},
 			},
 			GridModification{
 				&CellModification{
-					Cell:            grid.Cell(0, 0),
+					Cell:            CellRef{0, 0},
 					Number:          1,
 					ExcludesChanges: make(map[int]bool),
 				},
 				&CellModification{
-					Cell:            grid.Cell(0, 1),
+					Cell:            CellRef{0, 1},
 					Number:          1,
 					ExcludesChanges: make(map[int]bool),
 				},
 				&CellModification{
-					Cell:            grid.Cell(0, 2),
+					Cell:            CellRef{0, 2},
 					Number:          1,
 					ExcludesChanges: make(map[int]bool),
 				},
@@ -125,16 +125,16 @@ func TestSolveStepModifications(t *testing.T) {
 		{
 			&SolveStep{
 				Technique: techniquesByName["Pointing Pair Row"],
-				TargetCells: CellSlice{
-					grid.Cell(0, 0),
-					grid.Cell(0, 1),
-					grid.Cell(0, 2),
+				TargetCells: CellRefSlice{
+					CellRef{0, 0},
+					CellRef{0, 1},
+					CellRef{0, 2},
 				},
 				TargetNums: IntSlice{1, 2},
 			},
 			GridModification{
 				&CellModification{
-					Cell:   grid.Cell(0, 0),
+					Cell:   CellRef{0, 0},
 					Number: -1,
 					ExcludesChanges: map[int]bool{
 						1: true,
@@ -142,7 +142,7 @@ func TestSolveStepModifications(t *testing.T) {
 					},
 				},
 				&CellModification{
-					Cell:   grid.Cell(0, 1),
+					Cell:   CellRef{0, 1},
 					Number: -1,
 					ExcludesChanges: map[int]bool{
 						1: true,
@@ -150,7 +150,7 @@ func TestSolveStepModifications(t *testing.T) {
 					},
 				},
 				&CellModification{
-					Cell:   grid.Cell(0, 2),
+					Cell:   CellRef{0, 2},
 					Number: -1,
 					ExcludesChanges: map[int]bool{
 						1: true,
@@ -527,8 +527,8 @@ func TestStepsDescription(t *testing.T) {
 			{
 				FillStep: &SolveStep{
 					techniquesByName["Only Legal Number"],
-					CellSlice{
-						grid.Cell(0, 0),
+					CellRefSlice{
+						CellRef{0, 0},
 					},
 					IntSlice{1},
 					nil,
@@ -540,14 +540,14 @@ func TestStepsDescription(t *testing.T) {
 				PrecursorSteps: []*SolveStep{
 					{
 						techniquesByName["Pointing Pair Col"],
-						CellSlice{
-							grid.Cell(1, 0),
-							grid.Cell(1, 1),
+						CellRefSlice{
+							CellRef{1, 0},
+							CellRef{1, 1},
 						},
 						IntSlice{1, 2},
-						CellSlice{
-							grid.Cell(1, 3),
-							grid.Cell(1, 4),
+						CellRefSlice{
+							CellRef{1, 3},
+							CellRef{1, 4},
 						},
 						nil,
 						nil,
@@ -555,8 +555,8 @@ func TestStepsDescription(t *testing.T) {
 				},
 				FillStep: &SolveStep{
 					techniquesByName["Only Legal Number"],
-					CellSlice{
-						grid.Cell(2, 0),
+					CellRefSlice{
+						CellRef{2, 0},
 					},
 					IntSlice{2},
 					nil,
@@ -584,15 +584,6 @@ func TestStepsDescription(t *testing.T) {
 			t.Fail()
 		}
 	}
-}
-
-//TODO: this is useful. Should we use this in other tests?
-func cellRefsToCells(refs []cellRef, grid Grid) CellSlice {
-	var result CellSlice
-	for _, ref := range refs {
-		result = append(result, ref.Cell(grid))
-	}
-	return result
 }
 
 func TestPuzzleDifficulty(t *testing.T) {

@@ -151,9 +151,9 @@ func (self *xywingTechnique) find(grid Grid, coordinator findCoordinator) {
 							chunkedAffectedCells := affectedCells.Filter(filter)
 
 							step := &SolveStep{self,
-								chunkedAffectedCells,
+								chunkedAffectedCells.CellReferenceSlice(),
 								IntSlice{z},
-								CellSlice{pivotCell, xCell, yCell},
+								CellRefSlice{pivotCell.Reference(), xCell.Reference(), yCell.Reference()},
 								IntSlice{x, y, z},
 								nil,
 							}
@@ -169,9 +169,9 @@ func (self *xywingTechnique) find(grid Grid, coordinator findCoordinator) {
 
 					//Okay, we have a candidate step (unchunked). Is it useful?
 					step := &SolveStep{self,
-						affectedCells,
+						affectedCells.CellReferenceSlice(),
 						IntSlice{z},
-						CellSlice{pivotCell, xCell, yCell},
+						CellRefSlice{pivotCell.Reference(), xCell.Reference(), yCell.Reference()},
 						IntSlice{x, y, z},
 						nil,
 					}

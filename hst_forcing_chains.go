@@ -113,8 +113,8 @@ func (self *forcingChainsTechnique) find(grid Grid, coordinator findCoordinator)
 
 		//Check that the neighbor isn't just already having a single possibility, because then this technique is overkill.
 
-		firstAccumulator := &chainSearcherAccumulator{make(map[cellRef]IntSlice), make(map[cellRef]IntSlice)}
-		secondAccumulator := &chainSearcherAccumulator{make(map[cellRef]IntSlice), make(map[cellRef]IntSlice)}
+		firstAccumulator := &chainSearcherAccumulator{make(map[CellRef]IntSlice), make(map[CellRef]IntSlice)}
+		secondAccumulator := &chainSearcherAccumulator{make(map[CellRef]IntSlice), make(map[CellRef]IntSlice)}
 
 		chainSearcher(0, _MAX_IMPLICATION_STEPS,
 			candidateCell.MutableInGrid(firstGrid),
@@ -153,9 +153,9 @@ func (self *forcingChainsTechnique) find(grid Grid, coordinator findCoordinator)
 
 				//Okay, we have a candidate step. Is it useful?
 				step := &SolveStep{self,
-					CellSlice{cell.Cell(grid)},
+					CellRefSlice{cell},
 					IntSlice{numSlice[0]},
-					CellSlice{candidateCell},
+					CellRefSlice{candidateCell.Reference()},
 					candidateCell.Possibilities(),
 					numImplicationSteps,
 				}
@@ -185,8 +185,8 @@ func (self *forcingChainsTechnique) find(grid Grid, coordinator findCoordinator)
 }
 
 type chainSearcherAccumulator struct {
-	numbers         map[cellRef]IntSlice
-	firstGeneration map[cellRef]IntSlice
+	numbers         map[CellRef]IntSlice
+	firstGeneration map[CellRef]IntSlice
 }
 
 func (c *chainSearcherAccumulator) String() string {
@@ -254,8 +254,8 @@ func chainSearcher(generation int, maxGeneration int, cell MutableCell, numToApp
 	cell.SetNumber(numToApply)
 
 	//Accumulate information about this cell being set. We'll reduce out duplicates later.
-	accum.numbers[cell.ref()] = append(accum.numbers[cell.ref()], numToApply)
-	accum.firstGeneration[cell.ref()] = append(accum.firstGeneration[cell.ref()], generation)
+	accum.numbers[cell.Reference()] = append(accum.numbers[cell.Reference()], numToApply)
+	accum.firstGeneration[cell.Reference()] = append(accum.firstGeneration[cell.Reference()], generation)
 
 	for _, cellToVisit := range cellsToVisit {
 		possibilities := cellToVisit.Possibilities()

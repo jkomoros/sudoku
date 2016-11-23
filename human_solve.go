@@ -57,12 +57,12 @@ type SolveStep struct {
 	//The technique that was used to identify that this step is logically valid at this point in the solution.
 	Technique SolveTechnique
 	//The cells that will be affected by the techinque (either the number to fill in or possibilities to exclude).
-	TargetCells CellSlice
+	TargetCells CellRefSlice
 	//The numbers we will remove (or, in the case of Fill, add) to the TargetCells.
 	TargetNums IntSlice
 	//The cells that together lead the techinque to logically apply in this case; the cells behind the reasoning
 	//why the TargetCells will be mutated in the way specified by this SolveStep.
-	PointerCells CellSlice
+	PointerCells CellRefSlice
 	//The specific numbers in PointerCells that lead us to remove TargetNums from TargetCells.
 	//This is only very rarely needed (at this time only for hiddenSubset techniques)
 	PointerNums IntSlice
@@ -205,12 +205,12 @@ func (self *SolveStep) IsUseful(grid Grid) bool {
 		if len(self.TargetCells) == 0 || len(self.TargetNums) == 0 {
 			return false
 		}
-		cell := self.TargetCells[0].InGrid(grid)
+		cell := self.TargetCells[0].Cell(grid)
 		return self.TargetNums[0] != cell.Number()
 	} else {
 		useful := false
 		for _, cell := range self.TargetCells {
-			gridCell := cell.InGrid(grid)
+			gridCell := cell.Cell(grid)
 			for _, exclude := range self.TargetNums {
 				//It's right to use Possible because it includes the logic of "it's not possible if there's a number in there already"
 				//TODO: ensure the comment above is correct logically.
@@ -231,11 +231,11 @@ func (self *SolveStep) Apply(grid MutableGrid) {
 		if len(self.TargetCells) == 0 || len(self.TargetNums) == 0 {
 			return
 		}
-		cell := self.TargetCells[0].MutableInGrid(grid)
+		cell := self.TargetCells[0].MutableCell(grid)
 		cell.SetNumber(self.TargetNums[0])
 	} else {
 		for _, cell := range self.TargetCells {
-			gridCell := cell.MutableInGrid(grid)
+			gridCell := cell.MutableCell(grid)
 			for _, exclude := range self.TargetNums {
 				gridCell.SetExcluded(exclude, true)
 			}
@@ -386,7 +386,7 @@ func (c *CompoundSolveStep) Description() string {
 	}
 
 	var result []string
-	result = append(result, "Based on the other numbers you've entered, "+c.FillStep.TargetCells[0].ref().String()+" can only be a "+strconv.Itoa(c.FillStep.TargetNums[0])+".")
+	result = append(result, "Based on the other numbers you've entered, "+c.FillStep.TargetCells[0].String()+" can only be a "+strconv.Itoa(c.FillStep.TargetNums[0])+".")
 	result = append(result, "How do we know that?")
 	if len(c.PrecursorSteps) > 0 {
 		result = append(result, "We can't fill any cells right away so first we need to cull some possibilities.")
@@ -491,6 +491,9 @@ func calcluateGridDifficulty(grid Grid, accurate bool) float64 {
 	average := 0.0
 	lastAverage := 0.0
 
+	//TODO: ... this is a no-op, right? Why is it here? Presumably so that
+	//when every copy called HasMultipleSolutions at the top of HumanSolution
+	//it would already be cached?
 	grid.HasMultipleSolutions()
 
 	//Since this is so expensive, in testing situations we want to run it in less accurate mode (so it goes fast!)

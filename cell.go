@@ -97,10 +97,12 @@ type Cell interface {
 	//Grid returns a reference to the Grid that this Cell is associated with.
 	Grid() Grid
 
+	//Reference returns a CellReference corresponding to this cell.
+	Reference() CellRef
+
 	//The following are methods that are only internal. Some of them are
 	//nasty.
 
-	ref() cellRef
 	diagramRows(showMarks bool) []string
 	dataString() string
 	rank() int
@@ -208,10 +210,7 @@ type mutableCellImpl struct {
 func newCell(grid *mutableGridImpl, row int, col int) mutableCellImpl {
 	var block int
 
-	//Grid is only nil in contrived tests.
-	if grid != nil {
-		block = grid.blockForCell(row, col)
-	}
+	block = blockForCell(row, col)
 
 	return mutableCellImpl{cellImpl: cellImpl{gridRef: grid, row: row, col: col, block: block},
 		mutableGridRef: grid,
@@ -580,8 +579,8 @@ func (self *cellImpl) rank() int {
 	return count
 }
 
-func (self *cellImpl) ref() cellRef {
-	return cellRef{self.Row(), self.Col()}
+func (self *cellImpl) Reference() CellRef {
+	return CellRef{self.Row(), self.Col()}
 }
 
 //Sets ourselves to a random one of our possibilities.
@@ -689,37 +688,49 @@ func (self *mutableCellImpl) Neighbors() CellSlice {
 
 }
 
-//Neighbors doesn't cache its work (at least right now)
-func (self *cellImpl) Neighbors() CellSlice {
+func neighbors(cell CellRef) CellRefSlice {
+	//Neighbors takes advantage of the work we did at init time to cache all neighbor slices.
+	return neighborCache[cell]
+}
+
+//calcNeighbors actually calculates the neighbors slice for the given cell.
+func calcNeighbors(cell CellRef) CellRefSlice {
+
 	//We don't want duplicates, so we will collect in a map (used as a set) and then reduce.
-	neighborsMap := make(map[Cell]bool)
-	for _, cell := range self.gridRef.Row(self.Row()) {
-		if cell.Row() == self.Row() && cell.Col() == self.Col() {
+
+	neighborsMap := make(map[CellRef]bool)
+	for _, other := range row(cell.Row) {
+		if cell.Row == other.Row && cell.Col == other.Col {
 			continue
 		}
-		neighborsMap[cell] = true
+		neighborsMap[other] = true
 	}
-	for _, cell := range self.gridRef.Col(self.Col()) {
-		if cell.Row() == self.Row() && cell.Col() == self.Col() {
+	for _, other := range col(cell.Col) {
+		if cell.Row == other.Row && cell.Col == other.Col {
 			continue
 		}
-		neighborsMap[cell] = true
+		neighborsMap[other] = true
 	}
-	for _, cell := range self.gridRef.Block(self.Block()) {
-		if cell.Row() == self.Row() && cell.Col() == self.Col() {
+	for _, other := range block(cell.Block()) {
+		if cell.Row == other.Row && cell.Col == other.Col {
 			continue
 		}
-		neighborsMap[cell] = true
+		neighborsMap[other] = true
 	}
 
-	neighbors := make(CellSlice, len(neighborsMap))
+	neighbors := make(CellRefSlice, len(neighborsMap))
 	i := 0
 	for cell := range neighborsMap {
 		neighbors[i] = cell
 		i++
 	}
 	return neighbors
+}
 
+//Neighbors doesn't cache its work (at least right now)
+func (self *cellImpl) Neighbors() CellSlice {
+	//TODO: consider caching this.
+	return neighbors(self.Reference()).CellSlice(self.gridRef)
 }
 
 func (self *cellImpl) dataString() string {
@@ -735,7 +746,7 @@ func (self *cellImpl) positionInBlock() (top, right, bottom, left bool) {
 	if self.gridRef == nil {
 		return
 	}
-	topRow, topCol, bottomRow, bottomCol := self.gridRef.blockExtents(self.Block())
+	topRow, topCol, bottomRow, bottomCol := blockExtents(self.Block())
 	top = self.Row() == topRow
 	right = self.Col() == bottomCol
 	bottom = self.Row() == bottomRow

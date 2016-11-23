@@ -10,7 +10,7 @@ type GridModification []*CellModification
 type CellModification struct {
 	//The cell representing the cell to modify. The cell's analog (at the same
 	//row, col address) will be modified in the new grid.
-	Cell Cell
+	Cell CellRef
 	//The number to put in the cell. Negative numbers signify no changes.
 	Number int
 	//The excludes to proactively set. Invalid numbers will be ignored.
@@ -25,7 +25,7 @@ type CellModification struct {
 
 //newCellModification returns a CellModification for the given cell that is a
 //no-op.
-func newCellModification(cell Cell) *CellModification {
+func newCellModification(cell CellRef) *CellModification {
 	return &CellModification{
 		Cell:            cell,
 		Number:          -1,
@@ -62,7 +62,7 @@ func (m GridModification) equivalent(other GridModification) bool {
 	}
 	for i, modification := range m {
 		otherModification := other[i]
-		if modification.Cell.ref().String() != otherModification.Cell.ref().String() {
+		if modification.Cell.String() != otherModification.Cell.String() {
 			return false
 		}
 		if modification.Number != otherModification.Number {
@@ -123,7 +123,7 @@ func (self *gridImpl) CopyWithModifications(modifications GridModification) Grid
 	excludesModififed := false
 
 	for _, modification := range modifications {
-		cell := result.cellImpl(modification.Cell.Row(), modification.Cell.Col())
+		cell := result.cellImpl(modification.Cell.Row, modification.Cell.Col)
 
 		if modification.Number >= 0 && modification.Number <= DIM {
 			//cell.setNumber will handle setting all of the impossibles
@@ -217,7 +217,7 @@ func (self *mutableGridImpl) CopyWithModifications(modifications GridModificatio
 	modifications.normalize()
 
 	for _, modification := range modifications {
-		cell := modification.Cell.MutableInGrid(result)
+		cell := modification.Cell.MutableCell(result)
 
 		if modification.Number >= 0 && modification.Number <= DIM {
 			cell.SetNumber(modification.Number)

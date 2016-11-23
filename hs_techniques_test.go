@@ -107,9 +107,9 @@ func subsetIndexHelper(t *testing.T, result [][]int, expectedResult [][]int) {
 }
 
 type multipleValidStepLoopOptions struct {
-	targetCells  []cellRef
+	targetCells  CellRefSlice
 	targetNums   IntSlice
-	pointerCells []cellRef
+	pointerCells CellRefSlice
 	pointerNums  IntSlice
 	description  string
 	extra        interface{}
@@ -212,8 +212,8 @@ type solveTechniqueTestHelperOptions struct {
 	transpose bool
 	//Whether the descriptions of cells are a list of legal possible individual values, or must all match.
 	matchMode    solveTechniqueMatchMode
-	targetCells  []cellRef
-	pointerCells []cellRef
+	targetCells  CellRefSlice
+	pointerCells CellRefSlice
 	targetNums   IntSlice
 	pointerNums  IntSlice
 	targetSame   cellGroupType
@@ -354,13 +354,13 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 			//All must match
 
 			if options.targetCells != nil {
-				if !step.TargetCells.sameAsRefs(options.targetCells) {
+				if !step.TargetCells.sameAs(options.targetCells) {
 					l.Error(techniqueName, " had the wrong target cells: ", step.TargetCells)
 					continue
 				}
 			}
 			if options.pointerCells != nil {
-				if !step.PointerCells.sameAsRefs(options.pointerCells) {
+				if !step.PointerCells.sameAs(options.pointerCells) {
 					l.Error(techniqueName, " had the wrong pointer cells: ", step.PointerCells)
 					continue
 				}
@@ -415,7 +415,7 @@ func humanSolveTechniqueTestHelper(t *testing.T, puzzleName string, techniqueNam
 				foundMatch = false
 				for _, ref := range options.targetCells {
 					for _, cell := range step.TargetCells {
-						if ref == cell.ref() {
+						if ref == cell {
 							//TODO: break out early
 							foundMatch = true
 						}

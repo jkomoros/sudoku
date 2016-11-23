@@ -184,8 +184,6 @@ type Grid interface {
 	//invalidities.
 	basicInvalid() bool
 	numFilledCells() int
-	blockForCell(row int, col int) int
-	blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int)
 	rank() int
 }
 
@@ -281,9 +279,6 @@ type mutableGridImpl struct {
 	//cells means  that you get a copy, and have to be careful not to try
 	//modifying it because the modifications won't work.
 	cells                 [DIM * DIM]mutableCellImpl
-	rows                  [DIM]CellSlice
-	cols                  [DIM]CellSlice
-	blocks                [DIM]CellSlice
 	queueGetterLock       sync.RWMutex
 	theQueue              *finiteQueue
 	numFilledCellsCounter int
@@ -317,6 +312,34 @@ type gridImpl struct {
 //TODO:Allow num solver threads to be set at runtime
 const _NUM_SOLVER_THREADS = 4
 
+var neighborCache map[CellRef]CellRefSlice
+var rowCache map[int]CellRefSlice
+var colCache map[int]CellRefSlice
+var blockCache map[int]CellRefSlice
+
+func init() {
+
+	rowCache = make(map[int]CellRefSlice)
+	colCache = make(map[int]CellRefSlice)
+	blockCache = make(map[int]CellRefSlice)
+	for i := 0; i < DIM; i++ {
+		rowCache[i] = cellSliceImpl(i, 0, i, DIM-1)
+		colCache[i] = cellSliceImpl(0, i, DIM-1, i)
+		blockCache[i] = cellSliceImpl(blockExtents(i))
+	}
+	//Populate the neighborCachce
+
+	neighborCache = make(map[CellRef]CellRefSlice)
+
+	for r := 0; r < DIM; r++ {
+		for c := 0; c < DIM; c++ {
+			ref := CellRef{r, c}
+			neighborCache[ref] = calcNeighbors(ref)
+		}
+	}
+
+}
+
 //NewGrid creates a new, blank grid with all of its cells unfilled.
 func NewGrid() MutableGrid {
 
@@ -332,12 +355,6 @@ func NewGrid() MutableGrid {
 			//The cell can't insert itself because it doesn't know where it will actually live in memory yet.
 			i++
 		}
-	}
-
-	for index := 0; index < DIM; index++ {
-		result.rows[index] = result.cellSlice(index, 0, index, DIM-1)
-		result.cols[index] = result.cellSlice(0, index, DIM-1, index)
-		result.blocks[index] = result.cellSlice(result.blockExtents(index))
 	}
 
 	result.cachedSolutionsRequestedLength = -1
@@ -407,7 +424,7 @@ func newStarterGrid(grid MutableGrid) *gridImpl {
 	i := 0
 	for r := 0; r < DIM; r++ {
 		for c := 0; c < DIM; c++ {
-			result.theQueue.cellRefs[i] = cellRef{r, c}
+			result.theQueue.cellRefs[i] = CellRef{r, c}
 			i++
 		}
 	}
@@ -721,11 +738,27 @@ func legalIndex(index int) bool {
 	return index >= 0 && index < DIM
 }
 
-func (self *gridImpl) Row(index int) CellSlice {
+func row(index int) CellRefSlice {
+
+	//We could make this a public method, but it's only really necessary for
+	//performance, and exposing it publicly would be confusing to package
+	//consumers. So we'll just keep it internal, where performance is more
+	//important.
+
+	//TODO: calculate this once at init
 	if !legalIndex(index) {
 		return nil
 	}
-	return self.cellSlice(index, 0, index, DIM-1)
+	return rowCache[index]
+}
+
+func (self *gridImpl) Row(index int) CellSlice {
+	//TODO: for all of these use global Row, block, etc.
+
+	if !legalIndex(index) {
+		return nil
+	}
+	return row(index).CellSlice(self)
 }
 
 func (self *mutableGridImpl) Row(index int) CellSlice {
@@ -733,7 +766,7 @@ func (self *mutableGridImpl) Row(index int) CellSlice {
 		log.Println("Invalid index passed to Row: ", index)
 		return nil
 	}
-	return self.rows[index]
+	return row(index).CellSlice(self)
 }
 
 func (self *mutableGridImpl) MutableRow(index int) MutableCellSlice {
@@ -741,14 +774,22 @@ func (self *mutableGridImpl) MutableRow(index int) MutableCellSlice {
 		return nil
 	}
 
-	return self.mutableCellSlice(index, 0, index, DIM-1)
+	return row(index).MutableCellSlice(self)
+}
+
+func col(index int) CellRefSlice {
+	//TODO: calculate this once at init
+	if !legalIndex(index) {
+		return nil
+	}
+	return colCache[index]
 }
 
 func (self *gridImpl) Col(index int) CellSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return self.cellSlice(0, index, DIM-1, index)
+	return col(index).CellSlice(self)
 }
 
 func (self *mutableGridImpl) Col(index int) CellSlice {
@@ -756,21 +797,29 @@ func (self *mutableGridImpl) Col(index int) CellSlice {
 		log.Println("Invalid index passed to Col: ", index)
 		return nil
 	}
-	return self.cols[index]
+	return col(index).CellSlice(self)
 }
 
 func (self *mutableGridImpl) MutableCol(index int) MutableCellSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return self.mutableCellSlice(0, index, DIM-1, index)
+	return col(index).MutableCellSlice(self)
+}
+
+func block(index int) CellRefSlice {
+	//TODO: calculate this once at init
+	if !legalIndex(index) {
+		return nil
+	}
+	return blockCache[index]
 }
 
 func (self *gridImpl) Block(index int) CellSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return self.cellSlice(self.blockExtents(index))
+	return block(index).CellSlice(self)
 }
 
 func (self *mutableGridImpl) Block(index int) CellSlice {
@@ -778,19 +827,21 @@ func (self *mutableGridImpl) Block(index int) CellSlice {
 		log.Println("Invalid index passed to Block: ", index)
 		return nil
 	}
-	return self.blocks[index]
+	return block(index).CellSlice(self)
 }
 
 func (self *mutableGridImpl) MutableBlock(index int) MutableCellSlice {
 	if !legalIndex(index) {
 		return nil
 	}
-	return self.mutableCellSlice(self.blockExtents(index))
+	return block(index).MutableCellSlice(self)
 }
 
-func gridBlockExtentsImpl(grid Grid, index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
+func blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
 	//Conceptually, we'll pretend like the grid is made up of blocks that are arrayed with row/column
 	//Once we find the block r/c, we'll multiply by the actual dim to get the upper left corner.
+
+	//TODO: consider calculating all of the values for this at init time.
 
 	blockCol := index % BLOCK_DIM
 	blockRow := (index - blockCol) / BLOCK_DIM
@@ -801,30 +852,16 @@ func gridBlockExtentsImpl(grid Grid, index int) (topRow int, topCol int, bottomR
 	return row, col, row + BLOCK_DIM - 1, col + BLOCK_DIM - 1
 }
 
-func (self *gridImpl) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
-	return gridBlockExtentsImpl(self, index)
-}
-
-func (self *mutableGridImpl) blockExtents(index int) (topRow int, topCol int, bottomRow int, bottomCol int) {
-	return gridBlockExtentsImpl(self, index)
-}
-
-func gridBlockForCellImpl(row, col int) int {
+func blockForCell(row, col int) int {
+	//TODO: if we ever support non-square blocking, we'd need to not have this
+	//be generic but tied to a specific grid.
 	blockCol := col / BLOCK_DIM
 	blockRow := row / BLOCK_DIM
 	return blockRow*BLOCK_DIM + blockCol
 }
 
-func (self *gridImpl) blockForCell(row int, col int) int {
-	return gridBlockForCellImpl(row, col)
-}
-
-func (self *mutableGridImpl) blockForCell(row int, col int) int {
-	return gridBlockForCellImpl(row, col)
-}
-
 func (self *mutableGridImpl) blockHasNeighbors(index int) (top bool, right bool, bottom bool, left bool) {
-	topRow, topCol, bottomRow, bottomCol := self.blockExtents(index)
+	topRow, topCol, bottomRow, bottomCol := blockExtents(index)
 	top = topRow != 0
 	bottom = bottomRow != DIM-1
 	left = topCol != 0
@@ -867,17 +904,19 @@ func (self *mutableGridImpl) Cell(row int, col int) Cell {
 	return &self.cells[index]
 }
 
-func gridCellSliceImpl(grid Grid, rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
+func cellSliceImpl(rowOne int, colOne int, rowTwo int, colTwo int) CellRefSlice {
+
+	//TODO: name this function better.
 
 	//Substantially recreated in gridMutableCellSliceImpl
 
 	//both gridImpl and mutableGridImpl can use the same basic implementation
 	length := (rowTwo - rowOne + 1) * (colTwo - colOne + 1)
-	result := make(CellSlice, length)
+	result := make(CellRefSlice, length)
 	currentRow := rowOne
 	currentCol := colOne
 	for i := 0; i < length; i++ {
-		result[i] = grid.Cell(currentRow, currentCol)
+		result[i] = CellRef{currentRow, currentCol}
 		if colTwo > currentCol {
 			currentCol++
 		} else {
@@ -890,43 +929,6 @@ func gridCellSliceImpl(grid Grid, rowOne int, colOne int, rowTwo int, colTwo int
 		}
 	}
 	return result
-}
-
-func (self *gridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
-	return gridCellSliceImpl(self, rowOne, colOne, rowTwo, colTwo)
-}
-
-func (self *mutableGridImpl) cellSlice(rowOne int, colOne int, rowTwo int, colTwo int) CellSlice {
-	return gridCellSliceImpl(self, rowOne, colOne, rowTwo, colTwo)
-}
-
-func gridMutableCellSliceImpl(grid MutableGrid, rowOne int, colOne int, rowTwo int, colTwo int) MutableCellSlice {
-
-	//Substantially recreated in gridCellSliceImpl
-
-	//both gridImpl and mutableGridImpl can use the same basic implementation
-	length := (rowTwo - rowOne + 1) * (colTwo - colOne + 1)
-	result := make(MutableCellSlice, length)
-	currentRow := rowOne
-	currentCol := colOne
-	for i := 0; i < length; i++ {
-		result[i] = grid.MutableCell(currentRow, currentCol)
-		if colTwo > currentCol {
-			currentCol++
-		} else {
-			if rowTwo > currentRow {
-				currentRow++
-				currentCol = colOne
-			} else {
-				//This should only happen the last time through the loop.
-			}
-		}
-	}
-	return result
-}
-
-func (self *mutableGridImpl) mutableCellSlice(rowOne int, colOne int, rowTwo int, colTwo int) MutableCellSlice {
-	return gridMutableCellSliceImpl(self, rowOne, colOne, rowTwo, colTwo)
 }
 
 func (self *gridImpl) Solved() bool {

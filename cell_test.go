@@ -33,9 +33,9 @@ func TestCellCreation(t *testing.T) {
 		t.Fail()
 	}
 
-	ref := cell.ref()
+	ref := cell.Reference()
 
-	if ref.col != 0 || ref.row != 0 {
+	if ref.Col != 0 || ref.Row != 0 {
 		t.Error("Cell ref came back wrong")
 	}
 

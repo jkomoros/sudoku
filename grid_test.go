@@ -615,7 +615,7 @@ func TestGridLoad(t *testing.T) {
 
 	grid = grid.CopyWithModifications(GridModification{
 		&CellModification{
-			Cell:   cell,
+			Cell:   cell.Reference(),
 			Number: cell.Number() + 1,
 		},
 	})
@@ -626,7 +626,7 @@ func TestGridLoad(t *testing.T) {
 
 	grid = grid.CopyWithModifications(GridModification{
 		&CellModification{
-			Cell:   cell,
+			Cell:   cell.Reference(),
 			Number: cell.Number(),
 		},
 	})
@@ -637,7 +637,7 @@ func TestGridLoad(t *testing.T) {
 
 	grid = grid.CopyWithModifications(GridModification{
 		&CellModification{
-			Cell:   cell,
+			Cell:   cell.Reference(),
 			Number: 0,
 		},
 	})
@@ -650,7 +650,7 @@ func TestGridLoad(t *testing.T) {
 
 	grid = grid.CopyWithModifications(GridModification{
 		&CellModification{
-			Cell:            cell,
+			Cell:            cell.Reference(),
 			ExcludesChanges: excludes,
 		},
 	})
@@ -870,6 +870,9 @@ func BenchmarkAdvancedSolve(b *testing.B) {
 }
 
 func BenchmarkDifficulty(b *testing.B) {
+	//NOTE: this benchmark is exceptionally noisy--it's heavily dependent on
+	//how quickly the difficulty converges given the specific HumanSolutions
+	//generated.
 	for i := 0; i < b.N; i++ {
 		grid := LoadSDK(ADVANCED_TEST_GRID)
 		grid.Difficulty()
@@ -1043,10 +1046,10 @@ func TestSymmetricalGenerate(t *testing.T) {
 			cell := grid.Cell(r, c)
 			otherCell := cell.SymmetricalPartner(SYMMETRY_VERTICAL)
 			if cell.Number() != 0 && otherCell.Number() == 0 {
-				t.Error("Cell ", cell.ref().String(), "'s partner not filled but should be")
+				t.Error("Cell ", cell.Reference().String(), "'s partner not filled but should be")
 			}
 			if cell.Number() == 0 && otherCell.Number() != 0 {
-				t.Error("Cell ", cell.ref().String(), "'s partner IS filled and should be empty")
+				t.Error("Cell ", cell.Reference().String(), "'s partner IS filled and should be empty")
 			}
 		}
 	}

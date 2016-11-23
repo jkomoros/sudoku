@@ -71,9 +71,9 @@ func obviousInCollection(grid Grid, technique SolveTechnique, collectionGetter f
 				possibility := possibilities[0]
 				step := &SolveStep{
 					Technique:    technique,
-					TargetCells:  CellSlice{cell},
+					TargetCells:  CellRefSlice{cell.Reference()},
 					TargetNums:   IntSlice{possibility},
-					PointerCells: collection.RemoveCells(CellSlice{cell}),
+					PointerCells: collection.RemoveCells(CellSlice{cell}).CellReferenceSlice(),
 				}
 				if step.IsUseful(grid) {
 					if coordinator.foundResult(step) {
@@ -119,9 +119,9 @@ func (self *nakedSingleTechnique) find(grid Grid, coordinator findCoordinator) {
 		cell := obj.(Cell)
 		step := &SolveStep{
 			Technique:    self,
-			TargetCells:  CellSlice{cell},
+			TargetCells:  CellRefSlice{cell.Reference()},
 			TargetNums:   IntSlice{cell.implicitNumber()},
-			PointerCells: cell.Neighbors().FilterByFilled(),
+			PointerCells: cell.Neighbors().FilterByFilled().CellReferenceSlice(),
 		}
 		if step.IsUseful(grid) {
 			if coordinator.foundResult(step) {
@@ -157,12 +157,12 @@ func (self *hiddenSingleTechnique) Description(step *SolveStep) string {
 		groupName = "row"
 		otherGroupName = "column"
 		groupNum = step.TargetCells.Row()
-		otherGroupNum = strconv.Itoa(cell.Col())
+		otherGroupNum = strconv.Itoa(cell.Col)
 	case _GROUP_COL:
 		groupName = "column"
 		otherGroupName = "row"
 		groupNum = step.TargetCells.Col()
-		otherGroupNum = strconv.Itoa(cell.Row())
+		otherGroupNum = strconv.Itoa(cell.Row)
 	default:
 		groupName = "<NONE>"
 		otherGroupName = "<NONE>"
@@ -209,9 +209,9 @@ func necessaryInCollection(grid Grid, technique SolveTechnique, collectionGetter
 						//Found it... just make sure it's useful (it would be rare for it to not be).
 						step := &SolveStep{
 							Technique:    technique,
-							TargetCells:  CellSlice{cell},
+							TargetCells:  CellRefSlice{cell.Reference()},
 							TargetNums:   IntSlice{index + 1},
-							PointerCells: collection.FilterByUnfilled().RemoveCells(CellSlice{cell}),
+							PointerCells: collection.FilterByUnfilled().RemoveCells(CellSlice{cell}).CellReferenceSlice(),
 						}
 						if step.IsUseful(grid) {
 							if coordinator.foundResult(step) {

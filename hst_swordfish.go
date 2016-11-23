@@ -144,9 +144,9 @@ func (self *swordfishTechnique) find(grid Grid, coordinator findCoordinator) {
 
 			//Okay, we have a candidate step (unchunked). Is it useful?
 			step := &SolveStep{self,
-				affectedCells,
+				affectedCells.CellReferenceSlice(),
 				IntSlice{i},
-				pointerCells,
+				pointerCells.CellReferenceSlice(),
 				nil,
 				nil,
 			}

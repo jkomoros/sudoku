@@ -223,7 +223,7 @@ func searchGridSolutions(grid Grid, queue *syncedFiniteQueue, isFirstRun bool, n
 	var result Grid
 
 	for i, num := range possibilities {
-		modification := newCellModification(cell)
+		modification := newCellModification(cell.Reference())
 		modification.Number = num
 		copy := grid.CopyWithModifications(GridModification{
 			modification,
@@ -274,7 +274,7 @@ func withSimpleCellsFilled(grid Grid) Grid {
 
 			changesMade = true
 			modification := &CellModification{
-				Cell:   cell,
+				Cell:   cell.Reference(),
 				Number: cell.implicitNumber(),
 			}
 			modifications = append(modifications, modification)

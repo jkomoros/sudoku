@@ -19,10 +19,10 @@ func TestBasicCellSlice(t *testing.T) {
 		t.Fail()
 	}
 
-	var refs []cellRef
+	var refs CellRefSlice
 
 	for i := 0; i < DIM; i++ {
-		refs = append(refs, cellRef{2, i})
+		refs = append(refs, CellRef{2, i})
 	}
 
 	if !row.sameAsRefs(refs) {
@@ -81,7 +81,7 @@ func TestBasicCellSlice(t *testing.T) {
 		t.Fail()
 	}
 
-	description := cells.Description()
+	description := cells.CellReferenceSlice().Description()
 
 	if description != "(0,0), (0,1), and (0,2)" {
 		t.Log("Got wrong description of cellList: ", description)
@@ -100,8 +100,8 @@ func TestBasicCellSlice(t *testing.T) {
 
 type chainTestConfiguration struct {
 	name                 string
-	one                  []cellRef
-	two                  []cellRef
+	one                  CellRefSlice
+	two                  CellRefSlice
 	equivalentToPrevious bool
 }
 
@@ -138,71 +138,69 @@ func TestChainDissimilarity(t *testing.T) {
 	tests := []chainTestConfiguration{
 		{
 			"same row same block",
-			[]cellRef{{0, 0}},
-			[]cellRef{{0, 1}},
+			CellRefSlice{{0, 0}},
+			CellRefSlice{{0, 1}},
 			false,
 		},
 		//this next one verifies that it doesn't matter which of self or other you do first.
 		{
 			"same row same block, just flipped self and other",
-			[]cellRef{{0, 1}},
-			[]cellRef{{0, 0}},
+			CellRefSlice{{0, 1}},
+			CellRefSlice{{0, 0}},
 			true,
 		},
 		//These next two should be the same difficulty.
 		{
 			"same block 2 in same row 2 in same col 2 total",
-			[]cellRef{{0, 0}},
-			[]cellRef{{0, 1}, {1, 0}},
+			CellRefSlice{{0, 0}},
+			CellRefSlice{{0, 1}, {1, 0}},
 			false,
 		},
 		{
 			"two full rows at opposite ends",
-			[]cellRef{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 8}},
-			[]cellRef{{7, 0}, {7, 1}, {7, 2}, {7, 3}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}},
+			CellRefSlice{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 8}},
+			CellRefSlice{{7, 0}, {7, 1}, {7, 2}, {7, 3}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}},
 			true,
 		},
 		{
 			"same row different blocks",
-			[]cellRef{{0, 0}, {0, 1}},
-			[]cellRef{{0, 3}, {0, 4}},
+			CellRefSlice{{0, 0}, {0, 1}},
+			CellRefSlice{{0, 3}, {0, 4}},
 			true,
 		},
 		{
 			"same col different blocks",
-			[]cellRef{{0, 0}, {1, 0}},
-			[]cellRef{{3, 0}, {4, 0}},
+			CellRefSlice{{0, 0}, {1, 0}},
+			CellRefSlice{{3, 0}, {4, 0}},
 			true,
 		},
 		{
 			"same row different blocks, 2 vs 3",
-			[]cellRef{{0, 0}, {0, 1}},
-			[]cellRef{{0, 3}, {0, 4}, {0, 5}},
+			CellRefSlice{{0, 0}, {0, 1}},
+			CellRefSlice{{0, 3}, {0, 4}, {0, 5}},
 			true,
 		},
 		{
 			"same block opposite corners 1 x 1",
-			[]cellRef{{0, 0}},
-			[]cellRef{{2, 2}},
+			CellRefSlice{{0, 0}},
+			CellRefSlice{{2, 2}},
 			true,
 		},
 		{
 			"adjacent rows two different blocks",
-			[]cellRef{{0, 0}, {0, 1}},
-			[]cellRef{{1, 3}, {1, 4}},
+			CellRefSlice{{0, 0}, {0, 1}},
+			CellRefSlice{{1, 3}, {1, 4}},
 			false,
 		},
 		{
 			"single cell opposite corners",
-			[]cellRef{{0, 0}},
-			[]cellRef{{8, 8}},
+			CellRefSlice{{0, 0}},
+			CellRefSlice{{8, 8}},
 			false,
 		},
 	}
 
 	//Now run the tests
-
-	grid := NewGrid()
 
 	var results chainTestResults
 
@@ -212,15 +210,7 @@ func TestChainDissimilarity(t *testing.T) {
 		if !test.equivalentToPrevious {
 			equivalenceGroup++
 		}
-		var listOne CellSlice
-		var listTwo CellSlice
-		for _, ref := range test.one {
-			listOne = append(listOne, ref.Cell(grid))
-		}
-		for _, ref := range test.two {
-			listTwo = append(listTwo, ref.Cell(grid))
-		}
-		similarity := listOne.chainSimilarity(listTwo)
+		similarity := test.one.chainSimilarity(test.two)
 		if similarity < 0.0 {
 			t.Fatal(test.name, "failed with a dissimilarity less than 0.0: ", similarity)
 		}
@@ -391,9 +381,9 @@ func TestCellSetBasicOperations(t *testing.T) {
 	two := twoSlice.toCellSet()
 	three := threeSlice.toCellSet()
 
-	oneGolden := cellSet{cellOne.ref(): true, cellTwo.ref(): true}
-	twoGolden := cellSet{cellThree.ref(): true}
-	threeGolden := cellSet{cellTwo.ref(): true, cellThree.ref(): true}
+	oneGolden := cellSet{cellOne.Reference(): true, cellTwo.Reference(): true}
+	twoGolden := cellSet{cellThree.Reference(): true}
+	threeGolden := cellSet{cellTwo.Reference(): true, cellThree.Reference(): true}
 
 	if !reflect.DeepEqual(one, oneGolden) {
 		t.Fatal("Creating cellSet failed. Got", one, "wanted", oneGolden)
@@ -415,19 +405,19 @@ func TestCellSetBasicOperations(t *testing.T) {
 
 	oneThreeIntersection := one.intersection(three)
 
-	if !reflect.DeepEqual(oneThreeIntersection, cellSet{cellTwo.ref(): true}) {
+	if !reflect.DeepEqual(oneThreeIntersection, cellSet{cellTwo.Reference(): true}) {
 		t.Error("One three intersection failed. Got: ", oneThreeIntersection)
 	}
 
 	oneTwoUnion := one.union(two)
 
-	if !reflect.DeepEqual(oneTwoUnion, cellSet{cellOne.ref(): true, cellTwo.ref(): true, cellThree.ref(): true}) {
+	if !reflect.DeepEqual(oneTwoUnion, cellSet{cellOne.Reference(): true, cellTwo.Reference(): true, cellThree.Reference(): true}) {
 		t.Error("One two union failed. Got: ", oneTwoUnion)
 	}
 
 	oneThreeUnion := one.union(three)
 
-	if !reflect.DeepEqual(oneThreeUnion, cellSet{cellOne.ref(): true, cellTwo.ref(): true, cellThree.ref(): true}) {
+	if !reflect.DeepEqual(oneThreeUnion, cellSet{cellOne.Reference(): true, cellTwo.Reference(): true, cellThree.Reference(): true}) {
 		t.Error("One three union failed. Got: ", oneThreeUnion)
 	}
 
@@ -439,7 +429,7 @@ func TestCellSetBasicOperations(t *testing.T) {
 
 	oneThreeDifference := one.difference(three)
 
-	if !reflect.DeepEqual(oneThreeDifference, cellSet{cellOne.ref(): true}) {
+	if !reflect.DeepEqual(oneThreeDifference, cellSet{cellOne.Reference(): true}) {
 		t.Error("One three difference failed. Got: ", oneThreeDifference)
 	}
 

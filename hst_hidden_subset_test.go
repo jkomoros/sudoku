@@ -24,7 +24,7 @@ func TestSubsetCellsWithNUniquePossibilities(t *testing.T) {
 		t.Log("Number of subset cells did not match k: ", len(cellList))
 		t.Fail()
 	}
-	if cellList[0].Row() != 4 || cellList[0].Col() != 7 || cellList[1].Row() != 4 || cellList[1].Col() != 8 {
+	if cellList[0].Row != 4 || cellList[0].Col != 7 || cellList[1].Row != 4 || cellList[1].Col != 8 {
 		t.Log("Subset cells unique came back with wrong cells: ", cellList)
 		t.Fail()
 	}
@@ -35,8 +35,8 @@ func TestSubsetCellsWithNUniquePossibilities(t *testing.T) {
 
 func TestHiddenPairRow(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		targetCells:  []cellRef{{4, 7}, {4, 8}},
-		pointerCells: []cellRef{{4, 7}, {4, 8}},
+		targetCells:  []CellRef{{4, 7}, {4, 8}},
+		pointerCells: []CellRef{{4, 7}, {4, 8}},
 		targetSame:   _GROUP_ROW,
 		targetGroup:  4,
 		targetNums:   IntSlice([]int{7, 8, 2}),
@@ -52,8 +52,8 @@ func TestHiddenPairCol(t *testing.T) {
 
 	options := solveTechniqueTestHelperOptions{
 		transpose:    true,
-		targetCells:  []cellRef{{7, 4}, {8, 4}},
-		pointerCells: []cellRef{{7, 4}, {8, 4}},
+		targetCells:  []CellRef{{7, 4}, {8, 4}},
+		pointerCells: []CellRef{{7, 4}, {8, 4}},
 		targetSame:   _GROUP_COL,
 		targetGroup:  4,
 		targetNums:   IntSlice([]int{7, 8, 2}),
@@ -67,8 +67,8 @@ func TestHiddenPairCol(t *testing.T) {
 
 func TestHiddenPairBlock(t *testing.T) {
 	options := solveTechniqueTestHelperOptions{
-		targetCells:  []cellRef{{4, 7}, {4, 8}},
-		pointerCells: []cellRef{{4, 7}, {4, 8}},
+		targetCells:  []CellRef{{4, 7}, {4, 8}},
+		pointerCells: []CellRef{{4, 7}, {4, 8}},
 		//Yes, in this case we want them to be the same row.
 		targetSame:  _GROUP_ROW,
 		targetGroup: 4,
