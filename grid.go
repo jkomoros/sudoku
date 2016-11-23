@@ -748,6 +748,12 @@ func legalIndex(index int) bool {
 }
 
 func row(index int) CellRefSlice {
+
+	//We could make this a public method, but it's only really necessary for
+	//performance, and exposing it publicly would be confusing to package
+	//consumers. So we'll just keep it internal, where performance is more
+	//important.
+
 	//TODO: calculate this once at init
 	if !legalIndex(index) {
 		return nil
