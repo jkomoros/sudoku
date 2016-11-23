@@ -279,9 +279,6 @@ type mutableGridImpl struct {
 	//cells means  that you get a copy, and have to be careful not to try
 	//modifying it because the modifications won't work.
 	cells                 [DIM * DIM]mutableCellImpl
-	rows                  [DIM]CellSlice
-	cols                  [DIM]CellSlice
-	blocks                [DIM]CellSlice
 	queueGetterLock       sync.RWMutex
 	theQueue              *finiteQueue
 	numFilledCellsCounter int
@@ -358,12 +355,6 @@ func NewGrid() MutableGrid {
 			//The cell can't insert itself because it doesn't know where it will actually live in memory yet.
 			i++
 		}
-	}
-
-	for index := 0; index < DIM; index++ {
-		result.rows[index] = cellSliceImpl(index, 0, index, DIM-1).CellSlice(result)
-		result.cols[index] = cellSliceImpl(0, index, DIM-1, index).CellSlice(result)
-		result.blocks[index] = cellSliceImpl(blockExtents(index)).CellSlice(result)
 	}
 
 	result.cachedSolutionsRequestedLength = -1
@@ -775,7 +766,7 @@ func (self *mutableGridImpl) Row(index int) CellSlice {
 		log.Println("Invalid index passed to Row: ", index)
 		return nil
 	}
-	return self.rows[index]
+	return row(index).CellSlice(self)
 }
 
 func (self *mutableGridImpl) MutableRow(index int) MutableCellSlice {
@@ -806,7 +797,7 @@ func (self *mutableGridImpl) Col(index int) CellSlice {
 		log.Println("Invalid index passed to Col: ", index)
 		return nil
 	}
-	return self.cols[index]
+	return col(index).CellSlice(self)
 }
 
 func (self *mutableGridImpl) MutableCol(index int) MutableCellSlice {
@@ -836,7 +827,7 @@ func (self *mutableGridImpl) Block(index int) CellSlice {
 		log.Println("Invalid index passed to Block: ", index)
 		return nil
 	}
-	return self.blocks[index]
+	return block(index).CellSlice(self)
 }
 
 func (self *mutableGridImpl) MutableBlock(index int) MutableCellSlice {

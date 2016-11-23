@@ -24,9 +24,6 @@ type MutableCellSlice []MutableCell
 //Col(), Block(). That way actual cells could be used. ... But then actual
 //cellsw ould have to grow a Cell, MutableCell.
 
-//TODO: test whether the CellSlice caching on mutableGrid for row,block,col is
-//actually useful anymore.
-
 //CellReferenceSlice is a slice of CellReferences with many convenience methods.
 type CellRefSlice []CellRef
 
