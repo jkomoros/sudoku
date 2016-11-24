@@ -16,7 +16,6 @@ import (
 	"github.com/gonum/stat"
 	"github.com/jkomoros/sudoku"
 	"github.com/jkomoros/sudoku/sdkconverter"
-	"github.com/sajari/regression"
 	"github.com/skelterjohn/go.matrix"
 	"github.com/ziutek/mymysql/mysql"
 	_ "github.com/ziutek/mymysql/native"
@@ -344,25 +343,7 @@ func main() {
 				csvOut.Write(stringified)
 			}
 		} else {
-			//Phase 2b
-			result := calculateWeights(solveData)
-			log.Println("Regression done. Results:")
-			log.Println("N =", len(result.Data))
-			log.Println("Variance Observed = ", result.VarianceObserved)
-			log.Println("Variance Predicted = ", result.VariancePredicted)
-			log.Println("R2 = ", result.Rsquared)
-			log.Println("-------------------------")
-			for i := 0; i < len(result.RegCoeff); i++ {
-
-				var name string
-
-				if i == 0 {
-					name = "Constant"
-				} else {
-					name = result.Names.VariableNames[i-1]
-				}
-				csvOut.Write([]string{name, fmt.Sprintf("%g", result.GetRegCoeff(i))})
-			}
+			//Phase 2b is no longer supported; this regression never worked very well.
 		}
 		csvOut.Flush()
 
@@ -1250,54 +1231,6 @@ func removeZeroedColumns(stats [][]float64, safeIndexes []int) (newStats [][]flo
 
 	return result, indexesToKeep
 
-}
-
-func calculateWeights(stats [][]float64) *regression.Regression {
-
-	//TODO: update this description to describe what piece we actually do in THIS function.
-	/*
-		The basic approach is to solve each puzzle many times with our human solver.
-		Then, we summarize how often each technique was required for each puzzle
-		(by averaging all of the solve runs together). Then we set up a multiple
-		linear regression where the dependent var is the LOG of the userRelativelyDifficulty
-		(to linearlize it somewhat) and the dependent vars are the number of times
-		each technique was observed in the solve. Then we run the regression and
-		return it.
-
-		For more information on interpreting results from multiple linear regressions,
-		see: http://onlinestatbook.com/2/regression/multiple_regression.html
-
-	*/
-
-	//Set up the regression; I'll be adding data points as I go through each puzzle.
-	var r regression.Regression
-
-	//Keep column 0 (the Observed data point)
-	cleanedStats, keptIndexes := removeZeroedColumns(stats, []int{0})
-
-	signalNames := allSignalNames()
-
-	r.SetObservedName("Real World Difficulty")
-	for i, techniqueIndex := range keptIndexes {
-		//Don't add a label for the observed data
-		if techniqueIndex == 0 {
-			continue
-		}
-		//i of 0 is the observed. techniqueIndex has to be subtracted by 1 for the same reason to get it in 0-indexed.
-		r.SetVarName(i-1, signalNames[techniqueIndex-1])
-	}
-
-	for _, data := range cleanedStats {
-		//TODO: remove columns that are all 0.
-		//Note: I considered adding each solve for each puzzle as a separate datapoint. However, the R2 i was getting were
-		//consistently much lower than this method.
-
-		r.AddDataPoint(regression.DataPoint{Observed: data[0], Variables: data[1:]})
-	}
-	//Actually do the regression.
-	r.RunLinearRegression()
-
-	return &r
 }
 
 var cachedAllSignalNames []string
