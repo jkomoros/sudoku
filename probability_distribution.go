@@ -91,9 +91,27 @@ func (d ProbabilityDistribution) invert() ProbabilityDistribution {
 
 	//I don't know if this math makes any sense, but in the test distributions the outputs FEEL right.
 
-	//Invert
-	for i, weight := range invertedWeights {
-		weights[i] = invertWeight(weight)
+	allInfinite := true
+	for _, weight := range d {
+		if !math.IsInf(weight, 0) {
+			allInfinite = false
+			break
+		}
+	}
+
+	//If all of the items are infinite then we want to special case to spread
+	//probability evenly by putting all numbers to lowest possible numbers.
+	//However if there is a mix of some infinite and some non-infinite we want
+	//to basically ignore the infinite ones.
+	if allInfinite {
+		for i, _ := range weights {
+			weights[i] = math.SmallestNonzeroFloat64
+		}
+	} else {
+		//Invert
+		for i, weight := range invertedWeights {
+			weights[i] = invertWeight(weight)
+		}
 	}
 
 	//But now you need to renormalize since they won't sum to 1.
@@ -103,17 +121,19 @@ func (d ProbabilityDistribution) invert() ProbabilityDistribution {
 //invertWeight is the primary logic used to invert a positive weight.
 func invertWeight(inverted float64) float64 {
 
-	//This would have only happened if the denominator was really big. Set it to
-	//the closest value to 0 so that in most cases it will be effectively
-	//zero but that in cases where it's only guesses, we'll still get a
-	//good distribution.
 	if math.IsInf(inverted, 0) {
-		return math.SmallestNonzeroFloat64
+		//This will only happen if there's a mix of Inf and non-Inf in the
+		//input distribution--in which case the expected beahvior is that
+		//Inf's are basically ignore.d
+		return 0.0
 	}
 
 	result := 1 / math.Exp(inverted/10)
 
 	if math.IsInf(result, 0) {
+		result = math.SmallestNonzeroFloat64
+	} else if result == 0.0 {
+		//Some very large numbers will come out as 0.0, but that's wrong.
 		result = math.SmallestNonzeroFloat64
 	}
 	return result

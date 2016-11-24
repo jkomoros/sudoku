@@ -274,6 +274,19 @@ func TestWeightedRandomDistribution(t *testing.T) {
 			},
 			"Small numbers and very big one",
 		},
+		{
+			ProbabilityDistribution{
+				2400000028.253748,
+				math.Inf(1),
+				math.Inf(1),
+			},
+			ProbabilityDistribution{
+				1.0,
+				0.0,
+				0.0,
+			},
+			"Single very large non-inf with two infs",
+		},
 	}
 
 	for _, testCase := range cases {
