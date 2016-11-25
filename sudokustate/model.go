@@ -25,6 +25,8 @@ type Model struct {
 	currentCommand         *commandList
 	commands               *commandList
 	inProgressMultiCommand *multiCommand
+	//snapshot is a Diagram(true) of what the grid looked like when it was reset.
+	snapshot string
 }
 
 type commandList struct {
@@ -204,6 +206,7 @@ func (m *Model) Reset() {
 	m.currentCommand = nil
 	if m.grid != nil {
 		m.grid.ResetUnlockedCells()
+		m.snapshot = m.grid.Diagram(true)
 	}
 }
 

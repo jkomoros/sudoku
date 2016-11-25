@@ -6,6 +6,30 @@ import (
 	"testing"
 )
 
+func TestReset(t *testing.T) {
+	model := &Model{}
+
+	grid := sudoku.NewGrid()
+
+	grid.MutableCell(3, 3).SetNumber(5)
+	grid.LockFilledCells()
+
+	snapshot := grid.Diagram(true)
+
+	grid.MutableCell(4, 4).SetNumber(6)
+
+	model.SetGrid(grid)
+
+	if model.Grid().Cell(4, 4).Number() != 0 {
+		t.Error("Expected grid to be reset after being set, but the unlocked cell remained:", model.Grid().Cell(4, 4).Number())
+	}
+
+	if model.snapshot != snapshot {
+		t.Error("Got unexpected snapshot: got", model.snapshot, "expected", snapshot)
+	}
+
+}
+
 func TestMarkMutator(t *testing.T) {
 	model := &Model{}
 	model.SetGrid(sudoku.NewGrid())
