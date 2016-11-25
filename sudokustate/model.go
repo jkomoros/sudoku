@@ -41,8 +41,8 @@ type commandList struct {
 }
 
 type groupInfo struct {
-	ID   int
-	Name string
+	ID          int
+	Description string
 }
 
 type command interface {
@@ -220,14 +220,16 @@ func (m *Model) Redo() bool {
 //calls to SetMarks or SetNumber will be grouped into a single logical group
 //of actions--that is, if they are undone they will all be undone at once.
 //When a group is active, the modifications aren't actually made to the grid
-//until FinishGroupAndExecute is called.
-func (m *Model) StartGroup() {
+//until FinishGroupAndExecute is called. Description is a description of what
+//the group logically represents, primarily just for what will be shown in the
+//digest.
+func (m *Model) StartGroup(description string) {
 	//TODO: allow setting a name when the group is created.
 	m.inProgressMultiCommand = &multiCommand{
 		nil,
 		&groupInfo{
 			m.nextGroupID,
-			"",
+			description,
 		},
 	}
 	m.nextGroupID++

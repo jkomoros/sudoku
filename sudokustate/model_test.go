@@ -153,7 +153,7 @@ func TestGroups(t *testing.T) {
 		t.Error("Model reported being in group even though it wasn't")
 	}
 
-	model.StartGroup()
+	model.StartGroup("foo")
 
 	if !model.InGroup() {
 		t.Error("Model didn't report being in a group even though it was")
@@ -168,11 +168,11 @@ func TestGroups(t *testing.T) {
 
 	model.FinishGroupAndExecute()
 
-	if model.currentCommand.c.Type() != "group" {
-		t.Error("Got unexpected type for group command. Got", model.currentCommand.c.Type(), "expected 'group'")
-	}
-
 	command := model.currentCommand.c
+
+	if command.Type() != "group" {
+		t.Error("Got unexpected type for group command. Got", command.Type(), "expected 'group'")
+	}
 
 	subCommands := command.SubCommands()
 
@@ -194,6 +194,10 @@ func TestGroups(t *testing.T) {
 
 	if command.GroupInfo().ID != 0 {
 		t.Error("Expected ID of 0, got", command.GroupInfo().ID)
+	}
+
+	if command.GroupInfo().Description != "foo" {
+		t.Error("Expected description of 'foo', got:", command.GroupInfo().Description)
 	}
 
 	if model.InGroup() {
@@ -218,7 +222,7 @@ func TestGroups(t *testing.T) {
 		t.Error("Undoing a group update didn't set the grid back to same state")
 	}
 
-	model.StartGroup()
+	model.StartGroup("discardable")
 	model.CancelGroup()
 
 	if model.InGroup() {

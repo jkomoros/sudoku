@@ -809,7 +809,7 @@ func (c *mainController) ToggleSelectedMark(num int) {
 }
 
 func (c *mainController) FillAllLegalMarks() {
-	c.model.StartGroup()
+	c.model.StartGroup("fill all legal marks")
 
 	for _, cell := range c.Grid().Cells() {
 		if cell.Number() != 0 {
@@ -826,7 +826,7 @@ func (c *mainController) FillAllLegalMarks() {
 }
 
 func (c *mainController) RemovedInvalidMarksFromAll() {
-	c.model.StartGroup()
+	c.model.StartGroup("remove invalid marks from all")
 
 	for _, cell := range c.Grid().Cells() {
 		if cell.Number() != 0 {
