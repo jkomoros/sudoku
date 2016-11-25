@@ -44,6 +44,8 @@ func TestMarkMutator(t *testing.T) {
 		t.Error("Got invalid command, expected nil", command)
 	}
 
+	command = model.newMarkCommand(sudoku.CellRef{0, 0}, map[int]bool{1: false, 2: true, 3: false})
+
 	if command.Type() != "marks" {
 		t.Error("Got unexpected type for marks command. Got", command.Type(), "expected 'marks'")
 	}
@@ -57,8 +59,6 @@ func TestMarkMutator(t *testing.T) {
 	if subCommands[0] != command {
 		t.Error("Sub command for marks was not self", subCommands[0])
 	}
-
-	command = model.newMarkCommand(sudoku.CellRef{0, 0}, map[int]bool{1: false, 2: true, 3: false})
 
 	command.Apply(model)
 
@@ -89,6 +89,8 @@ func TestNumberMutator(t *testing.T) {
 		t.Error("Got non-nil number command for a no op")
 	}
 
+	command = model.newNumberCommand(sudoku.CellRef{0, 0}, 1)
+
 	if command.Type() != "number" {
 		t.Error("Got unexpected type for number command. Got", command.Type(), "expected 'number'")
 	}
@@ -102,8 +104,6 @@ func TestNumberMutator(t *testing.T) {
 	if subCommands[0] != command {
 		t.Error("Sub command for number was not self", subCommands[0])
 	}
-
-	command = model.newNumberCommand(sudoku.CellRef{0, 0}, 1)
 
 	command.Apply(model)
 
