@@ -189,7 +189,11 @@ func TestReset(t *testing.T) {
 func TestSingleMarkEnter(t *testing.T) {
 	model := newController()
 
-	model.SetGrid(sudoku.NewGrid())
+	//Keep our own reference to the mutable grid, since once we put it into
+	//model we'll only get a read-only grid.
+	grid := sudoku.NewGrid()
+
+	model.SetGrid(grid)
 
 	//Test that it fails on 0 mark cell
 
@@ -205,7 +209,7 @@ func TestSingleMarkEnter(t *testing.T) {
 
 	//Test that it works on one mark cell
 
-	model.Selected().SetMark(1, true)
+	model.Selected().MutableInGrid(grid).SetMark(1, true)
 
 	sendKeyEvent(model, termbox.KeyEnter)
 
@@ -221,8 +225,8 @@ func TestSingleMarkEnter(t *testing.T) {
 
 	model.MoveSelectionRight(false)
 
-	model.Selected().SetMark(1, true)
-	model.Selected().SetMark(2, true)
+	model.Selected().MutableInGrid(grid).SetMark(1, true)
+	model.Selected().MutableInGrid(grid).SetMark(2, true)
 
 	sendKeyEvent(model, termbox.KeyEnter)
 
@@ -238,8 +242,8 @@ func TestSingleMarkEnter(t *testing.T) {
 
 	model.MoveSelectionRight(false)
 	model.SetSelectedNumber(1)
-	model.Selected().Lock()
-	model.Selected().SetMark(2, true)
+	model.Selected().MutableInGrid(grid).Lock()
+	model.Selected().MutableInGrid(grid).SetMark(2, true)
 
 	sendKeyEvent(model, termbox.KeyEnter)
 
@@ -283,8 +287,13 @@ func TestSingleMarkEnter(t *testing.T) {
 
 func TestEnterMarksMode(t *testing.T) {
 	model := newController()
+
+	//Keep our own reference to the mutable grid, since once we put it into
+	//model we'll only get a read-only grid.
+	grid := sudoku.NewGrid()
+
 	//Add empty grid.
-	model.SetGrid(sudoku.NewGrid())
+	model.SetGrid(grid)
 
 	model.ToggleMarkMode()
 
@@ -314,7 +323,7 @@ func TestEnterMarksMode(t *testing.T) {
 	//Make sure that enter mark mode doesn't happen if the cell is locked or filled.
 
 	model.MoveSelectionRight(false)
-	model.Selected().Lock()
+	model.Selected().MutableInGrid(grid).Lock()
 
 	model.ToggleSelectedMark(1)
 
@@ -326,8 +335,8 @@ func TestEnterMarksMode(t *testing.T) {
 		t.Error("Trying to mark locked cell didn't console message")
 	}
 
-	model.Selected().Unlock()
-	model.Selected().SetNumber(1)
+	model.Selected().MutableInGrid(grid).Unlock()
+	model.Selected().MutableInGrid(grid).SetNumber(1)
 	model.ToggleSelectedMark(1)
 
 	if model.Selected().Mark(1) {

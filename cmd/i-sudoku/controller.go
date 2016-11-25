@@ -20,7 +20,7 @@ const (
 
 type mainController struct {
 	model    *Model
-	selected sudoku.MutableCell
+	selected sudoku.Cell
 	mode     InputMode
 	//The size of the console output. Not used for much.
 	outputWidth int
@@ -588,11 +588,11 @@ func (c *mainController) EnterHint() {
 	c.ClearConsole()
 }
 
-func (c *mainController) Selected() sudoku.MutableCell {
+func (c *mainController) Selected() sudoku.Cell {
 	return c.selected
 }
 
-func (c *mainController) SetSelected(cell sudoku.MutableCell) {
+func (c *mainController) SetSelected(cell sudoku.Cell) {
 	if cell == c.selected {
 		//Already done
 		return
