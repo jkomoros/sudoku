@@ -4,7 +4,7 @@ import (
 	"github.com/jkomoros/sudoku"
 )
 
-type model struct {
+type Model struct {
 	grid                   sudoku.MutableGrid
 	currentCommand         *commandList
 	commands               *commandList
@@ -18,23 +18,23 @@ type commandList struct {
 }
 
 type command interface {
-	Apply(m *model)
-	Undo(m *model)
-	ModifiedCells(m *model) sudoku.CellSlice
+	Apply(m *Model)
+	Undo(m *Model)
+	ModifiedCells(m *Model) sudoku.CellSlice
 }
 
 type baseCommand struct {
 	row, col int
 }
 
-func (b *baseCommand) ModifiedCells(m *model) sudoku.CellSlice {
+func (b *baseCommand) ModifiedCells(m *Model) sudoku.CellSlice {
 	if m == nil || m.grid == nil {
 		return nil
 	}
 	return sudoku.CellSlice{m.grid.Cell(b.row, b.col)}
 }
 
-func (m *multiCommand) ModifiedCells(model *model) sudoku.CellSlice {
+func (m *multiCommand) ModifiedCells(model *Model) sudoku.CellSlice {
 	var result sudoku.CellSlice
 
 	for _, command := range m.commands {
@@ -64,7 +64,7 @@ type multiCommand struct {
 	commands []command
 }
 
-func (m *model) executeCommand(c command) {
+func (m *Model) executeCommand(c command) {
 	listItem := &commandList{
 		c:    c,
 		next: nil,
@@ -80,7 +80,7 @@ func (m *model) executeCommand(c command) {
 	c.Apply(m)
 }
 
-func (m *model) LastModifiedCells() sudoku.CellSlice {
+func (m *Model) LastModifiedCells() sudoku.CellSlice {
 	if m.currentCommand == nil {
 		return nil
 	}
@@ -89,7 +89,7 @@ func (m *model) LastModifiedCells() sudoku.CellSlice {
 }
 
 //Undo returns true if there was something to undo.
-func (m *model) Undo() bool {
+func (m *Model) Undo() bool {
 	if m.currentCommand == nil {
 		return false
 	}
@@ -102,7 +102,7 @@ func (m *model) Undo() bool {
 }
 
 //Redo returns true if there was something to redo.
-func (m *model) Redo() bool {
+func (m *Model) Redo() bool {
 
 	if m.commands == nil {
 		return false
@@ -134,13 +134,13 @@ func (m *model) Redo() bool {
 	return true
 }
 
-func (m *model) StartGroup() {
+func (m *Model) StartGroup() {
 	m.inProgressMultiCommand = &multiCommand{
 		nil,
 	}
 }
 
-func (m *model) FinishGroupAndExecute() {
+func (m *Model) FinishGroupAndExecute() {
 	if m.inProgressMultiCommand == nil {
 		return
 	}
@@ -148,21 +148,21 @@ func (m *model) FinishGroupAndExecute() {
 	m.inProgressMultiCommand = nil
 }
 
-func (m *model) CancelGroup() {
+func (m *Model) CancelGroup() {
 	m.inProgressMultiCommand = nil
 }
 
-func (m *model) InGroup() bool {
+func (m *Model) InGroup() bool {
 	return m.inProgressMultiCommand != nil
 }
 
-func (m *model) SetGrid(grid sudoku.MutableGrid) {
+func (m *Model) SetGrid(grid sudoku.MutableGrid) {
 	m.commands = nil
 	m.currentCommand = nil
 	m.grid = grid
 }
 
-func (m *model) SetMarks(row, col int, marksToggle map[int]bool) {
+func (m *Model) SetMarks(row, col int, marksToggle map[int]bool) {
 	command := m.newMarkCommand(row, col, marksToggle)
 	if command == nil {
 		return
@@ -174,7 +174,7 @@ func (m *model) SetMarks(row, col int, marksToggle map[int]bool) {
 	}
 }
 
-func (m *model) newMarkCommand(row, col int, marksToggle map[int]bool) *markCommand {
+func (m *Model) newMarkCommand(row, col int, marksToggle map[int]bool) *markCommand {
 	//Only keep marks in the toggle that won't be a no-op
 	newMarksToggle := make(map[int]bool)
 
@@ -198,7 +198,7 @@ func (m *model) newMarkCommand(row, col int, marksToggle map[int]bool) *markComm
 	return &markCommand{baseCommand{row, col}, newMarksToggle}
 }
 
-func (m *model) SetNumber(row, col int, num int) {
+func (m *Model) SetNumber(row, col int, num int) {
 	command := m.newNumberCommand(row, col, num)
 	if command == nil {
 		return
@@ -210,7 +210,7 @@ func (m *model) SetNumber(row, col int, num int) {
 	}
 }
 
-func (m *model) newNumberCommand(row, col int, num int) *numberCommand {
+func (m *Model) newNumberCommand(row, col int, num int) *numberCommand {
 	cell := m.grid.Cell(row, col)
 
 	if cell == nil {
@@ -224,7 +224,7 @@ func (m *model) newNumberCommand(row, col int, num int) *numberCommand {
 	return &numberCommand{baseCommand{row, col}, num, cell.Number()}
 }
 
-func (m *markCommand) Apply(model *model) {
+func (m *markCommand) Apply(model *Model) {
 	cell := model.grid.MutableCell(m.row, m.col)
 	if cell == nil {
 		return
@@ -234,7 +234,7 @@ func (m *markCommand) Apply(model *model) {
 	}
 }
 
-func (m *markCommand) Undo(model *model) {
+func (m *markCommand) Undo(model *Model) {
 	cell := model.grid.MutableCell(m.row, m.col)
 	if cell == nil {
 		return
@@ -245,7 +245,7 @@ func (m *markCommand) Undo(model *model) {
 	}
 }
 
-func (n *numberCommand) Apply(model *model) {
+func (n *numberCommand) Apply(model *Model) {
 	cell := model.grid.MutableCell(n.row, n.col)
 	if cell == nil {
 		return
@@ -253,7 +253,7 @@ func (n *numberCommand) Apply(model *model) {
 	cell.SetNumber(n.number)
 }
 
-func (n *numberCommand) Undo(model *model) {
+func (n *numberCommand) Undo(model *Model) {
 	cell := model.grid.MutableCell(n.row, n.col)
 	if cell == nil {
 		return
@@ -261,13 +261,13 @@ func (n *numberCommand) Undo(model *model) {
 	cell.SetNumber(n.oldNumber)
 }
 
-func (m *multiCommand) Apply(model *model) {
+func (m *multiCommand) Apply(model *Model) {
 	for _, command := range m.commands {
 		command.Apply(model)
 	}
 }
 
-func (m *multiCommand) Undo(model *model) {
+func (m *multiCommand) Undo(model *Model) {
 	for i := len(m.commands) - 1; i >= 0; i-- {
 		m.commands[i].Undo(model)
 	}

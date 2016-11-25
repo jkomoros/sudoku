@@ -19,7 +19,7 @@ const (
 )
 
 type mainController struct {
-	model    *model
+	model    *Model
 	selected sudoku.MutableCell
 	mode     InputMode
 	//The size of the console output. Not used for much.
@@ -61,7 +61,7 @@ type toggle struct {
 
 func newController() *mainController {
 	c := &mainController{
-		model: &model{},
+		model: &Model{},
 		mode:  MODE_DEFAULT,
 	}
 	c.setUpToggles()

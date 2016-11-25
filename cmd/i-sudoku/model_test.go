@@ -7,7 +7,7 @@ import (
 )
 
 func TestMarkMutator(t *testing.T) {
-	model := &model{}
+	model := &Model{}
 	model.SetGrid(sudoku.NewGrid())
 
 	cell := model.grid.MutableCell(0, 0)
@@ -40,7 +40,7 @@ func TestMarkMutator(t *testing.T) {
 }
 
 func TestNumberMutator(t *testing.T) {
-	model := &model{}
+	model := &Model{}
 	model.SetGrid(sudoku.NewGrid())
 
 	cell := model.grid.Cell(0, 0)
@@ -72,7 +72,7 @@ func TestNumberMutator(t *testing.T) {
 }
 
 func TestGroups(t *testing.T) {
-	model := &model{}
+	model := &Model{}
 	model.SetGrid(sudoku.NewGrid())
 
 	model.SetNumber(0, 0, 1)
@@ -140,7 +140,7 @@ func TestGroups(t *testing.T) {
 
 func TestUndoRedo(t *testing.T) {
 
-	model := &model{}
+	model := &Model{}
 	model.SetGrid(sudoku.NewGrid())
 
 	if model.Undo() {
