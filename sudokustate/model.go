@@ -48,7 +48,7 @@ type groupInfo struct {
 type command interface {
 	Apply(m *Model)
 	Undo(m *Model)
-	ModifiedCells(m *Model) sudoku.CellSlice
+	ModifiedCells(m *Model) sudoku.CellRefSlice
 	//one of 'number', 'marks', 'group'
 	Type() string
 	//TODO: consider removing Type; the type can be derived by which Extra it has.
@@ -69,15 +69,15 @@ func (b *baseCommand) GroupInfo() *groupInfo {
 	return nil
 }
 
-func (b *baseCommand) ModifiedCells(m *Model) sudoku.CellSlice {
+func (b *baseCommand) ModifiedCells(m *Model) sudoku.CellRefSlice {
 	if m == nil || m.grid == nil {
 		return nil
 	}
-	return sudoku.CellSlice{b.ref.Cell(m.grid)}
+	return sudoku.CellRefSlice{b.ref}
 }
 
-func (m *multiCommand) ModifiedCells(model *Model) sudoku.CellSlice {
-	var result sudoku.CellSlice
+func (m *multiCommand) ModifiedCells(model *Model) sudoku.CellRefSlice {
+	var result sudoku.CellRefSlice
 
 	for _, command := range m.commands {
 		result = append(result, command.ModifiedCells(model)...)
@@ -160,7 +160,7 @@ func (m *Model) executeCommand(c command) {
 
 //LastModifiedCells returns the cells that were modified in the last action
 //that was taken on the grid.
-func (m *Model) LastModifiedCells() sudoku.CellSlice {
+func (m *Model) LastModifiedCells() sudoku.CellRefSlice {
 	if m.currentCommand == nil {
 		return nil
 	}

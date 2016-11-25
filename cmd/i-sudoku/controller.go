@@ -503,7 +503,7 @@ func (c *mainController) ShowDebugHint() {
 		{
 			FillStep: &sudoku.SolveStep{
 				Technique:   sudoku.Techniques[0],
-				TargetCells: c.model.LastModifiedCells().CellReferenceSlice(),
+				TargetCells: c.model.LastModifiedCells(),
 			},
 		},
 	}
@@ -559,7 +559,7 @@ func (c *mainController) ShowHint() {
 		{
 			FillStep: &sudoku.SolveStep{
 				Technique:   sudoku.Techniques[0],
-				TargetCells: c.model.LastModifiedCells().CellReferenceSlice(),
+				TargetCells: c.model.LastModifiedCells(),
 			},
 		},
 	}

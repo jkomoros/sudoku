@@ -76,7 +76,7 @@ func TestMarkMutator(t *testing.T) {
 		t.Error("Got wrong marks after undoing:", cell.Marks())
 	}
 
-	if !reflect.DeepEqual(command.ModifiedCells(model), sudoku.CellSlice{model.grid.Cell(0, 0)}) {
+	if !reflect.DeepEqual(command.ModifiedCells(model), sudoku.CellRefSlice{sudoku.CellRef{0, 0}}) {
 		t.Error("Didn't get right Modified Cells")
 	}
 }
@@ -125,7 +125,7 @@ func TestNumberMutator(t *testing.T) {
 		t.Error("Number mutator didn't undo")
 	}
 
-	if !reflect.DeepEqual(command.ModifiedCells(model), sudoku.CellSlice{model.grid.Cell(0, 0)}) {
+	if !reflect.DeepEqual(command.ModifiedCells(model), sudoku.CellRefSlice{sudoku.CellRef{0, 0}}) {
 		t.Error("Didn't get right Modified Cells")
 	}
 
@@ -247,34 +247,34 @@ func TestUndoRedo(t *testing.T) {
 		model.grid.Diagram(true),
 	}
 
-	rememberedModfiedCells := []sudoku.CellSlice{
+	rememberedModfiedCells := []sudoku.CellRefSlice{
 		nil,
 	}
 
 	model.SetNumber(sudoku.CellRef{0, 0}, 1)
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
-	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 0)})
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellRefSlice{sudoku.CellRef{0, 0}})
 
 	model.SetNumber(sudoku.CellRef{0, 1}, 2)
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
-	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 1)})
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellRefSlice{sudoku.CellRef{0, 1}})
 
 	model.SetNumber(sudoku.CellRef{0, 0}, 3)
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
-	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 0)})
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellRefSlice{sudoku.CellRef{0, 0}})
 
 	model.SetMarks(sudoku.CellRef{0, 2}, map[int]bool{3: true, 4: true})
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
-	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 2)})
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellRefSlice{sudoku.CellRef{0, 2}})
 
 	model.SetMarks(sudoku.CellRef{0, 2}, map[int]bool{1: true, 4: false})
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
-	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 2)})
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellRefSlice{sudoku.CellRef{0, 2}})
 
 	if model.Redo() {
 		t.Error("Able to redo even though at end")

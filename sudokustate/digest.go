@@ -48,7 +48,7 @@ func (m *Model) makeMovesDigest() []digestMove {
 			result = append(result, digestMove{
 				Type: subCommand.Type(),
 				//TODO: this is a hack, we just happen to know that there's only one item
-				Cell:  subCommand.ModifiedCells(m).CellReferenceSlice()[0],
+				Cell:  subCommand.ModifiedCells(m)[0],
 				Group: *groupInfo,
 			})
 		}
