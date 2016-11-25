@@ -732,7 +732,7 @@ func (c *mainController) NewGrid() {
 }
 
 func (c *mainController) ResetGrid() {
-	c.Grid().ResetUnlockedCells()
+	c.model.Reset()
 }
 
 func (c *mainController) Undo() {
