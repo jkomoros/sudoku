@@ -3,6 +3,14 @@
 sudokustate manages modifications to a given grid, allowing easy undo/redo,
 and keeping track of all moves.
 
+Moves can be made either by setting a number on a given cell or setting
+multiple marks on a given cell.
+
+When multiple modifications are logically part of the same move (for the
+purposes of undo/redo), a group can be created. Call `model.StartGroup`, make
+the changes, then `model.FinishGroupAndExecute` to make all of the changes in
+one 'move'.
+
 */
 package sudokustate
 
