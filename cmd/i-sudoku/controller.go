@@ -217,8 +217,8 @@ func (c *mainController) StatusLine() string {
 
 //TODO: should this vend a copy of the grid? I want to make it so the only
 //easy way to mutate the grid is via model mutators.
-func (c *mainController) Grid() sudoku.MutableGrid {
-	return c.model.grid
+func (c *mainController) Grid() sudoku.Grid {
+	return c.model.Grid()
 }
 
 func (c *mainController) SetGrid(grid sudoku.MutableGrid) {
@@ -573,7 +573,7 @@ func (c *mainController) ShowHint() {
 	//This hast to be after setting console message, since SetConsoleMessage clears the last hint.
 	c.lastShownHint = hint
 	lastStep := hint.CompoundSteps[0].FillStep
-	c.SetSelected(lastStep.TargetCells[0].MutableCell(c.Grid()))
+	c.SetSelected(lastStep.TargetCells[0].Cell(c.Grid()))
 }
 
 func (c *mainController) EnterHint() {
@@ -584,7 +584,7 @@ func (c *mainController) EnterHint() {
 	cell := lastStep.TargetCells[0]
 	num := lastStep.TargetNums[0]
 
-	c.SetSelected(cell.MutableCell(c.Grid()))
+	c.SetSelected(cell.Cell(c.Grid()))
 	c.SetSelectedNumber(num)
 
 	c.ClearConsole()
@@ -607,7 +607,7 @@ func (c *mainController) EnsureSelected() {
 	c.EnsureGrid()
 	//Ensures that at least one cell is selected.
 	if c.Selected() == nil {
-		c.SetSelected(c.Grid().MutableCell(0, 0))
+		c.SetSelected(c.Grid().Cell(0, 0))
 	}
 }
 
@@ -629,7 +629,7 @@ func (c *mainController) MoveSelectionLeft(fast bool) {
 			}
 			continue
 		}
-		c.SetSelected(c.Grid().MutableCell(row, col))
+		c.SetSelected(c.Grid().Cell(row, col))
 		break
 	}
 }
@@ -652,7 +652,7 @@ func (c *mainController) MoveSelectionRight(fast bool) {
 			}
 			continue
 		}
-		c.SetSelected(c.Grid().MutableCell(row, col))
+		c.SetSelected(c.Grid().Cell(row, col))
 		break
 	}
 }
@@ -675,7 +675,7 @@ func (m *mainController) MoveSelectionUp(fast bool) {
 			}
 			continue
 		}
-		m.SetSelected(m.Grid().MutableCell(r, c))
+		m.SetSelected(m.Grid().Cell(r, c))
 		break
 	}
 }
@@ -698,7 +698,7 @@ func (m *mainController) MoveSelectionDown(fast bool) {
 			}
 			continue
 		}
-		m.SetSelected(m.Grid().MutableCell(r, c))
+		m.SetSelected(m.Grid().Cell(r, c))
 		break
 	}
 }
