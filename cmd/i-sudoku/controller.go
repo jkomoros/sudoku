@@ -223,27 +223,29 @@ func (c *mainController) Grid() sudoku.MutableGrid {
 
 func (c *mainController) SetGrid(grid sudoku.MutableGrid) {
 	oldCell := c.Selected()
-	c.model.SetGrid(grid)
-	//The currently selected cell is tied to the grid, so we need to fix it up.
-	if oldCell != nil {
-		c.SetSelected(oldCell.MutableInGrid(c.model.grid))
-	}
-	if c.model.grid != nil {
+
+	if grid != nil {
 		//IF there are already some locked cells, we assume that only those
 		//cells should be locked. If there aren't any locked cells at all, we
 		//assume that all filled cells should be locked.
 
 		//TODO: this seems like magic behavior that's hard to reason about.
 		foundLockedCell := false
-		for _, cell := range c.model.grid.Cells() {
+		for _, cell := range grid.Cells() {
 			if cell.Locked() {
 				foundLockedCell = true
 				break
 			}
 		}
 		if !foundLockedCell {
-			c.model.grid.LockFilledCells()
+			grid.LockFilledCells()
 		}
+	}
+
+	c.model.SetGrid(grid)
+	//The currently selected cell is tied to the grid, so we need to fix it up.
+	if oldCell != nil {
+		c.SetSelected(oldCell.InGrid(c.model.Grid()))
 	}
 	c.cachedDifficulty = 0.0
 	c.snapshot = ""
