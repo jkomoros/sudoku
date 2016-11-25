@@ -14,13 +14,13 @@ func TestMarkMutator(t *testing.T) {
 
 	cell.SetMark(1, true)
 
-	command := model.newMarkCommand(0, 0, map[int]bool{1: true})
+	command := model.newMarkCommand(sudoku.CellRef{0, 0}, map[int]bool{1: true})
 
 	if command != nil {
 		t.Error("Got invalid command, expected nil", command)
 	}
 
-	command = model.newMarkCommand(0, 0, map[int]bool{1: false, 2: true, 3: false})
+	command = model.newMarkCommand(sudoku.CellRef{0, 0}, map[int]bool{1: false, 2: true, 3: false})
 
 	command.Apply(model)
 
@@ -45,13 +45,13 @@ func TestNumberMutator(t *testing.T) {
 
 	cell := model.grid.Cell(0, 0)
 
-	command := model.newNumberCommand(0, 0, 0)
+	command := model.newNumberCommand(sudoku.CellRef{0, 0}, 0)
 
 	if command != nil {
 		t.Error("Got non-nil number command for a no op")
 	}
 
-	command = model.newNumberCommand(0, 0, 1)
+	command = model.newNumberCommand(sudoku.CellRef{0, 0}, 1)
 
 	command.Apply(model)
 
@@ -75,13 +75,13 @@ func TestGroups(t *testing.T) {
 	model := &Model{}
 	model.SetGrid(sudoku.NewGrid())
 
-	model.SetNumber(0, 0, 1)
+	model.SetNumber(sudoku.CellRef{0, 0}, 1)
 
 	if model.grid.Cell(0, 0).Number() != 1 {
 		t.Fatal("Setting number outside group didn't set number")
 	}
 
-	model.SetMarks(0, 1, map[int]bool{3: true})
+	model.SetMarks(sudoku.CellRef{0, 1}, map[int]bool{3: true})
 
 	if !model.grid.Cell(0, 1).Marks().SameContentAs(sudoku.IntSlice{3}) {
 		t.Fatal("Setting marks outside of group didn't set marks")
@@ -99,8 +99,8 @@ func TestGroups(t *testing.T) {
 		t.Error("Model didn't report being in a group even though it was")
 	}
 
-	model.SetNumber(0, 2, 1)
-	model.SetMarks(0, 3, map[int]bool{3: true})
+	model.SetNumber(sudoku.CellRef{0, 2}, 1)
+	model.SetMarks(sudoku.CellRef{0, 3}, map[int]bool{3: true})
 
 	if model.grid.Diagram(true) != state {
 		t.Error("Within a group setnumber and setmarks mutated the grid")
@@ -159,27 +159,27 @@ func TestUndoRedo(t *testing.T) {
 		nil,
 	}
 
-	model.SetNumber(0, 0, 1)
+	model.SetNumber(sudoku.CellRef{0, 0}, 1)
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
 	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 0)})
 
-	model.SetNumber(0, 1, 2)
+	model.SetNumber(sudoku.CellRef{0, 1}, 2)
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
 	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 1)})
 
-	model.SetNumber(0, 0, 3)
+	model.SetNumber(sudoku.CellRef{0, 0}, 3)
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
 	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 0)})
 
-	model.SetMarks(0, 2, map[int]bool{3: true, 4: true})
+	model.SetMarks(sudoku.CellRef{0, 2}, map[int]bool{3: true, 4: true})
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
 	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 2)})
 
-	model.SetMarks(0, 2, map[int]bool{1: true, 4: false})
+	model.SetMarks(sudoku.CellRef{0, 2}, map[int]bool{1: true, 4: false})
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
 	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 2)})
@@ -219,7 +219,7 @@ func TestUndoRedo(t *testing.T) {
 		}
 	}
 
-	model.SetNumber(2, 0, 3)
+	model.SetNumber(sudoku.CellRef{2, 0}, 3)
 
 	if model.Redo() {
 		t.Error("Able to redo even though just spliced in a new move.")

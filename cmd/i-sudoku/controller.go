@@ -774,10 +774,10 @@ func (c *mainController) SetSelectedNumber(num int) {
 	}
 
 	if c.Selected().Number() != num {
-		c.model.SetNumber(c.Selected().Row(), c.Selected().Col(), num)
+		c.model.SetNumber(c.Selected().Reference(), num)
 	} else {
 		//If the number to set is already set, then empty the cell instead.
-		c.model.SetNumber(c.Selected().Row(), c.Selected().Col(), 0)
+		c.model.SetNumber(c.Selected().Reference(), 0)
 	}
 
 	c.checkHintDone()
@@ -805,7 +805,7 @@ func (c *mainController) ToggleSelectedMark(num int) {
 		c.SetConsoleMessage(MARKS_MODE_FAIL_NUMBER, true)
 		return
 	}
-	c.model.SetMarks(c.Selected().Row(), c.Selected().Col(), map[int]bool{num: !c.Selected().Mark(num)})
+	c.model.SetMarks(c.Selected().Reference(), map[int]bool{num: !c.Selected().Mark(num)})
 }
 
 func (c *mainController) FillAllLegalMarks() {
@@ -819,7 +819,7 @@ func (c *mainController) FillAllLegalMarks() {
 		for _, num := range cell.Possibilities() {
 			markMap[num] = true
 		}
-		c.model.SetMarks(cell.Row(), cell.Col(), markMap)
+		c.model.SetMarks(cell.Reference(), markMap)
 	}
 
 	c.model.FinishGroupAndExecute()
@@ -838,7 +838,7 @@ func (c *mainController) RemovedInvalidMarksFromAll() {
 				markMap[num] = false
 			}
 		}
-		c.model.SetMarks(cell.Row(), cell.Col(), markMap)
+		c.model.SetMarks(cell.Reference(), markMap)
 	}
 
 	c.model.FinishGroupAndExecute()
@@ -853,7 +853,7 @@ func (c *mainController) FillSelectedWithLegalMarks() {
 	for _, num := range c.Selected().Possibilities() {
 		markMap[num] = true
 	}
-	c.model.SetMarks(c.Selected().Row(), c.Selected().Col(), markMap)
+	c.model.SetMarks(c.Selected().Reference(), markMap)
 }
 
 func (c *mainController) RemoveInvalidMarksFromSelected() {
@@ -864,5 +864,5 @@ func (c *mainController) RemoveInvalidMarksFromSelected() {
 			markMap[num] = false
 		}
 	}
-	c.model.SetMarks(c.Selected().Row(), c.Selected().Col(), markMap)
+	c.model.SetMarks(c.Selected().Reference(), markMap)
 }

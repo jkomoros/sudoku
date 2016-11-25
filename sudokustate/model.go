@@ -40,14 +40,14 @@ type command interface {
 }
 
 type baseCommand struct {
-	row, col int
+	ref sudoku.CellRef
 }
 
 func (b *baseCommand) ModifiedCells(m *Model) sudoku.CellSlice {
 	if m == nil || m.grid == nil {
 		return nil
 	}
-	return sudoku.CellSlice{m.grid.Cell(b.row, b.col)}
+	return sudoku.CellSlice{b.ref.Cell(m.grid)}
 }
 
 func (m *multiCommand) ModifiedCells(model *Model) sudoku.CellSlice {
@@ -195,9 +195,8 @@ func (m *Model) SetGrid(grid sudoku.MutableGrid) {
 	m.Reset()
 }
 
-func (m *Model) SetMarks(row, col int, marksToggle map[int]bool) {
-	//TODO: should this take a cellRef?
-	command := m.newMarkCommand(row, col, marksToggle)
+func (m *Model) SetMarks(ref sudoku.CellRef, marksToggle map[int]bool) {
+	command := m.newMarkCommand(ref, marksToggle)
 	if command == nil {
 		return
 	}
@@ -208,11 +207,11 @@ func (m *Model) SetMarks(row, col int, marksToggle map[int]bool) {
 	}
 }
 
-func (m *Model) newMarkCommand(row, col int, marksToggle map[int]bool) *markCommand {
+func (m *Model) newMarkCommand(ref sudoku.CellRef, marksToggle map[int]bool) *markCommand {
 	//Only keep marks in the toggle that won't be a no-op
 	newMarksToggle := make(map[int]bool)
 
-	cell := m.grid.Cell(row, col)
+	cell := ref.Cell(m.grid)
 
 	if cell == nil {
 		return nil
@@ -229,12 +228,11 @@ func (m *Model) newMarkCommand(row, col int, marksToggle map[int]bool) *markComm
 		return nil
 	}
 
-	return &markCommand{baseCommand{row, col}, newMarksToggle}
+	return &markCommand{baseCommand{ref}, newMarksToggle}
 }
 
-func (m *Model) SetNumber(row, col int, num int) {
-	//TODO: should this take CellRef?
-	command := m.newNumberCommand(row, col, num)
+func (m *Model) SetNumber(ref sudoku.CellRef, num int) {
+	command := m.newNumberCommand(ref, num)
 	if command == nil {
 		return
 	}
@@ -245,8 +243,8 @@ func (m *Model) SetNumber(row, col int, num int) {
 	}
 }
 
-func (m *Model) newNumberCommand(row, col int, num int) *numberCommand {
-	cell := m.grid.Cell(row, col)
+func (m *Model) newNumberCommand(ref sudoku.CellRef, num int) *numberCommand {
+	cell := ref.Cell(m.grid)
 
 	if cell == nil {
 		return nil
@@ -256,11 +254,11 @@ func (m *Model) newNumberCommand(row, col int, num int) *numberCommand {
 		return nil
 	}
 
-	return &numberCommand{baseCommand{row, col}, num, cell.Number()}
+	return &numberCommand{baseCommand{ref}, num, cell.Number()}
 }
 
 func (m *markCommand) Apply(model *Model) {
-	cell := model.grid.MutableCell(m.row, m.col)
+	cell := m.ref.MutableCell(model.grid)
 	if cell == nil {
 		return
 	}
@@ -270,7 +268,7 @@ func (m *markCommand) Apply(model *Model) {
 }
 
 func (m *markCommand) Undo(model *Model) {
-	cell := model.grid.MutableCell(m.row, m.col)
+	cell := m.ref.MutableCell(model.grid)
 	if cell == nil {
 		return
 	}
@@ -281,7 +279,7 @@ func (m *markCommand) Undo(model *Model) {
 }
 
 func (n *numberCommand) Apply(model *Model) {
-	cell := model.grid.MutableCell(n.row, n.col)
+	cell := n.ref.MutableCell(model.grid)
 	if cell == nil {
 		return
 	}
@@ -289,7 +287,7 @@ func (n *numberCommand) Apply(model *Model) {
 }
 
 func (n *numberCommand) Undo(model *Model) {
-	cell := model.grid.MutableCell(n.row, n.col)
+	cell := n.ref.MutableCell(model.grid)
 	if cell == nil {
 		return
 	}
