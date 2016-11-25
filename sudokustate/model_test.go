@@ -60,6 +60,10 @@ func TestMarkMutator(t *testing.T) {
 		t.Error("Sub command for marks was not self", subCommands[0])
 	}
 
+	if command.GroupInfo() != nil {
+		t.Error("Expected nil info, got", command.GroupInfo())
+	}
+
 	command.Apply(model)
 
 	if !cell.Marks().SameContentAs(sudoku.IntSlice{2}) {
@@ -103,6 +107,10 @@ func TestNumberMutator(t *testing.T) {
 
 	if subCommands[0] != command {
 		t.Error("Sub command for number was not self", subCommands[0])
+	}
+
+	if command.GroupInfo() != nil {
+		t.Error("Expected nil info, got", command.GroupInfo())
 	}
 
 	command.Apply(model)
@@ -164,7 +172,9 @@ func TestGroups(t *testing.T) {
 		t.Error("Got unexpected type for group command. Got", model.currentCommand.c.Type(), "expected 'group'")
 	}
 
-	subCommands := model.currentCommand.c.SubCommands()
+	command := model.currentCommand.c
+
+	subCommands := command.SubCommands()
 
 	if len(subCommands) != 2 {
 		t.Fatal("Got wrong sized subcommands for marks", len(subCommands))
@@ -176,6 +186,14 @@ func TestGroups(t *testing.T) {
 
 	if subCommands[1].Type() != "marks" {
 		t.Error("Sub command #2 was not marks")
+	}
+
+	if command.GroupInfo() == nil {
+		t.Error("Expected non-nil info, got", command.GroupInfo())
+	}
+
+	if command.GroupInfo().ID != 0 {
+		t.Error("Expected ID of 0, got", command.GroupInfo().ID)
 	}
 
 	if model.InGroup() {

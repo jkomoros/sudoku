@@ -30,13 +30,19 @@ type Model struct {
 	commands               *commandList
 	inProgressMultiCommand *multiCommand
 	//snapshot is a Diagram(true) of what the grid looked like when it was reset.
-	snapshot string
+	snapshot    string
+	nextGroupID int
 }
 
 type commandList struct {
 	c    command
 	next *commandList
 	prev *commandList
+}
+
+type groupInfo struct {
+	ID   int
+	Name string
 }
 
 type command interface {
@@ -50,10 +56,17 @@ type command interface {
 	//All sub-commands related to this command. For basic commands it's just
 	//self; for group it's all sub-commands in order.
 	SubCommands() []command
+	//Returns the group info if this command is a containing group, nil if
+	//not.
+	GroupInfo() *groupInfo
 }
 
 type baseCommand struct {
 	ref sudoku.CellRef
+}
+
+func (b *baseCommand) GroupInfo() *groupInfo {
+	return nil
 }
 
 func (b *baseCommand) ModifiedCells(m *Model) sudoku.CellSlice {
@@ -73,6 +86,10 @@ func (m *multiCommand) ModifiedCells(model *Model) sudoku.CellSlice {
 	return result
 }
 
+func (m *multiCommand) GroupInfo() *groupInfo {
+	return m.groupInfo
+}
+
 func (m *multiCommand) AddCommand(c command) {
 	m.commands = append(m.commands, c)
 }
@@ -90,7 +107,8 @@ type numberCommand struct {
 }
 
 type multiCommand struct {
-	commands []command
+	commands  []command
+	groupInfo *groupInfo
 }
 
 func (m *markCommand) Type() string {
@@ -204,9 +222,15 @@ func (m *Model) Redo() bool {
 //When a group is active, the modifications aren't actually made to the grid
 //until FinishGroupAndExecute is called.
 func (m *Model) StartGroup() {
+	//TODO: allow setting a name when the group is created.
 	m.inProgressMultiCommand = &multiCommand{
 		nil,
+		&groupInfo{
+			m.nextGroupID,
+			"",
+		},
 	}
+	m.nextGroupID++
 }
 
 //FinishGroupAndExecute applies all of the modifications made inside of this
