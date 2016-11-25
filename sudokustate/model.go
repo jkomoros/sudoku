@@ -21,8 +21,12 @@ import (
 //Model maintains all of the state and modifications to the grid. The zero-
 //state is valid; create a new Model with sudokustate.Model{}.
 type Model struct {
-	grid                   sudoku.MutableGrid
-	currentCommand         *commandList
+	grid sudoku.MutableGrid
+	//The place in the command list that we currently are (this could move
+	//left or right down the list due to calls to undo or redo)
+	currentCommand *commandList
+	//The last command in the list of commands. currentCommand might not be
+	//the same as commands if the user has called Undo some number of times.
 	commands               *commandList
 	inProgressMultiCommand *multiCommand
 	//snapshot is a Diagram(true) of what the grid looked like when it was reset.
