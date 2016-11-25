@@ -64,6 +64,13 @@ type multiCommand struct {
 	commands []command
 }
 
+//Grid returns the underlying Grid managed by this Model. It's a non-mutable
+//reference to emphasize that all mutations should be done by the Model
+//itself.
+func (m *Model) Grid() sudoku.Grid {
+	return m.grid
+}
+
 func (m *Model) executeCommand(c command) {
 	listItem := &commandList{
 		c:    c,
