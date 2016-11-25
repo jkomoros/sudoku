@@ -15,10 +15,45 @@ type digestMove struct {
 	Marks  map[int]bool
 	Time   int
 	Number int
-	Group  digestGroup
+	Group  groupInfo
 }
 
-type digestGroup struct {
-	Type string
-	ID   int
+func (m *Model) makeDigest() digest {
+	return digest{
+		Puzzle: m.snapshot,
+		Moves:  m.makeMovesDigest(),
+	}
+}
+
+func (m *Model) makeMovesDigest() []digestMove {
+	var result []digestMove
+
+	//Move command cursor to the very first item in the linked list.
+	currentCommand := m.commands
+	if currentCommand == nil {
+		return nil
+	}
+	for currentCommand.prev != nil {
+		currentCommand = currentCommand.prev
+	}
+
+	for currentCommand != nil {
+
+		command := currentCommand.c
+
+		groupInfo := command.GroupInfo()
+
+		for _, subCommand := range command.SubCommands() {
+			result = append(result, digestMove{
+				Type: subCommand.Type(),
+				//TODO: this is a hack, we just happen to know that there's only one item
+				Cell:  subCommand.ModifiedCells(m).CellReferenceSlice()[0],
+				Group: *groupInfo,
+			})
+		}
+
+		currentCommand = currentCommand.next
+	}
+
+	return result
 }
