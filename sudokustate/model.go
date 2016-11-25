@@ -1,3 +1,9 @@
+/*
+
+sudokustate manages modifications to a given grid, allowing easy undo/redo,
+and keeping track of all moves.
+
+*/
 package sudokustate
 
 import (
