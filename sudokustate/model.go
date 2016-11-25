@@ -194,6 +194,7 @@ func (m *Model) SetGrid(grid sudoku.MutableGrid) {
 }
 
 func (m *Model) SetMarks(row, col int, marksToggle map[int]bool) {
+	//TODO: should this take a cellRef?
 	command := m.newMarkCommand(row, col, marksToggle)
 	if command == nil {
 		return
@@ -230,6 +231,7 @@ func (m *Model) newMarkCommand(row, col int, marksToggle map[int]bool) *markComm
 }
 
 func (m *Model) SetNumber(row, col int, num int) {
+	//TODO: should this take CellRef?
 	command := m.newNumberCommand(row, col, num)
 	if command == nil {
 		return
