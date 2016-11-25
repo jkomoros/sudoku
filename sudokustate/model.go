@@ -45,6 +45,8 @@ type command interface {
 	ModifiedCells(m *Model) sudoku.CellSlice
 	//one of 'number', 'marks', 'group'
 	Type() string
+	//TODO: consider removing Type; the type can be derived by which Extra it has.
+
 	//All sub-commands related to this command. For basic commands it's just
 	//self; for group it's all sub-commands in order.
 	SubCommands() []command
