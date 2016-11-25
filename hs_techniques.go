@@ -546,6 +546,17 @@ func (self *basicSolveTechnique) getter(grid Grid) func(int) CellSlice {
 	}
 }
 
+// Memoization of subsetIndexes
+type subsetCacheKey struct {
+	len, size int
+}
+
+var subsetIndexCache map[subsetCacheKey][][]int
+
+func init() {
+	subsetIndexCache = make(map[subsetCacheKey][][]int)
+}
+
 //This is useful both for hidden and naked subset techniques
 func subsetIndexes(len int, size int) [][]int {
 	//Given size of array to generate subset for, and size of desired subset, returns an array of all subset-indexes to try.
@@ -554,43 +565,58 @@ func subsetIndexes(len int, size int) [][]int {
 		return nil
 	}
 
-	//returns an array of slices of size size that give you all of the subsets of a list of length len
-	result := make([][]int, 0)
-	counters := make([]int, size)
-	for i := range counters {
-		counters[i] = i
-	}
-	for {
-		innerResult := make([]int, size)
-		for i, counter := range counters {
-			innerResult[i] = counter
-		}
-		result = append(result, innerResult)
-		//Now, increment.
-		//Start at the end and try to increment each counter one.
-		incremented := false
-		for i := size - 1; i >= 0; i-- {
+	//We memoize the results to this because we use subsetIndexes quite a bit,
+	//and with very similar subset sizes. For any meaningful run we should hit
+	//100% cache hit.
 
-			counter := counters[i]
-			if counter < len-(size-i) {
-				//Found one!
-				counters[i]++
-				incremented = true
-				if i < size-1 {
-					//It was an inner counter; need to set all of the higher counters to one above the one to the left.
-					base := counters[i] + 1
-					for j := i + 1; j < size; j++ {
-						counters[j] = base
-						base++
+	cacheKey := subsetCacheKey{len, size}
+
+	result := subsetIndexCache[cacheKey]
+
+	if result == nil {
+
+		//returns an array of slices of size size that give you all of the subsets of a list of length len
+		result = make([][]int, 0)
+		counters := make([]int, size)
+		for i := range counters {
+			counters[i] = i
+		}
+		for {
+			innerResult := make([]int, size)
+			for i, counter := range counters {
+				innerResult[i] = counter
+			}
+			result = append(result, innerResult)
+			//Now, increment.
+			//Start at the end and try to increment each counter one.
+			incremented := false
+			for i := size - 1; i >= 0; i-- {
+
+				counter := counters[i]
+				if counter < len-(size-i) {
+					//Found one!
+					counters[i]++
+					incremented = true
+					if i < size-1 {
+						//It was an inner counter; need to set all of the higher counters to one above the one to the left.
+						base := counters[i] + 1
+						for j := i + 1; j < size; j++ {
+							counters[j] = base
+							base++
+						}
 					}
+					break
 				}
+			}
+			//If we couldn't increment any, there's nothing to do.
+			if !incremented {
 				break
 			}
 		}
-		//If we couldn't increment any, there's nothing to do.
-		if !incremented {
-			break
-		}
+
+		subsetIndexCache[cacheKey] = result
+
 	}
+
 	return result
 }
