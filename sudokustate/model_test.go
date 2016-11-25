@@ -48,6 +48,16 @@ func TestMarkMutator(t *testing.T) {
 		t.Error("Got unexpected type for marks command. Got", command.Type(), "expected 'marks'")
 	}
 
+	subCommands := command.SubCommands()
+
+	if len(subCommands) != 1 {
+		t.Fatal("Got wrong sized subcommands for marks", len(subCommands))
+	}
+
+	if subCommands[0] != command {
+		t.Error("Sub command for marks was not self", subCommands[0])
+	}
+
 	command = model.newMarkCommand(sudoku.CellRef{0, 0}, map[int]bool{1: false, 2: true, 3: false})
 
 	command.Apply(model)
@@ -81,6 +91,16 @@ func TestNumberMutator(t *testing.T) {
 
 	if command.Type() != "number" {
 		t.Error("Got unexpected type for number command. Got", command.Type(), "expected 'number'")
+	}
+
+	subCommands := command.SubCommands()
+
+	if len(subCommands) != 1 {
+		t.Fatal("Got wrong sized subcommands for number", len(subCommands))
+	}
+
+	if subCommands[0] != command {
+		t.Error("Sub command for number was not self", subCommands[0])
 	}
 
 	command = model.newNumberCommand(sudoku.CellRef{0, 0}, 1)
@@ -142,6 +162,20 @@ func TestGroups(t *testing.T) {
 
 	if model.currentCommand.c.Type() != "group" {
 		t.Error("Got unexpected type for group command. Got", model.currentCommand.c.Type(), "expected 'group'")
+	}
+
+	subCommands := model.currentCommand.c.SubCommands()
+
+	if len(subCommands) != 2 {
+		t.Fatal("Got wrong sized subcommands for marks", len(subCommands))
+	}
+
+	if subCommands[0].Type() != "number" {
+		t.Error("Sub command #1 was not number")
+	}
+
+	if subCommands[1].Type() != "marks" {
+		t.Error("Sub command #2 was not marks")
 	}
 
 	if model.InGroup() {

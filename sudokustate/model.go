@@ -45,6 +45,9 @@ type command interface {
 	ModifiedCells(m *Model) sudoku.CellSlice
 	//one of 'number', 'marks', 'group'
 	Type() string
+	//All sub-commands related to this command. For basic commands it's just
+	//self; for group it's all sub-commands in order.
+	SubCommands() []command
 }
 
 type baseCommand struct {
@@ -98,6 +101,18 @@ func (n *numberCommand) Type() string {
 
 func (m *multiCommand) Type() string {
 	return "group"
+}
+
+func (m *markCommand) SubCommands() []command {
+	return []command{m}
+}
+
+func (n *numberCommand) SubCommands() []command {
+	return []command{n}
+}
+
+func (m *multiCommand) SubCommands() []command {
+	return m.commands
 }
 
 //Grid returns the underlying Grid managed by this Model. It's an immutable
