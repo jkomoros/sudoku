@@ -18,6 +18,8 @@ import (
 	"github.com/jkomoros/sudoku"
 )
 
+//Model maintains all of the state and modifications to the grid. The zero-
+//state is valid; create a new Model with sudokustate.Model{}.
 type Model struct {
 	grid                   sudoku.MutableGrid
 	currentCommand         *commandList
