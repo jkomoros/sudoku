@@ -19,6 +19,7 @@ type digestMove struct {
 }
 
 func (m *Model) makeDigest() digest {
+	//TODO: test this
 	return digest{
 		Puzzle: m.snapshot,
 		Moves:  m.makeMovesDigest(),
