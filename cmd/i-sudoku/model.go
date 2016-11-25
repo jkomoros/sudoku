@@ -163,10 +163,20 @@ func (m *Model) InGroup() bool {
 	return m.inProgressMultiCommand != nil
 }
 
-func (m *Model) SetGrid(grid sudoku.MutableGrid) {
+//Reset resets the current grid back to its fully unfilled states and discards
+//all commands.
+func (m *Model) Reset() {
+	//TODO: test this.
 	m.commands = nil
 	m.currentCommand = nil
+	if m.grid != nil {
+		m.grid.ResetUnlockedCells()
+	}
+}
+
+func (m *Model) SetGrid(grid sudoku.MutableGrid) {
 	m.grid = grid
+	m.Reset()
 }
 
 func (m *Model) SetMarks(row, col int, marksToggle map[int]bool) {
