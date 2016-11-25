@@ -43,6 +43,8 @@ type command interface {
 	Apply(m *Model)
 	Undo(m *Model)
 	ModifiedCells(m *Model) sudoku.CellSlice
+	//one of 'number', 'marks', 'group'
+	Type() string
 }
 
 type baseCommand struct {
@@ -84,6 +86,18 @@ type numberCommand struct {
 
 type multiCommand struct {
 	commands []command
+}
+
+func (m *markCommand) Type() string {
+	return "marks"
+}
+
+func (n *numberCommand) Type() string {
+	return "number"
+}
+
+func (m *multiCommand) Type() string {
+	return "group"
 }
 
 //Grid returns the underlying Grid managed by this Model. It's an immutable

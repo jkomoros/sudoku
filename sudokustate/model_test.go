@@ -44,6 +44,10 @@ func TestMarkMutator(t *testing.T) {
 		t.Error("Got invalid command, expected nil", command)
 	}
 
+	if command.Type() != "marks" {
+		t.Error("Got unexpected type for marks command. Got", command.Type(), "expected 'marks'")
+	}
+
 	command = model.newMarkCommand(sudoku.CellRef{0, 0}, map[int]bool{1: false, 2: true, 3: false})
 
 	command.Apply(model)
@@ -73,6 +77,10 @@ func TestNumberMutator(t *testing.T) {
 
 	if command != nil {
 		t.Error("Got non-nil number command for a no op")
+	}
+
+	if command.Type() != "number" {
+		t.Error("Got unexpected type for number command. Got", command.Type(), "expected 'number'")
 	}
 
 	command = model.newNumberCommand(sudoku.CellRef{0, 0}, 1)
@@ -131,6 +139,10 @@ func TestGroups(t *testing.T) {
 	}
 
 	model.FinishGroupAndExecute()
+
+	if model.currentCommand.c.Type() != "group" {
+		t.Error("Got unexpected type for group command. Got", model.currentCommand.c.Type(), "expected 'group'")
+	}
 
 	if model.InGroup() {
 		t.Error("After finishing a group model still said it was in group")
