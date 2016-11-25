@@ -843,8 +843,10 @@ func (c *mainController) RemovedInvalidMarksFromAll() {
 
 func (c *mainController) FillSelectedWithLegalMarks() {
 	c.EnsureSelected()
-	c.Selected().ResetMarks()
 	markMap := make(map[int]bool)
+	for i := 1; i <= sudoku.DIM; i++ {
+		markMap[i] = false
+	}
 	for _, num := range c.Selected().Possibilities() {
 		markMap[num] = true
 	}
