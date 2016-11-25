@@ -80,7 +80,7 @@ type multiCommand struct {
 	commands []command
 }
 
-//Grid returns the underlying Grid managed by this Model. It's a non-mutable
+//Grid returns the underlying Grid managed by this Model. It's an immutable
 //reference to emphasize that all mutations should be done by the Model
 //itself.
 func (m *Model) Grid() sudoku.Grid {
@@ -103,6 +103,8 @@ func (m *Model) executeCommand(c command) {
 	c.Apply(m)
 }
 
+//LastModifiedCells returns the cells that were modified in the last action
+//that was taken on the grid.
 func (m *Model) LastModifiedCells() sudoku.CellSlice {
 	if m.currentCommand == nil {
 		return nil
@@ -111,7 +113,8 @@ func (m *Model) LastModifiedCells() sudoku.CellSlice {
 	return m.currentCommand.c.ModifiedCells(m)
 }
 
-//Undo returns true if there was something to undo.
+//Undo rolls back a single action. It returns true if there was something to
+//undo.
 func (m *Model) Undo() bool {
 	if m.currentCommand == nil {
 		return false
@@ -124,7 +127,8 @@ func (m *Model) Undo() bool {
 	return true
 }
 
-//Redo returns true if there was something to redo.
+//Redo re-applies a single, previously undone, action. It returns true if
+//there was something to redo.
 func (m *Model) Redo() bool {
 
 	if m.commands == nil {
@@ -157,12 +161,19 @@ func (m *Model) Redo() bool {
 	return true
 }
 
+//StartGroup begins a new group of actions. After calling StartGroup, all
+//calls to SetMarks or SetNumber will be grouped into a single logical group
+//of actions--that is, if they are undone they will all be undone at once.
+//When a group is active, the modifications aren't actually made to the grid
+//until FinishGroupAndExecute is called.
 func (m *Model) StartGroup() {
 	m.inProgressMultiCommand = &multiCommand{
 		nil,
 	}
 }
 
+//FinishGroupAndExecute applies all of the modifications made inside of this
+//group.
 func (m *Model) FinishGroupAndExecute() {
 	if m.inProgressMultiCommand == nil {
 		return
@@ -171,16 +182,22 @@ func (m *Model) FinishGroupAndExecute() {
 	m.inProgressMultiCommand = nil
 }
 
+//CancelGroup throws out the in-progress group of modifications. None of the
+//modifications will actually be made to the grid.
 func (m *Model) CancelGroup() {
 	m.inProgressMultiCommand = nil
 }
 
+//InGroup returns true if a group is currently being built (that is,
+//StartGroup was called, and neither FinishGroupAndExecute nor CancelGroup
+//have been called.)
 func (m *Model) InGroup() bool {
 	return m.inProgressMultiCommand != nil
 }
 
-//Reset resets the current grid back to its fully unfilled states and discards
-//all commands.
+//Reset resets the current grid back to its fully unfilled state (resetting
+//all state in non-locked cells)and discards all actions taken on the grid so
+//far.
 func (m *Model) Reset() {
 	//TODO: test this.
 	m.commands = nil
@@ -190,11 +207,18 @@ func (m *Model) Reset() {
 	}
 }
 
+//SetGrid installs a new grid into the model, and then resets it. Note that
+//the grid you set into the model will be used directly; modifications you
+//make to it after installing into the model may get it in an odd state.
 func (m *Model) SetGrid(grid sudoku.MutableGrid) {
 	m.grid = grid
 	m.Reset()
 }
 
+//SetMarks will set the specified marks onto a cell. An entry of True will set
+//the mark, and entry of False will remove the mark in that slot. If InGroup()
+//is false, the change will be done immediately; if InGroup() is true the
+//change will not be applied until FinishGroupAndExecute() is called.
 func (m *Model) SetMarks(ref sudoku.CellRef, marksToggle map[int]bool) {
 	command := m.newMarkCommand(ref, marksToggle)
 	if command == nil {
@@ -231,6 +255,9 @@ func (m *Model) newMarkCommand(ref sudoku.CellRef, marksToggle map[int]bool) *ma
 	return &markCommand{baseCommand{ref}, newMarksToggle}
 }
 
+//SetNumber will set the specified number in a cell. If InGroup() is false,
+//the change will be done immediately; if InGroup() is true the change will
+//not be applied until FinishGroupAndExecute() is called.
 func (m *Model) SetNumber(ref sudoku.CellRef, num int) {
 	command := m.newNumberCommand(ref, num)
 	if command == nil {
