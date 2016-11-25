@@ -1153,6 +1153,18 @@ func (self intSet) intersection(other intSet) intSet {
 	return result
 }
 
+//No overlap is equivalent to len(self.intersection(other)) == 0 , just optimized
+func (self intSet) overlaps(other intSet) bool {
+	for item, value := range self {
+		if value {
+			if val, ok := other[item]; ok && val {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (self cellSet) intersection(other cellSet) cellSet {
 	result := make(cellSet)
 	for item, value := range self {

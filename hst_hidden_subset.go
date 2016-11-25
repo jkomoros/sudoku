@@ -99,15 +99,16 @@ func subsetCellsWithNUniquePossibilities(k int, inputCells CellSlice) ([]CellRef
 
 		//All of the OTHER numbers
 		possibilitiesUnion := subset.PossibilitiesUnion()
-		inversePossibilitiesUnion := inverseSubset.PossibilitiesUnion()
+		inversePossibilitiesUnionSet := inverseSubset.PossibilitiesUnion().toIntSet()
 
 		//Now try every K-sized subset of possibilitiesUnion
 		//subsetIndexes will detect the case where the set is already too small and return nil
 		for _, possibilitiesIndexes := range subsetIndexes(len(possibilitiesUnion), k) {
-			set := possibilitiesUnion.Subset(possibilitiesIndexes)
-			if len(set.Intersection(inversePossibilitiesUnion)) == 0 {
+			set := possibilitiesUnion.Subset(possibilitiesIndexes).toIntSet()
+			if !set.overlaps(inversePossibilitiesUnionSet) {
+				//This happens very, very rarely (< 0.1% of the time)
 				cellResults = append(cellResults, subset.CellReferenceSlice())
-				intResults = append(intResults, set)
+				intResults = append(intResults, set.toSlice())
 
 			}
 		}
