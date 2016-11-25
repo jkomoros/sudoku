@@ -1,4 +1,4 @@
-package main
+package sudokustate
 
 import (
 	"github.com/jkomoros/sudoku"
