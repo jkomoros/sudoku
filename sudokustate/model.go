@@ -59,6 +59,8 @@ type command interface {
 	//Returns the group info if this command is a containing group, nil if
 	//not.
 	GroupInfo() *groupInfo
+	//The Marks (if this is a mark command). Returns nil otherwise.
+	Marks() map[int]bool
 }
 
 type baseCommand struct {
@@ -66,6 +68,10 @@ type baseCommand struct {
 }
 
 func (b *baseCommand) GroupInfo() *groupInfo {
+	return nil
+}
+
+func (b *baseCommand) Marks() map[int]bool {
 	return nil
 }
 
@@ -90,6 +96,10 @@ func (m *multiCommand) GroupInfo() *groupInfo {
 	return m.groupInfo
 }
 
+func (m *multiCommand) Marks() map[int]bool {
+	return nil
+}
+
 func (m *multiCommand) AddCommand(c command) {
 	m.commands = append(m.commands, c)
 }
@@ -109,6 +119,10 @@ type numberCommand struct {
 type multiCommand struct {
 	commands  []command
 	groupInfo *groupInfo
+}
+
+func (m *markCommand) Marks() map[int]bool {
+	return m.marksToggle
 }
 
 func (m *markCommand) Type() string {

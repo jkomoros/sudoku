@@ -50,6 +50,7 @@ func (m *Model) makeMovesDigest() []digestMove {
 				//TODO: this is a hack, we just happen to know that there's only one item
 				Cell:  subCommand.ModifiedCells(m)[0],
 				Group: *groupInfo,
+				Marks: subCommand.Marks(),
 			})
 		}
 

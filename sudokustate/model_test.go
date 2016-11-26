@@ -64,6 +64,17 @@ func TestMarkMutator(t *testing.T) {
 		t.Error("Expected nil info, got", command.GroupInfo())
 	}
 
+	marks := command.Marks()
+
+	if marks == nil {
+		t.Error("Got nil from Marks on mark command")
+	}
+
+	//3:false is a no-op so we expect it to be discarded.
+	if !reflect.DeepEqual(map[int]bool{1: false, 2: true}, marks) {
+		t.Error("Marks back from command was wrong, got", marks)
+	}
+
 	command.Apply(model)
 
 	if !cell.Marks().SameContentAs(sudoku.IntSlice{2}) {
@@ -111,6 +122,10 @@ func TestNumberMutator(t *testing.T) {
 
 	if command.GroupInfo() != nil {
 		t.Error("Expected nil info, got", command.GroupInfo())
+	}
+
+	if command.Marks() != nil {
+		t.Error("Got non-nil from Marks on mark command")
 	}
 
 	command.Apply(model)
@@ -198,6 +213,10 @@ func TestGroups(t *testing.T) {
 
 	if command.GroupInfo().Description != "foo" {
 		t.Error("Expected description of 'foo', got:", command.GroupInfo().Description)
+	}
+
+	if command.Marks() != nil {
+		t.Error("Got non-nil from Marks on mark command")
 	}
 
 	if model.InGroup() {
