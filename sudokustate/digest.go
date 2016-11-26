@@ -14,7 +14,7 @@ type digestMove struct {
 	Cell   sudoku.CellRef
 	Marks  map[int]bool
 	Time   int
-	Number int
+	Number *int
 	Group  groupInfo
 }
 
@@ -48,9 +48,10 @@ func (m *Model) makeMovesDigest() []digestMove {
 			result = append(result, digestMove{
 				Type: subCommand.Type(),
 				//TODO: this is a hack, we just happen to know that there's only one item
-				Cell:  subCommand.ModifiedCells(m)[0],
-				Group: *groupInfo,
-				Marks: subCommand.Marks(),
+				Cell:   subCommand.ModifiedCells(m)[0],
+				Group:  *groupInfo,
+				Marks:  subCommand.Marks(),
+				Number: subCommand.Number(),
 			})
 		}
 
