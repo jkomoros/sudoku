@@ -61,6 +61,8 @@ type command interface {
 	GroupInfo() *groupInfo
 	//The Marks (if this is a mark command). Returns nil otherwise.
 	Marks() map[int]bool
+	//The number associated with this command, or nil if not a number command.
+	Number() *int
 }
 
 type baseCommand struct {
@@ -72,6 +74,10 @@ func (b *baseCommand) GroupInfo() *groupInfo {
 }
 
 func (b *baseCommand) Marks() map[int]bool {
+	return nil
+}
+
+func (b *baseCommand) Number() *int {
 	return nil
 }
 
@@ -100,6 +106,10 @@ func (m *multiCommand) Marks() map[int]bool {
 	return nil
 }
 
+func (m *multiCommand) Number() *int {
+	return nil
+}
+
 func (m *multiCommand) AddCommand(c command) {
 	m.commands = append(m.commands, c)
 }
@@ -123,6 +133,13 @@ type multiCommand struct {
 
 func (m *markCommand) Marks() map[int]bool {
 	return m.marksToggle
+}
+
+func (n *numberCommand) Number() *int {
+	//Indirect, since we're technically giving consumers a handle to change
+	//it, which we don't want.
+	result := n.number
+	return &result
 }
 
 func (m *markCommand) Type() string {

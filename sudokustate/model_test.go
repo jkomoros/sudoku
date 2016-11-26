@@ -64,6 +64,10 @@ func TestMarkMutator(t *testing.T) {
 		t.Error("Expected nil info, got", command.GroupInfo())
 	}
 
+	if command.Number() != nil {
+		t.Error("Expected nil for number, got non-nil:", command.Number())
+	}
+
 	marks := command.Marks()
 
 	if marks == nil {
@@ -126,6 +130,16 @@ func TestNumberMutator(t *testing.T) {
 
 	if command.Marks() != nil {
 		t.Error("Got non-nil from Marks on mark command")
+	}
+
+	number := command.Number()
+
+	if number == nil {
+		t.Error("Expected non-nil for number, got nil")
+	}
+
+	if *number != 1 {
+		t.Error("Number returned from number command was not right. Got:", *number)
 	}
 
 	command.Apply(model)
@@ -217,6 +231,10 @@ func TestGroups(t *testing.T) {
 
 	if command.Marks() != nil {
 		t.Error("Got non-nil from Marks on mark command")
+	}
+
+	if command.Number() != nil {
+		t.Error("Expected nil for number, got non-nil:", command.Number())
 	}
 
 	if model.InGroup() {
