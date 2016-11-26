@@ -18,6 +18,8 @@ type digestMove struct {
 	Group  groupInfo
 }
 
+//TODO: implement Model.Digest()[]byte
+
 func (m *Model) makeDigest() digest {
 	//TODO: test this
 	return digest{
