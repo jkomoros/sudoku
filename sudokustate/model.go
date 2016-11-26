@@ -53,6 +53,12 @@ type command interface {
 	Type() string
 	//TODO: consider removing Type; the type can be derived by which Extra it has.
 
+	//TODO: I HATE this way of approaching it--it seems so messy and backwards
+	//to expose all of the guts of each command, but in a messy way where most
+	//of the methods don't apply to most of the command types. Perhaps another
+	//way of doing this is to have each command have a digest() method that
+	//produces an object with all of its state.
+
 	//All sub-commands related to this command. For basic commands it's just
 	//self; for group it's all sub-commands in order.
 	SubCommands() []command
