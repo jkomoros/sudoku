@@ -15,20 +15,27 @@ type Digest struct {
 //MoveGroupDigest is the record of a group of moves that should all be applied
 //at once. Most MoveGroups have a single move, but some have multiple.
 type MoveGroupDigest struct {
-	Moves       []MoveDigest
-	TimeOffset  time.Duration `json:",omitempty"`
-	Description string        `json:",omitempty"`
+	Moves []MoveDigest
+	//How many nanoseconds elapsed since when the puzzle was reset to this
+	//move.
+	TimeOffset time.Duration `json:",omitempty"`
+	//The description of the group (if it has one). Simple groups that contain
+	//a single marks or number move often do not have group names.
+	Description string `json:",omitempty"`
 }
 
 //MoveDigest is the record of a single move captured within a Digest, either
-//setting a number or setting a set of marks on a cell (but never both). The
-//Marks field will have a true for every number that should be set, and a
-//false for every mark that should be unset. All other marks will be left the
-//same.
+//setting a number or setting a set of marks on a cell (but never both).
 type MoveDigest struct {
-	Cell   sudoku.CellRef
-	Marks  map[int]bool `json:",omitempty"`
-	Number *int         `json:",omitempty"`
+	Cell sudoku.CellRef
+	//Which marks should be modified. Numbers that have a true should be set,
+	//and numbers that have a false should be unset. All other marks will be
+	//left the same. Either one or the other of Marks or Number may be set,
+	//but never both.
+	Marks map[int]bool `json:",omitempty"`
+	//Which number to set. Either one or the other of Marks or Number may be
+	//set, but never both.
+	Number *int `json:",omitempty"`
 }
 
 //TODO: implement model.LoadDigest([]byte)
