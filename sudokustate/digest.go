@@ -5,12 +5,15 @@ import (
 	"github.com/jkomoros/sudoku"
 )
 
-type digest struct {
+//Digest is an object representing the state of the model. Suitable for being
+//saved as json.
+type Digest struct {
 	Puzzle string
-	Moves  []digestMove
+	Moves  []MoveDigest
 }
 
-type digestMove struct {
+//MoveDigest is the record of a single move captured within a Digest.
+type MoveDigest struct {
 	Type   string
 	Cell   sudoku.CellRef
 	Marks  map[int]bool `json:",omitempty"`
@@ -32,16 +35,15 @@ func (m *Model) Digest() []byte {
 	return result
 }
 
-func (m *Model) makeDigest() digest {
-	//TODO: test this
-	return digest{
+func (m *Model) makeDigest() Digest {
+	return Digest{
 		Puzzle: m.snapshot,
 		Moves:  m.makeMovesDigest(),
 	}
 }
 
-func (m *Model) makeMovesDigest() []digestMove {
-	var result []digestMove
+func (m *Model) makeMovesDigest() []MoveDigest {
+	var result []MoveDigest
 
 	//Move command cursor to the very first item in the linked list.
 	currentCommand := m.commands
@@ -57,7 +59,7 @@ func (m *Model) makeMovesDigest() []digestMove {
 		command := currentCommand.c
 
 		for _, subCommand := range command.SubCommands() {
-			result = append(result, digestMove{
+			result = append(result, MoveDigest{
 				Type: subCommand.Type(),
 				//TODO: this is a hack, we just happen to know that there's only one item
 				Cell:   subCommand.ModifiedCells(m)[0],
