@@ -4,20 +4,26 @@ import (
 	"github.com/jkomoros/sudoku"
 )
 
-//Digest is an object representing the state of the model. Suitable for being
-//saved as json.
+//Digest is an object representing the state of the model. Consists primarily
+//of a list of MoveGroupDigests. Suitable for being saved as json.
 type Digest struct {
 	Puzzle     string
 	MoveGroups []MoveGroupDigest
 }
 
+//MoveGroupDigest is the record of a group of moves that should all be applied
+//at once. Most MoveGroups have a single move, but some have multiple.
 type MoveGroupDigest struct {
 	Moves       []MoveDigest
 	Time        int    `json:",omitempty"`
 	Description string `json:",omitempty"`
 }
 
-//MoveDigest is the record of a single move captured within a Digest.
+//MoveDigest is the record of a single move captured within a Digest, either
+//setting a number or setting a set of marks on a cell (but never both). The
+//Marks field will have a true for every number that should be set, and a
+//false for every mark that should be unset. All other marks will be left the
+//same.
 type MoveDigest struct {
 	Cell   sudoku.CellRef
 	Marks  map[int]bool `json:",omitempty"`
