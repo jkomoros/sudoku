@@ -16,7 +16,7 @@ type Digest struct {
 //at once. Most MoveGroups have a single move, but some have multiple.
 type MoveGroupDigest struct {
 	Moves       []MoveDigest
-	Time        time.Duration `json:",omitempty"`
+	TimeOffset  time.Duration `json:",omitempty"`
 	Description string        `json:",omitempty"`
 }
 
@@ -71,7 +71,7 @@ func (m *Model) makeMoveGroupsDigest() []MoveGroupDigest {
 		result = append(result, MoveGroupDigest{
 			Moves:       moves,
 			Description: command.description,
-			Time:        command.time,
+			TimeOffset:  command.time,
 		})
 
 		currentCommand = currentCommand.next

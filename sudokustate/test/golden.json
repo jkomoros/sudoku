@@ -14,7 +14,7 @@
           }
         }
       ],
-      "Time": 100
+      "TimeOffset": 100
     },
     {
       "Moves": [
@@ -26,7 +26,7 @@
           "Number": 3
         }
       ],
-      "Time": 117
+      "TimeOffset": 117
     },
     {
       "Moves": [
@@ -48,7 +48,7 @@
           }
         }
       ],
-      "Time": 134,
+      "TimeOffset": 134,
       "Description": "test group"
     },
     {
@@ -61,7 +61,7 @@
           "Number": 4
         }
       ],
-      "Time": 151,
+      "TimeOffset": 151,
       "Description": "second group"
     },
     {
@@ -74,7 +74,7 @@
           "Number": 0
         }
       ],
-      "Time": 168
+      "TimeOffset": 168
     }
   ]
 }

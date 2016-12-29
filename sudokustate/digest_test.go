@@ -48,13 +48,13 @@ func TestDigest(t *testing.T) {
 
 	for i, _ := range digest.MoveGroups {
 		moveGroup := &digest.MoveGroups[i]
-		if moveGroup.Time < lastTime {
+		if moveGroup.TimeOffset < lastTime {
 			t.Error("The timestamp was smaller than a previous time stamp at movegroup", i)
 		}
-		lastTime = moveGroup.Time
+		lastTime = moveGroup.TimeOffset
 		//Set the time to an arbitraty but consitent inceasing value for
 		//golden comparison
-		moveGroup.Time = time.Duration(100 + (i * 17))
+		moveGroup.TimeOffset = time.Duration(100 + (i * 17))
 	}
 
 	//Uncomment to resave a new golden.
