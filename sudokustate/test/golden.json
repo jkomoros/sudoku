@@ -13,9 +13,7 @@
             "4": true
           }
         }
-      ],
-      "Time": 0,
-      "Description": ""
+      ]
     },
     {
       "Moves": [
@@ -26,9 +24,7 @@
           },
           "Number": 3
         }
-      ],
-      "Time": 0,
-      "Description": ""
+      ]
     },
     {
       "Moves": [
@@ -50,7 +46,6 @@
           }
         }
       ],
-      "Time": 0,
       "Description": "test group"
     },
     {
@@ -63,7 +58,6 @@
           "Number": 4
         }
       ],
-      "Time": 0,
       "Description": "second group"
     }
   ]

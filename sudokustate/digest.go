@@ -13,8 +13,8 @@ type Digest struct {
 
 type MoveGroupDigest struct {
 	Moves       []MoveDigest
-	Time        int
-	Description string
+	Time        int    `json:",omitempty"`
+	Description string `json:",omitempty"`
 }
 
 //MoveDigest is the record of a single move captured within a Digest.
