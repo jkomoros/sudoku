@@ -59,6 +59,17 @@
         }
       ],
       "Description": "second group"
+    },
+    {
+      "Moves": [
+        {
+          "Cell": {
+            "Row": 0,
+            "Col": 0
+          },
+          "Number": 0
+        }
+      ]
     }
   ]
 }

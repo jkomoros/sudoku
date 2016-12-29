@@ -33,6 +33,10 @@ func TestDigest(t *testing.T) {
 	model.SetNumber(sudoku.CellRef{0, 3}, 4)
 	model.FinishGroupAndExecute()
 
+	//This move undoes the earlier one and make sure that the digest handles
+	//setting a cell to zero appropriately.
+	model.SetNumber(sudoku.CellRef{0, 0}, 0)
+
 	digest := model.Digest()
 
 	//Uncomment to resave a new golden.
