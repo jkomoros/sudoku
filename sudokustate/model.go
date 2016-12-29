@@ -16,6 +16,7 @@ package sudokustate
 
 import (
 	"github.com/jkomoros/sudoku"
+	"time"
 )
 
 //TODO: make sure that groups that change the same set of cells within a group
@@ -36,6 +37,8 @@ type Model struct {
 	inProgressGroupCommand *groupCommand
 	//snapshot is a Diagram(true) of what the grid looked like when it was reset.
 	snapshot string
+	//started is the timestamp of when the grid was reset.
+	started time.Time
 }
 
 type commandList struct {
@@ -47,6 +50,8 @@ type commandList struct {
 type groupCommand struct {
 	subCommands []baseCommand
 	description string
+	//The duration of time since the started timestamp
+	time time.Duration
 }
 
 type command interface {
@@ -143,12 +148,16 @@ func (m *Model) executeBaseCommand(c baseCommand) {
 		group := &groupCommand{
 			[]baseCommand{c},
 			"",
+			0,
 		}
 		m.executeGroupCommand(group)
 	}
 }
 
 func (m *Model) executeGroupCommand(c *groupCommand) {
+
+	c.time = time.Since(m.started)
+
 	listItem := &commandList{
 		c:    c,
 		next: nil,
@@ -234,6 +243,7 @@ func (m *Model) StartGroup(description string) {
 	m.inProgressGroupCommand = &groupCommand{
 		nil,
 		description,
+		0,
 	}
 }
 
@@ -270,6 +280,7 @@ func (m *Model) Reset() {
 	if m.grid != nil {
 		m.grid.ResetUnlockedCells()
 		m.snapshot = m.grid.Diagram(true)
+		m.started = time.Now()
 	}
 }
 

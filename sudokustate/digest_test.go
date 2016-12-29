@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestDigest(t *testing.T) {
@@ -38,6 +39,23 @@ func TestDigest(t *testing.T) {
 	model.SetNumber(sudoku.CellRef{0, 0}, 0)
 
 	digest := model.Digest()
+
+	//Time will be set to a time that isn't the same in golden. So check for
+	//it to be reasonable now, then reset to a specific number so it compares
+	//to Golden ok.
+
+	var lastTime time.Duration
+
+	for i, _ := range digest.MoveGroups {
+		moveGroup := &digest.MoveGroups[i]
+		if moveGroup.Time < lastTime {
+			t.Error("The timestamp was smaller than a previous time stamp at movegroup", i)
+		}
+		lastTime = moveGroup.Time
+		//Set the time to an arbitraty but consitent inceasing value for
+		//golden comparison
+		moveGroup.Time = time.Duration(100 + (i * 17))
+	}
 
 	//Uncomment to resave a new golden.
 	outputGolden := false
