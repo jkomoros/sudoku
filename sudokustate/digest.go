@@ -8,6 +8,8 @@ import (
 //Digest is an object representing the state of the model. Consists primarily
 //of a list of MoveGroupDigests. Suitable for being saved as json.
 type Digest struct {
+	//Puzzle is the puzzle, encoded as a string in doku format. (See
+	//sdkconverter package)
 	Puzzle     string
 	MoveGroups []MoveGroupDigest
 }

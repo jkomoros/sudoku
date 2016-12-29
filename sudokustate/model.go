@@ -16,6 +16,7 @@ package sudokustate
 
 import (
 	"github.com/jkomoros/sudoku"
+	"github.com/jkomoros/sudoku/sdkconverter"
 	"time"
 )
 
@@ -278,8 +279,15 @@ func (m *Model) Reset() {
 	m.commands = nil
 	m.currentCommand = nil
 	if m.grid != nil {
+
+		converter := sdkconverter.Converters["doku"]
+
+		if converter == nil {
+			panic("Couldn't find doku converter")
+		}
+
 		m.grid.ResetUnlockedCells()
-		m.snapshot = m.grid.Diagram(true)
+		m.snapshot = converter.DataString(m.grid)
 		m.started = time.Now()
 	}
 }

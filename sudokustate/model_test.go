@@ -2,6 +2,7 @@ package sudokustate
 
 import (
 	"github.com/jkomoros/sudoku"
+	"github.com/jkomoros/sudoku/sdkconverter"
 	"reflect"
 	"testing"
 )
@@ -14,7 +15,13 @@ func TestReset(t *testing.T) {
 	grid.MutableCell(3, 3).SetNumber(5)
 	grid.LockFilledCells()
 
-	snapshot := grid.Diagram(true)
+	converter := sdkconverter.Converters["doku"]
+
+	if converter == nil {
+		t.Fatal("Couldn't find doku converter")
+	}
+
+	snapshot := converter.DataString(grid)
 
 	grid.MutableCell(4, 4).SetNumber(6)
 
