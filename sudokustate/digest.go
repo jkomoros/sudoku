@@ -13,10 +13,10 @@ type digest struct {
 type digestMove struct {
 	Type   string
 	Cell   sudoku.CellRef
-	Marks  map[int]bool
+	Marks  map[int]bool `json:",omitempty"`
 	Time   int
-	Number *int
-	Group  *groupInfo
+	Number *int       `json:",omitempty"`
+	Group  *groupInfo `json:",omitempty"`
 }
 
 //TODO: implement model.LoadDigest([]byte)
