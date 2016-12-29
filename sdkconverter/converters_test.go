@@ -200,6 +200,25 @@ func TestConvenienceFuncs(t *testing.T) {
 	}
 }
 
+func TestDataString(t *testing.T) {
+
+	dokuInput := loadTestPuzzle("doku_complex_normalized.doku")
+	grid := Load(dokuInput)
+
+	converted := DataString("doku", grid)
+
+	if converted != dokuInput {
+		t.Error("DataString for doku didn't work. Got", converted, "wanted", dokuInput)
+	}
+
+	converted = DataString("foo", grid)
+
+	if converted != "" {
+		t.Error("Unsuccessful data string thought it was OK")
+	}
+
+}
+
 func TestLoadInto(t *testing.T) {
 	grid := Load(loadTestPuzzle("converter_one_komo.sdk"))
 

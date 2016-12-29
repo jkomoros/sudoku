@@ -89,6 +89,21 @@ func init() {
 	Converters["doku"] = &dokuConverter{}
 }
 
+//DataString is a convenience method that returns the given grid's string
+//representation in the given format. If the converter does not exist, it will
+//return a zero-length string.
+func DataString(format string, grid sudoku.Grid) string {
+
+	converter := Converters[format]
+
+	if converter == nil {
+		return ""
+	}
+
+	return converter.DataString(grid)
+
+}
+
 //ToSDK is a convenience wrapper that takes the name of a format and the puzzle data
 //and returns an sdk string.
 func ToSDK(format string, other string) (sdk string) {
