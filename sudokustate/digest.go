@@ -7,16 +7,21 @@ import (
 //Digest is an object representing the state of the model. Suitable for being
 //saved as json.
 type Digest struct {
-	Puzzle string
-	Moves  []MoveDigest
+	Puzzle     string
+	MoveGroups []MoveGroupDigest
+}
+
+type MoveGroupDigest struct {
+	Moves       []MoveDigest
+	Time        int
+	Description string
 }
 
 //MoveDigest is the record of a single move captured within a Digest.
 type MoveDigest struct {
 	Cell   sudoku.CellRef
 	Marks  map[int]bool `json:",omitempty"`
-	Time   int
-	Number *int `json:",omitempty"`
+	Number *int         `json:",omitempty"`
 }
 
 //TODO: implement model.LoadDigest([]byte)
@@ -24,13 +29,13 @@ type MoveDigest struct {
 //Digest returns a Digest object representing the state of this model.
 func (m *Model) Digest() Digest {
 	return Digest{
-		Puzzle: m.snapshot,
-		Moves:  m.makeMovesDigest(),
+		Puzzle:     m.snapshot,
+		MoveGroups: m.makeMoveGroupsDigest(),
 	}
 }
 
-func (m *Model) makeMovesDigest() []MoveDigest {
-	var result []MoveDigest
+func (m *Model) makeMoveGroupsDigest() []MoveGroupDigest {
+	var result []MoveGroupDigest
 
 	//Move command cursor to the very first item in the linked list.
 	currentCommand := m.commands
@@ -45,14 +50,21 @@ func (m *Model) makeMovesDigest() []MoveDigest {
 
 		command := currentCommand.c
 
+		var moves []MoveDigest
+
 		for _, subCommand := range command.subCommands {
-			result = append(result, MoveDigest{
+			moves = append(moves, MoveDigest{
 				//TODO: this is a hack, we just happen to know that there's only one item
 				Cell:   subCommand.ModifiedCells(m)[0],
 				Marks:  subCommand.Marks(),
 				Number: subCommand.Number(),
 			})
 		}
+
+		result = append(result, MoveGroupDigest{
+			Moves:       moves,
+			Description: command.description,
+		})
 
 		currentCommand = currentCommand.next
 	}

@@ -36,7 +36,16 @@ func TestDigest(t *testing.T) {
 	digest := model.Digest()
 
 	//Uncomment to resave a new golden.
-	//ioutil.WriteFile("test/golden.json", json.MarshalIndent(digest, "", "  "), 0644)
+	outputGolden := false
+
+	if outputGolden {
+		jsonOutput, err := json.MarshalIndent(digest, "", "  ")
+		if err != nil {
+			t.Fatal("Golden JSON wasn't output", err)
+		}
+		ioutil.WriteFile("test/golden.json", jsonOutput, 0644)
+		t.Fatal("Wrote out a new golden")
+	}
 
 	golden, err := ioutil.ReadFile("test/golden.json")
 
