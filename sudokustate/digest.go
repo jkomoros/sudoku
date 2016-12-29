@@ -1,7 +1,6 @@
 package sudokustate
 
 import (
-	"encoding/json"
 	"github.com/jkomoros/sudoku"
 )
 
@@ -24,18 +23,8 @@ type MoveDigest struct {
 
 //TODO: implement model.LoadDigest([]byte)
 
-//Digest returns a []byte with the JSON that represents this model.
-func (m *Model) Digest() []byte {
-	obj := m.makeDigest()
-
-	result, err := json.MarshalIndent(obj, "", "  ")
-	if err != nil {
-		return nil
-	}
-	return result
-}
-
-func (m *Model) makeDigest() Digest {
+//Digest returns a Digest object representing the state of this model.
+func (m *Model) Digest() Digest {
 	return Digest{
 		Puzzle: m.snapshot,
 		Moves:  m.makeMovesDigest(),

@@ -1,8 +1,10 @@
 package sudokustate
 
 import (
+	"encoding/json"
 	"github.com/jkomoros/sudoku"
 	"io/ioutil"
+	"reflect"
 	"testing"
 )
 
@@ -31,14 +33,10 @@ func TestDigest(t *testing.T) {
 	model.SetNumber(sudoku.CellRef{0, 3}, 4)
 	model.FinishGroupAndExecute()
 
-	digestJson := model.Digest()
+	digest := model.Digest()
 
 	//Uncomment to resave a new golden.
-	//ioutil.WriteFile("test/golden.json", digestJson, 0644)
-
-	if digestJson == nil {
-		t.Error("Got nil digest for legitimate digest")
-	}
+	//ioutil.WriteFile("test/golden.json", json.MarshalIndent(digest, "", "  "), 0644)
 
 	golden, err := ioutil.ReadFile("test/golden.json")
 
@@ -46,8 +44,14 @@ func TestDigest(t *testing.T) {
 		t.Fatal("Couldn't load golden file at golden.json", err)
 	}
 
-	if string(digestJson) != string(golden) {
-		t.Error("Got incorrect golden json. Got", digestJson, "wanted", golden)
+	var goldenDigest Digest
+
+	if err := json.Unmarshal(golden, &goldenDigest); err != nil {
+		t.Fatal("Couldn't unmarshall golden file", err)
+	}
+
+	if !reflect.DeepEqual(goldenDigest, digest) {
+		t.Error("Got incorrect golden json. Got", digest, "wanted", goldenDigest)
 	}
 
 }
