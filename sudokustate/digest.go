@@ -13,12 +13,10 @@ type Digest struct {
 
 //MoveDigest is the record of a single move captured within a Digest.
 type MoveDigest struct {
-	Type   string
 	Cell   sudoku.CellRef
 	Marks  map[int]bool `json:",omitempty"`
 	Time   int
-	Number *int       `json:",omitempty"`
-	Group  *groupInfo `json:",omitempty"`
+	Number *int `json:",omitempty"`
 }
 
 //TODO: implement model.LoadDigest([]byte)
@@ -47,12 +45,10 @@ func (m *Model) makeMovesDigest() []MoveDigest {
 
 		command := currentCommand.c
 
-		for _, subCommand := range command.SubCommands() {
+		for _, subCommand := range command.subCommands {
 			result = append(result, MoveDigest{
-				Type: subCommand.Type(),
 				//TODO: this is a hack, we just happen to know that there's only one item
 				Cell:   subCommand.ModifiedCells(m)[0],
-				Group:  command.GroupInfo(),
 				Marks:  subCommand.Marks(),
 				Number: subCommand.Number(),
 			})

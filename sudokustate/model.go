@@ -30,64 +30,47 @@ type Model struct {
 	commands               *commandList
 	inProgressGroupCommand *groupCommand
 	//snapshot is a Diagram(true) of what the grid looked like when it was reset.
-	snapshot    string
-	nextGroupID int
+	snapshot string
 }
 
 type commandList struct {
-	c    command
+	c    *groupCommand
 	next *commandList
 	prev *commandList
 }
 
-type groupInfo struct {
-	ID          int
-	Description string
+type groupCommand struct {
+	subCommands []baseCommand
+	groupName   string
 }
 
 type command interface {
 	Apply(m *Model)
 	Undo(m *Model)
 	ModifiedCells(m *Model) sudoku.CellRefSlice
-	//one of 'number', 'marks', 'group'
-	Type() string
-	//TODO: consider removing Type; the type can be derived by which Extra it has.
+}
 
-	//TODO: I HATE this way of approaching it--it seems so messy and backwards
-	//to expose all of the guts of each command, but in a messy way where most
-	//of the methods don't apply to most of the command types. Perhaps another
-	//way of doing this is to have each command have a digest() method that
-	//produces an object with all of its state.
-
-	//All sub-commands related to this command. For basic commands it's just
-	//self; for group it's all sub-commands in order.
-	SubCommands() []command
-	//Returns the group info if this command is a containing group, nil if
-	//not.
-	GroupInfo() *groupInfo
+type baseCommand interface {
+	command
 	//The Marks (if this is a mark command). Returns nil otherwise.
 	Marks() map[int]bool
 	//The number associated with this command, or nil if not a number command.
 	Number() *int
 }
 
-type baseCommand struct {
+type basicCommand struct {
 	ref sudoku.CellRef
 }
 
-func (b *baseCommand) GroupInfo() *groupInfo {
+func (b *basicCommand) Marks() map[int]bool {
 	return nil
 }
 
-func (b *baseCommand) Marks() map[int]bool {
+func (b *basicCommand) Number() *int {
 	return nil
 }
 
-func (b *baseCommand) Number() *int {
-	return nil
-}
-
-func (b *baseCommand) ModifiedCells(m *Model) sudoku.CellRefSlice {
+func (b *basicCommand) ModifiedCells(m *Model) sudoku.CellRefSlice {
 	if m == nil || m.grid == nil {
 		return nil
 	}
@@ -97,15 +80,11 @@ func (b *baseCommand) ModifiedCells(m *Model) sudoku.CellRefSlice {
 func (m *groupCommand) ModifiedCells(model *Model) sudoku.CellRefSlice {
 	var result sudoku.CellRefSlice
 
-	for _, command := range m.commands {
+	for _, command := range m.subCommands {
 		result = append(result, command.ModifiedCells(model)...)
 	}
 
 	return result
-}
-
-func (m *groupCommand) GroupInfo() *groupInfo {
-	return m.groupInfo
 }
 
 func (m *groupCommand) Marks() map[int]bool {
@@ -116,25 +95,20 @@ func (m *groupCommand) Number() *int {
 	return nil
 }
 
-func (m *groupCommand) AddCommand(c command) {
-	m.commands = append(m.commands, c)
+func (m *groupCommand) AddCommand(c baseCommand) {
+	m.subCommands = append(m.subCommands, c)
 }
 
 type markCommand struct {
-	baseCommand
+	basicCommand
 	marksToggle map[int]bool
 }
 
 type numberCommand struct {
-	baseCommand
+	basicCommand
 	number int
 	//Necessary so we can undo.
 	oldNumber int
-}
-
-type groupCommand struct {
-	commands  []command
-	groupInfo *groupInfo
 }
 
 func (m *markCommand) Marks() map[int]bool {
@@ -148,30 +122,6 @@ func (n *numberCommand) Number() *int {
 	return &result
 }
 
-func (m *markCommand) Type() string {
-	return "marks"
-}
-
-func (n *numberCommand) Type() string {
-	return "number"
-}
-
-func (m *groupCommand) Type() string {
-	return "group"
-}
-
-func (m *markCommand) SubCommands() []command {
-	return []command{m}
-}
-
-func (n *numberCommand) SubCommands() []command {
-	return []command{n}
-}
-
-func (m *groupCommand) SubCommands() []command {
-	return m.commands
-}
-
 //Grid returns the underlying Grid managed by this Model. It's an immutable
 //reference to emphasize that all mutations should be done by the Model
 //itself.
@@ -179,7 +129,21 @@ func (m *Model) Grid() sudoku.Grid {
 	return m.grid
 }
 
-func (m *Model) executeCommand(c command) {
+func (m *Model) executeBaseCommand(c baseCommand) {
+	if m.InGroup() {
+		m.inProgressGroupCommand.AddCommand(c)
+	} else {
+		//If we're not manually in a group, we'll create a simple container
+		//group and submit that.
+		group := &groupCommand{
+			[]baseCommand{c},
+			"",
+		}
+		m.executeGroupCommand(group)
+	}
+}
+
+func (m *Model) executeGroupCommand(c *groupCommand) {
 	listItem := &commandList{
 		c:    c,
 		next: nil,
@@ -264,12 +228,8 @@ func (m *Model) StartGroup(description string) {
 	//TODO: allow setting a name when the group is created.
 	m.inProgressGroupCommand = &groupCommand{
 		nil,
-		&groupInfo{
-			m.nextGroupID,
-			description,
-		},
+		description,
 	}
-	m.nextGroupID++
 }
 
 //FinishGroupAndExecute applies all of the modifications made inside of this
@@ -278,7 +238,7 @@ func (m *Model) FinishGroupAndExecute() {
 	if m.inProgressGroupCommand == nil {
 		return
 	}
-	m.executeCommand(m.inProgressGroupCommand)
+	m.executeGroupCommand(m.inProgressGroupCommand)
 	m.inProgressGroupCommand = nil
 }
 
@@ -325,11 +285,7 @@ func (m *Model) SetMarks(ref sudoku.CellRef, marksToggle map[int]bool) {
 	if command == nil {
 		return
 	}
-	if m.InGroup() {
-		m.inProgressGroupCommand.AddCommand(command)
-	} else {
-		m.executeCommand(command)
-	}
+	m.executeBaseCommand(command)
 }
 
 func (m *Model) newMarkCommand(ref sudoku.CellRef, marksToggle map[int]bool) *markCommand {
@@ -353,7 +309,7 @@ func (m *Model) newMarkCommand(ref sudoku.CellRef, marksToggle map[int]bool) *ma
 		return nil
 	}
 
-	return &markCommand{baseCommand{ref}, newMarksToggle}
+	return &markCommand{basicCommand{ref}, newMarksToggle}
 }
 
 //SetNumber will set the specified number in a cell. If InGroup() is false,
@@ -364,11 +320,7 @@ func (m *Model) SetNumber(ref sudoku.CellRef, num int) {
 	if command == nil {
 		return
 	}
-	if m.InGroup() {
-		m.inProgressGroupCommand.AddCommand(command)
-	} else {
-		m.executeCommand(command)
-	}
+	m.executeBaseCommand(command)
 }
 
 func (m *Model) newNumberCommand(ref sudoku.CellRef, num int) *numberCommand {
@@ -382,7 +334,7 @@ func (m *Model) newNumberCommand(ref sudoku.CellRef, num int) *numberCommand {
 		return nil
 	}
 
-	return &numberCommand{baseCommand{ref}, num, cell.Number()}
+	return &numberCommand{basicCommand{ref}, num, cell.Number()}
 }
 
 func (m *markCommand) Apply(model *Model) {
@@ -423,13 +375,13 @@ func (n *numberCommand) Undo(model *Model) {
 }
 
 func (m *groupCommand) Apply(model *Model) {
-	for _, command := range m.commands {
+	for _, command := range m.subCommands {
 		command.Apply(model)
 	}
 }
 
 func (m *groupCommand) Undo(model *Model) {
-	for i := len(m.commands) - 1; i >= 0; i-- {
-		m.commands[i].Undo(model)
+	for i := len(m.subCommands) - 1; i >= 0; i-- {
+		m.subCommands[i].Undo(model)
 	}
 }
