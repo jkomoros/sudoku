@@ -19,8 +19,9 @@ type digestMove struct {
 	Group  groupInfo
 }
 
-//TODO: implement Model.Digest()[]byte
+//TODO: implement model.LoadDigest([]byte)
 
+//Digest returns a []byte with the JSON that represents this model.
 func (m *Model) Digest() []byte {
 	obj := m.makeDigest()
 
