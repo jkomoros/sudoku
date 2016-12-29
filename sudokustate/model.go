@@ -18,6 +18,11 @@ import (
 	"github.com/jkomoros/sudoku"
 )
 
+//TODO: make sure that groups that change the same set of cells within a group
+//apply/undo cleanly (does the undo need to go front to back or back to front?
+//or perhaps do we need to not allow groups to contain multiple records with
+//the same cell in them, to avoid this)
+
 //Model maintains all of the state and modifications to the grid. The zero-
 //state is valid; create a new Model with sudokustate.Model{}.
 type Model struct {
