@@ -2,6 +2,7 @@ package sudokustate
 
 import (
 	"github.com/jkomoros/sudoku"
+	"io/ioutil"
 	"testing"
 )
 
@@ -25,11 +26,20 @@ func TestDigest(t *testing.T) {
 	})
 	model.FinishGroupAndExecute()
 
-	digest := model.Digest()
+	digestJson := model.Digest()
 
-	if digest == nil {
+	if digestJson == nil {
 		t.Error("Got nil digest for legitimate digest")
 	}
 
-	//TODO: actually test the result against a golden.
+	golden, err := ioutil.ReadFile("test/golden.json")
+
+	if err != nil {
+		t.Fatal("Couldn't load golden file at golden.json", err)
+	}
+
+	if string(digestJson) != string(golden) {
+		t.Error("Got incorrect golden json. Got", digestJson, "wanted", golden)
+	}
+
 }
