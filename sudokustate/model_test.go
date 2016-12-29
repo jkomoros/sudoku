@@ -177,8 +177,8 @@ func TestGroups(t *testing.T) {
 		t.Error("Sub command #2 was not marks")
 	}
 
-	if command.groupName != "foo" {
-		t.Error("Expected description of 'foo', got:", command.groupName)
+	if command.description != "foo" {
+		t.Error("Expected description of 'foo', got:", command.description)
 	}
 
 	if command.Marks() != nil {

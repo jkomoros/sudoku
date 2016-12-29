@@ -41,7 +41,7 @@ type commandList struct {
 
 type groupCommand struct {
 	subCommands []baseCommand
-	groupName   string
+	description string
 }
 
 type command interface {
