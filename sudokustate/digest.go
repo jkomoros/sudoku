@@ -16,7 +16,7 @@ type digestMove struct {
 	Marks  map[int]bool
 	Time   int
 	Number *int
-	Group  groupInfo
+	Group  *groupInfo
 }
 
 //TODO: implement model.LoadDigest([]byte)
@@ -56,22 +56,12 @@ func (m *Model) makeMovesDigest() []digestMove {
 
 		command := currentCommand.c
 
-		groupInfoPtr := command.GroupInfo()
-
-		var info groupInfo
-
-		if groupInfoPtr == nil {
-			info = groupInfo{}
-		} else {
-			info = *groupInfoPtr
-		}
-
 		for _, subCommand := range command.SubCommands() {
 			result = append(result, digestMove{
 				Type: subCommand.Type(),
 				//TODO: this is a hack, we just happen to know that there's only one item
 				Cell:   subCommand.ModifiedCells(m)[0],
-				Group:  info,
+				Group:  command.GroupInfo(),
 				Marks:  subCommand.Marks(),
 				Number: subCommand.Number(),
 			})
