@@ -1,6 +1,7 @@
 package sudokustate
 
 import (
+	"encoding/json"
 	"github.com/jkomoros/sudoku"
 )
 
@@ -19,6 +20,16 @@ type digestMove struct {
 }
 
 //TODO: implement Model.Digest()[]byte
+
+func (m *Model) Digest() []byte {
+	obj := m.makeDigest()
+
+	result, err := json.MarshalIndent(obj, "", "  ")
+	if err != nil {
+		return nil
+	}
+	return result
+}
 
 func (m *Model) makeDigest() digest {
 	//TODO: test this
@@ -44,14 +55,22 @@ func (m *Model) makeMovesDigest() []digestMove {
 
 		command := currentCommand.c
 
-		groupInfo := command.GroupInfo()
+		groupInfoPtr := command.GroupInfo()
+
+		var info groupInfo
+
+		if groupInfoPtr == nil {
+			info = groupInfo{}
+		} else {
+			info = *groupInfoPtr
+		}
 
 		for _, subCommand := range command.SubCommands() {
 			result = append(result, digestMove{
 				Type: subCommand.Type(),
 				//TODO: this is a hack, we just happen to know that there's only one item
 				Cell:   subCommand.ModifiedCells(m)[0],
-				Group:  *groupInfo,
+				Group:  info,
 				Marks:  subCommand.Marks(),
 				Number: subCommand.Number(),
 			})
