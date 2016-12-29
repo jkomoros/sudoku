@@ -56,6 +56,20 @@
         "ID": 0,
         "Description": "test group"
       }
+    },
+    {
+      "Type": "number",
+      "Cell": {
+        "Row": 0,
+        "Col": 3
+      },
+      "Marks": null,
+      "Time": 0,
+      "Number": 4,
+      "Group": {
+        "ID": 1,
+        "Description": "second group"
+      }
     }
   ]
 }

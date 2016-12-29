@@ -26,7 +26,15 @@ func TestDigest(t *testing.T) {
 	})
 	model.FinishGroupAndExecute()
 
+	model.StartGroup("second group")
+
+	model.SetNumber(sudoku.CellRef{0, 3}, 4)
+	model.FinishGroupAndExecute()
+
 	digestJson := model.Digest()
+
+	//Uncomment to resave a new golden.
+	//ioutil.WriteFile("test/golden.json", digestJson, 0644)
 
 	if digestJson == nil {
 		t.Error("Got nil digest for legitimate digest")
