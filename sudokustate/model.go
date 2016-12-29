@@ -28,7 +28,7 @@ type Model struct {
 	//The last command in the list of commands. currentCommand might not be
 	//the same as commands if the user has called Undo some number of times.
 	commands               *commandList
-	inProgressMultiCommand *multiCommand
+	inProgressGroupCommand *groupCommand
 	//snapshot is a Diagram(true) of what the grid looked like when it was reset.
 	snapshot    string
 	nextGroupID int
@@ -94,7 +94,7 @@ func (b *baseCommand) ModifiedCells(m *Model) sudoku.CellRefSlice {
 	return sudoku.CellRefSlice{b.ref}
 }
 
-func (m *multiCommand) ModifiedCells(model *Model) sudoku.CellRefSlice {
+func (m *groupCommand) ModifiedCells(model *Model) sudoku.CellRefSlice {
 	var result sudoku.CellRefSlice
 
 	for _, command := range m.commands {
@@ -104,19 +104,19 @@ func (m *multiCommand) ModifiedCells(model *Model) sudoku.CellRefSlice {
 	return result
 }
 
-func (m *multiCommand) GroupInfo() *groupInfo {
+func (m *groupCommand) GroupInfo() *groupInfo {
 	return m.groupInfo
 }
 
-func (m *multiCommand) Marks() map[int]bool {
+func (m *groupCommand) Marks() map[int]bool {
 	return nil
 }
 
-func (m *multiCommand) Number() *int {
+func (m *groupCommand) Number() *int {
 	return nil
 }
 
-func (m *multiCommand) AddCommand(c command) {
+func (m *groupCommand) AddCommand(c command) {
 	m.commands = append(m.commands, c)
 }
 
@@ -132,7 +132,7 @@ type numberCommand struct {
 	oldNumber int
 }
 
-type multiCommand struct {
+type groupCommand struct {
 	commands  []command
 	groupInfo *groupInfo
 }
@@ -156,7 +156,7 @@ func (n *numberCommand) Type() string {
 	return "number"
 }
 
-func (m *multiCommand) Type() string {
+func (m *groupCommand) Type() string {
 	return "group"
 }
 
@@ -168,7 +168,7 @@ func (n *numberCommand) SubCommands() []command {
 	return []command{n}
 }
 
-func (m *multiCommand) SubCommands() []command {
+func (m *groupCommand) SubCommands() []command {
 	return m.commands
 }
 
@@ -262,7 +262,7 @@ func (m *Model) Redo() bool {
 //digest.
 func (m *Model) StartGroup(description string) {
 	//TODO: allow setting a name when the group is created.
-	m.inProgressMultiCommand = &multiCommand{
+	m.inProgressGroupCommand = &groupCommand{
 		nil,
 		&groupInfo{
 			m.nextGroupID,
@@ -275,24 +275,24 @@ func (m *Model) StartGroup(description string) {
 //FinishGroupAndExecute applies all of the modifications made inside of this
 //group.
 func (m *Model) FinishGroupAndExecute() {
-	if m.inProgressMultiCommand == nil {
+	if m.inProgressGroupCommand == nil {
 		return
 	}
-	m.executeCommand(m.inProgressMultiCommand)
-	m.inProgressMultiCommand = nil
+	m.executeCommand(m.inProgressGroupCommand)
+	m.inProgressGroupCommand = nil
 }
 
 //CancelGroup throws out the in-progress group of modifications. None of the
 //modifications will actually be made to the grid.
 func (m *Model) CancelGroup() {
-	m.inProgressMultiCommand = nil
+	m.inProgressGroupCommand = nil
 }
 
 //InGroup returns true if a group is currently being built (that is,
 //StartGroup was called, and neither FinishGroupAndExecute nor CancelGroup
 //have been called.)
 func (m *Model) InGroup() bool {
-	return m.inProgressMultiCommand != nil
+	return m.inProgressGroupCommand != nil
 }
 
 //Reset resets the current grid back to its fully unfilled state (resetting
@@ -326,7 +326,7 @@ func (m *Model) SetMarks(ref sudoku.CellRef, marksToggle map[int]bool) {
 		return
 	}
 	if m.InGroup() {
-		m.inProgressMultiCommand.AddCommand(command)
+		m.inProgressGroupCommand.AddCommand(command)
 	} else {
 		m.executeCommand(command)
 	}
@@ -365,7 +365,7 @@ func (m *Model) SetNumber(ref sudoku.CellRef, num int) {
 		return
 	}
 	if m.InGroup() {
-		m.inProgressMultiCommand.AddCommand(command)
+		m.inProgressGroupCommand.AddCommand(command)
 	} else {
 		m.executeCommand(command)
 	}
@@ -422,13 +422,13 @@ func (n *numberCommand) Undo(model *Model) {
 	cell.SetNumber(n.oldNumber)
 }
 
-func (m *multiCommand) Apply(model *Model) {
+func (m *groupCommand) Apply(model *Model) {
 	for _, command := range m.commands {
 		command.Apply(model)
 	}
 }
 
-func (m *multiCommand) Undo(model *Model) {
+func (m *groupCommand) Undo(model *Model) {
 	for i := len(m.commands) - 1; i >= 0; i-- {
 		m.commands[i].Undo(model)
 	}
