@@ -48,6 +48,8 @@ import (
 	"unicode/utf8"
 )
 
+//TODO: have public constants for all of the converter string formats?
+
 /*
  * Converters convert to and from non-default file formats for sudoku puzzles.
  */
