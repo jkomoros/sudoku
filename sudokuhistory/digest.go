@@ -70,6 +70,10 @@ func (d *Digest) valid() error {
 		}
 		lastTime = group.TimeOffset
 
+		if len(group.Moves) == 0 {
+			return errors.New("One of the groups had no moves")
+		}
+
 		for _, move := range group.Moves {
 			if move.Cell.Row < 0 || move.Cell.Row >= sudoku.DIM {
 				return errors.New("Invalid row in cellref")

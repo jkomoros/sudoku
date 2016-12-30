@@ -97,6 +97,12 @@ func TestDigestValid(t *testing.T) {
 		t.Error("Didn't notice that a move with both a marks and a move was invalid", move)
 	}
 
+	moveGroup.Moves = make([]MoveDigest, 0)
+
+	if err := digest.valid(); err == nil {
+		t.Error("Didn't notice that a move group had no moves")
+	}
+
 }
 
 func TestDigest(t *testing.T) {
