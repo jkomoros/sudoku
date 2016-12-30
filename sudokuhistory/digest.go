@@ -1,7 +1,9 @@
 package sudokuhistory
 
 import (
+	"errors"
 	"github.com/jkomoros/sudoku"
+	"github.com/jkomoros/sudoku/sdkconverter"
 	"time"
 )
 
@@ -41,6 +43,52 @@ type MoveDigest struct {
 }
 
 //TODO: implement model.LoadDigest([]byte)
+
+//valid will return nil if it is valid, an error otherwise.
+func (d *Digest) valid() error {
+
+	//Check that the puzzle exists.
+	if d.Puzzle == "" {
+		return errors.New("No puzzle")
+	}
+
+	//Check if the puzzle is a valid puzzle in doku format.
+	converter := sdkconverter.Converters[sdkconverter.DokuFormat]
+
+	if !converter.Valid(d.Puzzle) {
+		return errors.New("Puzzle snapshot not doku format")
+	}
+
+	var lastTime time.Duration
+
+	for _, group := range d.MoveGroups {
+		if group.TimeOffset < 0 {
+			return errors.New("Invalid time offset")
+		}
+		if group.TimeOffset < lastTime {
+			return errors.New("TimeOffsets did not monotonically increase")
+		}
+		lastTime = group.TimeOffset
+
+		for _, move := range group.Moves {
+			if move.Cell.Row < 0 || move.Cell.Row >= sudoku.DIM {
+				return errors.New("Invalid row in cellref")
+			}
+			if move.Cell.Col < 0 || move.Cell.Col >= sudoku.DIM {
+				return errors.New("Invalid col in cellref")
+			}
+			if move.Marks == nil && move.Number == nil {
+				return errors.New("Neither marks nor number provided in move")
+			}
+			if move.Marks != nil && move.Number != nil {
+				return errors.New("Both marks and number provided")
+			}
+		}
+	}
+
+	//Everything's OK!
+	return nil
+}
 
 //Digest returns a Digest object representing the state of this model.
 func (m *Model) Digest() Digest {
