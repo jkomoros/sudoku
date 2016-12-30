@@ -94,10 +94,7 @@ func (d *Digest) valid() error {
 
 //LoadDigest takes in a Digest produced by model.Digest() and sets the
 //internal state appropriately.
-func (m *Model) LoadDigest(d *Digest) error {
-	if d == nil {
-		return errors.New("No digest passed")
-	}
+func (m *Model) LoadDigest(d Digest) error {
 
 	if err := d.valid(); err != nil {
 		return err

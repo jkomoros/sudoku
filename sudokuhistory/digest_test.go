@@ -156,13 +156,13 @@ func TestDigest(t *testing.T) {
 
 	newModel := &Model{}
 
-	if err := newModel.LoadDigest(digest); err != nil {
+	if err := newModel.LoadDigest(*digest); err != nil {
 		t.Error("Load digest returned an error")
 	}
 
 	newDigest := newModel.Digest()
 
-	if !reflect.DeepEqual(digest, &newDigest) {
+	if !reflect.DeepEqual(*digest, newDigest) {
 		t.Error("Loading up a digest didn't set the state correctly")
 	}
 
