@@ -1,9 +1,28 @@
 /*
 Package sdkconverter provides a set of converters to and from sudoku's default sdk format.
 
-It supports three file types: 'sdk', 'doku', and 'komo'.
+It supports three file types: 'sdk', 'doku', and 'komo'. To help ensure you're
+using a supported format, pass FooFormat instead of the direct string.
+*/
+package sdkconverter
 
+import (
+	"github.com/jkomoros/sudoku"
+	"regexp"
+	"strconv"
+	"strings"
+	"unicode/utf8"
+)
 
+/*
+ * Converters convert to and from non-default file formats for sudoku puzzles.
+ */
+
+//Format is a type of puzzle format this package understands. For safety, use
+//the FooFormat constants instead of strings.
+type Format string
+
+/*
 SDK is the default file format of the main library, and many other sudoku
 tools. Rows are delimited by new lines, and columns are delimited by a
 single pipe character ('|'). Optionally the column delimiter may be replaced
@@ -12,7 +31,10 @@ character, 0-9 or '.'. '0' and '.' denote an unfilled cell. The sdk format
 does not support marks, locks, or user-filled numbers. The SDK format is the
 default format primarily because it is simple and understood by many other
 tools.
+*/
+const SDKFormat Format = "sdk"
 
+/*
 The doku format's rows are delimited by line breaks and columns are
 delimited by "|". Each cell consists of (in order):
 
@@ -31,26 +53,16 @@ If there are no locked cells, marks, or extra whitespace in any cells, then
 either only the column delimiters OR both the column and row delimiters may be
 omitted. Thus, every valid SDK file is a valid doku file. Doku is the
 recommended format for any uses that include user modifications of the cell.
+*/
+const DokuFormat Format = "doku"
 
+/*
 komo is a legacy format that is used in certain online sudoku games. Like doku
 it can store user modifications to the grid. Unlike all of the other formats,
 it  requires that each cell store the solution number for that cell, meaning
 it is unable to store grids that have no valid solution.
-
 */
-package sdkconverter
-
-import (
-	"github.com/jkomoros/sudoku"
-	"regexp"
-	"strconv"
-	"strings"
-	"unicode/utf8"
-)
-
-/*
- * Converters convert to and from non-default file formats for sudoku puzzles.
- */
+const KomoFormat Format = "komo"
 
 const _KOMO_CELL_RE = `\d!?(:\d)?(\[(\d\.)*\d\])?`
 const _DOKU_CELL_RE = `( |\.|\d)!?(\((\d,)*\d\))?( |\t)*`
@@ -78,20 +90,35 @@ type dokuConverter struct {
 type sdkConverter struct {
 }
 
-//Converters is a list of the provided converters. Currently only "komo",
-//"doku", and "sdk" (a pass-through) are provided.
-var Converters map[string]SudokuPuzzleConverter
+//Converters is a list of the provided converters for direct access. It's
+//better to use one of the convenience methods unless you need raw access.
+var Converters map[Format]SudokuPuzzleConverter
 
 func init() {
-	Converters = make(map[string]SudokuPuzzleConverter)
+	Converters = make(map[Format]SudokuPuzzleConverter)
 	Converters["komo"] = &komoConverter{}
 	Converters["sdk"] = &sdkConverter{}
 	Converters["doku"] = &dokuConverter{}
 }
 
+//DataString is a convenience method that returns the given grid's string
+//representation in the given format. If the converter does not exist, it will
+//return a zero-length string.
+func DataString(format Format, grid sudoku.Grid) string {
+
+	converter := Converters[format]
+
+	if converter == nil {
+		return ""
+	}
+
+	return converter.DataString(grid)
+
+}
+
 //ToSDK is a convenience wrapper that takes the name of a format and the puzzle data
 //and returns an sdk string.
-func ToSDK(format string, other string) (sdk string) {
+func ToSDK(format Format, other string) (sdk string) {
 	grid := sudoku.NewGrid()
 	converter := Converters[format]
 
@@ -107,7 +134,7 @@ func ToSDK(format string, other string) (sdk string) {
 
 //ToOther is a conenience wrapper that takes the name of a format and the sdk datastring
 //and returns the DataString in the other format.
-func ToOther(format string, sdk string) (other string) {
+func ToOther(format Format, sdk string) (other string) {
 
 	converter := Converters[format]
 
@@ -120,9 +147,9 @@ func ToOther(format string, sdk string) (other string) {
 	return converter.DataString(grid)
 }
 
-//Format returns the most likely format type for the provided puzzle string,
-//or "" if none are valid.
-func Format(puzzle string) string {
+//PuzzleFormat returns the most likely format type for the provided puzzle
+//string, or "" if none are valid.
+func PuzzleFormat(puzzle string) Format {
 	for format, converter := range Converters {
 		if converter.Valid(puzzle) {
 			return format
@@ -144,7 +171,7 @@ func Load(puzzle string) sudoku.MutableGrid {
 //puzzle string is guessed. If no valid format can be detected, the grid won't
 //be modified.
 func LoadInto(grid sudoku.MutableGrid, puzzle string) {
-	formatString := Format(puzzle)
+	formatString := PuzzleFormat(puzzle)
 	converter := Converters[formatString]
 	if converter == nil {
 		return

@@ -178,7 +178,7 @@ func (o *appOptions) fixUp(errOutput io.ReadWriter) bool {
 		logger.Println("Using difficulty max:", strconv.FormatFloat(vals.high, 'f', -1, 64), "min:", strconv.FormatFloat(vals.low, 'f', -1, 64))
 	}
 
-	o.CONVERTER = sdkconverter.Converters[o.PUZZLE_FORMAT]
+	o.CONVERTER = sdkconverter.Converters[sdkconverter.Format(o.PUZZLE_FORMAT)]
 
 	if o.CONVERTER == nil {
 		logger.Println("Invalid format option:", o.PUZZLE_FORMAT)

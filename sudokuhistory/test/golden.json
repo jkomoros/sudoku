@@ -1,0 +1,80 @@
+{
+  "Puzzle": ".|.|.|.|.|.|.|.|.\n.|.|.|.|.|.|.|.|.\n.|.|.|.|.|.|.|.|.\n.|.|.|.|.|.|.|.|.\n.|.|.|.|.|.|.|.|.\n.|.|.|.|.|.|.|.|.\n.|.|.|.|.|.|.|.|.\n.|.|.|.|.|.|.|.|.\n.|.|.|.|.|.|.|.|.",
+  "MoveGroups": [
+    {
+      "Moves": [
+        {
+          "Cell": {
+            "Row": 3,
+            "Col": 4
+          },
+          "Marks": {
+            "3": true,
+            "4": true
+          }
+        }
+      ],
+      "TimeOffset": 100
+    },
+    {
+      "Moves": [
+        {
+          "Cell": {
+            "Row": 0,
+            "Col": 0
+          },
+          "Number": 3
+        }
+      ],
+      "TimeOffset": 117
+    },
+    {
+      "Moves": [
+        {
+          "Cell": {
+            "Row": 0,
+            "Col": 1
+          },
+          "Number": 4
+        },
+        {
+          "Cell": {
+            "Row": 0,
+            "Col": 2
+          },
+          "Marks": {
+            "3": true,
+            "4": true
+          }
+        }
+      ],
+      "TimeOffset": 134,
+      "Description": "test group"
+    },
+    {
+      "Moves": [
+        {
+          "Cell": {
+            "Row": 0,
+            "Col": 3
+          },
+          "Number": 4
+        }
+      ],
+      "TimeOffset": 151,
+      "Description": "second group"
+    },
+    {
+      "Moves": [
+        {
+          "Cell": {
+            "Row": 0,
+            "Col": 0
+          },
+          "Number": 0
+        }
+      ],
+      "TimeOffset": 168
+    }
+  ]
+}

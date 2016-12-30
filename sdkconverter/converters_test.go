@@ -162,7 +162,7 @@ func TestSDKConverterValid(t *testing.T) {
 	validTestHelper(t, "sdk", "nakedpair3.sdk", true)
 }
 
-func validTestHelper(t *testing.T, format string, file string, expected bool) {
+func validTestHelper(t *testing.T, format Format, file string, expected bool) {
 	converter := Converters[format]
 
 	if converter == nil {
@@ -200,6 +200,25 @@ func TestConvenienceFuncs(t *testing.T) {
 	}
 }
 
+func TestDataString(t *testing.T) {
+
+	dokuInput := loadTestPuzzle("doku_complex_normalized.doku")
+	grid := Load(dokuInput)
+
+	converted := DataString("doku", grid)
+
+	if converted != dokuInput {
+		t.Error("DataString for doku didn't work. Got", converted, "wanted", dokuInput)
+	}
+
+	converted = DataString("foo", grid)
+
+	if converted != "" {
+		t.Error("Unsuccessful data string thought it was OK")
+	}
+
+}
+
 func TestLoadInto(t *testing.T) {
 	grid := Load(loadTestPuzzle("converter_one_komo.sdk"))
 
@@ -219,26 +238,26 @@ func TestLoadInto(t *testing.T) {
 }
 
 func TestFormat(t *testing.T) {
-	result := Format(loadTestPuzzle("converter_one.sdk"))
+	result := PuzzleFormat(loadTestPuzzle("converter_one.sdk"))
 	//doku and sdk are both valid options
 	if result != "sdk" && result != "doku" {
 		t.Error("Format guessed wrong format:", result)
 	}
-	result = Format(loadTestPuzzle("converter_one_komo.sdk"))
+	result = PuzzleFormat(loadTestPuzzle("converter_one_komo.sdk"))
 	if result != "komo" {
 		t.Error("Format guessed wrong format for komo puzzle: ", result)
 	}
-	result = Format(loadTestPuzzle("doku_complex.doku"))
+	result = PuzzleFormat(loadTestPuzzle("doku_complex.doku"))
 	if result != "doku" {
 		t.Error("Format guessed wrong format for doku puzzle: ", result)
 	}
-	result = Format(loadTestPuzzle("invalid_sdk_too_short.sdk"))
+	result = PuzzleFormat(loadTestPuzzle("invalid_sdk_too_short.sdk"))
 	if result != "" {
 		t.Error("Format guessed wrong format for an unknown puzzle type", result)
 	}
 }
 
-func converterTesterHelper(t *testing.T, testLoad bool, format string, otherFile string, sdkFile string) {
+func converterTesterHelper(t *testing.T, testLoad bool, format Format, otherFile string, sdkFile string) {
 
 	converter := Converters[format]
 

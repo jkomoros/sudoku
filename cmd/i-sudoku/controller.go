@@ -5,6 +5,7 @@ import (
 	"github.com/gosuri/uitable"
 	"github.com/jkomoros/sudoku"
 	"github.com/jkomoros/sudoku/sdkconverter"
+	"github.com/jkomoros/sudoku/sudokuhistory"
 	"github.com/mitchellh/go-wordwrap"
 	"github.com/nsf/termbox-go"
 	"io/ioutil"
@@ -19,8 +20,8 @@ const (
 )
 
 type mainController struct {
-	model    *model
-	selected sudoku.MutableCell
+	model    *sudokuhistory.Model
+	selected sudoku.Cell
 	mode     InputMode
 	//The size of the console output. Not used for much.
 	outputWidth int
@@ -61,7 +62,7 @@ type toggle struct {
 
 func newController() *mainController {
 	c := &mainController{
-		model: &model{},
+		model: &sudokuhistory.Model{},
 		mode:  MODE_DEFAULT,
 	}
 	c.setUpToggles()
@@ -217,33 +218,35 @@ func (c *mainController) StatusLine() string {
 
 //TODO: should this vend a copy of the grid? I want to make it so the only
 //easy way to mutate the grid is via model mutators.
-func (c *mainController) Grid() sudoku.MutableGrid {
-	return c.model.grid
+func (c *mainController) Grid() sudoku.Grid {
+	return c.model.Grid()
 }
 
 func (c *mainController) SetGrid(grid sudoku.MutableGrid) {
 	oldCell := c.Selected()
-	c.model.SetGrid(grid)
-	//The currently selected cell is tied to the grid, so we need to fix it up.
-	if oldCell != nil {
-		c.SetSelected(oldCell.MutableInGrid(c.model.grid))
-	}
-	if c.model.grid != nil {
+
+	if grid != nil {
 		//IF there are already some locked cells, we assume that only those
 		//cells should be locked. If there aren't any locked cells at all, we
 		//assume that all filled cells should be locked.
 
 		//TODO: this seems like magic behavior that's hard to reason about.
 		foundLockedCell := false
-		for _, cell := range c.model.grid.Cells() {
+		for _, cell := range grid.Cells() {
 			if cell.Locked() {
 				foundLockedCell = true
 				break
 			}
 		}
 		if !foundLockedCell {
-			c.model.grid.LockFilledCells()
+			grid.LockFilledCells()
 		}
+	}
+
+	c.model.SetGrid(grid)
+	//The currently selected cell is tied to the grid, so we need to fix it up.
+	if oldCell != nil {
+		c.SetSelected(oldCell.InGrid(c.model.Grid()))
 	}
 	c.cachedDifficulty = 0.0
 	c.snapshot = ""
@@ -263,7 +266,7 @@ func (c *mainController) LoadGridFromFile(file string) {
 	}
 	puzzle := string(puzzleBytes)
 
-	if sdkconverter.Format(puzzle) == "" {
+	if sdkconverter.PuzzleFormat(puzzle) == "" {
 		c.SetConsoleMessage("Provided puzzle is in unknown format.", true)
 		return
 	}
@@ -500,7 +503,7 @@ func (c *mainController) ShowDebugHint() {
 		{
 			FillStep: &sudoku.SolveStep{
 				Technique:   sudoku.Techniques[0],
-				TargetCells: c.model.LastModifiedCells().CellReferenceSlice(),
+				TargetCells: c.model.LastModifiedCells(),
 			},
 		},
 	}
@@ -556,7 +559,7 @@ func (c *mainController) ShowHint() {
 		{
 			FillStep: &sudoku.SolveStep{
 				Technique:   sudoku.Techniques[0],
-				TargetCells: c.model.LastModifiedCells().CellReferenceSlice(),
+				TargetCells: c.model.LastModifiedCells(),
 			},
 		},
 	}
@@ -571,7 +574,7 @@ func (c *mainController) ShowHint() {
 	//This hast to be after setting console message, since SetConsoleMessage clears the last hint.
 	c.lastShownHint = hint
 	lastStep := hint.CompoundSteps[0].FillStep
-	c.SetSelected(lastStep.TargetCells[0].MutableCell(c.Grid()))
+	c.SetSelected(lastStep.TargetCells[0].Cell(c.Grid()))
 }
 
 func (c *mainController) EnterHint() {
@@ -582,17 +585,17 @@ func (c *mainController) EnterHint() {
 	cell := lastStep.TargetCells[0]
 	num := lastStep.TargetNums[0]
 
-	c.SetSelected(cell.MutableCell(c.Grid()))
+	c.SetSelected(cell.Cell(c.Grid()))
 	c.SetSelectedNumber(num)
 
 	c.ClearConsole()
 }
 
-func (c *mainController) Selected() sudoku.MutableCell {
+func (c *mainController) Selected() sudoku.Cell {
 	return c.selected
 }
 
-func (c *mainController) SetSelected(cell sudoku.MutableCell) {
+func (c *mainController) SetSelected(cell sudoku.Cell) {
 	if cell == c.selected {
 		//Already done
 		return
@@ -605,7 +608,7 @@ func (c *mainController) EnsureSelected() {
 	c.EnsureGrid()
 	//Ensures that at least one cell is selected.
 	if c.Selected() == nil {
-		c.SetSelected(c.Grid().MutableCell(0, 0))
+		c.SetSelected(c.Grid().Cell(0, 0))
 	}
 }
 
@@ -627,7 +630,7 @@ func (c *mainController) MoveSelectionLeft(fast bool) {
 			}
 			continue
 		}
-		c.SetSelected(c.Grid().MutableCell(row, col))
+		c.SetSelected(c.Grid().Cell(row, col))
 		break
 	}
 }
@@ -650,7 +653,7 @@ func (c *mainController) MoveSelectionRight(fast bool) {
 			}
 			continue
 		}
-		c.SetSelected(c.Grid().MutableCell(row, col))
+		c.SetSelected(c.Grid().Cell(row, col))
 		break
 	}
 }
@@ -673,7 +676,7 @@ func (m *mainController) MoveSelectionUp(fast bool) {
 			}
 			continue
 		}
-		m.SetSelected(m.Grid().MutableCell(r, c))
+		m.SetSelected(m.Grid().Cell(r, c))
 		break
 	}
 }
@@ -696,7 +699,7 @@ func (m *mainController) MoveSelectionDown(fast bool) {
 			}
 			continue
 		}
-		m.SetSelected(m.Grid().MutableCell(r, c))
+		m.SetSelected(m.Grid().Cell(r, c))
 		break
 	}
 }
@@ -730,7 +733,7 @@ func (c *mainController) NewGrid() {
 }
 
 func (c *mainController) ResetGrid() {
-	c.Grid().ResetUnlockedCells()
+	c.model.Reset()
 }
 
 func (c *mainController) Undo() {
@@ -771,10 +774,10 @@ func (c *mainController) SetSelectedNumber(num int) {
 	}
 
 	if c.Selected().Number() != num {
-		c.model.SetNumber(c.Selected().Row(), c.Selected().Col(), num)
+		c.model.SetNumber(c.Selected().Reference(), num)
 	} else {
 		//If the number to set is already set, then empty the cell instead.
-		c.model.SetNumber(c.Selected().Row(), c.Selected().Col(), 0)
+		c.model.SetNumber(c.Selected().Reference(), 0)
 	}
 
 	c.checkHintDone()
@@ -802,11 +805,11 @@ func (c *mainController) ToggleSelectedMark(num int) {
 		c.SetConsoleMessage(MARKS_MODE_FAIL_NUMBER, true)
 		return
 	}
-	c.model.SetMarks(c.Selected().Row(), c.Selected().Col(), map[int]bool{num: !c.Selected().Mark(num)})
+	c.model.SetMarks(c.Selected().Reference(), map[int]bool{num: !c.Selected().Mark(num)})
 }
 
 func (c *mainController) FillAllLegalMarks() {
-	c.model.StartGroup()
+	c.model.StartGroup("fill all legal marks")
 
 	for _, cell := range c.Grid().Cells() {
 		if cell.Number() != 0 {
@@ -816,14 +819,14 @@ func (c *mainController) FillAllLegalMarks() {
 		for _, num := range cell.Possibilities() {
 			markMap[num] = true
 		}
-		c.model.SetMarks(cell.Row(), cell.Col(), markMap)
+		c.model.SetMarks(cell.Reference(), markMap)
 	}
 
 	c.model.FinishGroupAndExecute()
 }
 
 func (c *mainController) RemovedInvalidMarksFromAll() {
-	c.model.StartGroup()
+	c.model.StartGroup("remove invalid marks from all")
 
 	for _, cell := range c.Grid().Cells() {
 		if cell.Number() != 0 {
@@ -835,7 +838,7 @@ func (c *mainController) RemovedInvalidMarksFromAll() {
 				markMap[num] = false
 			}
 		}
-		c.model.SetMarks(cell.Row(), cell.Col(), markMap)
+		c.model.SetMarks(cell.Reference(), markMap)
 	}
 
 	c.model.FinishGroupAndExecute()
@@ -843,12 +846,14 @@ func (c *mainController) RemovedInvalidMarksFromAll() {
 
 func (c *mainController) FillSelectedWithLegalMarks() {
 	c.EnsureSelected()
-	c.Selected().ResetMarks()
 	markMap := make(map[int]bool)
+	for i := 1; i <= sudoku.DIM; i++ {
+		markMap[i] = false
+	}
 	for _, num := range c.Selected().Possibilities() {
 		markMap[num] = true
 	}
-	c.model.SetMarks(c.Selected().Row(), c.Selected().Col(), markMap)
+	c.model.SetMarks(c.Selected().Reference(), markMap)
 }
 
 func (c *mainController) RemoveInvalidMarksFromSelected() {
@@ -859,5 +864,5 @@ func (c *mainController) RemoveInvalidMarksFromSelected() {
 			markMap[num] = false
 		}
 	}
-	c.model.SetMarks(c.Selected().Row(), c.Selected().Col(), markMap)
+	c.model.SetMarks(c.Selected().Reference(), markMap)
 }

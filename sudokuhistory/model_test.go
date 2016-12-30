@@ -1,26 +1,72 @@
-package main
+package sudokuhistory
 
 import (
 	"github.com/jkomoros/sudoku"
+	"github.com/jkomoros/sudoku/sdkconverter"
 	"reflect"
 	"testing"
 )
 
+func TestReset(t *testing.T) {
+	model := &Model{}
+
+	grid := sudoku.NewGrid()
+
+	grid.MutableCell(3, 3).SetNumber(5)
+	grid.LockFilledCells()
+
+	converter := sdkconverter.Converters["doku"]
+
+	if converter == nil {
+		t.Fatal("Couldn't find doku converter")
+	}
+
+	snapshot := converter.DataString(grid)
+
+	grid.MutableCell(4, 4).SetNumber(6)
+
+	model.SetGrid(grid)
+
+	if model.Grid().Cell(4, 4).Number() != 0 {
+		t.Error("Expected grid to be reset after being set, but the unlocked cell remained:", model.Grid().Cell(4, 4).Number())
+	}
+
+	if model.snapshot != snapshot {
+		t.Error("Got unexpected snapshot: got", model.snapshot, "expected", snapshot)
+	}
+
+}
+
 func TestMarkMutator(t *testing.T) {
-	model := &model{}
+	model := &Model{}
 	model.SetGrid(sudoku.NewGrid())
 
 	cell := model.grid.MutableCell(0, 0)
 
 	cell.SetMark(1, true)
 
-	command := model.newMarkCommand(0, 0, map[int]bool{1: true})
+	command := model.newMarkCommand(sudoku.CellRef{0, 0}, map[int]bool{1: true})
 
 	if command != nil {
 		t.Error("Got invalid command, expected nil", command)
 	}
 
-	command = model.newMarkCommand(0, 0, map[int]bool{1: false, 2: true, 3: false})
+	command = model.newMarkCommand(sudoku.CellRef{0, 0}, map[int]bool{1: false, 2: true, 3: false})
+
+	if command.Number() != nil {
+		t.Error("Expected nil for number, got non-nil:", command.Number())
+	}
+
+	marks := command.Marks()
+
+	if marks == nil {
+		t.Error("Got nil from Marks on mark command")
+	}
+
+	//3:false is a no-op so we expect it to be discarded.
+	if !reflect.DeepEqual(map[int]bool{1: false, 2: true}, marks) {
+		t.Error("Marks back from command was wrong, got", marks)
+	}
 
 	command.Apply(model)
 
@@ -34,24 +80,38 @@ func TestMarkMutator(t *testing.T) {
 		t.Error("Got wrong marks after undoing:", cell.Marks())
 	}
 
-	if !reflect.DeepEqual(command.ModifiedCells(model), sudoku.CellSlice{model.grid.Cell(0, 0)}) {
+	if !reflect.DeepEqual(command.ModifiedCells(model), sudoku.CellRefSlice{sudoku.CellRef{0, 0}}) {
 		t.Error("Didn't get right Modified Cells")
 	}
 }
 
 func TestNumberMutator(t *testing.T) {
-	model := &model{}
+	model := &Model{}
 	model.SetGrid(sudoku.NewGrid())
 
 	cell := model.grid.Cell(0, 0)
 
-	command := model.newNumberCommand(0, 0, 0)
+	command := model.newNumberCommand(sudoku.CellRef{0, 0}, 0)
 
 	if command != nil {
 		t.Error("Got non-nil number command for a no op")
 	}
 
-	command = model.newNumberCommand(0, 0, 1)
+	command = model.newNumberCommand(sudoku.CellRef{0, 0}, 1)
+
+	if command.Marks() != nil {
+		t.Error("Got non-nil from Marks on mark command")
+	}
+
+	number := command.Number()
+
+	if number == nil {
+		t.Error("Expected non-nil for number, got nil")
+	}
+
+	if *number != 1 {
+		t.Error("Number returned from number command was not right. Got:", *number)
+	}
 
 	command.Apply(model)
 
@@ -65,23 +125,23 @@ func TestNumberMutator(t *testing.T) {
 		t.Error("Number mutator didn't undo")
 	}
 
-	if !reflect.DeepEqual(command.ModifiedCells(model), sudoku.CellSlice{model.grid.Cell(0, 0)}) {
+	if !reflect.DeepEqual(command.ModifiedCells(model), sudoku.CellRefSlice{sudoku.CellRef{0, 0}}) {
 		t.Error("Didn't get right Modified Cells")
 	}
 
 }
 
 func TestGroups(t *testing.T) {
-	model := &model{}
+	model := &Model{}
 	model.SetGrid(sudoku.NewGrid())
 
-	model.SetNumber(0, 0, 1)
+	model.SetNumber(sudoku.CellRef{0, 0}, 1)
 
 	if model.grid.Cell(0, 0).Number() != 1 {
 		t.Fatal("Setting number outside group didn't set number")
 	}
 
-	model.SetMarks(0, 1, map[int]bool{3: true})
+	model.SetMarks(sudoku.CellRef{0, 1}, map[int]bool{3: true})
 
 	if !model.grid.Cell(0, 1).Marks().SameContentAs(sudoku.IntSlice{3}) {
 		t.Fatal("Setting marks outside of group didn't set marks")
@@ -93,20 +153,48 @@ func TestGroups(t *testing.T) {
 		t.Error("Model reported being in group even though it wasn't")
 	}
 
-	model.StartGroup()
+	model.StartGroup("foo")
 
 	if !model.InGroup() {
 		t.Error("Model didn't report being in a group even though it was")
 	}
 
-	model.SetNumber(0, 2, 1)
-	model.SetMarks(0, 3, map[int]bool{3: true})
+	model.SetNumber(sudoku.CellRef{0, 2}, 1)
+	model.SetMarks(sudoku.CellRef{0, 3}, map[int]bool{3: true})
 
 	if model.grid.Diagram(true) != state {
 		t.Error("Within a group setnumber and setmarks mutated the grid")
 	}
 
 	model.FinishGroupAndExecute()
+
+	command := model.currentCommand.c
+
+	subCommands := command.subCommands
+
+	if len(subCommands) != 2 {
+		t.Fatal("Got wrong sized subcommands for marks", len(subCommands))
+	}
+
+	if subCommands[0].Number() == nil {
+		t.Error("Sub command #1 was not number")
+	}
+
+	if subCommands[1].Marks() == nil {
+		t.Error("Sub command #2 was not marks")
+	}
+
+	if command.description != "foo" {
+		t.Error("Expected description of 'foo', got:", command.description)
+	}
+
+	if command.Marks() != nil {
+		t.Error("Got non-nil from Marks on mark command")
+	}
+
+	if command.Number() != nil {
+		t.Error("Expected nil for number, got non-nil:", command.Number())
+	}
 
 	if model.InGroup() {
 		t.Error("After finishing a group model still said it was in group")
@@ -130,7 +218,7 @@ func TestGroups(t *testing.T) {
 		t.Error("Undoing a group update didn't set the grid back to same state")
 	}
 
-	model.StartGroup()
+	model.StartGroup("discardable")
 	model.CancelGroup()
 
 	if model.InGroup() {
@@ -140,7 +228,7 @@ func TestGroups(t *testing.T) {
 
 func TestUndoRedo(t *testing.T) {
 
-	model := &model{}
+	model := &Model{}
 	model.SetGrid(sudoku.NewGrid())
 
 	if model.Undo() {
@@ -155,34 +243,34 @@ func TestUndoRedo(t *testing.T) {
 		model.grid.Diagram(true),
 	}
 
-	rememberedModfiedCells := []sudoku.CellSlice{
+	rememberedModfiedCells := []sudoku.CellRefSlice{
 		nil,
 	}
 
-	model.SetNumber(0, 0, 1)
+	model.SetNumber(sudoku.CellRef{0, 0}, 1)
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
-	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 0)})
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellRefSlice{sudoku.CellRef{0, 0}})
 
-	model.SetNumber(0, 1, 2)
-
-	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
-	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 1)})
-
-	model.SetNumber(0, 0, 3)
+	model.SetNumber(sudoku.CellRef{0, 1}, 2)
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
-	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 0)})
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellRefSlice{sudoku.CellRef{0, 1}})
 
-	model.SetMarks(0, 2, map[int]bool{3: true, 4: true})
-
-	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
-	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 2)})
-
-	model.SetMarks(0, 2, map[int]bool{1: true, 4: false})
+	model.SetNumber(sudoku.CellRef{0, 0}, 3)
 
 	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
-	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellSlice{model.grid.Cell(0, 2)})
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellRefSlice{sudoku.CellRef{0, 0}})
+
+	model.SetMarks(sudoku.CellRef{0, 2}, map[int]bool{3: true, 4: true})
+
+	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellRefSlice{sudoku.CellRef{0, 2}})
+
+	model.SetMarks(sudoku.CellRef{0, 2}, map[int]bool{1: true, 4: false})
+
+	rememberedStates = append(rememberedStates, model.grid.Diagram(true))
+	rememberedModfiedCells = append(rememberedModfiedCells, sudoku.CellRefSlice{sudoku.CellRef{0, 2}})
 
 	if model.Redo() {
 		t.Error("Able to redo even though at end")
@@ -219,7 +307,7 @@ func TestUndoRedo(t *testing.T) {
 		}
 	}
 
-	model.SetNumber(2, 0, 3)
+	model.SetNumber(sudoku.CellRef{2, 0}, 3)
 
 	if model.Redo() {
 		t.Error("Able to redo even though just spliced in a new move.")
