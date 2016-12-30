@@ -5,7 +5,7 @@ import (
 	"github.com/gosuri/uitable"
 	"github.com/jkomoros/sudoku"
 	"github.com/jkomoros/sudoku/sdkconverter"
-	"github.com/jkomoros/sudoku/sudokustate"
+	"github.com/jkomoros/sudoku/sudokuhistory"
 	"github.com/mitchellh/go-wordwrap"
 	"github.com/nsf/termbox-go"
 	"io/ioutil"
@@ -20,7 +20,7 @@ const (
 )
 
 type mainController struct {
-	model    *sudokustate.Model
+	model    *sudokuhistory.Model
 	selected sudoku.Cell
 	mode     InputMode
 	//The size of the console output. Not used for much.
@@ -62,7 +62,7 @@ type toggle struct {
 
 func newController() *mainController {
 	c := &mainController{
-		model: &sudokustate.Model{},
+		model: &sudokuhistory.Model{},
 		mode:  MODE_DEFAULT,
 	}
 	c.setUpToggles()

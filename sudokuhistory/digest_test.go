@@ -1,4 +1,4 @@
-package sudokustate
+package sudokuhistory
 
 import (
 	"encoding/json"

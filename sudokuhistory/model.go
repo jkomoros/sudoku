@@ -1,6 +1,6 @@
 /*
 
-sudokustate manages modifications to a given grid, allowing easy undo/redo,
+sudokuhistory manages modifications to a given grid, allowing easy undo/redo,
 and keeping track of all moves.
 
 Moves can be made either by setting a number on a given cell or setting
@@ -12,7 +12,7 @@ the changes, then `model.FinishGroupAndExecute` to make all of the changes in
 one 'move'.
 
 */
-package sudokustate
+package sudokuhistory
 
 import (
 	"github.com/jkomoros/sudoku"
@@ -26,7 +26,7 @@ import (
 //the same cell in them, to avoid this)
 
 //Model maintains all of the state and modifications to the grid. The zero-
-//state is valid; create a new Model with sudokustate.Model{}.
+//state is valid; create a new Model with sudokuhistory.Model{}.
 type Model struct {
 	grid sudoku.MutableGrid
 	//The place in the command list that we currently are (this could move
