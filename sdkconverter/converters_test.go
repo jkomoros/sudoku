@@ -162,7 +162,7 @@ func TestSDKConverterValid(t *testing.T) {
 	validTestHelper(t, "sdk", "nakedpair3.sdk", true)
 }
 
-func validTestHelper(t *testing.T, format string, file string, expected bool) {
+func validTestHelper(t *testing.T, format Format, file string, expected bool) {
 	converter := Converters[format]
 
 	if converter == nil {
@@ -257,7 +257,7 @@ func TestFormat(t *testing.T) {
 	}
 }
 
-func converterTesterHelper(t *testing.T, testLoad bool, format string, otherFile string, sdkFile string) {
+func converterTesterHelper(t *testing.T, testLoad bool, format Format, otherFile string, sdkFile string) {
 
 	converter := Converters[format]
 

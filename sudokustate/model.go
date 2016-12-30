@@ -281,7 +281,7 @@ func (m *Model) Reset() {
 	if m.grid != nil {
 
 		m.grid.ResetUnlockedCells()
-		m.snapshot = sdkconverter.DataString("doku", m.grid)
+		m.snapshot = sdkconverter.DataString(sdkconverter.DokuFormat, m.grid)
 		m.started = time.Now()
 	}
 }
