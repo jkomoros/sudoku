@@ -137,9 +137,9 @@ func ToOther(format string, sdk string) (other string) {
 	return converter.DataString(grid)
 }
 
-//Format returns the most likely format type for the provided puzzle string,
-//or "" if none are valid.
-func Format(puzzle string) string {
+//PuzzleFormat returns the most likely format type for the provided puzzle
+//string, or "" if none are valid.
+func PuzzleFormat(puzzle string) string {
 	for format, converter := range Converters {
 		if converter.Valid(puzzle) {
 			return format
@@ -161,7 +161,7 @@ func Load(puzzle string) sudoku.MutableGrid {
 //puzzle string is guessed. If no valid format can be detected, the grid won't
 //be modified.
 func LoadInto(grid sudoku.MutableGrid, puzzle string) {
-	formatString := Format(puzzle)
+	formatString := PuzzleFormat(puzzle)
 	converter := Converters[formatString]
 	if converter == nil {
 		return

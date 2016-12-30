@@ -266,7 +266,7 @@ func (c *mainController) LoadGridFromFile(file string) {
 	}
 	puzzle := string(puzzleBytes)
 
-	if sdkconverter.Format(puzzle) == "" {
+	if sdkconverter.PuzzleFormat(puzzle) == "" {
 		c.SetConsoleMessage("Provided puzzle is in unknown format.", true)
 		return
 	}

@@ -238,20 +238,20 @@ func TestLoadInto(t *testing.T) {
 }
 
 func TestFormat(t *testing.T) {
-	result := Format(loadTestPuzzle("converter_one.sdk"))
+	result := PuzzleFormat(loadTestPuzzle("converter_one.sdk"))
 	//doku and sdk are both valid options
 	if result != "sdk" && result != "doku" {
 		t.Error("Format guessed wrong format:", result)
 	}
-	result = Format(loadTestPuzzle("converter_one_komo.sdk"))
+	result = PuzzleFormat(loadTestPuzzle("converter_one_komo.sdk"))
 	if result != "komo" {
 		t.Error("Format guessed wrong format for komo puzzle: ", result)
 	}
-	result = Format(loadTestPuzzle("doku_complex.doku"))
+	result = PuzzleFormat(loadTestPuzzle("doku_complex.doku"))
 	if result != "doku" {
 		t.Error("Format guessed wrong format for doku puzzle: ", result)
 	}
-	result = Format(loadTestPuzzle("invalid_sdk_too_short.sdk"))
+	result = PuzzleFormat(loadTestPuzzle("invalid_sdk_too_short.sdk"))
 	if result != "" {
 		t.Error("Format guessed wrong format for an unknown puzzle type", result)
 	}
