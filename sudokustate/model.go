@@ -280,14 +280,8 @@ func (m *Model) Reset() {
 	m.currentCommand = nil
 	if m.grid != nil {
 
-		converter := sdkconverter.Converters["doku"]
-
-		if converter == nil {
-			panic("Couldn't find doku converter")
-		}
-
 		m.grid.ResetUnlockedCells()
-		m.snapshot = converter.DataString(m.grid)
+		m.snapshot = sdkconverter.DataString("doku", m.grid)
 		m.started = time.Now()
 	}
 }
