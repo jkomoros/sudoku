@@ -327,6 +327,8 @@ func (m *Model) newMarkCommand(ref sudoku.CellRef, marksToggle map[int]bool) *ma
 		return nil
 	}
 
+	//TODO: should we bail if the cell is locked?
+
 	return &markCommand{basicCommand{ref}, newMarksToggle}
 }
 
@@ -351,6 +353,8 @@ func (m *Model) newNumberCommand(ref sudoku.CellRef, num int) *numberCommand {
 	if cell.Number() == num {
 		return nil
 	}
+
+	//TODO: should we bail if the cell is locked?
 
 	return &numberCommand{basicCommand{ref}, num, cell.Number()}
 }
