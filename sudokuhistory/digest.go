@@ -42,8 +42,6 @@ type MoveDigest struct {
 	Number *int `json:",omitempty"`
 }
 
-//TODO: implement model.LoadDigest([]byte)
-
 //valid will return nil if it is valid, an error otherwise.
 func (d *Digest) valid() error {
 
@@ -92,6 +90,39 @@ func (d *Digest) valid() error {
 
 	//Everything's OK!
 	return nil
+}
+
+//LoadDigest takes in a Digest produced by model.Digest() and sets the
+//internal state appropriately.
+func (m *Model) LoadDigest(d *Digest) error {
+	if d == nil {
+		return errors.New("No digest passed")
+	}
+
+	if err := d.valid(); err != nil {
+		return err
+	}
+
+	m.SetGrid(sdkconverter.Load(d.Puzzle))
+
+	for _, group := range d.MoveGroups {
+		m.StartGroup(group.Description)
+
+		for _, move := range group.Moves {
+			if move.Marks != nil {
+				m.SetMarks(move.Cell, move.Marks)
+			} else {
+				m.SetNumber(move.Cell, *move.Number)
+			}
+		}
+
+		m.FinishGroupAndExecute()
+
+		m.currentCommand.c.time = group.TimeOffset
+	}
+
+	return nil
+
 }
 
 //Digest returns a Digest object representing the state of this model.

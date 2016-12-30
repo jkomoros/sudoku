@@ -154,4 +154,16 @@ func TestDigest(t *testing.T) {
 		t.Error("Got incorrect golden json. Got", digest, "wanted", goldenDigest)
 	}
 
+	newModel := &Model{}
+
+	if err := newModel.LoadDigest(digest); err != nil {
+		t.Error("Load digest returned an error")
+	}
+
+	newDigest := newModel.Digest()
+
+	if !reflect.DeepEqual(digest, &newDigest) {
+		t.Error("Loading up a digest didn't set the state correctly")
+	}
+
 }
