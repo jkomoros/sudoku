@@ -123,6 +123,7 @@ func (m *Model) LoadDigest(d Digest) error {
 }
 
 //Digest returns a Digest object representing the state of this model.
+//Suitable for serializing as json.
 func (m *Model) Digest() Digest {
 	return Digest{
 		Puzzle:     m.snapshot,
