@@ -137,7 +137,7 @@ func TestFoundStepCacheGetSteps(t *testing.T) {
 	}
 
 	if cache.GetSteps() != nil {
-		t.Error("GetSteps on empty cache gave non-nil result")
+		t.Fatal("GetSteps on empty cache gave non-nil result")
 	}
 
 	cache.AddStepToQueue(stepOne)

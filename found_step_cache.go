@@ -181,6 +181,10 @@ func (f *foundStepCache) RemoveStepsWithCells(cells []CellRef) {
 //GetSteps gets all steps currently in the cache.
 func (f *foundStepCache) GetSteps() []*SolveStep {
 
+	if f.Len() == 0 {
+		return nil
+	}
+
 	result := make([]*SolveStep, f.Len())
 
 	currentItem := f.firstItem
