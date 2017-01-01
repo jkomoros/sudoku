@@ -123,6 +123,8 @@ func (f *foundStepCache) AddQueue() {
 //insertCacheItem adds the given cache item to the cache.
 func (f *foundStepCache) insertCacheItem(cacheItem *foundStepCacheItem) {
 
+	cacheItem.prev = nil
+
 	cacheItem.next = f.firstItem
 
 	f.firstItem = cacheItem
