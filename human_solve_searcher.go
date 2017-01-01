@@ -229,6 +229,9 @@ func humanSolveSearch(grid Grid, options *HumanSolveOptions) []*CompoundSolveSte
 			grid = grid.CopyWithModifications(newStep.Modifications())
 		}
 		stepsCache.AddQueue()
+		for _, step := range newStep.Steps() {
+			stepsCache.RemoveStepsWithCells(step.TargetCells)
+		}
 	}
 
 	return result
