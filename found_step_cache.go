@@ -18,10 +18,13 @@ type foundStepCacheItem struct {
 	foundStep *SolveStep
 }
 
+//Len returns the number of items in the cache.
+func (f *foundStepCache) Len() int {
+	return f.length
+}
+
 //AddStep adds a SolveStep to the cache.
 func (f *foundStepCache) AddStep(step *SolveStep) {
-
-	//TODO: implement
 
 	//TODO: how to handle adding steps that are effectively duplicates?
 }
