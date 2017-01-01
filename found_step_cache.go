@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"encoding/json"
 	"log"
 )
 
@@ -17,6 +18,9 @@ type foundStepCache struct {
 	firstItem *foundStepCacheItem
 	length    int
 	queue     *foundStepCacheItem
+	//Keep track of the hashes of added steps so we won't add the same step
+	//multiple times.
+	addedSteps map[string]bool
 }
 
 type foundStepCacheItem struct {
@@ -50,6 +54,8 @@ func (f *foundStepCache) remove(item *foundStepCacheItem) {
 	item.prev = nil
 	item.next = nil
 	f.length--
+
+	delete(f.addedSteps, solveStepHash(item.step))
 }
 
 //Len returns the number of items in the cache.
@@ -89,6 +95,18 @@ func (f *foundStepCacheItem) lastItem() *foundStepCacheItem {
 	return lastItem
 }
 
+//returns a unique string representing this step.
+func solveStepHash(step *SolveStep) string {
+	//TODO: figure out if there's a more efficient way to hash a struct
+	result, err := json.Marshal(step)
+
+	if err != nil {
+		panic("Couldn't serialize SolveStep")
+	}
+
+	return string(result)
+}
+
 //AddStepToQueue adds steps to a queue to be added to the cache when AddQueue is called.
 func (f *foundStepCache) AddStepToQueue(step *SolveStep) {
 	cacheItem := &foundStepCacheItem{
@@ -124,6 +142,17 @@ func (f *foundStepCache) AddQueue() {
 //insertCacheItem adds the given cache item to the cache.
 func (f *foundStepCache) insertCacheItem(cacheItem *foundStepCacheItem) {
 
+	hash := solveStepHash(cacheItem.step)
+
+	if f.addedSteps == nil {
+		f.addedSteps = make(map[string]bool)
+	}
+
+	if f.addedSteps[hash] == true {
+		//Skip this one, it was already added.
+		return
+	}
+
 	cacheItem.prev = nil
 
 	cacheItem.next = f.firstItem
@@ -134,9 +163,9 @@ func (f *foundStepCache) insertCacheItem(cacheItem *foundStepCacheItem) {
 		cacheItem.next.prev = cacheItem
 	}
 
-	f.length++
+	f.addedSteps[hash] = true
 
-	//TODO: how to handle adding steps that are effectively duplicates?
+	f.length++
 
 }
 

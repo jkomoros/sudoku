@@ -7,9 +7,25 @@ import (
 func TestFoundStepCacheAddStep(t *testing.T) {
 	cache := &foundStepCache{}
 
-	step := &SolveStep{}
+	stepOne := &SolveStep{
+		TargetCells: []CellRef{
+			{0, 1},
+		},
+	}
 
-	cache.AddStep(step)
+	stepTwo := &SolveStep{
+		TargetCells: []CellRef{
+			{0, 2},
+		},
+	}
+
+	stepThree := &SolveStep{
+		TargetCells: []CellRef{
+			{0, 3},
+		},
+	}
+
+	cache.AddStep(stepOne)
 
 	if cache.Len() != 1 {
 		t.Error("Added an item to cache but length wasn't 1")
@@ -27,7 +43,7 @@ func TestFoundStepCacheAddStep(t *testing.T) {
 		t.Error("First cache item's prev was not nil")
 	}
 
-	cache.AddStep(step)
+	cache.AddStep(stepTwo)
 
 	if cache.Len() != 2 {
 		t.Error("Added another item to the cache but length wasn't 2")
@@ -47,7 +63,7 @@ func TestFoundStepCacheAddStep(t *testing.T) {
 
 	//Test removing middle step
 
-	cache.AddStep(step)
+	cache.AddStep(stepThree)
 
 	if cache.Len() != 3 {
 		t.Error("Adding a third item didn't set length to three")
@@ -73,7 +89,7 @@ func TestFoundStepCacheAddStep(t *testing.T) {
 
 	//Test removing last step
 
-	cache.AddStep(step)
+	cache.AddStep(stepTwo)
 
 	firstItem = cache.firstItem
 	secondItem = firstItem.next
@@ -115,6 +131,74 @@ func TestFoundStepCacheAddStep(t *testing.T) {
 		t.Error("Removing an item twice left wrong length")
 	}
 
+}
+
+func TestFoundStepCacheDuplicates(t *testing.T) {
+	cache := &foundStepCache{}
+
+	stepOne := &SolveStep{
+		TargetCells: []CellRef{
+			{1, 0},
+		},
+	}
+	stepTwo := &SolveStep{
+		TargetCells: []CellRef{
+			{2, 0},
+		},
+	}
+	stepThree := &SolveStep{
+		TargetCells: []CellRef{
+			{3, 0},
+		},
+	}
+
+	//Make sure adding the same step multipel times only adds it once
+	cache.AddStep(stepOne)
+	cache.AddStep(stepOne)
+	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
+		stepOne,
+	}, "After adding stepone twice")
+
+	//Make sure you can add other steps
+	cache.AddStep(stepTwo)
+	cache.AddStep(stepThree)
+
+	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
+		stepThree,
+		stepTwo,
+		stepOne,
+	}, "After adding htree two onex2")
+
+	//make sure we can re-add a step after it's no longer included
+	cache.RemoveStepsWithCells([]CellRef{{1, 0}})
+
+	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
+		stepThree,
+		stepTwo,
+	}, "After removing step one")
+
+	cache.AddStep(stepOne)
+
+	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
+		stepOne,
+		stepThree,
+		stepTwo,
+	}, "Adding one after deleting")
+
+	//Make sure I can add to queue... but it's never actually added.
+	cache.AddStepToQueue(stepOne)
+
+	if cache.queue == nil {
+		t.Error("We couldn't add a dupe to the queue")
+	}
+
+	cache.AddQueue()
+
+	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
+		stepOne,
+		stepThree,
+		stepTwo,
+	}, "After adding queue")
 }
 
 func TestFoundStepCacheGetSteps(t *testing.T) {
@@ -210,7 +294,7 @@ func TestFoundStepCacheRemoveStepsWithCells(t *testing.T) {
 	}
 	stepTwo := &SolveStep{
 		TargetCells: []CellRef{
-			{1, 0},
+			{1, 0}, {2, 0},
 		},
 	}
 	stepThree := &SolveStep{
