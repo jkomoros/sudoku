@@ -797,8 +797,6 @@ func (n *humanSolveSearcherHeap) Pop() interface{} {
 func humanSolvePossibleStepsImpl(grid Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep, stepsCache *foundStepCache) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
 	//TODO: with the new approach, we're getting a lot more extreme negative difficulty values. Train a new model!
 
-	//TODO: do something with stepsCache.
-
 	//We send a copy here because our own selves will likely be modified soon
 	//after returning from this, and if the other threads haven't gotten the
 	//signal yet to shut down they might get in a weird state.
