@@ -88,7 +88,7 @@ func (f *foundStepCache) AddStepToQueue(step *SolveStep) {
 
 }
 
-//AddQueue adds all items to the cache that have been queued, in FIFO order.
+//AddQueue adds all items to the cache that have been queued, in LIFO order.
 func (f *foundStepCache) AddQueue() {
 	item := f.queue
 	var next *foundStepCacheItem
