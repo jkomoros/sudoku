@@ -20,6 +20,10 @@ type foundStepCacheItem struct {
 
 //remove removes the specified item and heals the list around it.
 func (f *foundStepCache) remove(item *foundStepCacheItem) {
+	//Check for an item that's already been removed.
+	if item.prev == nil && item.next == nil {
+		return
+	}
 	if item.prev == nil {
 		//first item
 		f.firstItem = item.next
@@ -30,6 +34,10 @@ func (f *foundStepCache) remove(item *foundStepCacheItem) {
 			item.next.prev = item.prev
 		}
 	}
+	//Make sure the item is orphaned so if we call remove on it again it won't
+	//do anything
+	item.prev = nil
+	item.next = nil
 	f.length--
 }
 

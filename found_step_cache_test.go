@@ -105,6 +105,16 @@ func TestFoundStepCacheAddStep(t *testing.T) {
 		t.Error("New first item wasn't pointing to nil")
 	}
 
+	cache.remove(firstItem)
+
+	if cache.firstItem != secondItem {
+		t.Error("removing the first item again didn't work right")
+	}
+
+	if cache.Len() != 1 {
+		t.Error("Removing an item twice left wrong length")
+	}
+
 }
 
 func TestFoundStepCacheGetSteps(t *testing.T) {
