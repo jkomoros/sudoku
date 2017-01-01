@@ -771,8 +771,10 @@ func (n *humanSolveSearcherHeap) Pop() interface{} {
 	return item
 }
 
-func humanSolvePossibleStepsImpl(grid Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
+func humanSolvePossibleStepsImpl(grid Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep, stepsCache *foundStepCache) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
 	//TODO: with the new approach, we're getting a lot more extreme negative difficulty values. Train a new model!
+
+	//TODO: do something with stepsCache.
 
 	//We send a copy here because our own selves will likely be modified soon
 	//after returning from this, and if the other threads haven't gotten the
@@ -807,10 +809,18 @@ func humanSolvePossibleStepsImpl(grid Grid, options *HumanSolveOptions, previous
 
 }
 
+func (self *gridImpl) humanSolvePossibleStepsWithCache(options *HumanSolveOptions, previousSteps []*CompoundSolveStep, stepsCache *foundStepCache) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
+	return humanSolvePossibleStepsImpl(self, options, previousSteps, stepsCache)
+}
+
+func (self *mutableGridImpl) humanSolvePossibleStepsWithCache(options *HumanSolveOptions, previousSteps []*CompoundSolveStep, stepsCache *foundStepCache) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
+	return humanSolvePossibleStepsImpl(self.Copy(), options, previousSteps, stepsCache)
+}
+
 func (self *gridImpl) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
-	return humanSolvePossibleStepsImpl(self, options, previousSteps)
+	return self.humanSolvePossibleStepsWithCache(options, previousSteps, nil)
 }
 
 func (self *mutableGridImpl) HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution) {
-	return humanSolvePossibleStepsImpl(self.Copy(), options, previousSteps)
+	return self.humanSolvePossibleStepsWithCache(options, previousSteps, nil)
 }

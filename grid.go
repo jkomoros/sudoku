@@ -177,6 +177,11 @@ type Grid interface {
 	//possibilites exist at each step. cmd/i-sudoku is one user of this method.
 	HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution)
 
+	//humansSolvePossibleStepsWithCache is equivalent to
+	//HumanSolvePossibleSteps, but with a stepsCache passed in so we can re-
+	//apply previously-found steps efficiently.
+	humanSolvePossibleStepsWithCache(options *HumanSolveOptions, previousSteps []*CompoundSolveStep, stepsCache *foundStepCache) (steps []*CompoundSolveStep, distribution ProbabilityDistribution)
+
 	//The rest of these are private methods
 	queue() queue
 	//Quick, non-exhausitve test for invaliditiies that the solver might have
