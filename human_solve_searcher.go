@@ -512,10 +512,15 @@ func (n *humanSolveSearcher) AddItem(item *humanSolveItem) {
 	n.itemsLock.Lock()
 
 	if n.stepsCache != nil {
-		//Wait, we should only do this for the first round of steps, not later
-		//ones, because those might rely on earlier steps that aren't
-		//applied...
-		n.stepsCache.AddStepToQueue(item.step)
+
+		//Only add items to the cache that are in the first round, because
+		//later rounds could depend on earlier rounds that might actually be
+		//applied.
+
+		if item.parent != nil && item.parent.parent == nil {
+			n.stepsCache.AddStepToQueue(item.step)
+		}
+
 	}
 
 	if item.IsComplete() {

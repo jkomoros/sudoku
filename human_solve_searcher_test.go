@@ -193,8 +193,10 @@ func TestHumanSolveSearcher(t *testing.T) {
 
 	stepsCache.AddQueue()
 
-	if stepsCache.Len() != 4 {
-		t.Error("After adding queue after adding steps we didn't get four items, got", stepsCache.Len())
+	//We exepct three because one of them is a completed step that relies on
+	//an earlier step, and thus shouldn't be in the stepsCache.
+	if stepsCache.Len() != 3 {
+		t.Error("After adding queue after adding steps we didn't get three items, got", stepsCache.Len())
 	}
 
 }
