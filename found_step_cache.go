@@ -105,16 +105,12 @@ func (f *foundStepCache) AddQueue() {
 //insertCacheItem adds the given cache item to the cache.
 func (f *foundStepCache) insertCacheItem(cacheItem *foundStepCacheItem) {
 
-	//TODO: ... why don't I just splice in at the beginning?
+	cacheItem.next = f.firstItem
 
-	cacheItem.prev = f.firstItem.lastItem()
+	f.firstItem = cacheItem
 
-	if cacheItem.prev == nil {
-		//First item in the cache
-		f.firstItem = cacheItem
-	} else {
-		//Not the first item.
-		cacheItem.prev.next = cacheItem
+	if cacheItem.next != nil {
+		cacheItem.next.prev = cacheItem
 	}
 
 	f.length++
