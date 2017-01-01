@@ -12,6 +12,7 @@ type foundStepCache struct {
 	//RemoveStepsWithCells have been called.
 	firstItem *foundStepCacheItem
 	length    int
+	queue     *foundStepCacheItem
 }
 
 type foundStepCacheItem struct {
@@ -51,10 +52,14 @@ func (f *foundStepCache) Len() int {
 	return f.length
 }
 
-func (f *foundStepCache) lastItem() *foundStepCacheItem {
+//Follows the chain and returns the last cache item
+func (f *foundStepCacheItem) lastItem() *foundStepCacheItem {
+
 	//TODO: consider having this just be a field in the struct that's kept up
-	//to date.
-	item := f.firstItem
+	//to date (for firstItem at least)
+
+	item := f
+
 	var lastItem *foundStepCacheItem
 
 	for item != nil {
@@ -65,14 +70,44 @@ func (f *foundStepCache) lastItem() *foundStepCacheItem {
 	return lastItem
 }
 
-//AddStep adds a SolveStep to the cache.
-func (f *foundStepCache) AddStep(step *SolveStep) {
-
+//AddStepToQueue adds steps to a queue to be added to the cache when AddQueue is called.
+func (f *foundStepCache) AddStepToQueue(step *SolveStep) {
 	cacheItem := &foundStepCacheItem{
-		prev: f.lastItem(),
+		prev: nil,
 		next: nil,
 		step: step,
 	}
+
+	cacheItem.prev = f.queue.lastItem()
+
+	if cacheItem.prev == nil {
+		//First item in the cache
+		f.queue = cacheItem
+	} else {
+		//Not the first item.
+		cacheItem.prev.next = cacheItem
+	}
+
+}
+
+//AddQueue adds all items to the cache that have been queued, in FIFO order.
+func (f *foundStepCache) AddQueue() {
+	item := f.queue
+	var next *foundStepCacheItem
+	for item != nil {
+		//next will be mangled when we're added to the cache, so take note of
+		//it now.
+		next = item.next
+		f.insertCacheItem(item)
+		item = next
+	}
+	f.queue = nil
+}
+
+//insertCacheItem adds the given cache item to the cache.
+func (f *foundStepCache) insertCacheItem(cacheItem *foundStepCacheItem) {
+
+	cacheItem.prev = f.firstItem.lastItem()
 
 	if cacheItem.prev == nil {
 		//First item in the cache
@@ -85,6 +120,17 @@ func (f *foundStepCache) AddStep(step *SolveStep) {
 	f.length++
 
 	//TODO: how to handle adding steps that are effectively duplicates?
+
+}
+
+//AddStep adds a SolveStep to the cache.
+func (f *foundStepCache) AddStep(step *SolveStep) {
+
+	f.insertCacheItem(&foundStepCacheItem{
+		prev: nil,
+		next: nil,
+		step: step,
+	})
 }
 
 //RemoveStepsWithCells removes all steps whose target or pointer cells overlap

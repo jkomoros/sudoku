@@ -140,9 +140,19 @@ func TestFoundStepCacheGetSteps(t *testing.T) {
 		t.Error("GetSteps on empty cache gave non-nil result")
 	}
 
-	cache.AddStep(stepOne)
-	cache.AddStep(stepTwo)
-	cache.AddStep(stepThree)
+	cache.AddStepToQueue(stepOne)
+	cache.AddStepToQueue(stepTwo)
+	cache.AddStepToQueue(stepThree)
+
+	if cache.GetSteps() != nil {
+		t.Error("GetSteps with only items in queue gave non-nil result")
+	}
+
+	if cache.Len() != 0 {
+		t.Error("GetSteps with only items in queue gave non-zero len")
+	}
+
+	cache.AddQueue()
 
 	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
 		stepOne,
