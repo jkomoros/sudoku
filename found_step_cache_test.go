@@ -185,3 +185,54 @@ func getStepsHelper(t *testing.T, result []*SolveStep, golden []*SolveStep) {
 	}
 
 }
+
+func TestFoundStepCacheRemoveStepsWithCells(t *testing.T) {
+	cache := &foundStepCache{}
+
+	stepOne := &SolveStep{
+		TargetCells: []CellRef{
+			{1, 0},
+		},
+	}
+	stepTwo := &SolveStep{
+		TargetCells: []CellRef{
+			{1, 0},
+		},
+	}
+	stepThree := &SolveStep{
+		PointerCells: []CellRef{
+			{3, 0},
+		},
+	}
+
+	cache.AddStep(stepOne)
+	cache.AddStep(stepTwo)
+	cache.AddStep(stepThree)
+
+	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
+		stepOne,
+		stepTwo,
+		stepThree,
+	})
+
+	cache.RemoveStepsWithCells([]CellRef{
+		{1, 0},
+	})
+
+	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
+		stepThree,
+	})
+
+	cache.AddStep(stepOne)
+	cache.AddStep(stepTwo)
+
+	cache.RemoveStepsWithCells([]CellRef{
+		{3, 0},
+	})
+
+	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
+		stepOne,
+		stepTwo,
+	})
+
+}

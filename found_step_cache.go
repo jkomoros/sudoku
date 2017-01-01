@@ -87,7 +87,43 @@ func (f *foundStepCache) AddStep(step *SolveStep) {
 //they were earlier added.
 func (f *foundStepCache) RemoveStepsWithCells(cells []CellRef) {
 
-	//TODO: implement
+	//TODO: implement the DIM*DIM map to linked list entries for speed.
+
+	var set cellSet
+
+	for _, cell := range cells {
+		set[cell] = true
+	}
+
+	currentItem := f.firstItem
+	var nextItem *foundStepCacheItem
+
+	for currentItem != nil {
+
+		itemRemoved := false
+		//We need to save this now, because if we remove ourselves our next
+		//will be blown away
+		nextItem = currentItem.next
+
+		for _, ref := range currentItem.step.TargetCells {
+			if set[ref] {
+				f.remove(currentItem)
+				itemRemoved = true
+				break
+			}
+		}
+
+		if !itemRemoved {
+			for _, ref := range currentItem.step.PointerCells {
+				if set[ref] {
+					f.remove(currentItem)
+					break
+				}
+			}
+		}
+
+		currentItem = nextItem
+	}
 
 }
 
