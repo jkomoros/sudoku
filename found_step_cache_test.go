@@ -106,3 +106,72 @@ func TestFoundStepCacheAddStep(t *testing.T) {
 	}
 
 }
+
+func TestFoundStepCacheGetSteps(t *testing.T) {
+	cache := &foundStepCache{}
+
+	stepOne := &SolveStep{
+		TargetCells: []CellRef{
+			{1, 0},
+		},
+	}
+	stepTwo := &SolveStep{
+		TargetCells: []CellRef{
+			{2, 0},
+		},
+	}
+	stepThree := &SolveStep{
+		TargetCells: []CellRef{
+			{3, 0},
+		},
+	}
+
+	if cache.GetSteps() != nil {
+		t.Error("GetSteps on empty cache gave non-nil result")
+	}
+
+	cache.AddStep(stepOne)
+	cache.AddStep(stepTwo)
+	cache.AddStep(stepThree)
+
+	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
+		stepOne,
+		stepTwo,
+		stepThree,
+	})
+
+	cache.remove(cache.firstItem.next)
+
+	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
+		stepOne,
+		stepThree,
+	})
+
+	cache.remove(cache.firstItem)
+
+	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
+		stepThree,
+	})
+
+	cache.AddStep(stepOne)
+
+	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
+		stepThree,
+		stepOne,
+	})
+
+}
+
+func getStepsHelper(t *testing.T, result []*SolveStep, golden []*SolveStep) {
+	if len(result) != len(golden) {
+		t.Fatal("Length mismatch. Got", len(result), "wanted", len(golden))
+	}
+	for i, item := range result {
+		other := golden[i]
+
+		if item != other {
+			t.Error("At item", i, "got wrong item. Got", item, "wanted", other)
+		}
+	}
+
+}

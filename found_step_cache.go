@@ -86,8 +86,17 @@ func (f *foundStepCache) RemoveStepsWithCells(cells []CellRef) {
 //GetSteps gets all steps currently in the cache.
 func (f *foundStepCache) GetSteps() []*SolveStep {
 
-	//TODO: implement
+	result := make([]*SolveStep, f.Len())
 
-	return nil
+	currentItem := f.firstItem
+	i := 0
+
+	for currentItem != nil {
+		result[i] = currentItem.step
+		i++
+		currentItem = currentItem.next
+	}
+
+	return result
 
 }
