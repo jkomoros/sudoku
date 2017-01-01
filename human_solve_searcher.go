@@ -182,7 +182,7 @@ func humanSolveHelper(grid Grid, options *HumanSolveOptions, previousSteps []*Co
 	if endConditionSolved {
 		steps = humanSolveSearch(grid, options)
 	} else {
-		result := humanSolveSearchSingleStep(grid, options, previousSteps)
+		result := humanSolveSearchSingleStep(grid, options, previousSteps, nil)
 		if result != nil {
 			steps = []*CompoundSolveStep{result}
 		}
@@ -215,7 +215,7 @@ func humanSolveSearch(grid Grid, options *HumanSolveOptions) []*CompoundSolveSte
 	//creating tons of extra grids when we can just accumulate the results in
 	//the one item otherwise.
 	for !grid.Solved() {
-		newStep := humanSolveSearchSingleStep(grid, options, result)
+		newStep := humanSolveSearchSingleStep(grid, options, result, nil)
 		if newStep == nil {
 			//Sad, guess we failed to solve the puzzle. :-(
 			return nil
@@ -235,12 +235,12 @@ func humanSolveSearch(grid Grid, options *HumanSolveOptions) []*CompoundSolveSte
 //humanSolveSearchSingleStep is the workhorse of the new HumanSolve. It
 //searches for the next CompoundSolveStep on the puzzle: a series of steps that
 //contains exactly one fill step at its end.
-func humanSolveSearchSingleStep(grid Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep) *CompoundSolveStep {
+func humanSolveSearchSingleStep(grid Grid, options *HumanSolveOptions, previousSteps []*CompoundSolveStep, stepsCache *foundStepCache) *CompoundSolveStep {
 
 	//This function doesn't do much on top of HumanSolvePossibleSteps, but
 	//it's worth it to mirror humanSolveSearch
 
-	steps, distribution := grid.HumanSolvePossibleSteps(options, previousSteps)
+	steps, distribution := grid.humanSolvePossibleStepsWithCache(options, previousSteps, stepsCache)
 
 	if len(steps) == 0 || len(distribution) == 0 {
 		return nil
