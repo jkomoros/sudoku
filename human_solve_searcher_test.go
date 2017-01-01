@@ -8,8 +8,9 @@ func TestHumanSolveSearcher(t *testing.T) {
 
 	grid := MutableLoadSDK(TEST_GRID)
 
-	//TODO: test that when we pass in stepsCache it works as intended.
-	searcher := newHumanSolveSearcher(grid, nil, DefaultHumanSolveOptions(), nil)
+	stepsCache := &foundStepCache{}
+
+	searcher := newHumanSolveSearcher(grid, nil, DefaultHumanSolveOptions(), stepsCache)
 
 	if searcher.itemsToExplore.Len() != 1 {
 		t.Error("Expected new frontier to have exactly one item in it, but got", searcher.itemsToExplore.Len())
@@ -65,6 +66,14 @@ func TestHumanSolveSearcher(t *testing.T) {
 
 	if len(searcher.itemsToExplore) != 0 {
 		t.Error("Expected the completed item to go into COmpletedItems, but it apparently went into items.")
+	}
+
+	if stepsCache.Len() != 0 {
+		t.Error("Inserting a step immediately added it to the cache instead of the queue")
+	}
+
+	if stepsCache.queue == nil {
+		t.Error("Inserting a step immediately did not add it to the stepsCache queue.")
 	}
 
 	//This is a fragile way to test this; it will need to be updated every
@@ -180,6 +189,12 @@ func TestHumanSolveSearcher(t *testing.T) {
 
 	if steps[0] != nonFillStepItem.step {
 		t.Error("Expected first step to be the step of nonFillStepItem. Got", steps[0])
+	}
+
+	stepsCache.AddQueue()
+
+	if stepsCache.Len() != 4 {
+		t.Error("After adding queue after adding steps we didn't get four items, got", stepsCache.Len())
 	}
 
 }
