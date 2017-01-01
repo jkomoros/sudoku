@@ -180,8 +180,8 @@ func TestFoundStepCacheGetSteps(t *testing.T) {
 	cache.AddStep(stepOne)
 
 	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
-		stepThree,
 		stepOne,
+		stepThree,
 	}, "after queue added first and second removed, first added again")
 
 }
