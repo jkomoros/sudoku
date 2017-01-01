@@ -1,8 +1,8 @@
 package sudoku
 
-//foundStepCache is a cache of steps that have already been found in a given
+//foundStepCache is a cache of SolveSteps that have already been found in a given
 //grid. It helps us reuse previously found steps to make repeated searches
-//fast.
+//fast when doing a HumanSolve.
 type foundStepCache struct {
 	//TODO: a field for which grid this is related to as a sanity check?
 
