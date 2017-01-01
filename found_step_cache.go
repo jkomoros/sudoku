@@ -78,6 +78,8 @@ func (f *foundStepCache) AddStepToQueue(step *SolveStep) {
 		step: step,
 	}
 
+	//TODO: I should just splice in at the beginning!
+
 	cacheItem.prev = f.queue.lastItem()
 
 	if cacheItem.prev == nil {
@@ -106,6 +108,8 @@ func (f *foundStepCache) AddQueue() {
 
 //insertCacheItem adds the given cache item to the cache.
 func (f *foundStepCache) insertCacheItem(cacheItem *foundStepCacheItem) {
+
+	//TODO: ... why don't I just splice in at the beginning?
 
 	cacheItem.prev = f.firstItem.lastItem()
 
