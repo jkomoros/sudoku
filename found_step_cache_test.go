@@ -154,6 +154,10 @@ func TestFoundStepCacheGetSteps(t *testing.T) {
 
 	cache.AddQueue()
 
+	if cache.firstItem.prev != nil {
+		t.Fatal("First item's prev was not nil when added from queue")
+	}
+
 	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
 		stepOne,
 		stepTwo,
