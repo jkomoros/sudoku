@@ -88,6 +88,10 @@ type humanSolveSearcher struct {
 	//TODO: keep track of stats: how big the frontier was at the end of each
 	//CompoundSolveStep. Then provide max/mean/median.
 
+	//Cache of steps that have been found. They will be added to the queue, so
+	//after searching for this step we can add them.
+	stepsCache *foundStepCache
+
 	//done will be closed when DoneSearching will return true. A convenient
 	//way for people to check DoneSearching without checking in a tight loop.
 	done chan bool
@@ -95,7 +99,7 @@ type humanSolveSearcher struct {
 	channelClosed bool
 
 	//itemsLock controls access to itemsToExplore, completedItems,
-	//straightforwardItemsCount, etc.
+	//straightforwardItemsCount, stepsCache, etc.
 	//TODO: consider having more fine-grained locks for performance.
 	itemsLock sync.Mutex
 
@@ -481,12 +485,13 @@ func (p *humanSolveItem) NextSearchWorkItem() *humanSolveWorkItem {
  *
  ************************************************************/
 
-func newHumanSolveSearcher(grid Grid, previousCompoundSteps []*CompoundSolveStep, options *HumanSolveOptions) *humanSolveSearcher {
+func newHumanSolveSearcher(grid Grid, previousCompoundSteps []*CompoundSolveStep, options *HumanSolveOptions, stepsCache *foundStepCache) *humanSolveSearcher {
 	searcher := &humanSolveSearcher{
 		grid:                  grid,
 		options:               options,
 		previousCompoundSteps: previousCompoundSteps,
-		done: make(chan bool),
+		done:       make(chan bool),
+		stepsCache: stepsCache,
 	}
 	heap.Init(&searcher.itemsToExplore)
 	initialItem := &humanSolveItem{
@@ -505,6 +510,10 @@ func (n *humanSolveSearcher) AddItem(item *humanSolveItem) {
 	}
 	item.added = true
 	n.itemsLock.Lock()
+
+	if n.stepsCache != nil {
+		n.stepsCache.AddStepToQueue(item.step)
+	}
 
 	if item.IsComplete() {
 		n.completedItems = append(n.completedItems, item)
@@ -784,7 +793,7 @@ func humanSolvePossibleStepsImpl(grid Grid, options *HumanSolveOptions, previous
 	//We send a copy here because our own selves will likely be modified soon
 	//after returning from this, and if the other threads haven't gotten the
 	//signal yet to shut down they might get in a weird state.
-	searcher := newHumanSolveSearcher(grid, previousSteps, options)
+	searcher := newHumanSolveSearcher(grid, previousSteps, options, stepsCache)
 
 	searcher.Search()
 

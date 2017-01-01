@@ -8,7 +8,8 @@ func TestHumanSolveSearcher(t *testing.T) {
 
 	grid := MutableLoadSDK(TEST_GRID)
 
-	searcher := newHumanSolveSearcher(grid, nil, DefaultHumanSolveOptions())
+	//TODO: test that when we pass in stepsCache it works as intended.
+	searcher := newHumanSolveSearcher(grid, nil, DefaultHumanSolveOptions(), nil)
 
 	if searcher.itemsToExplore.Len() != 1 {
 		t.Error("Expected new frontier to have exactly one item in it, but got", searcher.itemsToExplore.Len())
