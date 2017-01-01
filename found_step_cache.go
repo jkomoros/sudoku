@@ -1,5 +1,9 @@
 package sudoku
 
+import (
+	"log"
+)
+
 //TODO: should this really be in its own file?
 
 //foundStepCache is a cache of SolveSteps that have already been found in a given
@@ -50,6 +54,20 @@ func (f *foundStepCache) remove(item *foundStepCacheItem) {
 //Len returns the number of items in the cache.
 func (f *foundStepCache) Len() int {
 	return f.length
+}
+
+func (f *foundStepCacheItem) debugPrint() {
+	log.Println("***Starting***")
+	f.debugPrintImpl(0)
+}
+
+func (f *foundStepCacheItem) debugPrintImpl(count int) {
+	log.Println("Item", count, &f, "prev:", f.prev, "next:", f.next, "step:", f.step)
+	if f.next == nil {
+		return
+	}
+
+	f.next.debugPrintImpl(count + 1)
 }
 
 //Follows the chain and returns the last cache item

@@ -1,7 +1,6 @@
 package sudoku
 
 import (
-	"log"
 	"testing"
 )
 
@@ -181,20 +180,6 @@ func TestFoundStepCacheGetSteps(t *testing.T) {
 		stepOne,
 	}, "after queue added first and second removed, first added again")
 
-}
-
-func printFoundStepCacheItemChain(item *foundStepCacheItem) {
-
-	log.Println("***Starting chain***")
-
-	i := 0
-	for item != nil {
-
-		log.Println("Item", i, &item, "prev:", item.prev, "next:", item.next, "step:", item.step)
-
-		item = item.next
-		i++
-	}
 }
 
 func getStepsHelper(t *testing.T, result []*SolveStep, golden []*SolveStep, description string) {
