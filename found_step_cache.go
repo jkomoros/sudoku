@@ -26,7 +26,8 @@ type foundStepCacheItem struct {
 }
 
 //TODO: implement foundStepCache.Copy(), which will be necessary to use it
-//WITHIN computing a single step.
+//WITHIN computing a single step. (And will be very challenging to
+//implement...)
 
 //remove removes the specified item and heals the list around it.
 func (f *foundStepCache) remove(item *foundStepCacheItem) {
