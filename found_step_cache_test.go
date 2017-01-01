@@ -158,39 +158,39 @@ func TestFoundStepCacheGetSteps(t *testing.T) {
 		stepOne,
 		stepTwo,
 		stepThree,
-	})
+	}, "After queue added")
 
 	cache.remove(cache.firstItem.next)
 
 	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
 		stepOne,
 		stepThree,
-	})
+	}, "After queue added second item removed")
 
 	cache.remove(cache.firstItem)
 
 	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
 		stepThree,
-	})
+	}, "after queue added first and second items removed")
 
 	cache.AddStep(stepOne)
 
 	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
 		stepThree,
 		stepOne,
-	})
+	}, "after queue added first and second removed, first added again")
 
 }
 
-func getStepsHelper(t *testing.T, result []*SolveStep, golden []*SolveStep) {
+func getStepsHelper(t *testing.T, result []*SolveStep, golden []*SolveStep, description string) {
 	if len(result) != len(golden) {
-		t.Fatal("Length mismatch. Got", len(result), "wanted", len(golden))
+		t.Fatal("Length mismatch for", description, "Got", len(result), "wanted", len(golden))
 	}
 	for i, item := range result {
 		other := golden[i]
 
 		if item != other {
-			t.Error("At item", i, "got wrong item. Got", item, "wanted", other)
+			t.Error(description, "At item", i, "got wrong item. Got", item, "wanted", other)
 		}
 	}
 
@@ -223,7 +223,7 @@ func TestFoundStepCacheRemoveStepsWithCells(t *testing.T) {
 		stepOne,
 		stepTwo,
 		stepThree,
-	})
+	}, "After three steps added")
 
 	cache.RemoveStepsWithCells([]CellRef{
 		{1, 0},
@@ -231,7 +231,7 @@ func TestFoundStepCacheRemoveStepsWithCells(t *testing.T) {
 
 	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
 		stepThree,
-	})
+	}, "after 1,0 removed")
 
 	cache.AddStep(stepTwo)
 	cache.AddStep(stepOne)
@@ -243,6 +243,6 @@ func TestFoundStepCacheRemoveStepsWithCells(t *testing.T) {
 	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
 		stepOne,
 		stepTwo,
-	})
+	}, "after one two added again and 3,0 removed")
 
 }
