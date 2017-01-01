@@ -62,7 +62,7 @@ func (f *foundStepCacheItem) debugPrint() {
 }
 
 func (f *foundStepCacheItem) debugPrintImpl(count int) {
-	log.Println("Item", count, &f, "prev:", f.prev, "next:", f.next, "step:", f.step)
+	log.Println("Item", count, &f, "prev:", &f.prev, "next:", &f.next, "step:", f.step)
 	if f.next == nil {
 		return
 	}
