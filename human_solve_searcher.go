@@ -208,6 +208,8 @@ func humanSolveSearch(grid Grid, options *HumanSolveOptions) []*CompoundSolveSte
 		isMutableGrid = true
 	}
 
+	stepsCache := &foundStepCache{}
+
 	//TODO: it FEELS like here we should be using read only grids. Test what
 	//happens if we get rid of the mutablegrid path (and modify the callers
 	//who expect us to mutate the grid). however, we tried doing this, and it
@@ -215,7 +217,7 @@ func humanSolveSearch(grid Grid, options *HumanSolveOptions) []*CompoundSolveSte
 	//creating tons of extra grids when we can just accumulate the results in
 	//the one item otherwise.
 	for !grid.Solved() {
-		newStep := humanSolveSearchSingleStep(grid, options, result, nil)
+		newStep := humanSolveSearchSingleStep(grid, options, result, stepsCache)
 		if newStep == nil {
 			//Sad, guess we failed to solve the puzzle. :-(
 			return nil
@@ -226,7 +228,7 @@ func humanSolveSearch(grid Grid, options *HumanSolveOptions) []*CompoundSolveSte
 		} else {
 			grid = grid.CopyWithModifications(newStep.Modifications())
 		}
-
+		stepsCache.AddQueue()
 	}
 
 	return result
