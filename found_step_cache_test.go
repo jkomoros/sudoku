@@ -54,10 +54,10 @@ func TestFoundStepCacheAddStep(t *testing.T) {
 	}
 
 	firstItem := cache.firstItem
-	secondItem := cache.firstItem.next
+	secondItem := firstItem.next
 	thirdItem := secondItem.next
 
-	cache.remove(cache.firstItem.next)
+	cache.remove(secondItem)
 
 	if cache.Len() != 2 {
 		t.Error("removing middle item didn't reduce length by 1")
@@ -71,12 +71,12 @@ func TestFoundStepCacheAddStep(t *testing.T) {
 		t.Error("Remvoing middle item, third item didn't point back to third")
 	}
 
-	secondItem = thirdItem
-
 	//Test removing last step
 
 	cache.AddStep(step)
 
+	firstItem = cache.firstItem
+	secondItem = firstItem.next
 	thirdItem = secondItem.next
 
 	cache.remove(thirdItem)
@@ -215,9 +215,9 @@ func TestFoundStepCacheRemoveStepsWithCells(t *testing.T) {
 		},
 	}
 
-	cache.AddStep(stepOne)
-	cache.AddStep(stepTwo)
 	cache.AddStep(stepThree)
+	cache.AddStep(stepTwo)
+	cache.AddStep(stepOne)
 
 	getStepsHelper(t, cache.GetSteps(), []*SolveStep{
 		stepOne,
@@ -233,8 +233,8 @@ func TestFoundStepCacheRemoveStepsWithCells(t *testing.T) {
 		stepThree,
 	})
 
-	cache.AddStep(stepOne)
 	cache.AddStep(stepTwo)
+	cache.AddStep(stepOne)
 
 	cache.RemoveStepsWithCells([]CellRef{
 		{3, 0},
