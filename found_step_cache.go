@@ -18,6 +18,21 @@ type foundStepCacheItem struct {
 	step *SolveStep
 }
 
+//remove removes the specified item and heals the list around it.
+func (f *foundStepCache) remove(item *foundStepCacheItem) {
+	if item.prev == nil {
+		//first item
+		f.firstItem = item.next
+		f.firstItem.prev = nil
+	} else {
+		item.prev.next = item.next
+		if item.next != nil {
+			item.next.prev = item.prev
+		}
+	}
+	f.length--
+}
+
 //Len returns the number of items in the cache.
 func (f *foundStepCache) Len() int {
 	return f.length
