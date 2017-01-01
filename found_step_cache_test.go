@@ -184,6 +184,9 @@ func TestFoundStepCacheGetSteps(t *testing.T) {
 }
 
 func printFoundStepCacheItemChain(item *foundStepCacheItem) {
+
+	log.Println("***Starting chain***")
+
 	i := 0
 	for item != nil {
 
