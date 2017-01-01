@@ -13,9 +13,9 @@ type foundStepCache struct {
 }
 
 type foundStepCacheItem struct {
-	prev      *foundStepCacheItem
-	next      *foundStepCacheItem
-	foundStep *SolveStep
+	prev *foundStepCacheItem
+	next *foundStepCacheItem
+	step *SolveStep
 }
 
 //Len returns the number of items in the cache.
@@ -23,8 +23,38 @@ func (f *foundStepCache) Len() int {
 	return f.length
 }
 
+func (f *foundStepCache) lastItem() *foundStepCacheItem {
+	//TODO: consider having this just be a field in the struct that's kept up
+	//to date.
+	item := f.firstItem
+	var lastItem *foundStepCacheItem
+
+	for item != nil {
+		lastItem = item
+		item = item.next
+	}
+
+	return lastItem
+}
+
 //AddStep adds a SolveStep to the cache.
 func (f *foundStepCache) AddStep(step *SolveStep) {
+
+	cacheItem := &foundStepCacheItem{
+		prev: f.lastItem(),
+		next: nil,
+		step: step,
+	}
+
+	if cacheItem.prev == nil {
+		//First item in the cache
+		f.firstItem = cacheItem
+	} else {
+		//Not the first item.
+		cacheItem.prev.next = cacheItem
+	}
+
+	f.length++
 
 	//TODO: how to handle adding steps that are effectively duplicates?
 }
