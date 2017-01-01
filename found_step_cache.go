@@ -78,16 +78,12 @@ func (f *foundStepCache) AddStepToQueue(step *SolveStep) {
 		step: step,
 	}
 
-	//TODO: I should just splice in at the beginning!
+	cacheItem.next = f.queue
 
-	cacheItem.prev = f.queue.lastItem()
+	f.queue = cacheItem
 
-	if cacheItem.prev == nil {
-		//First item in the cache
-		f.queue = cacheItem
-	} else {
-		//Not the first item.
-		cacheItem.prev.next = cacheItem
+	if cacheItem.next != nil {
+		cacheItem.next.prev = cacheItem
 	}
 
 }
