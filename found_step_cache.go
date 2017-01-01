@@ -1,5 +1,7 @@
 package sudoku
 
+//TODO: should this really be in its own file?
+
 //foundStepCache is a cache of SolveSteps that have already been found in a given
 //grid. It helps us reuse previously found steps to make repeated searches
 //fast when doing a HumanSolve.
