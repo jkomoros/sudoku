@@ -498,6 +498,7 @@ func newHumanSolveSearcher(grid Grid, previousCompoundSteps []*CompoundSolveStep
 		searcher:  searcher,
 		heapIndex: -1,
 	}
+	//TODO: figure out how to inject items from stepCache here.
 	heap.Push(&searcher.itemsToExplore, initialItem)
 	return searcher
 }
