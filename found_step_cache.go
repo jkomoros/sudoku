@@ -18,6 +18,9 @@ type foundStepCacheItem struct {
 	step *SolveStep
 }
 
+//TODO: implement foundStepCache.Copy(), which will be necessary to use it
+//WITHIN computing a single step.
+
 //remove removes the specified item and heals the list around it.
 func (f *foundStepCache) remove(item *foundStepCacheItem) {
 	//Check for an item that's already been removed.
