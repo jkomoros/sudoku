@@ -140,7 +140,7 @@ func (f *foundStepCache) RemoveStepsWithCells(cells []CellRef) {
 
 	//TODO: implement the DIM*DIM map to linked list entries for speed.
 
-	var set cellSet
+	set := make(cellSet)
 
 	for _, cell := range cells {
 		set[cell] = true
