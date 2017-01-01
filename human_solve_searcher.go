@@ -512,6 +512,9 @@ func (n *humanSolveSearcher) AddItem(item *humanSolveItem) {
 	n.itemsLock.Lock()
 
 	if n.stepsCache != nil {
+		//Wait, we should only do this for the first round of steps, not later
+		//ones, because those might rely on earlier steps that aren't
+		//applied...
 		n.stepsCache.AddStepToQueue(item.step)
 	}
 
