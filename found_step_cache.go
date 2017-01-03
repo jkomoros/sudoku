@@ -87,7 +87,9 @@ func (f *foundStepCacheItem) debugPrintImpl(count int) {
 
 //returns a unique string representing this step.
 func solveStepHash(step *SolveStep) string {
-	//TODO: figure out if there's a more efficient way to hash a struct
+	//We tried using fmt.Sprintf("%#v", step) here, but it was slower
+
+	//TODO: normalize step before hashing
 	result, err := json.Marshal(step)
 
 	if err != nil {
