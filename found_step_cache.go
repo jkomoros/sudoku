@@ -77,24 +77,6 @@ func (f *foundStepCacheItem) debugPrintImpl(count int) {
 	f.next.debugPrintImpl(count + 1)
 }
 
-//Follows the chain and returns the last cache item
-func (f *foundStepCacheItem) lastItem() *foundStepCacheItem {
-
-	//TODO: consider having this just be a field in the struct that's kept up
-	//to date (for firstItem at least)
-
-	item := f
-
-	var lastItem *foundStepCacheItem
-
-	for item != nil {
-		lastItem = item
-		item = item.next
-	}
-
-	return lastItem
-}
-
 //returns a unique string representing this step.
 func solveStepHash(step *SolveStep) string {
 	//TODO: figure out if there's a more efficient way to hash a struct
