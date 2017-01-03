@@ -22,7 +22,8 @@ type foundStepCache struct {
 	//Keep track of the hashes of added steps so we won't add the same step
 	//multiple times.
 	addedSteps map[string]bool
-	lock       sync.RWMutex
+	//TODO: there's still a (very rare) race condition on cache somehow.
+	lock sync.RWMutex
 }
 
 type foundStepCacheItem struct {
