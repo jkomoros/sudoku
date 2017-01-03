@@ -509,6 +509,10 @@ func (n *humanSolveSearcher) AddItem(item *humanSolveItem) {
 	if item.added {
 		return
 	}
+
+	//TODO: reject solve steps that we've already seen (a Includes(Step)
+	//method on cache?) because otherwise we will return them once from cache
+	//and once from calculating fresh.
 	item.added = true
 	n.itemsLock.Lock()
 
