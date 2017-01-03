@@ -3,6 +3,7 @@ package sudoku
 import (
 	"encoding/json"
 	"log"
+	"sync"
 )
 
 //TODO: should this really be in its own file?
@@ -21,6 +22,7 @@ type foundStepCache struct {
 	//Keep track of the hashes of added steps so we won't add the same step
 	//multiple times.
 	addedSteps map[string]bool
+	lock       sync.RWMutex
 }
 
 type foundStepCacheItem struct {
@@ -39,6 +41,10 @@ func (f *foundStepCache) remove(item *foundStepCacheItem) {
 	if item.prev == nil && item.next == nil {
 		return
 	}
+
+	//This is not protected by a lock because our callers must hold the lock
+	//already.
+
 	if item.prev == nil {
 		//first item
 		f.firstItem = item.next
@@ -56,6 +62,7 @@ func (f *foundStepCache) remove(item *foundStepCacheItem) {
 	f.length--
 
 	delete(f.addedSteps, solveStepHash(item.step))
+
 }
 
 //Len returns the number of items in the cache.
@@ -97,6 +104,8 @@ func (f *foundStepCache) AddStepToQueue(step *SolveStep) {
 		step: step,
 	}
 
+	f.lock.Lock()
+
 	cacheItem.next = f.queue
 
 	f.queue = cacheItem
@@ -104,6 +113,8 @@ func (f *foundStepCache) AddStepToQueue(step *SolveStep) {
 	if cacheItem.next != nil {
 		cacheItem.next.prev = cacheItem
 	}
+
+	f.lock.Unlock()
 
 }
 
@@ -123,6 +134,10 @@ func (f *foundStepCache) AddQueue() {
 
 //insertCacheItem adds the given cache item to the cache.
 func (f *foundStepCache) insertCacheItem(cacheItem *foundStepCacheItem) {
+
+	f.lock.Lock()
+
+	defer f.lock.Unlock()
 
 	hash := solveStepHash(cacheItem.step)
 
@@ -168,6 +183,8 @@ func (f *foundStepCache) RemoveStepsWithCells(cells []CellRef) {
 
 	//TODO: implement the DIM*DIM map to linked list entries for speed.
 
+	f.lock.Lock()
+
 	set := make(cellSet)
 
 	for _, cell := range cells {
@@ -204,6 +221,8 @@ func (f *foundStepCache) RemoveStepsWithCells(cells []CellRef) {
 		currentItem = nextItem
 	}
 
+	f.lock.Unlock()
+
 }
 
 //GetSteps gets all steps currently in the cache.
@@ -212,6 +231,8 @@ func (f *foundStepCache) GetSteps() []*SolveStep {
 	if f.Len() == 0 {
 		return nil
 	}
+
+	f.lock.RLock()
 
 	result := make([]*SolveStep, f.Len())
 
@@ -223,6 +244,8 @@ func (f *foundStepCache) GetSteps() []*SolveStep {
 		i++
 		currentItem = currentItem.next
 	}
+
+	f.lock.RUnlock()
 
 	return result
 
