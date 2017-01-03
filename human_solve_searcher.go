@@ -91,6 +91,8 @@ type humanSolveSearcher struct {
 	//Cache of steps that have been found. They will be added to the queue, so
 	//after searching for this step we can add them.
 	stepsCache *foundStepCache
+	//We need a reference to the initial item to inject stepsCache to later.
+	initialItem *humanSolveItem
 
 	//done will be closed when DoneSearching will return true. A convenient
 	//way for people to check DoneSearching without checking in a tight loop.
@@ -500,6 +502,7 @@ func newHumanSolveSearcher(grid Grid, previousCompoundSteps []*CompoundSolveStep
 	}
 	//TODO: figure out how to inject items from stepCache here.
 	heap.Push(&searcher.itemsToExplore, initialItem)
+	searcher.initialItem = initialItem
 	return searcher
 }
 
@@ -662,6 +665,17 @@ func (n *humanSolveSearcher) Search() {
 		numFindThreads = 2
 	}
 
+	var cachedSteps []*SolveStep
+
+	if n.stepsCache != nil {
+		//We'll get a copy now before we've spun up other searcher ads that
+		//could ad to it before we need it.
+		cachedSteps = n.stepsCache.GetSteps()
+
+		//We don't inject these now because we want to get all of other other
+		//machinery running.
+	}
+
 	workItems := make(chan *humanSolveWorkItem)
 
 	//The thread to generate work items
@@ -673,6 +687,13 @@ func (n *humanSolveSearcher) Search() {
 
 	for i := 0; i < numFindThreads; i++ {
 		go humanSolveSearcherFindThread(workItems, &solveThreadsDone)
+	}
+
+	if n.stepsCache != nil {
+		//Inject the moves that are in the cache.
+		for _, step := range cachedSteps {
+			n.initialItem.AddStep(step)
+		}
 	}
 
 	allSolveThreadsDone := make(chan bool)
