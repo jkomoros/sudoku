@@ -22,8 +22,7 @@ type foundStepCache struct {
 	//Keep track of the hashes of added steps so we won't add the same step
 	//multiple times.
 	addedSteps map[string]bool
-	//TODO: there's still a (very rare) race condition on cache somehow.
-	lock sync.RWMutex
+	lock       sync.RWMutex
 }
 
 type foundStepCacheItem struct {
@@ -123,6 +122,7 @@ func (f *foundStepCache) AddStepToQueue(step *SolveStep) {
 
 //AddQueue adds all items to the cache that have been queued, in LIFO order.
 func (f *foundStepCache) AddQueue() {
+	f.lock.Lock()
 	item := f.queue
 	var next *foundStepCacheItem
 	for item != nil {
@@ -133,14 +133,13 @@ func (f *foundStepCache) AddQueue() {
 		item = next
 	}
 	f.queue = nil
+	f.lock.Unlock()
 }
 
 //insertCacheItem adds the given cache item to the cache.
 func (f *foundStepCache) insertCacheItem(cacheItem *foundStepCacheItem) {
 
-	f.lock.Lock()
-
-	defer f.lock.Unlock()
+	//You MUST have the lock held before calling this method.
 
 	hash := solveStepHash(cacheItem.step)
 
@@ -172,11 +171,13 @@ func (f *foundStepCache) insertCacheItem(cacheItem *foundStepCacheItem) {
 //AddStep adds a SolveStep to the cache.
 func (f *foundStepCache) AddStep(step *SolveStep) {
 
+	f.lock.Lock()
 	f.insertCacheItem(&foundStepCacheItem{
 		prev: nil,
 		next: nil,
 		step: step,
 	})
+	f.lock.Unlock()
 }
 
 //RemoveStepsWithCells removes all steps whose target or pointer cells overlap
