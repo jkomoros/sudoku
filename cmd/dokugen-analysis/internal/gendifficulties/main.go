@@ -3,13 +3,14 @@
 package main
 
 import (
-	"github.com/jkomoros/sudoku/cmd/dokugen-analysis/internal/wekaparser"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"sort"
 	"strconv"
+
+	"github.com/jkomoros/sudoku/cmd/dokugen-analysis/internal/wekaparser"
 )
 
 var BASE_SUDOKU_DIR string
@@ -66,7 +67,7 @@ func main() {
 	output += "\tLoadDifficultyModel(map[string]float64{\n"
 
 	var keys []string
-	for key, _ := range weights {
+	for key := range weights {
 		keys = append(keys, key)
 	}
 
