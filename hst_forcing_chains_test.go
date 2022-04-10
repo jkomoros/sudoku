@@ -226,7 +226,7 @@ func TestForcingChains(t *testing.T) {
 		*/
 	}
 
-	for i, _ := range tests {
+	for i := range tests {
 		tests[i].variantName = "Forcing Chain (" + strconv.Itoa(tests[i].extra.(int)) + " steps)"
 	}
 

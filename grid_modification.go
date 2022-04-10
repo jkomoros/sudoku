@@ -37,12 +37,12 @@ func newCellModification(cell CellRef) *CellModification {
 //normalize makes sure the GridModification is legal.
 func (m GridModification) normalize() {
 	for _, cellModification := range m {
-		for key, _ := range cellModification.ExcludesChanges {
+		for key := range cellModification.ExcludesChanges {
 			if key <= 0 || key > DIM {
 				delete(cellModification.ExcludesChanges, key)
 			}
 		}
-		for key, _ := range cellModification.MarksChanges {
+		for key := range cellModification.MarksChanges {
 			if key <= 0 || key > DIM {
 				delete(cellModification.MarksChanges, key)
 			}

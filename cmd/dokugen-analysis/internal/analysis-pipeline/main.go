@@ -14,9 +14,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/gosuri/uitable"
-	"github.com/jkomoros/sudoku"
-	"github.com/jkomoros/sudoku/cmd/dokugen-analysis/internal/wekaparser"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -29,6 +26,10 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/gosuri/uitable"
+	"github.com/jkomoros/sudoku"
+	"github.com/jkomoros/sudoku/cmd/dokugen-analysis/internal/wekaparser"
 )
 
 const HELP_MESSAGE = `
@@ -72,8 +73,7 @@ upon exit.
 *Different phases have different additional arguments. For example:
 * difficulties-histogram -- whether to emit a histogram of the difficulties at the end of the difficulties phase (whether or not that phase was active)
 * sample-rate=0
-* histogram-count (if 0, histogram phase will be skipped)
-`
+* histogram-count (if 0, histogram phase will be skipped)`
 
 const pathToDokugenAnalysis = "../../"
 const pathFromDokugenAnalysis = "internal/analysis-pipeline/"
@@ -208,7 +208,6 @@ func randomFileName(prefix, suffix string) string {
 		}
 	}
 	panic("Couldn't find a non used filename")
-	return ""
 }
 
 func randomString(length int) string {

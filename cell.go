@@ -380,7 +380,6 @@ func (self *cellImpl) setPossible(number int) {
 	}
 	if self.impossibles[number] == 0 {
 		panic("We were told to mark something that was already possible to possible.")
-		return
 	}
 	self.impossibles[number]--
 }

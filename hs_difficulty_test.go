@@ -13,7 +13,7 @@ func init() {
 	sampleSolveDirections = SolveDirections{
 		nil,
 		[]*CompoundSolveStep{
-			&CompoundSolveStep{
+			{
 				FillStep: &SolveStep{
 					techniquesByName["Necessary In Row"],
 					nil,
@@ -23,7 +23,7 @@ func init() {
 					nil,
 				},
 			},
-			&CompoundSolveStep{
+			{
 				FillStep: &SolveStep{
 					techniquesByName["Guess"],
 					nil,
@@ -33,9 +33,9 @@ func init() {
 					nil,
 				},
 			},
-			&CompoundSolveStep{
+			{
 				PrecursorSteps: []*SolveStep{
-					&SolveStep{
+					{
 						techniquesByName["Naked Pair Block"],
 						nil,
 						nil,

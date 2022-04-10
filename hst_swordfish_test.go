@@ -23,16 +23,16 @@ func swordfishExampleGrid(t *testing.T) MutableGrid {
 	//TODO: it's a smell that there's no way to serialize and load up a grid
 	//with extra excludes set.
 	excludedConfig := map[CellRef]IntSlice{
-		CellRef{0, 0}: IntSlice{1, 8},
-		CellRef{1, 3}: IntSlice{1},
-		CellRef{1, 4}: IntSlice{1, 8},
-		CellRef{2, 3}: IntSlice{1},
-		CellRef{2, 5}: IntSlice{1, 8},
-		CellRef{3, 0}: IntSlice{2, 8},
-		CellRef{4, 0}: IntSlice{7},
-		CellRef{4, 1}: IntSlice{7},
-		CellRef{7, 3}: IntSlice{1, 6},
-		CellRef{7, 5}: IntSlice{1},
+		{0, 0}: {1, 8},
+		{1, 3}: {1},
+		{1, 4}: {1, 8},
+		{2, 3}: {1},
+		{2, 5}: {1, 8},
+		{3, 0}: {2, 8},
+		{4, 0}: {7},
+		{4, 1}: {7},
+		{7, 3}: {1, 6},
+		{7, 5}: {1},
 	}
 
 	for ref, ints := range excludedConfig {

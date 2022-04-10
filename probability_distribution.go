@@ -104,7 +104,7 @@ func (d ProbabilityDistribution) invert() ProbabilityDistribution {
 	//However if there is a mix of some infinite and some non-infinite we want
 	//to basically ignore the infinite ones.
 	if allInfinite {
-		for i, _ := range weights {
+		for i := range weights {
 			weights[i] = math.SmallestNonzeroFloat64
 		}
 	} else {

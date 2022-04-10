@@ -116,7 +116,7 @@ func (self *swordfishTechnique) find(grid Grid, coordinator findCoordinator) {
 			//Generate the list of cells that will be affected
 			var affectedCells CellSlice
 
-			for minorGroupIndex, _ := range minorGroupIndexSet {
+			for minorGroupIndex := range minorGroupIndexSet {
 				if self.groupType == _GROUP_COL {
 					affectedCells = append(affectedCells, grid.Row(minorGroupIndex)...)
 				} else {
