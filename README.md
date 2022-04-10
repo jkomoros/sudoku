@@ -5,6 +5,8 @@ This is my first non-trivial project written in Go. It is very much a **work in 
 
 You can find documentation at http://godoc.org/github.com/jkomoros/sudoku
 
+You can install all of the commands (including `i-sudoku`) by running `go install github.com/jkomoros/...@latest`
+
 ##Included commands
 
 ###i-sudoku
