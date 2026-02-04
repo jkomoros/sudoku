@@ -92,13 +92,11 @@ func (self *forcingChainsTechnique) find(grid Grid, coordinator findCoordinator)
 			return
 		}
 
-		candidate := getter.GetSmallerThan(3)
+		candidateCell := getter.GetSmallerThan(3)
 
-		if candidate == nil {
+		if candidateCell == nil {
 			break
 		}
-
-		candidateCell := candidate.(Cell)
 
 		if len(candidateCell.Possibilities()) != 2 {
 			//We found one with 1 possibility, which isn't interesting for us--nakedSingle should do that one.

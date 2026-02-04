@@ -50,19 +50,16 @@ func (self *guessTechnique) find(grid Grid, coordinator findCoordinator) {
 			return
 		}
 
-		obj := getter.Get()
-		if obj == nil {
+		cell := getter.Get()
+		if cell == nil {
 			break
 		}
 
 		//This WILL happen, since guess will return a bunch of possible guesses you could make.
-		if obj.rank() > 3 {
+		if cell.rank() > 3 {
 			//Given that this WILL happen, it's important to return results so far, whatever they are.
 			break
 		}
-
-		//Convert RankedObject to a cell
-		cell := obj.(Cell)
 
 		cellInSolvedGrid := cell.InGrid(solvedGrid)
 

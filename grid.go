@@ -178,7 +178,7 @@ type Grid interface {
 	HumanSolvePossibleSteps(options *HumanSolveOptions, previousSteps []*CompoundSolveStep) (steps []*CompoundSolveStep, distribution ProbabilityDistribution)
 
 	//The rest of these are private methods
-	queue() queue
+	queue() queue[Cell]
 	//Quick, non-exhausitve test for invaliditiies that the solver might have
 	//done while solving. Not robust to a human putting it obvious
 	//invalidities.
@@ -280,7 +280,7 @@ type mutableGridImpl struct {
 	//modifying it because the modifications won't work.
 	cells                 [DIM * DIM]mutableCellImpl
 	queueGetterLock       sync.RWMutex
-	theQueue              *finiteQueue
+	theQueue              *finiteQueue[Cell]
 	numFilledCellsCounter int
 	invalidCells          map[MutableCell]bool
 	cachedSolutionsLock   sync.RWMutex
@@ -447,11 +447,11 @@ func (self *mutableGridImpl) numFilledCells() int {
 	return self.numFilledCellsCounter
 }
 
-func (self *gridImpl) queue() queue {
+func (self *gridImpl) queue() queue[Cell] {
 	return &self.theQueue
 }
 
-func (self *mutableGridImpl) queue() queue {
+func (self *mutableGridImpl) queue() queue[Cell] {
 
 	self.queueGetterLock.RLock()
 	queue := self.theQueue
@@ -459,10 +459,11 @@ func (self *mutableGridImpl) queue() queue {
 
 	if queue == nil {
 		self.queueGetterLock.Lock()
-		self.theQueue = newFiniteQueue(1, DIM)
+		self.theQueue = newFiniteQueue[Cell](1, DIM)
 		for i := range self.cells {
 			//If we did i, cell, cell would just be the temp variable. So we'll grab it via the index.
-			self.theQueue.Insert(&self.cells[i])
+			var cell Cell = &self.cells[i]
+			self.theQueue.Insert(cell)
 		}
 		queue = self.theQueue
 		self.queueGetterLock.Unlock()
@@ -1051,7 +1052,8 @@ func (self *mutableGridImpl) cellRankChanged(cell MutableCell) {
 	queue := self.theQueue
 	self.queueGetterLock.RUnlock()
 	if queue != nil {
-		queue.Insert(cell)
+		var c Cell = cell
+		queue.Insert(c)
 	}
 }
 

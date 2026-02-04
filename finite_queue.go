@@ -6,17 +6,17 @@ import (
 	"sync"
 )
 
-type rankedObject interface {
+type Ranked interface {
 	rank() int
 }
 
-type queue interface {
-	NewGetter() queueGetter
+type queue[T Ranked] interface {
+	NewGetter() queueGetter[T]
 }
 
-type queueGetter interface {
-	Get() rankedObject
-	GetSmallerThan(max int) rankedObject
+type queueGetter[T Ranked] interface {
+	Get() T
+	GetSmallerThan(max int) T
 }
 
 //readOnlyCellQueue is a special queue that fits queue and queue getter
@@ -33,33 +33,42 @@ type readOnlyCellQueueGetter struct {
 	counter int
 }
 
-type finiteQueue struct {
+type finiteQueue[T interface {
+	Ranked
+	comparable
+}] struct {
 	min           int
 	max           int
-	objects       []*finiteQueueBucket
-	currentBucket *finiteQueueBucket
+	objects       []*finiteQueueBucket[T]
+	currentBucket *finiteQueueBucket[T]
 	//Version monotonically increases as changes are made to the underlying queue.
 	//This is how getters ensure that they stay in sync with their underlying queue.
 	versionLock sync.RWMutex
 	version     int
 }
 
-type finiteQueueBucket struct {
-	objects  []rankedObject
+type finiteQueueBucket[T interface {
+	Ranked
+	comparable
+}] struct {
+	objects  []T
 	rank     int
 	shuffled bool
 }
 
 const _REALLOCATE_PROPORTION = 0.20
 
-type syncedFiniteQueue struct {
-	queue finiteQueue
+type syncedFiniteQueue[T interface {
+	Ranked
+	comparable
+}] struct {
+	queue finiteQueue[T]
 	lock  *sync.RWMutex
 	//TODO: should these counts actually be on the basic FiniteQueue?
 	items       int
 	activeItems int
-	In          chan rankedObject
-	Out         chan rankedObject
+	In          chan T
+	Out         chan T
 	ItemDone    chan bool
 	Exit        chan bool
 	//We'll send a true to this every time ItemDone() causes us to be IsDone()
@@ -67,34 +76,43 @@ type syncedFiniteQueue struct {
 	done chan bool
 }
 
-type finiteQueueGetter struct {
-	queue            *finiteQueue
-	dispensedObjects map[rankedObject]int
-	currentBucket    *finiteQueueBucket
+type finiteQueueGetter[T interface {
+	Ranked
+	comparable
+}] struct {
+	queue            *finiteQueue[T]
+	dispensedObjects map[T]int
+	currentBucket    *finiteQueueBucket[T]
 	baseVersion      int
 }
 
 //Returns a new queue that will work for items with a rank as low as min or as high as max (inclusive)
-func newFiniteQueue(min int, max int) *finiteQueue {
-	result := finiteQueue{min,
+func newFiniteQueue[T interface {
+	Ranked
+	comparable
+}](min int, max int) *finiteQueue[T] {
+	result := finiteQueue[T]{min,
 		max,
-		make([]*finiteQueueBucket, max-min+1),
+		make([]*finiteQueueBucket[T], max-min+1),
 		nil,
 		sync.RWMutex{},
 		0}
 	for i := 0; i < max-min+1; i++ {
-		result.objects[i] = &finiteQueueBucket{make([]rankedObject, 0), i + result.min, true}
+		result.objects[i] = &finiteQueueBucket[T]{make([]T, 0), i + result.min, true}
 	}
 	return &result
 }
 
-func newSyncedFiniteQueue(min int, max int, done chan bool) *syncedFiniteQueue {
-	result := &syncedFiniteQueue{*newFiniteQueue(min, max),
+func newSyncedFiniteQueue[T interface {
+	Ranked
+	comparable
+}](min int, max int, done chan bool) *syncedFiniteQueue[T] {
+	result := &syncedFiniteQueue[T]{*newFiniteQueue[T](min, max),
 		&sync.RWMutex{},
 		0,
 		0,
-		make(chan rankedObject),
-		make(chan rankedObject),
+		make(chan T),
+		make(chan T),
 		make(chan bool),
 		make(chan bool, 1),
 		done}
@@ -135,11 +153,11 @@ func (r *readOnlyCellQueue) Swap(i, j int) {
 	r.cellRefs[i], r.cellRefs[j] = r.cellRefs[j], r.cellRefs[i]
 }
 
-func (r *readOnlyCellQueue) NewGetter() queueGetter {
+func (r *readOnlyCellQueue) NewGetter() queueGetter[Cell] {
 	return &readOnlyCellQueueGetter{queue: r}
 }
 
-func (r *readOnlyCellQueueGetter) Get() rankedObject {
+func (r *readOnlyCellQueueGetter) Get() Cell {
 	//This will never return an item with a rank less than 0, which is the
 	//behavior of normal finiteQueues in Grids because of how they're
 	//configured. It feels kind of weird that we bake that constraint in here;
@@ -157,7 +175,7 @@ func (r *readOnlyCellQueueGetter) Get() rankedObject {
 	}
 }
 
-func (r *readOnlyCellQueueGetter) GetSmallerThan(max int) rankedObject {
+func (r *readOnlyCellQueueGetter) GetSmallerThan(max int) Cell {
 	item := r.Get()
 	if item == nil {
 		return nil
@@ -170,7 +188,7 @@ func (r *readOnlyCellQueueGetter) GetSmallerThan(max int) rankedObject {
 	return item
 }
 
-func (self *finiteQueueBucket) getItem() rankedObject {
+func (self *finiteQueueBucket[T]) getItem() T {
 
 	if !self.shuffled {
 		self.shuffle()
@@ -183,21 +201,23 @@ func (self *finiteQueueBucket) getItem() rankedObject {
 			return item
 		}
 	}
-	return nil
+	var zero T
+	return zero
 }
 
-func (self *finiteQueueBucket) empty() bool {
+func (self *finiteQueueBucket[T]) empty() bool {
 	return len(self.objects) == 0
 }
 
-func (self *finiteQueueBucket) addItem(item rankedObject) {
-	if item == nil {
+func (self *finiteQueueBucket[T]) addItem(item T) {
+	var zero T
+	if any(item) == any(zero) {
 		return
 	}
 	//Scrub the list for this item.
 	for _, obj := range self.objects {
 		//Structs will compare equal if all of their fields are the same.
-		if item == obj {
+		if any(item) == any(obj) {
 			//It's already there, just return.
 			return
 		}
@@ -206,19 +226,19 @@ func (self *finiteQueueBucket) addItem(item rankedObject) {
 	self.shuffled = false
 }
 
-func (self *finiteQueueBucket) copy() *finiteQueueBucket {
+func (self *finiteQueueBucket[T]) copy() *finiteQueueBucket[T] {
 	//TODO: test this
-	newObjects := make([]rankedObject, len(self.objects))
+	newObjects := make([]T, len(self.objects))
 	copy(newObjects, self.objects)
 	//We set shuffled to false because right now we copy the shuffle order of our copy.
-	return &finiteQueueBucket{newObjects, self.rank, false}
+	return &finiteQueueBucket[T]{newObjects, self.rank, false}
 }
 
-func (self *finiteQueueBucket) shuffle() {
+func (self *finiteQueueBucket[T]) shuffle() {
 	//TODO: test this.
 	//Shuffles the items in place.
 	newPositions := rand.Perm(len(self.objects))
-	newObjects := make([]rankedObject, len(self.objects))
+	newObjects := make([]T, len(self.objects))
 	for i, j := range newPositions {
 		newObjects[j] = self.objects[i]
 	}
@@ -226,7 +246,7 @@ func (self *finiteQueueBucket) shuffle() {
 	self.shuffled = true
 }
 
-func (self *syncedFiniteQueue) IsDone() bool {
+func (self *syncedFiniteQueue[T]) IsDone() bool {
 
 	self.lock.RLock()
 	result := self.activeItems == 0 && self.items == 0
@@ -235,10 +255,10 @@ func (self *syncedFiniteQueue) IsDone() bool {
 	return result
 }
 
-func (self *syncedFiniteQueue) workLoop() {
+func (self *syncedFiniteQueue[T]) workLoop() {
 
 	//We use this pattern to avoid duplicating code
-	when := func(condition bool, c chan rankedObject) chan rankedObject {
+	when := func(condition bool, c chan T) chan T {
 		if condition {
 			return c
 		}
@@ -250,6 +270,7 @@ func (self *syncedFiniteQueue) workLoop() {
 	for {
 		firstItem := self.queue.Get()
 		itemSent := false
+		var zero T
 
 		//We can take in new things, send out smallest one, or exit.
 		select {
@@ -276,7 +297,7 @@ func (self *syncedFiniteQueue) workLoop() {
 			if self.activeItems == 0 && exiting {
 				return
 			}
-		case when(firstItem != nil && !exiting, self.Out) <- firstItem:
+		case when(any(firstItem) != any(zero) && !exiting, self.Out) <- firstItem:
 			itemSent = true
 			self.lock.Lock()
 			self.items--
@@ -284,27 +305,27 @@ func (self *syncedFiniteQueue) workLoop() {
 			self.lock.Unlock()
 		}
 		//If we didn't send the item out, we need to put it back in.
-		if firstItem != nil && !itemSent {
+		if any(firstItem) != any(zero) && !itemSent {
 			self.queue.Insert(firstItem)
 		}
 	}
 
 }
 
-func (self *finiteQueue) NewGetter() queueGetter {
+func (self *finiteQueue[T]) NewGetter() queueGetter[T] {
 	list, _ := self.getBucket(self.min)
-	return &finiteQueueGetter{self, make(map[rankedObject]int), list, 0}
+	return &finiteQueueGetter[T]{self, make(map[T]int), list, 0}
 }
 
-func (self *finiteQueue) Min() int {
+func (self *finiteQueue[T]) Min() int {
 	return self.min
 }
 
-func (self *finiteQueue) Max() int {
+func (self *finiteQueue[T]) Max() int {
 	return self.max
 }
 
-func (self *finiteQueue) Insert(obj rankedObject) {
+func (self *finiteQueue[T]) Insert(obj T) {
 	rank := obj.rank()
 	list, ok := self.getBucket(rank)
 	if !ok {
@@ -318,32 +339,33 @@ func (self *finiteQueue) Insert(obj rankedObject) {
 	self.versionLock.Unlock()
 }
 
-func (self *finiteQueue) Get() rankedObject {
+func (self *finiteQueue[T]) Get() T {
 	return self.GetSmallerThan(self.max + 1)
 }
 
-func (self *finiteQueue) GetSmallerThan(max int) rankedObject {
+func (self *finiteQueue[T]) GetSmallerThan(max int) T {
 	return self.getSmallerThan(max)
 }
 
-func (self *finiteQueue) getSmallerThan(max int) rankedObject {
+func (self *finiteQueue[T]) getSmallerThan(max int) T {
 
 	//Very similar logic exists in finiteQueueBucket.getSmallerThan.
+	var zero T
 	if self.currentBucket == nil {
 		self.currentBucket, _ = self.getBucket(self.min)
 		if self.currentBucket == nil {
-			return nil
+			return zero
 		}
 	}
 
 	item := self.currentBucket.getItem()
 
-	for item == nil {
+	for any(item) == any(zero) {
 		if self.currentBucket.empty() {
 			self.currentBucket, _ = self.getBucket(self.currentBucket.rank + 1)
 			if self.currentBucket == nil || self.currentBucket.rank >= max {
 				//Got to the end
-				return nil
+				return zero
 			}
 		}
 		item = self.currentBucket.getItem()
@@ -356,34 +378,36 @@ func (self *finiteQueue) getSmallerThan(max int) rankedObject {
 
 }
 
-func (self *finiteQueue) legalRank(rank int) bool {
+func (self *finiteQueue[T]) legalRank(rank int) bool {
 	return rank >= self.min && rank <= self.max
 }
 
-func (self *finiteQueue) getBucket(rank int) (*finiteQueueBucket, bool) {
+func (self *finiteQueue[T]) getBucket(rank int) (*finiteQueueBucket[T], bool) {
 	if !self.legalRank(rank) {
 		return nil, false
 	}
 	return self.objects[rank-self.min], true
 }
 
-func (self *finiteQueueGetter) Get() rankedObject {
+func (self *finiteQueueGetter[T]) Get() T {
+	var zero T
 	if self.queue == nil {
-		return nil
+		return zero
 	}
 	return self.getSmallerThan(self.queue.max + 1)
 }
 
-func (self *finiteQueueGetter) GetSmallerThan(max int) rankedObject {
+func (self *finiteQueueGetter[T]) GetSmallerThan(max int) T {
 	return self.getSmallerThan(max)
 }
 
-func (self *finiteQueueGetter) getSmallerThan(max int) rankedObject {
+func (self *finiteQueueGetter[T]) getSmallerThan(max int) T {
 	//Very similar logic exists in finiteQueue.getSmallerThan.
 
 	//Sanity check
+	var zero T
 	if self.queue == nil {
-		return nil
+		return zero
 	}
 
 	self.queue.versionLock.RLock()
@@ -398,21 +422,21 @@ func (self *finiteQueueGetter) getSmallerThan(max int) rankedObject {
 	if self.currentBucket == nil {
 		newBucket, _ := self.queue.getBucket(self.queue.min)
 		if newBucket == nil {
-			return nil
+			return zero
 		}
 		self.currentBucket = newBucket.copy()
 	}
 
-	var item rankedObject
+	var item T
 
 	for {
 		item = self.currentBucket.getItem()
-		for item == nil {
+		for any(item) == any(zero) {
 			if self.currentBucket.empty() {
 				newBucket, _ := self.queue.getBucket(self.currentBucket.rank + 1)
 				if newBucket == nil || newBucket.rank >= max {
 					//Got to the end
-					return nil
+					return zero
 				}
 				self.currentBucket = newBucket.copy()
 			}

@@ -101,7 +101,7 @@ func TestReadOnlyCellQueue(t *testing.T) {
 }
 
 func TestFiniteQueue(t *testing.T) {
-	queue := newFiniteQueue(1, DIM)
+	queue := newFiniteQueue[*SimpleRankedObject](1, DIM)
 	if queue == nil {
 		t.Log("We didn't get a queue back from the constructor")
 		t.Fail()
@@ -154,9 +154,8 @@ func TestFiniteQueue(t *testing.T) {
 			t.Log("We got back an object with the wrong rank: ", retrievedObj.rank(), " is not ", obj.rank())
 			t.Fail()
 		}
-		convertedObj, _ := retrievedObj.(*SimpleRankedObject)
 		//We tried comparing addresses here, but they weren't the same. Why? Are we copying something somewhere?
-		if convertedObj.id != obj.id {
+		if retrievedObj.id != obj.id {
 			//Note that technically the API doesn't require that items with the same rank come back out in the same order.
 			//So this test will fail even in some valid cases.
 			t.Log("We didn't get back the objects we put in.")
@@ -207,7 +206,7 @@ func TestFiniteQueue(t *testing.T) {
 }
 
 func TestFiniteQueueGetter(t *testing.T) {
-	queue := newFiniteQueue(1, DIM)
+	queue := newFiniteQueue[*SimpleRankedObject](1, DIM)
 	//Note that the first item does not fit in the first bucket on purpose.
 	objects := [...]*SimpleRankedObject{{3, "a"}, {4, "b"}, {4, "c"}, {5, "d"}}
 	for _, object := range objects {
@@ -248,7 +247,7 @@ func TestFiniteQueueGetter(t *testing.T) {
 		queue.Insert(object)
 	}
 	getter = queue.NewGetter()
-	seenObjects := make(map[rankedObject]bool)
+	seenObjects := make(map[*SimpleRankedObject]bool)
 	item := getter.Get()
 	seenObjects[item] = true
 	newObject := &SimpleRankedObject{3, "e"}
@@ -314,7 +313,7 @@ func TestSyncedFiniteQueue(t *testing.T) {
 
 	done := make(chan bool, 1)
 
-	queue := newSyncedFiniteQueue(1, DIM, done)
+	queue := newSyncedFiniteQueue[*SimpleRankedObject](1, DIM, done)
 
 	select {
 	case <-queue.Out:
@@ -334,7 +333,7 @@ func TestSyncedFiniteQueue(t *testing.T) {
 
 	secondDone := make(chan bool, 1)
 
-	secondQueue := newSyncedFiniteQueue(1, DIM, secondDone)
+	secondQueue := newSyncedFiniteQueue[*SimpleRankedObject](1, DIM, secondDone)
 	//Note that the first item does not fit in the first bucket on purpose.
 	objects := [...]*SimpleRankedObject{{3, "a"}, {4, "b"}, {4, "c"}, {5, "d"}}
 	for _, object := range objects {

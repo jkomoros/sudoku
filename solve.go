@@ -84,7 +84,7 @@ func cachedNOrFewerSolutions(self *mutableGridImpl, max int) []Grid {
 func nOrFewerSolutions(grid Grid, max int) []Grid {
 	queueDone := make(chan bool, 1)
 
-	queue := newSyncedFiniteQueue(0, DIM*DIM, queueDone)
+	queue := newSyncedFiniteQueue[Grid](0, DIM*DIM, queueDone)
 
 	queue.In <- grid.Copy()
 
@@ -182,7 +182,7 @@ DoneReading:
 
 }
 
-func searchGridSolutions(grid Grid, queue *syncedFiniteQueue, isFirstRun bool, numSoughtSolutions int) Grid {
+func searchGridSolutions(grid Grid, queue *syncedFiniteQueue[Grid], isFirstRun bool, numSoughtSolutions int) Grid {
 	//This will only be called by Solutions.
 	//We will return ourselves if we are a solution, and if not we will return nil.
 	//If there are any sub children, we will send them to counter before we're done.
@@ -202,14 +202,9 @@ func searchGridSolutions(grid Grid, queue *syncedFiniteQueue, isFirstRun bool, n
 	}
 
 	//Well, looks like we're going to have to branch.
-	rankedObject := grid.queue().NewGetter().Get()
-	if rankedObject == nil {
+	cell := grid.queue().NewGetter().Get()
+	if cell == nil {
 		panic("Queue didn't have any cells.")
-	}
-
-	cell, ok := rankedObject.(Cell)
-	if !ok {
-		panic("We got back a non-cell from the grid's queue")
 	}
 
 	unshuffledPossibilities := cell.Possibilities()
@@ -263,22 +258,17 @@ func withSimpleCellsFilled(grid Grid) Grid {
 	for changesMade {
 		changesMade = false
 		getter := grid.queue().NewGetter()
-		obj := getter.GetSmallerThan(2)
+		cell := getter.GetSmallerThan(2)
 
 		var modifications GridModification
-		for obj != nil && !grid.basicInvalid() {
-			cell, ok := obj.(Cell)
-			if !ok {
-				panic("Expected a Cell in the queue, found something else")
-			}
-
+		for cell != nil && !grid.basicInvalid() {
 			changesMade = true
 			modification := &CellModification{
 				Cell:   cell.Reference(),
 				Number: cell.implicitNumber(),
 			}
 			modifications = append(modifications, modification)
-			obj = getter.GetSmallerThan(2)
+			cell = getter.GetSmallerThan(2)
 		}
 
 		if modifications != nil {
