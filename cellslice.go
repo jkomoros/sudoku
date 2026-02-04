@@ -1067,7 +1067,10 @@ func (self CellSlice) Intersection(other CellSlice) CellSlice {
 		return nil
 	}
 	grid := self[0].Grid()
-	return self.toCellSet().intersection(other.toCellSet()).toSlice(grid)
+	selfRefs := self.CellReferenceSlice()
+	otherRefs := other.CellReferenceSlice()
+	resultRefs := CellRefSlice(GenericIntersection(selfRefs, otherRefs))
+	return resultRefs.CellSlice(grid)
 }
 
 //Intersection returns a new CellSlice that represents the intersection of the
@@ -1077,7 +1080,10 @@ func (self MutableCellSlice) Intersection(other CellSlice) MutableCellSlice {
 		return nil
 	}
 	grid := self[0].MutableGrid()
-	return self.toCellSet().intersection(other.toCellSet()).toMutableSlice(grid)
+	selfRefs := self.CellReferenceSlice()
+	otherRefs := other.CellReferenceSlice()
+	resultRefs := CellRefSlice(GenericIntersection(selfRefs, otherRefs))
+	return resultRefs.MutableCellSlice(grid)
 }
 
 //Intersection returns a new CellSlice that represents the intersection of the
@@ -1086,7 +1092,7 @@ func (self CellRefSlice) Intersection(other CellRefSlice) CellRefSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	return self.toCellSet().intersection(other.toCellSet()).toReferenceSlice()
+	return GenericIntersection(self, other)
 }
 
 //Difference returns a new CellSlice that contains all of the cells in the
@@ -1096,7 +1102,10 @@ func (self CellSlice) Difference(other CellSlice) CellSlice {
 		return nil
 	}
 	grid := self[0].Grid()
-	return self.toCellSet().difference(other.toCellSet()).toSlice(grid)
+	selfRefs := self.CellReferenceSlice()
+	otherRefs := other.CellReferenceSlice()
+	resultRefs := CellRefSlice(GenericDifference(selfRefs, otherRefs))
+	return resultRefs.CellSlice(grid)
 }
 
 //Difference returns a new CellSlice that contains all of the cells in the
@@ -1106,7 +1115,10 @@ func (self MutableCellSlice) Difference(other CellSlice) MutableCellSlice {
 		return nil
 	}
 	grid := self[0].MutableGrid()
-	return self.toCellSet().difference(other.toCellSet()).toMutableSlice(grid)
+	selfRefs := self.CellReferenceSlice()
+	otherRefs := other.CellReferenceSlice()
+	resultRefs := CellRefSlice(GenericDifference(selfRefs, otherRefs))
+	return resultRefs.MutableCellSlice(grid)
 }
 
 //Difference returns a new CellReferenceSlice that contains all of the cells in the
@@ -1115,7 +1127,7 @@ func (self CellRefSlice) Difference(other CellRefSlice) CellRefSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	return self.toCellSet().difference(other.toCellSet()).toReferenceSlice()
+	return GenericDifference(self, other)
 }
 
 //Union returns a new CellSlice that contains all of the cells that are in
@@ -1125,7 +1137,10 @@ func (self CellSlice) Union(other CellSlice) CellSlice {
 		return nil
 	}
 	grid := self[0].Grid()
-	return self.toCellSet().union(other.toCellSet()).toSlice(grid)
+	selfRefs := self.CellReferenceSlice()
+	otherRefs := other.CellReferenceSlice()
+	resultRefs := CellRefSlice(GenericUnion(selfRefs, otherRefs))
+	return resultRefs.CellSlice(grid)
 }
 
 //Union returns a new CellSlice that contains all of the cells that are in
@@ -1135,7 +1150,10 @@ func (self MutableCellSlice) Union(other CellSlice) MutableCellSlice {
 		return nil
 	}
 	grid := self[0].MutableGrid()
-	return self.toCellSet().union(other.toCellSet()).toMutableSlice(grid)
+	selfRefs := self.CellReferenceSlice()
+	otherRefs := other.CellReferenceSlice()
+	resultRefs := CellRefSlice(GenericUnion(selfRefs, otherRefs))
+	return resultRefs.MutableCellSlice(grid)
 }
 
 //Union returns a new CellSlice that contains all of the cells that are in
@@ -1144,5 +1162,5 @@ func (self CellRefSlice) Union(other CellRefSlice) CellRefSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	return self.toCellSet().union(other.toCellSet()).toReferenceSlice()
+	return GenericUnion(self, other)
 }

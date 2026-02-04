@@ -118,3 +118,45 @@ func (s *genericSorter[T]) Less(i, j int) bool {
 func GenericSort[T any](slice []T, less func(i, j int) bool) {
 	sort.Sort(&genericSorter[T]{slice, less})
 }
+
+// GenericIntersection is the internal generic implementation of Intersection().
+// Returns a new slice containing items that appear in both slices.
+func GenericIntersection[T comparable](slice1, slice2 []T) []T {
+	set := GenericToCellSet(slice2)
+	var result []T
+	for _, item := range slice1 {
+		if set[item] {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+// GenericDifference is the internal generic implementation of Difference().
+// Returns a new slice containing items in slice1 that are not in slice2.
+func GenericDifference[T comparable](slice1, slice2 []T) []T {
+	set := GenericToCellSet(slice2)
+	var result []T
+	for _, item := range slice1 {
+		if !set[item] {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+// GenericUnion is the internal generic implementation of Union().
+// Returns a new slice containing all items from both slices (no duplicates).
+func GenericUnion[T comparable](slice1, slice2 []T) []T {
+	set := GenericToCellSet(slice1)
+	result := make([]T, len(slice1))
+	copy(result, slice1)
+
+	for _, item := range slice2 {
+		if !set[item] {
+			result = append(result, item)
+			set[item] = true
+		}
+	}
+	return result
+}
