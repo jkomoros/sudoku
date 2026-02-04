@@ -160,3 +160,89 @@ func GenericUnion[T comparable](slice1, slice2 []T) []T {
 	}
 	return result
 }
+
+// GenericIntersectionSet returns the intersection of two sets (map[T]bool).
+// Items that appear in both sets are included in the result.
+func GenericIntersectionSet[T comparable](set1, set2 map[T]bool) map[T]bool {
+	result := make(map[T]bool)
+	for item, value := range set1 {
+		if value {
+			if val, ok := set2[item]; ok && val {
+				result[item] = true
+			}
+		}
+	}
+	return result
+}
+
+// GenericDifferenceSet returns the difference of two sets (items in set1 but not in set2).
+func GenericDifferenceSet[T comparable](set1, set2 map[T]bool) map[T]bool {
+	result := make(map[T]bool)
+	for item, value := range set1 {
+		if value {
+			if val, ok := set2[item]; !ok || !val {
+				result[item] = true
+			}
+		}
+	}
+	return result
+}
+
+// GenericUnionSet returns the union of two sets (all items from both sets).
+func GenericUnionSet[T comparable](set1, set2 map[T]bool) map[T]bool {
+	result := make(map[T]bool)
+	for item, value := range set1 {
+		result[item] = value
+	}
+	for item, value := range set2 {
+		result[item] = value
+	}
+	return result
+}
+
+// GenericOverlaps checks if two sets have any items in common.
+// This is optimized compared to checking len(intersection) > 0.
+func GenericOverlaps[T comparable](set1, set2 map[T]bool) bool {
+	for item, value := range set1 {
+		if value {
+			if val, ok := set2[item]; ok && val {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// GenericSetToSlice converts a set (map[T]bool) to a slice of items where value is true.
+func GenericSetToSlice[T comparable](set map[T]bool) []T {
+	var result []T
+	for item, val := range set {
+		if val {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+// GenericSlicesEqual checks if two slices contain the same elements (order-independent).
+// Uses set-based comparison for efficiency.
+func GenericSlicesEqual[T comparable](slice1, slice2 []T) bool {
+	if len(slice1) != len(slice2) {
+		return false
+	}
+
+	set1 := GenericToCellSet(slice1)
+	set2 := GenericToCellSet(slice2)
+
+	if len(set1) != len(set2) {
+		return false
+	}
+
+	for item := range set1 {
+		if !set2[item] {
+			return false
+		}
+	}
+
+	return true
+}

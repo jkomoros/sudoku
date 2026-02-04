@@ -687,55 +687,15 @@ func (self CellSlice) CellReferenceSlice() CellRefSlice {
 }
 
 func (self CellSlice) sameAsRefs(refs CellRefSlice) bool {
-
 	//TODO: audit all of the private methods on CellSlice, MutableCellSlice
 	//now that we might not use them since we use something on
 	//CellReferenceSlice.
-	cellSet := make(map[string]bool)
-	for _, cell := range self {
-		cellSet[cell.Reference().String()] = true
-	}
-
-	refSet := make(map[string]bool)
-	for _, ref := range refs {
-		refSet[ref.String()] = true
-	}
-
-	if len(cellSet) != len(refSet) {
-		return false
-	}
-
-	for item := range cellSet {
-		if _, ok := refSet[item]; !ok {
-			return false
-		}
-	}
-
-	return true
+	selfRefs := self.CellReferenceSlice()
+	return GenericSlicesEqual(selfRefs, refs)
 }
 
 func (self CellRefSlice) sameAs(refs CellRefSlice) bool {
-	cellSet := make(map[string]bool)
-	for _, cell := range self {
-		cellSet[cell.String()] = true
-	}
-
-	refSet := make(map[string]bool)
-	for _, ref := range refs {
-		refSet[ref.String()] = true
-	}
-
-	if len(cellSet) != len(refSet) {
-		return false
-	}
-
-	for item := range cellSet {
-		if _, ok := refSet[item]; !ok {
-			return false
-		}
-	}
-
-	return true
+	return GenericSlicesEqual(self, refs)
 }
 
 //MutableCell returns the MutableCell in the given grid that this
@@ -914,13 +874,7 @@ func (self CellRefSlice) toCellSet() cellSet {
 }
 
 func (self intSet) toSlice() IntSlice {
-	var result IntSlice
-	for item, val := range self {
-		if val {
-			result = append(result, item)
-		}
-	}
-	return result
+	return IntSlice(GenericSetToSlice(self))
 }
 
 func (self cellSet) toSlice(grid Grid) CellSlice {
@@ -955,86 +909,33 @@ func (self cellSet) toMutableSlice(grid MutableGrid) MutableCellSlice {
 
 //TODO: test this directly (tested implicitly via intSlice.Intersection)
 func (self intSet) intersection(other intSet) intSet {
-	result := make(intSet)
-	for item, value := range self {
-		if value {
-			if val, ok := other[item]; ok && val {
-				result[item] = true
-			}
-		}
-	}
-	return result
+	return GenericIntersectionSet(self, other)
 }
 
 //overlaps is equivalent to len(self.intersection(other)) > 0 , just optimized
 func (self intSet) overlaps(other intSet) bool {
-	for item, value := range self {
-		if value {
-			if val, ok := other[item]; ok && val {
-				return true
-			}
-		}
-	}
-	return false
+	return GenericOverlaps(self, other)
 }
 
 func (self cellSet) intersection(other cellSet) cellSet {
-	result := make(cellSet)
-	for item, value := range self {
-		if value {
-			if val, ok := other[item]; ok && val {
-				result[item] = true
-			}
-		}
-	}
-	return result
+	return GenericIntersectionSet(self, other)
 }
 
 func (self intSet) difference(other intSet) intSet {
-	result := make(intSet)
-	for item, value := range self {
-		if value {
-			if val, ok := other[item]; !ok && !val {
-				result[item] = true
-			}
-		}
-	}
-	return result
+	return GenericDifferenceSet(self, other)
 }
 
 func (self cellSet) difference(other cellSet) cellSet {
-	result := make(cellSet)
-	for item, value := range self {
-		if value {
-			if val, ok := other[item]; !ok && !val {
-				result[item] = true
-			}
-		}
-	}
-	return result
+	return GenericDifferenceSet(self, other)
 }
 
 //TODO: test this.
 func (self intSet) union(other intSet) intSet {
-	result := make(intSet)
-	for item, value := range self {
-		result[item] = value
-	}
-	for item, value := range other {
-		result[item] = value
-	}
-	return result
+	return GenericUnionSet(self, other)
 }
 
 func (self cellSet) union(other cellSet) cellSet {
-	result := make(cellSet)
-	for item, value := range self {
-		result[item] = value
-	}
-	for item, value := range other {
-		result[item] = value
-	}
-	return result
+	return GenericUnionSet(self, other)
 }
 
 //Intersection returns a new IntSlice that represents the intersection of the two IntSlices,
