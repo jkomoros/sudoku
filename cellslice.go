@@ -204,10 +204,7 @@ func (self MutableCellSlice) CellReferenceSlice() CellRefSlice {
 //that are not filled with any number.
 func (self CellSlice) FilterByUnfilled() CellSlice {
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return cell.Number() == 0
-	}
-	return self.Filter(filter)
+	return self.Filter(IsUnfilled())
 }
 
 //FilterByUnfilled returns a new CellSlice with only the cells in the list
@@ -215,90 +212,63 @@ func (self CellSlice) FilterByUnfilled() CellSlice {
 func (self MutableCellSlice) FilterByUnfilled() MutableCellSlice {
 	//TODO: test all of the mutableCellSlice methods
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return cell.Number() == 0
-	}
-	return self.Filter(filter)
+	return self.Filter(IsUnfilled())
 }
 
 //FilterByFilled returns a new CellSlice with only the cells that have a
 //number in them.
 func (self CellSlice) FilterByFilled() CellSlice {
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return cell.Number() != 0
-	}
-	return self.Filter(filter)
+	return self.Filter(IsFilled())
 }
 
 //FilterByFilled returns a new CellSlice with only the cells that have a
 //number in them.
 func (self MutableCellSlice) FilterByFilled() MutableCellSlice {
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return cell.Number() != 0
-	}
-	return self.Filter(filter)
+	return self.Filter(IsFilled())
 }
 
 //FilterByPossible returns a new CellSlice with only the cells in the list that have the given number
 //as an active possibility.
 func (self CellSlice) FilterByPossible(possible int) CellSlice {
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return cell.Possible(possible)
-	}
-	return self.Filter(filter)
+	return self.Filter(HasPossible(possible))
 }
 
 //FilterByPossible returns a new CellSlice with only the cells in the list that have the given number
 //as an active possibility.
 func (self MutableCellSlice) FilterByPossible(possible int) MutableCellSlice {
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return cell.Possible(possible)
-	}
-	return self.Filter(filter)
+	return self.Filter(HasPossible(possible))
 }
 
 //FilterByNumPossibles returns a new CellSlice with only cells that have precisely the provided
 //number of possible numbers.
 func (self CellSlice) FilterByNumPossibilities(target int) CellSlice {
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return len(cell.Possibilities()) == target
-	}
-	return self.Filter(filter)
+	return self.Filter(HasNumPossibilities(target))
 }
 
 //FilterByNumPossibles returns a new CellSlice with only cells that have precisely the provided
 //number of possible numbers.
 func (self MutableCellSlice) FilterByNumPossibilities(target int) MutableCellSlice {
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return len(cell.Possibilities()) == target
-	}
-	return self.Filter(filter)
+	return self.Filter(HasNumPossibilities(target))
 }
 
 //FilterByHasPossibilities returns a new CellSlice with only cells that have 0 or more open possibilities.
 func (self CellSlice) FilterByHasPossibilities() CellSlice {
 	//Returns a list of cells that have possibilities.
 	//TODO: test this.
-	filter := func(cell Cell) bool {
-		return len(cell.Possibilities()) > 0
-	}
-	return self.Filter(filter)
+	return self.Filter(HasPossibilities())
 }
 
 //FilterByHasPossibilities returns a new CellSlice with only cells that have 0 or more open possibilities.
 func (self MutableCellSlice) FilterByHasPossibilities() MutableCellSlice {
 	//Returns a list of cells that have possibilities.
 	//TODO: test this.
-	filter := func(cell Cell) bool {
-		return len(cell.Possibilities()) > 0
-	}
-	return self.Filter(filter)
+	return self.Filter(HasPossibilities())
 }
 
 //RemoveCells returns a new CellSlice that does not contain any of the cells included in the provided CellSlice.

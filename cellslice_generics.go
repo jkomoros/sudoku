@@ -246,3 +246,41 @@ func GenericSlicesEqual[T comparable](slice1, slice2 []T) bool {
 
 	return true
 }
+
+// Predicate factory functions for common cell filtering operations.
+// These create reusable predicates that can be shared across CellSlice and MutableCellSlice.
+
+// IsUnfilled returns a predicate that checks if a cell is not filled.
+func IsUnfilled() func(Cell) bool {
+	return func(cell Cell) bool {
+		return cell.Number() == 0
+	}
+}
+
+// IsFilled returns a predicate that checks if a cell is filled.
+func IsFilled() func(Cell) bool {
+	return func(cell Cell) bool {
+		return cell.Number() != 0
+	}
+}
+
+// HasPossible returns a predicate that checks if a cell has a specific number as a possibility.
+func HasPossible(possible int) func(Cell) bool {
+	return func(cell Cell) bool {
+		return cell.Possible(possible)
+	}
+}
+
+// HasNumPossibilities returns a predicate that checks if a cell has exactly target possibilities.
+func HasNumPossibilities(target int) func(Cell) bool {
+	return func(cell Cell) bool {
+		return len(cell.Possibilities()) == target
+	}
+}
+
+// HasPossibilities returns a predicate that checks if a cell has any possibilities.
+func HasPossibilities() func(Cell) bool {
+	return func(cell Cell) bool {
+		return len(cell.Possibilities()) > 0
+	}
+}
