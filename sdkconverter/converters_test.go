@@ -2,7 +2,7 @@ package sdkconverter
 
 import (
 	"github.com/jkomoros/sudoku"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -297,7 +297,7 @@ func converterTesterHelper(t *testing.T, testLoad bool, format Format, otherFile
 }
 
 func loadTestPuzzle(puzzleName string) string {
-	data, err := ioutil.ReadFile("puzzles/" + puzzleName)
+	data, err := os.ReadFile("puzzles/" + puzzleName)
 
 	if err != nil {
 		return ""

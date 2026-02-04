@@ -1,7 +1,7 @@
 package wekaparser
 
 import (
-	"io/ioutil"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -98,7 +98,7 @@ func TestParseWeights(t *testing.T) {
 		"XYWing Percentage":                   -0.0014,
 	}
 
-	data, err := ioutil.ReadFile("test_input.txt")
+	data, err := os.ReadFile("test_input.txt")
 
 	if err != nil {
 		t.Error("Couldn't read file:", err)
@@ -119,7 +119,7 @@ func TestParseR2(t *testing.T) {
 
 	expectedR2 := 0.7681
 
-	data, err := ioutil.ReadFile("test_input.txt")
+	data, err := os.ReadFile("test_input.txt")
 
 	if err != nil {
 		t.Error("Couldn't read file:", err)

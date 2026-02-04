@@ -1,8 +1,8 @@
 package sudoku
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 	"sync"
 )
@@ -533,7 +533,7 @@ func LoadSDKFromFile(path string) (Grid, error) {
 //MutableLoadSDKFromFile is similar to LoadSDKFromFile, but returns a
 //MutableGrid.
 func MutableLoadSDKFromFile(path string) (MutableGrid, error) {
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

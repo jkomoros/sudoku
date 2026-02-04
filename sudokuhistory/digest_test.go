@@ -3,7 +3,7 @@ package sudokuhistory
 import (
 	"encoding/json"
 	"github.com/jkomoros/sudoku"
-	"io/ioutil"
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -13,17 +13,17 @@ func defaultDigest() *Digest {
 	model := &Model{}
 	model.SetGrid(sudoku.NewGrid())
 
-	model.SetMarks(sudoku.CellRef{3, 4}, map[int]bool{
+	model.SetMarks(sudoku.CellRef{Row: 3, Col: 4}, map[int]bool{
 		3: true,
 		4: true,
 	})
 
-	model.SetNumber(sudoku.CellRef{0, 0}, 3)
+	model.SetNumber(sudoku.CellRef{Row: 0, Col: 0}, 3)
 
 	model.StartGroup("test group")
 
-	model.SetNumber(sudoku.CellRef{0, 1}, 4)
-	model.SetMarks(sudoku.CellRef{0, 2}, map[int]bool{
+	model.SetNumber(sudoku.CellRef{Row: 0, Col: 1}, 4)
+	model.SetMarks(sudoku.CellRef{Row: 0, Col: 2}, map[int]bool{
 		3: true,
 		4: true,
 	})
@@ -31,12 +31,12 @@ func defaultDigest() *Digest {
 
 	model.StartGroup("second group")
 
-	model.SetNumber(sudoku.CellRef{0, 3}, 4)
+	model.SetNumber(sudoku.CellRef{Row: 0, Col: 3}, 4)
 	model.FinishGroupAndExecute()
 
 	//This move undoes the earlier one and make sure that the digest handles
 	//setting a cell to zero appropriately.
-	model.SetNumber(sudoku.CellRef{0, 0}, 0)
+	model.SetNumber(sudoku.CellRef{Row: 0, Col: 0}, 0)
 
 	result := model.Digest()
 	return &result
@@ -134,11 +134,11 @@ func TestDigest(t *testing.T) {
 		if err != nil {
 			t.Fatal("Golden JSON wasn't output", err)
 		}
-		ioutil.WriteFile("test/golden.json", jsonOutput, 0644)
+		os.WriteFile("test/golden.json", jsonOutput, 0644)
 		t.Fatal("Wrote out a new golden")
 	}
 
-	golden, err := ioutil.ReadFile("test/golden.json")
+	golden, err := os.ReadFile("test/golden.json")
 
 	if err != nil {
 		t.Fatal("Couldn't load golden file at golden.json", err)

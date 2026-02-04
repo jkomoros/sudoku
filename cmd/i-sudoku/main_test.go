@@ -6,7 +6,7 @@ import (
 	"github.com/jkomoros/sudoku"
 	"github.com/jkomoros/sudoku/sdkconverter"
 	"github.com/nsf/termbox-go"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -624,11 +624,11 @@ func TestProvideStarterPuzzle(t *testing.T) {
 
 	c := makeMainController(options, errOutput)
 
-	errorReaderBytes, _ := ioutil.ReadAll(errOutput)
+	errorReaderBytes, _ := io.ReadAll(errOutput)
 
 	errMessage := string(errorReaderBytes)
 
-	goldenPuzzle, _ := ioutil.ReadFile("test_puzzles/converter_one.sdk")
+	goldenPuzzle, _ := os.ReadFile("test_puzzles/converter_one.sdk")
 
 	if c.Grid().DataString() != string(goldenPuzzle) {
 		t.Error("Loading a normal puzzle with command line option failed.")

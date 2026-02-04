@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/jkomoros/sudoku/cmd/dokugen-analysis/internal/wekaparser"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -122,7 +121,7 @@ func main() {
 
 	fmt.Println("R2 =", r2)
 
-	ioutil.WriteFile(options.outFile, output, 0644)
+	os.WriteFile(options.outFile, output, 0644)
 
 	//Remove the temporary arff file.
 	os.Remove(temporaryArff)

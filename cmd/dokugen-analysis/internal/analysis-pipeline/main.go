@@ -14,7 +14,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -555,7 +554,7 @@ func main() {
 				if phaseEnabled(a, Histogram) && a.histogramPuzzleCount > 0 {
 					//Generate a bunch of puzzles and print out their difficutlies.
 
-					data, err := ioutil.ReadFile(effectiveAnalysisFile)
+					data, err := os.ReadFile(effectiveAnalysisFile)
 
 					if err != nil {
 						log.Println("Couldn't read back analysis file:", err)
@@ -765,7 +764,7 @@ func printR2Table(results map[string]float64) {
 }
 
 func numLinesInFile(filename string) int {
-	contents, err := ioutil.ReadFile(filename)
+	contents, err := os.ReadFile(filename)
 
 	if err != nil {
 		return 0

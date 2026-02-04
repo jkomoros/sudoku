@@ -3,7 +3,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -31,13 +30,13 @@ func init() {
 
 func main() {
 
-	input, err := ioutil.ReadFile(INPUT_FILE_NAME)
+	input, err := os.ReadFile(INPUT_FILE_NAME)
 
 	if err != nil {
 		if !os.IsNotExist(err) {
 			log.Fatalln("Got err trying to open first file:", err)
 		}
-		input, err = ioutil.ReadFile(INPUT_SAMPLE_FILE_NAME)
+		input, err = os.ReadFile(INPUT_SAMPLE_FILE_NAME)
 		if err != nil {
 			log.Fatalln("Couldn't load either of the input files.")
 		}
@@ -80,7 +79,7 @@ func main() {
 	output += "\t})\n"
 	output += "}\n"
 
-	err = ioutil.WriteFile(OUTPUT_FILE_NAME, []byte(output), 0644)
+	err = os.WriteFile(OUTPUT_FILE_NAME, []byte(output), 0644)
 
 	if err != nil {
 		log.Fatalln("Writing file didn't work:", err)
