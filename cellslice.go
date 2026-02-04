@@ -881,16 +881,7 @@ func (self IntSlice) Subset(indexes IntSlice) IntSlice {
 	//TODO: test this.
 	//Basically a carbon copy of CellSlice.Subset
 	//TODO: what's this behavior if indexes has dupes? What SHOULD it be?
-	result := make(IntSlice, len(indexes))
-	max := len(self)
-	for i, index := range indexes {
-		if index >= max {
-			//This probably is indicative of a larger problem.
-			continue
-		}
-		result[i] = self[index]
-	}
-	return result
+	return IntSlice(GenericSubset([]int(self), indexes))
 }
 
 //Sort sorts the IntSlice in place from small to large.
@@ -1050,14 +1041,13 @@ func (self cellSet) union(other cellSet) cellSet {
 //that is, the ints that appear in both slices.
 func (self IntSlice) Intersection(other IntSlice) IntSlice {
 	//Returns an IntSlice of the union of both intSlices
-
-	return self.toIntSet().intersection(other.toIntSet()).toSlice()
+	return IntSlice(GenericIntersection([]int(self), []int(other)))
 }
 
 //Difference returns a new IntSlice that contains all of the ints in the receiver that are not
 //also in other.
 func (self IntSlice) Difference(other IntSlice) IntSlice {
-	return self.toIntSet().difference(other.toIntSet()).toSlice()
+	return IntSlice(GenericDifference([]int(self), []int(other)))
 }
 
 //Intersection returns a new CellSlice that represents the intersection of the
