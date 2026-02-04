@@ -54,6 +54,18 @@ func getBlock(cell Cell) int {
 	return cell.Block()
 }
 
+func getRefRow(cell CellRef) int {
+	return cell.Row
+}
+
+func getRefCol(cell CellRef) int {
+	return cell.Col
+}
+
+func getRefBlock(cell CellRef) int {
+	return cell.Block()
+}
+
 //SameRow returns true if all cells are in the same row.
 func (self CellSlice) SameRow() bool {
 	return self.CollectNums(getRow).Same()
@@ -71,23 +83,17 @@ func (self CellSlice) SameBlock() bool {
 
 //SameRow returns true if all cells are in the same row.
 func (self CellRefSlice) SameRow() bool {
-	return self.CollectNums(func(cell CellRef) int {
-		return cell.Row
-	}).Same()
+	return self.CollectNums(getRefRow).Same()
 }
 
 //SameCol returns true if all cells are in the same column.
 func (self CellRefSlice) SameCol() bool {
-	return self.CollectNums(func(cell CellRef) int {
-		return cell.Col
-	}).Same()
+	return self.CollectNums(getRefCol).Same()
 }
 
 //SameBlock returns true if all cells are in the same block.
 func (self CellRefSlice) SameBlock() bool {
-	return self.CollectNums(func(cell CellRef) int {
-		return cell.Block()
-	}).Same()
+	return self.CollectNums(getRefBlock).Same()
 }
 
 //Row returns the row that at least one of the cells is in. If SameRow() is false, the Row
@@ -167,25 +173,19 @@ func (self CellSlice) AllBlocks() IntSlice {
 //AllRows returns all of the rows for cells in this slice.
 func (self CellRefSlice) AllRows() IntSlice {
 	//TODO: test this.
-	return self.CollectNums(func(cell CellRef) int {
-		return cell.Row
-	}).Unique()
+	return self.CollectNums(getRefRow).Unique()
 }
 
 //AllCols returns all of the columns for cells in this slice.
 func (self CellRefSlice) AllCols() IntSlice {
 	//TODO: test this.
-	return self.CollectNums(func(cell CellRef) int {
-		return cell.Col
-	}).Unique()
+	return self.CollectNums(getRefCol).Unique()
 }
 
 //AllBlocks returns all of the blocks for cells in this slice.
 func (self CellRefSlice) AllBlocks() IntSlice {
 	//TODO: test this.
-	return self.CollectNums(func(cell CellRef) int {
-		return cell.Block()
-	}).Unique()
+	return self.CollectNums(getRefBlock).Unique()
 }
 
 //CellReferenceSlice returns a CellReferenceSlice that corresponds to the
