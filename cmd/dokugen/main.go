@@ -16,7 +16,6 @@ import (
 	"github.com/jkomoros/sudoku"
 	"github.com/jkomoros/sudoku/sdkconverter"
 	"io"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -232,7 +231,7 @@ func process(options *appOptions, output io.ReadWriter, errOutput io.ReadWriter)
 	if options.PUZZLE_TO_SOLVE != "" {
 		//There are puzzles to load up.
 
-		data, err := ioutil.ReadFile(options.PUZZLE_TO_SOLVE)
+		data, err := os.ReadFile(options.PUZZLE_TO_SOLVE)
 
 		if err != nil {
 			logger.Fatalln("Read error for specified file:", err)
@@ -543,5 +542,4 @@ func generatePuzzle(min float64, max float64, options *sudoku.GenerationOptions,
 
 		count++
 	}
-	return nil
 }

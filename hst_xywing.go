@@ -61,13 +61,11 @@ func (self *xywingTechnique) find(grid Grid, coordinator findCoordinator) {
 			return
 		}
 
-		pivot := getter.GetSmallerThan(3)
+		pivotCell := getter.GetSmallerThan(3)
 
-		if pivot == nil {
+		if pivotCell == nil {
 			break
 		}
-
-		pivotCell := pivot.(Cell)
 
 		possibilities := pivotCell.Possibilities()
 

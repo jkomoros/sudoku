@@ -6,7 +6,7 @@ import (
 )
 
 func TestBasicSyncedStack(t *testing.T) {
-	stack := newSyncedStack()
+	stack := newSyncedStack[map[string]int]()
 	if stack == nil {
 		t.Log("Didn't get a stack back.")
 		t.Fail()
@@ -34,12 +34,11 @@ func TestBasicSyncedStack(t *testing.T) {
 		t.Fail()
 	}
 
-	rawResult := stack.Pop()
-	if rawResult == nil {
+	result := stack.Pop()
+	if result == nil {
 		t.Log("We didn't get back an item from a queue with one item.")
 		t.Fail()
 	}
-	result := rawResult.(map[string]int)
 	if _, ok := result["a"]; !ok {
 		t.Log("We didn't get back the item we put in.")
 		t.Fail()
@@ -67,24 +66,22 @@ func TestBasicSyncedStack(t *testing.T) {
 
 	stack.Insert(item)
 	stack.Insert(secondItem)
-	rawResult = stack.Pop()
-	if rawResult == nil {
+	result = stack.Pop()
+	if result == nil {
 		t.Log("We didn't get back an item from a queue with two items")
 		t.Fail()
 	}
-	result = rawResult.(map[string]int)
 	if _, ok := result["b"]; !ok {
 		t.Log("We got the wrong item back from a two item queue.")
 		t.Fail()
 	}
 	stack.Insert(secondItem)
 	//This should always be the last item.
-	rawResult = stack.Get(0.0)
-	if rawResult == nil {
+	result = stack.Get(0.0)
+	if result == nil {
 		t.Log("We didn't get back the first item with probability 0")
 		t.Fail()
 	}
-	result = rawResult.(map[string]int)
 	if _, ok := result["a"]; !ok {
 		t.Log("We didn't get back the first item")
 		t.Fail()
@@ -93,12 +90,11 @@ func TestBasicSyncedStack(t *testing.T) {
 		t.Log("We got back wrong length for a queue with one item")
 		t.Fail()
 	}
-	rawResult = stack.Get(0.0)
-	if rawResult == nil {
+	result = stack.Get(0.0)
+	if result == nil {
 		t.Log("We didn't get back the only item with probability 0.0")
 		t.Fail()
 	}
-	result = rawResult.(map[string]int)
 	if _, ok := result["b"]; !ok {
 		t.Log("We got the wrong item out of a queue with one item")
 		t.Fail()
@@ -107,10 +103,10 @@ func TestBasicSyncedStack(t *testing.T) {
 
 func TestChanSyncedStack(t *testing.T) {
 	doneChan := make(chan bool, 1)
-	stack := newChanSyncedStack(doneChan)
+	stack := newChanSyncedStack[int](doneChan)
 	item := 1
 	secondItem := 2
-	var result interface{}
+	var result int
 	select {
 	case <-stack.Output:
 		t.Log("We got something on output before there was anything to get.")
@@ -122,14 +118,14 @@ func TestChanSyncedStack(t *testing.T) {
 	stack.Insert(item)
 	stack.Insert(secondItem)
 
-	if stack.Pop() != nil {
+	if stack.Pop() != 0 {
 		t.Log("We were able to get something using Get")
 		t.Fail()
 	}
 
 	select {
 	case result = <-stack.Output:
-		if result.(int) != 2 && result.(int) != 1 {
+		if result != 2 && result != 1 {
 			t.Log("We got the wrong item out of the queue")
 			t.Fail()
 		}
@@ -140,7 +136,7 @@ func TestChanSyncedStack(t *testing.T) {
 
 	select {
 	case result = <-stack.Output:
-		if result.(int) != 2 && result.(int) != 1 {
+		if result != 2 && result != 1 {
 			t.Log("We got the wrong item out of the queue the second time.")
 			t.Fail()
 		}

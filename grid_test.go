@@ -2,8 +2,8 @@ package sudoku
 
 import (
 	"container/list"
-	"io/ioutil"
 	"math"
+	"os"
 	"runtime"
 	"strings"
 	"testing"
@@ -1116,7 +1116,7 @@ func puzzlePath(name string) string {
 	for e != nil {
 		directories.Remove(e)
 		directory := e.Value.(string)
-		infos, _ := ioutil.ReadDir(directory)
+		infos, _ := os.ReadDir(directory)
 		for _, info := range infos {
 			if info.IsDir() {
 				//We'll search this one later.

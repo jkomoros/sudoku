@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/nsf/termbox-go"
-	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -436,7 +436,7 @@ func (m *fileInputMode) tabComplete(c *mainController) {
 	}
 
 	rest := splitPath[len(splitPath)-1]
-	possibleCompletions, err := ioutil.ReadDir("./" + directoryPortion)
+	possibleCompletions, err := os.ReadDir("./" + directoryPortion)
 
 	if err != nil {
 		c.SetConsoleMessage("No valid directory"+err.Error(), true)

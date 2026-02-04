@@ -8,7 +8,6 @@ import (
 	"github.com/jkomoros/sudoku/sudokuhistory"
 	"github.com/mitchellh/go-wordwrap"
 	"github.com/nsf/termbox-go"
-	"io/ioutil"
 	"os"
 	"sort"
 	"strconv"
@@ -258,7 +257,7 @@ func (c *mainController) LoadGridFromFile(file string) {
 		return
 	}
 
-	puzzleBytes, err := ioutil.ReadFile(file)
+	puzzleBytes, err := os.ReadFile(file)
 
 	if err != nil {
 		c.SetConsoleMessage("Invalid file: "+err.Error(), true)
@@ -297,7 +296,7 @@ func (c *mainController) SaveGrid() {
 		return
 	}
 
-	ioutil.WriteFile(c.filename, []byte(converter.DataString(c.Grid())), 0644)
+	os.WriteFile(c.filename, []byte(converter.DataString(c.Grid())), 0644)
 
 	c.SetConsoleMessage(PUZZLE_SAVED_MESSAGE+c.filename, true)
 

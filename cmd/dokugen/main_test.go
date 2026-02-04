@@ -5,7 +5,7 @@ import (
 	"encoding/csv"
 	"flag"
 	"github.com/jkomoros/sudoku"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"regexp"
@@ -56,7 +56,7 @@ func expectUneventfulFixup(t *testing.T, options *appOptions) {
 
 	options.fixUp(errWriter)
 
-	errorReaderBytes, _ := ioutil.ReadAll(errWriter)
+	errorReaderBytes, _ := io.ReadAll(errWriter)
 
 	errOutput := string(errorReaderBytes)
 
@@ -243,7 +243,7 @@ func TestHelp(t *testing.T) {
 	options.flagSet.SetOutput(helpGoldenBuffer)
 	options.flagSet.PrintDefaults()
 
-	helpGoldenBytes, _ := ioutil.ReadAll(helpGoldenBuffer)
+	helpGoldenBytes, _ := io.ReadAll(helpGoldenBuffer)
 
 	expectations := string(helpGoldenBytes)
 
@@ -388,7 +388,7 @@ func TestInvalidPuzzleFormat(t *testing.T) {
 
 	options.fixUp(errWriter)
 
-	errorReaderBytes, _ := ioutil.ReadAll(errWriter)
+	errorReaderBytes, _ := io.ReadAll(errWriter)
 
 	errOutput := string(errorReaderBytes)
 
@@ -467,8 +467,8 @@ func getOutput(options *appOptions) (outputResult string, errorResult string) {
 
 	process(options, output, errOutput)
 
-	outputReaderBytes, _ := ioutil.ReadAll(output)
-	errorReaderBytes, _ := ioutil.ReadAll(errOutput)
+	outputReaderBytes, _ := io.ReadAll(output)
+	errorReaderBytes, _ := io.ReadAll(errOutput)
 
 	return string(outputReaderBytes), string(errorReaderBytes)
 }

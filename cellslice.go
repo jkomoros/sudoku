@@ -41,17 +41,6 @@ type CellRef struct {
 	Col int
 }
 
-type cellSliceSorter struct {
-	CellSlice
-}
-
-type mutableCellSliceSorter struct {
-	MutableCellSlice
-}
-
-type cellReferenceSliceSorter struct {
-	CellRefSlice
-}
 
 func getRow(cell Cell) int {
 	return cell.Row()
@@ -62,6 +51,18 @@ func getCol(cell Cell) int {
 }
 
 func getBlock(cell Cell) int {
+	return cell.Block()
+}
+
+func getRefRow(cell CellRef) int {
+	return cell.Row
+}
+
+func getRefCol(cell CellRef) int {
+	return cell.Col
+}
+
+func getRefBlock(cell CellRef) int {
 	return cell.Block()
 }
 
@@ -82,23 +83,17 @@ func (self CellSlice) SameBlock() bool {
 
 //SameRow returns true if all cells are in the same row.
 func (self CellRefSlice) SameRow() bool {
-	return self.CollectNums(func(cell CellRef) int {
-		return cell.Row
-	}).Same()
+	return self.CollectNums(getRefRow).Same()
 }
 
 //SameCol returns true if all cells are in the same column.
 func (self CellRefSlice) SameCol() bool {
-	return self.CollectNums(func(cell CellRef) int {
-		return cell.Col
-	}).Same()
+	return self.CollectNums(getRefCol).Same()
 }
 
 //SameBlock returns true if all cells are in the same block.
 func (self CellRefSlice) SameBlock() bool {
-	return self.CollectNums(func(cell CellRef) int {
-		return cell.Block()
-	}).Same()
+	return self.CollectNums(getRefBlock).Same()
 }
 
 //Row returns the row that at least one of the cells is in. If SameRow() is false, the Row
@@ -178,25 +173,19 @@ func (self CellSlice) AllBlocks() IntSlice {
 //AllRows returns all of the rows for cells in this slice.
 func (self CellRefSlice) AllRows() IntSlice {
 	//TODO: test this.
-	return self.CollectNums(func(cell CellRef) int {
-		return cell.Row
-	}).Unique()
+	return self.CollectNums(getRefRow).Unique()
 }
 
 //AllCols returns all of the columns for cells in this slice.
 func (self CellRefSlice) AllCols() IntSlice {
 	//TODO: test this.
-	return self.CollectNums(func(cell CellRef) int {
-		return cell.Col
-	}).Unique()
+	return self.CollectNums(getRefCol).Unique()
 }
 
 //AllBlocks returns all of the blocks for cells in this slice.
 func (self CellRefSlice) AllBlocks() IntSlice {
 	//TODO: test this.
-	return self.CollectNums(func(cell CellRef) int {
-		return cell.Block()
-	}).Unique()
+	return self.CollectNums(getRefBlock).Unique()
 }
 
 //CellReferenceSlice returns a CellReferenceSlice that corresponds to the
@@ -215,10 +204,7 @@ func (self MutableCellSlice) CellReferenceSlice() CellRefSlice {
 //that are not filled with any number.
 func (self CellSlice) FilterByUnfilled() CellSlice {
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return cell.Number() == 0
-	}
-	return self.Filter(filter)
+	return self.Filter(IsUnfilled())
 }
 
 //FilterByUnfilled returns a new CellSlice with only the cells in the list
@@ -226,130 +212,92 @@ func (self CellSlice) FilterByUnfilled() CellSlice {
 func (self MutableCellSlice) FilterByUnfilled() MutableCellSlice {
 	//TODO: test all of the mutableCellSlice methods
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return cell.Number() == 0
-	}
-	return self.Filter(filter)
+	return self.Filter(IsUnfilled())
 }
 
 //FilterByFilled returns a new CellSlice with only the cells that have a
 //number in them.
 func (self CellSlice) FilterByFilled() CellSlice {
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return cell.Number() != 0
-	}
-	return self.Filter(filter)
+	return self.Filter(IsFilled())
 }
 
 //FilterByFilled returns a new CellSlice with only the cells that have a
 //number in them.
 func (self MutableCellSlice) FilterByFilled() MutableCellSlice {
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return cell.Number() != 0
-	}
-	return self.Filter(filter)
+	return self.Filter(IsFilled())
 }
 
 //FilterByPossible returns a new CellSlice with only the cells in the list that have the given number
 //as an active possibility.
 func (self CellSlice) FilterByPossible(possible int) CellSlice {
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return cell.Possible(possible)
-	}
-	return self.Filter(filter)
+	return self.Filter(HasPossible(possible))
 }
 
 //FilterByPossible returns a new CellSlice with only the cells in the list that have the given number
 //as an active possibility.
 func (self MutableCellSlice) FilterByPossible(possible int) MutableCellSlice {
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return cell.Possible(possible)
-	}
-	return self.Filter(filter)
+	return self.Filter(HasPossible(possible))
 }
 
 //FilterByNumPossibles returns a new CellSlice with only cells that have precisely the provided
 //number of possible numbers.
 func (self CellSlice) FilterByNumPossibilities(target int) CellSlice {
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return len(cell.Possibilities()) == target
-	}
-	return self.Filter(filter)
+	return self.Filter(HasNumPossibilities(target))
 }
 
 //FilterByNumPossibles returns a new CellSlice with only cells that have precisely the provided
 //number of possible numbers.
 func (self MutableCellSlice) FilterByNumPossibilities(target int) MutableCellSlice {
 	//TODO: test this
-	filter := func(cell Cell) bool {
-		return len(cell.Possibilities()) == target
-	}
-	return self.Filter(filter)
+	return self.Filter(HasNumPossibilities(target))
 }
 
 //FilterByHasPossibilities returns a new CellSlice with only cells that have 0 or more open possibilities.
 func (self CellSlice) FilterByHasPossibilities() CellSlice {
 	//Returns a list of cells that have possibilities.
 	//TODO: test this.
-	filter := func(cell Cell) bool {
-		return len(cell.Possibilities()) > 0
-	}
-	return self.Filter(filter)
+	return self.Filter(HasPossibilities())
 }
 
 //FilterByHasPossibilities returns a new CellSlice with only cells that have 0 or more open possibilities.
 func (self MutableCellSlice) FilterByHasPossibilities() MutableCellSlice {
 	//Returns a list of cells that have possibilities.
 	//TODO: test this.
-	filter := func(cell Cell) bool {
-		return len(cell.Possibilities()) > 0
-	}
-	return self.Filter(filter)
+	return self.Filter(HasPossibilities())
 }
 
 //RemoveCells returns a new CellSlice that does not contain any of the cells included in the provided CellSlice.
 func (self CellSlice) RemoveCells(targets CellSlice) CellSlice {
 	//TODO: test this.
-	targetCells := make(map[Cell]bool)
-	for _, cell := range targets {
-		targetCells[cell] = true
-	}
-	filterFunc := func(cell Cell) bool {
-		return !targetCells[cell]
-	}
-	return self.Filter(filterFunc)
+	targetCells := GenericToCellSet([]Cell(targets))
+	return CellSlice(GenericRemoveCells([]Cell(self), targetCells))
 }
 
 //RemoveCells returns a new CellSlice that does not contain any of the cells included in the provided CellSlice.
 func (self MutableCellSlice) RemoveCells(targets CellSlice) MutableCellSlice {
 	//TODO: test this.
-	targetCells := make(map[Cell]bool)
-	for _, cell := range targets {
-		targetCells[cell] = true
+	// Convert both to cell references for comparison
+	targetRefs := GenericToCellSet(targets.CellReferenceSlice())
+	var result MutableCellSlice
+	for _, cell := range self {
+		if !targetRefs[cell.Reference()] {
+			result = append(result, cell)
+		}
 	}
-	filterFunc := func(cell Cell) bool {
-		return !targetCells[cell]
-	}
-	return self.Filter(filterFunc)
+	return result
 }
 
 //RemoveCells returns a new CellReferenceSlice that does not contain any of
 //the cells included in the provided CellReferenceSlice.
 func (self CellRefSlice) RemoveCells(targets CellRefSlice) CellRefSlice {
 	//TODO: test this.
-	targetCells := make(map[CellRef]bool)
-	for _, cell := range targets {
-		targetCells[cell] = true
-	}
-	filterFunc := func(cell CellRef) bool {
-		return !targetCells[cell]
-	}
-	return self.Filter(filterFunc)
+	targetCells := GenericToCellSet(targets)
+	return GenericRemoveCells(self, targetCells)
 }
 
 //PossibilitiesUnion returns an IntSlice that is the union of all active possibilities in cells in the set.
@@ -379,16 +327,7 @@ func (self CellSlice) PossibilitiesUnion() IntSlice {
 func (self CellSlice) Subset(indexes IntSlice) CellSlice {
 	//IntSlice.Subset is basically a carbon copy.
 	//TODO: what's this behavior if indexes has dupes? What SHOULD it be?
-	result := make(CellSlice, len(indexes))
-	max := len(self)
-	for i, index := range indexes {
-		if index >= max {
-			//This probably is indicative of a larger problem.
-			continue
-		}
-		result[i] = self[index]
-	}
-	return result
+	return CellSlice(GenericSubset([]Cell(self), indexes))
 }
 
 //Subset returns a new CellSlice that is the subset of the list including the items at the indexes provided
@@ -396,16 +335,7 @@ func (self CellSlice) Subset(indexes IntSlice) CellSlice {
 func (self MutableCellSlice) Subset(indexes IntSlice) MutableCellSlice {
 	//IntSlice.Subset is basically a carbon copy.
 	//TODO: what's this behavior if indexes has dupes? What SHOULD it be?
-	result := make(MutableCellSlice, len(indexes))
-	max := len(self)
-	for i, index := range indexes {
-		if index >= max {
-			//This probably is indicative of a larger problem.
-			continue
-		}
-		result[i] = self[index]
-	}
-	return result
+	return MutableCellSlice(GenericSubset([]MutableCell(self), indexes))
 }
 
 //Subset returns a new CellReferenceSlice that is the subset of the list including the items at the indexes provided
@@ -413,111 +343,48 @@ func (self MutableCellSlice) Subset(indexes IntSlice) MutableCellSlice {
 func (self CellRefSlice) Subset(indexes IntSlice) CellRefSlice {
 	//IntSlice.Subset is basically a carbon copy.
 	//TODO: what's this behavior if indexes has dupes? What SHOULD it be?
-	result := make(CellRefSlice, len(indexes))
-	max := len(self)
-	for i, index := range indexes {
-		if index >= max {
-			//This probably is indicative of a larger problem.
-			continue
-		}
-		result[i] = self[index]
-	}
-	return result
+	return GenericSubset(self, indexes)
 }
 
 //InverseSubset returns a new CellSlice that contains all of the elements from the list that are *not*
 //at the indexes provided in the IntSlice. See also Subset.
 func (self CellSlice) InverseSubset(indexes IntSlice) CellSlice {
 	//TODO: figure out what this should do when presented with dupes.
-
-	//LIke Subset, but returns all of the items NOT called out in indexes.
-	var result CellSlice
-
-	//Ensure indexes are in sorted order.
-	sort.Ints(indexes)
-
-	//Index into indexes we're considering
-	currentIndex := 0
-
-	for i := 0; i < len(self); i++ {
-		if currentIndex < len(indexes) && i == indexes[currentIndex] {
-			//Skip it!
-			currentIndex++
-		} else {
-			//Output it!
-			result = append(result, self[i])
-		}
-	}
-
-	return result
+	return CellSlice(GenericInverseSubset([]Cell(self), indexes))
 }
 
 //InverseSubset returns a new CellSlice that contains all of the elements from the list that are *not*
 //at the indexes provided in the IntSlice. See also Subset.
 func (self MutableCellSlice) InverseSubset(indexes IntSlice) MutableCellSlice {
 	//TODO: figure out what this should do when presented with dupes.
-
-	//LIke Subset, but returns all of the items NOT called out in indexes.
-	var result MutableCellSlice
-
-	//Ensure indexes are in sorted order.
-	sort.Ints(indexes)
-
-	//Index into indexes we're considering
-	currentIndex := 0
-
-	for i := 0; i < len(self); i++ {
-		if currentIndex < len(indexes) && i == indexes[currentIndex] {
-			//Skip it!
-			currentIndex++
-		} else {
-			//Output it!
-			result = append(result, self[i])
-		}
-	}
-
-	return result
+	return MutableCellSlice(GenericInverseSubset([]MutableCell(self), indexes))
 }
 
 //InverseSubset returns a new CellReferenceSlice that contains all of the elements from the list that are *not*
 //at the indexes provided in the IntSlice. See also Subset.
 func (self CellRefSlice) InverseSubset(indexes IntSlice) CellRefSlice {
 	//TODO: figure out what this should do when presented with dupes.
-
-	//LIke Subset, but returns all of the items NOT called out in indexes.
-	var result CellRefSlice
-
-	//Ensure indexes are in sorted order.
-	sort.Ints(indexes)
-
-	//Index into indexes we're considering
-	currentIndex := 0
-
-	for i := 0; i < len(self); i++ {
-		if currentIndex < len(indexes) && i == indexes[currentIndex] {
-			//Skip it!
-			currentIndex++
-		} else {
-			//Output it!
-			result = append(result, self[i])
-		}
-	}
-
-	return result
+	return GenericInverseSubset(self, indexes)
 }
 
 //Sort mutates the provided CellSlice so that the cells are in order from left to right, top to bottom
 //based on their position in the grid.
 func (self CellSlice) Sort() {
-	sorter := cellSliceSorter{self}
-	sort.Sort(sorter)
+	GenericSort([]Cell(self), func(i, j int) bool {
+		one := self[i]
+		two := self[j]
+		return (one.Row()*DIM + one.Col()) < (two.Row()*DIM + two.Col())
+	})
 }
 
 //Sort mutates the provided CellSlice so that the cells are in order from left to right, top to bottom
 //based on their position in the grid.
 func (self MutableCellSlice) Sort() {
-	sorter := mutableCellSliceSorter{self}
-	sort.Sort(sorter)
+	GenericSort([]MutableCell(self), func(i, j int) bool {
+		one := self[i]
+		two := self[j]
+		return (one.Row()*DIM + one.Col()) < (two.Row()*DIM + two.Col())
+	})
 }
 
 //Sort mutates the provided CellReferenceSlice so that the cells are in order
@@ -525,8 +392,11 @@ func (self MutableCellSlice) Sort() {
 func (self CellRefSlice) Sort() {
 	//TODO: note that this is dangerous to have because we cache the public
 	//rows,cols,blocks, and don't ahve locks.
-	sorter := cellReferenceSliceSorter{self}
-	sort.Sort(sorter)
+	GenericSort(self, func(i, j int) bool {
+		one := self[i]
+		two := self[j]
+		return (one.Row*DIM + one.Col) < (two.Row*DIM + two.Col)
+	})
 }
 
 //FilledNums returns an IntSlice representing all of the numbers that have been actively set on cells
@@ -544,101 +414,31 @@ func (self CellSlice) FilledNums() IntSlice {
 
 //CollectNums collects the result of running fetcher across all items in the list.
 func (self CellSlice) CollectNums(fetcher func(Cell) int) IntSlice {
-	var result IntSlice
-	for _, cell := range self {
-		result = append(result, fetcher(cell))
-	}
-	return result
+	return GenericCollectNums([]Cell(self), fetcher)
 }
 
 //CollectNums collects the result of running fetcher across all items in the list.
 func (self CellRefSlice) CollectNums(fetcher func(CellRef) int) IntSlice {
-	var result IntSlice
-	for _, cell := range self {
-		result = append(result, fetcher(cell))
-	}
-	return result
-}
-
-func (self cellSliceSorter) Len() int {
-	return len(self.CellSlice)
-}
-
-func (self mutableCellSliceSorter) Len() int {
-	return len(self.MutableCellSlice)
-}
-
-func (self cellReferenceSliceSorter) Len() int {
-	return len(self.CellRefSlice)
-}
-
-func (self cellSliceSorter) Less(i, j int) bool {
-	//Sort based on the index of the cell.
-	one := self.CellSlice[i]
-	two := self.CellSlice[j]
-
-	return (one.Row()*DIM + one.Col()) < (two.Row()*DIM + two.Col())
-}
-
-func (self mutableCellSliceSorter) Less(i, j int) bool {
-	//Sort based on the index of the cell.
-	one := self.MutableCellSlice[i]
-	two := self.MutableCellSlice[j]
-
-	return (one.Row()*DIM + one.Col()) < (two.Row()*DIM + two.Col())
-}
-
-func (self cellReferenceSliceSorter) Less(i, j int) bool {
-	//Sort based on the index of the cell.
-	one := self.CellRefSlice[i]
-	two := self.CellRefSlice[j]
-
-	return (one.Row*DIM + one.Col) < (two.Row*DIM + two.Col)
-}
-
-func (self cellSliceSorter) Swap(i, j int) {
-	self.CellSlice[i], self.CellSlice[j] = self.CellSlice[j], self.CellSlice[i]
-}
-
-func (self mutableCellSliceSorter) Swap(i, j int) {
-	self.MutableCellSlice[i], self.MutableCellSlice[j] = self.MutableCellSlice[j], self.MutableCellSlice[i]
-}
-
-func (self cellReferenceSliceSorter) Swap(i, j int) {
-	self.CellRefSlice[i], self.CellRefSlice[j] = self.CellRefSlice[j], self.CellRefSlice[i]
+	return GenericCollectNums(self, fetcher)
 }
 
 //Filter returns a new CellSlice that includes all cells where filter returned true.
 func (self CellSlice) Filter(filter func(Cell) bool) CellSlice {
-	var result CellSlice
-	for _, cell := range self {
-		if filter(cell) {
-			result = append(result, cell)
-		}
-	}
-	return result
+	return CellSlice(GenericFilter([]Cell(self), filter))
 }
 
 //Filter returns a new CellSlice that includes all cells where filter returned true.
 func (self MutableCellSlice) Filter(filter func(Cell) bool) MutableCellSlice {
-	var result MutableCellSlice
-	for _, cell := range self {
-		if filter(cell) {
-			result = append(result, cell)
-		}
+	// Wrap the filter to accept MutableCell
+	wrappedFilter := func(cell MutableCell) bool {
+		return filter(cell)
 	}
-	return result
+	return MutableCellSlice(GenericFilter([]MutableCell(self), wrappedFilter))
 }
 
 //Filter returns a new CellReferenceSlice that includes all cells where filter returned true.
 func (self CellRefSlice) Filter(filter func(CellRef) bool) CellRefSlice {
-	var result CellRefSlice
-	for _, cell := range self {
-		if filter(cell) {
-			result = append(result, cell)
-		}
-	}
-	return result
+	return GenericFilter(self, filter)
 }
 
 //Map executes the mapper function on each cell in the list.
@@ -857,55 +657,15 @@ func (self CellSlice) CellReferenceSlice() CellRefSlice {
 }
 
 func (self CellSlice) sameAsRefs(refs CellRefSlice) bool {
-
 	//TODO: audit all of the private methods on CellSlice, MutableCellSlice
 	//now that we might not use them since we use something on
 	//CellReferenceSlice.
-	cellSet := make(map[string]bool)
-	for _, cell := range self {
-		cellSet[cell.Reference().String()] = true
-	}
-
-	refSet := make(map[string]bool)
-	for _, ref := range refs {
-		refSet[ref.String()] = true
-	}
-
-	if len(cellSet) != len(refSet) {
-		return false
-	}
-
-	for item := range cellSet {
-		if _, ok := refSet[item]; !ok {
-			return false
-		}
-	}
-
-	return true
+	selfRefs := self.CellReferenceSlice()
+	return GenericSlicesEqual(selfRefs, refs)
 }
 
 func (self CellRefSlice) sameAs(refs CellRefSlice) bool {
-	cellSet := make(map[string]bool)
-	for _, cell := range self {
-		cellSet[cell.String()] = true
-	}
-
-	refSet := make(map[string]bool)
-	for _, ref := range refs {
-		refSet[ref.String()] = true
-	}
-
-	if len(cellSet) != len(refSet) {
-		return false
-	}
-
-	for item := range cellSet {
-		if _, ok := refSet[item]; !ok {
-			return false
-		}
-	}
-
-	return true
+	return GenericSlicesEqual(self, refs)
 }
 
 //MutableCell returns the MutableCell in the given grid that this
@@ -1051,16 +811,7 @@ func (self IntSlice) Subset(indexes IntSlice) IntSlice {
 	//TODO: test this.
 	//Basically a carbon copy of CellSlice.Subset
 	//TODO: what's this behavior if indexes has dupes? What SHOULD it be?
-	result := make(IntSlice, len(indexes))
-	max := len(self)
-	for i, index := range indexes {
-		if index >= max {
-			//This probably is indicative of a larger problem.
-			continue
-		}
-		result[i] = self[index]
-	}
-	return result
+	return IntSlice(GenericSubset([]int(self), indexes))
 }
 
 //Sort sorts the IntSlice in place from small to large.
@@ -1077,37 +828,23 @@ func (self IntSlice) toIntSet() intSet {
 }
 
 func (self CellSlice) toCellSet() cellSet {
-	result := make(cellSet)
-	for _, item := range self {
-		result[item.Reference()] = true
-	}
-	return result
+	// Convert to references first, then use generic helper
+	refs := self.CellReferenceSlice()
+	return GenericToCellSet(refs)
 }
 
 func (self MutableCellSlice) toCellSet() cellSet {
-	result := make(cellSet)
-	for _, item := range self {
-		result[item.Reference()] = true
-	}
-	return result
+	// Convert to references first, then use generic helper
+	refs := self.CellReferenceSlice()
+	return GenericToCellSet(refs)
 }
 
 func (self CellRefSlice) toCellSet() cellSet {
-	result := make(cellSet)
-	for _, item := range self {
-		result[item] = true
-	}
-	return result
+	return GenericToCellSet(self)
 }
 
 func (self intSet) toSlice() IntSlice {
-	var result IntSlice
-	for item, val := range self {
-		if val {
-			result = append(result, item)
-		}
-	}
-	return result
+	return IntSlice(GenericSetToSlice(self))
 }
 
 func (self cellSet) toSlice(grid Grid) CellSlice {
@@ -1142,100 +879,46 @@ func (self cellSet) toMutableSlice(grid MutableGrid) MutableCellSlice {
 
 //TODO: test this directly (tested implicitly via intSlice.Intersection)
 func (self intSet) intersection(other intSet) intSet {
-	result := make(intSet)
-	for item, value := range self {
-		if value {
-			if val, ok := other[item]; ok && val {
-				result[item] = true
-			}
-		}
-	}
-	return result
+	return GenericIntersectionSet(self, other)
 }
 
 //overlaps is equivalent to len(self.intersection(other)) > 0 , just optimized
 func (self intSet) overlaps(other intSet) bool {
-	for item, value := range self {
-		if value {
-			if val, ok := other[item]; ok && val {
-				return true
-			}
-		}
-	}
-	return false
+	return GenericOverlaps(self, other)
 }
 
 func (self cellSet) intersection(other cellSet) cellSet {
-	result := make(cellSet)
-	for item, value := range self {
-		if value {
-			if val, ok := other[item]; ok && val {
-				result[item] = true
-			}
-		}
-	}
-	return result
+	return GenericIntersectionSet(self, other)
 }
 
 func (self intSet) difference(other intSet) intSet {
-	result := make(intSet)
-	for item, value := range self {
-		if value {
-			if val, ok := other[item]; !ok && !val {
-				result[item] = true
-			}
-		}
-	}
-	return result
+	return GenericDifferenceSet(self, other)
 }
 
 func (self cellSet) difference(other cellSet) cellSet {
-	result := make(cellSet)
-	for item, value := range self {
-		if value {
-			if val, ok := other[item]; !ok && !val {
-				result[item] = true
-			}
-		}
-	}
-	return result
+	return GenericDifferenceSet(self, other)
 }
 
 //TODO: test this.
 func (self intSet) union(other intSet) intSet {
-	result := make(intSet)
-	for item, value := range self {
-		result[item] = value
-	}
-	for item, value := range other {
-		result[item] = value
-	}
-	return result
+	return GenericUnionSet(self, other)
 }
 
 func (self cellSet) union(other cellSet) cellSet {
-	result := make(cellSet)
-	for item, value := range self {
-		result[item] = value
-	}
-	for item, value := range other {
-		result[item] = value
-	}
-	return result
+	return GenericUnionSet(self, other)
 }
 
 //Intersection returns a new IntSlice that represents the intersection of the two IntSlices,
 //that is, the ints that appear in both slices.
 func (self IntSlice) Intersection(other IntSlice) IntSlice {
 	//Returns an IntSlice of the union of both intSlices
-
-	return self.toIntSet().intersection(other.toIntSet()).toSlice()
+	return IntSlice(GenericIntersection([]int(self), []int(other)))
 }
 
 //Difference returns a new IntSlice that contains all of the ints in the receiver that are not
 //also in other.
 func (self IntSlice) Difference(other IntSlice) IntSlice {
-	return self.toIntSet().difference(other.toIntSet()).toSlice()
+	return IntSlice(GenericDifference([]int(self), []int(other)))
 }
 
 //Intersection returns a new CellSlice that represents the intersection of the
@@ -1245,7 +928,10 @@ func (self CellSlice) Intersection(other CellSlice) CellSlice {
 		return nil
 	}
 	grid := self[0].Grid()
-	return self.toCellSet().intersection(other.toCellSet()).toSlice(grid)
+	selfRefs := self.CellReferenceSlice()
+	otherRefs := other.CellReferenceSlice()
+	resultRefs := CellRefSlice(GenericIntersection(selfRefs, otherRefs))
+	return resultRefs.CellSlice(grid)
 }
 
 //Intersection returns a new CellSlice that represents the intersection of the
@@ -1255,7 +941,10 @@ func (self MutableCellSlice) Intersection(other CellSlice) MutableCellSlice {
 		return nil
 	}
 	grid := self[0].MutableGrid()
-	return self.toCellSet().intersection(other.toCellSet()).toMutableSlice(grid)
+	selfRefs := self.CellReferenceSlice()
+	otherRefs := other.CellReferenceSlice()
+	resultRefs := CellRefSlice(GenericIntersection(selfRefs, otherRefs))
+	return resultRefs.MutableCellSlice(grid)
 }
 
 //Intersection returns a new CellSlice that represents the intersection of the
@@ -1264,7 +953,7 @@ func (self CellRefSlice) Intersection(other CellRefSlice) CellRefSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	return self.toCellSet().intersection(other.toCellSet()).toReferenceSlice()
+	return GenericIntersection(self, other)
 }
 
 //Difference returns a new CellSlice that contains all of the cells in the
@@ -1274,7 +963,10 @@ func (self CellSlice) Difference(other CellSlice) CellSlice {
 		return nil
 	}
 	grid := self[0].Grid()
-	return self.toCellSet().difference(other.toCellSet()).toSlice(grid)
+	selfRefs := self.CellReferenceSlice()
+	otherRefs := other.CellReferenceSlice()
+	resultRefs := CellRefSlice(GenericDifference(selfRefs, otherRefs))
+	return resultRefs.CellSlice(grid)
 }
 
 //Difference returns a new CellSlice that contains all of the cells in the
@@ -1284,7 +976,10 @@ func (self MutableCellSlice) Difference(other CellSlice) MutableCellSlice {
 		return nil
 	}
 	grid := self[0].MutableGrid()
-	return self.toCellSet().difference(other.toCellSet()).toMutableSlice(grid)
+	selfRefs := self.CellReferenceSlice()
+	otherRefs := other.CellReferenceSlice()
+	resultRefs := CellRefSlice(GenericDifference(selfRefs, otherRefs))
+	return resultRefs.MutableCellSlice(grid)
 }
 
 //Difference returns a new CellReferenceSlice that contains all of the cells in the
@@ -1293,7 +988,7 @@ func (self CellRefSlice) Difference(other CellRefSlice) CellRefSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	return self.toCellSet().difference(other.toCellSet()).toReferenceSlice()
+	return GenericDifference(self, other)
 }
 
 //Union returns a new CellSlice that contains all of the cells that are in
@@ -1303,7 +998,10 @@ func (self CellSlice) Union(other CellSlice) CellSlice {
 		return nil
 	}
 	grid := self[0].Grid()
-	return self.toCellSet().union(other.toCellSet()).toSlice(grid)
+	selfRefs := self.CellReferenceSlice()
+	otherRefs := other.CellReferenceSlice()
+	resultRefs := CellRefSlice(GenericUnion(selfRefs, otherRefs))
+	return resultRefs.CellSlice(grid)
 }
 
 //Union returns a new CellSlice that contains all of the cells that are in
@@ -1313,7 +1011,10 @@ func (self MutableCellSlice) Union(other CellSlice) MutableCellSlice {
 		return nil
 	}
 	grid := self[0].MutableGrid()
-	return self.toCellSet().union(other.toCellSet()).toMutableSlice(grid)
+	selfRefs := self.CellReferenceSlice()
+	otherRefs := other.CellReferenceSlice()
+	resultRefs := CellRefSlice(GenericUnion(selfRefs, otherRefs))
+	return resultRefs.MutableCellSlice(grid)
 }
 
 //Union returns a new CellSlice that contains all of the cells that are in
@@ -1322,5 +1023,5 @@ func (self CellRefSlice) Union(other CellRefSlice) CellRefSlice {
 	if len(self) == 0 {
 		return nil
 	}
-	return self.toCellSet().union(other.toCellSet()).toReferenceSlice()
+	return GenericUnion(self, other)
 }

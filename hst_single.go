@@ -110,13 +110,12 @@ func (self *nakedSingleTechnique) find(grid Grid, coordinator findCoordinator) {
 		if coordinator.shouldExitEarly() {
 			return
 		}
-		obj := getter.GetSmallerThan(2)
-		if obj == nil {
+		cell := getter.GetSmallerThan(2)
+		if cell == nil {
 			//There weren't any cells with one option left.
 			//If there weren't any, period, then results is still nil already.
 			return
 		}
-		cell := obj.(Cell)
 		step := &SolveStep{
 			Technique:    self,
 			TargetCells:  CellRefSlice{cell.Reference()},

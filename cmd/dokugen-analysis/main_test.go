@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/jkomoros/sudoku"
+	"math"
 	"reflect"
 	"testing"
 )
@@ -47,7 +48,8 @@ func TestSkewAmount(t *testing.T) {
 
 	for _, tt := range tests {
 		actual := skewAmount(puzzles, tt.pow)
-		if actual != tt.expected {
+		const epsilon = 1e-10
+		if math.Abs(actual-tt.expected) > epsilon {
 			t.Error("SkewAmount(", tt.pow, "): expected", tt.expected, ", got:", actual)
 		}
 	}
